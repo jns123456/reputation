@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
 from comments.selectors import (
     attach_comment_votes,
@@ -7,10 +8,13 @@ from comments.selectors import (
     get_user_comment_votes,
     get_user_prediction_votes,
 )
+from integrations.kalshi.embed import build_kalshi_embed_context
 from integrations.polymarket.embed import build_polymarket_embed_context
-from integrations.services import refresh_market_from_polymarket
+from integrations.sync import refresh_market
 from markets.models import Market
-from markets.selectors import get_market_categories, get_markets_list
+from markets.selectors import get_market_categories, get_markets_for_display
+from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
+from markets.source_filters import build_source_filter_urls, normalize_source_filter
 from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction
 from reputation.services import calculate_reputation_stakes
@@ -20,7 +24,21 @@ def market_list(request):
     status = request.GET.get("status", "")
     category = request.GET.get("category", "")
     search = request.GET.get("q", "")
-    markets = get_markets_list(status=status or None, category=category or None, search=search or None)
+    source = normalize_source_filter(request.GET.get("source", ""))
+    sort = normalize_sort_filter(request.GET.get("sort", ""))
+
+    markets = get_markets_for_display(
+        status=status or None,
+        category=category or None,
+        search=search or None,
+        source=source or None,
+        sort=sort or None,
+    )
+    source_filter_urls = build_source_filter_urls(
+        base_url=reverse("markets:list"),
+        active_source=source,
+        extra={"q": search, "status": status, "category": category, "sort": sort},
+    )
     return render(
         request,
         "markets/market_list.html",
@@ -29,15 +47,18 @@ def market_list(request):
             "categories": get_market_categories(),
             "current_status": status,
             "current_category": category,
+            "current_source": source,
+            "current_sort": sort,
+            "sort_choices": MARKET_SORT_CHOICES,
             "search_query": search,
+            "source_filter_urls": source_filter_urls,
         },
     )
 
 
 def market_detail(request, slug):
     market = get_object_or_404(Market, slug=slug)
-    if market.source == Market.Source.POLYMARKET:
-        market = refresh_market_from_polymarket(market)
+    market = refresh_market(market)
 
     predictions = get_market_predictions(market)
     discussions = get_market_prediction_discussions(market=market, predictions=predictions)
@@ -53,7 +74,9 @@ def market_detail(request, slug):
     forecast_form = None
     if request.user.is_authenticated and market.is_open:
         existing_forecast = get_user_active_prediction(request.user, market)
-        forecast_form = ForecastForm(instance=existing_forecast, market=market)
+        forecast_form = (
+            ForecastForm(market=market) if not existing_forecast else None
+        )
 
     prediction_sections = [
         {
@@ -77,6 +100,7 @@ def market_detail(request, slug):
             "predictions": predictions,
             "prediction_sections": prediction_sections,
             "polymarket_embed": build_polymarket_embed_context(market),
+            "kalshi_embed": build_kalshi_embed_context(market),
             "forecast_form": forecast_form,
             "existing_forecast": existing_forecast,
         },

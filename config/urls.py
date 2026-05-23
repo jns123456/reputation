@@ -8,5 +8,6 @@ urlpatterns = [
     path("markets/", include("markets.urls")),
     path("predictions/", include("predictions.urls")),
     path("comments/", include("comments.urls")),
+    path("challenges/", include("challenges.urls")),
     path("api/", include("config.api_urls")),
 ]

@@ -1,6 +1,7 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib import messages
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -8,9 +9,18 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.bookmark_selectors import is_bookmarked
 from accounts.bookmark_services import toggle_bookmark
-from accounts.forms import ProfileEditForm, SignUpForm
+from accounts.follow_selectors import get_follower_count, get_following_count, is_following
+from accounts.follow_services import toggle_follow
+from accounts.forms import NotificationPreferenceForm, ProfileEditForm, SignUpForm
 from accounts.models import Bookmark, User
 from accounts.category_selectors import get_user_category_breakdown
+from accounts.notification_selectors import get_recent_notifications, get_user_notifications
+from accounts.notification_services import (
+    get_or_create_notification_preferences,
+    mark_all_notifications_read,
+    mark_notification_read,
+    queue_login_notification_toast,
+)
 from accounts.selectors import get_user_prediction_history
 
 
@@ -19,6 +29,11 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         return reverse("accounts:profile", kwargs={"username": self.request.user.username})
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        queue_login_notification_toast(request=self.request)
+        return response
 
 
 class CustomLogoutView(LogoutView):
@@ -33,6 +48,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            queue_login_notification_toast(request=request)
             return redirect("accounts:profile", username=user.username)
     else:
         form = SignUpForm()
@@ -63,6 +79,9 @@ def profile_detail(request, username):
             "profile_user": user,
             "predictions": predictions,
             "category_breakdown": category_breakdown,
+            "is_following": is_following(follower=request.user, following_user=user),
+            "follower_count": get_follower_count(user),
+            "following_count": get_following_count(user),
         },
     )
 
@@ -99,3 +118,92 @@ def bookmark_toggle(request):
             },
         )
     return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+@login_required
+@require_POST
+def follow_toggle(request):
+    username = request.POST.get("username")
+    if not username:
+        return HttpResponseBadRequest("Missing username")
+
+    target_user = get_object_or_404(User, username=username)
+    toggle_follow(follower=request.user, following_user=target_user)
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "accounts/partials/follow_button.html",
+            {
+                "profile_user": target_user,
+                "is_following": is_following(
+                    follower=request.user,
+                    following_user=target_user,
+                ),
+            },
+        )
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def alert_settings(request):
+    preferences = get_or_create_notification_preferences(request.user)
+    if request.method == "POST":
+        form = NotificationPreferenceForm(request.POST, instance=preferences)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Alert preferences saved.")
+            return redirect("accounts:alert_settings")
+    else:
+        form = NotificationPreferenceForm(instance=preferences)
+    return render(
+        request,
+        "accounts/alert_settings.html",
+        {"form": form},
+    )
+
+
+@login_required
+def notifications_list(request):
+    notifications = get_user_notifications(user=request.user)
+    return render(
+        request,
+        "accounts/notifications.html",
+        {"notifications": notifications},
+    )
+
+
+@login_required
+def notifications_dropdown(request):
+    notifications = get_recent_notifications(user=request.user, limit=8)
+    return render(
+        request,
+        "accounts/partials/notifications_dropdown.html",
+        {"recent_notifications": notifications},
+    )
+
+
+@login_required
+@require_POST
+def notification_mark_read(request, notification_id):
+    from accounts.models import Notification
+
+    notification = get_object_or_404(Notification, pk=notification_id)
+    mark_notification_read(notification=notification, user=request.user)
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "accounts/partials/notification_item.html",
+            {"notification": notification},
+        )
+    return redirect("accounts:notifications")
+
+
+@login_required
+@require_POST
+def notifications_mark_all_read(request):
+    mark_all_notifications_read(user=request.user)
+    messages.success(request, "All notifications marked as read.")
+    return redirect("accounts:notifications")

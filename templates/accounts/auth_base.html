@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+  .auth-field-help ul {
+    margin-top: 0.375rem;
+    list-style: none;
+    padding: 0;
+  }
+  .auth-field-help li {
+    position: relative;
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+  }
+  .auth-field-help li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: rgb(148 163 184);
+  }
+  .auth-card .form-input.pl-10 {
+    padding-left: 2.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="relative mx-auto max-w-5xl overflow-hidden">
+  <div class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true"></div>
+
+  <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
+    <div class="hidden lg:block">
+      <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% block auth_eyebrow %}Join the network{% endblock %}</p>
+      <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-900">
+        {% block auth_headline %}Build reputation through forecasts{% endblock %}
+      </h1>
+      <p class="mt-4 text-base leading-relaxed text-slate-600">
+        {% block auth_description %}
+        Debate real-world events, publish formal predictions, and earn
+        <span class="badge-rep">Reputation</span> when markets resolve — no betting, no wallets.
+        {% endblock %}
+      </p>
+      <ul class="mt-8 space-y-4">
+        <li class="flex items-start gap-3 text-sm text-slate-600">
+          <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </span>
+          <span><strong class="font-medium text-slate-800">Reputation</strong> tracks predictive accuracy on resolved forecasts.</span>
+        </li>
+        <li class="flex items-start gap-3 text-sm text-slate-600">
+          <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </span>
+          <span><strong class="font-medium text-slate-800">Popularity</strong> reflects social engagement — kept separate from credibility.</span>
+        </li>
+        <li class="flex items-start gap-3 text-sm text-slate-600">
+          <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </span>
+          <span>Live odds from Polymarket. Pick Yes or No and explain your reasoning.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mx-auto w-full max-w-md lg:max-w-none">
+      <div class="auth-card overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-brand-50/80 to-white px-6 py-5 sm:px-8">
+          <div class="lg:hidden">
+            <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% block auth_mobile_eyebrow %}Reputation{% endblock %}</p>
+          </div>
+          <h2 class="mt-2 text-xl font-bold tracking-tight text-slate-900 lg:mt-0">
+            {% block auth_title %}{% endblock %}
+          </h2>
+          {% block auth_subtitle %}{% endblock %}
+        </div>
+
+        <div class="px-6 py-6 sm:px-8 sm:py-7">
+          {% block auth_form %}{% endblock %}
+        </div>
+
+        <div class="border-t border-slate-100 bg-slate-50/80 px-6 py-4 text-center text-sm text-slate-600 sm:px-8">
+          {% block auth_footer %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

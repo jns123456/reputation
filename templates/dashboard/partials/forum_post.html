@@ -37,7 +37,7 @@
         </strong>
         {% if reputation_stakes %}
         <span class="text-sm text-slate-500">
-          · Polymarket {{ reputation_stakes.prob_percent }}%
+          · {{ market|market_source_label }} {{ reputation_stakes.prob_percent }}%
           · <span class="text-emerald-700">+{{ reputation_stakes.win_points }}</span>/<span class="text-red-700">−{{ reputation_stakes.loss_points }}</span>
         </span>
         {% endif %}

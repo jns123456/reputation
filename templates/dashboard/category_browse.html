@@ -101,10 +101,12 @@
       <h2 class="text-lg font-semibold text-slate-900">
         {% if active_area %}Trending in {{ active_area.name }}{% else %}Trending in {{ category.name }}{% endif %}
       </h2>
-      <a href="{% url 'markets:list' %}?category={{ category.name|urlencode }}" class="text-sm font-medium text-brand-600 hover:underline">
+      <a href="{% url 'markets:list' %}?category={{ category.name|urlencode }}{% if source_filter_urls.active_source %}&source={{ source_filter_urls.active_source }}{% endif %}" class="text-sm font-medium text-brand-600 hover:underline">
         Advanced filters →
       </a>
     </div>
+
+    {% include "markets/partials/source_filter_pills.html" %}
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 {% if not area_summaries %}2xl:grid-cols-4{% endif %}">
       {% for market in markets %}
@@ -114,7 +116,7 @@
         {% if active_area %}
           No open forecasts in {{ active_area.name }} yet.
         {% else %}
-          No open forecasts in this category yet. Check back after the next Polymarket import.
+          No open forecasts in this category yet. Check back after the next market sync.
         {% endif %}
       </div>
       {% endfor %}

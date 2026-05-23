@@ -1,7 +1,7 @@
 # Reputational Prediction Social Network — Project Context
 
 > **This file is the primary source of truth for all AI agents and developers working on this codebase.**
-> Read it fully before writing or modifying any code.
+> Read it fully before writing or modifying any code — including **§15 Recursive Learning**, which holds durable lessons from past work.
 
 ---
 
@@ -546,6 +546,7 @@ Before making any change, an AI agent **must**:
 8. **Write or update tests** for any scoring or business logic change.
 9. **Keep changes minimal** — smallest correct diff; do not refactor unrelated code.
 10. **Match existing conventions** — naming, layering, template patterns, test style.
+11. **Consult and update §15** — read recorded lessons before acting; append or prune entries when something durable was learned or became obsolete.
 
 ### Decision Checklist
 
@@ -590,4 +591,51 @@ If a proposed feature violates any of these principles, redesign before implemen
 
 ---
 
-*Last updated: project initialization. Update this file when architecture, scope, or conventions change.*
+## 15. Recursive Learning (Agent Memory)
+
+This section is **operational memory**, not product spec. It grows from real work and shrinks when entries stop being useful. Goal: **do not repeat serious mistakes**; do not duplicate what §1–14 already state.
+
+### When to record
+
+| Record | Skip |
+|--------|------|
+| Grave mistakes (data loss, security, MVP boundary violations, broken immutability) | One-off typos or obvious bugs |
+| User corrections that change how this repo must be handled | Facts already documented above |
+| Non-obvious traps (env, migrations, integrations, deploy) discovered the hard way | Session-only or task-specific context |
+| Patterns that failed twice or would mislead the next agent | Preferences unless the user asks they be permanent |
+
+### Entry format
+
+One line per lesson when possible:
+
+```
+[YYYY-MM] category — mistake/context → rule going forward
+```
+
+Categories: `security`, `domain`, `architecture`, `integration`, `workflow`, `testing`, `other`.
+
+### Pruning (required)
+
+Remove or shorten an entry when:
+
+- The codebase or §1–14 now makes it redundant.
+- The issue was fixed structurally and the warning no longer helps.
+- It refers to removed code, tools, or workflows.
+
+When editing §15, **delete or merge** stale lines — do not only append. Prefer ≤15 active entries; if over limit, drop the least actionable or oldest resolved items first.
+
+### Grave mistakes (never repeat)
+
+<!-- Add only incidents with lasting impact. Remove once fixed in code *and* covered elsewhere. -->
+
+*(none yet)*
+
+### Lessons learned
+
+<!-- Durable, project-specific knowledge not covered above. Review and prune each time you touch this file. -->
+
+*(none yet)*
+
+---
+
+*Last updated: 2026-05-23. Update §1–14 when architecture, scope, or conventions change; update §15 when durable lessons are learned or retired.*

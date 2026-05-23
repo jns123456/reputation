@@ -13,6 +13,31 @@ class BrowseArea:
     category_slug: str
 
 
+KALSHI_SERIES_BY_BROWSE_AREA: dict[tuple[str, str], frozenset[str]] = {
+    ("sports", "soccer"): frozenset(),
+    ("sports", "nba"): frozenset({"KXNBAGAME", "KXWNBAGAME", "KXNBAH2HPTS"}),
+    ("sports", "mlb"): frozenset({"KXMLBGAME", "KXMLBSPREAD"}),
+    ("sports", "nhl"): frozenset({"KXNHLGAME"}),
+    ("sports", "nfl"): frozenset({"KXNFLGAME", "KXNFLNFCCHAMP"}),
+    ("sports", "ufc"): frozenset(),
+    ("sports", "tennis"): frozenset(),
+    ("sports", "cricket"): frozenset(),
+    ("economy", "fed"): frozenset({"KXFED", "KXFEDDECISION", "KXEFFR", "KXCBDECISIONENGLAND"}),
+    ("economy", "finance"): frozenset({"KXUSTYLD", "KXMORTGAGERATE"}),
+    ("economy", "macro"): frozenset({"KXECONSTATCPIYOY", "KXPAYROLLS", "KXJOBLESS", "KXU3"}),
+    ("science-tech", "ai"): frozenset({"KXAILABDIS", "KXFRONTIERAI"}),
+}
+
+
+def _kalshi_series_ticker(market) -> str:
+    raw = market.kalshi_raw or {}
+    event_payload = market.kalshi_event_raw or {}
+    event = event_payload.get("event") if isinstance(event_payload, dict) else {}
+    if not isinstance(event, dict):
+        event = event_payload if isinstance(event_payload, dict) else {}
+    return (raw.get("series_ticker") or event.get("series_ticker") or "").upper()
+
+
 BROWSE_AREAS: tuple[BrowseArea, ...] = (
     # Sports
     BrowseArea("soccer", "Soccer", frozenset({"soccer", "fifa-world-cup", "2026-fifa-world-cup", "ucl", "champions-league"}), "sports"),
@@ -73,4 +98,10 @@ def get_browse_area(category_slug: str, area_slug: str) -> BrowseArea | None:
 
 
 def market_matches_browse_area(market, area: BrowseArea) -> bool:
-    return bool(_collect_tag_slugs(market).intersection(area.tag_slugs))
+    if _collect_tag_slugs(market).intersection(area.tag_slugs):
+        return True
+    series = _kalshi_series_ticker(market)
+    if not series:
+        return False
+    kalshi_series = KALSHI_SERIES_BY_BROWSE_AREA.get((area.category_slug, area.slug), frozenset())
+    return series in kalshi_series

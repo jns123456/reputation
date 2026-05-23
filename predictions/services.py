@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from markets.models import Market
 from predictions.models import Prediction
+from predictions.selectors import get_user_active_prediction
 from reputation.services import apply_reputation_for_prediction
 
 
@@ -21,6 +22,8 @@ def create_prediction(*, user, market, predicted_outcome, reasoning=""):
     market = _refresh_market_odds(market)
     if not market.is_open:
         raise ValueError("Cannot predict on a closed or resolved market.")
+    if get_user_active_prediction(user, market):
+        raise ValueError("You already have a forecast on this market.")
 
     probability_snapshot = dict(market.current_probability or {})
 
@@ -43,6 +46,10 @@ def create_prediction(*, user, market, predicted_outcome, reasoning=""):
         )
 
         apply_category_prediction_created(user, resolve_category_from_market(market))
+
+    from accounts.notification_services import notify_followers_of_prediction
+
+    notify_followers_of_prediction(prediction=prediction)
 
     return prediction
 
@@ -112,5 +119,9 @@ def resolve_market_predictions(market):
 
         apply_reputation_for_prediction(prediction)
         resolved.append(prediction)
+
+    from challenges.services import check_challenge_completion
+
+    check_challenge_completion(market=market)
 
     return resolved

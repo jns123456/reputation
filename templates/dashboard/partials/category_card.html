@@ -1,4 +1,4 @@
-<a href="{% url 'dashboard:category_browse' slug=category.slug %}"
+<a href="{% url 'dashboard:category_browse' slug=category.slug %}{% if active_source %}?source={{ active_source }}{% endif %}"
    class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
   <div class="pointer-events-none absolute inset-0 bg-gradient-to-br {{ category.card_hover }}" aria-hidden="true"></div>
   <div class="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full {{ category.card_glow }} blur-2xl transition duration-300 group-hover:scale-110" aria-hidden="true"></div>

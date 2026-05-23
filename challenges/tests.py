@@ -1,0 +1,431 @@
+from django.test import TestCase
+from django.core.exceptions import ValidationError
+
+from accounts.models import User, UserFollow
+from accounts.follow_selectors import are_mutual_followers, get_mutual_followers
+from challenges.models import Challenge, ChallengeParticipant, MAX_CHALLENGE_MARKETS
+from challenges.selectors import get_challenge_standings
+from challenges.services import (
+    accept_challenge,
+    create_challenge,
+    decline_challenge,
+)
+from markets.models import Market
+
+
+class MutualFollowTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        self.carol = User.objects.create_user(username="carol", password="pass")
+
+    def test_mutual_followers(self):
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        UserFollow.objects.create(follower=self.alice, following=self.carol)
+
+        self.assertTrue(are_mutual_followers(self.alice, self.bob))
+        self.assertFalse(are_mutual_followers(self.alice, self.carol))
+        mutual = list(get_mutual_followers(self.alice))
+        self.assertEqual(len(mutual), 1)
+        self.assertEqual(mutual[0].username, "bob")
+
+
+class ChallengeCreateTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market1 = Market.objects.create(
+            external_id="m1",
+            title="Event 1",
+            slug="event-1",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.market2 = Market.objects.create(
+            external_id="m2",
+            title="Event 2",
+            slug="event-2",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+
+    def test_create_challenge_success(self):
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Head to head",
+            market_ids=[self.market1.id, self.market2.id],
+            opponent_ids=[self.bob.id],
+        )
+        self.assertEqual(challenge.status, Challenge.Status.PENDING)
+        self.assertEqual(challenge.challenge_markets.count(), 2)
+        self.assertEqual(challenge.participants.count(), 2)
+        creator_part = challenge.participants.get(user=self.alice)
+        self.assertEqual(creator_part.status, ChallengeParticipant.Status.ACCEPTED)
+
+    def test_rejects_non_mutual_follow(self):
+        carol = User.objects.create_user(username="carol", password="pass")
+        with self.assertRaises(ValidationError):
+            create_challenge(
+                creator=self.alice,
+                title="",
+                market_ids=[self.market1.id],
+                opponent_ids=[carol.id],
+            )
+
+    def test_rejects_more_than_ten_markets(self):
+        market_ids = []
+        for i in range(MAX_CHALLENGE_MARKETS + 1):
+            m = Market.objects.create(
+                external_id=f"mx-{i}",
+                title=f"Event {i}",
+                slug=f"event-max-{i}",
+                status=Market.Status.OPEN,
+                outcomes=[{"label": "Yes"}],
+                current_probability={"Yes": 0.5},
+            )
+            market_ids.append(m.id)
+        with self.assertRaises(ValidationError):
+            create_challenge(
+                creator=self.alice,
+                title="",
+                market_ids=market_ids,
+                opponent_ids=[self.bob.id],
+            )
+
+
+class ChallengeFlowTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market = Market.objects.create(
+            external_id="m1",
+            title="Event 1",
+            slug="event-1",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.challenge = create_challenge(
+            creator=self.alice,
+            title="Duel",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+
+    def test_accept_activates_challenge(self):
+        accept_challenge(challenge=self.challenge, user=self.bob)
+        self.challenge.refresh_from_db()
+        self.assertEqual(self.challenge.status, Challenge.Status.ACTIVE)
+        self.assertIsNotNone(self.challenge.started_at)
+
+    def test_decline_without_accept_keeps_pending(self):
+        decline_challenge(challenge=self.challenge, user=self.bob)
+        self.challenge.refresh_from_db()
+        self.assertEqual(self.challenge.status, Challenge.Status.PENDING)
+
+    def test_standings_zero_before_active(self):
+        standings = get_challenge_standings(self.challenge)
+        self.assertEqual(len(standings), 1)
+        self.assertEqual(standings[0]["reputation_points"], 0)
+
+
+class PriorPredictionChallengeTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market = Market.objects.create(
+            external_id="m-prior",
+            title="Prior event",
+            slug="prior-event",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.9, "No": 0.1},
+        )
+
+    def test_pre_challenge_forecast_counts_in_standings(self):
+        from predictions.services import create_prediction, resolve_market_predictions
+
+        prediction = create_prediction(
+            user=self.bob,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        original_created_at = prediction.created_at
+
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Retroactive",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=challenge, user=self.bob)
+        challenge.refresh_from_db()
+
+        self.assertLess(prediction.created_at, challenge.started_at)
+
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save()
+        resolve_market_predictions(self.market)
+
+        prediction.refresh_from_db()
+        self.assertEqual(prediction.created_at, original_created_at)
+
+        standings = get_challenge_standings(challenge)
+        bob_row = next(row for row in standings if row["participant"].user_id == self.bob.id)
+        self.assertEqual(bob_row["reputation_points"], 10)
+
+
+class ResolutionSnapshotTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market1 = Market.objects.create(
+            external_id="ms1",
+            title="Event A",
+            slug="event-a",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.market2 = Market.objects.create(
+            external_id="ms2",
+            title="Event B",
+            slug="event-b",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+
+    def test_snapshots_include_cumulative_standings(self):
+        from django.utils import timezone
+        from predictions.services import create_prediction, resolve_market_predictions
+        from challenges.selectors import get_challenge_resolution_snapshots
+
+        create_prediction(user=self.alice, market=self.market1, predicted_outcome="Yes")
+        create_prediction(user=self.bob, market=self.market1, predicted_outcome="No")
+        create_prediction(user=self.alice, market=self.market2, predicted_outcome="Yes")
+        create_prediction(user=self.bob, market=self.market2, predicted_outcome="Yes")
+
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Multi",
+            market_ids=[self.market1.id, self.market2.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=challenge, user=self.bob)
+
+        self.market1.status = Market.Status.RESOLVED
+        self.market1.resolved_outcome = "Yes"
+        self.market1.resolution_date = timezone.now()
+        self.market1.save()
+        resolve_market_predictions(self.market1)
+
+        self.market2.status = Market.Status.RESOLVED
+        self.market2.resolved_outcome = "Yes"
+        self.market2.resolution_date = timezone.now()
+        self.market2.save()
+        resolve_market_predictions(self.market2)
+
+        snapshots = get_challenge_resolution_snapshots(challenge)
+        self.assertEqual(len(snapshots), 2)
+        self.assertEqual(len(snapshots[0]["standings"]), 2)
+        self.assertEqual(len(snapshots[1]["standings"]), 2)
+        alice_after_two = next(
+            row for row in snapshots[1]["standings"]
+            if row["participant"].user_id == self.alice.id
+        )
+        self.assertGreater(alice_after_two["reputation_points"], 0)
+
+
+class ChallengeNotificationTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market = Market.objects.create(
+            external_id="m1",
+            title="Event 1",
+            slug="event-1",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.challenge = create_challenge(
+            creator=self.alice,
+            title="Duel",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+
+    def test_invitation_notification_on_create(self):
+        from accounts.models import Notification
+
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.bob,
+                notification_type=Notification.NotificationType.CHALLENGE_INVITATION,
+                challenge=self.challenge,
+            ).exists()
+        )
+
+    def test_market_resolved_notification(self):
+        from accounts.models import Notification
+        from challenges.notification_services import notify_challenge_market_resolved
+
+        accept_challenge(challenge=self.challenge, user=self.bob)
+        self.challenge.refresh_from_db()
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save()
+
+        notify_challenge_market_resolved(challenge=self.challenge, market=self.market)
+
+        for user in (self.alice, self.bob):
+            self.assertTrue(
+                Notification.objects.filter(
+                    recipient=user,
+                    notification_type=Notification.NotificationType.CHALLENGE_MARKET_RESOLVED,
+                    challenge=self.challenge,
+                    market=self.market,
+                ).exists()
+            )
+
+    def test_accept_marks_invitation_notification_read(self):
+        from accounts.models import Notification
+
+        notification = Notification.objects.get(
+            recipient=self.bob,
+            notification_type=Notification.NotificationType.CHALLENGE_INVITATION,
+            challenge=self.challenge,
+        )
+        accept_challenge(challenge=self.challenge, user=self.bob)
+        notification.refresh_from_db()
+        self.assertIsNotNone(notification.read_at)
+
+    def test_accept_notifies_creator(self):
+        from accounts.models import Notification
+
+        accept_challenge(challenge=self.challenge, user=self.bob)
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.alice,
+                actor=self.bob,
+                notification_type=Notification.NotificationType.CHALLENGE_ACCEPTED,
+                challenge=self.challenge,
+            ).exists()
+        )
+
+
+class ChallengeInvitationListTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market = Market.objects.create(
+            external_id="m-inv",
+            title="Event 1",
+            slug="event-inv",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+        self.challenge = create_challenge(
+            creator=self.alice,
+            title="Mundial",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+
+    def test_list_shows_pending_invitation_with_actions(self):
+        self.client.force_login(self.bob)
+        response = self.client.get("/challenges/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pending invitations")
+        self.assertContains(response, "Mundial")
+        self.assertContains(response, "Accept")
+        self.assertContains(response, "Decline")
+
+    def test_decline_from_list(self):
+        self.client.force_login(self.bob)
+        response = self.client.post(f"/challenges/{self.challenge.pk}/decline/")
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(
+            ChallengeParticipant.objects.filter(
+                user=self.bob,
+                challenge=self.challenge,
+                status=ChallengeParticipant.Status.INVITED,
+            ).exists()
+        )
+
+class MarketSearchTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="alice", password="pass")
+        self.market_a = Market.objects.create(
+            external_id="ma",
+            title="Bitcoin price 2026",
+            slug="bitcoin-price-2026",
+            category="Crypto",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+        self.market_b = Market.objects.create(
+            external_id="mb",
+            title="US election winner",
+            slug="us-election-winner",
+            category="Politics",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+        Market.objects.create(
+            external_id="mc",
+            title="Closed market",
+            slug="closed-market",
+            status=Market.Status.CLOSED,
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+
+    def test_search_open_markets_filters_by_title(self):
+        from challenges.selectors import search_open_markets_for_challenge
+
+        results = list(search_open_markets_for_challenge(query="bitcoin"))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].id, self.market_a.id)
+
+    def test_search_includes_selected_markets(self):
+        from challenges.selectors import search_open_markets_for_challenge
+
+        results = list(
+            search_open_markets_for_challenge(
+                query="zzzzz",
+                selected_ids=[self.market_b.id],
+            )
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].id, self.market_b.id)
+
+    def test_market_search_view(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            "/challenges/markets/search/",
+            {"q": "election"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "US election winner")
+        self.assertNotContains(response, "Bitcoin price 2026")

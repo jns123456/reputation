@@ -35,8 +35,15 @@
     <span class="truncate font-medium">
       {% if market.volume_label %}{{ market.volume_label }}{% endif %}
     </span>
-    {% if market.category %}
-    <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500">{{ market.category }}</span>
-    {% endif %}
+    <div class="flex shrink-0 items-center gap-1.5">
+      {% if market.source == "kalshi" %}
+      <span class="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Kalshi</span>
+      {% elif market.source == "polymarket" %}
+      <span class="rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700">Polymarket</span>
+      {% endif %}
+      {% if market.category %}
+      <span class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500">{{ market.category }}</span>
+      {% endif %}
+    </div>
   </div>
 </a>

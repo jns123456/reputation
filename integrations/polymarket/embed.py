@@ -6,7 +6,6 @@ from django.conf import settings
 
 from integrations.polymarket.urls import (
     get_polymarket_embed_slug,
-    resolve_polymarket_market_url,
     resolve_polymarket_public_url,
 )
 
@@ -45,6 +44,5 @@ def build_polymarket_embed_context(market):
         "embed_width": settings.POLYMARKET_EMBED_WIDTH,
         "embed_height": settings.POLYMARKET_EMBED_HEIGHT,
         "polymarket_url": resolve_polymarket_public_url(market),
-        "polymarket_market_url": resolve_polymarket_market_url(market),
         "embed_generator_url": "https://embed.polymarket.com/",
     }

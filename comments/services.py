@@ -105,6 +105,16 @@ def cast_vote(*, user, target_type, target_id, value):
             voter=user,
         )
 
+        from accounts.notification_services import notify_vote_received
+
+        notify_vote_received(
+            actor=user,
+            recipient=content_owner,
+            target=target,
+            target_type=target_type,
+            value=value,
+        )
+
     return vote
 
 

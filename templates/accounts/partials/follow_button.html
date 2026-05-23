@@ -1,0 +1,17 @@
+<div id="follow-user-{{ profile_user.username }}">
+{% if user.is_authenticated and user != profile_user %}
+<form method="post" action="{% url 'accounts:follow_toggle' %}" class="inline"
+      hx-post="{% url 'accounts:follow_toggle' %}"
+      hx-target="#follow-user-{{ profile_user.username }}"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+  <input type="hidden" name="username" value="{{ profile_user.username }}">
+  <button type="submit"
+          class="{% if is_following %}btn-secondary{% else %}btn-primary{% endif %}">
+    {% if is_following %}Following{% else %}Follow{% endif %}
+  </button>
+</form>
+{% elif not user.is_authenticated %}
+<a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn-primary">Follow</a>
+{% endif %}
+</div>

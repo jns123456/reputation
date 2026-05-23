@@ -26,7 +26,7 @@
 
       {% with reputation_stakes=prediction|prediction_stakes %}
       <p class="mt-1 text-xs text-slate-500">
-        Polymarket gave {{ prediction.predicted_outcome }} {{ reputation_stakes.prob_percent }}% at forecast time
+            {{ prediction.market|market_source_label }} gave {{ prediction.predicted_outcome }} {{ reputation_stakes.prob_percent }}% at forecast time
         · <span class="text-emerald-700">+{{ reputation_stakes.win_points }}</span> if correct
         · <span class="text-red-700">−{{ reputation_stakes.loss_points }}</span> if wrong
       </p>

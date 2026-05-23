@@ -11,6 +11,7 @@
         <span class="badge-status-{{ market.status }}">{{ market.get_status_display }}</span>
         {% if market.category %}<span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{{ market.category }}</span>{% endif %}
         {% if market.source == "polymarket" %}<span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">Polymarket</span>{% endif %}
+        {% if market.source == "kalshi" %}<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">Kalshi</span>{% endif %}
       </div>
       <h1 class="mt-2 text-2xl font-bold text-slate-900">{{ market.title }}</h1>
       {% if market.description %}
@@ -19,6 +20,10 @@
       {% if market.polymarket_url %}
       <div class="mt-3">
         <a href="{{ market.polymarket_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">View on Polymarket ↗</a>
+      </div>
+      {% elif market.kalshi_url %}
+      <div class="mt-3">
+        <a href="{{ market.kalshi_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">View on Kalshi ↗</a>
       </div>
       {% endif %}
     </div>
@@ -48,6 +53,8 @@
 
 {% if polymarket_embed %}
   {% include "markets/partials/polymarket_embed.html" %}
+{% elif kalshi_embed %}
+  {% include "markets/partials/kalshi_embed.html" %}
 {% endif %}
 
 {% if market.is_open %}

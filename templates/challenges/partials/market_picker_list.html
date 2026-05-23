@@ -1,0 +1,15 @@
+{% if markets %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+  {% for market in markets %}
+    {% include "challenges/partials/market_picker_card.html" %}
+  {% endfor %}
+</div>
+{% elif search_query %}
+<div class="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+  No events match "{{ search_query }}".
+</div>
+{% else %}
+<div class="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400">
+  No open events available.
+</div>
+{% endif %}

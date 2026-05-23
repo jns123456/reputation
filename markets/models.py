@@ -2,7 +2,10 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
+from integrations.kalshi.images import resolve_kalshi_market_image
+from integrations.kalshi.urls import resolve_kalshi_public_url
 from integrations.polymarket.urls import resolve_polymarket_public_url
+from markets.categories import resolve_market_category_slug
 
 
 class Market(models.Model):
@@ -13,12 +16,14 @@ class Market(models.Model):
 
     class Source(models.TextChoices):
         POLYMARKET = "polymarket", "Polymarket"
+        KALSHI = "kalshi", "Kalshi"
         MANUAL = "manual", "Manual"
 
     external_id = models.CharField(max_length=255, unique=True, db_index=True)
     title = models.CharField(max_length=500)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True, db_index=True)
+    canonical_category_slug = models.CharField(max_length=50, blank=True, db_index=True)
     slug = models.SlugField(max_length=550, unique=True)
     source = models.CharField(
         max_length=50,
@@ -40,16 +45,24 @@ class Market(models.Model):
     polymarket_raw = models.JSONField(default=dict, blank=True)
     polymarket_event_raw = models.JSONField(default=dict, blank=True)
     polymarket_synced_at = models.DateTimeField(null=True, blank=True)
+    kalshi_ticker = models.CharField(max_length=255, blank=True, db_index=True)
+    kalshi_raw = models.JSONField(default=dict, blank=True)
+    kalshi_event_raw = models.JSONField(default=dict, blank=True)
+    kalshi_synced_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "canonical_category_slug"]),
+        ]
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
+        self.canonical_category_slug = resolve_market_category_slug(self)
         if not self.slug:
             base = slugify(self.title)[:500] or "market"
             slug = base
@@ -79,6 +92,14 @@ class Market(models.Model):
         return bool(self.polymarket_raw)
 
     @property
+    def kalshi_url(self):
+        return resolve_kalshi_public_url(self)
+
+    @property
+    def has_kalshi_data(self):
+        return bool(self.kalshi_raw)
+
+    @property
     def outcome_labels(self):
         if isinstance(self.outcomes, list):
             return [o.get("label", o) if isinstance(o, dict) else str(o) for o in self.outcomes]
@@ -86,24 +107,35 @@ class Market(models.Model):
 
     @property
     def image_url(self):
-        """Market/event image from Polymarket import payload."""
-        raw = self.polymarket_raw or {}
-        event = self.polymarket_event_raw or {}
+        """Market/event image from import payload."""
+        if self.source == self.Source.KALSHI:
+            kalshi_image = resolve_kalshi_market_image(self)
+            if kalshi_image:
+                return kalshi_image
+
+        raw = self.polymarket_raw or self.kalshi_raw or {}
+        event = self.polymarket_event_raw or self.kalshi_event_raw or {}
+        event_data = event.get("event") if isinstance(event, dict) else {}
+        if not isinstance(event_data, dict):
+            event_data = event if isinstance(event, dict) else {}
         return (
             raw.get("image")
             or raw.get("icon")
+            or raw.get("image_url")
             or event.get("image")
             or event.get("icon")
+            or event_data.get("image")
+            or event_data.get("icon")
             or ""
         )
 
     @property
     def volume_label(self):
         """Human-readable volume string for card footers."""
-        raw = self.polymarket_raw or {}
-        event = self.polymarket_event_raw or {}
+        raw = self.polymarket_raw or self.kalshi_raw or {}
+        event = self.polymarket_event_raw or self.kalshi_event_raw or {}
         for source in (raw, event):
-            for key in ("volumeNum", "volume", "volume24hr"):
+            for key in ("volumeNum", "volume", "volume24hr", "volume_fp", "volume_24h_fp"):
                 value = source.get(key)
                 if value is None or value == "":
                     continue

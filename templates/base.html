@@ -4,9 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Reputation{% endblock %} — Predictive Social Network</title>
+  <script>
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem("reputation-theme"); } catch (_e) {}
+      var dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      if (dark) document.documentElement.classList.add("dark");
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: "class",
       theme: {
         extend: {
           colors: {
@@ -25,16 +34,55 @@
   <style>
     [x-cloak] { display: none !important; }
     .form-input, .form-select, .form-textarea {
-      @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid rgb(203 213 225);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      color: rgb(15 23 42);
+      background-color: #fff;
+      transition: border-color 150ms, box-shadow 150ms;
     }
-    .btn-primary { @apply inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition; }
-    .btn-secondary { @apply inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition; }
-    .badge-rep { @apply inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800; }
-    .badge-pop { @apply inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800; }
-    .badge-agent { @apply inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800; }
-    .badge-status-open { @apply inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800; }
-    .badge-status-closed { @apply inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600; }
-    .badge-status-resolved { @apply inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: #6366f1;
+      outline: none;
+      box-shadow: 0 0 0 1px #6366f1;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 0.5rem;
+      background-color: #4f46e5;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 150ms;
+    }
+    .btn-primary:hover { background-color: #4338ca; }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 0.5rem;
+      border: 1px solid rgb(203 213 225);
+      background-color: #fff;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: rgb(51 65 85);
+      cursor: pointer;
+      transition: background-color 150ms;
+    }
+    .btn-secondary:hover { background-color: rgb(248 250 252); }
+    .badge-rep { display: inline-flex; align-items: center; border-radius: 9999px; background-color: rgb(209 250 229); padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: rgb(6 78 59); }
+    .badge-pop { display: inline-flex; align-items: center; border-radius: 9999px; background-color: rgb(254 243 199); padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: rgb(146 64 14); }
+    .badge-agent { display: inline-flex; align-items: center; border-radius: 9999px; background-color: rgb(237 233 254); padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: rgb(91 33 182); }
+    .badge-status-open { display: inline-flex; border-radius: 9999px; background-color: rgb(220 252 231); padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: rgb(22 101 52); }
+    .badge-status-closed { display: inline-flex; border-radius: 9999px; background-color: rgb(241 245 249); padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: rgb(71 85 105); }
+    .badge-status-resolved { display: inline-flex; border-radius: 9999px; background-color: rgb(219 234 254); padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: rgb(30 64 175); }
 
     /* Vote thumbs — same green / rose palette as Yes / No forecast picks */
     .vote-thumb-up:hover:not(:disabled) {
@@ -57,75 +105,136 @@
       color: rgb(159 18 57);
       box-shadow: 0 0 0 1px rgb(225 29 72);
     }
+
+    /* Dark mode — global overrides for existing Tailwind utility classes */
+    html.dark { color-scheme: dark; }
+
+    html.dark .form-input,
+    html.dark .form-select,
+    html.dark .form-textarea {
+      border-color: rgb(71 85 105);
+      color: rgb(241 245 249);
+      background-color: rgb(30 41 59);
+    }
+    html.dark .form-input:focus,
+    html.dark .form-select:focus,
+    html.dark .form-textarea:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 1px #818cf8;
+    }
+    html.dark .btn-secondary {
+      border-color: rgb(71 85 105);
+      background-color: rgb(30 41 59);
+      color: rgb(226 232 240);
+    }
+    html.dark .btn-secondary:hover { background-color: rgb(51 65 85); }
+
+    html.dark .badge-rep { background-color: rgb(6 78 59 / 0.45); color: rgb(167 243 208); }
+    html.dark .badge-pop { background-color: rgb(120 53 15 / 0.45); color: rgb(253 230 138); }
+    html.dark .badge-agent { background-color: rgb(76 29 149 / 0.45); color: rgb(221 214 254); }
+    html.dark .badge-status-open { background-color: rgb(20 83 45 / 0.45); color: rgb(187 247 208); }
+    html.dark .badge-status-closed { background-color: rgb(51 65 85 / 0.6); color: rgb(203 213 225); }
+    html.dark .badge-status-resolved { background-color: rgb(30 58 138 / 0.45); color: rgb(191 219 254); }
+
+    html.dark .vote-thumb-up:hover:not(:disabled) {
+      background-color: rgb(6 78 59 / 0.35);
+      color: rgb(110 231 183);
+      box-shadow: 0 0 0 1px rgb(16 185 129);
+    }
+    html.dark .vote-thumb-up.is-active {
+      background-color: rgb(6 78 59 / 0.55);
+      color: rgb(167 243 208);
+      box-shadow: 0 0 0 1px rgb(5 150 105);
+    }
+    html.dark .vote-thumb-down:hover:not(:disabled) {
+      background-color: rgb(136 19 55 / 0.35);
+      color: rgb(253 164 175);
+      box-shadow: 0 0 0 1px rgb(244 63 94);
+    }
+    html.dark .vote-thumb-down.is-active {
+      background-color: rgb(136 19 55 / 0.55);
+      color: rgb(254 205 211);
+      box-shadow: 0 0 0 1px rgb(225 29 72);
+    }
+
+    html.dark .bg-white { background-color: rgb(30 41 59) !important; }
+    html.dark .bg-slate-50 { background-color: rgb(15 23 42) !important; }
+    html.dark .bg-slate-100 { background-color: rgb(51 65 85) !important; }
+    html.dark .bg-slate-50\/80 { background-color: rgb(15 23 42 / 0.8) !important; }
+    html.dark .hover\:bg-slate-50:hover { background-color: rgb(51 65 85) !important; }
+    html.dark .hover\:bg-slate-50\/80:hover { background-color: rgb(51 65 85 / 0.8) !important; }
+    html.dark .hover\:bg-slate-100:hover { background-color: rgb(71 85 105) !important; }
+    html.dark .hover\:bg-slate-200:hover { background-color: rgb(71 85 105) !important; }
+
+    html.dark .text-slate-900 { color: rgb(241 245 249) !important; }
+    html.dark .text-slate-800 { color: rgb(226 232 240) !important; }
+    html.dark .text-slate-700 { color: rgb(203 213 225) !important; }
+    html.dark .text-slate-600 { color: rgb(148 163 184) !important; }
+    html.dark .text-slate-500 { color: rgb(148 163 184) !important; }
+    html.dark .text-slate-400 { color: rgb(100 116 139) !important; }
+
+    html.dark .border-slate-200,
+    html.dark .border-slate-200\/80 { border-color: rgb(51 65 85) !important; }
+    html.dark .border-slate-100 { border-color: rgb(51 65 85) !important; }
+    html.dark .border-slate-300 { border-color: rgb(71 85 105) !important; }
+    html.dark .hover\:border-brand-200:hover { border-color: rgb(79 70 229 / 0.5) !important; }
+    html.dark .hover\:border-slate-300:hover { border-color: rgb(100 116 139) !important; }
+
+    html.dark .bg-emerald-50 { background-color: rgb(6 78 59 / 0.35) !important; }
+    html.dark .bg-emerald-100 { background-color: rgb(6 78 59 / 0.45) !important; }
+    html.dark .border-emerald-200 { border-color: rgb(16 185 129 / 0.35) !important; }
+    html.dark .text-emerald-700 { color: rgb(110 231 183) !important; }
+    html.dark .text-emerald-800 { color: rgb(167 243 208) !important; }
+
+    html.dark .bg-rose-50 { background-color: rgb(136 19 55 / 0.35) !important; }
+    html.dark .border-rose-200 { border-color: rgb(244 63 94 / 0.35) !important; }
+    html.dark .text-rose-700 { color: rgb(253 164 175) !important; }
+    html.dark .text-rose-800 { color: rgb(254 205 211) !important; }
+
+    html.dark .bg-indigo-50 { background-color: rgb(49 46 129 / 0.35) !important; }
+    html.dark .text-indigo-700 { color: rgb(165 180 252) !important; }
+    html.dark .hover\:bg-indigo-100:hover { background-color: rgb(49 46 129 / 0.55) !important; }
+    html.dark .hover\:bg-emerald-100:hover { background-color: rgb(6 78 59 / 0.55) !important; }
+    html.dark .hover\:bg-brand-50:hover { background-color: rgb(49 46 129 / 0.35) !important; }
+
+    html.dark .from-brand-50\/80 { --tw-gradient-from: rgb(49 46 129 / 0.35) var(--tw-gradient-from-position) !important; }
+    html.dark .to-white { --tw-gradient-to: rgb(30 41 59) var(--tw-gradient-to-position) !important; }
+    html.dark .from-slate-100 { --tw-gradient-from: rgb(51 65 85) var(--tw-gradient-from-position) !important; }
+    html.dark .to-slate-200 { --tw-gradient-to: rgb(71 85 105) var(--tw-gradient-to-position) !important; }
+
+    html.dark .hover\:text-brand-700:hover { color: rgb(165 180 252) !important; }
+    html.dark .hover\:text-brand-600:hover { color: rgb(165 180 252) !important; }
+    html.dark .text-brand-600 { color: rgb(129 140 248) !important; }
+    html.dark .text-brand-700 { color: rgb(165 180 252) !important; }
+    html.dark .group-hover\:text-brand-700:is(.group:hover *) { color: rgb(165 180 252) !important; }
+
+    html.dark .border-red-200 { border-color: rgb(127 29 29 / 0.5) !important; }
+    html.dark .bg-red-50 { background-color: rgb(127 29 29 / 0.25) !important; }
+    html.dark .text-red-800 { color: rgb(254 202 202) !important; }
+    html.dark .text-red-600 { color: rgb(252 165 165) !important; }
+    html.dark .hover\:bg-red-50:hover { background-color: rgb(127 29 29 / 0.35) !important; }
+
+    html.dark .border-green-200 { border-color: rgb(20 83 45 / 0.5) !important; }
+    html.dark .bg-green-50 { background-color: rgb(20 83 45 / 0.25) !important; }
+    html.dark .text-green-800 { color: rgb(187 247 208) !important; }
+
+    html.dark .ring-white { --tw-ring-color: rgb(30 41 59) !important; }
+    html.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.35) !important; }
+    html.dark .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.35) !important; }
+    html.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.35) !important; }
+    html.dark .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4) !important; }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full bg-slate-50 text-slate-900">
-  <nav class="border-b border-slate-200 bg-white" x-data="{ mobileOpen: false }">
-    <div class="mx-auto max-w-6xl px-4 py-3">
-      <div class="flex items-center justify-between">
-        <a href="{% url 'dashboard:landing' %}" class="text-lg font-bold text-brand-700">Reputation</a>
+<body class="h-full bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100">
+  {% include "includes/navbar.html" %}
 
-        <button type="button"
-                class="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 md:hidden"
-                @click="mobileOpen = !mobileOpen"
-                :aria-expanded="mobileOpen"
-                aria-label="Toggle navigation">
-          <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-          <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-
-        <div class="hidden items-center gap-4 text-sm md:flex">
-          <a href="{% url 'markets:list' %}" class="text-slate-600 hover:text-brand-600">Markets</a>
-          <a href="{% url 'dashboard:forum' %}" class="text-slate-600 hover:text-brand-600">Forum</a>
-          <a href="{% url 'dashboard:about' %}" class="text-slate-600 hover:text-brand-600">About</a>
-          <a href="{% url 'dashboard:faq' %}" class="text-slate-600 hover:text-brand-600">FAQ</a>
-          <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-slate-600 hover:text-brand-600">Reputation</a>
-          <a href="{% url 'dashboard:popularity_leaderboard' %}" class="text-slate-600 hover:text-brand-600">Popularity</a>
-          {% if user.is_authenticated %}
-            <a href="{% url 'accounts:profile' username=user.username %}" class="text-slate-600 hover:text-brand-600">{{ user.public_name }}</a>
-            <form method="post" action="{% url 'accounts:logout' %}" class="inline">
-              {% csrf_token %}
-              <button type="submit" class="text-slate-500 hover:text-red-600">Logout</button>
-            </form>
-          {% else %}
-            <a href="{% url 'accounts:login' %}" class="text-slate-600 hover:text-brand-600">Login</a>
-            <a href="{% url 'accounts:signup' %}" class="btn-primary">Sign up</a>
-          {% endif %}
-        </div>
-      </div>
-
-      <div x-show="mobileOpen" x-cloak x-transition class="mt-3 border-t border-slate-100 pt-3 md:hidden">
-        <div class="flex flex-col gap-1 text-sm">
-          <a href="{% url 'markets:list' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Markets</a>
-          <a href="{% url 'dashboard:forum' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Forum</a>
-          <a href="{% url 'dashboard:about' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">About</a>
-          <a href="{% url 'dashboard:faq' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">FAQ</a>
-          <a href="{% url 'dashboard:reputation_leaderboard' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Reputation</a>
-          <a href="{% url 'dashboard:popularity_leaderboard' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Popularity</a>
-          {% if user.is_authenticated %}
-            <a href="{% url 'accounts:profile' username=user.username %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">{{ user.public_name }}</a>
-            <form method="post" action="{% url 'accounts:logout' %}" class="px-3 py-2">
-              {% csrf_token %}
-              <button type="submit" class="text-slate-500 hover:text-red-600">Logout</button>
-            </form>
-          {% else %}
-            <a href="{% url 'accounts:login' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Login</a>
-            <a href="{% url 'accounts:signup' %}" class="mx-3 btn-primary justify-center">Sign up</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </nav>
+  {% include "accounts/partials/login_notification_toast.html" %}
 
   {% if messages %}
   <div class="mx-auto max-w-6xl px-4 pt-4">
     {% for message in messages %}
-    <div class="mb-2 rounded-lg border px-4 py-2 text-sm {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-800{% else %}border-green-200 bg-green-50 text-green-800{% endif %}">
+    <div class="mb-2 rounded-lg border px-4 py-2 text-sm transition-colors {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200{% else %}border-green-200 bg-green-50 text-green-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200{% endif %}">
       {{ message }}
     </div>
     {% endfor %}
@@ -136,7 +245,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="border-t border-slate-200 bg-white py-8 text-center text-sm text-slate-500">
+  <footer class="border-t border-slate-200 bg-white py-8 text-center text-sm text-slate-500 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
     <p>Reputation — Social predictions without betting. Popularity ≠ Reputation.</p>
     <div class="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
       <a href="{% url 'dashboard:about' %}" class="hover:text-brand-600">About</a>
@@ -146,6 +255,8 @@
     </div>
   </footer>
   {% block extra_js %}{% endblock %}
+  <script src="{% static 'js/theme.js' %}"></script>
+  <script>window.reputationTheme && window.reputationTheme.init();</script>
   <script src="{% static 'js/forum-actions.js' %}"></script>
   <script>
     window.focusDiscussionComposer = function (discussionId) {

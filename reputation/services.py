@@ -129,4 +129,8 @@ def apply_reputation_for_prediction(prediction):
         is_correct=is_correct,
     )
 
+    from accounts.notification_services import notify_prediction_resolved
+
+    notify_prediction_resolved(prediction=prediction, reputation_event=event)
+
     return event

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     "reputation",
     "integrations",
     "dashboard",
+    "challenges",
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "accounts.context_processors.notification_context",
+                "challenges.context_processors.challenge_context",
             ],
         },
     },
@@ -101,6 +105,8 @@ LOGOUT_REDIRECT_URL = "dashboard:landing"
 
 CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_BROKER_CONNECTION_TIMEOUT = env.float("CELERY_BROKER_CONNECTION_TIMEOUT", default=0.5)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = False
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -113,6 +119,20 @@ CACHES = {
 }
 
 POLYMARKET_ECONOMY_CACHE_SECONDS = env.int("POLYMARKET_ECONOMY_CACHE_SECONDS", default=300)
+MARKET_SYNC_CACHE_SECONDS = env.int("MARKET_SYNC_CACHE_SECONDS", default=POLYMARKET_ECONOMY_CACHE_SECONDS)
+MARKET_SYNC_CATEGORY_LIMIT = env.int("MARKET_SYNC_CATEGORY_LIMIT", default=48)
+MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=30)
+MARKET_SYNC_STALE_BATCH_SIZE = env.int("MARKET_SYNC_STALE_BATCH_SIZE", default=100)
+KALSHI_SYNC_OPEN_LIMIT = env.int("KALSHI_SYNC_OPEN_LIMIT", default=200)
+KALSHI_SYNC_CATEGORY_LIMIT = env.int("KALSHI_SYNC_CATEGORY_LIMIT", default=12)
+KALSHI_SYNC_CATEGORY_SERIES_LIMIT = env.int("KALSHI_SYNC_CATEGORY_SERIES_LIMIT", default=2)
+KALSHI_SYNC_CACHE_SECONDS = env.int("KALSHI_SYNC_CACHE_SECONDS", default=900)
+KALSHI_API_MIN_INTERVAL_MS = env.int("KALSHI_API_MIN_INTERVAL_MS", default=300)
+KALSHI_API_MAX_RETRIES = env.int("KALSHI_API_MAX_RETRIES", default=3)
+CATEGORY_SYNC_FAILURE_COOLDOWN_SECONDS = env.int(
+    "CATEGORY_SYNC_FAILURE_COOLDOWN_SECONDS",
+    default=120,
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
@@ -133,6 +153,26 @@ POLYMARKET_API_URL = env(
     default="https://gamma-api.polymarket.com",
 )
 
+KALSHI_API_URL = env(
+    "KALSHI_API_URL",
+    default="https://external-api.kalshi.com/trade-api/v2",
+)
+
+CELERY_BEAT_SCHEDULE = {
+    "sync-all-category-markets": {
+        "task": "integrations.tasks.sync_all_category_markets_task",
+        "schedule": crontab(minute="*/15"),
+    },
+    "refresh-stale-open-markets": {
+        "task": "integrations.tasks.refresh_stale_open_markets_task",
+        "schedule": crontab(minute="*/10"),
+    },
+    "import-kalshi-open-markets": {
+        "task": "integrations.tasks.import_kalshi_open_markets_task",
+        "schedule": crontab(minute="5,35"),
+    },
+}
+
 # Official Polymarket embed widget — https://embed.polymarket.com/
 POLYMARKET_EMBED_BASE_URL = env(
     "POLYMARKET_EMBED_BASE_URL",
@@ -149,3 +189,4 @@ POLYMARKET_EMBED_BORDER = env.bool("POLYMARKET_EMBED_BORDER", default=True)
 POLYMARKET_EMBED_CONTENT_WIDTH = env.int("POLYMARKET_EMBED_CONTENT_WIDTH", default=1200)
 POLYMARKET_EMBED_WIDTH = env("POLYMARKET_EMBED_WIDTH", default="100%")
 POLYMARKET_EMBED_HEIGHT = env.int("POLYMARKET_EMBED_HEIGHT", default=420)
+KALSHI_EMBED_HEIGHT = env.int("KALSHI_EMBED_HEIGHT", default=POLYMARKET_EMBED_HEIGHT)

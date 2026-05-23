@@ -9,26 +9,14 @@
       </p>
     </div>
     {% if polymarket_embed.polymarket_url %}
-    <div class="flex flex-wrap items-center gap-2">
-      <a
-        href="{{ polymarket_embed.polymarket_url }}"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
-      >
-        Open on Polymarket ↗
-      </a>
-      {% if polymarket_embed.polymarket_market_url and polymarket_embed.polymarket_market_url != polymarket_embed.polymarket_url %}
-      <a
-        href="{{ polymarket_embed.polymarket_market_url }}"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-      >
-        View this outcome ↗
-      </a>
-      {% endif %}
-    </div>
+    <a
+      href="{{ polymarket_embed.polymarket_url }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
+    >
+      Open on Polymarket ↗
+    </a>
     {% endif %}
   </div>
 

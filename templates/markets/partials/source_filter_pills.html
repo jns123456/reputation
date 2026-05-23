@@ -1,0 +1,16 @@
+{# Source filter: pass source_filter_urls from build_source_filter_urls() #}
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Source</span>
+  <a href="{{ source_filter_urls.all }}"
+     class="rounded-full px-3 py-1 text-xs font-medium transition {% if not source_filter_urls.active_source %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+    All
+  </a>
+  <a href="{{ source_filter_urls.polymarket }}"
+     class="rounded-full px-3 py-1 text-xs font-medium transition {% if source_filter_urls.active_source == 'polymarket' %}bg-indigo-600 text-white{% else %}bg-indigo-50 text-indigo-700 hover:bg-indigo-100{% endif %}">
+    Polymarket
+  </a>
+  <a href="{{ source_filter_urls.kalshi }}"
+     class="rounded-full px-3 py-1 text-xs font-medium transition {% if source_filter_urls.active_source == 'kalshi' %}bg-emerald-600 text-white{% else %}bg-emerald-50 text-emerald-700 hover:bg-emerald-100{% endif %}">
+    Kalshi
+  </a>
+</div>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load notification_tags %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold">Notifications</h1>
+    <p class="mt-1 text-sm text-slate-600">Follows, forecasts, likes and dislikes on your activity.</p>
+  </div>
+  <div class="flex flex-wrap items-center gap-3">
+    <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary">Alert settings</a>
+    {% if notifications %}
+    <form method="post" action="{% url 'accounts:notifications_mark_all_read' %}">
+      {% csrf_token %}
+      <button type="submit" class="text-sm text-brand-600 hover:underline">Mark all as read</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-6 space-y-3">
+  {% for notification in notifications %}
+    {% include "accounts/partials/notification_item.html" %}
+  {% empty %}
+  <div class="rounded-xl border border-slate-200 bg-white p-8 text-center">
+    <p class="text-slate-500">No notifications yet.</p>
+    <p class="mt-2 text-sm text-slate-400">
+      Follow users, get followers, and receive engagement on your comments and forecasts.
+    </p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

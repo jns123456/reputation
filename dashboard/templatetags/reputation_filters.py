@@ -54,6 +54,16 @@ def prediction_reputation_delta(prediction):
     )
 
 
+@register.filter
+def market_source_label(market):
+    source = getattr(market, "source", "")
+    if source == "kalshi":
+        return "Kalshi"
+    if source == "polymarket":
+        return "Polymarket"
+    return "Market"
+
+
 @register.simple_tag
 def outcome_stakes(market, outcome_label):
     from reputation.services import calculate_reputation_stakes

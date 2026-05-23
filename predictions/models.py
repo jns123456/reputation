@@ -57,4 +57,4 @@ class Prediction(models.Model):
 
     @property
     def is_editable(self):
-        return self.status == self.Status.PENDING and self.market.is_open
+        return False

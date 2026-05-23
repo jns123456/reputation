@@ -6,6 +6,7 @@ from django.urls import reverse
 from markets.categories import resolve_market_category_slug
 from markets.models import Market
 from markets.selectors import (
+    blend_markets_by_source,
     filter_markets_by_browse_area,
     get_browse_area_summaries,
     get_category_summaries,
@@ -64,6 +65,16 @@ class MarketCategoryResolutionTests(TestCase):
         )
         self.assertEqual(resolve_market_category_slug(market), "other")
 
+    def test_kalshi_event_category_maps_to_sports(self):
+        market = Market(
+            external_id="kalshi-sport",
+            title="NBA game",
+            slug="nba-game",
+            source=Market.Source.KALSHI,
+            kalshi_event_raw={"event": {"category": "Sports", "series_ticker": "KXNBAGAME"}},
+        )
+        self.assertEqual(resolve_market_category_slug(market), "sports")
+
 
 class MarketCategorySelectorTests(TestCase):
     def setUp(self):
@@ -114,8 +125,8 @@ class CategoryBrowseViewTests(TestCase):
         self.assertContains(response, "Explore by category")
         self.assertContains(response, "Economy")
 
-    @patch("dashboard.views.sync_binary_markets_by_tag")
-    def test_category_browse_page(self, mock_sync):
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_category_browse_page(self, mock_enqueue):
         Market.objects.create(
             external_id="view-pol",
             title="Primary winner",
@@ -128,8 +139,8 @@ class CategoryBrowseViewTests(TestCase):
         self.assertContains(response, "Politics")
         self.assertContains(response, "Primary winner")
 
-    @patch("dashboard.views.sync_binary_markets_by_tag")
-    def test_category_browse_area_filter(self, mock_sync):
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_category_browse_area_filter(self, mock_enqueue):
         Market.objects.create(
             external_id="sport-soccer",
             title="World Cup final",
@@ -195,6 +206,46 @@ class CategoryBrowseViewTests(TestCase):
         )
         self.assertEqual([market.pk for market in filtered], [nba.pk])
 
+    def test_kalshi_series_matches_browse_area(self):
+        kalshi_nba = Market.objects.create(
+            external_id="kalshi-nba-filter",
+            title="NBA Kalshi",
+            slug="nba-kalshi",
+            status=Market.Status.OPEN,
+            source=Market.Source.KALSHI,
+            kalshi_event_raw={"event": {"category": "Sports", "series_ticker": "KXNBAGAME"}},
+        )
+        sports = get_open_markets_by_canonical_category(category_slug="sports")
+        filtered = filter_markets_by_browse_area(
+            markets=sports,
+            category_slug="sports",
+            area_slug="nba",
+        )
+        self.assertEqual([market.pk for market in filtered], [kalshi_nba.pk])
+
     def test_unknown_category_returns_404(self):
         response = self.client.get(reverse("dashboard:category_browse", kwargs={"slug": "unknown"}))
         self.assertEqual(response.status_code, 404)
+
+
+class BlendMarketsBySourceTests(TestCase):
+    def test_blend_includes_both_sources(self):
+        poly = Market.objects.create(
+            external_id="blend-poly",
+            title="Poly high volume",
+            slug="blend-poly",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            polymarket_raw={"volumeNum": 1_000_000},
+        )
+        kalshi = Market.objects.create(
+            external_id="blend-kalshi",
+            title="Kalshi market",
+            slug="blend-kalshi",
+            source=Market.Source.KALSHI,
+            status=Market.Status.OPEN,
+            kalshi_raw={"volume_fp": "100"},
+        )
+        blended = blend_markets_by_source([poly, kalshi], limit=2)
+        sources = {market.source for market in blended}
+        self.assertEqual(sources, {Market.Source.POLYMARKET, Market.Source.KALSHI})

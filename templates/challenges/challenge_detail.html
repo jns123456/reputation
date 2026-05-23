@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}{{ challenge.display_title }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <a href="{% url 'challenges:list' %}" class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400">&larr; All challenges</a>
+  <div class="mt-2 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ challenge.display_title }}</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        Created by @{{ challenge.creator.username }}
+        {% if challenge.started_at %}· Started {{ challenge.started_at|date:"M j, Y" }}{% endif %}
+        {% if challenge.completed_at %}· Finished {{ challenge.completed_at|date:"M j, Y" }}{% endif %}
+      </p>
+      {% if challenge.status == 'active' or challenge.status == 'completed' %}
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <div class="h-2 w-48 max-w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div class="h-full rounded-full bg-brand-600 transition-all"
+               style="width: {% if event_progress.total %}{% widthratio event_progress.resolved event_progress.total 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+        <span class="text-sm text-slate-600 dark:text-slate-300">
+          {{ event_progress.resolved }} of {{ event_progress.total }} events resolved
+        </span>
+      </div>
+      {% endif %}
+    </div>
+    <span class="inline-flex shrink-0 rounded-full px-3 py-1 text-sm font-medium
+      {% if challenge.status == 'active' %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300
+      {% elif challenge.status == 'completed' %}bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200
+      {% elif challenge.status == 'cancelled' %}bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300
+      {% else %}bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300{% endif %}">
+      {{ challenge.get_status_display }}
+    </span>
+  </div>
+</div>
+
+{% if participation and participation.status == 'invited' %}
+<div class="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-800 dark:bg-brand-950/30">
+  <p class="text-sm text-brand-900 dark:text-brand-200">You've been challenged! Accept to compete.</p>
+  <form method="post" action="{% url 'challenges:accept' pk=challenge.pk %}" class="inline">
+    {% csrf_token %}
+    <button type="submit" class="btn-primary">Accept challenge</button>
+  </form>
+  <form method="post" action="{% url 'challenges:decline' pk=challenge.pk %}" class="inline">
+    {% csrf_token %}
+    <button type="submit" class="btn-secondary">Decline</button>
+  </form>
+</div>
+{% endif %}
+
+{% if is_creator and challenge.status == 'pending' %}
+<div class="mb-6 flex items-center gap-3">
+  <p class="text-sm text-slate-600 dark:text-slate-300">Waiting for opponents to respond.</p>
+  <form method="post" action="{% url 'challenges:cancel' pk=challenge.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn-secondary text-red-600 dark:text-red-400">Cancel</button>
+  </form>
+</div>
+{% endif %}
+
+{% if challenge.status == 'completed' and challenge.winner %}
+<div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+  <p class="font-semibold text-emerald-900 dark:text-emerald-200">
+    Winner: {{ challenge.winner.public_name }}
+  </p>
+  <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-300">Highest total reputation score across all challenge events.</p>
+</div>
+{% elif challenge.status == 'completed' and not challenge.winner %}
+<div class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+  <p class="font-semibold text-slate-800 dark:text-slate-200">Tie — no winner</p>
+</div>
+{% endif %}
+
+<div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+  <div class="min-w-0 space-y-8">
+    <section>
+      <div class="mb-4 flex items-center justify-between gap-2">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Events ({{ markets|length }})</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Forecasts are private — only total scores are shown.</p>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+        {% for market in markets %}
+          {% include "challenges/partials/challenge_market_card.html" %}
+        {% endfor %}
+      </div>
+    </section>
+
+    {% if resolution_snapshots %}
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Resolution updates</h2>
+      {% for snapshot in resolution_snapshots %}
+      <article class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p class="font-semibold text-slate-900 dark:text-slate-100">{{ snapshot.market.title }}</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Outcome: <span class="font-semibold text-slate-700 dark:text-slate-200">{{ snapshot.outcome }}</span>
+            </p>
+          </div>
+          <a href="{% url 'markets:detail' slug=snapshot.market.slug %}"
+             class="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400">
+            View event
+          </a>
+        </div>
+        <div class="mt-4">
+          <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Standings after this event</h3>
+          {% include "challenges/partials/standings_table.html" with standings=snapshot.standings compact=False %}
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </div>
+
+  <aside class="space-y-6 xl:sticky xl:top-20 xl:self-start">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+      <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">Standings</h2>
+      {% if challenge.status == 'pending' %}
+      <p class="text-sm text-slate-500 dark:text-slate-400">Scores appear once the challenge is active.</p>
+      {% elif standings %}
+      <ol class="space-y-3">
+        {% for row in standings %}
+        <li class="flex items-center justify-between rounded-lg border border-slate-100 p-3 dark:border-slate-700">
+          <div class="flex items-center gap-3">
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+              {% if row.rank %}{{ row.rank }}{% else %}—{% endif %}
+            </span>
+            <div>
+              <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
+                 class="font-medium text-slate-900 dark:text-slate-100">
+                {{ row.participant.user.public_name }}
+              </a>
+              {% if row.participant.status == 'invited' %}
+              <span class="ml-1 text-xs text-amber-600">pending</span>
+              {% endif %}
+            </div>
+          </div>
+          <span class="badge-rep font-semibold">
+            {% if row.reputation_points >= 0 %}+{% endif %}{{ row.reputation_points }} rep
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <p class="text-sm text-slate-500 dark:text-slate-400">No participants yet.</p>
+      {% endif %}
+    </section>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+      <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Participants</h2>
+      <ul class="space-y-2">
+        {% for participant in challenge.participants.all %}
+        <li class="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 dark:border-slate-700">
+          <a href="{% url 'accounts:profile' username=participant.user.username %}" class="text-sm font-medium text-slate-700 dark:text-slate-200">
+            {{ participant.user.public_name }}
+          </a>
+          <span class="text-xs text-slate-400">{{ participant.get_status_display }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}

@@ -1,7 +1,16 @@
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 
-from accounts.models import AIAgentProfile, Bookmark, User, UserCategoryStats, UserProfile
+from accounts.models import (
+    AIAgentProfile,
+    Bookmark,
+    Notification,
+    NotificationPreference,
+    User,
+    UserCategoryStats,
+    UserFollow,
+    UserProfile,
+)
 
 
 class UserProfileInline(admin.StackedInline):
@@ -67,6 +76,40 @@ class BookmarkAdmin(admin.ModelAdmin):
     list_display = ("user", "target_type", "target_id", "created_at")
     list_filter = ("target_type",)
     search_fields = ("user__username",)
+
+
+@admin.register(UserFollow)
+class UserFollowAdmin(admin.ModelAdmin):
+    list_display = ("follower", "following", "created_at")
+    search_fields = ("follower__username", "following__username")
+
+
+@admin.register(NotificationPreference)
+class NotificationPreferenceAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "notify_followed_predictions",
+        "notify_new_follower",
+        "notify_votes_received",
+        "notify_prediction_resolved",
+        "notify_in_app",
+        "notify_email",
+    )
+    search_fields = ("user__username",)
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = (
+        "recipient",
+        "actor",
+        "notification_type",
+        "prediction",
+        "read_at",
+        "created_at",
+    )
+    list_filter = ("notification_type", "read_at")
+    search_fields = ("recipient__username", "actor__username")
 
 
 @admin.register(AIAgentProfile)

@@ -11,6 +11,7 @@ class CanonicalCategory:
     tag_slugs: frozenset[str]
     category_names: frozenset[str]
     polymarket_tag: str
+    kalshi_series_tickers: frozenset[str]
     icon_bg: str
     icon_fg: str
     ring: str
@@ -38,6 +39,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"crypto", "cryptocurrency"}),
         polymarket_tag="crypto",
+        kalshi_series_tickers=frozenset({"KXMSTRSELL", "KXETHETF"}),
         icon_bg="bg-violet-500/15",
         icon_fg="text-violet-600",
         ring="ring-violet-500/20",
@@ -63,6 +65,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"economy", "economics", "business"}),
         polymarket_tag="economy",
+        kalshi_series_tickers=frozenset({"KXFED", "KXECONSTATCPIYOY", "KXPAYROLLS", "KXJOBLESS"}),
         icon_bg="bg-emerald-500/15",
         icon_fg="text-emerald-600",
         ring="ring-emerald-500/20",
@@ -89,6 +92,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"politics"}),
         polymarket_tag="politics",
+        kalshi_series_tickers=frozenset({"KXTARIFFDECISIONRELEASE", "KXPARDONANYONE"}),
         icon_bg="bg-blue-500/15",
         icon_fg="text-blue-600",
         ring="ring-blue-500/20",
@@ -118,6 +122,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"sports"}),
         polymarket_tag="sports",
+        kalshi_series_tickers=frozenset({"KXNBAGAME", "KXMLBGAME", "KXNFLGAME", "KXWNBAGAME"}),
         icon_bg="bg-orange-500/15",
         icon_fg="text-orange-600",
         ring="ring-orange-500/20",
@@ -142,6 +147,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"pop culture", "entertainment"}),
         polymarket_tag="pop-culture",
+        kalshi_series_tickers=frozenset(),
         icon_bg="bg-pink-500/15",
         icon_fg="text-pink-600",
         ring="ring-pink-500/20",
@@ -165,6 +171,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"technology", "science", "tech", "science & tech"}),
         polymarket_tag="science",
+        kalshi_series_tickers=frozenset({"KXAILABDIS", "KXFRONTIERAI"}),
         icon_bg="bg-cyan-500/15",
         icon_fg="text-cyan-600",
         ring="ring-cyan-500/20",
@@ -189,6 +196,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         ),
         category_names=frozenset({"world", "geopolitics"}),
         polymarket_tag="geopolitics",
+        kalshi_series_tickers=frozenset({"KXUKRIMPEACH", "KXRUCRUDEX"}),
         icon_bg="bg-slate-500/15",
         icon_fg="text-slate-600",
         ring="ring-slate-500/20",
@@ -205,6 +213,7 @@ OTHER_CATEGORY = CanonicalCategory(
     tag_slugs=frozenset(),
     category_names=frozenset(),
     polymarket_tag="",
+    kalshi_series_tickers=frozenset(),
     icon_bg="bg-slate-500/15",
     icon_fg="text-slate-500",
     ring="ring-slate-500/20",
@@ -215,6 +224,18 @@ OTHER_CATEGORY = CanonicalCategory(
 
 CATEGORY_BY_SLUG = {category.slug: category for category in CANONICAL_CATEGORIES}
 CATEGORY_BY_SLUG[OTHER_CATEGORY.slug] = OTHER_CATEGORY
+
+KALSHI_EVENT_CATEGORY_MAP = {
+    "sports": "sports",
+    "economics": "economy",
+    "politics": "politics",
+    "entertainment": "pop-culture",
+    "science and technology": "science-tech",
+    "science & technology": "science-tech",
+    "climate and weather": "world",
+    "world": "world",
+    "crypto": "crypto",
+}
 
 
 def _collect_tag_slugs(market) -> set[str]:
@@ -230,6 +251,17 @@ def _collect_tag_slugs(market) -> set[str]:
     return slugs
 
 
+def _kalshi_event_category_slug(market) -> str | None:
+    event_payload = market.kalshi_event_raw or {}
+    event = event_payload.get("event") if isinstance(event_payload, dict) else {}
+    if not isinstance(event, dict):
+        event = event_payload if isinstance(event_payload, dict) else {}
+    kalshi_category = (event.get("category") or "").strip().lower()
+    if not kalshi_category:
+        return None
+    return KALSHI_EVENT_CATEGORY_MAP.get(kalshi_category)
+
+
 def resolve_market_category_slug(market) -> str:
     """Map a market to one canonical category slug."""
     tag_slugs = _collect_tag_slugs(market)
@@ -237,6 +269,10 @@ def resolve_market_category_slug(market) -> str:
     for category in CANONICAL_CATEGORIES:
         if tag_slugs.intersection(category.tag_slugs):
             return category.slug
+
+    kalshi_slug = _kalshi_event_category_slug(market)
+    if kalshi_slug:
+        return kalshi_slug
 
     category_name = (market.category or "").strip().lower()
     for category in CANONICAL_CATEGORIES:

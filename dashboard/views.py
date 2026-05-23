@@ -3,6 +3,8 @@ from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect, render
+from django.urls import reverse
+import logging
 
 from accounts.category_selectors import (
     get_top_popular_users_by_category,
@@ -11,15 +13,19 @@ from accounts.category_selectors import (
 )
 from accounts.selectors import get_top_popular_users, get_top_predictors
 from dashboard.forum_context import get_forum_page_context
-from integrations.services import sync_binary_markets_by_tag
+from integrations.celery_utils import enqueue_category_sync
 from markets.categories import get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
+from markets.source_filters import build_source_filter_urls, normalize_source_filter
 from markets.selectors import (
     filter_markets_by_browse_area,
     get_browse_area_summaries,
+    get_category_display_markets,
     get_category_summaries,
     get_open_markets_by_canonical_category,
 )
+
+logger = logging.getLogger(__name__)
 
 CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
@@ -29,39 +35,53 @@ def _load_category_summaries():
     summaries = cache.get(CATEGORY_SUMMARIES_CACHE_KEY)
     if summaries is None:
         summaries = get_category_summaries(include_empty=False)
-        cache.set(CATEGORY_SUMMARIES_CACHE_KEY, summaries, settings.POLYMARKET_ECONOMY_CACHE_SECONDS)
+        cache.set(CATEGORY_SUMMARIES_CACHE_KEY, summaries, settings.MARKET_SYNC_CACHE_SECONDS)
     return summaries
 
 
 def landing(request):
     category_summaries = _load_category_summaries()
     top_predictors = get_top_predictors(5)
+    source = normalize_source_filter(request.GET.get("source", ""))
+    landing_source_filter_urls = build_source_filter_urls(
+        base_url=reverse("dashboard:landing"),
+        active_source=source,
+    )
     return render(
         request,
         "dashboard/landing.html",
         {
             "category_summaries": category_summaries,
             "top_predictors": top_predictors,
+            "landing_source_filter_urls": landing_source_filter_urls,
+            "active_source": source,
         },
     )
 
 
-def _sync_category_markets_if_needed(category):
-    """Import fresh markets from Polymarket when browsing a tagged category."""
-    if not category.polymarket_tag:
+def _enqueue_category_sync_if_needed(category):
+    """Queue background sync; never block the HTTP response."""
+    if not category.polymarket_tag and not category.kalshi_series_tickers:
         return
 
-    cache_key = f"{CATEGORY_SYNC_CACHE_PREFIX}{category.slug}"
-    if cache.get(cache_key):
+    poly_cache_key = f"{CATEGORY_SYNC_CACHE_PREFIX}polymarket:{category.slug}"
+    kalshi_cache_key = f"{CATEGORY_SYNC_CACHE_PREFIX}kalshi:{category.slug}"
+    poly_due = category.polymarket_tag and not cache.get(poly_cache_key)
+    kalshi_due = category.kalshi_series_tickers and not cache.get(kalshi_cache_key)
+
+    if not poly_due and not kalshi_due:
         return
 
-    sync_binary_markets_by_tag(
-        tag_slug=category.polymarket_tag,
-        default_category=category.name,
-        limit=48,
-    )
-    cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
-    cache.set(cache_key, True, settings.POLYMARKET_ECONOMY_CACHE_SECONDS)
+    if poly_due:
+        cache.set(poly_cache_key, True, settings.MARKET_SYNC_CACHE_SECONDS)
+    if kalshi_due:
+        cache.set(
+            kalshi_cache_key,
+            True,
+            getattr(settings, "KALSHI_SYNC_CACHE_SECONDS", settings.MARKET_SYNC_CACHE_SECONDS),
+        )
+
+    enqueue_category_sync(category.slug)
 
 
 def category_browse(request, slug):
@@ -69,12 +89,14 @@ def category_browse(request, slug):
     if category is None:
         raise Http404("Category not found")
 
-    _sync_category_markets_if_needed(category)
+    _enqueue_category_sync_if_needed(category)
+
+    area_slug = request.GET.get("area", "").strip()
+    source = normalize_source_filter(request.GET.get("source", ""))
 
     total_markets = get_open_markets_by_canonical_category(category_slug=slug)
     area_summaries = get_browse_area_summaries(category_slug=slug, markets=total_markets)
 
-    area_slug = request.GET.get("area", "").strip()
     active_area = get_browse_area(slug, area_slug) if area_slug else None
     display_markets = total_markets
     if active_area:
@@ -83,8 +105,20 @@ def category_browse(request, slug):
             category_slug=slug,
             area_slug=area_slug,
         )
+    if source:
+        display_markets = [market for market in display_markets if market.source == source]
 
-    markets = display_markets[:48]
+    markets = get_category_display_markets(
+        category_slug=slug,
+        source=source or None,
+        area_slug=area_slug or None,
+        markets=total_markets,
+    )
+    source_filter_urls = build_source_filter_urls(
+        base_url=reverse("dashboard:category_browse", kwargs={"slug": slug}),
+        active_source=source,
+        extra={"area": area_slug},
+    )
     return render(
         request,
         "dashboard/category_browse.html",
@@ -96,6 +130,8 @@ def category_browse(request, slug):
             "area_summaries": area_summaries,
             "active_area": active_area,
             "active_area_slug": active_area.slug if active_area else "",
+            "active_source": source,
+            "source_filter_urls": source_filter_urls,
         },
     )
 

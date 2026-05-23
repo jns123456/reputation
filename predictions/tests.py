@@ -36,16 +36,21 @@ class PredictionPermissionTests(TestCase):
                 predicted_outcome="No",
             )
 
-    def test_update_creates_new_record(self):
-        new_pred = update_prediction(
-            prediction=self.prediction,
-            user=self.user,
-            predicted_outcome="No",
-        )
-        self.prediction.refresh_from_db()
-        self.assertEqual(self.prediction.status, Prediction.Status.VOID)
-        self.assertEqual(self.prediction.superseded_by_id, new_pred.id)
-        self.assertEqual(new_pred.predicted_outcome, "No")
+    def test_update_prediction_is_not_allowed(self):
+        with self.assertRaises(ValueError):
+            update_prediction(
+                prediction=self.prediction,
+                user=self.user,
+                predicted_outcome="No",
+            )
+
+    def test_cannot_create_duplicate_forecast(self):
+        with self.assertRaises(ValueError):
+            create_prediction(
+                user=self.user,
+                market=self.market,
+                predicted_outcome="No",
+            )
 
     def test_create_prediction_stores_probability_snapshot(self):
         self.market.current_probability = {"Yes": 0.35, "No": 0.65}

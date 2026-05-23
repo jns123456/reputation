@@ -35,13 +35,13 @@
 
           {% if reputation_stakes %}
           <p class="mt-1 text-xs text-slate-500">
-            Polymarket gave {{ prediction.predicted_outcome }} {{ reputation_stakes.prob_percent }}% at forecast time
+            {{ market|market_source_label }} gave {{ prediction.predicted_outcome }} {{ reputation_stakes.prob_percent }}% at forecast time
             · <span class="text-emerald-700">+{{ reputation_stakes.win_points }}</span> if correct
             · <span class="text-red-700">−{{ reputation_stakes.loss_points }}</span> if wrong
           </p>
           {% elif prediction.probability_at_prediction_time %}
           <p class="mt-1 text-xs text-slate-500">
-            Polymarket at forecast time:
+            {{ market|market_source_label }} at forecast time:
             {% for label, prob in prediction.probability_at_prediction_time.items %}
               {{ label }} {{ prob|as_percent }}%{% if not forloop.last %} · {% endif %}
             {% endfor %}

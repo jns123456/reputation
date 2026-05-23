@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 from markets.models import Market
 from predictions.forms import ForecastForm
 from predictions.selectors import get_user_active_prediction
-from predictions.services import create_prediction, update_prediction
+from predictions.services import create_prediction
 
 
 @login_required
@@ -18,29 +18,24 @@ def create_prediction_view(request, slug):
 
     if request.method == "POST":
         if existing:
-            form = ForecastForm(request.POST, instance=existing, market=market)
-            if form.is_valid():
-                update_prediction(
-                    prediction=existing,
-                    user=request.user,
-                    predicted_outcome=form.cleaned_data["predicted_outcome"],
-                    reasoning=form.cleaned_data.get("reasoning", ""),
-                )
-                messages.success(request, "Your forecast was updated.")
-                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
-        else:
-            form = ForecastForm(request.POST, market=market)
-            if form.is_valid():
-                create_prediction(
-                    user=request.user,
-                    market=market,
-                    predicted_outcome=form.cleaned_data["predicted_outcome"],
-                    reasoning=form.cleaned_data.get("reasoning", ""),
-                )
-                messages.success(request, "Your forecast was posted.")
-                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
+            messages.error(
+                request,
+                "Your forecast cannot be changed after it is posted.",
+            )
+            return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#place-forecast")
+
+        form = ForecastForm(request.POST, market=market)
+        if form.is_valid():
+            create_prediction(
+                user=request.user,
+                market=market,
+                predicted_outcome=form.cleaned_data["predicted_outcome"],
+                reasoning=form.cleaned_data.get("reasoning", ""),
+            )
+            messages.success(request, "Your forecast was posted.")
+            return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
     else:
-        form = ForecastForm(instance=existing, market=market)
+        form = ForecastForm(market=market) if not existing else None
 
     return render(
         request,
