@@ -1,0 +1,31 @@
+<div id="prediction-discussion-{{ prediction.id }}">
+  {% if user.is_authenticated %}
+  <div class="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100">
+    <p class="mb-3 text-sm font-medium text-slate-700">
+      {% if prediction_vote == 1 %}
+      You upvoted this forecast — add your perspective
+      {% elif prediction_vote == -1 %}
+      You downvoted this forecast — explain your view
+      {% else %}
+      Join the conversation
+      {% endif %}
+    </p>
+    {% include "comments/partials/comment_reply_form.html" with market=market prediction=prediction variant="composer" placeholder="What do you think about this forecast? Agree, disagree, or add context…" %}
+  </div>
+  {% else %}
+  <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500">
+    <a href="{% url 'accounts:login' %}?next={{ request.path }}#forecast-{{ prediction.id }}" class="font-semibold text-brand-600 hover:underline">Log in</a>
+    to comment on this forecast.
+  </div>
+  {% endif %}
+
+  {% if threads %}
+  <div class="space-y-1">
+    {% include "comments/partials/comment_thread_list.html" %}
+  </div>
+  {% else %}
+  <p class="rounded-lg border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500">
+    No comments yet — start the thread above.
+  </p>
+  {% endif %}
+</div>

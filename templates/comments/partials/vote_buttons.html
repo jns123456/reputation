@@ -1,0 +1,65 @@
+{% if layout == "vertical" %}
+<div class="flex w-8 flex-col items-center gap-0.5 pt-1" id="votes-{{ target_type }}-{{ target_id }}">
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'comments:vote' %}" class="inline"
+        hx-post="{% url 'comments:vote' %}"
+        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-swap="outerHTML"
+        {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="target_type" value="{{ target_type }}">
+    <input type="hidden" name="target_id" value="{{ target_id }}">
+    <input type="hidden" name="value" value="1">
+    <input type="hidden" name="layout" value="vertical">
+    <button type="submit" class="rounded-md p-1 text-xs text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600 {% if user_vote == 1 %}bg-emerald-50 text-emerald-600{% endif %}" title="Upvote" aria-label="Upvote">▲</button>
+  </form>
+  <span class="min-w-[1.25rem] text-center text-xs font-semibold tabular-nums text-slate-700">{{ score }}</span>
+  <form method="post" action="{% url 'comments:vote' %}"
+        hx-post="{% url 'comments:vote' %}"
+        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-swap="outerHTML"
+        {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="target_type" value="{{ target_type }}">
+    <input type="hidden" name="target_id" value="{{ target_id }}">
+    <input type="hidden" name="value" value="-1">
+    <input type="hidden" name="layout" value="vertical">
+    <button type="submit" class="rounded-md p-1 text-xs text-slate-400 transition hover:bg-red-50 hover:text-red-600 {% if user_vote == -1 %}bg-red-50 text-red-600{% endif %}" title="Downvote" aria-label="Downvote">▼</button>
+  </form>
+  {% else %}
+  <span class="text-xs font-semibold text-slate-500">{{ score }}</span>
+  {% endif %}
+</div>
+{% else %}
+<div class="mt-2 flex items-center gap-2" id="votes-{{ target_type }}-{{ target_id }}">
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'comments:vote' %}" class="inline"
+        hx-post="{% url 'comments:vote' %}"
+        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-swap="outerHTML"
+        {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="target_type" value="{{ target_type }}">
+    <input type="hidden" name="target_id" value="{{ target_id }}">
+    <input type="hidden" name="value" value="1">
+    <input type="hidden" name="layout" value="horizontal">
+    <button type="submit" class="rounded p-1 text-slate-400 hover:bg-green-50 hover:text-green-600 {% if user_vote == 1 %}text-green-600{% endif %}" title="Upvote">▲</button>
+  </form>
+  <span class="text-sm font-medium text-slate-700">{{ score }}</span>
+  <form method="post" action="{% url 'comments:vote' %}"
+        hx-post="{% url 'comments:vote' %}"
+        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-swap="outerHTML"
+        {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="target_type" value="{{ target_type }}">
+    <input type="hidden" name="target_id" value="{{ target_id }}">
+    <input type="hidden" name="value" value="-1">
+    <input type="hidden" name="layout" value="horizontal">
+    <button type="submit" class="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 {% if user_vote == -1 %}text-red-600{% endif %}" title="Downvote">▼</button>
+  </form>
+  {% else %}
+  <span class="text-sm text-slate-500">Score: {{ score }}</span>
+  {% endif %}
+</div>
+{% endif %}

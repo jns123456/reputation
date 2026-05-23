@@ -1,0 +1,56 @@
+{# Official Polymarket embed — https://embed.polymarket.com/ #}
+<section class="mt-8">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold text-slate-900">Live Polymarket Chart</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Embedded odds chart from Polymarket — updates automatically.
+        <a href="{{ polymarket_embed.embed_generator_url }}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline">Customize embed ↗</a>
+      </p>
+    </div>
+    {% if polymarket_embed.polymarket_url %}
+    <div class="flex flex-wrap items-center gap-2">
+      <a
+        href="{{ polymarket_embed.polymarket_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
+      >
+        Open on Polymarket ↗
+      </a>
+      {% if polymarket_embed.polymarket_market_url and polymarket_embed.polymarket_market_url != polymarket_embed.polymarket_url %}
+      <a
+        href="{{ polymarket_embed.polymarket_market_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        View this outcome ↗
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <p class="mt-3 text-xs text-slate-500">
+    The chart is view-only. Use <strong>Open on Polymarket</strong> above to visit the market — in-chart links are disabled because Polymarket’s embed breaks for Spanish locale users.
+  </p>
+
+  <figure
+    class="polymarket-embed mt-3 block w-full overflow-hidden rounded-xl border border-slate-200 bg-white"
+    style="margin:0"
+  >
+    <iframe
+      title="Polymarket market chart — {{ market.title }}"
+      src="{{ polymarket_embed.embed_url }}"
+      width="{{ polymarket_embed.embed_width }}"
+      height="{{ polymarket_embed.embed_height }}"
+      class="block w-full max-w-full border-0"
+      frameborder="0"
+      allowtransparency="true"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      sandbox="allow-scripts allow-same-origin"
+    ></iframe>
+  </figure>
+</section>

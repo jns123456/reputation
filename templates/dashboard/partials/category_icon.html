@@ -1,0 +1,64 @@
+{% comment %}
+Inline SVG icons for canonical browse categories.
+Usage: {% include "dashboard/partials/category_icon.html" with slug="politics" class="text-blue-600" %}
+{% endcomment %}
+{% if slug == "economy" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M8 15l3-4 3 2 4-6"/>
+  <circle cx="18" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+</svg>
+{% elif slug == "politics" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M5 21V9l7-4 7 4v12"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 17h6"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v4"/>
+</svg>
+{% elif slug == "sports" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 010-5C7 4 8.5 6 12 6s5-2 6.5-2a2.5 2.5 0 010 5H18"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9v10a2 2 0 002 2h8a2 2 0 002-2V9"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4"/>
+  <circle cx="12" cy="14" r="2.5"/>
+</svg>
+{% elif slug == "crypto" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <circle cx="12" cy="12" r="9"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 8h4.5a2 2 0 010 4H9v4"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h5"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v2M12 16v2"/>
+</svg>
+{% elif slug == "pop-culture" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <rect x="3" y="5" width="18" height="14" rx="2"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l2 4M14 5l2 4"/>
+  <circle cx="8.5" cy="14" r="1.25" fill="currentColor" stroke="none"/>
+  <circle cx="12" cy="14" r="1.25" fill="currentColor" stroke="none"/>
+  <circle cx="15.5" cy="14" r="1.25" fill="currentColor" stroke="none"/>
+</svg>
+{% elif slug == "science-tech" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <circle cx="12" cy="12" r="2.5"/>
+  <ellipse cx="12" cy="12" rx="9" ry="3.5"/>
+  <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)"/>
+  <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(120 12 12)"/>
+</svg>
+{% elif slug == "world" %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <circle cx="12" cy="12" r="9"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.5 2.8 4 6.2 4 9s-1.5 6.2-4 9"/>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-2.5 2.8-4 6.2-4 9s1.5 6.2 4 9"/>
+</svg>
+{% else %}
+<svg class="h-6 w-6 {{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <rect x="4" y="4" width="7" height="7" rx="1.5"/>
+  <rect x="13" y="4" width="7" height="7" rx="1.5"/>
+  <rect x="4" y="13" width="7" height="7" rx="1.5"/>
+  <rect x="13" y="13" width="7" height="7" rx="1.5"/>
+</svg>
+{% endif %}

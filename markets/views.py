@@ -1,0 +1,83 @@
+from django.shortcuts import get_object_or_404, render
+
+from comments.selectors import (
+    attach_comment_votes,
+    collect_comment_ids,
+    get_market_prediction_discussions,
+    get_user_comment_votes,
+    get_user_prediction_votes,
+)
+from integrations.polymarket.embed import build_polymarket_embed_context
+from integrations.services import refresh_market_from_polymarket
+from markets.models import Market
+from markets.selectors import get_market_categories, get_markets_list
+from predictions.forms import ForecastForm
+from predictions.selectors import get_market_predictions, get_user_active_prediction
+from reputation.services import calculate_reputation_stakes
+
+
+def market_list(request):
+    status = request.GET.get("status", "")
+    category = request.GET.get("category", "")
+    search = request.GET.get("q", "")
+    markets = get_markets_list(status=status or None, category=category or None, search=search or None)
+    return render(
+        request,
+        "markets/market_list.html",
+        {
+            "markets": markets,
+            "categories": get_market_categories(),
+            "current_status": status,
+            "current_category": category,
+            "search_query": search,
+        },
+    )
+
+
+def market_detail(request, slug):
+    market = get_object_or_404(Market, slug=slug)
+    if market.source == Market.Source.POLYMARKET:
+        market = refresh_market_from_polymarket(market)
+
+    predictions = get_market_predictions(market)
+    discussions = get_market_prediction_discussions(market=market, predictions=predictions)
+    all_comment_ids = []
+    for threads in discussions.values():
+        all_comment_ids.extend(collect_comment_ids(threads))
+    comment_votes = get_user_comment_votes(request.user, all_comment_ids)
+    for threads in discussions.values():
+        attach_comment_votes(threads, comment_votes)
+    prediction_votes = get_user_prediction_votes(request.user, [p.id for p in predictions])
+
+    existing_forecast = None
+    forecast_form = None
+    if request.user.is_authenticated and market.is_open:
+        existing_forecast = get_user_active_prediction(request.user, market)
+        forecast_form = ForecastForm(instance=existing_forecast, market=market)
+
+    prediction_sections = [
+        {
+            "prediction": p,
+            "threads": discussions.get(p.id, []),
+            "comment_count": len(collect_comment_ids(discussions.get(p.id, []))),
+            "prediction_vote": prediction_votes.get(p.id, 0),
+            "reputation_stakes": calculate_reputation_stakes(
+                predicted_outcome=p.predicted_outcome,
+                probability_snapshot=p.probability_at_prediction_time,
+            ),
+        }
+        for p in predictions
+    ]
+
+    return render(
+        request,
+        "markets/market_detail.html",
+        {
+            "market": market,
+            "predictions": predictions,
+            "prediction_sections": prediction_sections,
+            "polymarket_embed": build_polymarket_embed_context(market),
+            "forecast_form": forecast_form,
+            "existing_forecast": existing_forecast,
+        },
+    )

@@ -1,0 +1,174 @@
+{% load reputation_filters %}
+<section id="place-forecast" class="mt-10 overflow-hidden rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-sm">
+  <div class="border-b border-brand-100 px-6 py-5">
+    <div class="flex gap-3">
+      {% if market.image_url %}
+      <img src="{{ market.image_url }}" alt="" class="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover" loading="lazy">
+      {% endif %}
+      <div class="min-w-0 flex-1">
+        <p class="text-xs font-semibold uppercase tracking-wide text-brand-600">Place a forecast</p>
+        <h2 class="mt-1 text-lg font-bold leading-snug text-slate-900 sm:text-xl">{{ market.title }}</h2>
+      </div>
+      {% with countdown=market.expiration_countdown %}
+      {% if countdown %}
+      <span class="shrink-0 self-start rounded-full px-3 py-1 text-xs font-semibold tabular-nums
+        {% if countdown.tone == 'urgent' %}bg-amber-100 text-amber-800
+        {% elif countdown.tone == 'soon' %}bg-orange-100 text-orange-800
+        {% elif countdown.tone == 'past' %}bg-slate-100 text-slate-500
+        {% elif countdown.tone == 'resolved' %}bg-blue-100 text-blue-800
+        {% else %}bg-blue-100 text-blue-800{% endif %}">
+        {{ countdown.text }}
+      </span>
+      {% endif %}
+      {% endwith %}
+    </div>
+    <p class="mt-3 text-sm text-slate-600">
+      Pick <strong>Yes</strong> or <strong>No</strong>. Live Polymarket odds are captured when you submit.
+    </p>
+    {% if market.close_date %}
+    <p class="mt-1 text-xs text-slate-500">
+      Market closes {{ market.close_date|date:"M j, Y" }}
+    </p>
+    {% endif %}
+  </div>
+
+  <div class="px-6 py-5">
+    {% if user.is_authenticated %}
+      {% if existing %}
+      <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        Your current forecast: <strong>{{ existing.predicted_outcome }}</strong>
+        (posted {{ existing.created_at|timesince }} ago).
+        Submitting again replaces it with a new record.
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'predictions:create' slug=market.slug %}" class="space-y-5">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <div>
+          <span class="block text-sm font-semibold text-slate-800">{{ form.predicted_outcome.label }}</span>
+          <p class="mt-0.5 text-xs text-slate-500">Reputation at stake based on current Polymarket odds.</p>
+          <div class="mt-3 grid grid-cols-2 gap-3">
+            {% for radio in form.predicted_outcome %}
+            {% outcome_stakes market radio.choice_label as stakes %}
+            <label class="relative cursor-pointer {% if radio.choice_label|lower == 'yes' %}forecast-option-yes{% elif radio.choice_label|lower == 'no' %}forecast-option-no{% endif %}">
+              {{ radio.tag }}
+              <span class="forecast-choice flex flex-col items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-4 py-4 text-center transition">
+                <span class="text-lg font-bold">{{ radio.choice_label }}</span>
+                <span class="mt-1 text-xs font-medium text-slate-500">Market {{ stakes.prob_percent }}%</span>
+                <span class="mt-2 text-xs leading-relaxed">
+                  <span class="font-semibold text-emerald-700">+{{ stakes.win_points }}</span> if correct
+                  <span class="text-slate-300"> · </span>
+                  <span class="font-semibold text-red-700">−{{ stakes.loss_points }}</span> if wrong
+                </span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.predicted_outcome.errors %}
+          <p class="mt-2 text-sm text-red-600">{{ form.predicted_outcome.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="forecast-reasoning-block">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <label for="{{ form.reasoning.id_for_label }}" class="text-sm font-semibold text-slate-800">
+              {{ form.reasoning.label }}
+              <span class="ml-1 font-normal text-slate-400">(optional)</span>
+            </label>
+            <span class="text-xs text-slate-400" id="reasoning-count-{{ market.slug }}">0 / 2,000</span>
+          </div>
+          <p class="mt-1 text-xs text-slate-500">Share the argument behind your pick — visible in the public forecast feed.</p>
+          <div class="mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100">
+            {{ form.reasoning }}
+          </div>
+          {% if form.reasoning.errors %}
+          <p class="mt-1.5 text-sm text-red-600">{{ form.reasoning.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto">
+          {% if existing %}Update forecast{% else %}Post forecast{% endif %}
+        </button>
+      </form>
+    {% else %}
+      <p class="text-sm text-slate-600">
+        <a href="{% url 'accounts:login' %}?next={% url 'markets:detail' slug=market.slug %}#place-forecast" class="font-semibold text-brand-600 hover:underline">Log in</a>
+        to place your forecast on this market.
+      </p>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .forecast-choice input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Yes — green hover & selected */
+  .forecast-option-yes .forecast-choice:hover {
+    border-color: rgb(16 185 129);
+    background-color: rgb(236 253 245);
+    color: rgb(4 120 87);
+  }
+  .forecast-option-yes:has(input[type="radio"]:checked) .forecast-choice {
+    border-color: rgb(5 150 105);
+    background-color: rgb(209 250 229);
+    color: rgb(6 95 70);
+    box-shadow: 0 0 0 1px rgb(5 150 105);
+  }
+
+  /* No — red hover & selected */
+  .forecast-option-no .forecast-choice:hover {
+    border-color: rgb(244 63 94);
+    background-color: rgb(255 241 242);
+    color: rgb(190 18 60);
+  }
+  .forecast-option-no:has(input[type="radio"]:checked) .forecast-choice {
+    border-color: rgb(225 29 72);
+    background-color: rgb(255 228 230);
+    color: rgb(159 18 57);
+    box-shadow: 0 0 0 1px rgb(225 29 72);
+  }
+
+  .forecast-reasoning-input {
+    display: block;
+    width: 100%;
+    min-height: 7.5rem;
+    resize: vertical;
+    border: 0;
+    background: transparent;
+    padding: 1rem 1.125rem;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    color: rgb(15 23 42);
+  }
+  .forecast-reasoning-input::placeholder {
+    color: rgb(148 163 184);
+  }
+  .forecast-reasoning-input:focus {
+    outline: none;
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var textarea = document.querySelector("#place-forecast .forecast-reasoning-input");
+    var counter = document.getElementById("reasoning-count-{{ market.slug }}");
+    if (!textarea || !counter) return;
+    function updateCount() {
+      var len = textarea.value.length;
+      counter.textContent = len.toLocaleString() + " / 2,000";
+      counter.classList.toggle("text-amber-600", len > 1800);
+      counter.classList.toggle("text-slate-400", len <= 1800);
+    }
+    textarea.addEventListener("input", updateCount);
+    updateCount();
+  });
+</script>

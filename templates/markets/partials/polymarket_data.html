@@ -1,0 +1,72 @@
+{% load reputation_filters %}
+{% for section in polymarket_sections %}
+<section class="mt-8 rounded-xl border border-slate-200 bg-white overflow-hidden" x-data="{ open: {{ forloop.first|yesno:'true,false' }} }">
+  <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900">{{ section.title }}</h2>
+      {% if section.subtitle %}<p class="text-sm text-slate-500">{{ section.subtitle }}</p>{% endif %}
+    </div>
+    <span class="text-slate-400" x-text="open ? '▼' : '▶'"></span>
+  </button>
+
+  <div x-show="open" x-cloak class="border-t border-slate-100 px-5 pb-5">
+    {% for group in section.groups %}
+    <div class="mt-4">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ group.title }}</h3>
+      <dl class="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-100">
+        {% for field in group.fields %}
+        <div class="grid gap-1 px-3 py-2 sm:grid-cols-3 sm:gap-4 {% if forloop.counter0|divisibleby:2 %}bg-white{% else %}bg-slate-50{% endif %}">
+          <dt class="text-xs font-medium text-slate-500 sm:col-span-1 break-all">{{ field.key }}</dt>
+          <dd class="text-sm text-slate-900 sm:col-span-2 break-words">
+            {% if field.type == "url" %}
+            <a href="{{ field.value }}" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline break-all">{{ field.value }}</a>
+            {% elif field.type == "json" or field.type == "longtext" %}
+            <pre class="max-h-48 overflow-auto rounded bg-slate-900 p-3 text-xs text-slate-100 whitespace-pre-wrap">{{ field.value }}</pre>
+            {% elif field.type == "boolean" %}
+            <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {% if field.value == 'Yes' %}bg-green-100 text-green-800{% else %}bg-slate-100 text-slate-600{% endif %}">{{ field.value }}</span>
+            {% elif field.type == "percent" %}
+            <span class="font-mono font-medium text-emerald-700">{{ field.value }}</span>
+            {% else %}
+            {{ field.value }}
+            {% endif %}
+          </dd>
+        </div>
+        {% endfor %}
+      </dl>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% empty %}
+<p class="mt-4 text-sm text-slate-500">No Polymarket API data stored for this market yet.</p>
+{% endfor %}
+
+{% if market.polymarket_raw %}
+<section class="mt-6 rounded-xl border border-slate-200 bg-white overflow-hidden" x-data="{ open: false }">
+  <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900">Raw JSON — Market API</h2>
+      <p class="text-sm text-slate-500">Complete unmodified Polymarket market response</p>
+    </div>
+    <span class="text-slate-400" x-text="open ? '▼' : '▶'"></span>
+  </button>
+  <div x-show="open" x-cloak class="border-t border-slate-100 p-5">
+    <pre class="max-h-[32rem] overflow-auto rounded-lg bg-slate-900 p-4 text-xs text-slate-100 whitespace-pre-wrap">{{ market.polymarket_raw|pretty_json }}</pre>
+  </div>
+</section>
+{% endif %}
+
+{% if market.polymarket_event_raw %}
+<section class="mt-4 rounded-xl border border-slate-200 bg-white overflow-hidden" x-data="{ open: false }">
+  <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900">Raw JSON — Event API</h2>
+      <p class="text-sm text-slate-500">Complete unmodified Polymarket event response</p>
+    </div>
+    <span class="text-slate-400" x-text="open ? '▼' : '▶'"></span>
+  </button>
+  <div x-show="open" x-cloak class="border-t border-slate-100 p-5">
+    <pre class="max-h-[32rem] overflow-auto rounded-lg bg-slate-900 p-4 text-xs text-slate-100 whitespace-pre-wrap">{{ market.polymarket_event_raw|pretty_json }}</pre>
+  </div>
+</section>
+{% endif %}
