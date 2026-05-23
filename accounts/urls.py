@@ -9,5 +9,6 @@ urlpatterns = [
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", views.CustomLogoutView.as_view(), name="logout"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),
+    path("bookmarks/toggle/", views.bookmark_toggle, name="bookmark_toggle"),
     path("users/<str:username>/", views.profile_detail, name="profile"),
 ]

@@ -1,13 +1,15 @@
 from predictions.models import Prediction
+from predictions.selectors import annotate_prediction_interactions
 
 
 def get_user_prediction_history(user, limit=50):
-    return (
+    qs = (
         Prediction.objects.filter(user=user)
         .exclude(status=Prediction.Status.VOID)
-        .select_related("market")
-        .order_by("-created_at")[:limit]
+        .select_related("market", "user")
+        .order_by("-created_at")
     )
+    return annotate_prediction_interactions(qs)[:limit]
 
 
 def get_top_predictors(limit=20):

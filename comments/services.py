@@ -19,6 +19,12 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
     if prediction and prediction.market_id != market.id:
         raise ValueError("Prediction belongs to a different market.")
 
+    _assert_can_comment_on_prediction(
+        user=user,
+        prediction=prediction,
+        parent_comment=parent_comment,
+    )
+
     with transaction.atomic():
         comment = Comment.objects.create(
             user=user,
@@ -55,6 +61,8 @@ def cast_vote(*, user, target_type, target_id, value):
 
     content_owner = target.user
     if content_owner == user:
+        if target_type == Vote.TargetType.PREDICTION:
+            raise ValueError("You cannot vote on your own forecast.")
         raise ValueError("Cannot vote on your own content.")
 
     with transaction.atomic():
@@ -98,6 +106,17 @@ def cast_vote(*, user, target_type, target_id, value):
         )
 
     return vote
+
+
+def _assert_can_comment_on_prediction(*, user, prediction, parent_comment=None):
+    if prediction is None or user != prediction.user:
+        return
+    if parent_comment is None:
+        raise ValueError(
+            "You cannot comment on your own forecast. Reply to others instead."
+        )
+    if parent_comment.user == user:
+        raise ValueError("You cannot reply to your own comment.")
 
 
 def _get_vote_target(target_type, target_id):

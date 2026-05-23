@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Forum{% endblock %}
+
+{% block extra_head %}
+<style>
+  .forum-action-like:hover:not(:disabled),
+  .forum-action-like.is-active {
+    color: rgb(4 120 87);
+    background-color: rgb(236 253 245);
+  }
+  .forum-action-dislike:hover:not(:disabled),
+  .forum-action-dislike.is-active {
+    color: rgb(190 18 60);
+    background-color: rgb(255 241 242);
+  }
+  .forum-action.is-bookmarked {
+    color: rgb(79 70 229);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-xl">
+  <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur px-4 py-4">
+    <h1 class="text-xl font-bold text-slate-900">Forum</h1>
+    <p class="mt-1 text-sm text-slate-500">Live forecasts from the community — like a prediction feed.</p>
+
+    <form method="get" action="{% url 'dashboard:forum' %}" class="mt-4">
+      <label for="forum-market-filter" class="sr-only">Filter by market</label>
+      <select id="forum-market-filter"
+              name="market"
+              class="form-select w-full rounded-xl border-slate-300 bg-slate-50 text-sm font-medium"
+              onchange="this.form.submit()">
+        <option value="">All markets</option>
+        {% for market in market_options %}
+        <option value="{{ market.slug }}" {% if active_market_slug == market.slug %}selected{% endif %}>
+          {{ market.title }}
+        </option>
+        {% endfor %}
+      </select>
+    </form>
+  </header>
+
+  <div id="forum-feed"
+       class="min-h-[50vh] divide-y divide-slate-200 border-x border-slate-200 bg-white"
+       hx-get="{% url 'dashboard:forum_feed' %}{% if active_market_slug %}?market={{ active_market_slug }}{% endif %}"
+       hx-trigger="every 20s"
+       hx-swap="innerHTML">
+    {% include "dashboard/partials/forum_feed.html" %}
+  </div>
+</div>
+{% endblock %}

@@ -49,9 +49,19 @@
         </p>
       </div>
     </div>
-    <a href="{% url 'dashboard:landing' %}" class="btn-secondary shrink-0 self-start sm:self-center">
-      ← All categories
-    </a>
+    <div class="flex flex-col gap-2 shrink-0 self-start sm:self-center">
+      <a href="{% url 'dashboard:landing' %}" class="btn-secondary">
+        ← All categories
+      </a>
+      <div class="flex gap-2">
+        <a href="{% url 'dashboard:reputation_leaderboard_category' slug=category.slug %}" class="btn-secondary text-xs">
+          Reputation leaders
+        </a>
+        <a href="{% url 'dashboard:popularity_leaderboard_category' slug=category.slug %}" class="btn-secondary text-xs">
+          Popularity leaders
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 

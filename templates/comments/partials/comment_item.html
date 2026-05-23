@@ -1,6 +1,15 @@
-<div class="flex gap-2 {% if depth %}mt-3{% else %}mt-4 first:mt-0{% endif %}" x-data="{ showReply: false, collapsed: false }">
+<div class="flex gap-2 {% if depth %}mt-3{% else %}mt-4 first:mt-0{% endif %}"
+     x-data="{ showReply: false, collapsed: false }"
+     data-sort-score="{{ comment.popularity_score }}"
+     data-sort-time="{{ comment.created_at|date:'U' }}"
+     data-sort-reputation="{{ comment.user.profile.reputation_score }}"
+     data-sort-user-popularity="{{ comment.user.profile.popularity_score }}">
   <div class="shrink-0">
-    {% include "comments/partials/vote_buttons.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" %}
+    {% if user.is_authenticated and user == comment.user %}
+      {% include "comments/partials/vote_buttons.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" can_vote=False %}
+    {% else %}
+      {% include "comments/partials/vote_buttons.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" %}
+    {% endif %}
   </div>
 
   <div class="min-w-0 flex-1 rounded-lg {% if not depth %}border border-slate-100 bg-white px-3 py-2.5 shadow-sm{% else %}border-l-2 border-slate-200 pl-3{% endif %}">
@@ -22,7 +31,7 @@
     <div x-show="!collapsed">
       <p class="mt-1 text-sm leading-relaxed text-slate-800">{{ comment.body }}</p>
 
-      {% if user.is_authenticated %}
+      {% if user.is_authenticated and user != comment.user %}
       <button type="button" @click="showReply = !showReply" class="mt-2 text-xs font-semibold text-brand-600 hover:underline">
         <span x-show="!showReply">Reply</span>
         <span x-show="showReply" x-cloak>Cancel reply</span>
@@ -32,9 +41,13 @@
       </div>
       {% endif %}
 
+      {% if comment.thread_replies %}
+      <div data-popularity-sort>
       {% for reply in comment.thread_replies %}
         {% include "comments/partials/comment_item.html" with comment=reply depth=depth|add:1 %}
       {% endfor %}
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>

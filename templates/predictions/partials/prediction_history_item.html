@@ -43,6 +43,8 @@
       {% if prediction.reasoning %}
       <p class="mt-2 text-sm leading-relaxed text-slate-700">{{ prediction.reasoning }}</p>
       {% endif %}
+
+      {% include "predictions/partials/prediction_interaction_stats.html" %}
     </div>
 
     <div class="flex shrink-0 flex-col items-end gap-2">

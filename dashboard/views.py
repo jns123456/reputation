@@ -2,11 +2,17 @@ from django.conf import settings
 from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
+from accounts.category_selectors import (
+    get_top_popular_users_by_category,
+    get_top_predictors_by_category,
+    validate_category_slug,
+)
 from accounts.selectors import get_top_popular_users, get_top_predictors
+from dashboard.forum_context import get_forum_page_context
 from integrations.services import sync_binary_markets_by_tag
-from markets.categories import get_category_for_slug
+from markets.categories import get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
 from markets.selectors import (
     filter_markets_by_browse_area,
@@ -14,7 +20,6 @@ from markets.selectors import (
     get_category_summaries,
     get_open_markets_by_canonical_category,
 )
-from predictions.models import Prediction
 
 CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
@@ -97,23 +102,108 @@ def category_browse(request, slug):
 
 @login_required
 def home(request):
-    user_predictions = Prediction.objects.filter(user=request.user).select_related("market")[:10]
-    profile = request.user.profile
+    return redirect("accounts:profile", username=request.user.username)
+
+
+def reputation_leaderboard(request):
+    category_slug = request.GET.get("category", "").strip()
+    category = validate_category_slug(category_slug) if category_slug else None
+    if category_slug and category is None:
+        raise Http404("Category not found")
+
+    if category:
+        leaders = get_top_predictors_by_category(category.slug, 50)
+    else:
+        leaders = get_top_predictors(50)
+
     return render(
         request,
-        "dashboard/home.html",
+        "dashboard/reputation_leaderboard.html",
         {
-            "recent_predictions": user_predictions,
-            "profile": profile,
+            "leaders": leaders,
+            "category": category,
+            "chart_categories": get_all_chart_categories(),
+            "is_category_leaderboard": category is not None,
         },
     )
 
 
-def reputation_leaderboard(request):
-    leaders = get_top_predictors(50)
-    return render(request, "dashboard/reputation_leaderboard.html", {"leaders": leaders})
-
-
 def popularity_leaderboard(request):
-    leaders = get_top_popular_users(50)
-    return render(request, "dashboard/popularity_leaderboard.html", {"leaders": leaders})
+    category_slug = request.GET.get("category", "").strip()
+    category = validate_category_slug(category_slug) if category_slug else None
+    if category_slug and category is None:
+        raise Http404("Category not found")
+
+    if category:
+        leaders = get_top_popular_users_by_category(category.slug, 50)
+    else:
+        leaders = get_top_popular_users(50)
+
+    return render(
+        request,
+        "dashboard/popularity_leaderboard.html",
+        {
+            "leaders": leaders,
+            "category": category,
+            "chart_categories": get_all_chart_categories(),
+            "is_category_leaderboard": category is not None,
+        },
+    )
+
+
+def reputation_leaderboard_category(request, slug):
+    category = get_category_for_slug(slug)
+    if category is None:
+        raise Http404("Category not found")
+    leaders = get_top_predictors_by_category(category.slug, 50)
+    return render(
+        request,
+        "dashboard/reputation_leaderboard.html",
+        {
+            "leaders": leaders,
+            "category": category,
+            "chart_categories": get_all_chart_categories(),
+            "is_category_leaderboard": True,
+        },
+    )
+
+
+def popularity_leaderboard_category(request, slug):
+    category = get_category_for_slug(slug)
+    if category is None:
+        raise Http404("Category not found")
+    leaders = get_top_popular_users_by_category(category.slug, 50)
+    return render(
+        request,
+        "dashboard/popularity_leaderboard.html",
+        {
+            "leaders": leaders,
+            "category": category,
+            "chart_categories": get_all_chart_categories(),
+            "is_category_leaderboard": True,
+        },
+    )
+
+
+def about(request):
+    return render(request, "dashboard/about.html")
+
+
+def faq(request):
+    return render(request, "dashboard/faq.html")
+
+
+def forum(request):
+    context = get_forum_page_context(
+        request=request,
+        market_slug=request.GET.get("market", ""),
+    )
+    return render(request, "dashboard/forum.html", context)
+
+
+def forum_feed(request):
+    context = get_forum_page_context(
+        request=request,
+        market_slug=request.GET.get("market", ""),
+    )
+    return render(request, "dashboard/partials/forum_feed.html", context)

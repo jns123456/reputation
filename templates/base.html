@@ -20,6 +20,8 @@
   </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+  {% load static %}
+  <script src="{% static 'js/popularity-sort.js' %}"></script>
   <style>
     [x-cloak] { display: none !important; }
     .form-input, .form-select, .form-textarea {
@@ -33,28 +35,89 @@
     .badge-status-open { @apply inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800; }
     .badge-status-closed { @apply inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600; }
     .badge-status-resolved { @apply inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800; }
+
+    /* Vote thumbs — same green / rose palette as Yes / No forecast picks */
+    .vote-thumb-up:hover:not(:disabled) {
+      background-color: rgb(236 253 245);
+      color: rgb(4 120 87);
+      box-shadow: 0 0 0 1px rgb(16 185 129);
+    }
+    .vote-thumb-up.is-active {
+      background-color: rgb(209 250 229);
+      color: rgb(6 95 70);
+      box-shadow: 0 0 0 1px rgb(5 150 105);
+    }
+    .vote-thumb-down:hover:not(:disabled) {
+      background-color: rgb(255 241 242);
+      color: rgb(190 18 60);
+      box-shadow: 0 0 0 1px rgb(244 63 94);
+    }
+    .vote-thumb-down.is-active {
+      background-color: rgb(255 228 230);
+      color: rgb(159 18 57);
+      box-shadow: 0 0 0 1px rgb(225 29 72);
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="h-full bg-slate-50 text-slate-900">
-  <nav class="border-b border-slate-200 bg-white">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-      <a href="{% url 'dashboard:landing' %}" class="text-lg font-bold text-brand-700">Reputation</a>
-      <div class="flex items-center gap-4 text-sm">
-        <a href="{% url 'markets:list' %}" class="text-slate-600 hover:text-brand-600">Markets</a>
-        <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-slate-600 hover:text-brand-600">Reputation</a>
-        <a href="{% url 'dashboard:popularity_leaderboard' %}" class="text-slate-600 hover:text-brand-600">Popularity</a>
-        {% if user.is_authenticated %}
-          <a href="{% url 'dashboard:home' %}" class="text-slate-600 hover:text-brand-600">Dashboard</a>
-          <a href="{% url 'accounts:profile' username=user.username %}" class="text-slate-600 hover:text-brand-600">{{ user.public_name }}</a>
-          <form method="post" action="{% url 'accounts:logout' %}" class="inline">
-            {% csrf_token %}
-            <button type="submit" class="text-slate-500 hover:text-red-600">Logout</button>
-          </form>
-        {% else %}
-          <a href="{% url 'accounts:login' %}" class="text-slate-600 hover:text-brand-600">Login</a>
-          <a href="{% url 'accounts:signup' %}" class="btn-primary">Sign up</a>
-        {% endif %}
+  <nav class="border-b border-slate-200 bg-white" x-data="{ mobileOpen: false }">
+    <div class="mx-auto max-w-6xl px-4 py-3">
+      <div class="flex items-center justify-between">
+        <a href="{% url 'dashboard:landing' %}" class="text-lg font-bold text-brand-700">Reputation</a>
+
+        <button type="button"
+                class="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 md:hidden"
+                @click="mobileOpen = !mobileOpen"
+                :aria-expanded="mobileOpen"
+                aria-label="Toggle navigation">
+          <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <div class="hidden items-center gap-4 text-sm md:flex">
+          <a href="{% url 'markets:list' %}" class="text-slate-600 hover:text-brand-600">Markets</a>
+          <a href="{% url 'dashboard:forum' %}" class="text-slate-600 hover:text-brand-600">Forum</a>
+          <a href="{% url 'dashboard:about' %}" class="text-slate-600 hover:text-brand-600">About</a>
+          <a href="{% url 'dashboard:faq' %}" class="text-slate-600 hover:text-brand-600">FAQ</a>
+          <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-slate-600 hover:text-brand-600">Reputation</a>
+          <a href="{% url 'dashboard:popularity_leaderboard' %}" class="text-slate-600 hover:text-brand-600">Popularity</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' username=user.username %}" class="text-slate-600 hover:text-brand-600">{{ user.public_name }}</a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="text-slate-500 hover:text-red-600">Logout</button>
+            </form>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="text-slate-600 hover:text-brand-600">Login</a>
+            <a href="{% url 'accounts:signup' %}" class="btn-primary">Sign up</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div x-show="mobileOpen" x-cloak x-transition class="mt-3 border-t border-slate-100 pt-3 md:hidden">
+        <div class="flex flex-col gap-1 text-sm">
+          <a href="{% url 'markets:list' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Markets</a>
+          <a href="{% url 'dashboard:forum' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Forum</a>
+          <a href="{% url 'dashboard:about' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">About</a>
+          <a href="{% url 'dashboard:faq' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">FAQ</a>
+          <a href="{% url 'dashboard:reputation_leaderboard' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Reputation</a>
+          <a href="{% url 'dashboard:popularity_leaderboard' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Popularity</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' username=user.username %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">{{ user.public_name }}</a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="px-3 py-2">
+              {% csrf_token %}
+              <button type="submit" class="text-slate-500 hover:text-red-600">Logout</button>
+            </form>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-brand-600">Login</a>
+            <a href="{% url 'accounts:signup' %}" class="mx-3 btn-primary justify-center">Sign up</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </nav>
@@ -73,10 +136,17 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-500">
-    Reputation — Social predictions without betting. Popularity ≠ Reputation.
+  <footer class="border-t border-slate-200 bg-white py-8 text-center text-sm text-slate-500">
+    <p>Reputation — Social predictions without betting. Popularity ≠ Reputation.</p>
+    <div class="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+      <a href="{% url 'dashboard:about' %}" class="hover:text-brand-600">About</a>
+      <a href="{% url 'dashboard:faq' %}" class="hover:text-brand-600">FAQ</a>
+      <a href="{% url 'dashboard:reputation_leaderboard' %}" class="hover:text-brand-600">Reputation</a>
+      <a href="{% url 'dashboard:popularity_leaderboard' %}" class="hover:text-brand-600">Popularity</a>
+    </div>
   </footer>
   {% block extra_js %}{% endblock %}
+  <script src="{% static 'js/forum-actions.js' %}"></script>
   <script>
     window.focusDiscussionComposer = function (discussionId) {
       var root = document.getElementById(discussionId);

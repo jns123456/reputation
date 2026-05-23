@@ -58,9 +58,10 @@
   <h2 class="text-lg font-semibold">Public forecast history</h2>
   <p class="text-sm text-slate-500">
     All forecasts on this market — scored on <span class="badge-rep">Reputation</span> when resolved.
-    Upvote forecasts you find insightful for <span class="badge-pop">Popularity</span> points.
+    Earn <span class="badge-pop">Popularity</span> when others like your forecast (especially your reasoning)
+    or your comments on other people's forecasts.
   </p>
-  <div class="mt-4 space-y-4">
+  <div id="forecast-list" class="mt-4 space-y-4" data-popularity-sort>
     {% for item in prediction_sections %}
       {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote reputation_stakes=item.reputation_stakes %}
     {% empty %}

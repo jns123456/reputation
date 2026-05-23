@@ -1,0 +1,59 @@
+{% load reputation_filters %}
+<article class="border-b border-slate-200 px-4 py-4 transition hover:bg-slate-50/80"
+         id="forum-post-{{ prediction.id }}"
+         data-sort-score="{{ prediction.popularity_score }}"
+         data-sort-time="{{ prediction.created_at|date:'U' }}"
+         data-sort-reputation="{{ prediction.user.profile.reputation_score }}"
+         data-sort-user-popularity="{{ prediction.user.profile.popularity_score }}">
+  <div class="flex gap-3">
+    <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="shrink-0">
+      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
+        {{ prediction.user.public_name|slice:":1"|upper }}
+      </div>
+    </a>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm leading-tight">
+        <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="font-bold text-slate-900 hover:underline">
+          {{ prediction.user.public_name }}
+        </a>
+        {% if prediction.user.is_ai_agent %}<span class="badge-agent">AI</span>{% endif %}
+        <span class="text-slate-500">@{{ prediction.user.username }}</span>
+        <span class="text-slate-400">·</span>
+        <a href="{% url 'markets:detail' slug=market.slug %}#forecast-{{ prediction.id }}" class="text-slate-500 hover:underline">
+          <time datetime="{{ prediction.created_at|date:'c' }}">{{ prediction.created_at|timesince }}</time>
+        </a>
+      </div>
+
+      <a href="{% url 'markets:detail' slug=market.slug %}" class="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-brand-700 hover:bg-brand-50">
+        {% if market.category %}<span class="text-slate-500">{{ market.category }} ·</span>{% endif %}
+        <span class="truncate">{{ market.title }}</span>
+      </a>
+
+      <div class="mt-2 text-[15px] leading-relaxed text-slate-900">
+        <span class="text-slate-600">Forecast </span>
+        <strong class="{% if prediction.predicted_outcome|lower == 'yes' %}text-emerald-700{% elif prediction.predicted_outcome|lower == 'no' %}text-red-700{% else %}text-brand-700{% endif %}">
+          {{ prediction.predicted_outcome }}
+        </strong>
+        {% if reputation_stakes %}
+        <span class="text-sm text-slate-500">
+          · Polymarket {{ reputation_stakes.prob_percent }}%
+          · <span class="text-emerald-700">+{{ reputation_stakes.win_points }}</span>/<span class="text-red-700">−{{ reputation_stakes.loss_points }}</span>
+        </span>
+        {% endif %}
+      </div>
+
+      {% if prediction.reasoning %}
+      <p class="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800">{{ prediction.reasoning }}</p>
+      {% endif %}
+
+      {% if prediction.status == "resolved" %}
+      <p class="mt-2 text-xs font-semibold {% if prediction.is_correct %}text-emerald-700{% else %}text-red-700{% endif %}">
+        {% if prediction.is_correct %}✓ Correct forecast{% else %}✗ Incorrect forecast{% endif %}
+      </p>
+      {% endif %}
+
+      {% include "dashboard/partials/forum_post_actions.html" with share_path=market.slug %}
+    </div>
+  </div>
+</article>

@@ -83,6 +83,10 @@ def vote_view(request):
         return HttpResponseBadRequest("Invalid target type")
 
     try:
+        existing_vote = get_user_vote(request.user, target_type, int(target_id))
+        if existing_vote and existing_vote.value == value and value != 0:
+            value = 0
+
         cast_vote(
             user=request.user,
             target_type=target_type,
@@ -112,7 +116,18 @@ def vote_view(request):
         from predictions.models import Prediction
 
         prediction = get_object_or_404(Prediction, pk=int(target_id))
+        prediction.refresh_from_db()
         user_vote = get_user_vote(request.user, target_type, int(target_id))
+        layout = request.POST.get("layout", "vertical")
+        if layout == "forum":
+            return render(
+                request,
+                "dashboard/partials/forum_vote_actions.html",
+                {
+                    "prediction": prediction,
+                    "prediction_vote": user_vote.value if user_vote else 0,
+                },
+            )
         return render(
             request,
             "comments/partials/vote_buttons.html",
@@ -121,7 +136,7 @@ def vote_view(request):
                 "target_id": prediction.id,
                 "score": prediction.popularity_score,
                 "user_vote": user_vote.value if user_vote else 0,
-                "layout": request.POST.get("layout", "vertical"),
+                "layout": layout,
                 "after_vote_focus": f"prediction-discussion-{prediction.id}",
             },
         )

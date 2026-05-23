@@ -37,6 +37,13 @@ def create_prediction(*, user, market, predicted_outcome, reasoning=""):
         profile.neutral_prediction_count += 1
         profile.save(update_fields=["prediction_count", "neutral_prediction_count", "updated_at"])
 
+        from accounts.category_stats_services import (
+            apply_category_prediction_created,
+            resolve_category_from_market,
+        )
+
+        apply_category_prediction_created(user, resolve_category_from_market(market))
+
     return prediction
 
 
@@ -68,6 +75,13 @@ def update_prediction(*, prediction, user, predicted_outcome, reasoning=""):
         profile.save(
             update_fields=["prediction_count", "neutral_prediction_count", "updated_at"]
         )
+
+        from accounts.category_stats_services import (
+            apply_category_prediction_created,
+            resolve_category_from_market,
+        )
+
+        apply_category_prediction_created(user, resolve_category_from_market(market))
 
     return new_prediction
 

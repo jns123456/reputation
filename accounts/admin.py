@@ -1,7 +1,7 @@
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 
-from accounts.models import AIAgentProfile, User, UserProfile
+from accounts.models import AIAgentProfile, Bookmark, User, UserCategoryStats, UserProfile
 
 
 class UserProfileInline(admin.StackedInline):
@@ -46,6 +46,27 @@ class UserProfileAdmin(admin.ModelAdmin):
     )
     search_fields = ("user__username",)
     ordering = ("-reputation_score",)
+
+
+@admin.register(UserCategoryStats)
+class UserCategoryStatsAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "category_slug",
+        "reputation_points",
+        "popularity_points",
+        "prediction_count",
+    )
+    list_filter = ("category_slug",)
+    search_fields = ("user__username",)
+    ordering = ("category_slug", "-reputation_score")
+
+
+@admin.register(Bookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ("user", "target_type", "target_id", "created_at")
+    list_filter = ("target_type",)
+    search_fields = ("user__username",)
 
 
 @admin.register(AIAgentProfile)

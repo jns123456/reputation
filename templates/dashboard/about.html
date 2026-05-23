@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<section class="relative mb-12 overflow-hidden rounded-2xl border border-slate-200/80 bg-white px-6 py-10 shadow-sm sm:px-10 sm:py-14">
+  <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true"></div>
+  <div class="relative max-w-3xl">
+    <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Our thesis</p>
+    <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+      Social predictions without betting
+    </h1>
+    <p class="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg">
+      Reputation is an AI-native platform that combines the discussion culture of Reddit,
+      the real-world questions of Polymarket, and a durable record of predictive quality —
+      <strong class="font-semibold text-slate-800">without money on the line</strong>.
+    </p>
+    <p class="mt-4 text-base leading-relaxed text-slate-600">
+      Users debate, comment, and publish formal forecasts about events imported from Polymarket.
+      When markets resolve, the platform scores who got it right. Over time, that history
+      becomes a credible signal of forecasting ability — separate from likes, fame, or hype.
+    </p>
+  </div>
+</section>
+
+<section class="mb-12">
+  <div class="mb-6 max-w-2xl">
+    <h2 class="text-xl font-semibold text-slate-900 sm:text-2xl">Two scores, one profile</h2>
+    <p class="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
+      Most platforms collapse “popular” and “right” into a single number. We keep them independent
+      so credibility stays honest.
+    </p>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2">
+    <article class="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm sm:p-8">
+      <div class="flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </span>
+        <div>
+          <span class="badge-rep">Reputation</span>
+          <h3 class="mt-1 text-lg font-semibold text-slate-900">Predictive quality</h3>
+        </div>
+      </div>
+      <p class="mt-4 text-sm leading-relaxed text-slate-600">
+        Earned only when your <strong class="text-slate-800">formal forecasts</strong> resolve against
+        real-world outcomes. Harder calls against market consensus reward more; obvious picks reward less.
+        Upvotes never touch this score.
+      </p>
+      <a href="{% url 'dashboard:reputation_leaderboard' %}" class="mt-5 inline-flex text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline">
+        Reputation leaderboard →
+      </a>
+    </article>
+
+    <article class="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-6 shadow-sm sm:p-8">
+      <div class="flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </span>
+        <div>
+          <span class="badge-pop">Popularity</span>
+          <h3 class="mt-1 text-lg font-semibold text-slate-900">Social engagement</h3>
+        </div>
+      </div>
+      <p class="mt-4 text-sm leading-relaxed text-slate-600">
+        Driven by upvotes and downvotes on comments and forecasts. A viral argument can make you
+        popular without making you accurate — and a sharp predictor can stay quiet but climb the
+        reputation ranks.
+      </p>
+      <a href="{% url 'dashboard:popularity_leaderboard' %}" class="mt-5 inline-flex text-sm font-medium text-amber-700 hover:text-amber-800 hover:underline">
+        Popularity leaderboard →
+      </a>
+    </article>
+  </div>
+</section>
+
+<section class="mb-12 grid gap-6 lg:grid-cols-3">
+  <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+    <h2 class="text-xl font-semibold text-slate-900">Not a betting platform</h2>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+      Reputation is a <strong class="text-slate-800">social and reputational network</strong>, not a
+      sportsbook or trading venue. There are no wallets, deposits, withdrawals, or financial settlements.
+      Polymarket supplies real-world questions and resolution data — we use that signal to score forecasts,
+      not to move money.
+    </p>
+    <div class="mt-5 flex flex-wrap gap-2">
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">No betting</span>
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">No wallets</span>
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">No custody</span>
+      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Free to use</span>
+    </div>
+  </article>
+
+  <article class="rounded-2xl border border-brand-200/80 bg-gradient-to-br from-brand-50 to-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-slate-900">Free for everyone</h2>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+      Creating an account, browsing markets, commenting, and publishing forecasts costs nothing.
+      Your time and insight are the input — not your bank balance.
+    </p>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+      You can still <strong class="text-slate-800">monetize your content</strong> off-platform:
+      newsletters, paid analysis, consulting, or any audience you build around your public track record.
+    </p>
+  </article>
+</section>
+
+<section class="mb-12 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-white p-6 shadow-sm sm:p-8">
+  <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+    <div class="max-w-2xl">
+      <p class="text-xs font-semibold uppercase tracking-widest text-violet-600">Future-ready</p>
+      <h2 class="mt-2 text-xl font-semibold text-slate-900 sm:text-2xl">Portable reputation with EAS</h2>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+        Today, reputation and popularity live on this platform. Our long-term goal is to make both
+        <strong class="text-slate-800">portable and verifiable</strong> using the
+        <a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-700 underline decoration-violet-300 underline-offset-2 hover:text-violet-800">Ethereum Attestation Service (EAS)</a>
+        — an open infrastructure layer for onchain and offchain attestations about anything.
+      </p>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">
+        Imagine carrying a cryptographic proof of your forecasting history — or your community standing —
+        into other apps, agent marketplaces, and identity systems without starting from zero each time.
+        EAS is optional future integration; the MVP stays fully usable without blockchain.
+      </p>
+    </div>
+    <div class="shrink-0 rounded-xl border border-violet-100 bg-white/80 p-5 text-sm text-slate-600 shadow-sm md:max-w-xs">
+      <p class="font-medium text-slate-800">What EAS enables</p>
+      <ul class="mt-3 space-y-2">
+        <li class="flex gap-2"><span class="text-violet-500">•</span> Verifiable prediction outcomes</li>
+        <li class="flex gap-2"><span class="text-violet-500">•</span> Composable trust across apps</li>
+        <li class="flex gap-2"><span class="text-violet-500">•</span> AI agent credibility signals</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="mb-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+  <div class="mb-6 max-w-3xl">
+    <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The spirit of the platform</p>
+    <h2 class="mt-2 text-xl font-semibold text-slate-900 sm:text-2xl">Leaderboards of skill, not bankrolls</h2>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+      On betting and trading platforms, the leaderboard is usually a leaderboard of
+      <strong class="text-slate-800">money</strong> — who wagered the most, risked the most capital,
+      or got lucky on a large stake. Wealth and access become proxies for credibility.
+    </p>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+      Here, the leaderboard is a leaderboard of
+      <strong class="text-slate-800">points</strong> — earned purely from the quality of your forecasts
+      when markets resolve. No deposit required. No bankroll. A student, a journalist, or a sharp
+      analyst with zero dollars to bet can still climb to the top if they are consistently right.
+      That is the point.
+    </p>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <article class="rounded-xl border border-slate-200 bg-slate-50/80 p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Money leaderboard</p>
+      <h3 class="mt-2 font-semibold text-slate-900">Who had the most to lose?</h3>
+      <ul class="mt-4 space-y-2.5 text-sm text-slate-600">
+        <li class="flex gap-2"><span class="text-slate-400">✕</span> Rewards capital, not necessarily insight</li>
+        <li class="flex gap-2"><span class="text-slate-400">✕</span> Excludes anyone without funds to wager</li>
+        <li class="flex gap-2"><span class="text-slate-400">✕</span> One lucky big bet can distort the ranking</li>
+        <li class="flex gap-2"><span class="text-slate-400">✕</span> Conflates risk appetite with forecasting ability</li>
+      </ul>
+    </article>
+
+    <article class="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Points leaderboard</p>
+      <h3 class="mt-2 font-semibold text-slate-900">Who was most accurate?</h3>
+      <ul class="mt-4 space-y-2.5 text-sm text-slate-600">
+        <li class="flex gap-2"><span class="text-emerald-500">✓</span> Rewards judgment on real-world questions</li>
+        <li class="flex gap-2"><span class="text-emerald-500">✓</span> Open to anyone — accuracy is the only entry fee</li>
+        <li class="flex gap-2"><span class="text-emerald-500">✓</span> Harder contrarian calls score higher than obvious picks</li>
+        <li class="flex gap-2"><span class="text-emerald-500">✓</span> A public record of forecasting ability, not net worth</li>
+      </ul>
+    </article>
+  </div>
+
+  <p class="mt-6 max-w-3xl text-sm leading-relaxed text-slate-600">
+    You can be highly accurate with no bankroll at all. The rankings surface
+    <em>who understands the world</em>, not who could afford to bet on it.
+  </p>
+</section>
+
+<section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+  <h2 class="text-xl font-semibold text-slate-900">Leaderboards</h2>
+  <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+    Two public rankings reflect the split above — both scored in points, never in dollars. The
+    <a href="{% url 'dashboard:reputation_leaderboard' %}" class="font-medium text-emerald-700 hover:underline">Reputation leaderboard</a>
+    surfaces the best predictors by resolved forecast quality. The
+    <a href="{% url 'dashboard:popularity_leaderboard' %}" class="font-medium text-amber-700 hover:underline">Popularity leaderboard</a>
+    highlights the most engaged voices in discussion. Same people can appear on both — or on neither.
+    That asymmetry is the point.
+  </p>
+  <div class="mt-6 flex flex-wrap gap-3">
+    <a href="{% url 'markets:list' %}" class="btn-primary">Browse markets</a>
+    <a href="{% url 'dashboard:faq' %}" class="btn-secondary">Read the FAQ</a>
+  </div>
+</section>
+{% endblock %}

@@ -18,6 +18,19 @@ def record_popularity_event(*, user, points_delta, event_type, reason, comment=N
     profile.popularity_points += points_delta
     profile.popularity_score = float(profile.popularity_points)
     profile.save(update_fields=["popularity_points", "popularity_score", "updated_at"])
+
+    from accounts.category_stats_services import (
+        apply_category_popularity_delta,
+        resolve_category_from_popularity_event,
+    )
+
+    category_slug = resolve_category_from_popularity_event(
+        comment=comment,
+        prediction=prediction,
+    )
+    if category_slug is not None:
+        apply_category_popularity_delta(user, category_slug, points_delta)
+
     return event
 
 

@@ -1,7 +1,11 @@
 {% extends "base.html" %}
-{% load reputation_filters %}
+{% load reputation_filters static %}
 
 {% block title %}{{ profile_user.public_name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -16,7 +20,7 @@
   {% endif %}
 </div>
 
-<div class="mt-8 grid gap-4 sm:grid-cols-2">
+<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <div class="rounded-xl border border-slate-200 bg-white p-5">
     <p class="text-sm text-slate-500">Reputation</p>
     <p class="text-3xl font-bold text-rep-600">{{ profile_user.profile.reputation_points }}</p>
@@ -27,7 +31,76 @@
     <p class="text-3xl font-bold text-pop-600">{{ profile_user.profile.popularity_points }}</p>
     <span class="badge-pop">Social engagement</span>
   </div>
+  <div class="rounded-xl border border-slate-200 bg-white p-5">
+    <p class="text-sm text-slate-500">Predictions</p>
+    <p class="text-3xl font-bold">{{ profile_user.profile.prediction_count }}</p>
+    <p class="mt-1 text-xs text-slate-500">{{ profile_user.profile.correct_prediction_count }} correct · {{ profile_user.profile.incorrect_prediction_count }} incorrect</p>
+  </div>
+  <div class="rounded-xl border border-slate-200 bg-white p-5">
+    <p class="text-sm text-slate-500">Accuracy</p>
+    {% with total=profile_user.profile.correct_prediction_count|add:profile_user.profile.incorrect_prediction_count %}
+    <p class="text-3xl font-bold">
+      {% if total > 0 %}{% widthratio profile_user.profile.correct_prediction_count total 100 %}%{% else %}—{% endif %}
+    </p>
+    {% endwith %}
+  </div>
 </div>
+
+<section class="mt-10">
+  <h2 class="text-lg font-semibold">Expertise by category</h2>
+  <p class="mt-1 text-sm text-slate-600">Reputation and popularity broken down by topic — spot specialists in crypto, politics, sports, and more.</p>
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <p class="text-sm font-medium text-rep-600">Reputation radar</p>
+      <p class="text-xs text-slate-500">Predictive quality per category</p>
+      <div class="mt-4 aspect-square max-h-80">
+        <canvas id="reputation-radar-chart"></canvas>
+      </div>
+    </div>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <p class="text-sm font-medium text-pop-600">Popularity radar</p>
+      <p class="text-xs text-slate-500">Social engagement per category</p>
+      <div class="mt-4 aspect-square max-h-80">
+        <canvas id="popularity-radar-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Category</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Reputation</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Popularity</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Predictions</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Leaderboards</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for row in category_breakdown %}
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 font-medium">{{ row.category.name }}</td>
+          <td class="px-4 py-3"><span class="badge-rep">{{ row.reputation_points }}</span></td>
+          <td class="px-4 py-3"><span class="badge-pop">{{ row.popularity_points }}</span></td>
+          <td class="px-4 py-3 text-sm text-slate-600">
+            {{ row.prediction_count }}
+            {% if row.correct_prediction_count or row.incorrect_prediction_count %}
+            <span class="text-slate-400">· {{ row.correct_prediction_count }}/{{ row.correct_prediction_count|add:row.incorrect_prediction_count }} correct</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-sm">
+            <a href="{% url 'dashboard:reputation_leaderboard_category' slug=row.category.slug %}" class="text-brand-600 hover:underline">Rep</a>
+            <span class="text-slate-300">·</span>
+            <a href="{% url 'dashboard:popularity_leaderboard_category' slug=row.category.slug %}" class="text-brand-600 hover:underline">Pop</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 
 <section class="mt-10">
   <div class="flex items-center justify-between">
@@ -42,4 +115,16 @@
     {% endfor %}
   </div>
 </section>
+
+<script id="profile-radar-config" type="application/json">
+{
+  "labels": [{% for row in category_breakdown %}"{{ row.category.name|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+  "reputationValues": [{% for row in category_breakdown %}{{ row.reputation_points }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+  "popularityValues": [{% for row in category_breakdown %}{{ row.popularity_points }}{% if not forloop.last %}, {% endif %}{% endfor %}]
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/profile-radar-charts.js' %}"></script>
 {% endblock %}

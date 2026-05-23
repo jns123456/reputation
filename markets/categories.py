@@ -248,3 +248,8 @@ def resolve_market_category_slug(market) -> str:
 
 def get_category_for_slug(slug: str) -> CanonicalCategory | None:
     return CATEGORY_BY_SLUG.get(slug)
+
+
+def get_all_chart_categories() -> tuple[CanonicalCategory, ...]:
+    """All categories shown on profile radar charts and category leaderboards."""
+    return CANONICAL_CATEGORIES + (OTHER_CATEGORY,)

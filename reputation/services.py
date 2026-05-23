@@ -117,4 +117,16 @@ def apply_reputation_for_prediction(prediction):
         ]
     )
 
+    from accounts.category_stats_services import (
+        apply_category_reputation_delta,
+        resolve_category_from_market,
+    )
+
+    apply_category_reputation_delta(
+        prediction.user,
+        resolve_category_from_market(prediction.market),
+        delta,
+        is_correct=is_correct,
+    )
+
     return event

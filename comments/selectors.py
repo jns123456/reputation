@@ -1,6 +1,13 @@
 from collections import defaultdict
 
 from comments.models import Comment, Vote
+from reputation.display_ranking import DISPLAY_RANK_ORM_FIELDS, display_rank_key_for_content
+
+
+def _sort_comment_tree(nodes):
+    nodes.sort(key=display_rank_key_for_content)
+    for node in nodes:
+        _sort_comment_tree(node.thread_replies)
 
 
 def attach_comment_votes(threads, vote_map):
@@ -28,17 +35,14 @@ def build_comment_forest(comments):
         elif not parent_id:
             top_level.append(node)
 
-    for node in nodes:
-        node.thread_replies.sort(key=lambda reply: reply.created_at)
-
-    top_level.sort(key=lambda node: (-node.popularity_score, -node.created_at.timestamp()))
+    _sort_comment_tree(top_level)
     return top_level
 
 
 def get_prediction_comment_threads(prediction):
     comments = (
         Comment.objects.filter(prediction=prediction)
-        .select_related("user")
+        .select_related("user", "user__profile")
         .order_by("created_at")
     )
     return build_comment_forest(comments)
@@ -52,7 +56,7 @@ def get_market_prediction_discussions(*, market, predictions):
 
     comments = (
         Comment.objects.filter(market=market, prediction_id__in=prediction_ids)
-        .select_related("user")
+        .select_related("user", "user__profile")
         .order_by("created_at")
     )
     grouped = defaultdict(list)
@@ -69,9 +73,9 @@ def get_market_comments(market):
     """Top-level market comments without a linked prediction (legacy/general)."""
     top_level = (
         Comment.objects.filter(market=market, prediction__isnull=True, parent_comment__isnull=True)
-        .select_related("user")
+        .select_related("user", "user__profile")
         .prefetch_related("replies__user")
-        .order_by("-popularity_score", "-created_at")
+        .order_by(*DISPLAY_RANK_ORM_FIELDS)
     )
     return top_level
 
