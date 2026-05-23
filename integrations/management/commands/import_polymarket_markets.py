@@ -15,12 +15,42 @@ class Command(BaseCommand):
             action="store_true",
             help="Import binary Yes/No markets from Polymarket Economy category",
         )
+        parser.add_argument(
+            "--crypto",
+            action="store_true",
+            help="Import binary Yes/No markets from Polymarket Crypto category",
+        )
+        parser.add_argument(
+            "--tag",
+            type=str,
+            default="",
+            help="Import binary Yes/No markets for a Polymarket tag slug (e.g. sports, politics)",
+        )
+        parser.add_argument(
+            "--category-name",
+            type=str,
+            default="",
+            help="Default category label when using --tag",
+        )
 
     def handle(self, *args, **options):
         if options["economy"]:
             from integrations.services import sync_economy_binary_markets
 
             result = sync_economy_binary_markets(limit=options["limit"])
+        elif options["crypto"]:
+            from integrations.services import sync_crypto_binary_markets
+
+            result = sync_crypto_binary_markets(limit=options["limit"])
+        elif options["tag"]:
+            from integrations.services import sync_binary_markets_by_tag
+
+            category_name = options["category_name"] or options["tag"].replace("-", " ").title()
+            result = sync_binary_markets_by_tag(
+                tag_slug=options["tag"],
+                default_category=category_name,
+                limit=options["limit"],
+            )
         else:
             result = import_markets_from_polymarket(
                 limit=options["limit"],

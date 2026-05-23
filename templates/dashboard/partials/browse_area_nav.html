@@ -1,0 +1,37 @@
+{% if area_summaries %}
+<nav class="browse-area-nav" aria-label="{{ category.name }} sub-areas">
+  <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+    All {{ category.name }}
+  </p>
+
+  <ul class="space-y-0.5">
+    <li>
+      <a href="{% url 'dashboard:category_browse' slug=category.slug %}"
+         class="group flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm transition {% if not active_area_slug %}bg-slate-100 font-semibold text-slate-900{% else %}text-slate-700 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
+          {% include "dashboard/partials/category_icon.html" with slug=category.slug class=category.icon_fg %}
+        </span>
+        <span class="min-w-0 flex-1 truncate">All</span>
+        <span class="shrink-0 tabular-nums text-xs {% if not active_area_slug %}font-semibold text-slate-700{% else %}text-slate-400{% endif %}">
+          {{ total_market_count }}
+        </span>
+      </a>
+    </li>
+
+    {% for item in area_summaries %}
+    <li>
+      <a href="{% url 'dashboard:category_browse' slug=category.slug %}?area={{ item.area.slug }}"
+         class="group flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm transition {% if active_area_slug == item.area.slug %}bg-slate-100 font-semibold text-slate-900{% else %}text-slate-700 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
+          {% include "dashboard/partials/browse_area_icon.html" with slug=item.area.slug %}
+        </span>
+        <span class="min-w-0 flex-1 truncate">{{ item.area.name }}</span>
+        <span class="shrink-0 tabular-nums text-xs {% if active_area_slug == item.area.slug %}font-semibold text-slate-700{% else %}text-slate-400{% endif %}">
+          {{ item.count }}
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}

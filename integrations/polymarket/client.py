@@ -12,6 +12,7 @@ from django.utils.dateparse import parse_datetime
 logger = logging.getLogger(__name__)
 
 ECONOMY_TAG_SLUG = "economy"
+CRYPTO_TAG_SLUG = "crypto"
 
 
 class PolymarketClient:
@@ -51,41 +52,80 @@ class PolymarketClient:
             return data
         return data.get("data", data.get("events", []))
 
-    def fetch_economy_binary_markets(self, limit=20):
-        """Fetch active binary Yes/No markets from Polymarket Economy category."""
+    def fetch_binary_markets_by_tag(
+        self,
+        tag_slug,
+        *,
+        limit=20,
+        default_category="",
+        fallback_tag_in_payload=None,
+    ):
+        """Fetch active binary Yes/No markets for a Polymarket tag slug."""
         events = self.fetch_events(
-            tag_slug=ECONOMY_TAG_SLUG,
+            tag_slug=tag_slug,
             limit=max(limit * 2, 30),
             active=True,
             closed=False,
             order="volume24hr",
         )
         binary_markets = []
+        seen_ids = set()
+
         for event in events:
             for market in event.get("markets") or []:
-                if is_binary_market_record(market) and not market.get("closed"):
-                    enriched = dict(market)
-                    enriched.setdefault("category", "Economy")
-                    enriched["volume24hr"] = market.get("volume24hr") or event.get("volume24hr")
-                    binary_markets.append(enriched)
-                    if len(binary_markets) >= limit:
-                        return binary_markets
+                if not is_binary_market_record(market) or market.get("closed"):
+                    continue
+                market_id = market.get("id")
+                if market_id in seen_ids:
+                    continue
+                enriched = dict(market)
+                if default_category:
+                    enriched.setdefault("category", default_category)
+                enriched["volume24hr"] = market.get("volume24hr") or event.get("volume24hr")
+                binary_markets.append(enriched)
+                seen_ids.add(market_id)
+                if len(binary_markets) >= limit:
+                    return binary_markets[:limit]
 
+        fallback_token = (fallback_tag_in_payload or tag_slug).lower()
         if len(binary_markets) < limit:
             standalone = self.fetch_markets(limit=limit * 3, active=True)
             for market in standalone:
-                if is_binary_market_record(market) and not market.get("closed"):
-                    category = str(market.get("category") or "").lower()
-                    tags = json.dumps(market.get("tags") or []).lower()
-                    if category == "economy" or "economy" in tags:
-                        enriched = dict(market)
-                        enriched.setdefault("category", "Economy")
-                        if market.get("id") not in {m.get("id") for m in binary_markets}:
-                            binary_markets.append(enriched)
-                            if len(binary_markets) >= limit:
-                                break
+                if not is_binary_market_record(market) or market.get("closed"):
+                    continue
+                market_id = market.get("id")
+                if market_id in seen_ids:
+                    continue
+                category = str(market.get("category") or "").lower()
+                tags = json.dumps(market.get("tags") or []).lower()
+                if category == fallback_token or fallback_token in tags:
+                    enriched = dict(market)
+                    if default_category:
+                        enriched.setdefault("category", default_category)
+                    binary_markets.append(enriched)
+                    seen_ids.add(market_id)
+                    if len(binary_markets) >= limit:
+                        break
 
         return binary_markets[:limit]
+
+    def fetch_economy_binary_markets(self, limit=20):
+        """Fetch active binary Yes/No markets from Polymarket Economy category."""
+        return self.fetch_binary_markets_by_tag(
+            ECONOMY_TAG_SLUG,
+            limit=limit,
+            default_category="Economy",
+            fallback_tag_in_payload="economy",
+        )
+
+    def fetch_crypto_binary_markets(self, limit=20):
+        """Fetch active binary Yes/No markets from Polymarket Crypto category."""
+        return self.fetch_binary_markets_by_tag(
+            CRYPTO_TAG_SLUG,
+            limit=limit,
+            default_category="Crypto",
+            fallback_tag_in_payload="crypto",
+        )
 
     def fetch_market_by_id(self, external_id):
         url = f"{self.base_url}/markets/{external_id}"

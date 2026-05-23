@@ -5,11 +5,19 @@ from django.http import Http404
 from django.shortcuts import render
 
 from accounts.selectors import get_top_popular_users, get_top_predictors
+from integrations.services import sync_binary_markets_by_tag
 from markets.categories import get_category_for_slug
-from markets.selectors import get_category_summaries, get_open_markets_by_canonical_category
+from markets.browse_areas import get_browse_area
+from markets.selectors import (
+    filter_markets_by_browse_area,
+    get_browse_area_summaries,
+    get_category_summaries,
+    get_open_markets_by_canonical_category,
+)
 from predictions.models import Prediction
 
 CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
+CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
 
 
 def _load_category_summaries():
@@ -33,20 +41,56 @@ def landing(request):
     )
 
 
+def _sync_category_markets_if_needed(category):
+    """Import fresh markets from Polymarket when browsing a tagged category."""
+    if not category.polymarket_tag:
+        return
+
+    cache_key = f"{CATEGORY_SYNC_CACHE_PREFIX}{category.slug}"
+    if cache.get(cache_key):
+        return
+
+    sync_binary_markets_by_tag(
+        tag_slug=category.polymarket_tag,
+        default_category=category.name,
+        limit=48,
+    )
+    cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+    cache.set(cache_key, True, settings.POLYMARKET_ECONOMY_CACHE_SECONDS)
+
+
 def category_browse(request, slug):
     category = get_category_for_slug(slug)
     if category is None:
         raise Http404("Category not found")
 
-    all_markets = get_open_markets_by_canonical_category(category_slug=slug)
-    markets = all_markets[:48]
+    _sync_category_markets_if_needed(category)
+
+    total_markets = get_open_markets_by_canonical_category(category_slug=slug)
+    area_summaries = get_browse_area_summaries(category_slug=slug, markets=total_markets)
+
+    area_slug = request.GET.get("area", "").strip()
+    active_area = get_browse_area(slug, area_slug) if area_slug else None
+    display_markets = total_markets
+    if active_area:
+        display_markets = filter_markets_by_browse_area(
+            markets=total_markets,
+            category_slug=slug,
+            area_slug=area_slug,
+        )
+
+    markets = display_markets[:48]
     return render(
         request,
         "dashboard/category_browse.html",
         {
             "category": category,
             "markets": markets,
-            "market_count": len(all_markets),
+            "market_count": len(display_markets),
+            "total_market_count": len(total_markets),
+            "area_summaries": area_summaries,
+            "active_area": active_area,
+            "active_area_slug": active_area.slug if active_area else "",
         },
     )
 

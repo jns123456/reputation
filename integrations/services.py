@@ -144,10 +144,15 @@ def sync_market_by_external_id(external_id):
     )
 
 
-def sync_economy_binary_markets(*, limit=12):
-    """Fetch Economy Yes/No markets from Polymarket and upsert locally."""
+def sync_binary_markets_by_tag(*, tag_slug, default_category, limit=48):
+    """Fetch binary Yes/No markets for a Polymarket tag and upsert locally."""
     client = PolymarketClient()
-    raw_markets = client.fetch_economy_binary_markets(limit=limit)
+    raw_markets = client.fetch_binary_markets_by_tag(
+        tag_slug,
+        limit=limit,
+        default_category=default_category,
+        fallback_tag_in_payload=tag_slug,
+    )
 
     imported = []
     errors = []
@@ -156,7 +161,7 @@ def sync_economy_binary_markets(*, limit=12):
         try:
             if not raw.get("id"):
                 continue
-            normalized = normalize_polymarket_record(raw, default_category="Economy")
+            normalized = normalize_polymarket_record(raw, default_category=default_category)
             raw_event = _fetch_event_for_market(client, raw)
             market, created = import_market_from_normalized(
                 normalized,
@@ -165,10 +170,28 @@ def sync_economy_binary_markets(*, limit=12):
             )
             imported.append({"market": market, "created": created, "raw": raw})
         except Exception as exc:
-            logger.exception("Failed to import economy market: %s", raw.get("id"))
+            logger.exception("Failed to import %s market: %s", tag_slug, raw.get("id"))
             errors.append({"raw_id": raw.get("id"), "error": str(exc)})
 
     return {"imported": imported, "errors": errors}
+
+
+def sync_economy_binary_markets(*, limit=12):
+    """Fetch Economy Yes/No markets from Polymarket and upsert locally."""
+    return sync_binary_markets_by_tag(
+        tag_slug="economy",
+        default_category="Economy",
+        limit=limit,
+    )
+
+
+def sync_crypto_binary_markets(*, limit=48):
+    """Fetch Crypto Yes/No markets from Polymarket and upsert locally."""
+    return sync_binary_markets_by_tag(
+        tag_slug="crypto",
+        default_category="Crypto",
+        limit=limit,
+    )
 
 
 def get_economy_binary_markets(*, limit=12, sync=True):

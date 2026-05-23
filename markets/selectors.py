@@ -6,6 +6,11 @@ from markets.categories import (
     get_category_for_slug,
     resolve_market_category_slug,
 )
+from markets.browse_areas import (
+    get_browse_area,
+    get_browse_areas_for_category,
+    market_matches_browse_area,
+)
 from markets.models import Market
 
 
@@ -39,6 +44,28 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
     if limit is not None:
         return matched[:limit]
     return matched
+
+
+def get_browse_area_summaries(*, category_slug, markets=None):
+    """Count open markets per sub-area; only areas with at least one market."""
+    if markets is None:
+        markets = get_open_markets_by_canonical_category(category_slug=category_slug)
+
+    summaries = []
+    for area in get_browse_areas_for_category(category_slug):
+        count = sum(1 for market in markets if market_matches_browse_area(market, area))
+        if count:
+            summaries.append({"area": area, "count": count})
+
+    summaries.sort(key=lambda item: item["count"], reverse=True)
+    return summaries
+
+
+def filter_markets_by_browse_area(*, markets, category_slug, area_slug):
+    area = get_browse_area(category_slug, area_slug)
+    if area is None:
+        return markets
+    return [market for market in markets if market_matches_browse_area(market, area)]
 
 
 def get_category_summaries(*, include_empty=False):
