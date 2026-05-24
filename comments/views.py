@@ -79,7 +79,12 @@ def vote_view(request):
     target_id = request.POST.get("target_id")
     value = int(request.POST.get("value", 0))
 
-    if target_type not in (Vote.TargetType.COMMENT, Vote.TargetType.PREDICTION):
+    if target_type not in (
+        Vote.TargetType.COMMENT,
+        Vote.TargetType.PREDICTION,
+        Vote.TargetType.PULSE_POST,
+        Vote.TargetType.PULSE_COMMENT,
+    ):
         return HttpResponseBadRequest("Invalid target type")
 
     try:
@@ -113,16 +118,59 @@ def vote_view(request):
                     "layout": request.POST.get("layout", "horizontal"),
                 },
             )
+        if target_type == Vote.TargetType.PULSE_COMMENT:
+            from pulse.models import Comment as PulseComment
+
+            comment = get_object_or_404(PulseComment, pk=int(target_id))
+            user_vote = get_user_vote(request.user, target_type, int(target_id))
+            return render(
+                request,
+                "comments/partials/vote_buttons.html",
+                {
+                    "target_type": Vote.TargetType.PULSE_COMMENT,
+                    "target_id": comment.id,
+                    "score": comment.popularity_score,
+                    "user_vote": user_vote.value if user_vote else 0,
+                    "layout": request.POST.get("layout", "vertical"),
+                },
+            )
+        if target_type == Vote.TargetType.PULSE_POST:
+            from pulse.models import Post
+
+            post = get_object_or_404(Post, pk=int(target_id))
+            post.refresh_from_db()
+            user_vote = get_user_vote(request.user, target_type, int(target_id))
+            layout = request.POST.get("layout", "forum")
+            if layout == "forum":
+                return render(
+                    request,
+                    "forum/partials/vote_actions.html",
+                    {
+                        "post": post,
+                        "post_vote": user_vote.value if user_vote else 0,
+                    },
+                )
+            return render(
+                request,
+                "comments/partials/vote_buttons.html",
+                {
+                    "target_type": Vote.TargetType.PULSE_POST,
+                    "target_id": post.id,
+                    "score": post.popularity_score,
+                    "user_vote": user_vote.value if user_vote else 0,
+                    "layout": layout,
+                },
+            )
         from predictions.models import Prediction
 
         prediction = get_object_or_404(Prediction, pk=int(target_id))
         prediction.refresh_from_db()
         user_vote = get_user_vote(request.user, target_type, int(target_id))
         layout = request.POST.get("layout", "vertical")
-        if layout == "forum":
+        if layout == "forecasts":
             return render(
                 request,
-                "dashboard/partials/forum_vote_actions.html",
+                "dashboard/partials/forecast_vote_actions.html",
                 {
                     "prediction": prediction,
                     "prediction_vote": user_vote.value if user_vote else 0,

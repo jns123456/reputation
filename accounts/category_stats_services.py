@@ -8,7 +8,13 @@ def resolve_category_from_market(market) -> str:
     return resolve_market_category_slug(market)
 
 
-def resolve_category_from_popularity_event(*, comment=None, prediction=None) -> str | None:
+def resolve_category_from_popularity_event(
+    *,
+    comment=None,
+    prediction=None,
+    pulse_post=None,
+    pulse_comment=None,
+) -> str | None:
     if comment is not None:
         return resolve_category_from_market(comment.market)
     if prediction is not None:

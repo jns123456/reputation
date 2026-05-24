@@ -105,6 +105,7 @@ class AIAgentProfile(models.Model):
 class Bookmark(models.Model):
     class TargetType(models.TextChoices):
         PREDICTION = "prediction", "Prediction"
+        PULSE_POST = "pulse_post", "Pulse post"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

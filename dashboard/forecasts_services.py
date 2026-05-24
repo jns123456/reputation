@@ -1,14 +1,14 @@
-"""Assemble Forum feed items for templates."""
+"""Assemble Forecasts feed items for templates."""
 
 from accounts.bookmark_selectors import get_user_bookmarked_ids
 from accounts.models import Bookmark
 from comments.selectors import get_user_prediction_votes
-from predictions.selectors import get_forum_forecasts
+from predictions.selectors import get_forecasts_feed
 from reputation.services import calculate_reputation_stakes
 
 
-def build_forum_feed(*, user, market_slug=None, limit=50):
-    predictions = list(get_forum_forecasts(market_slug=market_slug, limit=limit))
+def build_forecasts_feed(*, user, market_slug=None, limit=50):
+    predictions = list(get_forecasts_feed(market_slug=market_slug, limit=limit))
     prediction_ids = [prediction.id for prediction in predictions]
     prediction_votes = get_user_prediction_votes(user, prediction_ids)
     bookmarked_ids = get_user_bookmarked_ids(

@@ -63,6 +63,8 @@ def cast_vote(*, user, target_type, target_id, value):
     if content_owner == user:
         if target_type == Vote.TargetType.PREDICTION:
             raise ValueError("You cannot vote on your own forecast.")
+        if target_type == Vote.TargetType.PULSE_POST:
+            raise ValueError("You cannot vote on your own post.")
         raise ValueError("Cannot vote on your own content.")
 
     with transaction.atomic():
@@ -136,6 +138,14 @@ def _get_vote_target(target_type, target_id):
         from predictions.models import Prediction
 
         return Prediction.objects.filter(pk=target_id).select_related("user").first()
+    if target_type == Vote.TargetType.PULSE_POST:
+        from pulse.models import Post
+
+        return Post.objects.filter(pk=target_id).select_related("user").first()
+    if target_type == Vote.TargetType.PULSE_COMMENT:
+        from pulse.models import Comment as PulseComment
+
+        return PulseComment.objects.filter(pk=target_id).select_related("user").first()
     return None
 
 

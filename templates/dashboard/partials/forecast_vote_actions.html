@@ -8,9 +8,9 @@
     <input type="hidden" name="target_type" value="prediction">
     <input type="hidden" name="target_id" value="{{ prediction.id }}">
     <input type="hidden" name="value" value="1">
-    <input type="hidden" name="layout" value="forum">
+    <input type="hidden" name="layout" value="forecasts">
     <button type="submit"
-            class="forum-action forum-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if prediction_vote == 1 %}is-active{% endif %}"
+            class="forecast-action forecast-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if prediction_vote == 1 %}is-active{% endif %}"
             title="Like" aria-label="Like">
       {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
       <span class="text-xs font-medium tabular-nums {% if prediction.popularity_score == 0 %}sr-only{% endif %}" data-vote-score="{{ prediction.popularity_score }}">{{ prediction.popularity_score }}</span>
@@ -24,30 +24,30 @@
     <input type="hidden" name="target_type" value="prediction">
     <input type="hidden" name="target_id" value="{{ prediction.id }}">
     <input type="hidden" name="value" value="-1">
-    <input type="hidden" name="layout" value="forum">
+    <input type="hidden" name="layout" value="forecasts">
     <button type="submit"
-            class="forum-action forum-action-dislike rounded-full px-2 py-1.5 transition {% if prediction_vote == -1 %}is-active{% endif %}"
+            class="forecast-action forecast-action-dislike rounded-full px-2 py-1.5 transition {% if prediction_vote == -1 %}is-active{% endif %}"
             title="Dislike" aria-label="Dislike">
       {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
     </button>
   </form>
   {% elif user.is_authenticated %}
-  <span class="forum-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="You can't vote on your own forecast">
+  <span class="forecast-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="You can't vote on your own forecast">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
     {% if prediction.popularity_score %}<span class="text-xs font-medium tabular-nums" data-vote-score="{{ prediction.popularity_score }}">{{ prediction.popularity_score }}</span>{% endif %}
   </span>
-  <span class="forum-action cursor-not-allowed rounded-full px-2 py-1.5 text-slate-300 opacity-60">
+  <span class="forecast-action cursor-not-allowed rounded-full px-2 py-1.5 text-slate-300 opacity-60">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
   </span>
   {% else %}
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
-     class="forum-action forum-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition"
+     class="forecast-action forecast-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition"
      title="Log in to like">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
     {% if prediction.popularity_score %}<span class="text-xs font-medium tabular-nums">{{ prediction.popularity_score }}</span>{% endif %}
   </a>
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
-     class="forum-action forum-action-dislike rounded-full px-2 py-1.5 transition"
+     class="forecast-action forecast-action-dislike rounded-full px-2 py-1.5 transition"
      title="Log in to dislike">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
   </a>

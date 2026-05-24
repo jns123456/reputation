@@ -12,7 +12,11 @@
              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
             Markets
           </a>
-          <a href="{% url 'dashboard:forum' %}"
+          <a href="{% url 'dashboard:forecasts' %}"
+             class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
+            Forecasts
+          </a>
+          <a href="{% url 'forum:feed' %}"
              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
             Forum
           </a>
@@ -165,7 +169,8 @@
     <div x-show="mobileOpen" x-cloak x-transition class="border-t border-slate-100 pb-4 pt-2 dark:border-slate-700 md:hidden">
       <div class="flex flex-col gap-0.5 text-sm">
         <a href="{% url 'markets:list' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Markets</a>
-        <a href="{% url 'dashboard:forum' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Forum</a>
+        <a href="{% url 'dashboard:forecasts' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Forecasts</a>
+        <a href="{% url 'forum:feed' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Forum</a>
         <a href="{% url 'challenges:list' %}" class="flex items-center justify-between rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
           <span>Challenges</span>
           {% if pending_challenge_invites_count %}

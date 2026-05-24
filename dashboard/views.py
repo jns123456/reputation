@@ -12,7 +12,7 @@ from accounts.category_selectors import (
     validate_category_slug,
 )
 from accounts.selectors import get_top_popular_users, get_top_predictors
-from dashboard.forum_context import get_forum_page_context
+from dashboard.forecasts_context import get_forecasts_page_context
 from integrations.celery_utils import enqueue_category_sync
 from markets.categories import get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
@@ -229,17 +229,17 @@ def faq(request):
     return render(request, "dashboard/faq.html")
 
 
-def forum(request):
-    context = get_forum_page_context(
+def forecasts(request):
+    context = get_forecasts_page_context(
         request=request,
         market_slug=request.GET.get("market", ""),
     )
-    return render(request, "dashboard/forum.html", context)
+    return render(request, "dashboard/forecasts.html", context)
 
 
-def forum_feed(request):
-    context = get_forum_page_context(
+def forecasts_feed(request):
+    context = get_forecasts_page_context(
         request=request,
         market_slug=request.GET.get("market", ""),
     )
-    return render(request, "dashboard/partials/forum_feed.html", context)
+    return render(request, "dashboard/partials/forecasts_feed.html", context)

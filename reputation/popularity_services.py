@@ -5,11 +5,23 @@ from django.conf import settings
 from reputation.models import PopularityEvent
 
 
-def record_popularity_event(*, user, points_delta, event_type, reason, comment=None, prediction=None):
+def record_popularity_event(
+    *,
+    user,
+    points_delta,
+    event_type,
+    reason,
+    comment=None,
+    prediction=None,
+    pulse_post=None,
+    pulse_comment=None,
+):
     event = PopularityEvent.objects.create(
         user=user,
         comment=comment,
         prediction=prediction,
+        pulse_post=pulse_post,
+        pulse_comment=pulse_comment,
         event_type=event_type,
         points_delta=points_delta,
         reason=reason,
@@ -27,6 +39,8 @@ def record_popularity_event(*, user, points_delta, event_type, reason, comment=N
     category_slug = resolve_category_from_popularity_event(
         comment=comment,
         prediction=prediction,
+        pulse_post=pulse_post,
+        pulse_comment=pulse_comment,
     )
     if category_slug is not None:
         apply_category_popularity_delta(user, category_slug, points_delta)
@@ -60,6 +74,8 @@ def apply_vote_popularity(*, content_owner, target, target_type, old_value, new_
 
     comment = target if target_type == Vote.TargetType.COMMENT else None
     prediction = target if target_type == Vote.TargetType.PREDICTION else None
+    pulse_post = target if target_type == Vote.TargetType.PULSE_POST else None
+    pulse_comment = target if target_type == Vote.TargetType.PULSE_COMMENT else None
 
     record_popularity_event(
         user=content_owner,
@@ -68,6 +84,8 @@ def apply_vote_popularity(*, content_owner, target, target_type, old_value, new_
         reason=f"Vote change on {target_type} by {voter.username}",
         comment=comment,
         prediction=prediction,
+        pulse_post=pulse_post,
+        pulse_comment=pulse_comment,
     )
 
     if hasattr(target, "popularity_score"):

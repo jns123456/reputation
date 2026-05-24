@@ -92,30 +92,52 @@ def bookmark_toggle(request):
     target_type = request.POST.get("target_type")
     target_id = request.POST.get("target_id")
 
-    if target_type != Bookmark.TargetType.PREDICTION:
+    if target_type not in (Bookmark.TargetType.PREDICTION, Bookmark.TargetType.PULSE_POST):
         return HttpResponseBadRequest("Invalid bookmark target")
 
-    from predictions.models import Prediction
+    if target_type == Bookmark.TargetType.PREDICTION:
+        from predictions.models import Prediction
 
-    prediction = get_object_or_404(Prediction, pk=int(target_id))
+        target = get_object_or_404(Prediction, pk=int(target_id))
+        bookmark_template = "dashboard/partials/forecast_bookmark_button.html"
+        bookmark_context = {
+            "prediction": target,
+            "is_bookmarked": is_bookmarked(
+                request.user,
+                target_type,
+                target.id,
+            ),
+        }
+    else:
+        from pulse.models import Post
+
+        target = get_object_or_404(Post, pk=int(target_id))
+        bookmark_template = "forum/partials/bookmark_button.html"
+        bookmark_context = {
+            "post": target,
+            "is_bookmarked": is_bookmarked(
+                request.user,
+                target_type,
+                target.id,
+            ),
+        }
+
     toggle_bookmark(
         user=request.user,
         target_type=target_type,
-        target_id=prediction.id,
+        target_id=target.id,
     )
 
     if request.headers.get("HX-Request"):
+        bookmark_context["is_bookmarked"] = is_bookmarked(
+            request.user,
+            target_type,
+            target.id,
+        )
         return render(
             request,
-            "dashboard/partials/forum_bookmark_button.html",
-            {
-                "prediction": prediction,
-                "is_bookmarked": is_bookmarked(
-                    request.user,
-                    target_type,
-                    prediction.id,
-                ),
-            },
+            bookmark_template,
+            bookmark_context,
         )
     return redirect(request.META.get("HTTP_REFERER", "/"))
 

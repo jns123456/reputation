@@ -1,0 +1,53 @@
+<div class="flex gap-2 {% if depth %}mt-3{% else %}mt-4 first:mt-0{% endif %}"
+     x-data="{ showReply: false, collapsed: false }"
+     data-sort-score="{{ comment.popularity_score }}"
+     data-sort-time="{{ comment.created_at|date:'U' }}"
+     data-sort-reputation="{{ comment.user.profile.reputation_score }}"
+     data-sort-user-popularity="{{ comment.user.profile.popularity_score }}">
+  <div class="shrink-0">
+    {% if user.is_authenticated and user == comment.user %}
+      {% include "comments/partials/vote_buttons.html" with target_type="pulse_comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" can_vote=False %}
+    {% else %}
+      {% include "comments/partials/vote_buttons.html" with target_type="pulse_comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" %}
+    {% endif %}
+  </div>
+
+  <div class="min-w-0 flex-1 rounded-lg {% if not depth %}border border-slate-100 bg-white px-3 py-2.5 shadow-sm dark:border-slate-700 dark:bg-slate-800{% else %}border-l-2 border-slate-200 pl-3 dark:border-slate-600{% endif %}">
+    <div class="text-xs text-slate-500 dark:text-slate-400">
+      <a href="{% url 'accounts:profile' username=comment.user.username %}" class="font-semibold text-slate-800 hover:underline dark:text-slate-200">
+        {{ comment.user.public_name }}
+      </a>
+      {% if comment.user.is_ai_agent %}<span class="badge-agent ml-1">AI</span>{% endif %}
+      <span class="mx-1">·</span>
+      <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }} ago</time>
+      {% if comment.thread_replies %}
+      <button type="button" @click="collapsed = !collapsed" class="ml-2 font-medium text-slate-400 hover:text-brand-600">
+        <span x-show="!collapsed">− collapse</span>
+        <span x-show="collapsed" x-cloak>+ {{ comment.thread_replies|length }} repl{% if comment.thread_replies|length == 1 %}y{% else %}ies{% endif %}</span>
+      </button>
+      {% endif %}
+    </div>
+
+    <div x-show="!collapsed">
+      <p class="mt-1 text-sm leading-relaxed text-slate-800 dark:text-slate-200">{{ comment.body }}</p>
+
+      {% if user.is_authenticated and user != comment.user %}
+      <button type="button" @click="showReply = !showReply" class="mt-2 text-xs font-semibold text-brand-600 hover:underline">
+        <span x-show="!showReply">Reply</span>
+        <span x-show="showReply" x-cloak>Cancel reply</span>
+      </button>
+      <div x-show="showReply" x-cloak class="mt-2 rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
+        {% include "forum/partials/comment_form.html" with parent_comment=comment placeholder="Write a reply…" show_cancel=True cancel_action="showReply = false" %}
+      </div>
+      {% endif %}
+
+      {% if comment.thread_replies %}
+      <div data-popularity-sort>
+      {% for reply in comment.thread_replies %}
+        {% include "forum/partials/comment_item.html" with comment=reply depth=depth|add:1 %}
+      {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

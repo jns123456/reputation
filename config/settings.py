@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "integrations",
     "dashboard",
     "challenges",
+    "pulse",
 ]
 
 MIDDLEWARE = [
@@ -97,6 +98,10 @@ if DEBUG:
 else:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+PULSE_MAX_IMAGE_BYTES = env.int("PULSE_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "accounts:login"
@@ -147,6 +152,7 @@ REPUTATION_BASE_POINTS = 10
 REPUTATION_BASE_PENALTY = 5
 POPULARITY_UPVOTE_POINTS = 1
 POPULARITY_DOWNVOTE_POINTS = -1
+POPULARITY_REPOST_POINTS = 1
 
 POLYMARKET_API_URL = env(
     "POLYMARKET_API_URL",

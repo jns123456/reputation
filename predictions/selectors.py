@@ -54,7 +54,7 @@ def get_user_active_prediction(user, market):
     )
 
 
-def get_forum_forecasts(*, market_slug=None, limit=50):
+def get_forecasts_feed(*, market_slug=None, limit=50):
     qs = (
         Prediction.objects.filter(
             status__in=[Prediction.Status.PENDING, Prediction.Status.RESOLVED],
@@ -69,7 +69,7 @@ def get_forum_forecasts(*, market_slug=None, limit=50):
     return qs[:limit]
 
 
-def get_forum_market_options():
+def get_forecasts_market_options():
     market_ids = (
         Prediction.objects.exclude(status=Prediction.Status.VOID)
         .values_list("market_id", flat=True)

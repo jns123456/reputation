@@ -7,14 +7,14 @@ from predictions.models import Prediction
 from predictions.services import create_prediction
 
 
-class ForumPageTests(TestCase):
+class ForecastsPageTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="forumuser", password="pass")
+        self.user = User.objects.create_user(username="forecastsuser", password="pass")
         self.other = User.objects.create_user(username="other", password="pass")
         self.market = Market.objects.create(
-            external_id="forum-m1",
-            title="Forum test market",
-            slug="forum-test-market",
+            external_id="forecasts-m1",
+            title="Forecasts test market",
+            slug="forecasts-test-market",
             status=Market.Status.OPEN,
             outcomes=[{"label": "Yes"}, {"label": "No"}],
             current_probability={"Yes": 0.5, "No": 0.5},
@@ -27,16 +27,16 @@ class ForumPageTests(TestCase):
         )
         self.client = Client()
 
-    def test_forum_page_lists_forecasts(self):
-        response = self.client.get("/forum/")
+    def test_forecasts_page_lists_forecasts(self):
+        response = self.client.get("/forecasts/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Forum")
+        self.assertContains(response, "Forecasts")
         self.assertContains(response, "Strong signal from on-chain data.")
-        self.assertContains(response, "Forum test market")
+        self.assertContains(response, "Forecasts test market")
 
-    def test_forum_feed_filters_by_market(self):
+    def test_forecasts_feed_filters_by_market(self):
         other_market = Market.objects.create(
-            external_id="forum-m2",
+            external_id="forecasts-m2",
             title="Other market",
             slug="other-market",
             status=Market.Status.OPEN,
@@ -50,20 +50,20 @@ class ForumPageTests(TestCase):
             reasoning="Different market forecast",
         )
 
-        response = self.client.get("/forum/feed/?market=forum-test-market")
+        response = self.client.get("/forecasts/feed/?market=forecasts-test-market")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Strong signal")
         self.assertNotContains(response, "Different market forecast")
 
-    def test_forum_vote_toggle_via_htmx(self):
-        self.client.login(username="forumuser", password="pass")
+    def test_forecasts_vote_toggle_via_htmx(self):
+        self.client.login(username="forecastsuser", password="pass")
         response = self.client.post(
             "/comments/vote/",
             {
                 "target_type": "prediction",
                 "target_id": self.prediction.id,
                 "value": "1",
-                "layout": "forum",
+                "layout": "forecasts",
             },
             HTTP_HX_REQUEST="true",
         )
@@ -76,7 +76,7 @@ class ForumPageTests(TestCase):
                 "target_type": "prediction",
                 "target_id": self.prediction.id,
                 "value": "1",
-                "layout": "forum",
+                "layout": "forecasts",
             },
             HTTP_HX_REQUEST="true",
         )
@@ -84,7 +84,7 @@ class ForumPageTests(TestCase):
         self.assertNotContains(response, "is-active")
 
     def test_bookmark_toggle(self):
-        self.client.login(username="forumuser", password="pass")
+        self.client.login(username="forecastsuser", password="pass")
         self.assertFalse(
             Bookmark.objects.filter(
                 user=self.user,

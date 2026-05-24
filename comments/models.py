@@ -46,6 +46,8 @@ class Vote(models.Model):
     class TargetType(models.TextChoices):
         COMMENT = "comment", "Comment"
         PREDICTION = "prediction", "Prediction"
+        PULSE_POST = "pulse_post", "Pulse post"
+        PULSE_COMMENT = "pulse_comment", "Pulse comment"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

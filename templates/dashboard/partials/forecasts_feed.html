@@ -1,5 +1,5 @@
 {% for item in feed_items %}
-  {% include "dashboard/partials/forum_post.html" with prediction=item.prediction market=item.market comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
+  {% include "dashboard/partials/forecast_post.html" with prediction=item.prediction market=item.market comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
 {% empty %}
 <div class="px-4 py-16 text-center text-slate-500">
   <p class="text-lg font-medium text-slate-700">No forecasts yet</p>

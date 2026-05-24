@@ -36,6 +36,8 @@ class PopularityEvent(models.Model):
         DOWNVOTE_RECEIVED = "downvote_received", "Downvote received"
         COMMENT_POSTED = "comment_posted", "Comment posted"
         REPLY_RECEIVED = "reply_received", "Reply received"
+        POST_PUBLISHED = "post_published", "Post published"
+        REPOST_RECEIVED = "repost_received", "Repost received"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -51,6 +53,20 @@ class PopularityEvent(models.Model):
     )
     prediction = models.ForeignKey(
         "predictions.Prediction",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="popularity_events",
+    )
+    pulse_post = models.ForeignKey(
+        "pulse.Post",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="popularity_events",
+    )
+    pulse_comment = models.ForeignKey(
+        "pulse.Comment",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
