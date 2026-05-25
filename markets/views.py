@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
+from accounts.bookmark_selectors import get_user_bookmarked_ids
+from accounts.models import Bookmark
 from comments.selectors import (
     attach_comment_votes,
     collect_comment_ids,
@@ -69,6 +71,11 @@ def market_detail(request, slug):
     for threads in discussions.values():
         attach_comment_votes(threads, comment_votes)
     prediction_votes = get_user_prediction_votes(request.user, [p.id for p in predictions])
+    bookmarked_ids = get_user_bookmarked_ids(
+        request.user,
+        Bookmark.TargetType.PREDICTION,
+        [p.id for p in predictions],
+    )
 
     existing_forecast = None
     forecast_form = None
@@ -84,6 +91,7 @@ def market_detail(request, slug):
             "threads": discussions.get(p.id, []),
             "comment_count": len(collect_comment_ids(discussions.get(p.id, []))),
             "prediction_vote": prediction_votes.get(p.id, 0),
+            "is_bookmarked": p.id in bookmarked_ids,
             "reputation_stakes": calculate_reputation_stakes(
                 predicted_outcome=p.predicted_outcome,
                 probability_snapshot=p.probability_at_prediction_time,

@@ -100,6 +100,30 @@ def notify_vote_received(*, actor, recipient, target, target_type, value):
     else:
         return None
 
+    if target_type == "prediction":
+        opposite_type = (
+            Notification.NotificationType.DOWNVOTE_RECEIVED
+            if notification_type == Notification.NotificationType.UPVOTE_RECEIVED
+            else Notification.NotificationType.UPVOTE_RECEIVED
+        )
+        Notification.objects.filter(
+            recipient=recipient,
+            prediction=target,
+            notification_type=opposite_type,
+            actor=actor,
+        ).delete()
+        notification, _ = Notification.objects.update_or_create(
+            recipient=recipient,
+            notification_type=notification_type,
+            prediction=target,
+            defaults={
+                "actor": actor,
+                "vote_target_type": target_type,
+                "vote_target_id": target.id,
+            },
+        )
+        return notification
+
     kwargs = {
         "actor": actor,
         "notification_type": notification_type,
@@ -109,8 +133,6 @@ def notify_vote_received(*, actor, recipient, target, target_type, value):
 
     if target_type == "comment":
         kwargs["comment"] = target
-    elif target_type == "prediction":
-        kwargs["prediction"] = target
 
     return _create_notification(recipient=recipient, **kwargs)
 

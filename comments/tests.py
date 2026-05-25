@@ -185,6 +185,28 @@ class PredictionThreadTests(TestCase):
         comment.refresh_from_db()
         self.assertEqual(comment.popularity_score, 1)
 
+    def test_prediction_vote_like_dislike_like_cycle(self):
+        self.client.login(username="debater", password="pass")
+        pred_id = self.prediction.id
+        for value in ("1", "-1", "1"):
+            response = self.client.post(
+                "/comments/vote/",
+                {
+                    "target_type": Vote.TargetType.PREDICTION,
+                    "target_id": pred_id,
+                    "value": value,
+                    "layout": "forecasts",
+                },
+                HTTP_HX_REQUEST="true",
+            )
+            self.assertEqual(response.status_code, 200, msg=f"vote value={value} failed")
+        vote = Vote.objects.get(
+            user=self.commenter,
+            target_type=Vote.TargetType.PREDICTION,
+            target_id=pred_id,
+        )
+        self.assertEqual(vote.value, 1)
+
     def test_comment_threads_sorted_by_popularity(self):
         low = create_comment(
             user=self.commenter,

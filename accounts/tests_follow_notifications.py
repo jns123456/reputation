@@ -193,6 +193,40 @@ class VoteNotificationTests(TestCase):
         notification = Notification.objects.get(recipient=self.author)
         self.assertEqual(notification.notification_type, Notification.NotificationType.DOWNVOTE_RECEIVED)
 
+    def test_prediction_vote_switch_updates_notification(self):
+        prediction = create_prediction(
+            user=self.author,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        cast_vote(
+            user=self.voter,
+            target_type=Vote.TargetType.PREDICTION,
+            target_id=prediction.id,
+            value=1,
+        )
+        cast_vote(
+            user=self.voter,
+            target_type=Vote.TargetType.PREDICTION,
+            target_id=prediction.id,
+            value=-1,
+        )
+        cast_vote(
+            user=self.voter,
+            target_type=Vote.TargetType.PREDICTION,
+            target_id=prediction.id,
+            value=1,
+        )
+        notifications = Notification.objects.filter(
+            recipient=self.author,
+            prediction=prediction,
+        )
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(
+            notifications.get().notification_type,
+            Notification.NotificationType.UPVOTE_RECEIVED,
+        )
+
     def test_respects_vote_notification_preference(self):
         preferences = get_or_create_notification_preferences(self.author)
         preferences.notify_votes_received = False

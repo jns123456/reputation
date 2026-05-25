@@ -27,6 +27,7 @@ urlpatterns = [
         name="notifications_mark_all_read",
     ),
     path("bookmarks/toggle/", views.bookmark_toggle, name="bookmark_toggle"),
+    path("bookmarks/", views.bookmarks_list, name="bookmarks"),
     path("follow/toggle/", views.follow_toggle, name="follow_toggle"),
     path("users/<str:username>/", views.profile_detail, name="profile"),
 ]

@@ -124,6 +124,8 @@
               </div>
               <a href="{% url 'accounts:profile' username=user.username %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">Your profile</a>
+              <a href="{% url 'accounts:bookmarks' %}"
+                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">Saved</a>
               <a href="{% url 'accounts:alert_settings' %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">Alert settings</a>
               <a href="{% url 'accounts:notifications' %}"
@@ -189,6 +191,7 @@
           {% endif %}
         </a>
         <a href="{% url 'accounts:profile' username=user.username %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ user.public_name }}</a>
+        <a href="{% url 'accounts:bookmarks' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Saved</a>
         <a href="{% url 'accounts:alert_settings' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Alert settings</a>
         <form method="post" action="{% url 'accounts:logout' %}" class="px-3 py-2">
           {% csrf_token %}

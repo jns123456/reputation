@@ -106,6 +106,20 @@
       box-shadow: 0 0 0 1px rgb(225 29 72);
     }
 
+    .forecast-action-like:hover:not(:disabled),
+    .forecast-action-like.is-active {
+      color: rgb(4 120 87);
+      background-color: rgb(236 253 245);
+    }
+    .forecast-action-dislike:hover:not(:disabled),
+    .forecast-action-dislike.is-active {
+      color: rgb(190 18 60);
+      background-color: rgb(255 241 242);
+    }
+    .forecast-action.is-bookmarked {
+      color: rgb(79 70 229);
+    }
+
     /* Dark mode — global overrides for existing Tailwind utility classes */
     html.dark { color-scheme: dark; }
 
@@ -262,6 +276,7 @@
     window.focusDiscussionComposer = function (discussionId) {
       var root = document.getElementById(discussionId);
       if (!root) return;
+      root.dispatchEvent(new CustomEvent("open-composer", { bubbles: false }));
       root.scrollIntoView({ behavior: "smooth", block: "nearest" });
       var textarea = root.querySelector(".comment-composer-input, textarea");
       if (textarea) {

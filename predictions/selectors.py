@@ -34,12 +34,22 @@ def annotate_prediction_interactions(qs):
     )
 
 def get_market_predictions(market, limit=50):
-    return (
-        Prediction.objects.filter(market=market, status__in=[Prediction.Status.PENDING, Prediction.Status.RESOLVED])
+    qs = (
+        Prediction.objects.filter(
+            market=market,
+            status__in=[Prediction.Status.PENDING, Prediction.Status.RESOLVED],
+        )
         .exclude(status=Prediction.Status.VOID)
         .select_related("user", "user__profile")
-        .order_by(*DISPLAY_RANK_ORM_FIELDS)[:limit]
+        .order_by(*DISPLAY_RANK_ORM_FIELDS)
     )
+    return annotate_prediction_interactions(qs)[:limit]
+
+
+def get_prediction_with_interactions(pk):
+    return annotate_prediction_interactions(
+        Prediction.objects.filter(pk=pk).select_related("user", "user__profile")
+    ).first()
 
 
 def get_user_active_prediction(user, market):
@@ -61,12 +71,11 @@ def get_forecasts_feed(*, market_slug=None, limit=50):
         )
         .exclude(status=Prediction.Status.VOID)
         .select_related("user", "user__profile", "market")
-        .annotate(comment_count=Count("comments", distinct=True))
         .order_by("-created_at")
     )
     if market_slug:
         qs = qs.filter(market__slug=market_slug)
-    return qs[:limit]
+    return annotate_prediction_interactions(qs)[:limit]
 
 
 def get_forecasts_market_options():

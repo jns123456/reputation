@@ -68,9 +68,9 @@
     Earn <span class="badge-pop">Popularity</span> when others like your forecast (especially your reasoning)
     or your comments on other people's forecasts.
   </p>
-  <div id="forecast-list" class="mt-4 space-y-4" data-popularity-sort>
+  <div id="forecast-list" class="mt-4 divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white" data-popularity-sort>
     {% for item in prediction_sections %}
-      {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote reputation_stakes=item.reputation_stakes %}
+      {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
     {% empty %}
     <p class="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-slate-500">
       No forecasts yet. Be the first to place one.

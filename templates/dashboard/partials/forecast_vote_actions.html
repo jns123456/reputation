@@ -13,7 +13,7 @@
             class="forecast-action forecast-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if prediction_vote == 1 %}is-active{% endif %}"
             title="Like" aria-label="Like">
       {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-      <span class="text-xs font-medium tabular-nums {% if prediction.popularity_score == 0 %}sr-only{% endif %}" data-vote-score="{{ prediction.popularity_score }}">{{ prediction.popularity_score }}</span>
+      <span class="text-xs font-medium tabular-nums {% if prediction.like_count <= 0 %}sr-only{% endif %}" data-vote-like-count="{{ prediction.like_count }}">+{{ prediction.like_count }}</span>
     </button>
   </form>
   <form method="post" action="{% url 'comments:vote' %}" class="inline"
@@ -26,30 +26,33 @@
     <input type="hidden" name="value" value="-1">
     <input type="hidden" name="layout" value="forecasts">
     <button type="submit"
-            class="forecast-action forecast-action-dislike rounded-full px-2 py-1.5 transition {% if prediction_vote == -1 %}is-active{% endif %}"
+            class="forecast-action forecast-action-dislike flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if prediction_vote == -1 %}is-active{% endif %}"
             title="Dislike" aria-label="Dislike">
       {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
+      <span class="text-xs font-medium tabular-nums {% if prediction.dislike_count <= 0 %}sr-only{% endif %}" data-vote-dislike-count="{{ prediction.dislike_count }}">-{{ prediction.dislike_count }}</span>
     </button>
   </form>
   {% elif user.is_authenticated %}
   <span class="forecast-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="You can't vote on your own forecast">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-    {% if prediction.popularity_score %}<span class="text-xs font-medium tabular-nums" data-vote-score="{{ prediction.popularity_score }}">{{ prediction.popularity_score }}</span>{% endif %}
+    {% if prediction.like_count > 0 %}<span class="text-xs font-medium tabular-nums" data-vote-like-count="{{ prediction.like_count }}">+{{ prediction.like_count }}</span>{% endif %}
   </span>
-  <span class="forecast-action cursor-not-allowed rounded-full px-2 py-1.5 text-slate-300 opacity-60">
+  <span class="forecast-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
+    {% if prediction.dislike_count > 0 %}<span class="text-xs font-medium tabular-nums" data-vote-dislike-count="{{ prediction.dislike_count }}">-{{ prediction.dislike_count }}</span>{% endif %}
   </span>
   {% else %}
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
      class="forecast-action forecast-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition"
      title="Log in to like">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-    {% if prediction.popularity_score %}<span class="text-xs font-medium tabular-nums">{{ prediction.popularity_score }}</span>{% endif %}
+    {% if prediction.like_count > 0 %}<span class="text-xs font-medium tabular-nums">+{{ prediction.like_count }}</span>{% endif %}
   </a>
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
-     class="forecast-action forecast-action-dislike rounded-full px-2 py-1.5 transition"
+     class="forecast-action forecast-action-dislike flex items-center gap-1 rounded-full px-2 py-1.5 transition"
      title="Log in to dislike">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
+    {% if prediction.dislike_count > 0 %}<span class="text-xs font-medium tabular-nums">-{{ prediction.dislike_count }}</span>{% endif %}
   </a>
   {% endif %}
 </div>

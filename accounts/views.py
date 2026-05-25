@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from accounts.bookmark_selectors import is_bookmarked
 from accounts.bookmark_services import toggle_bookmark
+from accounts.bookmarks_services import build_bookmarks_page_items
 from accounts.follow_selectors import get_follower_count, get_following_count, is_following
 from accounts.follow_services import toggle_follow
 from accounts.forms import NotificationPreferenceForm, ProfileEditForm, SignUpForm
@@ -140,6 +141,26 @@ def bookmark_toggle(request):
             bookmark_context,
         )
     return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+@login_required
+def bookmarks_list(request):
+    active_type = (request.GET.get("type") or "").strip()
+    if active_type not in ("", Bookmark.TargetType.PREDICTION, Bookmark.TargetType.PULSE_POST):
+        active_type = ""
+
+    bookmark_items = build_bookmarks_page_items(
+        user=request.user,
+        target_type=active_type or None,
+    )
+    return render(
+        request,
+        "accounts/bookmarks.html",
+        {
+            "bookmark_items": bookmark_items,
+            "active_type": active_type,
+        },
+    )
 
 
 @login_required

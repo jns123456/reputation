@@ -13,7 +13,7 @@
             class="forum-action forum-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if post_vote == 1 %}is-active{% endif %}"
             title="Like" aria-label="Like">
       {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-      <span class="text-xs font-medium tabular-nums {% if post.popularity_score == 0 %}sr-only{% endif %}" data-vote-score="{{ post.popularity_score }}">{{ post.popularity_score }}</span>
+      <span class="text-xs font-medium tabular-nums {% if post.popularity_score <= 0 %}sr-only{% endif %}" data-vote-score="{{ post.popularity_score }}">{% if post.popularity_score > 0 %}+{% endif %}{{ post.popularity_score }}</span>
     </button>
   </form>
   <form method="post" action="{% url 'comments:vote' %}" class="inline"
@@ -34,7 +34,7 @@
   {% elif user.is_authenticated %}
   <span class="forum-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="You can't vote on your own post">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-    {% if post.popularity_score %}<span class="text-xs font-medium tabular-nums" data-vote-score="{{ post.popularity_score }}">{{ post.popularity_score }}</span>{% endif %}
+    {% if post.popularity_score > 0 %}<span class="text-xs font-medium tabular-nums" data-vote-score="{{ post.popularity_score }}">+{{ post.popularity_score }}</span>{% endif %}
   </span>
   <span class="forum-action cursor-not-allowed rounded-full px-2 py-1.5 text-slate-300 opacity-60">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}

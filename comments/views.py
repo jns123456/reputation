@@ -161,10 +161,13 @@ def vote_view(request):
                     "layout": layout,
                 },
             )
-        from predictions.models import Prediction
+        from predictions.selectors import get_prediction_with_interactions
 
-        prediction = get_object_or_404(Prediction, pk=int(target_id))
-        prediction.refresh_from_db()
+        prediction = get_prediction_with_interactions(int(target_id))
+        if prediction is None:
+            from predictions.models import Prediction
+
+            raise Prediction.DoesNotExist
         user_vote = get_user_vote(request.user, target_type, int(target_id))
         layout = request.POST.get("layout", "vertical")
         if layout == "forecasts":
