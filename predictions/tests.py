@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 
 from accounts.models import User
 from accounts.selectors import get_user_prediction_history
@@ -8,6 +9,7 @@ from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import get_market_predictions
 from predictions.services import create_prediction, update_prediction
+from predictions.forms import ForecastForm
 
 
 class PredictionPermissionTests(TestCase):
@@ -148,3 +150,24 @@ class PredictionPermissionTests(TestCase):
         self.assertEqual(prediction.comment_count, 1)
         self.assertEqual(prediction.like_count, 1)
         self.assertEqual(prediction.dislike_count, 1)
+
+
+class ForecastFormTests(TestCase):
+    def test_three_way_soccer_form_accepts_all_outcomes(self):
+        market = Market.objects.create(
+            external_id="wc-match:test",
+            title="Mexico vs. South Africa",
+            slug="mexico-vs-south-africa-form",
+            status=Market.Status.OPEN,
+            outcomes=[
+                {"label": "Mexico"},
+                {"label": "Draw"},
+                {"label": "South Africa"},
+            ],
+            current_probability={"Mexico": 0.67, "Draw": 0.22, "South Africa": 0.11},
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+        )
+        form = ForecastForm(data={"predicted_outcome": "Draw"}, market=market)
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["predicted_outcome"], "Draw")
+        self.assertEqual(form.outcome_count, 3)

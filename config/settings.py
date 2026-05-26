@@ -17,6 +17,7 @@ SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-key-change-in-produc
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+KALSHI_ENABLED = env.bool("KALSHI_ENABLED", default=False)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -127,6 +128,8 @@ CACHES = {
 POLYMARKET_ECONOMY_CACHE_SECONDS = env.int("POLYMARKET_ECONOMY_CACHE_SECONDS", default=300)
 MARKET_SYNC_CACHE_SECONDS = env.int("MARKET_SYNC_CACHE_SECONDS", default=POLYMARKET_ECONOMY_CACHE_SECONDS)
 MARKET_SYNC_CATEGORY_LIMIT = env.int("MARKET_SYNC_CATEGORY_LIMIT", default=48)
+# 0 = import every available World Cup group-stage match from Polymarket.
+WORLD_CUP_MATCH_SYNC_LIMIT = env.int("WORLD_CUP_MATCH_SYNC_LIMIT", default=0)
 MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=30)
 MARKET_SYNC_STALE_BATCH_SIZE = env.int("MARKET_SYNC_STALE_BATCH_SIZE", default=100)
 KALSHI_SYNC_OPEN_LIMIT = env.int("KALSHI_SYNC_OPEN_LIMIT", default=200)
@@ -174,11 +177,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "integrations.tasks.refresh_stale_open_markets_task",
         "schedule": crontab(minute="*/10"),
     },
-    "import-kalshi-open-markets": {
+}
+if KALSHI_ENABLED:
+    CELERY_BEAT_SCHEDULE["import-kalshi-open-markets"] = {
         "task": "integrations.tasks.import_kalshi_open_markets_task",
         "schedule": crontab(minute="5,35"),
-    },
-}
+    }
 
 # Official Polymarket embed widget — https://embed.polymarket.com/
 POLYMARKET_EMBED_BASE_URL = env(

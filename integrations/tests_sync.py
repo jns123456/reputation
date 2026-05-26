@@ -1,7 +1,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from integrations.sync import refresh_market, refresh_stale_open_markets, sync_category_markets
@@ -9,6 +9,7 @@ from markets.categories import get_category_for_slug
 from markets.models import Market
 
 
+@override_settings(KALSHI_ENABLED=True)
 class RefreshMarketTests(TestCase):
     @patch("integrations.sync.refresh_market_from_kalshi")
     def test_refresh_market_dispatches_kalshi(self, mock_refresh):
@@ -34,7 +35,20 @@ class RefreshMarketTests(TestCase):
         self.assertEqual(refresh_market(market), market)
         mock_refresh.assert_called_once_with(market)
 
+    @override_settings(KALSHI_ENABLED=False)
+    @patch("integrations.sync.refresh_market_from_kalshi")
+    def test_refresh_market_skips_kalshi_when_disabled(self, mock_refresh):
+        market = Market(
+            external_id="KXTEST",
+            title="Kalshi market",
+            slug="kalshi-market",
+            source=Market.Source.KALSHI,
+        )
+        self.assertEqual(refresh_market(market), market)
+        mock_refresh.assert_not_called()
 
+
+@override_settings(KALSHI_ENABLED=True)
 class SyncCategoryMarketsTests(TestCase):
     @patch("integrations.sync.sync_kalshi_markets_by_series")
     @patch("integrations.sync.sync_binary_markets_by_tag")
@@ -66,7 +80,21 @@ class SyncCategoryMarketsTests(TestCase):
             self.assertTrue(kwargs["include_metadata"])
             self.assertEqual(kwargs["limit"], 12)
 
+    @patch("integrations.sync.sync_kalshi_markets_by_series")
+    @patch("integrations.sync.sync_binary_markets_by_tag")
+    @override_settings(KALSHI_ENABLED=False)
+    def test_sync_category_skips_kalshi_when_disabled(self, mock_poly, mock_kalshi):
+        category = get_category_for_slug("economy")
+        mock_poly.return_value = {"imported": [{"created": True}], "errors": []}
 
+        summary = sync_category_markets(category, limit=12)
+
+        mock_poly.assert_called_once()
+        mock_kalshi.assert_not_called()
+        self.assertEqual(summary.imported, 1)
+
+
+@override_settings(KALSHI_ENABLED=True)
 class RefreshStaleOpenMarketsTests(TestCase):
     @patch("integrations.sync.refresh_market")
     def test_refresh_stale_open_markets(self, mock_refresh):

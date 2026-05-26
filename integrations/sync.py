@@ -14,8 +14,9 @@ from integrations.services import (
     sync_binary_markets_by_tag,
     sync_kalshi_markets_by_series,
 )
-from markets.categories import CANONICAL_CATEGORIES, CanonicalCategory
+from markets.categories import CANONICAL_CATEGORIES, CanonicalCategory, FIFA_WORLD_CUP_CATEGORY_SLUG
 from markets.models import Market
+from markets.source_filters import kalshi_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ def refresh_market(market):
     """Refresh a market from its configured external source."""
     if market.source == Market.Source.POLYMARKET:
         return refresh_market_from_polymarket(market)
-    if market.source == Market.Source.KALSHI:
+    if market.source == Market.Source.KALSHI and kalshi_enabled():
         return refresh_market_from_kalshi(market)
     return market
 
@@ -50,6 +51,15 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None, kalshi_lig
     """Import fresh markets for a browse category from all configured sources."""
     limit = limit or settings.MARKET_SYNC_CATEGORY_LIMIT
     summary = SyncSummary()
+
+    if category.slug == FIFA_WORLD_CUP_CATEGORY_SLUG:
+        try:
+            from integrations.services import sync_world_cup_match_markets
+
+            summary.absorb(sync_world_cup_match_markets())
+        except Exception:
+            logger.exception("World Cup match sync failed for category %s", category.slug)
+        return summary
 
     if category.polymarket_tag:
         try:
@@ -63,7 +73,7 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None, kalshi_lig
         except Exception:
             logger.exception("Polymarket category sync failed for %s", category.slug)
 
-    if not category.kalshi_series_tickers:
+    if not kalshi_enabled() or not category.kalshi_series_tickers:
         return summary
 
     kalshi_limit = (
@@ -120,7 +130,9 @@ def sync_all_category_markets(*, limit=None) -> dict:
     per_category = {}
 
     for category in CANONICAL_CATEGORIES:
-        if not category.polymarket_tag and not category.kalshi_series_tickers:
+        has_poly = bool(category.polymarket_tag)
+        has_kalshi = kalshi_enabled() and bool(category.kalshi_series_tickers)
+        if not has_poly and not has_kalshi:
             continue
         summary = sync_category_markets(category, limit=limit, kalshi_lightweight=False)
         per_category[category.slug] = {
@@ -155,10 +167,14 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
     refreshed = 0
     failures = 0
 
+    active_sources = [Market.Source.POLYMARKET]
+    if kalshi_enabled():
+        active_sources.append(Market.Source.KALSHI)
+
     stale_markets = (
         Market.objects.filter(
             status=Market.Status.OPEN,
-            source__in=[Market.Source.POLYMARKET, Market.Source.KALSHI],
+            source__in=active_sources,
         )
         .order_by("updated_at")[: batch_size * 3]
     )

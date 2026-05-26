@@ -4,6 +4,7 @@ from django.db.models import Count, Q
 
 from markets.categories import (
     CANONICAL_CATEGORIES,
+    FIFA_WORLD_CUP_CATEGORY_SLUG,
     OTHER_CATEGORY,
     get_category_for_slug,
 )
@@ -14,6 +15,7 @@ from markets.browse_areas import (
 )
 from markets.models import Market
 from markets.sort_options import market_volume, normalize_sort_filter, sort_markets
+from markets.source_filters import kalshi_enabled
 
 SOURCE_DISPLAY_ORDER = (
     Market.Source.POLYMARKET,
@@ -21,6 +23,14 @@ SOURCE_DISPLAY_ORDER = (
     Market.Source.MANUAL,
 )
 CATEGORY_BROWSE_LIMIT = 48
+
+
+def _exclude_disabled_sources(markets):
+    if kalshi_enabled():
+        return markets
+    if isinstance(markets, list):
+        return [market for market in markets if market.source != Market.Source.KALSHI]
+    return markets.exclude(source=Market.Source.KALSHI)
 
 
 def _sort_markets_by_volume(markets):
@@ -89,9 +99,11 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
     if category is None:
         return []
 
-    qs = Market.objects.filter(
-        status=Market.Status.OPEN,
-        canonical_category_slug=category.slug,
+    qs = _exclude_disabled_sources(
+        Market.objects.filter(
+            status=Market.Status.OPEN,
+            canonical_category_slug=category.slug,
+        )
     )
     markets = list(qs)
     markets.sort(key=lambda market: (market_volume(market), market.updated_at), reverse=True)
@@ -131,7 +143,7 @@ def get_category_summaries(*, include_empty=False):
     counts[OTHER_CATEGORY.slug] = 0
 
     for row in (
-        Market.objects.filter(status=Market.Status.OPEN)
+        _exclude_disabled_sources(Market.objects.filter(status=Market.Status.OPEN))
         .values("canonical_category_slug")
         .annotate(count=Count("id"))
     ):
@@ -149,11 +161,24 @@ def get_category_summaries(*, include_empty=False):
         summaries.append({"category": OTHER_CATEGORY, "count": other_count})
 
     summaries.sort(key=lambda item: item["count"], reverse=True)
-    return summaries
+    if include_empty:
+        return summaries
+    return _pin_featured_world_cup_summary(summaries)
+
+
+def _pin_featured_world_cup_summary(summaries):
+    """Always show FIFA World Cup 2026 first on the landing page."""
+    world_cup = get_category_for_slug(FIFA_WORLD_CUP_CATEGORY_SLUG)
+    if world_cup is None:
+        return summaries
+
+    summaries = [item for item in summaries if item["category"].slug != world_cup.slug]
+    count = len(get_open_markets_by_canonical_category(category_slug=world_cup.slug))
+    return [{"category": world_cup, "count": count}, *summaries]
 
 
 def get_markets_list(*, status=None, category=None, search=None, source=None):
-    qs = Market.objects.all()
+    qs = _exclude_disabled_sources(Market.objects.all())
     if status:
         qs = qs.filter(status=status)
     if category:

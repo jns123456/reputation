@@ -15,6 +15,24 @@ CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 
 
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
+def sync_world_cup_match_markets_task(self):
+    """Background import of FIFA World Cup 3-way match markets."""
+    from integrations.services import sync_world_cup_match_markets
+
+    try:
+        result = sync_world_cup_match_markets()
+        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        logger.info(
+            "sync_world_cup_match_markets_task finished: imported=%s errors=%s",
+            len(result["imported"]),
+            len(result["errors"]),
+        )
+    except Exception as exc:
+        logger.exception("sync_world_cup_match_markets_task failed")
+        raise self.retry(exc=exc) from exc
+
+
+@shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
 def sync_category_markets_task(self, category_slug, kalshi_lightweight=True):
     """Background sync for a single browse category."""
     category = get_category_for_slug(category_slug)
@@ -63,9 +81,13 @@ def refresh_stale_open_markets_task(self):
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
 def import_kalshi_open_markets_task(self):
     """Discover newly listed open Kalshi markets."""
-    try:
-        from django.conf import settings
+    from django.conf import settings
 
+    from markets.source_filters import kalshi_enabled
+
+    if not kalshi_enabled():
+        return
+    try:
         result = import_markets_from_kalshi(
             limit=settings.KALSHI_SYNC_OPEN_LIMIT,
             status="open",

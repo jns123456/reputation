@@ -6,6 +6,7 @@ from integrations.services import (
     import_markets_from_polymarket,
     refresh_kalshi_market_images,
 )
+from markets.source_filters import kalshi_enabled
 
 
 class Command(BaseCommand):
@@ -56,6 +57,9 @@ class Command(BaseCommand):
             return
 
         if options["kalshi_discovery"]:
+            if not kalshi_enabled():
+                self.stdout.write(self.style.WARNING("Kalshi is disabled (KALSHI_ENABLED=False)."))
+                return
             result = import_markets_from_kalshi(limit=options["limit"])
             self._print_import_result("Kalshi discovery", result)
             return
@@ -66,6 +70,9 @@ class Command(BaseCommand):
             return
 
         if options["kalshi_images"]:
+            if not kalshi_enabled():
+                self.stdout.write(self.style.WARNING("Kalshi is disabled (KALSHI_ENABLED=False)."))
+                return
             result = refresh_kalshi_market_images(batch_size=options["limit"])
             self.stdout.write(
                 self.style.SUCCESS(

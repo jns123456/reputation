@@ -3,7 +3,7 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<section class="relative mb-10 overflow-hidden rounded-2xl border border-slate-200/80 bg-white px-6 py-8 shadow-sm sm:px-8 sm:py-10">
+<section class="relative mb-10 overflow-hidden rounded-2xl border border-slate-300 bg-white px-6 py-8 shadow-sm ring-1 ring-slate-200/50 sm:px-8 sm:py-10">
   <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true"></div>
   <div class="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true"></div>
   <div class="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -57,7 +57,7 @@
   <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {% for profile in top_predictors %}
     <a href="{% url 'accounts:profile' username=profile.user.username %}"
-       class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-brand-200 hover:shadow-md">
+       class="flex items-center justify-between rounded-xl border border-slate-300 bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/50 transition hover:border-brand-300 hover:shadow-md">
       <div class="flex min-w-0 items-center gap-3">
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">{{ forloop.counter }}</span>
         <span class="truncate font-medium text-slate-900">{{ profile.user.public_name }}</span>

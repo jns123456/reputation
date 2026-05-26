@@ -38,11 +38,20 @@ class MarketCategoryResolutionTests(TestCase):
     def test_sports_from_tags(self):
         market = Market(
             external_id="cat-sport",
-            title="World Cup",
-            slug="world-cup",
+            title="World Cup winner",
+            slug="world-cup-winner",
             polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
         )
         self.assertEqual(resolve_market_category_slug(market), "sports")
+
+    def test_world_cup_match_market_resolves_to_world_cup_category(self):
+        market = Market(
+            external_id="wc-match:fifwc-mex-rsa-2026-06-11",
+            title="Mexico vs. South Africa",
+            slug="mexico-vs-south-africa",
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+        )
+        self.assertEqual(resolve_market_category_slug(market), "fifa-world-cup-2026")
 
     def test_crypto_wins_over_economy_when_both_tags_present(self):
         market = Market(
@@ -123,7 +132,7 @@ class CategoryBrowseViewTests(TestCase):
         response = self.client.get(reverse("dashboard:landing"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Explore by category")
-        self.assertContains(response, "Economy")
+        self.assertContains(response, "FIFA World Cup 2026")
 
     @patch("dashboard.views.enqueue_category_sync")
     def test_category_browse_page(self, mock_enqueue):
@@ -205,6 +214,20 @@ class CategoryBrowseViewTests(TestCase):
             area_slug="nba",
         )
         self.assertEqual([market.pk for market in filtered], [nba.pk])
+
+    def test_world_cup_category_lists_match_markets(self):
+        Market.objects.create(
+            external_id="wc-match:fifwc-mex-rsa-2026-06-11",
+            title="Mexico vs. South Africa",
+            slug="mexico-vs-south-africa",
+            status=Market.Status.OPEN,
+            canonical_category_slug="fifa-world-cup-2026",
+            outcomes=[{"label": "Mexico"}, {"label": "Draw"}, {"label": "South Africa"}],
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+        )
+        markets = get_open_markets_by_canonical_category(category_slug="fifa-world-cup-2026")
+        self.assertEqual(len(markets), 1)
+        self.assertEqual(markets[0].slug, "mexico-vs-south-africa")
 
     def test_kalshi_series_matches_browse_area(self):
         kalshi_nba = Market.objects.create(

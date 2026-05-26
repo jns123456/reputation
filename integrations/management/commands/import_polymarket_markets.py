@@ -21,6 +21,11 @@ class Command(BaseCommand):
             help="Import binary Yes/No markets from Polymarket Crypto category",
         )
         parser.add_argument(
+            "--world-cup",
+            action="store_true",
+            help="Import FIFA World Cup match markets as 3-outcome forecasts (win/draw/loss)",
+        )
+        parser.add_argument(
             "--tag",
             type=str,
             default="",
@@ -42,6 +47,10 @@ class Command(BaseCommand):
             from integrations.services import sync_crypto_binary_markets
 
             result = sync_crypto_binary_markets(limit=options["limit"])
+        elif options["world_cup"]:
+            from integrations.services import sync_world_cup_match_markets
+
+            result = sync_world_cup_match_markets()
         elif options["tag"]:
             from integrations.services import sync_binary_markets_by_tag
 

@@ -40,7 +40,7 @@ def _kalshi_series_ticker(market) -> str:
 
 BROWSE_AREAS: tuple[BrowseArea, ...] = (
     # Sports
-    BrowseArea("soccer", "Soccer", frozenset({"soccer", "fifa-world-cup", "2026-fifa-world-cup", "ucl", "champions-league"}), "sports"),
+    BrowseArea("soccer", "Soccer", frozenset({"soccer", "ucl", "champions-league"}), "sports"),
     BrowseArea("nba", "NBA", frozenset({"nba", "nba-finals", "nba-champion", "2026-nba-playoffs", "basketball"}), "sports"),
     BrowseArea("mlb", "MLB", frozenset({"mlb", "baseball"}), "sports"),
     BrowseArea("nhl", "NHL", frozenset({"nhl", "hockey", "stanley-cup", "2026-nhl-playoffs"}), "sports"),

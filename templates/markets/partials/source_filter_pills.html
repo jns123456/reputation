@@ -9,8 +9,10 @@
      class="rounded-full px-3 py-1 text-xs font-medium transition {% if source_filter_urls.active_source == 'polymarket' %}bg-indigo-600 text-white{% else %}bg-indigo-50 text-indigo-700 hover:bg-indigo-100{% endif %}">
     Polymarket
   </a>
+  {% if source_filter_urls.show_kalshi %}
   <a href="{{ source_filter_urls.kalshi }}"
      class="rounded-full px-3 py-1 text-xs font-medium transition {% if source_filter_urls.active_source == 'kalshi' %}bg-emerald-600 text-white{% else %}bg-emerald-50 text-emerald-700 hover:bg-emerald-100{% endif %}">
     Kalshi
   </a>
+  {% endif %}
 </div>

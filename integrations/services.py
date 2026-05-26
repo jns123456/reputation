@@ -97,6 +97,11 @@ def refresh_market_from_polymarket(market):
     if market.source != Market.Source.POLYMARKET or not market.external_id:
         return market
 
+    from integrations.polymarket.soccer_matches import is_world_cup_match_market
+
+    if is_world_cup_match_market(market):
+        return refresh_world_cup_match_market(market)
+
     client = PolymarketClient()
     try:
         raw_market = client.fetch_market_by_id(market.external_id)
@@ -202,6 +207,93 @@ def sync_crypto_binary_markets(*, limit=48):
         default_category="Crypto",
         limit=limit,
     )
+
+
+def _world_cup_sync_limit(limit):
+    """Resolve sync cap; 0 or None means import all available group-stage matches."""
+    from django.conf import settings
+
+    if limit is None:
+        limit = getattr(settings, "WORLD_CUP_MATCH_SYNC_LIMIT", 0)
+    if not limit:
+        return None
+    return limit
+
+
+def sync_world_cup_match_markets(*, limit=None):
+    """Fetch FIFA World Cup match events and upsert as 3-outcome markets."""
+    from integrations.polymarket.soccer_matches import (
+        build_world_cup_match_raw,
+        normalize_world_cup_match_event,
+    )
+
+    client = PolymarketClient()
+    events = client.fetch_world_cup_match_events(limit=_world_cup_sync_limit(limit))
+
+    imported = []
+    errors = []
+
+    for event in events:
+        try:
+            normalized = normalize_world_cup_match_event(event, default_category="Sports")
+            if not normalized:
+                continue
+            raw_market = build_world_cup_match_raw(event, normalized=normalized)
+            market, created = import_market_from_normalized(
+                normalized,
+                raw_market=raw_market,
+                raw_event=event,
+            )
+            imported.append({"market": market, "created": created, "raw": event})
+        except Exception as exc:
+            logger.exception("Failed to import World Cup match event: %s", event.get("slug"))
+            errors.append({"raw_id": event.get("slug"), "error": str(exc)})
+
+    return {"imported": imported, "errors": errors}
+
+
+def refresh_world_cup_match_market(market):
+    """Refresh a composite World Cup match market from its Polymarket event."""
+    from integrations.polymarket.soccer_matches import (
+        WORLD_CUP_MATCH_EXTERNAL_PREFIX,
+        build_world_cup_match_raw,
+        is_world_cup_match_market,
+        normalize_world_cup_match_event,
+    )
+
+    if not is_world_cup_match_market(market):
+        return market
+
+    client = PolymarketClient()
+    slug = market.polymarket_slug
+    if not slug and market.external_id.startswith(WORLD_CUP_MATCH_EXTERNAL_PREFIX):
+        slug = market.external_id.removeprefix(WORLD_CUP_MATCH_EXTERNAL_PREFIX)
+    if not slug:
+        return market
+
+    try:
+        event = client.fetch_event_by_slug(slug)
+    except Exception:
+        logger.exception("Failed to fetch World Cup match event %s", slug)
+        return market
+
+    if not event:
+        return market
+
+    normalized = normalize_world_cup_match_event(
+        event,
+        default_category=market.category or "Sports",
+    )
+    if not normalized:
+        return market
+
+    raw_market = build_world_cup_match_raw(event, normalized=normalized)
+    market, _ = import_market_from_normalized(
+        normalized,
+        raw_market=raw_market,
+        raw_event=event,
+    )
+    return market
 
 
 def get_economy_binary_markets(*, limit=12, sync=True):

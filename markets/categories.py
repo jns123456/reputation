@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+FIFA_WORLD_CUP_CATEGORY_SLUG = "fifa-world-cup-2026"
+
 
 @dataclass(frozen=True)
 class CanonicalCategory:
@@ -129,6 +131,21 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
         hero_bg="bg-gradient-to-br from-orange-500/10 to-amber-600/5",
         card_glow="bg-gradient-to-br from-orange-500/20 to-amber-600/10",
         card_hover="from-orange-500/0 to-amber-600/0 group-hover:from-orange-500/10 group-hover:to-amber-600/5",
+    ),
+    CanonicalCategory(
+        slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
+        name="FIFA World Cup 2026",
+        description="Match forecasts — win, draw, or loss",
+        tag_slugs=frozenset({"fifa-world-cup", "2026-fifa-world-cup"}),
+        category_names=frozenset(),
+        polymarket_tag="fifa-world-cup",
+        kalshi_series_tickers=frozenset(),
+        icon_bg="bg-emerald-500/15",
+        icon_fg="text-emerald-600",
+        ring="ring-emerald-500/20",
+        hero_bg="bg-gradient-to-br from-emerald-500/10 to-amber-500/5",
+        card_glow="bg-gradient-to-br from-emerald-500/25 to-amber-500/15",
+        card_hover="from-emerald-500/0 to-amber-500/0 group-hover:from-emerald-500/10 group-hover:to-amber-500/5",
     ),
     CanonicalCategory(
         slug="pop-culture",
@@ -264,6 +281,11 @@ def _kalshi_event_category_slug(market) -> str | None:
 
 def resolve_market_category_slug(market) -> str:
     """Map a market to one canonical category slug."""
+    from integrations.polymarket.soccer_matches import is_world_cup_match_market
+
+    if is_world_cup_match_market(market):
+        return FIFA_WORLD_CUP_CATEGORY_SLUG
+
     tag_slugs = _collect_tag_slugs(market)
 
     for category in CANONICAL_CATEGORIES:

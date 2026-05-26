@@ -2,13 +2,21 @@
 
 from urllib.parse import urlencode
 
+from django.conf import settings
+
 from markets.models import Market
 
 VALID_MARKET_SOURCES = frozenset({Market.Source.POLYMARKET, Market.Source.KALSHI})
 
 
+def kalshi_enabled() -> bool:
+    return getattr(settings, "KALSHI_ENABLED", False)
+
+
 def normalize_source_filter(value: str) -> str:
     value = (value or "").strip()
+    if value == Market.Source.KALSHI and not kalshi_enabled():
+        return ""
     if value in VALID_MARKET_SOURCES:
         return value
     return ""
@@ -34,4 +42,5 @@ def build_source_filter_urls(*, base_url: str, active_source: str = "", extra: d
         "polymarket": url_for(Market.Source.POLYMARKET),
         "kalshi": url_for(Market.Source.KALSHI),
         "active_source": normalized,
+        "show_kalshi": kalshi_enabled(),
     }

@@ -106,6 +106,27 @@ class Market(models.Model):
         return []
 
     @property
+    def is_soccer_match(self):
+        from integrations.polymarket.soccer_matches import is_world_cup_match_market
+
+        return is_world_cup_match_market(self)
+
+    @property
+    def kickoff_at(self):
+        raw = self.polymarket_raw or {}
+        kickoff = raw.get("kickoff_at")
+        if not kickoff:
+            return self.close_date
+        from django.utils.dateparse import parse_datetime
+
+        parsed = parse_datetime(str(kickoff))
+        if parsed is None:
+            return self.close_date
+        if timezone.is_naive(parsed):
+            parsed = timezone.make_aware(parsed, timezone.utc)
+        return parsed
+
+    @property
     def image_url(self):
         """Market/event image from import payload."""
         if self.source == self.Source.KALSHI:

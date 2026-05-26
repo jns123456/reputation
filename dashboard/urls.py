@@ -9,6 +9,7 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("faq/", views.faq, name="faq"),
     path("browse/<slug:slug>/", views.category_browse, name="category_browse"),
+    path("world-cup/games/", views.world_cup_games, name="world_cup_games"),
     path("forecasts/", views.forecasts, name="forecasts"),
     path("forecasts/feed/", views.forecasts_feed, name="forecasts_feed"),
     path("dashboard/", views.home, name="home"),

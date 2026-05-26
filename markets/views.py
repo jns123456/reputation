@@ -16,7 +16,7 @@ from integrations.sync import refresh_market
 from markets.models import Market
 from markets.selectors import get_market_categories, get_markets_for_display
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
-from markets.source_filters import build_source_filter_urls, normalize_source_filter
+from markets.source_filters import build_source_filter_urls, kalshi_enabled, normalize_source_filter
 from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction
 from reputation.services import calculate_reputation_stakes
@@ -108,7 +108,7 @@ def market_detail(request, slug):
             "predictions": predictions,
             "prediction_sections": prediction_sections,
             "polymarket_embed": build_polymarket_embed_context(market),
-            "kalshi_embed": build_kalshi_embed_context(market),
+            "kalshi_embed": build_kalshi_embed_context(market) if kalshi_enabled() else None,
             "forecast_form": forecast_form,
             "existing_forecast": existing_forecast,
         },

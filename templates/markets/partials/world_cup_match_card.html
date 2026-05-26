@@ -1,0 +1,46 @@
+{% load reputation_filters %}
+<a href="{% url 'markets:detail' slug=market.slug %}"
+   class="group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md">
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0 flex-1">
+      {% if market.kickoff_at %}
+      <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+        {{ market.kickoff_at|date:"D, M j · H:i" }} UTC
+      </p>
+      {% endif %}
+      <h3 class="mt-1 text-base font-bold leading-snug text-slate-900 group-hover:text-brand-700 sm:text-lg">
+        {{ market.title }}
+      </h3>
+    </div>
+    {% if market.image_url %}
+    <img src="{{ market.image_url }}" alt="" class="h-11 w-11 shrink-0 rounded-lg border border-slate-100 object-cover" loading="lazy">
+    {% endif %}
+  </div>
+
+  {% if market.current_probability %}
+  <div class="mt-4 grid grid-cols-3 gap-2">
+    {% for label, prob in market.current_probability.items %}
+    <div class="flex flex-col items-center rounded-lg border py-2.5 transition group-hover:brightness-[0.98]
+      {% if label|lower == 'draw' %}border-amber-200 bg-amber-50{% elif forloop.first %}border-emerald-200 bg-emerald-50{% else %}border-slate-200 bg-slate-50{% endif %}">
+      <span class="truncate px-1 text-[10px] font-semibold uppercase tracking-wide
+        {% if label|lower == 'draw' %}text-amber-700{% elif forloop.first %}text-emerald-700{% else %}text-slate-600{% endif %}">
+        {% if label|lower == 'draw' %}Draw{% else %}{{ label }}{% endif %}
+      </span>
+      <span class="mt-0.5 text-lg font-bold tabular-nums
+        {% if label|lower == 'draw' %}text-amber-800{% elif forloop.first %}text-emerald-800{% else %}text-slate-800{% endif %}">
+        {{ prob|as_percent }}%
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="mt-4 text-center text-sm text-slate-400">Odds unavailable</p>
+  {% endif %}
+
+  <div class="mt-auto flex items-center justify-between gap-2 pt-4 text-xs text-slate-400">
+    <span class="truncate font-medium">
+      {% if market.volume_label %}{{ market.volume_label }}{% else %}3-way result{% endif %}
+    </span>
+    <span class="shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700">Polymarket</span>
+  </div>
+</a>

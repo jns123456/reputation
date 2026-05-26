@@ -4,7 +4,7 @@ from predictions.models import Prediction
 
 
 class ForecastForm(forms.ModelForm):
-    """Binary Yes/No forecast form for open markets."""
+    """Forecast form for open markets (binary or multi-outcome)."""
 
     class Meta:
         model = Prediction
@@ -24,7 +24,7 @@ class ForecastForm(forms.ModelForm):
     def __init__(self, *args, market=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.market = market
-        labels = self._binary_outcome_labels()
+        labels = self._outcome_labels()
         self.fields["predicted_outcome"] = forms.ChoiceField(
             choices=[(label, label) for label in labels],
             widget=forms.RadioSelect,
@@ -34,19 +34,23 @@ class ForecastForm(forms.ModelForm):
         self.fields["reasoning"].label = "Explain your forecast"
         self.fields["reasoning"].help_text = "Optional — shown on your public forecast. Max 2,000 characters."
 
-    def _binary_outcome_labels(self):
+    def _outcome_labels(self):
         if not self.market:
             return ["Yes", "No"]
         labels = self.market.outcome_labels
-        if len(labels) == 2:
+        if len(labels) >= 2:
             return labels
         return ["Yes", "No"]
 
+    @property
+    def outcome_count(self):
+        return len(self._outcome_labels())
+
     def clean_predicted_outcome(self):
         outcome = self.cleaned_data["predicted_outcome"]
-        allowed = self._binary_outcome_labels()
+        allowed = self._outcome_labels()
         if outcome not in allowed:
-            raise forms.ValidationError("Choose Yes or No for this market.")
+            raise forms.ValidationError("Choose a valid outcome for this market.")
         return outcome
 
     def clean(self):

@@ -52,6 +52,38 @@ class PolymarketClient:
             return data
         return data.get("data", data.get("events", []))
 
+    def fetch_events_paginated(
+        self,
+        *,
+        tag_slug=None,
+        page_size=100,
+        max_pages=50,
+        active=True,
+        closed=False,
+        order=None,
+    ):
+        """Fetch all events for a tag, following Polymarket offset pagination."""
+        all_events = []
+        offset = 0
+
+        for _ in range(max_pages):
+            events = self.fetch_events(
+                tag_slug=tag_slug,
+                limit=page_size,
+                offset=offset,
+                active=active,
+                closed=closed,
+                order=order,
+            )
+            if not events:
+                break
+            all_events.extend(events)
+            if len(events) < page_size:
+                break
+            offset += page_size
+
+        return all_events
+
     def fetch_binary_markets_by_tag(
         self,
         tag_slug,
@@ -126,6 +158,38 @@ class PolymarketClient:
             default_category="Crypto",
             fallback_tag_in_payload="crypto",
         )
+
+    def fetch_world_cup_match_events(self, *, limit=None, tag_slug=None):
+        """Fetch FIFA World Cup group-stage match events with 3-way moneyline markets."""
+        from integrations.polymarket.soccer_matches import (
+            WORLD_CUP_MATCH_TAG_SLUG,
+            is_world_cup_match_event,
+        )
+
+        tag_slug = tag_slug or WORLD_CUP_MATCH_TAG_SLUG
+        matches = []
+        seen_slugs = set()
+
+        events = self.fetch_events_paginated(
+            tag_slug=tag_slug,
+            page_size=100,
+            max_pages=50,
+            active=True,
+            closed=False,
+        )
+        for event in events:
+            slug = event.get("slug")
+            if not slug or slug in seen_slugs:
+                continue
+            if not is_world_cup_match_event(event):
+                continue
+            matches.append(event)
+            seen_slugs.add(slug)
+            if limit is not None and len(matches) >= limit:
+                break
+
+        matches.sort(key=lambda event: event.get("startDate") or event.get("endDate") or "")
+        return matches
 
     def fetch_market_by_id(self, external_id):
         url = f"{self.base_url}/markets/{external_id}"
