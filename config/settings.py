@@ -118,16 +118,26 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "reputation-cache",
+if env("REDIS_URL", default=""):
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": env("REDIS_URL"),
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "reputation-cache",
+        }
+    }
 
 POLYMARKET_ECONOMY_CACHE_SECONDS = env.int("POLYMARKET_ECONOMY_CACHE_SECONDS", default=300)
 MARKET_SYNC_CACHE_SECONDS = env.int("MARKET_SYNC_CACHE_SECONDS", default=POLYMARKET_ECONOMY_CACHE_SECONDS)
 MARKET_SYNC_CATEGORY_LIMIT = env.int("MARKET_SYNC_CATEGORY_LIMIT", default=48)
+MARKET_FULL_SYNC_INTERVAL_HOURS = env.int("MARKET_FULL_SYNC_INTERVAL_HOURS", default=6)
+ENABLE_EMBEDDED_MARKET_SYNC = env.bool("ENABLE_EMBEDDED_MARKET_SYNC", default=False)
 # 0 = import every available World Cup group-stage match from Polymarket.
 WORLD_CUP_MATCH_SYNC_LIMIT = env.int("WORLD_CUP_MATCH_SYNC_LIMIT", default=0)
 MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=30)
@@ -171,11 +181,11 @@ KALSHI_API_URL = env(
 CELERY_BEAT_SCHEDULE = {
     "sync-all-category-markets": {
         "task": "integrations.tasks.sync_all_category_markets_task",
-        "schedule": crontab(minute="*/15"),
+        "schedule": crontab(minute=0, hour="*/6"),
     },
     "refresh-stale-open-markets": {
         "task": "integrations.tasks.refresh_stale_open_markets_task",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute=30, hour="*/6"),
     },
 }
 if KALSHI_ENABLED:

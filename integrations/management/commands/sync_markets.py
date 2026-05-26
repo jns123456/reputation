@@ -38,9 +38,30 @@ class Command(BaseCommand):
             action="store_true",
             help="Refresh Kalshi event metadata (team/event images for cards)",
         )
+        parser.add_argument(
+            "--if-due",
+            action="store_true",
+            help="Run category + stale sync only when MARKET_FULL_SYNC_INTERVAL_HOURS has elapsed",
+        )
         parser.add_argument("--limit", type=int, default=50)
 
     def handle(self, *args, **options):
+        if options["if_due"]:
+            from integrations.market_sync_scheduler import run_scheduled_market_sync
+
+            result = run_scheduled_market_sync(force=False)
+            if result is None:
+                self.stdout.write("Scheduled sync not due yet.")
+                return
+            self._print_summary("Category sync", result["categories"])
+            stale = result["stale"]
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Stale refresh: {stale['refreshed']} refreshed ({stale['failures']} failures)"
+                )
+            )
+            return
+
         if options["categories"]:
             result = sync_all_category_markets(limit=options["limit"])
             self._print_summary("Category sync", result)
@@ -84,7 +105,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.WARNING(
-                "No action selected. Use --categories, --stale, --kalshi-discovery, "
+                "No action selected. Use --categories, --if-due, --stale, --kalshi-discovery, "
                 "--kalshi-images, or --polymarket."
             )
         )

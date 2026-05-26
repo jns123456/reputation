@@ -173,7 +173,12 @@ def _pin_featured_world_cup_summary(summaries):
         return summaries
 
     summaries = [item for item in summaries if item["category"].slug != world_cup.slug]
-    count = len(get_open_markets_by_canonical_category(category_slug=world_cup.slug))
+    count = _exclude_disabled_sources(
+        Market.objects.filter(
+            status=Market.Status.OPEN,
+            canonical_category_slug=world_cup.slug,
+        )
+    ).count()
     return [{"category": world_cup, "count": count}, *summaries]
 
 

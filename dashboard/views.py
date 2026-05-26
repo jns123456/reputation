@@ -14,10 +14,9 @@ from accounts.category_selectors import (
 from accounts.selectors import get_top_popular_users, get_top_predictors
 from dashboard.forecasts_context import get_forecasts_page_context
 from integrations.celery_utils import celery_broker_available, enqueue_category_sync
-from integrations.services import sync_world_cup_match_markets
-from integrations.sync import sync_all_category_markets, sync_category_markets
 from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
+from markets.models import Market
 from markets.source_filters import build_source_filter_urls, kalshi_enabled, normalize_source_filter
 from markets.selectors import (
     filter_markets_by_browse_area,
@@ -31,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
-WORLD_CUP_SYNC_CACHE_KEY = f"{CATEGORY_SYNC_CACHE_PREFIX}polymarket:world-cup-games"
 LANDING_SYNC_CACHE_KEY = "landing_polymarket_sync"
 
 
@@ -44,7 +42,6 @@ def _load_category_summaries():
 
 
 def landing(request):
-    _trigger_landing_sync_if_needed()
     category_summaries = _load_category_summaries()
     top_predictors = get_top_predictors(5)
     source = normalize_source_filter(request.GET.get("source", ""))
@@ -64,45 +61,8 @@ def landing(request):
     )
 
 
-def _run_category_sync(category):
-    try:
-        sync_category_markets(category, kalshi_lightweight=True)
-        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
-    except Exception:
-        logger.exception("Inline category sync failed for %s", category.slug)
-
-
-def _enqueue_or_run_category_sync(category):
-    if enqueue_category_sync(category.slug):
-        return
-    _run_category_sync(category)
-
-
-def _trigger_landing_sync_if_needed():
-    """Kick off a full Polymarket sync when the landing page loads (throttled)."""
-    if cache.get(LANDING_SYNC_CACHE_KEY):
-        return
-
-    cache.set(LANDING_SYNC_CACHE_KEY, True, settings.MARKET_SYNC_CACHE_SECONDS)
-
-    if celery_broker_available():
-        from integrations.tasks import sync_all_category_markets_task
-
-        try:
-            sync_all_category_markets_task.delay()
-            return
-        except Exception:
-            logger.exception("Failed to enqueue landing Polymarket sync")
-
-    try:
-        sync_all_category_markets()
-        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
-    except Exception:
-        logger.exception("Inline landing Polymarket sync failed")
-
-
 def _enqueue_category_sync_if_needed(category):
-    """Queue background sync; fall back to inline sync when Celery is unavailable."""
+    """Queue background sync; never block the HTTP response on external APIs."""
     has_poly = bool(category.polymarket_tag)
     has_kalshi = kalshi_enabled() and bool(category.kalshi_series_tickers)
     if not has_poly and not has_kalshi:
@@ -125,7 +85,8 @@ def _enqueue_category_sync_if_needed(category):
             getattr(settings, "KALSHI_SYNC_CACHE_SECONDS", settings.MARKET_SYNC_CACHE_SECONDS),
         )
 
-    _enqueue_or_run_category_sync(category)
+    if not enqueue_category_sync(category.slug):
+        logger.debug("Category sync for %s not queued; Celery broker unavailable", category.slug)
 
 
 def category_browse(request, slug):
@@ -183,48 +144,22 @@ def category_browse(request, slug):
     )
 
 
-def _enqueue_world_cup_sync_if_needed():
-    """Queue World Cup match import; fall back to inline sync when Celery is unavailable."""
-    if cache.get(WORLD_CUP_SYNC_CACHE_KEY):
-        return
-
-    cache.set(WORLD_CUP_SYNC_CACHE_KEY, True, settings.MARKET_SYNC_CACHE_SECONDS)
-
-    if celery_broker_available():
-        from integrations.tasks import sync_world_cup_match_markets_task
-
-        try:
-            sync_world_cup_match_markets_task.delay()
-            return
-        except Exception:
-            logger.exception("Failed to enqueue World Cup match sync")
-
-    try:
-        sync_world_cup_match_markets()
-    except Exception:
-        logger.exception("Inline World Cup match sync failed")
-
-
 def _world_cup_match_markets(*, source=""):
-    matches = get_open_markets_by_canonical_category(category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG)
-    if source:
-        matches = [market for market in matches if market.source == source]
-    matches.sort(
-        key=lambda market: (
-            market.kickoff_at or market.close_date or market.updated_at,
-            -market.updated_at.timestamp() if market.updated_at else 0,
-        )
+    qs = Market.objects.filter(
+        status=Market.Status.OPEN,
+        canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
     )
-    return matches
+    if source:
+        qs = qs.filter(source=source)
+    return list(qs.order_by("close_date", "title"))
 
 
 def _world_cup_games_context(request, *, category=None):
-    _enqueue_world_cup_sync_if_needed()
-    _enqueue_category_sync_if_needed(category or get_category_for_slug(FIFA_WORLD_CUP_CATEGORY_SLUG))
+    category = category or get_category_for_slug(FIFA_WORLD_CUP_CATEGORY_SLUG)
+    _enqueue_category_sync_if_needed(category)
 
     source = normalize_source_filter(request.GET.get("source", ""))
     matches = _world_cup_match_markets(source=source)
-    category = category or get_category_for_slug(FIFA_WORLD_CUP_CATEGORY_SLUG)
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("dashboard:category_browse", kwargs={"slug": FIFA_WORLD_CUP_CATEGORY_SLUG}),
         active_source=source,
