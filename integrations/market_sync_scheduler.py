@@ -107,12 +107,12 @@ def start_embedded_market_sync_scheduler() -> None:
         daemon=True,
     )
     thread.start()
-        logger.info(
-            "Embedded market sync scheduler started (every %s hours)",
-            getattr(settings, "MARKET_FULL_SYNC_INTERVAL_HOURS", 6),
-        )
-        print(
-            f"Embedded market sync scheduler started (every "
-            f"{getattr(settings, 'MARKET_FULL_SYNC_INTERVAL_HOURS', 6)} hours)",
-            flush=True,
-        )
+    logger.info(
+        "Embedded market sync scheduler started (every %s hours)",
+        getattr(settings, "MARKET_FULL_SYNC_INTERVAL_HOURS", 6),
+    )
+    print(
+        f"Embedded market sync scheduler started (every "
+        f"{getattr(settings, 'MARKET_FULL_SYNC_INTERVAL_HOURS', 6)} hours)",
+        flush=True,
+    )
