@@ -119,10 +119,15 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 if env("REDIS_URL", default=""):
+    redis_url = env("REDIS_URL")
+    redis_cache_options = {}
+    if redis_url.startswith("rediss://"):
+        redis_cache_options["ssl_cert_reqs"] = None
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
-            "LOCATION": env("REDIS_URL"),
+            "LOCATION": redis_url,
+            "OPTIONS": redis_cache_options,
         }
     }
 else:

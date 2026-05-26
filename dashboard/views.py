@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
-LANDING_SYNC_CACHE_KEY = "landing_polymarket_sync"
+WORLD_CUP_SYNC_CACHE_KEY = f"{CATEGORY_SYNC_CACHE_PREFIX}polymarket:world-cup-games"
 
 
 def _load_category_summaries():

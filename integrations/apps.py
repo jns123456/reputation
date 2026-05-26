@@ -1,3 +1,4 @@
+import os
 import sys
 
 from django.apps import AppConfig
@@ -17,6 +18,7 @@ class IntegrationsConfig(AppConfig):
     def _should_start_embedded_sync():
         if "test" in sys.argv:
             return False
-        if any(cmd in sys.argv for cmd in ("migrate", "collectstatic", "shell", "createsuperuser")):
-            return False
-        return True
+        if "runserver" in sys.argv:
+            return True
+        dyno = os.environ.get("DYNO", "")
+        return dyno.startswith("web.")
