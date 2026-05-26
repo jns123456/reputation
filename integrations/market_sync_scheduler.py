@@ -53,6 +53,7 @@ def run_scheduled_market_sync(*, force: bool = False) -> dict | None:
 
     try:
         logger.info("Starting scheduled Polymarket market sync")
+        print("Starting scheduled Polymarket market sync", flush=True)
         category_result = sync_all_category_markets(
             limit=getattr(settings, "MARKET_SYNC_CATEGORY_LIMIT", 48)
         )
@@ -68,6 +69,11 @@ def run_scheduled_market_sync(*, force: bool = False) -> dict | None:
             category_result["imported"],
             category_result["updated"],
             stale_result["refreshed"],
+        )
+        print(
+            f"Scheduled market sync finished: imported={category_result['imported']} "
+            f"updated={category_result['updated']} stale={stale_result['refreshed']}",
+            flush=True,
         )
         return summary
     finally:
@@ -101,7 +107,12 @@ def start_embedded_market_sync_scheduler() -> None:
         daemon=True,
     )
     thread.start()
-    logger.info(
-        "Embedded market sync scheduler started (every %s hours)",
-        getattr(settings, "MARKET_FULL_SYNC_INTERVAL_HOURS", 6),
-    )
+        logger.info(
+            "Embedded market sync scheduler started (every %s hours)",
+            getattr(settings, "MARKET_FULL_SYNC_INTERVAL_HOURS", 6),
+        )
+        print(
+            f"Embedded market sync scheduler started (every "
+            f"{getattr(settings, 'MARKET_FULL_SYNC_INTERVAL_HOURS', 6)} hours)",
+            flush=True,
+        )

@@ -64,6 +64,9 @@ class Command(BaseCommand):
 
         if options["categories"]:
             result = sync_all_category_markets(limit=options["limit"])
+            from integrations.market_sync_scheduler import record_full_sync_run
+
+            record_full_sync_run()
             self._print_summary("Category sync", result)
             return
 
