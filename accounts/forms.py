@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 from accounts.models import NotificationPreference, User
 
@@ -13,7 +14,7 @@ class SignUpForm(UserCreationForm):
     is_anonymous_profile = forms.BooleanField(
         required=False,
         initial=False,
-        label="Use anonymous profile",
+        label=_("Use anonymous profile"),
         widget=forms.CheckboxInput(
             attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
         ),
@@ -87,28 +88,28 @@ class NotificationPreferenceForm(forms.ModelForm):
             ),
         }
         labels = {
-            "notify_followed_predictions": "Forecasts from users you follow",
-            "notify_new_follower": "When someone follows you",
-            "notify_votes_received": "Upvotes and downvotes on your content",
-            "notify_prediction_resolved": "When your forecasts are resolved",
-            "notify_challenge_updates": "Challenge invitations and updates",
-            "notify_in_app": "In-app notifications",
-            "notify_email": "Email notifications",
+            "notify_followed_predictions": _("Forecasts from users you follow"),
+            "notify_new_follower": _("When someone follows you"),
+            "notify_votes_received": _("Upvotes and downvotes on your content"),
+            "notify_prediction_resolved": _("When your forecasts are resolved"),
+            "notify_challenge_updates": _("Challenge invitations and updates"),
+            "notify_in_app": _("In-app notifications"),
+            "notify_email": _("Email notifications"),
         }
         help_texts = {
-            "notify_followed_predictions": (
+            "notify_followed_predictions": _(
                 "Get notified when someone you follow makes a new prediction."
             ),
-            "notify_new_follower": "Get notified when a user starts following you.",
-            "notify_votes_received": (
+            "notify_new_follower": _("Get notified when a user starts following you."),
+            "notify_votes_received": _(
                 "Get notified when someone likes or dislikes your comments or forecasts."
             ),
-            "notify_prediction_resolved": (
+            "notify_prediction_resolved": _(
                 "Get notified when a market closes and see the reputation points you gained or lost."
             ),
-            "notify_challenge_updates": (
+            "notify_challenge_updates": _(
                 "Get notified about challenge invites, resolved events, and final results."
             ),
-            "notify_in_app": "Show alerts in your notification bell.",
-            "notify_email": "Send alerts to your email address (when email is configured).",
+            "notify_in_app": _("Show alerts in your notification bell."),
+            "notify_email": _("Send alerts to your email address (when email is configured)."),
         }

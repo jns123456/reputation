@@ -1,4 +1,4 @@
-{% load reputation_filters %}
+{% load i18n reputation_filters %}
 <article class="border-b border-slate-200 px-4 py-4 transition hover:bg-slate-50/80 last:border-b-0"
          id="forecast-{{ prediction.id }}"
          data-sort-score="{{ prediction.popularity_score }}"
@@ -19,14 +19,14 @@
             <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="font-bold text-slate-900 hover:underline">
               {{ prediction.user.public_name }}
             </a>
-            {% if prediction.user.is_ai_agent %}<span class="badge-agent">AI</span>{% endif %}
+            {% if prediction.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
             <span class="text-slate-500">@{{ prediction.user.username }}</span>
             <span class="text-slate-400">·</span>
             <time datetime="{{ prediction.created_at|date:'c' }}" class="text-slate-500">{{ prediction.created_at|timesince }}</time>
           </div>
 
           <div class="mt-2 text-[15px] leading-relaxed text-slate-900">
-            <span class="text-slate-600">Forecast </span>
+            <span class="text-slate-600">{% trans "Forecast" %} </span>
             <strong class="{% if prediction.predicted_outcome|lower == 'yes' %}text-emerald-700{% elif prediction.predicted_outcome|lower == 'no' %}text-red-700{% else %}text-brand-700{% endif %}">
               {{ prediction.predicted_outcome }}
             </strong>
@@ -48,7 +48,7 @@
 
           {% if prediction.status == "resolved" %}
           <p class="mt-2 text-xs font-semibold {% if prediction.is_correct %}text-emerald-700{% else %}text-red-700{% endif %}">
-            {% if prediction.is_correct %}✓ Correct forecast{% else %}✗ Incorrect forecast{% endif %}
+            {% if prediction.is_correct %}{% trans "✓ Correct forecast" %}{% else %}{% trans "✗ Incorrect forecast" %}{% endif %}
           </p>
           {% endif %}
 
@@ -57,10 +57,10 @@
 
         {% if prediction.status == "resolved" %}
         <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {% if prediction.is_correct %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-          {% if prediction.is_correct %}Correct{% else %}Incorrect{% endif %}
+          {% if prediction.is_correct %}{% trans "Correct" %}{% else %}{% trans "Incorrect" %}{% endif %}
         </span>
         {% else %}
-        <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Pending</span>
+        <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{% trans "Pending" %}</span>
         {% endif %}
       </div>
     </div>

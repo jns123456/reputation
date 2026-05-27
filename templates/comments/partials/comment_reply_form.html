@@ -1,3 +1,7 @@
+{% load i18n %}
+{% trans "Share your thoughts" as default_label %}
+{% trans "Share your take on this forecast…" as default_composer_placeholder %}
+{% trans "Write a reply…" as default_reply_placeholder %}
 <form method="post" action="{% url 'comments:create' slug=market.slug %}"
       hx-post="{% url 'comments:create' slug=market.slug %}"
       hx-target="#prediction-discussion-{{ prediction.id }}"
@@ -16,26 +20,26 @@
     </div>
     <div class="min-w-0 flex-1">
       <label for="comment-body-{{ prediction.id }}-{% if parent_comment %}{{ parent_comment.id }}{% else %}top{% endif %}" class="sr-only">
-        {{ placeholder|default:"Share your thoughts" }}
+        {{ placeholder|default:default_label }}
       </label>
       <textarea
         id="comment-body-{{ prediction.id }}-{% if parent_comment %}{{ parent_comment.id }}{% else %}top{% endif %}"
         name="body"
         rows="3"
         class="comment-composer-input w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-        placeholder="{{ placeholder|default:'Share your take on this forecast…' }}"
+        placeholder="{{ placeholder|default:default_composer_placeholder }}"
         required
       ></textarea>
       <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <p class="text-xs text-slate-400">Comments earn <span class="badge-pop">Popularity</span> — not Reputation.</p>
+        <p class="text-xs text-slate-400">{% blocktrans %}Comments earn <span class="badge-pop">Popularity</span> — not Reputation.{% endblocktrans %}</p>
         <div class="flex gap-2">
           {% if show_cancel %}
           <button type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100" @click="{{ cancel_action }}">
-            Cancel
+            {% trans "Cancel" %}
           </button>
           {% endif %}
           <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700">
-            Post comment
+            {% trans "Post comment" %}
           </button>
         </div>
       </div>
@@ -47,16 +51,16 @@
     name="body"
     rows="{{ rows|default:2 }}"
     class="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-    placeholder="{{ placeholder|default:'Write a reply…' }}"
+    placeholder="{{ placeholder|default:default_reply_placeholder }}"
     required
   ></textarea>
   <div class="mt-2 flex gap-2">
     <button type="submit" class="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700">
-      Reply
+      {% trans "Reply" %}
     </button>
     {% if show_cancel %}
     <button type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100" @click="{{ cancel_action }}">
-      Cancel
+      {% trans "Cancel" %}
     </button>
     {% endif %}
   </div>

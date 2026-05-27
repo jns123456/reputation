@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from predictions.models import Prediction
 
@@ -16,7 +17,7 @@ class ForecastForm(forms.ModelForm):
                     "class": "forecast-reasoning-input",
                     "rows": 5,
                     "maxlength": "2000",
-                    "placeholder": "What data, news, or logic supports your pick?",
+                    "placeholder": _("What data, news, or logic supports your pick?"),
                 }
             ),
         }
@@ -28,11 +29,13 @@ class ForecastForm(forms.ModelForm):
         self.fields["predicted_outcome"] = forms.ChoiceField(
             choices=[(label, label) for label in labels],
             widget=forms.RadioSelect,
-            label="Your forecast",
+            label=_("Your forecast"),
         )
         self.fields["reasoning"].required = False
-        self.fields["reasoning"].label = "Explain your forecast"
-        self.fields["reasoning"].help_text = "Optional — shown on your public forecast. Max 2,000 characters."
+        self.fields["reasoning"].label = _("Explain your forecast")
+        self.fields["reasoning"].help_text = _(
+            "Optional — shown on your public forecast. Max 2,000 characters."
+        )
 
     def _outcome_labels(self):
         if not self.market:
@@ -50,13 +53,13 @@ class ForecastForm(forms.ModelForm):
         outcome = self.cleaned_data["predicted_outcome"]
         allowed = self._outcome_labels()
         if outcome not in allowed:
-            raise forms.ValidationError("Choose a valid outcome for this market.")
+            raise forms.ValidationError(_("Choose a valid outcome for this market."))
         return outcome
 
     def clean(self):
         cleaned = super().clean()
         if self.market and not self.market.is_open:
-            raise forms.ValidationError("This market is no longer open for forecasts.")
+            raise forms.ValidationError(_("This market is no longer open for forecasts."))
         return cleaned
 
 

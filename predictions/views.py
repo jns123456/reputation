@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -20,7 +21,7 @@ def create_prediction_view(request, slug):
         if existing:
             messages.error(
                 request,
-                "Your forecast cannot be changed after it is posted.",
+                _("Your forecast cannot be changed after it is posted."),
             )
             return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#place-forecast")
 
@@ -32,7 +33,7 @@ def create_prediction_view(request, slug):
                 predicted_outcome=form.cleaned_data["predicted_outcome"],
                 reasoning=form.cleaned_data.get("reasoning", ""),
             )
-            messages.success(request, "Your forecast was posted.")
+            messages.success(request, _("Your forecast was posted."))
             return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
     else:
         form = ForecastForm(market=market) if not existing else None

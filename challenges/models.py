@@ -1,16 +1,17 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 MAX_CHALLENGE_MARKETS = 10
 
 
 class Challenge(models.Model):
     class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
-        ACTIVE = "active", "Active"
-        COMPLETED = "completed", "Completed"
-        CANCELLED = "cancelled", "Cancelled"
+        PENDING = "pending", _("Pending")
+        ACTIVE = "active", _("Active")
+        COMPLETED = "completed", _("Completed")
+        CANCELLED = "cancelled", _("Cancelled")
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,

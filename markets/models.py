@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 from integrations.kalshi.urls import resolve_kalshi_public_url
 from integrations.polymarket.urls import resolve_polymarket_public_url
@@ -9,9 +11,9 @@ from markets.categories import resolve_market_category_slug
 
 class Market(models.Model):
     class Status(models.TextChoices):
-        OPEN = "open", "Open"
-        CLOSED = "closed", "Closed"
-        RESOLVED = "resolved", "Resolved"
+        OPEN = "open", _("Open")
+        CLOSED = "closed", _("Closed")
+        RESOLVED = "resolved", _("Resolved")
 
     class Source(models.TextChoices):
         POLYMARKET = "polymarket", "Polymarket"
@@ -153,7 +155,7 @@ class Market(models.Model):
         """
         if self.status == self.Status.RESOLVED:
             return {
-                "text": "Resolved",
+                "text": _("Resolved"),
                 "days": 0,
                 "tone": "resolved",
             }
@@ -166,17 +168,17 @@ class Market(models.Model):
         if days > 1:
             tone = "urgent" if days <= 7 else "normal"
             return {
-                "text": f"{days} days left",
+                "text": ngettext("%(days)s day left", "%(days)s days left", days) % {"days": days},
                 "days": days,
                 "tone": tone,
             }
         if days == 1:
-            return {"text": "1 day left", "days": 1, "tone": "soon"}
+            return {"text": _("1 day left"), "days": 1, "tone": "soon"}
         if days == 0:
-            return {"text": "Ends today", "days": 0, "tone": "urgent"}
+            return {"text": _("Ends today"), "days": 0, "tone": "urgent"}
         past = abs(days)
         if past == 1:
-            text = "Ended yesterday"
+            text = _("Ended yesterday")
         else:
-            text = f"Ended {past} days ago"
+            text = ngettext("Ended %(past)s day ago", "Ended %(past)s days ago", past) % {"past": past}
         return {"text": text, "days": days, "tone": "past"}

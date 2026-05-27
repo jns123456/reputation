@@ -1,45 +1,51 @@
 {% extends "base.html" %}
-{% load reputation_filters %}
+{% load i18n reputation_filters %}
 
-{% block title %}Markets{% endblock %}
+{% block title %}{% trans "Markets" %}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
-  <nav class="mb-4 text-sm text-slate-500 dark:text-slate-400" aria-label="Breadcrumb">
-    <a href="{% url 'markets:list' %}" class="font-medium hover:text-brand-600">Markets</a>
+  <nav class="mb-4 text-sm text-slate-500 dark:text-slate-400" aria-label="{% trans 'Breadcrumb' %}">
+    <a href="{% url 'markets:list' %}" class="font-medium hover:text-brand-600">{% trans "Markets" %}</a>
     <span class="mx-2">/</span>
-    <span class="font-medium text-slate-700 dark:text-slate-200">All markets</span>
+    <span class="font-medium text-slate-700 dark:text-slate-200">{% trans "All markets" %}</span>
   </nav>
 
-  {% include "includes/pr_page_hero.html" with eyebrow="Markets" compact=True title="All" gradient="markets" description="Forecast on real-world events — odds from Polymarket and Kalshi, no betting." %}
+  {% trans "Markets" as hero_eyebrow %}
+  {% trans "All" as hero_title %}
+  {% trans "markets" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Forecast on real-world events — odds from Polymarket and Kalshi, no betting.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
 
-  <div class="pr-panel mb-6 p-4" data-pr-reveal data-delay="1">
-    <form method="get" class="flex flex-wrap items-end gap-3">
-      <div class="min-w-[12rem] flex-1">
-        <label class="mb-1 block text-xs font-medium text-slate-500">Search</label>
-        <input type="search" name="q" value="{{ search_query }}" placeholder="Search markets…" class="form-input">
+  <div class="pr-panel mb-6 p-3 sm:p-4" data-pr-reveal data-delay="1">
+    <form method="get" class="pr-filter-grid">
+      <div class="sm:min-w-[12rem] sm:flex-1">
+        <label class="mb-1 block text-xs font-medium text-slate-500">{% trans "Search" %}</label>
+        <input type="search" name="q" value="{{ search_query }}" placeholder="{% trans 'Search markets…' %}" class="form-input">
       </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-500">Status</label>
-        <select name="status" class="form-select w-32">
-          <option value="">All statuses</option>
-          <option value="open" {% if current_status == "open" %}selected{% endif %}>Open</option>
-          <option value="closed" {% if current_status == "closed" %}selected{% endif %}>Closed</option>
-          <option value="resolved" {% if current_status == "resolved" %}selected{% endif %}>Resolved</option>
-        </select>
+      <div class="grid grid-cols-2 gap-3 sm:contents">
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-500">{% trans "Status" %}</label>
+          <select name="status" class="form-select sm:w-32">
+            <option value="">{% trans "All statuses" %}</option>
+            <option value="open" {% if current_status == "open" %}selected{% endif %}>{% trans "Open" %}</option>
+            <option value="closed" {% if current_status == "closed" %}selected{% endif %}>{% trans "Closed" %}</option>
+            <option value="resolved" {% if current_status == "resolved" %}selected{% endif %}>{% trans "Resolved" %}</option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-500">{% trans "Category" %}</label>
+          <select name="category" class="form-select sm:w-36">
+            <option value="">{% trans "All categories" %}</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-500">Category</label>
-        <select name="category" class="form-select w-36">
-          <option value="">All categories</option>
-          {% for cat in categories %}
-          <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium text-slate-500">Sort</label>
-        <select name="sort" class="form-select w-40" aria-label="Sort markets">
+      <div class="sm:w-auto">
+        <label class="mb-1 block text-xs font-medium text-slate-500">{% trans "Sort" %}</label>
+        <select name="sort" class="form-select sm:w-40" aria-label="{% trans 'Sort markets' %}">
           {% for value, label in sort_choices %}
           <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
@@ -48,7 +54,7 @@
       {% if current_source %}
       <input type="hidden" name="source" value="{{ current_source }}">
       {% endif %}
-      <button type="submit" class="btn-primary">Filter</button>
+      <button type="submit" class="btn-primary w-full sm:w-auto">{% trans "Filter" %}</button>
     </form>
     <div class="mt-4">
       {% include "markets/partials/source_filter_pills.html" %}
@@ -56,20 +62,22 @@
   </div>
 
   {% if categories %}
+  {% trans "Hide" as hide_label %}
+  {% trans "Show" as show_label %}
   <div class="mb-6" data-pr-reveal data-delay="2" x-data="{ categoriesOpen: {% if current_category %}true{% else %}false{% endif %} }">
     <button type="button"
             class="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800"
             @click="categoriesOpen = !categoriesOpen"
             :aria-expanded="categoriesOpen">
       <span>
-        Categories
+        {% trans "Categories" %}
         {% if current_category %}
         <span class="ml-1 font-normal text-slate-500 dark:text-slate-400">· {{ current_category }}</span>
         {% else %}
         <span class="ml-1 font-normal text-slate-500 dark:text-slate-400">· {{ categories|length }}</span>
         {% endif %}
       </span>
-      <span class="shrink-0 text-slate-400" x-text="categoriesOpen ? 'Hide' : 'Show'"></span>
+      <span class="shrink-0 text-slate-400" x-text="categoriesOpen ? '{{ hide_label|escapejs }}' : '{{ show_label|escapejs }}'"></span>
     </button>
     <div x-show="categoriesOpen"
          x-cloak
@@ -79,7 +87,7 @@
          class="mt-3 flex flex-wrap gap-2">
       <a href="{{ source_filter_urls.all }}"
          class="pr-filter-pill {% if not current_category %}is-active{% endif %}">
-        All categories
+        {% trans "All categories" %}
       </a>
       {% for cat in categories %}
       <a href="?category={{ cat|urlencode }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_source %}&source={{ current_source }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
@@ -97,11 +105,11 @@
     {% empty %}
     <div class="pr-empty col-span-full">
       {% if source_filter_urls.active_source == 'kalshi' %}
-        No Kalshi markets match your filters.
+        {% trans "No Kalshi markets match your filters." %}
       {% elif source_filter_urls.active_source == 'polymarket' %}
-        No Polymarket markets match your filters.
+        {% trans "No Polymarket markets match your filters." %}
       {% else %}
-        No markets found. Run <code class="text-xs">sync_markets --categories</code> or import via admin.
+        {% blocktrans %}No markets found. Run <code class="text-xs">sync_markets --categories</code> or import via admin.{% endblocktrans %}
       {% endif %}
     </div>
     {% endfor %}

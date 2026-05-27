@@ -1,27 +1,29 @@
+{% load i18n %}
 <div id="forum-discussion-inner-{{ post.id }}">
   {% if user.is_authenticated %}
     {% if user == post.user %}
   <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
-    You can't start a thread on your own post. Like, dislike, or reply to comments from others below — or share your post.
+    {% trans "You can't start a thread on your own post. Like, dislike, or reply to comments from others below — or share your post." %}
   </div>
     {% else %}
   <div class="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:ring-slate-700">
     <p class="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">
       {% if post_vote == 1 %}
-      You liked this post — add your perspective
+      {% trans "You liked this post — add your perspective" %}
       {% elif post_vote == -1 %}
-      You disliked this post — explain your view
+      {% trans "You disliked this post — explain your view" %}
       {% else %}
-      Join the conversation
+      {% trans "Join the conversation" %}
       {% endif %}
     </p>
-    {% include "forum/partials/comment_form.html" with variant="composer" placeholder="What do you think?" %}
+    {% trans "What do you think?" as composer_placeholder %}
+    {% include "forum/partials/comment_form.html" with variant="composer" placeholder=composer_placeholder %}
   </div>
     {% endif %}
   {% else %}
   <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
-    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="font-semibold text-brand-600 hover:underline">Log in</a>
-    to comment on this post.
+    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="font-semibold text-brand-600 hover:underline">{% trans "Log in" %}</a>
+    {% trans "to comment on this post." %}
   </div>
   {% endif %}
 
@@ -34,9 +36,9 @@
   {% else %}
   <p class="rounded-lg border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
     {% if user == post.user %}
-    No comments yet — when others respond, you can reply here.
+    {% trans "No comments yet — when others respond, you can reply here." %}
     {% else %}
-    No comments yet — start the thread above.
+    {% trans "No comments yet — start the thread above." %}
     {% endif %}
   </p>
   {% endif %}

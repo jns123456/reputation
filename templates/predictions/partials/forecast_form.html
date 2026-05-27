@@ -1,7 +1,7 @@
-{% load reputation_filters %}
+{% load i18n reputation_filters %}
 <section id="place-forecast" class="forecast-section mt-10 overflow-hidden rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-sm dark:border-brand-800/50 dark:from-slate-800 dark:to-slate-900 dark:shadow-lg dark:shadow-black/25">
-  <div class="border-b border-brand-100 px-6 py-5 dark:border-slate-700/80">
-    <div class="flex gap-3">
+  <div class="border-b border-brand-100 px-4 py-4 dark:border-slate-700/80 sm:px-6 sm:py-5">
+    <div class="flex flex-wrap items-start gap-3">
       {% if market.image_url %}
       <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-500 dark:bg-white/90">
         <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="lazy">
@@ -9,7 +9,7 @@
       {% endif %}
       <div class="min-w-0 flex-1">
         <p class="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
-          {% if existing %}Your forecast{% else %}Place a forecast{% endif %}
+          {% if existing %}{% trans "Your forecast" %}{% else %}{% trans "Place a forecast" %}{% endif %}
         </p>
         <h2 class="mt-1 text-lg font-bold leading-snug text-slate-900 dark:text-slate-50 sm:text-xl">{{ market.title }}</h2>
       </div>
@@ -28,46 +28,48 @@
     </div>
     <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">
       {% if existing %}
-        Posted {{ existing.created_at|timesince }} ago. Forecasts are permanent and cannot be edited.
+        {% blocktrans with timesince=existing.created_at|timesince %}Posted {{ timesince }} ago. Forecasts are permanent and cannot be edited.{% endblocktrans %}
+      {% elif market.source == "kalshi" %}
+        {% blocktrans %}Pick your outcome below. Live Kalshi odds are captured when you submit.{% endblocktrans %}
       {% else %}
-        Pick your outcome below. Live
-        {% if market.source == "kalshi" %}Kalshi{% else %}Polymarket{% endif %}
-        odds are captured when you submit.
+        {% blocktrans %}Pick your outcome below. Live Polymarket odds are captured when you submit.{% endblocktrans %}
       {% endif %}
     </p>
     {% if market.close_date %}
     <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-      Market closes {{ market.close_date|date:"M j, Y" }}
+      {% blocktrans with close_date=market.close_date|date:"M j, Y" %}Market closes {{ close_date }}{% endblocktrans %}
     </p>
     {% endif %}
   </div>
 
-  <div class="px-6 py-5">
+  <div class="px-4 py-4 sm:px-6 sm:py-5">
     {% if user.is_authenticated %}
       {% if existing %}
       <div class="space-y-4">
         <div class="rounded-xl border-2 border-brand-200 px-5 py-4 dark:border-brand-700/50 forecast-pick-card">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Your pick</p>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Your pick" %}</p>
           <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-50">{{ existing.predicted_outcome }}</p>
           {% with stakes=existing|prediction_stakes %}
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Odds at submission: {{ stakes.prob_percent }}% market probability.
-            <span class="font-semibold text-emerald-700 dark:text-emerald-400">+{{ stakes.win_points }}</span> if correct,
-            <span class="font-semibold text-red-700 dark:text-red-400">−{{ stakes.loss_points }}</span> if wrong.
+            {% blocktrans with prob=stakes.prob_percent win=stakes.win_points loss=stakes.loss_points %}
+            Odds at submission: {{ prob }}% market probability.
+            <span class="font-semibold text-emerald-700 dark:text-emerald-400">+{{ win }}</span> if correct,
+            <span class="font-semibold text-red-700 dark:text-red-400">−{{ loss }}</span> if wrong.
+            {% endblocktrans %}
           </p>
           {% endwith %}
         </div>
 
         {% if existing.reasoning %}
         <div class="rounded-xl border border-slate-200 px-5 py-4 dark:border-slate-600 forecast-reasoning-display">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Your reasoning</p>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Your reasoning" %}</p>
           <p class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{{ existing.reasoning }}</p>
         </div>
         {% endif %}
 
         <p class="text-sm text-slate-500 dark:text-slate-400">
-          This forecast is locked until the market resolves.
-          <a href="#forecasts" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">View in public feed</a>
+          {% trans "This forecast is locked until the market resolves." %}
+          <a href="#forecasts" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "View in public feed" %}</a>
         </p>
       </div>
       {% else %}
@@ -82,9 +84,11 @@
         <div>
           <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">{{ form.predicted_outcome.label }}</span>
           <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            Reputation at stake based on current
-            {% if market.source == "kalshi" %}Kalshi{% else %}Polymarket{% endif %}
-            odds.
+            {% if market.source == "kalshi" %}
+            {% blocktrans %}Reputation at stake based on current Kalshi odds.{% endblocktrans %}
+            {% else %}
+            {% blocktrans %}Reputation at stake based on current Polymarket odds.{% endblocktrans %}
+            {% endif %}
           </p>
           <div class="mt-3 grid gap-3 {% if form.outcome_count >= 3 %}grid-cols-1 sm:grid-cols-3{% else %}grid-cols-2{% endif %}">
             {% for radio in form.predicted_outcome %}
@@ -98,11 +102,13 @@
               {{ radio.tag }}
               <span class="forecast-choice flex flex-col items-center justify-center rounded-xl border-2 border-slate-200 px-4 py-4 text-center transition dark:border-slate-600">
                 <span class="text-lg font-bold text-slate-900 dark:text-slate-50">{{ radio.choice_label }}</span>
-                <span class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">Market {{ stakes.prob_percent }}%</span>
+                <span class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{% blocktrans with prob=stakes.prob_percent %}Market {{ prob }}%{% endblocktrans %}</span>
                 <span class="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                  <span class="font-semibold text-emerald-700 dark:text-emerald-400">+{{ stakes.win_points }}</span> if correct
+                  {% blocktrans with win=stakes.win_points loss=stakes.loss_points %}
+                  <span class="font-semibold text-emerald-700 dark:text-emerald-400">+{{ win }}</span> if correct
                   <span class="text-slate-300 dark:text-slate-600"> · </span>
-                  <span class="font-semibold text-red-700 dark:text-red-400">−{{ stakes.loss_points }}</span> if wrong
+                  <span class="font-semibold text-red-700 dark:text-red-400">−{{ loss }}</span> if wrong
+                  {% endblocktrans %}
                 </span>
               </span>
             </label>
@@ -117,11 +123,11 @@
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <label for="{{ form.reasoning.id_for_label }}" class="text-sm font-semibold text-slate-800 dark:text-slate-100">
               {{ form.reasoning.label }}
-              <span class="ml-1 font-normal text-slate-400 dark:text-slate-500">(optional)</span>
+              <span class="ml-1 font-normal text-slate-400 dark:text-slate-500">{% trans "(optional)" %}</span>
             </label>
-            <span class="text-xs text-slate-400 dark:text-slate-500" id="reasoning-count-{{ market.slug }}">0 / 2,000</span>
+            <span class="text-xs text-slate-400 dark:text-slate-500" id="reasoning-count-{{ market.slug }}" data-reasoning-separator="{% trans '/' %}" data-reasoning-max="2,000">0 / 2,000</span>
           </div>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Share the argument behind your pick — visible in the public forecast feed.</p>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Share the argument behind your pick — visible in the public forecast feed." %}</p>
           <div class="mt-2 overflow-hidden rounded-xl border border-slate-200 shadow-sm transition focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100 dark:border-slate-600 dark:focus-within:border-brand-500 dark:focus-within:ring-brand-900/50 forecast-reasoning-wrap">
             {{ form.reasoning }}
           </div>
@@ -131,14 +137,14 @@
         </div>
 
         <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto">
-          Post forecast
+          {% trans "Post forecast" %}
         </button>
       </form>
       {% endif %}
     {% else %}
       <p class="text-sm text-slate-600 dark:text-slate-300">
-        <a href="{% url 'accounts:login' %}?next={% url 'markets:detail' slug=market.slug %}#place-forecast" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">Log in</a>
-        to place your forecast on this market.
+        <a href="{% url 'accounts:login' %}?next={% url 'markets:detail' slug=market.slug %}#place-forecast" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "Log in" %}</a>
+        {% trans "to place your forecast on this market." %}
       </p>
     {% endif %}
   </div>
@@ -372,9 +378,11 @@
     var textarea = document.querySelector("#place-forecast .forecast-reasoning-input");
     var counter = document.getElementById("reasoning-count-{{ market.slug }}");
     if (!textarea || !counter) return;
+    var sep = counter.dataset.reasoningSeparator || "/";
+    var max = counter.dataset.reasoningMax || "2,000";
     function updateCount() {
       var len = textarea.value.length;
-      counter.textContent = len.toLocaleString() + " / 2,000";
+      counter.textContent = len.toLocaleString() + " " + sep + " " + max;
       counter.classList.toggle("text-amber-600", len > 1800);
       counter.classList.toggle("text-slate-400", len <= 1800);
       counter.classList.toggle("dark:text-amber-400", len > 1800);

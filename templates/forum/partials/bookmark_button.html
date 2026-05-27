@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if user.is_authenticated %}
 <form method="post" action="{% url 'accounts:bookmark_toggle' %}" class="inline"
       hx-post="{% url 'accounts:bookmark_toggle' %}"
@@ -8,8 +9,8 @@
   <input type="hidden" name="target_id" value="{{ post.id }}">
   <button type="submit"
           class="forum-action rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-800 {% if is_bookmarked %}is-bookmarked text-brand-600{% endif %}"
-          title="{% if is_bookmarked %}Remove bookmark{% else %}Bookmark{% endif %}"
-          aria-label="{% if is_bookmarked %}Remove bookmark{% else %}Bookmark{% endif %}">
+          title="{% if is_bookmarked %}{% trans 'Remove bookmark' %}{% else %}{% trans 'Bookmark' %}{% endif %}"
+          aria-label="{% if is_bookmarked %}{% trans 'Remove bookmark' %}{% else %}{% trans 'Bookmark' %}{% endif %}">
     {% if is_bookmarked %}
     <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z"/>
@@ -24,7 +25,7 @@
 {% else %}
 <a href="{% url 'accounts:login' %}?next={{ request.path }}"
    class="forum-action rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-800"
-   title="Log in to bookmark">
+   title="{% trans 'Log in to bookmark' %}">
   <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
     <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>

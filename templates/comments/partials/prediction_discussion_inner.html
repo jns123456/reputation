@@ -1,10 +1,11 @@
+{% load i18n %}
 <div id="prediction-discussion-{{ prediction.id }}"
      x-data="{ showComposer: false }"
      @open-composer="showComposer = true">
   {% if user.is_authenticated %}
     {% if user == prediction.user %}
   <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500">
-    You can't start a thread on your own forecast. Like, dislike, or reply to comments from others below — or share your post.
+    {% trans "You can't start a thread on your own forecast. Like, dislike, or reply to comments from others below — or share your post." %}
   </div>
     {% else %}
   <div class="mb-5">
@@ -17,11 +18,11 @@
       </span>
       <span>
         {% if prediction_vote == 1 %}
-        You liked this forecast — add your perspective
+        {% trans "You liked this forecast — add your perspective" %}
         {% elif prediction_vote == -1 %}
-        You disliked this forecast — explain your view
+        {% trans "You disliked this forecast — explain your view" %}
         {% else %}
-        Join the conversation
+        {% trans "Join the conversation" %}
         {% endif %}
       </span>
     </button>
@@ -30,28 +31,29 @@
       <div class="mb-3 flex items-center justify-between gap-2">
         <p class="text-sm font-medium text-slate-700">
           {% if prediction_vote == 1 %}
-          You liked this forecast — add your perspective
+          {% trans "You liked this forecast — add your perspective" %}
           {% elif prediction_vote == -1 %}
-          You disliked this forecast — explain your view
+          {% trans "You disliked this forecast — explain your view" %}
           {% else %}
-          Join the conversation
+          {% trans "Join the conversation" %}
           {% endif %}
         </p>
         <button type="button"
                 @click="showComposer = false"
                 class="rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                aria-label="Close comment form">
-          Cancel
+                aria-label="{% trans 'Close comment form' %}">
+          {% trans "Cancel" %}
         </button>
       </div>
-      {% include "comments/partials/comment_reply_form.html" with market=market prediction=prediction variant="composer" placeholder="What do you think about this forecast? Agree, disagree, or add context…" %}
+      {% trans "What do you think about this forecast? Agree, disagree, or add context…" as forecast_composer_placeholder %}
+      {% include "comments/partials/comment_reply_form.html" with market=market prediction=prediction variant="composer" placeholder=forecast_composer_placeholder %}
     </div>
   </div>
     {% endif %}
   {% else %}
   <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500">
-    <a href="{% url 'accounts:login' %}?next={{ request.path }}#forecast-{{ prediction.id }}" class="font-semibold text-brand-600 hover:underline">Log in</a>
-    to comment on this forecast.
+    <a href="{% url 'accounts:login' %}?next={{ request.path }}#forecast-{{ prediction.id }}" class="font-semibold text-brand-600 hover:underline">{% trans "Log in" %}</a>
+    {% trans "to comment on this forecast." %}
   </div>
   {% endif %}
 
@@ -62,9 +64,13 @@
   {% else %}
   <p class="rounded-lg border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500">
     {% if user == prediction.user %}
-    No comments yet — when others respond, you can reply here.
+    {% trans "No comments yet — when others respond, you can reply here." %}
     {% else %}
-    No comments yet{% if user.is_authenticated %} — tap above to start the thread{% endif %}.
+    {% if user.is_authenticated %}
+    {% trans "No comments yet — tap above to start the thread." %}
+    {% else %}
+    {% trans "No comments yet." %}
+    {% endif %}
     {% endif %}
   </p>
   {% endif %}

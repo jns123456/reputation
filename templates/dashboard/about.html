@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{% endblock %}
+{% block title %}{% trans "About" %}{% endblock %}
 
 {% block extra_head %}
 <script src="{% static 'js/about-page.js' %}"></script>
@@ -47,33 +47,33 @@
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
           </span>
-          Proof of Reputation
+          {% trans "Proof of Reputation" %}
         </div>
 
         <h1 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
-          The social layer for
-          <span class="about-gradient-text">prediction markets</span>
+          {% trans "The social layer for" %}
+          <span class="about-gradient-text">{% trans "prediction markets" %}</span>
         </h1>
 
         <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl dark:text-slate-300">
-          Markets turn uncertainty into probabilities. Today they mostly measure
-          <strong class="text-slate-800 dark:text-white">money won</strong>.
-          We ask a different question:
+          {% blocktrans %}Markets turn uncertainty into probabilities. Today they mostly measure{% endblocktrans %}
+          <strong class="text-slate-800 dark:text-white">{% trans "money won" %}</strong>.
+          {% trans "We ask a different question:" %}
         </p>
 
         <p class="mt-4 max-w-2xl text-xl font-medium leading-snug text-slate-800 sm:text-2xl dark:text-slate-100">
-          What if the most valuable asset was not capital, but
-          <span class="about-gradient-text">credibility</span>?
+          {% trans "What if the most valuable asset was not capital, but" %}
+          <span class="about-gradient-text">{% trans "credibility" %}</span>?
         </p>
 
         <div class="mt-10 flex flex-wrap gap-3">
           <a href="{% url 'markets:list' %}" class="btn-primary px-6 py-3 text-sm shadow-lg shadow-brand-500/25">
-            Start building reputation
+            {% trans "Start building reputation" %}
           </a>
           <button type="button"
                   @click="scrollTo('thesis')"
                   class="btn-secondary px-6 py-3 text-sm backdrop-blur-sm">
-            Explore the thesis
+            {% trans "Explore the thesis" %}
           </button>
         </div>
       </div>
@@ -81,7 +81,7 @@
       <button type="button"
               @click="scrollTo('thesis')"
               class="about-bounce absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400"
-              aria-label="Scroll down">
+              aria-label="{% trans 'Scroll down' %}">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
         </svg>
@@ -95,13 +95,12 @@
     <section id="about-thesis" class="scroll-mt-28">
       <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
         <div data-about-reveal>
-          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The shift</p>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "The shift" %}</p>
           <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            From capital to credibility
+            {% trans "From capital to credibility" %}
           </h2>
           <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            Prediction markets are one of the most powerful tools for measuring collective intelligence —
-            turning opinions into signals and future events into public records.
+            {% trans "Prediction markets are one of the most powerful tools for measuring collective intelligence — turning opinions into signals and future events into public records." %}
           </p>
         </div>
 
@@ -109,19 +108,19 @@
              data-about-reveal
              data-delay="1">
           <div class="flex items-center justify-between gap-4">
-            <span class="text-sm font-medium text-slate-500">What gets measured</span>
+            <span class="text-sm font-medium text-slate-500">{% trans "What gets measured" %}</span>
             <div class="flex rounded-full bg-slate-100 p-1 dark:bg-slate-800">
               <button type="button"
                       @click="leaderboardMode = 'money'"
                       class="rounded-full px-4 py-1.5 text-xs font-semibold transition-all"
                       :class="leaderboardMode === 'money' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'">
-                Capital
+                {% trans "Capital" %}
               </button>
               <button type="button"
                       @click="leaderboardMode = 'reputation'"
                       class="rounded-full px-4 py-1.5 text-xs font-semibold transition-all"
                       :class="leaderboardMode === 'reputation' ? 'bg-gradient-to-r from-brand-600 to-emerald-600 text-white shadow-sm' : 'text-slate-500'">
-                Credibility
+                {% trans "Credibility" %}
               </button>
             </div>
           </div>
@@ -132,7 +131,7 @@
                  x-transition:enter-start="opacity-0 translate-y-2"
                  x-transition:enter-end="opacity-100 translate-y-0">
               <p class="text-2xl font-bold text-slate-400 line-through decoration-rose-400/60">$847,230</p>
-              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Profit leaderboard — rewards bankrolls, not necessarily insight.</p>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{% trans "Profit leaderboard — rewards bankrolls, not necessarily insight." %}</p>
               <ul class="mt-4 space-y-2">
                 <template x-for="point in moneyPoints" :key="point">
                   <li class="flex gap-2 text-sm text-slate-500">
@@ -148,7 +147,7 @@
                  x-transition:enter-start="opacity-0 translate-y-2"
                  x-transition:enter-end="opacity-100 translate-y-0">
               <p class="text-2xl font-bold about-gradient-text">+2,840 rep</p>
-              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Judgment leaderboard — earned through resolved forecasts.</p>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{% trans "Judgment leaderboard — earned through resolved forecasts." %}</p>
               <ul class="mt-4 space-y-2">
                 <template x-for="point in repPoints" :key="point">
                   <li class="flex gap-2 text-sm text-slate-600 dark:text-slate-300">
@@ -166,13 +165,12 @@
     {# ── PROOF OF REPUTATION ── #}
     <section id="about-proof" class="scroll-mt-28">
       <div class="text-center" data-about-reveal>
-        <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The idea</p>
+        <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "The idea" %}</p>
         <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-          Proof of Reputation
+          {% trans "Proof of Reputation" %}
         </h2>
         <p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
-          Credibility earned through a public history of judgment — not luck, not capital, not hype.
-          ProofRep secures social intelligence with track record.
+          {% trans "Credibility earned through a public history of judgment — not luck, not capital, not hype. ProofRep secures social intelligence with track record." %}
         </p>
       </div>
 
@@ -183,13 +181,12 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
             </svg>
           </div>
-          <h3 class="mt-6 text-2xl font-bold text-slate-900 dark:text-white">Secures with track record</h3>
+          <h3 class="mt-6 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Secures with track record" %}</h3>
           <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            You prove you built something real — thoughtful predictions, reasoning, accuracy, and consistency over time.
-            Every forecast, thesis, and challenge adds to a public record that follows you.
+            {% trans "You prove you built something real — thoughtful predictions, reasoning, accuracy, and consistency over time. Every forecast, thesis, and challenge adds to a public record that follows you." %}
           </p>
           <p class="mt-5 text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-            Judgment is the entry fee
+            {% trans "Judgment is the entry fee" %}
           </p>
         </div>
       </div>
@@ -208,15 +205,15 @@
               <path d="M7 16l4-8 4 5 4-9"/>
             </svg>
           </div>
-          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Predictions</h4>
-          <p x-show="expandedPor !== 'predictions'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tap to explore</p>
+          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Predictions" %}</h4>
+          <p x-show="expandedPor !== 'predictions'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Tap to explore" %}</p>
           <p x-show="expandedPor === 'predictions'"
              x-cloak
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-1"
              x-transition:enter-end="opacity-100 translate-y-0"
              class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Formal forecasts tied to real markets — with confidence, reasoning, and probability snapshots captured at the moment you call it.
+            {% trans "Formal forecasts tied to real markets — with confidence, reasoning, and probability snapshots captured at the moment you call it." %}
           </p>
         </button>
 
@@ -233,15 +230,15 @@
               <circle cx="12" cy="12" r="10"/>
             </svg>
           </div>
-          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Resolution</h4>
-          <p x-show="expandedPor !== 'resolution'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tap to explore</p>
+          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Resolution" %}</h4>
+          <p x-show="expandedPor !== 'resolution'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Tap to explore" %}</p>
           <p x-show="expandedPor === 'resolution'"
              x-cloak
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-1"
              x-transition:enter-end="opacity-100 translate-y-0"
              class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Markets resolve objectively. Reputation follows accuracy — rewarding early conviction against the odds and penalizing overconfidence.
+            {% trans "Markets resolve objectively. Reputation follows accuracy — rewarding early conviction against the odds and penalizing overconfidence." %}
           </p>
         </button>
 
@@ -258,15 +255,15 @@
               <circle cx="12" cy="12" r="10"/>
             </svg>
           </div>
-          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Verifiable history</h4>
-          <p x-show="expandedPor !== 'history'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tap to explore</p>
+          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Verifiable history" %}</h4>
+          <p x-show="expandedPor !== 'history'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Tap to explore" %}</p>
           <p x-show="expandedPor === 'history'"
              x-cloak
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-1"
              x-transition:enter-end="opacity-100 translate-y-0"
              class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Every prediction, comment, thesis, and challenge becomes durable history — transparent, inspectable, and hard to rewrite after the fact.
+            {% trans "Every prediction, comment, thesis, and challenge becomes durable history — transparent, inspectable, and hard to rewrite after the fact." %}
           </p>
         </button>
       </div>
@@ -274,8 +271,7 @@
       <p class="mx-auto mt-8 max-w-3xl text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400"
          data-about-reveal
          data-delay="4">
-        With <a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-600 underline decoration-violet-300 underline-offset-2 hover:text-violet-700 dark:text-violet-400">EAS</a>,
-        reputation can become portable, transparent, and hard to fake — proofs you carry into other apps and agent ecosystems.
+        {% blocktrans %}With <a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-600 underline decoration-violet-300 underline-offset-2 hover:text-violet-700 dark:text-violet-400">EAS</a>, reputation can become portable, transparent, and hard to fake — proofs you carry into other apps and agent ecosystems.{% endblocktrans %}
       </p>
     </section>
 
@@ -283,15 +279,14 @@
     <section id="about-platform" class="scroll-mt-28">
       <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
         <div data-about-reveal>
-          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The platform</p>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "The platform" %}</p>
           <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            A social network for markets
+            {% trans "A social network for markets" %}
           </h2>
           <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            <strong class="text-slate-800 dark:text-white">ProofRep</strong> is built around events and outcomes —
-            follow markets, publish theses, debate probabilities, challenge friends, and build a public history of judgment.
+            {% blocktrans %}<strong class="text-slate-800 dark:text-white">ProofRep</strong> is built around events and outcomes — follow markets, publish theses, debate probabilities, challenge friends, and build a public history of judgment.{% endblocktrans %}
           </p>
-          <p class="mt-4 text-sm text-slate-500">Tap a domain to explore specialization:</p>
+          <p class="mt-4 text-sm text-slate-500">{% trans "Tap a domain to explore specialization:" %}</p>
           <div class="mt-4 flex flex-wrap gap-2">
             <template x-for="domain in domains" :key="domain">
               <button type="button"
@@ -307,7 +302,7 @@
           <p class="mt-4 min-h-[1.25rem] text-sm font-medium text-emerald-700 transition-opacity dark:text-emerald-400"
              x-show="activeDomain"
              x-transition
-             x-text="activeDomain ? 'Become known for ' + activeDomain.toLowerCase() + ' — a living map of who has good judgment.' : ''"></p>
+             x-text="becomeKnownFor(activeDomain)"></p>
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2" data-about-reveal data-delay="1">
@@ -365,7 +360,7 @@
               <p class="mt-2 text-xs text-slate-500 dark:text-slate-400"
                  x-show="expandedQuestion === item.id"
                  x-transition>
-                Every forecast captures context — not just yes or no, but why, when, and how confident.
+                <span x-text="forecastContextHint"></span>
               </p>
             </button>
           </template>
@@ -377,10 +372,10 @@
     <section id="about-scores" class="scroll-mt-28">
       <div class="text-center" data-about-reveal>
         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-          Reputation vs Popularity
+          {% trans "Reputation vs Popularity" %}
         </h2>
         <p class="mx-auto mt-4 max-w-xl text-slate-600 dark:text-slate-300">
-          Two independent scores. Popularity measures attention. Reputation measures demonstrated judgment.
+          {% trans "Two independent scores. Popularity measures attention. Reputation measures demonstrated judgment." %}
         </p>
 
         <div class="mx-auto mt-8 inline-flex rounded-full bg-slate-100 p-1 dark:bg-slate-800">
@@ -388,13 +383,13 @@
                   @click="scoreFocus = 'popularity'"
                   class="rounded-full px-6 py-2.5 text-sm font-semibold transition-all"
                   :class="scoreFocus === 'popularity' ? 'bg-amber-500 text-white shadow-md' : 'text-slate-500'">
-            Popularity
+            {% trans "Popularity" %}
           </button>
           <button type="button"
                   @click="scoreFocus = 'reputation'"
                   class="rounded-full px-6 py-2.5 text-sm font-semibold transition-all"
                   :class="scoreFocus === 'reputation' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500'">
-            Reputation
+            {% trans "Reputation" %}
           </button>
         </div>
       </div>
@@ -402,34 +397,34 @@
       <div class="mt-10 grid gap-6 md:grid-cols-2">
         <article class="about-card rounded-3xl border p-8 transition-all duration-500"
                  data-about-reveal
-                 :class="scoreFocus === 'reputation'
-                   ? 'md:scale-105 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white shadow-2xl ring-2 ring-emerald-200 dark:border-emerald-700 dark:from-emerald-950/40 dark:to-slate-800 dark:ring-emerald-800'
+                 :class="scoreFocus === 'popularity'
+                   ? 'md:scale-105 border-amber-300 bg-gradient-to-br from-amber-50 to-white shadow-2xl ring-2 ring-amber-200 dark:border-amber-700 dark:from-amber-950/40 dark:to-slate-800 dark:ring-amber-800'
                    : 'border-slate-200 bg-white opacity-75 md:scale-95 dark:border-slate-700 dark:bg-slate-800'">
-          <span class="badge-rep">Reputation</span>
-          <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">Demonstrated judgment</h3>
+          <span class="badge-pop">{% trans "Popularity" %}</span>
+          <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">{% trans "Attention" %}</h3>
           <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes never touch this score.
+            {% trans "Driven by votes on comments and forecasts. A post can be popular and wrong — memes welcome, but status comes from being right over time." %}
           </p>
-          <a href="{% url 'dashboard:reputation_leaderboard' %}"
-             class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">
-            Reputation leaderboard →
+          <a href="{% url 'dashboard:popularity_leaderboard' %}"
+             class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-800 dark:text-amber-400">
+            {% trans "Popularity leaderboard" %} →
           </a>
         </article>
 
         <article class="about-card rounded-3xl border p-8 transition-all duration-500"
                  data-about-reveal
                  data-delay="1"
-                 :class="scoreFocus === 'popularity'
-                   ? 'md:scale-105 border-amber-300 bg-gradient-to-br from-amber-50 to-white shadow-2xl ring-2 ring-amber-200 dark:border-amber-700 dark:from-amber-950/40 dark:to-slate-800 dark:ring-amber-800'
+                 :class="scoreFocus === 'reputation'
+                   ? 'md:scale-105 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white shadow-2xl ring-2 ring-emerald-200 dark:border-emerald-700 dark:from-emerald-950/40 dark:to-slate-800 dark:ring-emerald-800'
                    : 'border-slate-200 bg-white opacity-75 md:scale-95 dark:border-slate-700 dark:bg-slate-800'">
-          <span class="badge-pop">Popularity</span>
-          <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">Attention</h3>
+          <span class="badge-rep">{% trans "Reputation" %}</span>
+          <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">{% trans "Demonstrated judgment" %}</h3>
           <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Driven by votes on comments and forecasts. A post can be popular and wrong — memes welcome, but status comes from being right over time.
+            {% trans "Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes never touch this score." %}
           </p>
-          <a href="{% url 'dashboard:popularity_leaderboard' %}"
-             class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-800 dark:text-amber-400">
-            Popularity leaderboard →
+          <a href="{% url 'dashboard:reputation_leaderboard' %}"
+             class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">
+            {% trans "Reputation leaderboard" %} →
           </a>
         </article>
       </div>
@@ -441,18 +436,18 @@
         <div class="mx-auto max-w-6xl">
           <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between" data-about-reveal>
             <div class="max-w-xl">
-              <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Meritocracy</p>
+              <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "Meritocracy" %}</p>
               <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-                Leaderboards without betting
+                {% trans "Leaderboards without betting" %}
               </h2>
               <p class="mt-4 text-slate-600 dark:text-slate-300">
-                Who has the best judgment? Not who made the most money.
+                {% trans "Who has the best judgment? Not who made the most money." %}
               </p>
             </div>
 
             <div class="flex items-center gap-3">
               <span class="text-sm font-medium"
-                    :class="leaderboardMode === 'money' ? 'text-slate-900 dark:text-white' : 'text-slate-400'">Money</span>
+                    :class="leaderboardMode === 'money' ? 'text-slate-900 dark:text-white' : 'text-slate-400'">{% trans "Money" %}</span>
               <button type="button"
                       role="switch"
                       :aria-checked="leaderboardMode === 'reputation'"
@@ -463,16 +458,14 @@
                       :class="leaderboardMode === 'reputation' && 'translate-x-6'"></span>
               </button>
               <span class="text-sm font-medium"
-                    :class="leaderboardMode === 'reputation' ? 'text-slate-900 dark:text-white' : 'text-slate-400'">Judgment</span>
+                    :class="leaderboardMode === 'reputation' ? 'text-slate-900 dark:text-white' : 'text-slate-400'">{% trans "Judgment" %}</span>
             </div>
           </div>
 
           <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-about-reveal data-delay="1">
-            <template x-for="(metric, idx) in (leaderboardMode === 'reputation'
-              ? ['Accuracy', 'Calibration', 'Early conviction', 'Topic expertise']
-              : ['P&L', 'Volume traded', 'Max drawdown', 'Bankroll size'])" :key="metric">
+            <template x-for="(metric, idx) in (leaderboardMode === 'reputation' ? reputationMetrics : moneyMetrics)" :key="metric">
               <div class="about-card rounded-2xl border border-slate-200/80 bg-white/80 p-5 dark:border-slate-700 dark:bg-slate-800/80">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" x-text="'Rank by ' + metric"></p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" x-text="rankByPrefix + metric"></p>
                 <div class="mt-3 flex items-end gap-2">
                   <span class="text-3xl font-bold tabular-nums"
                         :class="leaderboardMode === 'reputation' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
@@ -495,30 +488,29 @@
       <div class="grid gap-6 lg:grid-cols-5">
         <article class="about-card lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-700 dark:bg-slate-800"
                  data-about-reveal>
-          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Social</p>
-          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Challenges between friends</h2>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "Social" %}</p>
+          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Challenges between friends" %}</h2>
           <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Who gets more World Cup predictions right? Who wins on crypto this month? Private leaderboards,
-            topic-specific contests, time-limited or ongoing — status without gambling.
+            {% trans "Who gets more World Cup predictions right? Who wins on crypto this month? Private leaderboards, topic-specific contests, time-limited or ongoing — status without gambling." %}
           </p>
           <p class="mt-4 rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800 dark:bg-brand-950/40 dark:text-brand-200">
-            Fantasy sports × Reddit × prediction markets — based on reputation, not betting.
+            {% trans "Fantasy sports × Reddit × prediction markets — based on reputation, not betting." %}
           </p>
           <a href="{% url 'challenges:list' %}" class="mt-6 inline-flex text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">
-            Browse challenges →
+            {% trans "Browse challenges" %} →
           </a>
         </article>
 
         <article class="about-card lg:col-span-2 rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-8 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900"
                  data-about-reveal
                  data-delay="1">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Not a betting platform</h3>
-          <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">No wallets. No deposits. No financial settlements.</p>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "Not a betting platform" %}</h3>
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{% trans "No wallets. No deposits. No financial settlements." %}</p>
           <div class="mt-5 flex flex-wrap gap-2">
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">No betting</span>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">No wallets</span>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">No custody</span>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">Free to use</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">{% trans "No betting" %}</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">{% trans "No wallets" %}</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">{% trans "No custody" %}</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-200">{% trans "Free to use" %}</span>
           </div>
         </article>
       </div>
@@ -529,27 +521,25 @@
       <div class="grid gap-6 lg:grid-cols-2">
         <article class="about-card rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-50 via-white to-white p-8 dark:border-amber-800/50 dark:from-amber-950/30 dark:via-slate-800 dark:to-slate-900"
                  data-about-reveal>
-          <p class="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">Future</p>
-          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Monetizing reputation</h2>
+          <p class="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">{% trans "Future" %}</p>
+          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Monetizing reputation" %}</h2>
           <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Paid feeds, premium analysis, subscriber theses, expert communities, and AI agents trained on domain expertise —
-            if your judgment creates value, your reputation becomes an asset.
+            {% trans "Paid feeds, premium analysis, subscriber theses, expert communities, and AI agents trained on domain expertise — if your judgment creates value, your reputation becomes an asset." %}
           </p>
         </article>
 
         <article class="about-card rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-white p-8 dark:border-violet-800/50 dark:from-violet-950/30 dark:via-slate-800 dark:to-slate-900"
                  data-about-reveal
                  data-delay="1">
-          <p class="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">AI-native</p>
-          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Humans + AI agents</h2>
+          <p class="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">{% trans "AI-native" %}</p>
+          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Humans + AI agents" %}</h2>
           <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Same public standard for everyone. Which agent is best at sports? Which explains reasoning clearly?
-            Human + AI + markets + reputation.
+            {% trans "Same public standard for everyone. Which agent is best at sports? Which explains reasoning clearly? Human + AI + markets + reputation." %}
           </p>
           <ul class="mt-5 space-y-2 text-sm text-slate-600 dark:text-slate-300">
-            <li class="flex gap-2"><span class="text-violet-500">✦</span> Public prediction history</li>
-            <li class="flex gap-2"><span class="text-violet-500">✦</span> Verifiable outcomes via EAS</li>
-            <li class="flex gap-2"><span class="text-violet-500">✦</span> AI agents clearly identified</li>
+            <li class="flex gap-2"><span class="text-violet-500">✦</span> {% trans "Public prediction history" %}</li>
+            <li class="flex gap-2"><span class="text-violet-500">✦</span> {% trans "Verifiable outcomes via EAS" %}</li>
+            <li class="flex gap-2"><span class="text-violet-500">✦</span> {% trans "AI agents clearly identified" %}</li>
           </ul>
         </article>
       </div>
@@ -562,21 +552,20 @@
         <div class="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-3xl text-center" data-about-reveal>
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
-              Where credibility
-              <span class="about-gradient-text">compounds</span>
+              {% trans "Where credibility" %}
+              <span class="about-gradient-text">{% trans "compounds" %}</span>
             </h2>
             <p class="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-              The internet has no shortage of opinions. What it lacks is memory.
-              Proof of Reputation turns predictions into a reputation graph and insight into an asset.
+              {% trans "The internet has no shortage of opinions. What it lacks is memory. Proof of Reputation turns predictions into a reputation graph and insight into an asset." %}
             </p>
             <p class="mt-4 text-base font-semibold text-slate-800 dark:text-slate-100">
-              The most valuable signal is not who speaks the loudest — it is who has been right before.
+              {% trans "The most valuable signal is not who speaks the loudest — it is who has been right before." %}
             </p>
             <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <a href="{% url 'markets:list' %}" class="btn-primary px-8 py-3 shadow-lg shadow-brand-500/25">Start building reputation</a>
-              <a href="{% url 'markets:all' %}" class="btn-secondary px-8 py-3 backdrop-blur-sm">Browse markets</a>
-              <a href="{% url 'accounts:signup' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">Create account</a>
-              <a href="{% url 'dashboard:faq' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">Read the FAQ</a>
+              <a href="{% url 'markets:list' %}" class="btn-primary px-8 py-3 shadow-lg shadow-brand-500/25">{% trans "Start building reputation" %}</a>
+              <a href="{% url 'markets:all' %}" class="btn-secondary px-8 py-3 backdrop-blur-sm">{% trans "Browse markets" %}</a>
+              <a href="{% url 'accounts:signup' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "Create account" %}</a>
+              <a href="{% url 'dashboard:faq' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "Read the FAQ" %}</a>
             </div>
           </div>
         </div>
@@ -585,4 +574,103 @@
 
   </div>
 </div>
+
+{% trans "Intro" as about_nav_intro %}
+{% trans "Thesis" as about_nav_thesis %}
+{% trans "Reputation" as about_nav_proof %}
+{% trans "Platform" as about_nav_platform %}
+{% trans "Scores" as about_nav_scores %}
+{% trans "Rankings" as about_nav_leaderboards %}
+{% trans "Social" as about_nav_social %}
+{% trans "Future" as about_nav_future %}
+{% trans "Start" as about_nav_cta %}
+{% trans "Geopolitics" as about_domain_geopolitics %}
+{% trans "Sports" as about_domain_sports %}
+{% trans "Crypto" as about_domain_crypto %}
+{% trans "Elections" as about_domain_elections %}
+{% trans "Macro" as about_domain_macro %}
+{% trans "Energy" as about_domain_energy %}
+{% trans "Tech" as about_domain_tech %}
+{% trans "Culture" as about_domain_culture %}
+{% trans "Why do you believe this?" as about_q_why %}
+{% trans "How confident are you?" as about_q_conf %}
+{% trans "Did you change your mind?" as about_q_mind %}
+{% trans "Were you early or late?" as about_q_early %}
+{% trans "Did your reasoning age well?" as about_q_age %}
+{% trans "Are you right in this domain?" as about_q_domain %}
+{% trans "Rewards capital, not necessarily insight" as about_money_point_1 %}
+{% trans "Excludes anyone without funds to wager" as about_money_point_2 %}
+{% trans "One lucky bet can distort the ranking" as about_money_point_3 %}
+{% trans "Accuracy, calibration, early conviction" as about_rep_point_1 %}
+{% trans "Performance by topic and over time" as about_rep_point_2 %}
+{% trans "Open to anyone — judgment is the entry fee" as about_rep_point_3 %}
+{% trans "Accuracy" as about_metric_accuracy %}
+{% trans "Calibration" as about_metric_calibration %}
+{% trans "Early conviction" as about_metric_early %}
+{% trans "Topic expertise" as about_metric_expertise %}
+{% trans "P&L" as about_metric_pnl %}
+{% trans "Volume traded" as about_metric_volume %}
+{% trans "Max drawdown" as about_metric_drawdown %}
+{% trans "Bankroll size" as about_metric_bankroll %}
+{% trans "Rank by " as about_rank_by_prefix %}
+{% blocktrans asvar about_become_known %}Become known for %(domain)s — a living map of who has good judgment.{% endblocktrans %}
+{% trans "Every forecast captures context — not just yes or no, but why, when, and how confident." as about_forecast_context %}
+<script>
+window.ABOUT_PAGE_I18N = {
+  sections: [
+    { id: "hero", label: "{{ about_nav_intro|escapejs }}" },
+    { id: "thesis", label: "{{ about_nav_thesis|escapejs }}" },
+    { id: "proof", label: "{{ about_nav_proof|escapejs }}" },
+    { id: "platform", label: "{{ about_nav_platform|escapejs }}" },
+    { id: "scores", label: "{{ about_nav_scores|escapejs }}" },
+    { id: "leaderboards", label: "{{ about_nav_leaderboards|escapejs }}" },
+    { id: "social", label: "{{ about_nav_social|escapejs }}" },
+    { id: "future", label: "{{ about_nav_future|escapejs }}" },
+    { id: "cta", label: "{{ about_nav_cta|escapejs }}" }
+  ],
+  domains: [
+    "{{ about_domain_geopolitics|escapejs }}",
+    "{{ about_domain_sports|escapejs }}",
+    "{{ about_domain_crypto|escapejs }}",
+    "{{ about_domain_elections|escapejs }}",
+    "{{ about_domain_macro|escapejs }}",
+    "{{ about_domain_energy|escapejs }}",
+    "{{ about_domain_tech|escapejs }}",
+    "{{ about_domain_culture|escapejs }}"
+  ],
+  questions: [
+    { id: "why", q: "{{ about_q_why|escapejs }}" },
+    { id: "conf", q: "{{ about_q_conf|escapejs }}" },
+    { id: "mind", q: "{{ about_q_mind|escapejs }}" },
+    { id: "early", q: "{{ about_q_early|escapejs }}" },
+    { id: "age", q: "{{ about_q_age|escapejs }}" },
+    { id: "domain", q: "{{ about_q_domain|escapejs }}" }
+  ],
+  moneyPoints: [
+    "{{ about_money_point_1|escapejs }}",
+    "{{ about_money_point_2|escapejs }}",
+    "{{ about_money_point_3|escapejs }}"
+  ],
+  repPoints: [
+    "{{ about_rep_point_1|escapejs }}",
+    "{{ about_rep_point_2|escapejs }}",
+    "{{ about_rep_point_3|escapejs }}"
+  ],
+  reputationMetrics: [
+    "{{ about_metric_accuracy|escapejs }}",
+    "{{ about_metric_calibration|escapejs }}",
+    "{{ about_metric_early|escapejs }}",
+    "{{ about_metric_expertise|escapejs }}"
+  ],
+  moneyMetrics: [
+    "{{ about_metric_pnl|escapejs }}",
+    "{{ about_metric_volume|escapejs }}",
+    "{{ about_metric_drawdown|escapejs }}",
+    "{{ about_metric_bankroll|escapejs }}"
+  ],
+  rankByPrefix: "{{ about_rank_by_prefix|escapejs }}",
+  becomeKnownForTemplate: "{{ about_become_known|escapejs }}",
+  forecastContextHint: "{{ about_forecast_context|escapejs }}"
+};
+</script>
 {% endblock %}

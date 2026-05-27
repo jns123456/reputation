@@ -1,3 +1,4 @@
+{% load i18n %}
 {% for comment in threads %}
   {% include "comments/partials/comment_item.html" with comment=comment depth=0 %}
 {% endfor %}

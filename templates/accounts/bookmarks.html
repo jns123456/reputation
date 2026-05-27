@@ -1,18 +1,19 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Saved{% endblock %}
+{% block title %}{% trans "Saved" %}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
   <div class="pr-feed-shell">
     <header class="pr-feed-header rounded-t-2xl" data-pr-reveal>
-      <p class="pr-eyebrow">Your library</p>
-      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">Saved</h1>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Forecasts and forum posts you bookmarked.</p>
+      <p class="pr-eyebrow">{% trans "Your library" %}</p>
+      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">{% trans "Saved" %}</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Forecasts and forum posts you bookmarked." %}</p>
       <div class="mt-4 flex flex-wrap gap-2">
-        <a href="{% url 'accounts:bookmarks' %}" class="pr-filter-pill {% if not active_type %}is-active{% endif %}">All</a>
-        <a href="{% url 'accounts:bookmarks' %}?type=prediction" class="pr-filter-pill {% if active_type == 'prediction' %}is-active{% endif %}">Forecasts</a>
-        <a href="{% url 'accounts:bookmarks' %}?type=pulse_post" class="pr-filter-pill {% if active_type == 'pulse_post' %}is-active{% endif %}">Forum</a>
+        <a href="{% url 'accounts:bookmarks' %}" class="pr-filter-pill {% if not active_type %}is-active{% endif %}">{% trans "All" %}</a>
+        <a href="{% url 'accounts:bookmarks' %}?type=prediction" class="pr-filter-pill {% if active_type == 'prediction' %}is-active{% endif %}">{% trans "Forecasts" %}</a>
+        <a href="{% url 'accounts:bookmarks' %}?type=pulse_post" class="pr-filter-pill {% if active_type == 'pulse_post' %}is-active{% endif %}">{% trans "Forum" %}</a>
       </div>
     </header>
 
@@ -28,12 +29,12 @@
         <svg class="mx-auto h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <p class="mt-4 text-lg font-medium text-slate-700 dark:text-slate-200">Nothing saved yet</p>
-        <p class="mt-2 text-sm">Tap the bookmark icon on a forecast or forum post to save it here.</p>
+        <p class="mt-4 text-lg font-medium text-slate-700 dark:text-slate-200">{% trans "Nothing saved yet" %}</p>
+        <p class="mt-2 text-sm">{% trans "Tap the bookmark icon on a forecast or forum post to save it here." %}</p>
         <div class="mt-6 flex flex-wrap justify-center gap-3">
-          <a href="{% url 'dashboard:forecasts' %}" class="font-semibold text-brand-600 hover:underline">Browse forecasts</a>
+          <a href="{% url 'dashboard:forecasts' %}" class="font-semibold text-brand-600 hover:underline">{% trans "Browse forecasts" %}</a>
           <span class="text-slate-300">·</span>
-          <a href="{% url 'forum:feed' %}" class="font-semibold text-brand-600 hover:underline">Browse forum</a>
+          <a href="{% url 'forum:feed' %}" class="font-semibold text-brand-600 hover:underline">{% trans "Browse forum" %}</a>
         </div>
       </div>
       {% endfor %}

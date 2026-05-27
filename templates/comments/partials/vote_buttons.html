@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if layout == "vertical" %}
 <div class="flex w-9 flex-col items-center gap-1 pt-0.5" id="votes-{{ target_type }}-{{ target_id }}">
   {% if user.is_authenticated and can_vote != False %}
@@ -13,7 +14,7 @@
     <input type="hidden" name="layout" value="vertical">
     <button type="submit"
             class="vote-thumb vote-thumb-up rounded-lg p-1.5 text-slate-400 transition {% if user_vote == 1 %}is-active{% endif %}"
-            title="Like" aria-label="Like">
+            title="{% trans 'Like' %}" aria-label="{% trans 'Like' %}">
       {% include "comments/partials/vote_thumb_icon.html" with direction="up" %}
     </button>
   </form>
@@ -30,28 +31,28 @@
     <input type="hidden" name="layout" value="vertical">
     <button type="submit"
             class="vote-thumb vote-thumb-down rounded-lg p-1.5 text-slate-400 transition {% if user_vote == -1 %}is-active{% endif %}"
-            title="Dislike" aria-label="Dislike">
+            title="{% trans 'Dislike' %}" aria-label="{% trans 'Dislike' %}">
       {% include "comments/partials/vote_thumb_icon.html" with direction="down" %}
     </button>
   </form>
   {% elif user.is_authenticated %}
-  <button type="button" disabled class="vote-thumb vote-thumb-up cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}You can't vote on your own forecast{% else %}You can't vote on your own content{% endif %}" aria-label="Like (disabled)">
+  <button type="button" disabled class="vote-thumb vote-thumb-up cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}{% trans "You can't vote on your own forecast" %}{% else %}{% trans "You can't vote on your own content" %}{% endif %}" aria-label="{% trans 'Like (disabled)' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" %}
   </button>
   <span class="min-w-[1.25rem] text-center text-xs font-semibold tabular-nums text-slate-700" data-vote-score="{{ score }}">{{ score }}</span>
-  <button type="button" disabled class="vote-thumb vote-thumb-down cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}You can't vote on your own forecast{% else %}You can't vote on your own content{% endif %}" aria-label="Dislike (disabled)">
+  <button type="button" disabled class="vote-thumb vote-thumb-down cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}{% trans "You can't vote on your own forecast" %}{% else %}{% trans "You can't vote on your own content" %}{% endif %}" aria-label="{% trans 'Dislike (disabled)' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" %}
   </button>
   {% else %}
   <a href="{% url 'accounts:login' %}?next={{ request.path }}#votes-{{ target_type }}-{{ target_id }}"
      class="vote-thumb vote-thumb-up rounded-lg p-1.5 text-slate-400 transition"
-     title="Log in to like" aria-label="Log in to like">
+     title="{% trans 'Log in to like' %}" aria-label="{% trans 'Log in to like' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" %}
   </a>
   <span class="min-w-[1.25rem] text-center text-xs font-semibold tabular-nums text-slate-700" data-vote-score="{{ score }}">{{ score }}</span>
   <a href="{% url 'accounts:login' %}?next={{ request.path }}#votes-{{ target_type }}-{{ target_id }}"
      class="vote-thumb vote-thumb-down rounded-lg p-1.5 text-slate-400 transition"
-     title="Log in to dislike" aria-label="Log in to dislike">
+     title="{% trans 'Log in to dislike' %}" aria-label="{% trans 'Log in to dislike' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" %}
   </a>
   {% endif %}
@@ -71,7 +72,7 @@
     <input type="hidden" name="layout" value="horizontal">
     <button type="submit"
             class="vote-thumb vote-thumb-up rounded-lg p-1.5 text-slate-400 transition {% if user_vote == 1 %}is-active{% endif %}"
-            title="Like" aria-label="Like">
+            title="{% trans 'Like' %}" aria-label="{% trans 'Like' %}">
       {% include "comments/partials/vote_thumb_icon.html" with direction="up" %}
     </button>
   </form>
@@ -88,24 +89,24 @@
     <input type="hidden" name="layout" value="horizontal">
     <button type="submit"
             class="vote-thumb vote-thumb-down rounded-lg p-1.5 text-slate-400 transition {% if user_vote == -1 %}is-active{% endif %}"
-            title="Dislike" aria-label="Dislike">
+            title="{% trans 'Dislike' %}" aria-label="{% trans 'Dislike' %}">
       {% include "comments/partials/vote_thumb_icon.html" with direction="down" %}
     </button>
   </form>
   {% elif user.is_authenticated %}
-  <button type="button" disabled class="vote-thumb vote-thumb-up cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}You can't vote on your own forecast{% else %}You can't vote on your own content{% endif %}" aria-label="Like (disabled)">
+  <button type="button" disabled class="vote-thumb vote-thumb-up cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}{% trans "You can't vote on your own forecast" %}{% else %}{% trans "You can't vote on your own content" %}{% endif %}" aria-label="{% trans 'Like (disabled)' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" %}
   </button>
   <span class="text-sm font-medium text-slate-700" data-vote-score="{{ score }}">{{ score }}</span>
-  <button type="button" disabled class="vote-thumb vote-thumb-down cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}You can't vote on your own forecast{% else %}You can't vote on your own content{% endif %}" aria-label="Dislike (disabled)">
+  <button type="button" disabled class="vote-thumb vote-thumb-down cursor-not-allowed rounded-lg p-1.5 text-slate-300 opacity-50" title="{% if target_type == 'prediction' %}{% trans "You can't vote on your own forecast" %}{% else %}{% trans "You can't vote on your own content" %}{% endif %}" aria-label="{% trans 'Dislike (disabled)' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" %}
   </button>
   {% else %}
-  <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="vote-thumb vote-thumb-up rounded-lg p-1.5 text-slate-400 transition" title="Log in to like" aria-label="Log in to like">
+  <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="vote-thumb vote-thumb-up rounded-lg p-1.5 text-slate-400 transition" title="{% trans 'Log in to like' %}" aria-label="{% trans 'Log in to like' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" %}
   </a>
   <span class="text-sm font-medium text-slate-700" data-vote-score="{{ score }}">{{ score }}</span>
-  <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="vote-thumb vote-thumb-down rounded-lg p-1.5 text-slate-400 transition" title="Log in to dislike" aria-label="Log in to dislike">
+  <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="vote-thumb vote-thumb-down rounded-lg p-1.5 text-slate-400 transition" title="{% trans 'Log in to dislike' %}" aria-label="{% trans 'Log in to dislike' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" %}
   </a>
   {% endif %}

@@ -1,4 +1,5 @@
-{# label, value, value_class, badge_text, badge_class, subtext, delay #}
+{% load i18n %}
+{# label, value, value_class, badge_text, badge_class, subtext, delay — pass translated strings from parent templates #}
 <div class="pr-stat-card pr-card" data-pr-reveal {% if delay %}data-delay="{{ delay }}"{% endif %}>
   <p class="pr-stat-label">{{ label }}</p>
   <p class="pr-stat-value {% if value_class %}{{ value_class }}{% endif %}">{{ value }}</p>

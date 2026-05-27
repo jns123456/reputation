@@ -1,4 +1,4 @@
-{% load reputation_filters %}
+{% load i18n reputation_filters %}
 {% for section in polymarket_sections %}
 <section class="mt-8 rounded-xl border border-slate-200 bg-white overflow-hidden" x-data="{ open: {{ forloop.first|yesno:'true,false' }} }">
   <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
@@ -38,15 +38,15 @@
   </div>
 </section>
 {% empty %}
-<p class="mt-4 text-sm text-slate-500">No Polymarket API data stored for this market yet.</p>
+<p class="mt-4 text-sm text-slate-500">{% trans "No Polymarket API data stored for this market yet." %}</p>
 {% endfor %}
 
 {% if market.polymarket_raw %}
 <section class="mt-6 rounded-xl border border-slate-200 bg-white overflow-hidden" x-data="{ open: false }">
   <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
     <div>
-      <h2 class="text-lg font-semibold text-slate-900">Raw JSON — Market API</h2>
-      <p class="text-sm text-slate-500">Complete unmodified Polymarket market response</p>
+      <h2 class="text-lg font-semibold text-slate-900">{% trans "Raw JSON — Market API" %}</h2>
+      <p class="text-sm text-slate-500">{% trans "Complete unmodified Polymarket market response" %}</p>
     </div>
     <span class="text-slate-400" x-text="open ? '▼' : '▶'"></span>
   </button>
@@ -60,8 +60,8 @@
 <section class="mt-4 rounded-xl border border-slate-200 bg-white overflow-hidden" x-data="{ open: false }">
   <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50">
     <div>
-      <h2 class="text-lg font-semibold text-slate-900">Raw JSON — Event API</h2>
-      <p class="text-sm text-slate-500">Complete unmodified Polymarket event response</p>
+      <h2 class="text-lg font-semibold text-slate-900">{% trans "Raw JSON — Event API" %}</h2>
+      <p class="text-sm text-slate-500">{% trans "Complete unmodified Polymarket event response" %}</p>
     </div>
     <span class="text-slate-400" x-text="open ? '▼' : '▶'"></span>
   </button>

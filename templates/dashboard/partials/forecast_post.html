@@ -1,4 +1,4 @@
-{% load reputation_filters %}
+{% load reputation_filters i18n %}
 <article class="border-b border-slate-200 px-4 py-4 transition hover:bg-slate-50/80"
          id="forecast-post-{{ prediction.id }}"
          data-sort-score="{{ prediction.popularity_score }}"
@@ -31,7 +31,7 @@
       </a>
 
       <div class="mt-2 text-[15px] leading-relaxed text-slate-900">
-        <span class="text-slate-600">Forecast </span>
+        <span class="text-slate-600">{% trans "Forecast" %} </span>
         <strong class="{% if prediction.predicted_outcome|lower == 'yes' %}text-emerald-700{% elif prediction.predicted_outcome|lower == 'no' %}text-red-700{% else %}text-brand-700{% endif %}">
           {{ prediction.predicted_outcome }}
         </strong>
@@ -49,7 +49,7 @@
 
       {% if prediction.status == "resolved" %}
       <p class="mt-2 text-xs font-semibold {% if prediction.is_correct %}text-emerald-700{% else %}text-red-700{% endif %}">
-        {% if prediction.is_correct %}✓ Correct forecast{% else %}✗ Incorrect forecast{% endif %}
+        {% if prediction.is_correct %}{% trans "✓ Correct forecast" %}{% else %}{% trans "✗ Incorrect forecast" %}{% endif %}
       </p>
       {% endif %}
 

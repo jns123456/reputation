@@ -1,4 +1,4 @@
-{% load reputation_filters %}
+{% load reputation_filters i18n %}
 <label class="challenge-market-card group relative block h-full cursor-pointer">
   <input type="checkbox"
          value="{{ market.id }}"
@@ -32,7 +32,7 @@
       <div class="flex flex-1 flex-col items-center rounded-lg border py-2.5 transition
         {% if label|lower == 'yes' %}border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/35 dark:group-hover:border-emerald-700/60 dark:group-hover:bg-emerald-900/45{% elif label|lower == 'no' %}border-rose-200 bg-rose-50 group-hover:bg-rose-100 dark:border-rose-800/50 dark:bg-rose-950/35 dark:group-hover:border-rose-700/60 dark:group-hover:bg-rose-900/45{% else %}border-slate-200 bg-slate-50 group-hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/55 dark:group-hover:border-slate-500 dark:group-hover:bg-slate-700/70{% endif %}">
         <span class="text-xs font-semibold uppercase tracking-wide {% if label|lower == 'yes' %}text-emerald-700 dark:text-emerald-300{% elif label|lower == 'no' %}text-rose-700 dark:text-rose-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
-          {% if label|lower == 'yes' %}Yes{% elif label|lower == 'no' %}No{% else %}{{ label }}{% endif %}
+          {% if label|lower == 'yes' %}{% trans "Yes" %}{% elif label|lower == 'no' %}{% trans "No" %}{% else %}{{ label }}{% endif %}
         </span>
         <span class="mt-0.5 text-xl font-bold tabular-nums {% if label|lower == 'yes' %}text-emerald-800 dark:text-emerald-200{% elif label|lower == 'no' %}text-rose-800 dark:text-rose-200{% else %}text-slate-800 dark:text-slate-100{% endif %}">
           {{ prob|as_percent }}%
@@ -41,13 +41,13 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="mt-4 text-center text-sm text-slate-400">Odds unavailable</p>
+    <p class="mt-4 text-center text-sm text-slate-400">{% trans "Odds unavailable" %}</p>
     {% endif %}
 
     <div class="mt-auto pt-4">
       {% if market.close_date %}
       <p class="mb-2 text-xs text-slate-500 dark:text-slate-400">
-        Closes {{ market.close_date|date:"M j, Y" }}
+        {% blocktrans with date=market.close_date|date:"M j, Y" %}Closes {{ date }}{% endblocktrans %}
       </p>
       {% endif %}
       {% with countdown=market.expiration_countdown %}

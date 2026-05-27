@@ -1,15 +1,22 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}New challenge{% endblock %}
+{% block title %}{% trans "New challenge" %}{% endblock %}
 
 {% block content %}
+{% trans "selected" as markets_selected_label %}
 <div class="pr-page pb-8">
   {% url 'challenges:list' as list_url %}
-  {% include "includes/pr_page_hero.html" with eyebrow="Challenges" compact=True title="Create a" gradient="challenge" description="Pick up to 10 open events and challenge users you follow mutually." secondary_url=list_url secondary_label="Back to challenges" %}
+  {% trans "Challenges" as hero_eyebrow %}
+  {% trans "Create a" as hero_title %}
+  {% trans "challenge" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Pick up to 10 open events and challenge users you follow mutually.{% endblocktrans %}
+  {% trans "Back to challenges" as hero_secondary_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description secondary_url=list_url secondary_label=hero_secondary_label %}
 
 {% if not mutual_followers %}
 <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-  You need mutual followers to create a challenge. Follow someone who follows you back.
+  {% trans "You need mutual followers to create a challenge. Follow someone who follows you back." %}
 </div>
 {% endif %}
 
@@ -25,12 +32,12 @@
   <div class="grid gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] xl:grid-cols-[minmax(0,24rem)_1fr]">
     <aside class="space-y-6 lg:sticky lg:top-20 lg:self-start">
       <div>
-        <label for="{{ form.title.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Name (optional)</label>
+        <label for="{{ form.title.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{% trans "Name (optional)" %}</label>
         {{ form.title }}
       </div>
 
       <div>
-        <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Users to challenge</label>
+        <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">{% trans "Users to challenge" %}</label>
         {% if form.opponents.errors %}
         <p class="mb-2 text-sm text-red-600">{{ form.opponents.errors.0 }}</p>
         {% endif %}
@@ -44,25 +51,25 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-sm text-slate-500 dark:text-slate-400">No mutual followers yet.</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{% trans "No mutual followers yet." %}</p>
         {% endif %}
       </div>
 
       <button type="submit" class="btn-primary w-full justify-center sm:w-auto" {% if not mutual_followers %}disabled{% endif %}>
-        Send challenge
+        {% trans "Send challenge" %}
       </button>
     </aside>
 
-    <section x-data="challengeMarketPicker({{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }})"
+    <section x-data="challengeMarketPicker({{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }}, '{{ markets_selected_label|escapejs }}')"
              x-init="init()"
              class="min-w-0">
       <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Select events</h2>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Choose up to {{ max_challenge_markets }} open markets</p>
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Select events" %}</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">{% blocktrans with max=max_challenge_markets %}Choose up to {{ max }} open markets{% endblocktrans %}</p>
         </div>
         <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-              x-text="`${Object.keys(selected).length} / ${maxMarkets} selected`"></span>
+              x-text="Object.keys(selected).length + ' / ' + maxMarkets + ' ' + selectedLabel"></span>
       </div>
 
       {% if form.markets.errors %}
@@ -76,7 +83,7 @@
             <button type="button"
                     @click="remove(id)"
                     class="rounded-full p-0.5 hover:bg-brand-200 dark:hover:bg-brand-800"
-                    aria-label="Remove event">
+                    aria-label="{% trans 'Remove event' %}">
               <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
               </svg>
@@ -93,7 +100,7 @@
         <input type="search"
                id="challenge-market-search"
                name="q"
-               placeholder="Search events…"
+               placeholder="{% trans 'Search events…' %}"
                autocomplete="off"
                class="form-input pl-9"
                hx-get="{% url 'challenges:market_search' %}"
@@ -122,10 +129,12 @@
 </div>
 
 <script>
-  function challengeMarketPicker(maxMarkets, initialSelectedIds, initialTitles) {
+  function challengeMarketPicker(maxMarkets, initialSelectedIds, initialTitles, selectedLabel) {
     initialTitles = initialTitles || {};
+    selectedLabel = selectedLabel || "selected";
     return {
       maxMarkets,
+      selectedLabel,
       selected: {},
       init() {
         const list = document.getElementById("market-picker-list");

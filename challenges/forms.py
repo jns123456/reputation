@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from challenges.models import MAX_CHALLENGE_MARKETS
 from markets.models import Market
@@ -11,7 +12,7 @@ class ChallengeCreateForm(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "class": "form-input",
-                "placeholder": "Optional challenge name",
+                "placeholder": _("Optional challenge name"),
             },
         ),
     )
@@ -24,7 +25,7 @@ class ChallengeCreateForm(forms.Form):
             attrs={"class": "challenge-market-checkbox"},
         ),
         error_messages={
-            "required": "Select at least one event.",
+            "required": _("Select at least one event."),
         },
     )
     opponents = forms.MultipleChoiceField(
@@ -32,7 +33,7 @@ class ChallengeCreateForm(forms.Form):
             attrs={"class": "challenge-opponent-checkbox"},
         ),
         error_messages={
-            "required": "Select at least one user to challenge.",
+            "required": _("Select at least one user to challenge."),
         },
     )
 
@@ -52,7 +53,7 @@ class ChallengeCreateForm(forms.Form):
             return markets
         if len(markets) > MAX_CHALLENGE_MARKETS:
             raise forms.ValidationError(
-                f"You can select at most {MAX_CHALLENGE_MARKETS} events."
+                _("You can select at most %(max)s events.") % {"max": MAX_CHALLENGE_MARKETS}
             )
         return markets
 
@@ -61,5 +62,5 @@ class ChallengeCreateForm(forms.Form):
         if not opponents:
             return opponents
         if self.user and str(self.user.id) in opponents:
-            raise forms.ValidationError("You cannot challenge yourself.")
+            raise forms.ValidationError(_("You cannot challenge yourself."))
         return opponents

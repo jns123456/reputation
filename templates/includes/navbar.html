@@ -1,5 +1,13 @@
+{% load i18n i18n_extras %}
 <nav class="site-header sticky top-0 z-40 border-b border-slate-200/60 bg-white/85 backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/85"
-     x-data="{ mobileOpen: false }">
+     x-data="{
+       mobileOpen: false,
+       closeMobile() { this.mobileOpen = false; document.body.classList.remove('pr-nav-open'); },
+       toggleMobile() {
+         this.mobileOpen = !this.mobileOpen;
+         document.body.classList.toggle('pr-nav-open', this.mobileOpen);
+       }
+     }">
   <div class="mx-auto max-w-6xl px-4">
     <div class="flex h-14 items-center justify-between gap-4">
       <div class="flex min-w-0 items-center gap-6">
@@ -10,19 +18,19 @@
         <div class="hidden items-center gap-1 md:flex">
           <a href="{% url 'markets:list' %}"
              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
-            Markets
+            {% trans "Markets" %}
           </a>
           <a href="{% url 'dashboard:forecasts' %}"
              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
-            Forecasts
+            {% trans "Forecasts" %}
           </a>
           <a href="{% url 'forum:feed' %}"
              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
-            Forum
+            {% trans "Forum" %}
           </a>
           <a href="{% url 'challenges:list' %}"
              class="relative rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400">
-            Challenges
+            {% trans "Challenges" %}
             {% if pending_challenge_invites_count %}
             <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-slate-900">
               {% if pending_challenge_invites_count > 99 %}99+{% else %}{{ pending_challenge_invites_count }}{% endif %}
@@ -35,7 +43,7 @@
                     @click="open = !open"
                     class="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400"
                     :aria-expanded="open">
-              Leaderboards
+              {% trans "Leaderboards" %}
               <svg class="h-4 w-4 transition" :class="open && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
               </svg>
@@ -44,11 +52,11 @@
                  class="absolute left-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
               <a href="{% url 'dashboard:reputation_leaderboard' %}"
                  class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
-                <span class="badge-rep">Rep</span> Reputation
+                <span class="badge-rep">Rep</span> {% trans "Reputation" %}
               </a>
               <a href="{% url 'dashboard:popularity_leaderboard' %}"
                  class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
-                <span class="badge-pop">Pop</span> Popularity
+                <span class="badge-pop">Pop</span> {% trans "Popularity" %}
               </a>
             </div>
           </div>
@@ -56,6 +64,8 @@
       </div>
 
       <div class="flex items-center gap-2">
+        {% include "includes/language_switcher.html" %}
+
         <div x-data="{
                isDark: document.documentElement.classList.contains('dark'),
                toggleTheme() {
@@ -66,8 +76,8 @@
           <button type="button"
                   @click="toggleTheme()"
                   class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400"
-                  :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                  :title="isDark ? 'Light mode' : 'Dark mode'">
+                  :aria-label="isDark ? '{% trans "Switch to light mode" %}' : '{% trans "Switch to dark mode" %}'"
+                  :title="isDark ? '{% trans "Light mode" %}' : '{% trans "Dark mode" %}'">
             <svg x-show="!isDark" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round"
                     d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -86,7 +96,7 @@
                     id="notifications-bell-btn"
                     @click="open = !open"
                     class="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400"
-                    aria-label="Notifications"
+                    aria-label="{% trans 'Notifications' %}"
                     :aria-expanded="open">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -104,7 +114,7 @@
                  hx-get="{% url 'accounts:notifications_dropdown' %}"
                  hx-trigger="click from:#notifications-bell-btn once"
                  hx-swap="innerHTML">
-              <div class="px-4 py-6 text-center text-sm text-slate-500">Loading notifications…</div>
+              <div class="px-4 py-6 text-center text-sm text-slate-500">{% trans "Loading notifications…" %}</div>
             </div>
           </div>
 
@@ -128,21 +138,21 @@
                 <p class="truncate text-xs text-slate-500 dark:text-slate-400">@{{ user.username }}</p>
               </div>
               <a href="{% url 'accounts:profile' username=user.username %}"
-                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">Your profile</a>
+                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Your profile" %}</a>
               <a href="{% url 'accounts:bookmarks' %}"
-                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">Saved</a>
+                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Saved" %}</a>
               <a href="{% url 'accounts:alert_settings' %}"
-                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">Alert settings</a>
+                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Alert settings" %}</a>
               <a href="{% url 'accounts:notifications' %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700 md:hidden">
-                Notifications{% if unread_notification_count %} ({{ unread_notification_count }}){% endif %}
+                {% trans "Notifications" %}{% if unread_notification_count %} ({{ unread_notification_count }}){% endif %}
               </a>
               <div class="border-t border-slate-100 dark:border-slate-700">
                 <form method="post" action="{% url 'accounts:logout' %}">
                   {% csrf_token %}
                   <button type="submit"
                           class="block w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40">
-                    Log out
+                    {% trans "Log out" %}
                   </button>
                 </form>
               </div>
@@ -152,17 +162,17 @@
         {% else %}
         <div class="hidden items-center gap-2 md:flex">
           <a href="{% url 'accounts:login' %}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand-600 dark:text-slate-300 dark:hover:text-brand-400">
-            Log in
+            {% trans "Log in" %}
           </a>
-          <a href="{% url 'accounts:signup' %}" class="btn-primary">Sign up</a>
+          <a href="{% url 'accounts:signup' %}" class="btn-primary">{% trans "Sign up" %}</a>
         </div>
         {% endif %}
 
         <button type="button"
-                class="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 md:hidden"
-                @click="mobileOpen = !mobileOpen"
+                class="inline-flex items-center justify-center rounded-lg p-2.5 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 md:hidden"
+                @click="toggleMobile()"
                 :aria-expanded="mobileOpen"
-                aria-label="Toggle navigation">
+                aria-label="{% trans 'Toggle navigation' %}">
           <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
@@ -175,36 +185,56 @@
 
     <div x-show="mobileOpen" x-cloak x-transition class="border-t border-slate-100 pb-4 pt-2 dark:border-slate-700 md:hidden">
       <div class="flex flex-col gap-0.5 text-sm">
-        <a href="{% url 'markets:list' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Markets</a>
-        <a href="{% url 'dashboard:forecasts' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Forecasts</a>
-        <a href="{% url 'forum:feed' %}" class="rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">Forum</a>
-        <a href="{% url 'challenges:list' %}" class="flex items-center justify-between rounded-lg px-3 py-2.5 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
-          <span>Challenges</span>
+        <a href="{% url 'markets:list' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">{% trans "Markets" %}</a>
+        <a href="{% url 'dashboard:forecasts' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">{% trans "Forecasts" %}</a>
+        <a href="{% url 'forum:feed' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">{% trans "Forum" %}</a>
+        <a href="{% url 'challenges:list' %}" @click="closeMobile()" class="flex items-center justify-between rounded-lg px-3 py-3 font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+          <span>{% trans "Challenges" %}</span>
           {% if pending_challenge_invites_count %}
           <span class="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">{{ pending_challenge_invites_count }}</span>
           {% endif %}
         </a>
-        <p class="px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Leaderboards</p>
-        <a href="{% url 'dashboard:reputation_leaderboard' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Reputation</a>
-        <a href="{% url 'dashboard:popularity_leaderboard' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Popularity</a>
+        <p class="px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{% trans "Leaderboards" %}</p>
+        <a href="{% url 'dashboard:reputation_leaderboard' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Reputation" %}</a>
+        <a href="{% url 'dashboard:popularity_leaderboard' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Popularity" %}</a>
+        <a href="{% url 'dashboard:about' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "About" %}</a>
+        <a href="{% url 'dashboard:faq' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "FAQ" %}</a>
+        <p class="px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{% trans "Language" %}</p>
+        <div class="flex flex-wrap gap-2 px-3 pb-2">
+          {% get_available_languages as AVAILABLE_LANGUAGES %}
+          {% get_language_info_list for AVAILABLE_LANGUAGES as language_infos %}
+          {% get_current_language as CURRENT_LANGUAGE %}
+          {% for language in language_infos %}
+          <form method="post" action="{% url 'set_language' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="{{ language.code }}">
+            <button type="submit" @click="closeMobile()"
+                    class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition {% if language.code == CURRENT_LANGUAGE %}border-brand-300 bg-brand-50 text-brand-700 dark:border-brand-700 dark:bg-brand-950/50 dark:text-brand-300{% else %}border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800{% endif %}">
+              <span class="text-lg leading-none" aria-hidden="true">{{ language.code|language_flag }}</span>
+              <span>{{ language.name_local }}</span>
+            </button>
+          </form>
+          {% endfor %}
+        </div>
         {% if user.is_authenticated %}
-        <p class="px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Account</p>
-        <a href="{% url 'accounts:notifications' %}" class="flex items-center justify-between rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">
-          <span>Notifications</span>
+        <p class="px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{% trans "Account" %}</p>
+        <a href="{% url 'accounts:notifications' %}" @click="closeMobile()" class="flex items-center justify-between rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">
+          <span>{% trans "Notifications" %}</span>
           {% if unread_notification_count %}
           <span class="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">{{ unread_notification_count }}</span>
           {% endif %}
         </a>
-        <a href="{% url 'accounts:profile' username=user.username %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ user.public_name }}</a>
-        <a href="{% url 'accounts:bookmarks' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Saved</a>
-        <a href="{% url 'accounts:alert_settings' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Alert settings</a>
+        <a href="{% url 'accounts:profile' username=user.username %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{{ user.public_name }}</a>
+        <a href="{% url 'accounts:bookmarks' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Saved" %}</a>
+        <a href="{% url 'accounts:alert_settings' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Alert settings" %}</a>
         <form method="post" action="{% url 'accounts:logout' %}" class="px-3 py-2">
           {% csrf_token %}
-          <button type="submit" class="text-sm text-red-600 dark:text-red-400">Log out</button>
+          <button type="submit" class="min-h-[2.75rem] text-sm text-red-600 dark:text-red-400">{% trans "Log out" %}</button>
         </form>
         {% else %}
-        <a href="{% url 'accounts:login' %}" class="rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">Log in</a>
-        <a href="{% url 'accounts:signup' %}" class="mx-3 btn-primary justify-center">Sign up</a>
+        <a href="{% url 'accounts:login' %}" @click="closeMobile()" class="rounded-lg px-3 py-3 text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Log in" %}</a>
+        <a href="{% url 'accounts:signup' %}" @click="closeMobile()" class="mx-3 btn-primary justify-center">{% trans "Sign up" %}</a>
         {% endif %}
       </div>
     </div>

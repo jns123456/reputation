@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.utils.translation import gettext as _
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -37,7 +38,7 @@ def create_comment_view(request, slug):
     prediction_id = request.POST.get("prediction")
 
     if not form.is_valid():
-        return HttpResponseBadRequest("Invalid comment")
+        return HttpResponseBadRequest(_("Invalid comment"))
 
     parent = None
     if parent_id:
@@ -50,7 +51,7 @@ def create_comment_view(request, slug):
         prediction = parent.prediction
 
     if not prediction:
-        return HttpResponseBadRequest("Comments must be posted on a forecast thread.")
+        return HttpResponseBadRequest(_("Comments must be posted on a forecast thread."))
 
     try:
         create_comment(
@@ -85,7 +86,7 @@ def vote_view(request):
         Vote.TargetType.PULSE_POST,
         Vote.TargetType.PULSE_COMMENT,
     ):
-        return HttpResponseBadRequest("Invalid target type")
+        return HttpResponseBadRequest(_("Invalid target type"))
 
     try:
         existing_vote = get_user_vote(request.user, target_type, int(target_id))

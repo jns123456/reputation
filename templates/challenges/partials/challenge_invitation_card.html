@@ -1,29 +1,30 @@
+{% load i18n %}
 <div class="rounded-xl border border-brand-200 bg-brand-50/60 p-4 dark:border-brand-800 dark:bg-brand-950/30">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0 flex-1">
-      <p class="text-xs font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-300">Challenge invitation</p>
+      <p class="text-xs font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-300">{% trans "Challenge invitation" %}</p>
       <h3 class="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
         <a href="{% url 'challenges:detail' pk=invitation.challenge.pk %}" class="hover:text-brand-700 dark:hover:text-brand-400">
           {{ invitation.challenge.display_title }}
         </a>
       </h3>
       <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-        @{{ invitation.challenge.creator.username }} challenged you
-        · {{ invitation.challenge.challenge_markets.count }} event{{ invitation.challenge.challenge_markets.count|pluralize }}
+        {% blocktrans with username=invitation.challenge.creator.username %}@{{ username }} challenged you{% endblocktrans %}
+        · {% blocktrans count counter=invitation.challenge.challenge_markets.count %}{{ counter }} event{% plural %}{{ counter }} events{% endblocktrans %}
       </p>
     </div>
     <div class="flex shrink-0 flex-wrap items-center gap-2">
       <form method="post" action="{% url 'challenges:accept' pk=invitation.challenge.pk %}">
         {% csrf_token %}
-        <button type="submit" class="btn-primary">Accept</button>
+        <button type="submit" class="btn-primary">{% trans "Accept" %}</button>
       </form>
       <form method="post" action="{% url 'challenges:decline' pk=invitation.challenge.pk %}">
         {% csrf_token %}
-        <button type="submit" class="btn-secondary">Decline</button>
+        <button type="submit" class="btn-secondary">{% trans "Decline" %}</button>
       </form>
       <a href="{% url 'challenges:detail' pk=invitation.challenge.pk %}"
          class="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400">
-        View details
+        {% trans "View details" %}
       </a>
     </div>
   </div>

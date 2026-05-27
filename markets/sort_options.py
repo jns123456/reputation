@@ -2,6 +2,8 @@
 
 from datetime import datetime, timezone as dt_timezone
 
+from django.utils.translation import gettext_lazy as _
+
 SORT_TRENDING = "trending"
 SORT_VOLUME = "volume"
 SORT_LIQUIDITY = "liquidity"
@@ -19,12 +21,12 @@ VALID_MARKET_SORTS = frozenset(
 )
 
 MARKET_SORT_CHOICES = (
-    ("", "Recommended mix"),
-    (SORT_TRENDING, "Trending"),
-    (SORT_VOLUME, "Volume"),
-    (SORT_LIQUIDITY, "Liquidity"),
-    (SORT_NEWEST, "Newest"),
-    (SORT_ENDING_SOON, "Ending soon"),
+    ("", _("Recommended mix")),
+    (SORT_TRENDING, _("Trending")),
+    (SORT_VOLUME, _("Volume")),
+    (SORT_LIQUIDITY, _("Liquidity")),
+    (SORT_NEWEST, _("Newest")),
+    (SORT_ENDING_SOON, _("Ending soon")),
 )
 
 _METRIC_KEYS = {

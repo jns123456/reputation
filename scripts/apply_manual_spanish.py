@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""Apply hand-reviewed Spanish translations for remaining PO entries."""
+
+import json
+from pathlib import Path
+
+import polib
+
+PO_PATH = Path(__file__).resolve().parent.parent / "locale" / "es" / "LC_MESSAGES" / "django.po"
+CACHE_PATH = Path(__file__).resolve().parent / "spanish_translation_cache.json"
+
+MANUAL = {
+    "%(days)s day left": "%(days)s día restante",
+    "Ended %(past)s day ago": "Terminó hace %(past)s día",
+    "\n          You have %(counter)s new alert\n          ": "\n          Tienes %(counter)s alerta nueva\n          ",
+    "%(counter)s follower": "%(counter)s seguidor",
+    "%(counter)s following": "%(counter)s siguiendo",
+    "%(counter)s event": "%(counter)s evento",
+    "%(counter)s participant": "%(counter)s participante",
+    "+ %(counter)s reply": "+ %(counter)s respuesta",
+    "open forecast": "pronóstico abierto",
+    "Wrong: −50": "Incorrecto: −50",
+    "Every change creates an auditable event record with a human-readable reason. Resolved forecasts cannot be deleted.": "Cada cambio crea un registro auditable con una razón legible. Los pronósticos resueltos no se pueden eliminar.",
+    "Common questions": "Preguntas frecuentes",
+    "What is the difference between reputation and popularity?": "¿Cuál es la diferencia entre reputación y popularidad?",
+    '<span class="badge-rep">Reputation</span> measures whether your <strong class="text-slate-800 dark:text-slate-200">formal forecasts</strong> were right after markets resolve. <span class="badge-pop">Popularity</span> measures social engagement — upvotes and downvotes on comments and forecasts.': '<span class="badge-rep">Reputación</span> mide si tus <strong class="text-slate-800 dark:text-slate-200">pronósticos formales</strong> fueron correctos tras resolver los mercados. <span class="badge-pop">Popularidad</span> mide el engagement social — votos positivos y negativos en comentarios y pronósticos.',
+    "A meme comment can top the popularity leaderboard while a quiet analyst tops reputation. The systems never cross-contaminate.": "Un comentario meme puede liderar la clasificación de popularidad mientras un analista discreto lidera la reputación. Los sistemas nunca se mezclan.",
+    "Do comments affect my reputation?": "¿Los comentarios afectan mi reputación?",
+    'No. Comments only affect <span class="badge-pop">Popularity</span> through votes. Reputation changes only when a <strong class="text-slate-800 dark:text-slate-200">formal prediction</strong> you published is resolved against the market outcome.': 'No. Los comentarios solo afectan la <span class="badge-pop">Popularidad</span> mediante votos. La reputación cambia solo cuando un <strong class="text-slate-800 dark:text-slate-200">pronóstico formal</strong> que publicaste se resuelve contra el resultado del mercado.',
+    "Can I bet money here?": "¿Puedo apostar dinero aquí?",
+    '<strong class="text-slate-800 dark:text-slate-200">No.</strong> ProofRep is not a betting, trading, or gambling platform. There are no wallets, deposits, or financial settlements.': '<strong class="text-slate-800 dark:text-slate-200">No.</strong> ProofRep no es una plataforma de apuestas, trading ni juego. No hay billeteras, depósitos ni liquidaciones financieras.',
+    "Is it free? Can I monetize my content?": "¿Es gratis? ¿Puedo monetizar mi contenido?",
+    'Using the platform is <strong class="text-slate-800 dark:text-slate-200">completely free</strong> — sign up, browse, comment, and forecast at no cost.': 'Usar la plataforma es <strong class="text-slate-800 dark:text-slate-200">completamente gratis</strong>: regístrate, explora, comenta y pronostica sin costo.',
+    "Your public track record can still be valuable off-platform: paid newsletters, consulting, sponsorships, or premium analysis built on the credibility you earn here.": "Tu historial público puede valer fuera de la plataforma: newsletters de pago, consultoría, patrocinios o análisis premium basados en la credibilidad que ganas aquí.",
+    "How do leaderboards work?": "¿Cómo funcionan las clasificaciones?",
+    "We maintain two separate rankings:": "Mantenemos dos clasificaciones separadas:",
+    '<a href="%(reputation_url)s" class="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Reputation leaderboard</a> — total reputation points from resolved forecasts.': '<a href="%(reputation_url)s" class="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Clasificación de reputación</a> — puntos totales de reputación por pronósticos resueltos.',
+    '<a href="%(popularity_url)s" class="font-medium text-amber-700 hover:underline dark:text-amber-400">Popularity leaderboard</a> — total popularity points from community votes.': '<a href="%(popularity_url)s" class="font-medium text-amber-700 hover:underline dark:text-amber-400">Clasificación de popularidad</a> — puntos totales de popularidad por votos de la comunidad.',
+    "What is EAS and why does it matter?": "¿Qué es EAS y por qué importa?",
+    '<a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-700 hover:underline dark:text-violet-400">Ethereum Attestation Service (EAS)</a> is open infrastructure for verifiable statements about identity, reputation, and credentials.': '<a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-700 hover:underline dark:text-violet-400">Ethereum Attestation Service (EAS)</a> es infraestructura abierta para afirmaciones verificables sobre identidad, reputación y credenciales.',
+    "Our roadmap includes optional attestations so your reputation history could become <strong class=\"text-slate-800 dark:text-slate-200\">portable proofs</strong> you carry into other apps and agent ecosystems.": "Nuestra hoja de ruta incluye atestaciones opcionales para que tu historial de reputación pueda convertirse en <strong class=\"text-slate-800 dark:text-slate-200\">pruebas portables</strong> que llevas a otras apps y ecosistemas de agentes.",
+    "Can AI agents participate?": "¿Pueden participar agentes de IA?",
+    'Yes. Verified agents are labeled with an <span class="badge-agent">AI</span> badge so readers always know who (or what) they are engaging with.': 'Sí. Los agentes verificados llevan la insignia <span class="badge-agent">IA</span> para que los lectores sepan con quién (o qué) interactúan.',
+    "Still curious?": "¿Sigues con curiosidad?",
+    "Read our full thesis on the About page, then jump into a market and publish your first forecast.": "Lee nuestra tesis completa en Acerca de, luego entra a un mercado y publica tu primer pronóstico.",
+    "About the project": "Sobre el proyecto",
+    "Community": "Comunidad",
+    "Live forecasts from the community — formal predictions tied to real markets.": "Pronósticos en vivo de la comunidad — predicciones formales ligadas a mercados reales.",
+    "Filter by market": "Filtrar por mercado",
+    "Dashboard": "Panel",
+    "Your dashboard": "Tu panel",
+    "Welcome back,": "Bienvenido de nuevo,",
+    "Track your reputation, popularity, and recent forecasts at a glance.": "Sigue tu reputación, popularidad y pronósticos recientes de un vistazo.",
+    "Recent Predictions": "Predicciones recientes",
+    "Full history": "Historial completo",
+    "Correct": "Correcto",
+    "Incorrect": "Incorrecto",
+    "to make your first prediction.": "para hacer tu primera predicción.",
+    "%(name)s sub-areas": "Subáreas de %(name)s",
+    "%(counter)s forecast": "%(counter)s pronóstico",
+    "Browse": "Explorar",
+    "Remove bookmark": "Quitar marcador",
+    "Bookmark": "Marcar",
+    "Log in to bookmark": "Inicia sesión para marcar",
+    "✓ Correct forecast": "✓ Pronóstico correcto",
+    "✗ Incorrect forecast": "✗ Pronóstico incorrecto",
+    "View comments": "Ver comentarios",
+    "Be the first to post a forecast on a market, or try another filter.": "Sé el primero en publicar un pronóstico en un mercado, o prueba otro filtro.",
+    "Most engaged users in this category — scores sum into the global popularity leaderboard.": "Usuarios más activos en esta categoría — las puntuaciones suman a la clasificación global de popularidad.",
+    "Ranked by social engagement across all categories — separate from predictive reputation.": "Clasificados por engagement social en todas las categorías — separado de la reputación predictiva.",
+    "Rank": "Puesto",
+    "User": "Usuario",
+    "Global": "Global",
+    "No data yet for this category.": "Aún no hay datos para esta categoría.",
+    "Top predictors in this category — scores sum into the global reputation leaderboard.": "Mejores predictores en esta categoría — las puntuaciones suman a la clasificación global de reputación.",
+    "Ranked by predictive quality across all categories — not social popularity.": "Clasificados por calidad predictiva en todas las categorías — no por popularidad social.",
+    "%(name)s — Match Forecasts": "%(name)s — Pronósticos de partidos",
+    "3-way match forecasts": "Pronósticos de resultado triple",
+    "Odds imported from": "Cuotas importadas de",
+    "pick a winner, draw, or away side. No betting, only reputation.": "elige ganador, empate o visitante. Sin apuestas, solo reputación.",
+    "open match": "partido abierto",
+    "Upcoming & live matches": "Próximos y en vivo",
+    "Sorted by kickoff": "Ordenados por inicio",
+    "No match forecasts yet.": "Aún no hay pronósticos de partidos.",
+    "Markets sync automatically from Polymarket — refresh in a moment.": "Los mercados se sincronizan automáticamente desde Polymarket — actualiza en un momento.",
+    "Short posts from the community — text and photos, up to 200 characters.": "Publicaciones breves de la comunidad — texto y fotos, hasta 200 caracteres.",
+    "to post on Forum.": "para publicar en el Foro.",
+    "Comment": "Comentar",
+    "Remove image": "Quitar imagen",
+    "Photo": "Foto",
+    "Post": "Publicar",
+    "No posts yet": "Aún no hay publicaciones",
+    "Be the first to share something on Forum.": "Sé el primero en compartir algo en el Foro.",
+    "Share post": "Compartir publicación",
+    "%(name)s on Forum": "%(name)s en el Foro",
+    "Reposted": "Republicado",
+    "You can't start a thread on your own post. Like, dislike, or reply to comments from others below — or share your post.": "No puedes abrir un hilo en tu propia publicación. Da like, dislike o responde comentarios de otros abajo — o comparte tu publicación.",
+    "You liked this post — add your perspective": "Te gustó esta publicación — añade tu perspectiva",
+    "You disliked this post — explain your view": "No te gustó esta publicación — explica tu punto de vista",
+    "What do you think?": "¿Qué opinas?",
+    "to comment on this post.": "para comentar en esta publicación.",
+    "No comments yet — start the thread above.": "Aún no hay comentarios — inicia el hilo arriba.",
+    "Undo repost": "Deshacer repost",
+    "Repost": "Repostear",
+    "You can't repost your own post": "No puedes repostear tu propia publicación",
+    "Log in to repost": "Inicia sesión para repostear",
+    "You can't vote on your own post": "No puedes votar tu propia publicación",
+    "Comments": "Comentarios",
+    "Pagination": "Paginación",
+    "\n    Showing\n    <span class=\"font-medium text-slate-700\">%(start)s–%(end)s</span>\n    of\n    <span class=\"font-medium text-slate-700\">%(count)s</span>\n    ": "\n    Mostrando\n    <span class=\"font-medium text-slate-700\">%(start)s–%(end)s</span>\n    de\n    <span class=\"font-medium text-slate-700\">%(count)s</span>\n    ",
+    "Previous": "Anterior",
+    "Page %(number)s of %(total)s": "Página %(number)s de %(total)s",
+    "Next": "Siguiente",
+    "View on Polymarket ↗": "Ver en Polymarket ↗",
+    "View on Kalshi ↗": "Ver en Kalshi ↗",
+    "Live odds": "Cuotas en vivo",
+    "Resolved outcome: <strong>%(outcome)s</strong>": "Resultado resuelto: <strong>%(outcome)s</strong>",
+    "Public forecast history": "Historial público de pronósticos",
+    'All forecasts on this market — scored on <span class="badge-rep">Reputation</span> when resolved. Earn <span class="badge-pop">Popularity</span> when others like your forecast or comments.': 'Todos los pronósticos en este mercado — puntuados en <span class="badge-rep">Reputación</span> al resolverse. Gana <span class="badge-pop">Popularidad</span> cuando otros dan like a tu pronóstico o comentarios.',
+    "No forecasts yet. Be the first to place one.": "Aún no hay pronósticos. Sé el primero en publicar uno.",
+    "Browse by": "Explorar por",
+    "category": "categoría",
+    "Pick a topic — Politics, Sports, Crypto, Economy, and more. Real forecasts from Polymarket, no betting.": "Elige un tema — Política, Deportes, Cripto, Economía y más. Pronósticos reales de Polymarket, sin apuestas.",
+    "Categories": "Categorías",
+    'No categories yet. Run <code class="text-xs">sync_markets --top-volume</code> to import Polymarket markets.': 'Aún no hay categorías. Ejecuta <code class="text-xs">sync_markets --top-volume</code> para importar mercados de Polymarket.',
+    "Breadcrumb": "Miga de pan",
+    "Forecast on real-world events — odds from Polymarket and Kalshi, no betting.": "Pronostica eventos reales — cuotas de Polymarket y Kalshi, sin apuestas.",
+    "Search": "Buscar",
+    "Search markets…": "Buscar mercados…",
+    "Status": "Estado",
+    "Sort": "Ordenar",
+    "Filter": "Filtrar",
+    "Hide": "Ocultar",
+    "Show": "Mostrar",
+    "No Kalshi markets match your filters.": "Ningún mercado de Kalshi coincide con tus filtros.",
+    "No Polymarket markets match your filters.": "Ningún mercado de Polymarket coincide con tus filtros.",
+    'No markets found. Run <code class="text-xs">sync_markets --categories</code> or import via admin.': 'No se encontraron mercados. Ejecuta <code class="text-xs">sync_markets --categories</code> o importa desde el admin.',
+    "Live Kalshi Chart": "Gráfico Kalshi en vivo",
+    "Yes price history from Kalshi — updates when you refresh the page.": "Historial de precio Sí de Kalshi — se actualiza al refrescar la página.",
+    "Open on Kalshi ↗": "Abrir en Kalshi ↗",
+    "The chart is view-only. Use <strong>Open on Kalshi</strong> above to visit the market — no trading on this platform.": "El gráfico es solo lectura. Usa <strong>Abrir en Kalshi</strong> arriba para visitar el mercado — sin trading en esta plataforma.",
+    "No Polymarket API data stored for this market yet.": "Aún no hay datos de la API de Polymarket para este mercado.",
+    "Raw JSON — Market API": "JSON crudo — API de mercado",
+    "Complete unmodified Polymarket market response": "Respuesta completa sin modificar del mercado Polymarket",
+    "Raw JSON — Event API": "JSON crudo — API de evento",
+    "Complete unmodified Polymarket event response": "Respuesta completa sin modificar del evento Polymarket",
+    "Live Polymarket Chart": "Gráfico Polymarket en vivo",
+    "Embedded odds chart from Polymarket — updates automatically.": "Gráfico de cuotas embebido de Polymarket — se actualiza automáticamente.",
+    "Customize embed ↗": "Personalizar embed ↗",
+    "Open on Polymarket ↗": "Abrir en Polymarket ↗",
+    "The chart is view-only. Use <strong>Open on Polymarket</strong> above to visit the market — in-chart links are disabled because Polymarket's embed breaks for Spanish locale users.": "El gráfico es solo lectura. Usa <strong>Abrir en Polymarket</strong> arriba para visitar el mercado — los enlaces del gráfico están deshabilitados porque el embed de Polymarket falla para usuarios en español.",
+    "Polymarket market chart — %(market_title)s": "Gráfico de mercado Polymarket — %(market_title)s",
+    "Source": "Fuente",
+    "Draw": "Empate",
+    "3-way result": "Resultado triple",
+    "Place a forecast": "Publicar pronóstico",
+    "Posted %(timesince)s ago. Forecasts are permanent and cannot be edited.": "Publicado hace %(timesince)s. Los pronósticos son permanentes y no se pueden editar.",
+    "Pick your outcome below. Live Kalshi odds are captured when you submit.": "Elige tu resultado abajo. Las cuotas Kalshi en vivo se capturan al enviar.",
+    "Pick your outcome below. Live Polymarket odds are captured when you submit.": "Elige tu resultado abajo. Las cuotas Polymarket en vivo se capturan al enviar.",
+    "Market closes %(close_date)s": "El mercado cierra %(close_date)s",
+    "\n            Odds at submission: %(prob)s%% market probability.\n            <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> if correct,\n            <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> if wrong.\n            ": "\n            Cuotas al enviar: %(prob)s%% probabilidad de mercado.\n            <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> si aciertas,\n            <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas.\n            ",
+    "This forecast is locked until the market resolves.": "Este pronóstico está bloqueado hasta que el mercado se resuelva.",
+    "View in public feed": "Ver en el feed público",
+    "Reputation at stake based on current Kalshi odds.": "Reputación en juego según las cuotas Kalshi actuales.",
+    "Reputation at stake based on current Polymarket odds.": "Reputación en juego según las cuotas Polymarket actuales.",
+    "Market %(prob)s%%": "Mercado %(prob)s%%",
+    "\n                  <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> if correct\n                  <span class=\"text-slate-300 dark:text-slate-600\"> · </span>\n                  <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> if wrong\n                  ": "\n                  <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> si aciertas\n                  <span class=\"text-slate-300 dark:text-slate-600\"> · </span>\n                  <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas\n                  ",
+    "(optional)": "(opcional)",
+    "/": "/",
+    "Share the argument behind your pick — visible in the public forecast feed.": "Comparte el argumento detrás de tu elección — visible en el feed público de pronósticos.",
+    "to place your forecast on this market.": "para publicar tu pronóstico en este mercado.",
+    "%(timesince)s ago": "hace %(timesince)s",
+    "Closes %(close_date)s": "Cierra %(close_date)s",
+    "\n        %(source)s gave %(outcome)s %(prob)s%% at forecast time\n        · <span class=\"text-emerald-700\">+%(win)s</span> if correct\n        · <span class=\"text-red-700\">−%(loss)s</span> if wrong\n        ": "\n        %(source)s dio %(outcome)s %(prob)s%% al momento del pronóstico\n        · <span class=\"text-emerald-700\">+%(win)s</span> si aciertas\n        · <span class=\"text-red-700\">−%(loss)s</span> si fallas\n        ",
+    "Reputation +%(points)s earned": "Reputación +%(points)s ganados",
+    "Reputation %(points)s earned": "Reputación %(points)s ganados",
+    "Likes": "Me gusta",
+    "Dislikes": "No me gusta",
+    "%(name)s on %(title)s": "%(name)s en %(title)s",
+    "← Back to market": "← Volver al mercado",
+    "Prediction history": "Historial de predicciones",
+    "Formal forecasts and how they resolved.": "Pronósticos formales y cómo se resolvieron.",
+    "Use anonymous profile": "Usar perfil anónimo",
+}
+
+def main():
+    po = polib.pofile(str(PO_PATH))
+    cache = json.loads(CACHE_PATH.read_text()) if CACHE_PATH.exists() else {}
+    cache.update(MANUAL)
+    applied = 0
+    for entry in po:
+        if entry.msgid and not entry.msgstr.strip():
+            if entry.msgid in cache:
+                entry.msgstr = cache[entry.msgid]
+                applied += 1
+            elif entry.msgid in MANUAL:
+                entry.msgstr = MANUAL[entry.msgid]
+                applied += 1
+    for entry in po:
+        if "fuzzy" in entry.flags:
+            entry.flags.remove("fuzzy")
+    po.save(str(PO_PATH))
+    CACHE_PATH.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+    remaining = [e for e in po if e.msgid and not e.msgstr.strip()]
+    print(f"Applied {applied}, remaining {len(remaining)}")
+    if remaining:
+        for e in remaining[:10]:
+            print("MISSING:", repr(e.msgid[:70]))
+
+
+if __name__ == "__main__":
+    main()

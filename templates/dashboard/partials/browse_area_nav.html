@@ -1,7 +1,8 @@
+{% load i18n %}
 {% if area_summaries %}
-<nav class="browse-area-nav" aria-label="{{ category.name }} sub-areas">
+<nav class="browse-area-nav" aria-label="{% blocktrans with name=category.name %}{{ name }} sub-areas{% endblocktrans %}">
   <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-    All {{ category.name }}
+    {% blocktrans with name=category.name %}All {{ name }}{% endblocktrans %}
   </p>
 
   <ul class="space-y-0.5">
@@ -11,7 +12,7 @@
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
           {% include "dashboard/partials/category_icon.html" with slug=category.slug class=category.icon_fg %}
         </span>
-        <span class="min-w-0 flex-1 truncate">All</span>
+        <span class="min-w-0 flex-1 truncate">{% trans "All" %}</span>
         <span class="shrink-0 tabular-nums text-xs {% if not active_area_slug %}font-semibold text-slate-700{% else %}text-slate-400{% endif %}">
           {{ total_market_count }}
         </span>

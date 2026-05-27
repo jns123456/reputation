@@ -1,18 +1,18 @@
 {% extends "accounts/auth_base.html" %}
+{% load i18n %}
 
-{% block title %}Sign up{% endblock %}
+{% block title %}{% trans "Sign up" %}{% endblock %}
 
-{% block auth_eyebrow %}Get started{% endblock %}
-{% block auth_headline %}Start building your track record{% endblock %}
+{% block auth_eyebrow %}{% trans "Get started" %}{% endblock %}
+{% block auth_headline %}{% trans "Start building your track record" %}{% endblock %}
 {% block auth_description %}
-Create a free account to publish forecasts on real-world markets, join discussions,
-and prove your predictive skill over time.
+{% trans "Create a free account to publish forecasts on real-world markets, join discussions, and prove your predictive skill over time." %}
 {% endblock %}
-{% block auth_mobile_eyebrow %}Get started{% endblock %}
+{% block auth_mobile_eyebrow %}{% trans "Get started" %}{% endblock %}
 
-{% block auth_title %}Create account{% endblock %}
+{% block auth_title %}{% trans "Create account" %}{% endblock %}
 {% block auth_subtitle %}
-<p class="mt-1 text-sm text-slate-500">Takes less than a minute. No payment required.</p>
+<p class="mt-1 text-sm text-slate-500">{% trans "Takes less than a minute. No payment required." %}</p>
 {% endblock %}
 
 {% block auth_form %}
@@ -20,7 +20,7 @@ and prove your predictive skill over time.
   {% csrf_token %}
 
   <fieldset class="space-y-4">
-    <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500">Account</legend>
+    <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500">{% trans "Account" %}</legend>
 
     {% for field in form %}
       {% if field.name == "username" or field.name == "email" or field.name == "password1" or field.name == "password2" %}
@@ -44,7 +44,7 @@ and prove your predictive skill over time.
   </fieldset>
 
   <fieldset class="space-y-4 border-t border-slate-100 pt-6">
-    <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500">Profile <span class="font-normal normal-case tracking-normal text-slate-400">(optional)</span></legend>
+    <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500">{% trans "Profile" %} <span class="font-normal normal-case tracking-normal text-slate-400">({% trans "optional" %})</span></legend>
 
     {% for field in form %}
       {% if field.name == "display_name" or field.name == "bio" %}
@@ -64,7 +64,7 @@ and prove your predictive skill over time.
         <div>
           <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
           <p class="mt-0.5 text-xs leading-relaxed text-slate-500">
-            Hide your real identity and use a pseudonym in public discussions.
+            {% trans "Hide your real identity and use a pseudonym in public discussions." %}
           </p>
           {% if field.errors %}<p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>{% endif %}
         </div>
@@ -74,12 +74,12 @@ and prove your predictive skill over time.
   </fieldset>
 
   <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm">
-    Create account
+    {% trans "Create account" %}
   </button>
 </form>
 {% endblock %}
 
 {% block auth_footer %}
-Already have an account?
-<a href="{% url 'accounts:login' %}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline">Log in</a>
+{% trans "Already have an account?" %}
+<a href="{% url 'accounts:login' %}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline">{% trans "Log in" %}</a>
 {% endblock %}

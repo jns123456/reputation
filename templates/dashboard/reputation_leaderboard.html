@@ -1,15 +1,22 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-{% if category %}{{ category.name }} Reputation{% else %}Reputation Leaderboard{% endif %}
+{% if category %}{% blocktrans with name=category.name %}{{ name }} Reputation{% endblocktrans %}{% else %}{% trans "Reputation Leaderboard" %}{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
+  {% trans "Leaderboard" as hero_eyebrow %}
   {% if category %}
-  {% include "includes/pr_page_hero.html" with eyebrow="Leaderboard" compact=True title=category.name gradient="Reputation" description="Top predictors in this category — scores sum into the global reputation leaderboard." %}
+  {% trans "Reputation" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Top predictors in this category — scores sum into the global reputation leaderboard.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=category.name gradient=hero_gradient description=hero_description %}
   {% else %}
-  {% include "includes/pr_page_hero.html" with eyebrow="Leaderboard" compact=True title="Reputation" gradient="Leaderboard" description="Ranked by predictive quality across all categories — not social popularity." %}
+  {% trans "Reputation" as hero_title %}
+  {% trans "Leaderboard" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Ranked by predictive quality across all categories — not social popularity.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
   {% endif %}
 
   <div class="mt-2" data-pr-reveal data-delay="1">
@@ -17,18 +24,19 @@
   </div>
 
   <div class="pr-table-wrap mt-6" data-pr-reveal data-delay="2">
+    <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
       <thead>
         <tr>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Rank</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">User</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "User" %}</th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
-            {% if category %}Category reputation{% else %}Reputation{% endif %}
+            {% if category %}{% trans "Category reputation" %}{% else %}{% trans "Reputation" %}{% endif %}
           </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Predictions</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Correct</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>
           {% if category %}
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">Global</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Global" %}</th>
           {% endif %}
         </tr>
       </thead>
@@ -47,7 +55,7 @@
             <td class="px-4 py-3 text-sm text-slate-500">{{ row.user.profile.reputation_points }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No data yet for this category.</td></tr>
+          <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet for this category." %}</td></tr>
           {% endfor %}
         {% else %}
           {% for profile in leaders %}
@@ -62,7 +70,7 @@
             <td class="px-4 py-3 text-sm">{{ profile.correct_prediction_count }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No data yet.</td></tr>
+          <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet." %}</td></tr>
           {% endfor %}
         {% endif %}
       </tbody>

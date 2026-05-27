@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+from django.utils.translation import gettext_lazy as _
+
 FIFA_WORLD_CUP_CATEGORY_SLUG = "fifa-world-cup-2026"
 
 
@@ -25,8 +27,8 @@ class CanonicalCategory:
 CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     CanonicalCategory(
         slug="crypto",
-        name="Crypto",
-        description="Bitcoin, Ethereum, and digital assets",
+        name=_("Crypto"),
+        description=_("Bitcoin, Ethereum, and digital assets"),
         tag_slugs=frozenset(
             {
                 "crypto",
@@ -51,8 +53,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug="economy",
-        name="Economy",
-        description="Rates, inflation, jobs, and macro trends",
+        name=_("Economy"),
+        description=_("Rates, inflation, jobs, and macro trends"),
         tag_slugs=frozenset(
             {
                 "economy",
@@ -77,8 +79,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug="politics",
-        name="Politics",
-        description="Elections, policy, and government",
+        name=_("Politics"),
+        description=_("Elections, policy, and government"),
         tag_slugs=frozenset(
             {
                 "politics",
@@ -104,8 +106,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug="sports",
-        name="Sports",
-        description="Leagues, tournaments, and championships",
+        name=_("Sports"),
+        description=_("Leagues, tournaments, and championships"),
         tag_slugs=frozenset(
             {
                 "sports",
@@ -134,8 +136,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
-        name="FIFA World Cup 2026",
-        description="Match forecasts — win, draw, or loss",
+        name=_("FIFA World Cup 2026"),
+        description=_("Match forecasts — win, draw, or loss"),
         tag_slugs=frozenset({"fifa-world-cup", "2026-fifa-world-cup"}),
         category_names=frozenset(),
         polymarket_tag="fifa-world-cup",
@@ -149,8 +151,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug="pop-culture",
-        name="Pop Culture",
-        description="Movies, games, music, and entertainment",
+        name=_("Pop Culture"),
+        description=_("Movies, games, music, and entertainment"),
         tag_slugs=frozenset(
             {
                 "pop-culture",
@@ -174,8 +176,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug="science-tech",
-        name="Science & Tech",
-        description="AI, space, breakthroughs, and innovation",
+        name=_("Science & Tech"),
+        description=_("AI, space, breakthroughs, and innovation"),
         tag_slugs=frozenset(
             {
                 "science",
@@ -198,8 +200,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
     ),
     CanonicalCategory(
         slug="world",
-        name="World",
-        description="Geopolitics, conflicts, and global events",
+        name=_("World"),
+        description=_("Geopolitics, conflicts, and global events"),
         tag_slugs=frozenset(
             {
                 "geopolitics",
@@ -225,8 +227,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
 
 OTHER_CATEGORY = CanonicalCategory(
     slug="other",
-    name="Other",
-    description="More markets across the platform",
+    name=_("Other"),
+    description=_("More markets across the platform"),
     tag_slugs=frozenset(),
     category_names=frozenset(),
     polymarket_tag="",

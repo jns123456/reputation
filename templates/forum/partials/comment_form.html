@@ -1,3 +1,5 @@
+{% load i18n %}
+{% trans "Write a comment…" as default_comment_placeholder %}
 <form method="post"
       action="{% url 'forum:comment' post_id=post.id %}"
       hx-post="{% url 'forum:comment' post_id=post.id %}"
@@ -10,13 +12,13 @@
   {% endif %}
   <textarea name="body"
             rows="{% if variant == 'composer' %}3{% else %}2{% endif %}"
-            placeholder="{{ placeholder|default:'Write a comment…' }}"
+            placeholder="{{ placeholder|default:default_comment_placeholder }}"
             class="form-textarea comment-composer-input w-full"
             required></textarea>
   <div class="mt-2 flex items-center gap-2">
-    <button type="submit" class="btn-primary text-sm">{% if parent_comment %}Reply{% else %}Comment{% endif %}</button>
+    <button type="submit" class="btn-primary text-sm">{% if parent_comment %}{% trans "Reply" %}{% else %}{% trans "Comment" %}{% endif %}</button>
     {% if show_cancel %}
-    <button type="button" class="btn-secondary text-sm" @click="{{ cancel_action }}">Cancel</button>
+    <button type="button" class="btn-secondary text-sm" @click="{{ cancel_action }}">{% trans "Cancel" %}</button>
     {% endif %}
   </div>
 </form>

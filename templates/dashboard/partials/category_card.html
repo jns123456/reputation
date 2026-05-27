@@ -1,3 +1,4 @@
+{% load i18n %}
 <a href="{% url 'dashboard:category_browse' slug=category.slug %}{% if active_source %}?source={{ active_source }}{% endif %}"
    class="pr-card group relative flex h-full flex-col overflow-hidden {% if large %}min-h-[11rem] rounded-3xl p-6{% else %}rounded-2xl p-5{% endif %} border border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-brand-600">
   <div class="pointer-events-none absolute inset-0 bg-gradient-to-br {{ category.card_hover }}" aria-hidden="true"></div>
@@ -17,10 +18,10 @@
     <p class="mt-1 line-clamp-2 flex-1 text-sm leading-snug text-slate-500">{{ category.description }}</p>
     <div class="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-4">
       <span class="text-sm font-medium text-slate-600">
-        {{ count }} forecast{{ count|pluralize }}
+        {% blocktrans count counter=count %}{{ counter }} forecast{% plural %}{{ counter }} forecasts{% endblocktrans %}
       </span>
-      <span class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 opacity-0 transition duration-300 group-hover:opacity-100">
-        Browse
+      <span class="pr-card-hover-reveal inline-flex items-center gap-1 text-sm font-semibold text-brand-600 opacity-100 sm:opacity-0 sm:transition sm:duration-300 sm:group-hover:opacity-100">
+        {% trans "Browse" %}
         <svg class="h-4 w-4 transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>

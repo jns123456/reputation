@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import Http404
@@ -66,7 +67,7 @@ def challenge_create(request):
                     market_ids=[m.id for m in form.cleaned_data["markets"]],
                     opponent_ids=[int(uid) for uid in form.cleaned_data["opponents"]],
                 )
-                messages.success(request, "Challenge created. Waiting for opponents to accept.")
+                messages.success(request, _("Challenge created. Waiting for opponents to accept."))
                 return redirect("challenges:detail", pk=challenge.pk)
             except ValidationError as exc:
                 if hasattr(exc, "message_dict"):
@@ -158,7 +159,7 @@ def challenge_accept(request, pk):
     challenge = get_object_or_404(Challenge, pk=pk)
     try:
         accept_challenge(challenge=challenge, user=request.user)
-        messages.success(request, "You joined the challenge.")
+        messages.success(request, _("You joined the challenge."))
     except ValidationError as exc:
         messages.error(request, exc.messages[0] if exc.messages else str(exc))
     return redirect("challenges:detail", pk=pk)
@@ -170,7 +171,7 @@ def challenge_decline(request, pk):
     challenge = get_object_or_404(Challenge, pk=pk)
     try:
         decline_challenge(challenge=challenge, user=request.user)
-        messages.info(request, "You declined the challenge.")
+        messages.info(request, _("You declined the challenge."))
     except ValidationError as exc:
         messages.error(request, exc.messages[0] if exc.messages else str(exc))
     return redirect("challenges:list")
@@ -182,7 +183,7 @@ def challenge_cancel(request, pk):
     challenge = get_object_or_404(Challenge, pk=pk, creator=request.user)
     try:
         cancel_challenge(challenge=challenge, user=request.user)
-        messages.info(request, "Challenge cancelled.")
+        messages.info(request, _("Challenge cancelled."))
     except ValidationError as exc:
         messages.error(request, exc.messages[0] if exc.messages else str(exc))
     return redirect("challenges:list")

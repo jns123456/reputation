@@ -1,8 +1,10 @@
 document.addEventListener("alpine:init", function () {
+  var i18n = window.ABOUT_PAGE_I18N || {};
+
   Alpine.store("aboutNav", {
     scrollProgress: 0,
     activeSection: "hero",
-    sections: [
+    sections: i18n.sections || [
       { id: "hero", label: "Intro" },
       { id: "thesis", label: "Thesis" },
       { id: "proof", label: "Reputation" },
@@ -28,7 +30,7 @@ document.addEventListener("alpine:init", function () {
       scoreFocus: "reputation",
       activeDomain: null,
       expandedQuestion: null,
-      domains: [
+      domains: i18n.domains || [
         "Geopolitics",
         "Sports",
         "Crypto",
@@ -38,7 +40,7 @@ document.addEventListener("alpine:init", function () {
         "Tech",
         "Culture",
       ],
-      questions: [
+      questions: i18n.questions || [
         { id: "why", q: "Why do you believe this?" },
         { id: "conf", q: "How confident are you?" },
         { id: "mind", q: "Did you change your mind?" },
@@ -46,16 +48,31 @@ document.addEventListener("alpine:init", function () {
         { id: "age", q: "Did your reasoning age well?" },
         { id: "domain", q: "Are you right in this domain?" },
       ],
-      moneyPoints: [
+      moneyPoints: i18n.moneyPoints || [
         "Rewards capital, not necessarily insight",
         "Excludes anyone without funds to wager",
         "One lucky bet can distort the ranking",
       ],
-      repPoints: [
+      repPoints: i18n.repPoints || [
         "Accuracy, calibration, early conviction",
         "Performance by topic and over time",
         "Open to anyone — judgment is the entry fee",
       ],
+      reputationMetrics: i18n.reputationMetrics || [
+        "Accuracy",
+        "Calibration",
+        "Early conviction",
+        "Topic expertise",
+      ],
+      moneyMetrics: i18n.moneyMetrics || [
+        "P&L",
+        "Volume traded",
+        "Max drawdown",
+        "Bankroll size",
+      ],
+      rankByPrefix: i18n.rankByPrefix || "Rank by ",
+      becomeKnownForTemplate: i18n.becomeKnownForTemplate || "Become known for %(domain)s — a living map of who has good judgment.",
+      forecastContextHint: i18n.forecastContextHint || "Every forecast captures context — not just yes or no, but why, when, and how confident.",
       init: function () {
         var self = this;
         this._onScroll = function () {
@@ -63,6 +80,10 @@ document.addEventListener("alpine:init", function () {
         };
         window.addEventListener("scroll", this._onScroll, { passive: true });
         this.updateScrollState();
+      },
+      becomeKnownFor: function (domain) {
+        if (!domain) return "";
+        return (this.becomeKnownForTemplate || "").replace("%(domain)s", domain.toLowerCase());
       },
       updateScrollState: function () {
         var nav = Alpine.store("aboutNav");

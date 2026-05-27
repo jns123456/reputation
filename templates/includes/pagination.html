@@ -1,32 +1,35 @@
+{% load i18n %}
 {% if page_obj.paginator.num_pages > 1 %}
-<nav class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between" aria-label="Pagination">
+<nav class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between" aria-label="{% trans 'Pagination' %}">
   <p class="text-sm text-slate-500">
+    {% blocktrans with start=page_obj.start_index end=page_obj.end_index count=page_obj.paginator.count %}
     Showing
-    <span class="font-medium text-slate-700">{{ page_obj.start_index }}–{{ page_obj.end_index }}</span>
+    <span class="font-medium text-slate-700">{{ start }}–{{ end }}</span>
     of
-    <span class="font-medium text-slate-700">{{ page_obj.paginator.count }}</span>
+    <span class="font-medium text-slate-700">{{ count }}</span>
+    {% endblocktrans %}
   </p>
   <div class="flex items-center gap-2">
     {% if page_obj.has_previous %}
     <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}"
        class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-      Previous
+      {% trans "Previous" %}
     </a>
     {% else %}
-    <span class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-sm text-slate-400">Previous</span>
+    <span class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-sm text-slate-400">{% trans "Previous" %}</span>
     {% endif %}
 
     <span class="px-2 text-sm tabular-nums text-slate-600">
-      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      {% blocktrans with number=page_obj.number total=page_obj.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktrans %}
     </span>
 
     {% if page_obj.has_next %}
     <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}"
        class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-      Next
+      {% trans "Next" %}
     </a>
     {% else %}
-    <span class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-sm text-slate-400">Next</span>
+    <span class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-sm text-slate-400">{% trans "Next" %}</span>
     {% endif %}
   </div>
 </nav>

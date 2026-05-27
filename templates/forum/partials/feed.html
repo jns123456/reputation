@@ -1,8 +1,9 @@
+{% load i18n %}
 {% for item in feed_items %}
   {% include "forum/partials/post_card.html" with post=item.post original_post=item.original_post comment_count=item.comment_count post_vote=item.post_vote is_bookmarked=item.is_bookmarked repost_count=item.repost_count is_reposted=item.is_reposted %}
 {% empty %}
 <div class="px-4 py-16 text-center text-slate-500 dark:text-slate-400">
-  <p class="text-lg font-medium text-slate-700 dark:text-slate-300">No posts yet</p>
-  <p class="mt-2 text-sm">Be the first to share something on Forum.</p>
+  <p class="text-lg font-medium text-slate-700 dark:text-slate-300">{% trans "No posts yet" %}</p>
+  <p class="mt-2 text-sm">{% trans "Be the first to share something on Forum." %}</p>
 </div>
 {% endfor %}

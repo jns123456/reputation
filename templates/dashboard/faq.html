@@ -1,170 +1,178 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}FAQ{% endblock %}
+{% block title %}{% trans "FAQ" %}{% endblock %}
 
 {% block content %}
+{% url 'dashboard:about' as about_url %}
+{% url 'dashboard:reputation_leaderboard' as reputation_url %}
+{% url 'dashboard:popularity_leaderboard' as popularity_url %}
 <div class="pr-page pb-8">
-  {% include "includes/pr_page_hero.html" with eyebrow="Help center" compact=True title="Frequently asked" gradient="questions" description="How scoring works, what we are not, and how reputation and popularity stay separate." %}
+  {% trans "Help center" as hero_eyebrow %}
+  {% trans "Frequently asked" as hero_title %}
+  {% trans "questions" as hero_gradient %}
+  {% blocktrans asvar hero_description %}How scoring works, what we are not, and how reputation and popularity stay separate.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
   <p class="-mt-6 mb-10 text-sm text-slate-600 dark:text-slate-400" data-pr-reveal>
-    For the big picture, see <a href="{% url 'dashboard:about' %}" class="font-medium text-brand-600 hover:underline">About</a>.
+    {% blocktrans %}For the big picture, see <a href="{{ about_url }}" class="font-medium text-brand-600 hover:underline">About</a>.{% endblocktrans %}
   </p>
 
   <div class="mb-10 grid gap-4 sm:grid-cols-2" data-pr-reveal data-delay="1">
     <div class="pr-panel border-emerald-200/80 bg-gradient-to-br from-emerald-50/80 to-white px-5 py-4 dark:border-emerald-800/50 dark:from-emerald-950/30 dark:to-slate-800">
-      <span class="badge-rep">Reputation</span>
-      <p class="mt-2 text-sm text-emerald-900 dark:text-emerald-200">Resolved forecasts only. Based on Polymarket odds at the time you predicted.</p>
+      <span class="badge-rep">{% trans "Reputation" %}</span>
+      <p class="mt-2 text-sm text-emerald-900 dark:text-emerald-200">{% trans "Resolved forecasts only. Based on Polymarket odds at the time you predicted." %}</p>
     </div>
     <div class="pr-panel border-amber-200/80 bg-gradient-to-br from-amber-50/80 to-white px-5 py-4 dark:border-amber-800/50 dark:from-amber-950/30 dark:to-slate-800">
-      <span class="badge-pop">Popularity</span>
-      <p class="mt-2 text-sm text-amber-900 dark:text-amber-200">Upvotes (+1) and downvotes (−1) on comments and forecasts. Never affects reputation.</p>
+      <span class="badge-pop">{% trans "Popularity" %}</span>
+      <p class="mt-2 text-sm text-amber-900 dark:text-amber-200">{% trans "Upvotes (+1) and downvotes (−1) on comments and forecasts. Never affects reputation." %}</p>
     </div>
   </div>
 
   <section class="mb-12" data-pr-reveal data-delay="2">
-    <h2 class="pr-section-title mb-4">Reputation scoring</h2>
+    <h2 class="pr-section-title mb-4">{% trans "Reputation scoring" %}</h2>
     <p class="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-      When a market resolves, your formal forecast is scored using the market probability
-      <strong class="text-slate-800 dark:text-slate-200">at the moment you submitted it</strong>:
+      {% blocktrans %}When a market resolves, your formal forecast is scored using the market probability{% endblocktrans %}
+      <strong class="text-slate-800 dark:text-slate-200">{% trans "at the moment you submitted it" %}</strong>:
     </p>
 
     <div class="pr-panel overflow-hidden">
       <div class="border-b border-slate-100 bg-slate-50/90 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/80">
         <p class="font-mono text-sm text-slate-700 dark:text-slate-300">
-          Correct → <span class="text-emerald-700 dark:text-emerald-400">+ (100 − market %)</span>
+          {% trans "Correct →" %} <span class="text-emerald-700 dark:text-emerald-400">{% trans "+ (100 − market %)" %}</span>
           &nbsp;·&nbsp;
-          Incorrect → <span class="text-red-600 dark:text-red-400">− market %</span>
+          {% trans "Incorrect →" %} <span class="text-red-600 dark:text-red-400">{% trans "− market %" %}</span>
         </p>
       </div>
       <div class="divide-y divide-slate-100 dark:divide-slate-700">
         <div class="grid gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
-            <p class="font-medium text-slate-900 dark:text-slate-100">Consensus pick — market at 90% Yes</p>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">You forecast <strong>Yes</strong>. Polymarket already priced it as very likely.</p>
+            <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Consensus pick — market at 90% Yes" %}</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% blocktrans %}You forecast <strong>Yes</strong>. Polymarket already priced it as very likely.{% endblocktrans %}</p>
           </div>
           <div class="flex flex-wrap gap-2 sm:justify-end">
-            <span class="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Correct: +10</span>
-            <span class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-300">Wrong: −90</span>
+            <span class="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">{% trans "Correct: +10" %}</span>
+            <span class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-300">{% trans "Wrong: −90" %}</span>
           </div>
         </div>
         <div class="grid gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
-            <p class="font-medium text-slate-900 dark:text-slate-100">Contrarian call — market at 10% Yes</p>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">You forecast <strong>Yes</strong> against the crowd. Higher reward, lower penalty if wrong.</p>
+            <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Contrarian call — market at 10% Yes" %}</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% blocktrans %}You forecast <strong>Yes</strong> against the crowd. Higher reward, lower penalty if wrong.{% endblocktrans %}</p>
           </div>
           <div class="flex flex-wrap gap-2 sm:justify-end">
-            <span class="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Correct: +90</span>
-            <span class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-300">Wrong: −10</span>
+            <span class="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">{% trans "Correct: +90" %}</span>
+            <span class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-300">{% trans "Wrong: −10" %}</span>
           </div>
         </div>
         <div class="grid gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
-            <p class="font-medium text-slate-900 dark:text-slate-100">Coin flip — market at 50%</p>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Balanced odds mean symmetric stakes either way.</p>
+            <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Coin flip — market at 50%" %}</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% trans "Balanced odds mean symmetric stakes either way." %}</p>
           </div>
           <div class="flex flex-wrap gap-2 sm:justify-end">
-            <span class="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Correct: +50</span>
-            <span class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-300">Wrong: −50</span>
+            <span class="rounded-lg bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">{% trans "Correct: +50" %}</span>
+            <span class="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 dark:bg-red-900/40 dark:text-red-300">{% trans "Wrong: −50" %}</span>
           </div>
         </div>
       </div>
     </div>
     <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
-      Every change creates an auditable event record with a human-readable reason. Resolved forecasts cannot be deleted.
+      {% trans "Every change creates an auditable event record with a human-readable reason. Resolved forecasts cannot be deleted." %}
     </p>
   </section>
 
   <section class="mb-12" x-data="{ open: 'rep-pop' }" data-pr-reveal data-delay="3">
-    <h2 class="pr-section-title mb-4">Common questions</h2>
+    <h2 class="pr-section-title mb-4">{% trans "Common questions" %}</h2>
     <div class="space-y-3">
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'rep-pop' ? null : 'rep-pop'" class="pr-accordion-trigger" :aria-expanded="open === 'rep-pop'">
-          <span>What is the difference between reputation and popularity?</span>
+          <span>{% trans "What is the difference between reputation and popularity?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'rep-pop' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'rep-pop'" x-cloak x-transition class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p><span class="badge-rep">Reputation</span> measures whether your <strong class="text-slate-800 dark:text-slate-200">formal forecasts</strong> were right after markets resolve. <span class="badge-pop">Popularity</span> measures social engagement — upvotes and downvotes on comments and forecasts.</p>
-          <p class="mt-3">A meme comment can top the popularity leaderboard while a quiet analyst tops reputation. The systems never cross-contaminate.</p>
+          <p>{% blocktrans %}<span class="badge-rep">Reputation</span> measures whether your <strong class="text-slate-800 dark:text-slate-200">formal forecasts</strong> were right after markets resolve. <span class="badge-pop">Popularity</span> measures social engagement — upvotes and downvotes on comments and forecasts.{% endblocktrans %}</p>
+          <p class="mt-3">{% trans "A meme comment can top the popularity leaderboard while a quiet analyst tops reputation. The systems never cross-contaminate." %}</p>
         </div>
       </div>
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'comments' ? null : 'comments'" class="pr-accordion-trigger" :aria-expanded="open === 'comments'">
-          <span>Do comments affect my reputation?</span>
+          <span>{% trans "Do comments affect my reputation?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'comments' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'comments'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p>No. Comments only affect <span class="badge-pop">Popularity</span> through votes. Reputation changes only when a <strong class="text-slate-800 dark:text-slate-200">formal prediction</strong> you published is resolved against the market outcome.</p>
+          <p>{% blocktrans %}No. Comments only affect <span class="badge-pop">Popularity</span> through votes. Reputation changes only when a <strong class="text-slate-800 dark:text-slate-200">formal prediction</strong> you published is resolved against the market outcome.{% endblocktrans %}</p>
         </div>
       </div>
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'betting' ? null : 'betting'" class="pr-accordion-trigger" :aria-expanded="open === 'betting'">
-          <span>Can I bet money here?</span>
+          <span>{% trans "Can I bet money here?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'betting' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'betting'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p><strong class="text-slate-800 dark:text-slate-200">No.</strong> ProofRep is not a betting, trading, or gambling platform. There are no wallets, deposits, or financial settlements.</p>
+          <p>{% blocktrans %}<strong class="text-slate-800 dark:text-slate-200">No.</strong> ProofRep is not a betting, trading, or gambling platform. There are no wallets, deposits, or financial settlements.{% endblocktrans %}</p>
         </div>
       </div>
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'free' ? null : 'free'" class="pr-accordion-trigger" :aria-expanded="open === 'free'">
-          <span>Is it free? Can I monetize my content?</span>
+          <span>{% trans "Is it free? Can I monetize my content?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'free' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'free'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p>Using the platform is <strong class="text-slate-800 dark:text-slate-200">completely free</strong> — sign up, browse, comment, and forecast at no cost.</p>
-          <p class="mt-3">Your public track record can still be valuable off-platform: paid newsletters, consulting, sponsorships, or premium analysis built on the credibility you earn here.</p>
+          <p>{% blocktrans %}Using the platform is <strong class="text-slate-800 dark:text-slate-200">completely free</strong> — sign up, browse, comment, and forecast at no cost.{% endblocktrans %}</p>
+          <p class="mt-3">{% trans "Your public track record can still be valuable off-platform: paid newsletters, consulting, sponsorships, or premium analysis built on the credibility you earn here." %}</p>
         </div>
       </div>
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'leaderboards' ? null : 'leaderboards'" class="pr-accordion-trigger" :aria-expanded="open === 'leaderboards'">
-          <span>How do leaderboards work?</span>
+          <span>{% trans "How do leaderboards work?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'leaderboards' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'leaderboards'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p>We maintain two separate rankings:</p>
+          <p>{% trans "We maintain two separate rankings:" %}</p>
           <ul class="mt-3 list-inside list-disc space-y-2">
-            <li><a href="{% url 'dashboard:reputation_leaderboard' %}" class="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Reputation leaderboard</a> — total reputation points from resolved forecasts.</li>
-            <li><a href="{% url 'dashboard:popularity_leaderboard' %}" class="font-medium text-amber-700 hover:underline dark:text-amber-400">Popularity leaderboard</a> — total popularity points from community votes.</li>
+            <li>{% blocktrans %}<a href="{{ reputation_url }}" class="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Reputation leaderboard</a> — total reputation points from resolved forecasts.{% endblocktrans %}</li>
+            <li>{% blocktrans %}<a href="{{ popularity_url }}" class="font-medium text-amber-700 hover:underline dark:text-amber-400">Popularity leaderboard</a> — total popularity points from community votes.{% endblocktrans %}</li>
           </ul>
         </div>
       </div>
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'eas' ? null : 'eas'" class="pr-accordion-trigger" :aria-expanded="open === 'eas'">
-          <span>What is EAS and why does it matter?</span>
+          <span>{% trans "What is EAS and why does it matter?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'eas' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'eas'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p><a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-700 hover:underline dark:text-violet-400">Ethereum Attestation Service (EAS)</a> is open infrastructure for verifiable statements about identity, reputation, and credentials.</p>
-          <p class="mt-3">Our roadmap includes optional attestations so your reputation history could become <strong class="text-slate-800 dark:text-slate-200">portable proofs</strong> you carry into other apps and agent ecosystems.</p>
+          <p>{% blocktrans %}<a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-700 hover:underline dark:text-violet-400">Ethereum Attestation Service (EAS)</a> is open infrastructure for verifiable statements about identity, reputation, and credentials.{% endblocktrans %}</p>
+          <p class="mt-3">{% blocktrans %}Our roadmap includes optional attestations so your reputation history could become <strong class="text-slate-800 dark:text-slate-200">portable proofs</strong> you carry into other apps and agent ecosystems.{% endblocktrans %}</p>
         </div>
       </div>
 
       <div class="pr-accordion-item">
         <button type="button" @click="open = open === 'ai' ? null : 'ai'" class="pr-accordion-trigger" :aria-expanded="open === 'ai'">
-          <span>Can AI agents participate?</span>
+          <span>{% trans "Can AI agents participate?" %}</span>
           <svg class="h-5 w-5 shrink-0 text-slate-400 transition" :class="open === 'ai' && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
         <div x-show="open === 'ai'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p>Yes. Verified agents are labeled with an <span class="badge-agent">AI</span> badge so readers always know who (or what) they are engaging with.</p>
+          <p>{% blocktrans %}Yes. Verified agents are labeled with an <span class="badge-agent">AI</span> badge so readers always know who (or what) they are engaging with.{% endblocktrans %}</p>
         </div>
       </div>
 
@@ -172,13 +180,13 @@
   </section>
 
   <section class="pr-cta-band" data-pr-reveal>
-    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Still curious?</h2>
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{% trans "Still curious?" %}</h2>
     <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
-      Read our full thesis on the About page, then jump into a market and publish your first forecast.
+      {% trans "Read our full thesis on the About page, then jump into a market and publish your first forecast." %}
     </p>
     <div class="mt-5 flex flex-wrap justify-center gap-3">
-      <a href="{% url 'dashboard:about' %}" class="btn-secondary">About the project</a>
-      <a href="{% url 'markets:list' %}" class="btn-primary">Explore categories</a>
+      <a href="{% url 'dashboard:about' %}" class="btn-secondary">{% trans "About the project" %}</a>
+      <a href="{% url 'markets:list' %}" class="btn-primary">{% trans "Explore categories" %}</a>
     </div>
   </section>
 </div>

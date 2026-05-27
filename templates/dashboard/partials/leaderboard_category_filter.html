@@ -1,11 +1,12 @@
-<div class="flex flex-wrap gap-2">
+{% load i18n %}
+<div class="pr-scroll-x md:flex md:flex-wrap md:gap-2 md:overflow-visible">
   <a href="{% url global_url_name %}"
-     class="rounded-full px-3 py-1 text-xs font-medium transition {% if not category %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-    All categories
+     class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if not category %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+    {% trans "All categories" %}
   </a>
   {% for chart_category in chart_categories %}
   <a href="{% url category_url_name slug=chart_category.slug %}"
-     class="rounded-full px-3 py-1 text-xs font-medium transition {% if category and category.slug == chart_category.slug %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+     class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if category and category.slug == chart_category.slug %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
     {{ chart_category.name }}
   </a>
   {% endfor %}

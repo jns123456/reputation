@@ -1,17 +1,20 @@
 {% extends "base.html" %}
-{% load reputation_filters %}
+{% load i18n reputation_filters %}
 
-{% block title %}Prediction History{% endblock %}
+{% block title %}{% trans "Prediction History" %}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
-  {% include "includes/pr_page_hero.html" with eyebrow="Track record" compact=True title="Prediction history" gradient=profile_user.public_name description="Formal forecasts and how they resolved." %}
+  {% trans "Track record" as hero_eyebrow %}
+  {% trans "Prediction history" as hero_title %}
+  {% blocktrans asvar hero_description %}Formal forecasts and how they resolved.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=profile_user.public_name description=hero_description %}
 
   <div class="mt-2 space-y-3" data-pr-reveal>
     {% for prediction in predictions %}
       {% include "predictions/partials/prediction_history_item.html" %}
     {% empty %}
-    <div class="pr-empty">No predictions yet.</div>
+    <div class="pr-empty">{% trans "No predictions yet." %}</div>
     {% endfor %}
   </div>
 </div>

@@ -79,7 +79,7 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 - Native token
 - Payment marketplace
 - Complex monetization system
-- Native mobile app
+- Native mobile app (mobile-first **web** is the primary surface; ~95% of usage expected on phones)
 - Matching engine
 - Internal trading system
 - Production smart contracts
@@ -108,8 +108,9 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 | Approach | Server-rendered Django templates with progressive enhancement |
 | HTML interactivity | HTMX |
 | Light reactivity | Alpine.js |
-| Styling | TailwindCSS |
+| Styling | TailwindCSS — **mobile-first** (default styles for phones; `sm:`/`md:`/`lg:` enhance for larger screens) |
 | Icons | Lucide Icons |
+| Mobile navigation | Fixed bottom tab bar on phones (`includes/mobile_bottom_nav.html`); top hamburger for secondary links |
 
 ### Infrastructure
 
@@ -384,11 +385,31 @@ Do not over-engineer the formula in MVP. Make it easy to audit and test.
 
 **Style:** Clean, modern, credibility-focused — slightly financial/social network aesthetic.
 
+**Primary device:** Mobile phones. ~95% of usage is expected on mobile. Design **mobile layouts first**, then enhance for tablet and desktop — never the reverse.
+
+### Mobile-first rules (mandatory)
+
+| Rule | Detail |
+|------|--------|
+| Layout default | Single column, full-width cards, stacked filters — no sidebars on phones |
+| Touch targets | Minimum **44×44px** for buttons, votes, nav items, and action bars |
+| Navigation | Bottom tab bar for primary routes on `< md`; top navbar for brand + overflow menu |
+| Hover affordances | Never rely on `:hover` alone — show key CTAs (e.g. "Browse →") on touch devices |
+| Tables | Wrap in `.pr-table-wrap` (horizontal scroll) or use card stacks — never clip columns |
+| Forms | Inputs **≥ 16px** font size to prevent iOS auto-zoom; full-width fields on mobile |
+| Safe areas | Respect `env(safe-area-inset-*)` for notched phones (bottom nav, fixed headers) |
+| Performance | Prefer CSS over JS for layout; avoid heavy embeds above the fold on mobile |
+| Breakpoints | Tailwind defaults: base = phone, `sm:` 640px+, `md:` 768px+, `lg:` 1024px+ |
+
+Shared mobile styles live in `static/css/proofrep-ui.css`. Reuse `.pr-*` components before adding page-specific CSS.
+
 ### Key Pages
 
-- Landing page
-- Market list page
+- Landing / About page
+- Market hub and market list
 - Market detail page (discussion + predictions)
+- Forecasts feed
+- Forum feed
 - Comment thread section
 - Prediction creation form
 - User profile page
@@ -405,6 +426,8 @@ Do not over-engineer the formula in MVP. Make it easy to audit and test.
 3. Predictions should feel more formal and durable than comments.
 4. Resolved prediction history must be easy to inspect.
 5. AI agent users must be visually distinguishable from human users.
+6. **Thumb-reachable:** primary actions (forecast, comment, vote) sit in the lower half of the viewport when possible.
+7. **No horizontal page scroll** — only intentional scroll inside tables or pill rows.
 
 ---
 
@@ -434,6 +457,8 @@ Do not over-engineer the formula in MVP. Make it easy to audit and test.
 - Server-rendered Django templates with HTMX partials.
 - Alpine.js only for lightweight client-side state.
 - TailwindCSS for styling; avoid inline styles.
+- **Mobile-first Tailwind:** write base classes for phones, add `sm:`/`md:`/`lg:` for larger screens.
+- Touch-friendly action partials: use `.pr-action-bar` / `.pr-touch-target` patterns from `proofrep-ui.css`.
 - Keep templates readable; extract partials for reuse.
 
 ### Testing
@@ -632,9 +657,10 @@ When editing §15, **delete or merge** stale lines — do not only append. Prefe
 
 ### Lessons learned
 
-<!-- Durable, project-specific knowledge not covered above. Review and prune each time you touch this file. -->
-
-*(none yet)*
+```
+[2026-05] workflow — UI was desktop-first (hover-only CTAs, clipped tables, small tap targets) → design mobile-first per §7; use `.pr-bottom-nav`, `.pr-action-bar`, `.pr-table-wrap` with overflow-x, 44px touch targets, and `@media (hover: none)` for touch-visible CTAs.
+[2026-05] workflow — Spanish/English UI uses Django i18n (`LocaleMiddleware`, `{% trans %}`, `locale/es/`); navbar language switch uses flags via `i18n_extras.language_flag` (🇺🇸 en, 🇪🇸 es); after new strings run `makemessages -l es` then `compilemessages`; optional `scripts/fill_spanish_po.py` / `apply_manual_spanish.py` for bulk PO updates.
+```
 
 ---
 

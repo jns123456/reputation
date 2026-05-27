@@ -1,6 +1,7 @@
 """Challenge business logic."""
 
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 from django.db import transaction
 from django.utils import timezone
 
@@ -18,31 +19,35 @@ from markets.models import Market
 def create_challenge(*, creator, title="", market_ids, opponent_ids):
     """Create a challenge with up to 10 markets and mutual-follow opponents."""
     if not market_ids:
-        raise ValidationError("Select at least one event.")
+        raise ValidationError(_("Select at least one event."))
     if len(market_ids) > MAX_CHALLENGE_MARKETS:
-        raise ValidationError(f"A challenge can include at most {MAX_CHALLENGE_MARKETS} events.")
+        raise ValidationError(
+            _("A challenge can include at most %(max)s events.")
+            % {"max": MAX_CHALLENGE_MARKETS}
+        )
     if len(set(market_ids)) != len(market_ids):
-        raise ValidationError("Duplicate events are not allowed.")
+        raise ValidationError(_("Duplicate events are not allowed."))
     if not opponent_ids:
-        raise ValidationError("Select at least one user to challenge.")
+        raise ValidationError(_("Select at least one user to challenge."))
     if creator.id in opponent_ids:
-        raise ValidationError("You cannot challenge yourself.")
+        raise ValidationError(_("You cannot challenge yourself."))
 
     markets = list(Market.objects.filter(id__in=market_ids))
     if len(markets) != len(market_ids):
-        raise ValidationError("One or more selected events were not found.")
+        raise ValidationError(_("One or more selected events were not found."))
 
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
     opponents = list(User.objects.filter(id__in=opponent_ids))
     if len(opponents) != len(opponent_ids):
-        raise ValidationError("One or more selected users were not found.")
+        raise ValidationError(_("One or more selected users were not found."))
 
     for opponent in opponents:
         if not are_mutual_followers(creator, opponent):
             raise ValidationError(
-                f"You and @{opponent.username} must follow each other to challenge them."
+                _("You and @%(username)s must follow each other to challenge them.")
+                % {"username": opponent.username}
             )
 
     with transaction.atomic():
@@ -85,9 +90,9 @@ def accept_challenge(*, challenge, user):
         user=user,
     ).first()
     if not participant:
-        raise ValidationError("You are not part of this challenge.")
+        raise ValidationError(_("You are not part of this challenge."))
     if participant.status == ChallengeParticipant.Status.DECLINED:
-        raise ValidationError("You already declined this challenge.")
+        raise ValidationError(_("You already declined this challenge."))
     if participant.status == ChallengeParticipant.Status.ACCEPTED:
         return participant
 
@@ -110,9 +115,9 @@ def decline_challenge(*, challenge, user):
         user=user,
     ).first()
     if not participant:
-        raise ValidationError("You are not part of this challenge.")
+        raise ValidationError(_("You are not part of this challenge."))
     if participant.challenge.creator_id == user.id:
-        raise ValidationError("The creator cannot decline their own challenge.")
+        raise ValidationError(_("The creator cannot decline their own challenge."))
 
     participant.status = ChallengeParticipant.Status.DECLINED
     participant.save(update_fields=["status"])
@@ -127,9 +132,9 @@ def decline_challenge(*, challenge, user):
 
 def cancel_challenge(*, challenge, user):
     if challenge.creator_id != user.id:
-        raise ValidationError("Only the creator can cancel a challenge.")
+        raise ValidationError(_("Only the creator can cancel a challenge."))
     if challenge.status != Challenge.Status.PENDING:
-        raise ValidationError("Only pending challenges can be cancelled.")
+        raise ValidationError(_("Only pending challenges can be cancelled."))
 
     challenge.status = Challenge.Status.CANCELLED
     challenge.save(update_fields=["status", "updated_at"])

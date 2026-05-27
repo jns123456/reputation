@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="follow-user-{{ profile_user.username }}">
 {% if user.is_authenticated and user != profile_user %}
 <form method="post" action="{% url 'accounts:follow_toggle' %}" class="inline"
@@ -8,10 +9,10 @@
   <input type="hidden" name="username" value="{{ profile_user.username }}">
   <button type="submit"
           class="{% if is_following %}btn-secondary{% else %}btn-primary{% endif %}">
-    {% if is_following %}Following{% else %}Follow{% endif %}
+    {% if is_following %}{% trans "Following" %}{% else %}{% trans "Follow" %}{% endif %}
   </button>
 </form>
 {% elif not user.is_authenticated %}
-<a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn-primary">Follow</a>
+<a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn-primary">{% trans "Follow" %}</a>
 {% endif %}
 </div>

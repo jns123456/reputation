@@ -1,6 +1,7 @@
 """Comment and vote services."""
 
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from comments.models import Comment, Vote
 from reputation.models import PopularityEvent
@@ -10,14 +11,14 @@ from reputation.popularity_services import apply_vote_popularity, record_popular
 def create_comment(*, user, market, body, parent_comment=None, prediction=None):
     if parent_comment:
         if parent_comment.market_id != market.id:
-            raise ValueError("Parent comment belongs to a different market.")
+            raise ValueError(_("Parent comment belongs to a different market."))
         if prediction and parent_comment.prediction_id != prediction.id:
-            raise ValueError("Parent comment belongs to a different forecast thread.")
+            raise ValueError(_("Parent comment belongs to a different forecast thread."))
         if not prediction:
             prediction = parent_comment.prediction
 
     if prediction and prediction.market_id != market.id:
-        raise ValueError("Prediction belongs to a different market.")
+        raise ValueError(_("Prediction belongs to a different market."))
 
     _assert_can_comment_on_prediction(
         user=user,
@@ -57,15 +58,15 @@ def cast_vote(*, user, target_type, target_id, value):
     """Cast or update a vote. Value: 1 (upvote), -1 (downvote), 0 (remove)."""
     target = _get_vote_target(target_type, target_id)
     if target is None:
-        raise ValueError("Vote target not found.")
+        raise ValueError(_("Vote target not found."))
 
     content_owner = target.user
     if content_owner == user:
         if target_type == Vote.TargetType.PREDICTION:
-            raise ValueError("You cannot vote on your own forecast.")
+            raise ValueError(_("You cannot vote on your own forecast."))
         if target_type == Vote.TargetType.PULSE_POST:
-            raise ValueError("You cannot vote on your own post.")
-        raise ValueError("Cannot vote on your own content.")
+            raise ValueError(_("You cannot vote on your own post."))
+        raise ValueError(_("Cannot vote on your own content."))
 
     with transaction.atomic():
         vote, created = Vote.objects.get_or_create(
@@ -125,10 +126,10 @@ def _assert_can_comment_on_prediction(*, user, prediction, parent_comment=None):
         return
     if parent_comment is None:
         raise ValueError(
-            "You cannot comment on your own forecast. Reply to others instead."
+            _("You cannot comment on your own forecast. Reply to others instead.")
         )
     if parent_comment.user == user:
-        raise ValueError("You cannot reply to your own comment.")
+        raise ValueError(_("You cannot reply to your own comment."))
 
 
 def _get_vote_target(target_type, target_id):

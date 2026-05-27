@@ -2,6 +2,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -196,7 +197,7 @@ def alert_settings(request):
         form = NotificationPreferenceForm(request.POST, instance=preferences)
         if form.is_valid():
             form.save()
-            messages.success(request, "Alert preferences saved.")
+            messages.success(request, _("Alert preferences saved."))
             return redirect("accounts:alert_settings")
     else:
         form = NotificationPreferenceForm(instance=preferences)
@@ -253,5 +254,5 @@ def notification_mark_read(request, notification_id):
 @require_POST
 def notifications_mark_all_read(request):
     mark_all_notifications_read(user=request.user)
-    messages.success(request, "All notifications marked as read.")
+    messages.success(request, _("All notifications marked as read."))
     return redirect("accounts:notifications")

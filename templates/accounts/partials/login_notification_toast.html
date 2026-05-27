@@ -1,4 +1,4 @@
-{% load notification_tags %}
+{% load i18n notification_tags %}
 
 {% if login_notification_toast %}
 <div x-data="{ open: true }"
@@ -23,19 +23,19 @@
       </span>
       <div>
         <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          {% if login_notification_toast.count == 1 %}
-          You have 1 new alert
-          {% else %}
-          You have {{ login_notification_toast.count }} new alerts
-          {% endif %}
+          {% blocktrans count counter=login_notification_toast.count %}
+          You have {{ counter }} new alert
+          {% plural %}
+          You have {{ counter }} new alerts
+          {% endblocktrans %}
         </p>
-        <p class="text-xs text-slate-500 dark:text-slate-400">While you were away</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">{% trans "While you were away" %}</p>
       </div>
     </div>
     <button type="button"
             @click="open = false"
             class="rounded-lg p-1 text-slate-400 transition hover:bg-white hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-            aria-label="Dismiss alerts">
+            aria-label="{% trans 'Dismiss alerts' %}">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
       </svg>
@@ -51,7 +51,7 @@
   <div class="border-t border-slate-100 px-4 py-2.5 dark:border-slate-700">
     <a href="{% url 'accounts:notifications' %}"
        class="block rounded-lg py-2 text-center text-sm font-medium text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/30">
-      View all notifications
+      {% trans "View all notifications" %}
     </a>
   </div>
 </div>

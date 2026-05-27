@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Forecasts{% endblock %}
+{% block title %}{% trans "Forecasts" %}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -24,17 +25,17 @@
 <div class="pr-page pb-8">
   <div class="pr-feed-shell">
     <header class="pr-feed-header rounded-t-2xl" data-pr-reveal>
-      <p class="pr-eyebrow">Community</p>
-      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">Forecasts</h1>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Live forecasts from the community — formal predictions tied to real markets.</p>
+      <p class="pr-eyebrow">{% trans "Community" %}</p>
+      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">{% trans "Forecasts" %}</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Live forecasts from the community — formal predictions tied to real markets." %}</p>
 
       <form method="get" action="{% url 'dashboard:forecasts' %}" class="mt-4">
-        <label for="forecasts-market-filter" class="sr-only">Filter by market</label>
+        <label for="forecasts-market-filter" class="sr-only">{% trans "Filter by market" %}</label>
         <select id="forecasts-market-filter"
                 name="market"
                 class="form-select w-full rounded-xl border-slate-300 bg-slate-50/80 text-sm font-medium dark:border-slate-600 dark:bg-slate-800/80"
                 onchange="this.form.submit()">
-          <option value="">All markets</option>
+          <option value="">{% trans "All markets" %}</option>
           {% for market in market_options %}
           <option value="{{ market.slug }}" {% if active_market_slug == market.slug %}selected{% endif %}>{{ market.title }}</option>
           {% endfor %}

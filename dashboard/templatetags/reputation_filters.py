@@ -1,5 +1,7 @@
-from django import template
 import json
+
+from django import template
+from django.utils.translation import gettext as _
 
 register = template.Library()
 
@@ -58,10 +60,10 @@ def prediction_reputation_delta(prediction):
 def market_source_label(market):
     source = getattr(market, "source", "")
     if source == "kalshi":
-        return "Kalshi"
+        return _("Kalshi")
     if source == "polymarket":
-        return "Polymarket"
-    return "Market"
+        return _("Polymarket")
+    return _("Market")
 
 
 @register.simple_tag

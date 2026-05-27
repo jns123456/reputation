@@ -1,6 +1,7 @@
 from django import template
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 
 from accounts.models import Notification
 
@@ -8,7 +9,6 @@ register = template.Library()
 
 
 def _actor_link(notification):
-    url = notification.actor.get_absolute_url() if hasattr(notification.actor, "get_absolute_url") else None
     name = notification.actor.public_name
     from django.urls import reverse
 
@@ -94,7 +94,7 @@ def notification_message(notification, compact=False):
     t = notification.notification_type
 
     if t == Notification.NotificationType.NEW_FOLLOWER:
-        return mark_safe(f"{actor} started following you")
+        return format_html("{} {}", actor, _("started following you"))
 
     if t == Notification.NotificationType.FOLLOWED_USER_PREDICTION and notification.prediction_id:
         market_url = reverse(
@@ -102,18 +102,21 @@ def notification_message(notification, compact=False):
             kwargs={"slug": notification.prediction.market.slug},
         )
         market_title = notification.prediction.market.title
-        return mark_safe(
-            f'{actor} published a forecast on '
-            f'<a href="{market_url}" class="text-brand-600 hover:underline">{market_title}</a>'
+        return format_html(
+            "{} {} <a href=\"{}\" class=\"text-brand-600 hover:underline\">{}</a>",
+            actor,
+            _("published a forecast on"),
+            market_url,
+            market_title,
         )
 
     if t == Notification.NotificationType.UPVOTE_RECEIVED:
         content = _vote_content_label(notification)
-        return mark_safe(f"{actor} liked your {content}")
+        return format_html("{} {} {}", actor, _("liked your"), content)
 
     if t == Notification.NotificationType.DOWNVOTE_RECEIVED:
         content = _vote_content_label(notification)
-        return mark_safe(f"{actor} disliked your {content}")
+        return format_html("{} {} {}", actor, _("disliked your"), content)
 
     if t == Notification.NotificationType.PREDICTION_RESOLVED and notification.prediction_id:
         market_url = reverse(
@@ -122,36 +125,53 @@ def notification_message(notification, compact=False):
         )
         market_title = notification.prediction.market.title
         delta = notification.reputation_event.points_delta if notification.reputation_event_id else 0
-        outcome_label = "correct" if notification.prediction.is_correct else "incorrect"
+        outcome_label = _("correct") if notification.prediction.is_correct else _("incorrect")
         delta_label = f"+{delta}" if delta >= 0 else str(delta)
-        return mark_safe(
-            f'Market <a href="{market_url}" class="text-brand-600 hover:underline">{market_title}</a> '
-            f"was resolved. Your forecast was {outcome_label} — "
-            f'<span class="font-semibold">{delta_label}</span> reputation points.'
+        return format_html(
+            '{market} <a href="{url}" class="text-brand-600 hover:underline">{title}</a> '
+            "{resolved} {outcome} — "
+            '<span class="font-semibold">{delta}</span> {points}.',
+            market=_("Market"),
+            url=market_url,
+            title=market_title,
+            resolved=_("was resolved. Your forecast was"),
+            outcome=outcome_label,
+            delta=delta_label,
+            points=_("reputation points"),
         )
 
     if t == Notification.NotificationType.CHALLENGE_INVITATION and notification.challenge_id:
         challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
         challenge_title = notification.challenge.display_title
-        return mark_safe(
-            f"{actor} challenged you to "
-            f'<a href="{challenge_url}" class="text-brand-600 hover:underline">{challenge_title}</a>'
+        return format_html(
+            '{} {} <a href="{}" class="text-brand-600 hover:underline">{}</a>',
+            actor,
+            _("challenged you to"),
+            challenge_url,
+            challenge_title,
         )
 
     if t == Notification.NotificationType.CHALLENGE_ACCEPTED and notification.challenge_id:
         challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
         challenge_title = notification.challenge.display_title
-        return mark_safe(
-            f"{actor} accepted your challenge "
-            f'<a href="{challenge_url}" class="text-brand-600 hover:underline">{challenge_title}</a>'
+        return format_html(
+            '{} {} <a href="{}" class="text-brand-600 hover:underline">{}</a>',
+            actor,
+            _("accepted your challenge"),
+            challenge_url,
+            challenge_title,
         )
 
     if t == Notification.NotificationType.CHALLENGE_MARKET_RESOLVED and notification.challenge_id:
         challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
         challenge_title = notification.challenge.display_title
-        market_title = notification.market.title if notification.market_id else "An event"
+        market_title = notification.market.title if notification.market_id else _("An event")
         outcome = notification.market.resolved_outcome if notification.market_id else ""
-        outcome_html = f' Result: <span class="font-semibold">{outcome}</span>.' if outcome else ""
+        outcome_html = (
+            format_html(' {}: <span class="font-semibold">{}</span>.', _("Result"), outcome)
+            if outcome
+            else ""
+        )
         standings = []
         if notification.market_id:
             standings = get_challenge_standings_snapshot_for_market(
@@ -160,20 +180,40 @@ def notification_message(notification, compact=False):
             )
         if compact:
             summary = _build_standings_summary(standings) if standings else ""
-            summary_html = f" Standings: {summary}." if summary else ""
+            summary_html = (
+                format_html(" {}: {}.", _("Standings"), summary) if summary else ""
+            )
             return mark_safe(
-                f'In <span class="font-semibold">{challenge_title}</span>, '
-                f"<span class=\"font-semibold\">{market_title}</span> was resolved.{outcome_html}{summary_html}"
+                format_html(
+                    "{in_challenge} <span class=\"font-semibold\">{challenge}</span>, "
+                    "<span class=\"font-semibold\">{market}</span> {resolved}{outcome}{summary}",
+                    in_challenge=_("In"),
+                    challenge=challenge_title,
+                    market=market_title,
+                    resolved=_("was resolved."),
+                    outcome=mark_safe(outcome_html),
+                    summary=mark_safe(summary_html),
+                )
             )
         table_html = render_to_string(
             "challenges/partials/standings_table.html",
             {"standings": standings, "compact": False},
         )
         return mark_safe(
-            f'<p>In <a href="{challenge_url}" class="text-brand-600 hover:underline">{challenge_title}</a>, '
-            f'<span class="font-semibold">{market_title}</span> was resolved.{outcome_html}</p>'
-            f'<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Standings</p>'
-            f"{table_html}"
+            format_html(
+                '<p>{in_text} <a href="{url}" class="text-brand-600 hover:underline">{title}</a>, '
+                '<span class="font-semibold">{market}</span> {resolved}{outcome}</p>'
+                '<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{standings_label}</p>'
+                "{table}",
+                in_text=_("In"),
+                url=challenge_url,
+                title=challenge_title,
+                market=market_title,
+                resolved=_("was resolved."),
+                outcome=mark_safe(outcome_html),
+                standings_label=_("Standings"),
+                table=mark_safe(table_html),
+            )
         )
 
     if t == Notification.NotificationType.CHALLENGE_COMPLETED and notification.challenge_id:
@@ -182,37 +222,54 @@ def notification_message(notification, compact=False):
         winner = notification.challenge.winner
         standings = get_challenge_standings(notification.challenge)
         if winner and winner.id == notification.recipient_id:
-            headline = f'You won <a href="{challenge_url}" class="text-brand-600 hover:underline">{challenge_title}</a>!'
+            headline = format_html(
+                '{} <a href="{}" class="text-brand-600 hover:underline">{}</a>!',
+                _("You won"),
+                challenge_url,
+                challenge_title,
+            )
         elif winner:
-            headline = (
-                f'<a href="{challenge_url}" class="text-brand-600 hover:underline">{challenge_title}</a> '
-                f"is complete. Winner: <span class=\"font-semibold\">{winner.public_name}</span>."
+            headline = format_html(
+                '<a href="{}" class="text-brand-600 hover:underline">{}</a> {} '
+                '<span class="font-semibold">{}</span>.',
+                challenge_url,
+                challenge_title,
+                _("is complete. Winner:"),
+                winner.public_name,
             )
         else:
-            headline = (
-                f'<a href="{challenge_url}" class="text-brand-600 hover:underline">{challenge_title}</a> '
-                f"ended in a tie."
+            headline = format_html(
+                '<a href="{}" class="text-brand-600 hover:underline">{}</a> {}.',
+                challenge_url,
+                challenge_title,
+                _("ended in a tie"),
             )
         if compact:
             summary = _build_standings_summary(standings) if standings else ""
-            summary_html = f" Final standings: {summary}." if summary else ""
-            return mark_safe(f"{headline}{summary_html}")
+            summary_html = (
+                format_html(" {}: {}.", _("Final standings"), summary) if summary else ""
+            )
+            return mark_safe(format_html("{}{}", headline, mark_safe(summary_html)))
         table_html = render_to_string(
             "challenges/partials/standings_table.html",
             {"standings": standings, "compact": False},
         )
         return mark_safe(
-            f"<p>{headline}</p>"
-            f'<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Final standings</p>'
-            f"{table_html}"
+            format_html(
+                "<p>{}</p>"
+                '<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{}</p>{}',
+                headline,
+                _("Final standings"),
+                mark_safe(table_html),
+            )
         )
 
-    return mark_safe(f"{actor} sent you a notification")
+    return format_html("{} {}", actor, _("sent you a notification"))
 
 
 def _vote_content_label(notification):
     if notification.comment_id:
-        return "comment"
+        return _("comment")
     if notification.prediction_id:
-        return "forecast"
-    return "content"
+        return _("forecast")
+    return _("content")

@@ -1,18 +1,21 @@
 {% extends "base.html" %}
-{% load notification_tags %}
+{% load i18n notification_tags %}
 
-{% block title %}Notifications{% endblock %}
+{% block title %}{% trans "Notifications" %}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
-  {% include "includes/pr_page_hero.html" with eyebrow="Activity" compact=True title="Notifications" description="Follows, forecasts, likes and dislikes on your activity." %}
+  {% trans "Activity" as hero_eyebrow %}
+  {% trans "Notifications" as hero_title %}
+  {% blocktrans asvar hero_description %}Follows, forecasts, likes and dislikes on your activity.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
 
   <div class="mb-6 flex flex-wrap items-center gap-3" data-pr-reveal>
-    <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary">Alert settings</a>
+    <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary">{% trans "Alert settings" %}</a>
     {% if notifications %}
     <form method="post" action="{% url 'accounts:notifications_mark_all_read' %}">
       {% csrf_token %}
-      <button type="submit" class="text-sm text-brand-600 hover:underline">Mark all as read</button>
+      <button type="submit" class="text-sm text-brand-600 hover:underline">{% trans "Mark all as read" %}</button>
     </form>
     {% endif %}
   </div>
@@ -21,7 +24,7 @@
     {% for notification in notifications %}
       {% include "accounts/partials/notification_item.html" %}
     {% empty %}
-    <div class="pr-empty">No notifications yet.</div>
+    <div class="pr-empty">{% trans "No notifications yet." %}</div>
     {% endfor %}
   </div>
 </div>

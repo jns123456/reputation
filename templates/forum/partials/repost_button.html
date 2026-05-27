@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="repost-forum-post-{{ original_post.id }}">
   {% if user.is_authenticated and original_post.user != user %}
   <form method="post" action="{% url 'forum:repost' post_id=original_post.id %}" class="inline"
@@ -7,8 +8,8 @@
     {% csrf_token %}
     <button type="submit"
             class="forum-action forum-action-repost flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if is_reposted %}is-active{% endif %}"
-            title="{% if is_reposted %}Undo repost{% else %}Repost{% endif %}"
-            aria-label="{% if is_reposted %}Undo repost{% else %}Repost{% endif %}">
+            title="{% if is_reposted %}{% trans 'Undo repost' %}{% else %}{% trans 'Repost' %}{% endif %}"
+            aria-label="{% if is_reposted %}{% trans 'Undo repost' %}{% else %}{% trans 'Repost' %}{% endif %}">
       <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
         <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
@@ -19,7 +20,7 @@
     </button>
   </form>
   {% elif user.is_authenticated %}
-  <span class="forum-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="You can't repost your own post">
+  <span class="forum-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="{% trans "You can't repost your own post" %}">
     <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
       <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
@@ -31,7 +32,7 @@
   {% else %}
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
      class="forum-action forum-action-repost flex items-center gap-1 rounded-full px-2 py-1.5 transition"
-     title="Log in to repost">
+     title="{% trans 'Log in to repost' %}">
     <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
       <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>

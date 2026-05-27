@@ -1,11 +1,12 @@
+{% load i18n %}
 {% if standings %}
 <div class="{% if compact %}mt-1.5{% else %}mt-3{% endif %} overflow-x-auto">
   <table class="w-full text-left {% if compact %}text-xs{% else %}text-sm{% endif %}">
     <thead>
       <tr class="border-b border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-400">
         <th class="pb-1.5 pr-2 font-medium">#</th>
-        <th class="pb-1.5 pr-2 font-medium">Player</th>
-        <th class="pb-1.5 text-right font-medium">Rep</th>
+        <th class="pb-1.5 pr-2 font-medium">{% trans "Player" %}</th>
+        <th class="pb-1.5 text-right font-medium">{% trans "Rep" %}</th>
       </tr>
     </thead>
     <tbody>

@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from pulse.models import Post
 
@@ -21,7 +22,7 @@ class PostForm(forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "maxlength": "200",
-                    "placeholder": "What's on your mind?",
+                    "placeholder": _("What's on your mind?"),
                     "class": "form-textarea resize-none border-0 bg-transparent p-0 text-[15px] shadow-none focus:ring-0",
                 }
             ),
@@ -37,11 +38,11 @@ class PostForm(forms.ModelForm):
 
         max_bytes = getattr(settings, "PULSE_MAX_IMAGE_BYTES", 5 * 1024 * 1024)
         if image.size > max_bytes:
-            raise ValidationError("Image must be 5 MB or smaller.")
+            raise ValidationError(_("Image must be 5 MB or smaller."))
 
         content_type = getattr(image, "content_type", "")
         if content_type and content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
-            raise ValidationError("Upload a JPEG, PNG, WebP, or GIF image.")
+            raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image."))
 
         return image
 
@@ -50,7 +51,7 @@ class PostForm(forms.ModelForm):
         body = cleaned.get("body", "")
         image = cleaned.get("image")
         if not body and not image:
-            raise ValidationError("Add text or an image to your post.")
+            raise ValidationError(_("Add text or an image to your post."))
         return cleaned
 
 
@@ -59,7 +60,7 @@ class CommentForm(forms.Form):
         widget=forms.Textarea(
             attrs={
                 "rows": 2,
-                "placeholder": "Write a comment…",
+                "placeholder": _("Write a comment…"),
                 "class": "form-textarea",
             }
         )

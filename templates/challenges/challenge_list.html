@@ -1,17 +1,22 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Challenges{% endblock %}
+{% block title %}{% trans "Challenges" %}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
   {% url 'challenges:create' as create_url %}
-  {% include "includes/pr_page_hero.html" with eyebrow="Social" compact=True title="Challenges" gradient="" description="Compete with mutual followers on up to 10 events. Highest reputation score wins." action_url=create_url action_label="New challenge" %}
+  {% trans "Social" as hero_eyebrow %}
+  {% trans "Challenges" as hero_title %}
+  {% blocktrans asvar hero_description %}Compete with mutual followers on up to 10 events. Highest reputation score wins.{% endblocktrans %}
+  {% trans "New challenge" as hero_action_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label %}
 
   {% if pending_invitations %}
   <section class="mb-8" data-pr-reveal data-delay="1">
     <div class="mb-3 flex items-center justify-between gap-2">
       <h2 class="pr-section-title">
-        Pending invitations
+        {% trans "Pending invitations" %}
         <span class="ml-1 rounded-full bg-brand-600 px-2 py-0.5 text-xs font-bold text-white">{{ pending_invitations|length }}</span>
       </h2>
     </div>
@@ -24,7 +29,7 @@
   {% endif %}
 
   <div class="mb-6 flex flex-wrap gap-2" data-pr-reveal data-delay="2">
-    <a href="{% url 'challenges:list' %}" class="pr-filter-pill {% if not current_status %}is-active{% endif %}">All</a>
+    <a href="{% url 'challenges:list' %}" class="pr-filter-pill {% if not current_status %}is-active{% endif %}">{% trans "All" %}</a>
     {% for value, label in status_choices %}
     <a href="?status={{ value }}" class="pr-filter-pill {% if current_status == value %}is-active{% endif %}">{{ label }}</a>
     {% endfor %}
@@ -39,9 +44,9 @@
         <div>
           <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ challenge.display_title }}</h2>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            by @{{ challenge.creator.username }}
-            · {{ challenge.challenge_markets.count }} event{{ challenge.challenge_markets.count|pluralize }}
-            · {{ challenge.participants.count }} participant{{ challenge.participants.count|pluralize }}
+            {% blocktrans with username=challenge.creator.username %}by @{{ username }}{% endblocktrans %}
+            · {% blocktrans count counter=challenge.challenge_markets.count %}{{ counter }} event{% plural %}{{ counter }} events{% endblocktrans %}
+            · {% blocktrans count counter=challenge.participants.count %}{{ counter }} participant{% plural %}{{ counter }} participants{% endblocktrans %}
           </p>
         </div>
         <div class="flex items-center gap-2">
@@ -53,7 +58,7 @@
             {{ challenge.get_status_display }}
           </span>
           {% if challenge.winner %}
-          <span class="text-sm text-rep-600 dark:text-emerald-400">Winner: {{ challenge.winner.public_name }}</span>
+          <span class="text-sm text-rep-600 dark:text-emerald-400">{% blocktrans with name=challenge.winner.public_name %}Winner: {{ name }}{% endblocktrans %}</span>
           {% endif %}
         </div>
       </div>
@@ -62,12 +67,12 @@
   </div>
   {% elif not pending_invitations %}
   <div class="pr-empty" data-pr-reveal>
-    <p class="text-slate-600 dark:text-slate-300">No challenges yet.</p>
-    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Follow users back to unlock head-to-head challenges.</p>
-    <a href="{% url 'challenges:create' %}" class="btn-primary mt-4 inline-flex">Create your first challenge</a>
+    <p class="text-slate-600 dark:text-slate-300">{% trans "No challenges yet." %}</p>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Follow users back to unlock head-to-head challenges." %}</p>
+    <a href="{% url 'challenges:create' %}" class="btn-primary mt-4 inline-flex">{% trans "Create your first challenge" %}</a>
   </div>
   {% else %}
-  <p class="text-sm text-slate-500 dark:text-slate-400">No other challenges yet. Respond to your invitations above.</p>
+  <p class="text-sm text-slate-500 dark:text-slate-400">{% trans "No other challenges yet. Respond to your invitations above." %}</p>
   {% endif %}
 </div>
 {% endblock %}

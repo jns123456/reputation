@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if new_feed_item %}
 <article hx-swap-oob="afterbegin:#forum-feed">
   {% include "forum/partials/post_card.html" with post=new_feed_item.post original_post=new_feed_item.original_post comment_count=new_feed_item.comment_count post_vote=new_feed_item.post_vote is_bookmarked=new_feed_item.is_bookmarked repost_count=new_feed_item.repost_count is_reposted=new_feed_item.is_reposted %}

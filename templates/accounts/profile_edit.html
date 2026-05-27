@@ -1,10 +1,14 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}{% trans "Edit Profile" %}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
-  {% include "includes/pr_page_hero.html" with eyebrow="Settings" compact=True title="Edit profile" description="Update your display name, bio, and privacy preferences." %}
+  {% trans "Settings" as hero_eyebrow %}
+  {% trans "Edit profile" as hero_title %}
+  {% blocktrans asvar hero_description %}Update your display name, bio, and privacy preferences.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
 
   <form method="post" class="pr-panel mx-auto max-w-lg space-y-4 p-6" data-pr-reveal>
     {% csrf_token %}
@@ -15,7 +19,7 @@
       {% if field.errors %}<p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>{% endif %}
     </div>
     {% endfor %}
-    <button type="submit" class="btn-primary">Save</button>
+    <button type="submit" class="btn-primary">{% trans "Save" %}</button>
   </form>
 </div>
 {% endblock %}

@@ -2,6 +2,7 @@
 
 from django.conf import settings
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from pulse.models import Comment, Post
 from reputation.models import PopularityEvent
@@ -28,7 +29,7 @@ def toggle_repost(*, user, post):
     """Create or remove a repost of another user's Forum post."""
     original = resolve_original_post(post)
     if original.user_id == user.id:
-        raise ValueError("You cannot repost your own post.")
+        raise ValueError(_("You cannot repost your own post."))
 
     existing = Post.objects.filter(user=user, reposted_from=original).first()
     if existing:
@@ -77,7 +78,7 @@ def _remove_repost(*, repost, original):
 def create_pulse_comment(*, user, post, body, parent_comment=None):
     if parent_comment:
         if parent_comment.post_id != post.id:
-            raise ValueError("Parent comment belongs to a different post.")
+            raise ValueError(_("Parent comment belongs to a different post."))
 
     _assert_can_comment_on_post(user=user, post=post, parent_comment=parent_comment)
 
@@ -112,6 +113,6 @@ def _assert_can_comment_on_post(*, user, post, parent_comment=None):
     if user != post.user:
         return
     if parent_comment is None:
-        raise ValueError("You cannot comment on your own post. Reply to others instead.")
+        raise ValueError(_("You cannot comment on your own post. Reply to others instead."))
     if parent_comment.user == user:
-        raise ValueError("You cannot reply to your own comment.")
+        raise ValueError(_("You cannot reply to your own comment."))

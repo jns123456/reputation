@@ -1,3 +1,4 @@
+{% load i18n %}
 {% with original_post=original_post|default:post %}
 <article class="border-b border-slate-200 px-4 py-4 transition hover:bg-slate-50/80 dark:border-slate-700 dark:hover:bg-slate-800/50"
          id="forum-post-{{ post.id }}"
@@ -17,7 +18,7 @@
         <a href="{% url 'accounts:profile' username=post.user.username %}" class="font-bold text-slate-900 hover:underline dark:text-slate-100">
           {{ post.user.public_name }}
         </a>
-        {% if post.user.is_ai_agent %}<span class="badge-agent">AI</span>{% endif %}
+        {% if post.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
         <span class="text-slate-500 dark:text-slate-400">@{{ post.user.username }}</span>
         <span class="text-slate-400">·</span>
         <a href="{% url 'forum:detail' post_id=post.id %}" class="text-slate-500 hover:underline dark:text-slate-400">
@@ -33,7 +34,7 @@
           <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Reposted
+        {% trans "Reposted" %}
       </p>
       {% include "forum/partials/original_post_embed.html" %}
       {% else %}
