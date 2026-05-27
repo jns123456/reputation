@@ -3,62 +3,47 @@
 
 {% block title %}{% trans "Forum post" %}{% endblock %}
 
-{% block extra_head %}
-<style>
-  .forum-action-like:hover:not(:disabled),
-  .forum-action-like.is-active {
-    color: rgb(4 120 87);
-    background-color: rgb(236 253 245);
-  }
-  .forum-action-dislike:hover:not(:disabled),
-  .forum-action-dislike.is-active {
-    color: rgb(190 18 60);
-    background-color: rgb(255 241 242);
-  }
-  .forum-action.is-bookmarked {
-    color: rgb(79 70 229);
-  }
-  .forum-action-repost:hover:not(:disabled),
-  .forum-action-repost.is-active {
-    color: rgb(4 120 87);
-    background-color: rgb(236 253 245);
-  }
-</style>
-{% endblock %}
+{% block main_class %}mx-auto max-w-none px-0 py-0{% endblock %}
+{% block body_class %} x-forum-page{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-xl">
-  <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur px-4 py-3 dark:border-slate-700 dark:bg-slate-900/95">
-    <a href="{% url 'forum:feed' %}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-brand-600 dark:text-slate-400">
-      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      {% trans "Forum" %}
-    </a>
-  </header>
+<div class="x-forum-layout">
+  <aside class="x-forum-sidebar x-forum-sidebar--left" aria-label="{% trans 'Primary' %}">
+    {% include "forum/partials/sidebar_left.html" %}
+  </aside>
 
-  <article class="border-x border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900"
-           id="forum-post-{{ post.id }}"
-           data-sort-score="{{ post.popularity_score }}"
-           data-sort-time="{{ post.created_at|date:'U' }}"
-           data-sort-reputation="{{ post.user.profile.reputation_score }}"
-           data-sort-user-popularity="{{ post.user.profile.popularity_score }}">
-    <div class="flex gap-3">
-      <a href="{% url 'accounts:profile' username=post.user.username %}" class="shrink-0">
-        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
-          {{ post.user.public_name|slice:":1"|upper }}
-        </div>
+  <div class="x-forum-main">
+    <header class="x-thread-header">
+      <a href="{% url 'forum:feed' %}" class="x-thread-back" aria-label="{% trans 'Back' %}">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </a>
-      <div class="min-w-0 flex-1">
-        <div class="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm leading-tight">
-          <a href="{% url 'accounts:profile' username=post.user.username %}" class="font-bold text-slate-900 hover:underline dark:text-slate-100">
-            {{ post.user.public_name }}
-          </a>
-          {% if post.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
-          <span class="text-slate-500 dark:text-slate-400">@{{ post.user.username }}</span>
-          <span class="text-slate-400">·</span>
-          <time datetime="{{ post.created_at|date:'c' }}" class="text-slate-500 dark:text-slate-400">{{ post.created_at|timesince }}</time>
+      <h1 class="x-thread-title">{% trans "Post" %}</h1>
+    </header>
+
+    <article class="x-tweet"
+             style="cursor: default;"
+             id="forum-post-{{ post.id }}"
+             x-data="{ showReply: false }"
+             data-sort-score="{{ post.popularity_score }}"
+             data-sort-time="{{ post.created_at|date:'U' }}"
+             data-sort-reputation="{{ post.user.profile.reputation_score }}"
+             data-sort-user-popularity="{{ post.user.profile.popularity_score }}">
+      <a href="{% url 'accounts:profile' username=post.user.username %}" class="x-tweet-avatar" tabindex="-1" aria-hidden="true">
+        {{ post.user.public_name|slice:":1"|upper }}
+      </a>
+      <div class="x-tweet-body">
+        <div class="x-tweet-head">
+          <div class="x-tweet-meta">
+            <a href="{% url 'accounts:profile' username=post.user.username %}" class="x-tweet-name">{% include "accounts/partials/user_display_name.html" with user=post.user %}</a>
+            {% if post.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
+            {% if post.user.show_username_publicly %}
+            <a href="{% url 'accounts:profile' username=post.user.username %}" class="x-tweet-handle">@{{ post.user.username }}</a>
+            {% endif %}
+          </div>
+          {% include "forum/partials/post_more_menu.html" with redirect_after_delete=True %}
         </div>
         {% if post.is_repost %}
-        <p class="mt-1 flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+        <p class="x-tweet-repost-label">
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
             <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
@@ -71,14 +56,25 @@
         {% else %}
         {% include "forum/partials/post_content.html" with post=post %}
         {% endif %}
+        <p class="mt-3 text-sm text-[var(--x-muted)]">
+          <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|date:"g:i A · M j, Y" }}</time>
+        </p>
         {% include "forum/partials/post_actions.html" %}
-      </div>
-    </div>
-  </article>
 
-  <section id="forum-discussion-{{ post.id }}" class="border-x border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
-    <h2 class="mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{% trans "Comments" %}</h2>
-    {% include "forum/partials/post_discussion_inner.html" %}
-  </section>
+        {% if user.is_authenticated and user != post.user %}
+        {% include "forum/partials/inline_reply_composer.html" with reply_context="detail" show_cancel=True cancel_action="showReply = false" %}
+        {% endif %}
+      </div>
+    </article>
+
+    <h2 class="x-thread-replies-label">{% trans "Comments" %}</h2>
+    <section id="forum-discussion-{{ post.id }}" class="border-b border-[var(--x-border)] px-4 py-4">
+      {% include "forum/partials/post_discussion_inner.html" %}
+    </section>
+  </div>
+
+  <aside class="x-forum-sidebar x-forum-sidebar--right" aria-label="{% trans 'Trending' %}">
+    {% include "forum/partials/sidebar_right.html" %}
+  </aside>
 </div>
 {% endblock %}

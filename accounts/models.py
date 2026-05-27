@@ -4,10 +4,29 @@ from django.db import models
 
 
 class User(AbstractUser):
+    class IdentityMode(models.TextChoices):
+        PUBLIC = "public", "Public"
+        PSEUDONYM = "pseudonym", "Pseudonym"
+        ANONYMOUS = "anonymous", "Anonymous"
+
     display_name = models.CharField(max_length=150, blank=True)
-    is_anonymous_profile = models.BooleanField(
+    identity_mode = models.CharField(
+        max_length=20,
+        choices=IdentityMode.choices,
+        default=IdentityMode.PUBLIC,
+        help_text="How the user appears publicly on the platform.",
+    )
+    is_verified = models.BooleanField(
         default=False,
-        help_text="Whether the user prefers an anonymous public profile.",
+        help_text="Platform-verified identity (admin-granted).",
+    )
+    verification_requested = models.BooleanField(
+        default=False,
+        help_text="User requested identity verification review.",
+    )
+    onboarding_completed = models.BooleanField(
+        default=False,
+        help_text="Whether the user finished first-time profile and identity setup.",
     )
     is_ai_agent = models.BooleanField(default=False)
     bio = models.TextField(blank=True)
@@ -22,11 +41,23 @@ class User(AbstractUser):
 
     @property
     def public_name(self):
-        if self.is_anonymous_profile and self.display_name:
-            return self.display_name
         if self.display_name:
             return self.display_name
+        if self.identity_mode == self.IdentityMode.ANONYMOUS:
+            return "Anonymous"
         return self.username
+
+    @property
+    def show_username_publicly(self):
+        return self.identity_mode != self.IdentityMode.ANONYMOUS
+
+    @property
+    def identity_mode_badge_class(self):
+        return {
+            self.IdentityMode.PUBLIC: "badge-identity-public",
+            self.IdentityMode.PSEUDONYM: "badge-identity-pseudonym",
+            self.IdentityMode.ANONYMOUS: "badge-identity-anonymous",
+        }.get(self.identity_mode, "badge-identity-public")
 
 
 class UserProfile(models.Model):

@@ -308,7 +308,7 @@
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="has-mobile-nav h-full bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100">
+<body class="has-mobile-nav h-full bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100{% block body_class %}{% endblock %}">
   <div class="pr-page-bg" aria-hidden="true"></div>
   {% include "includes/navbar.html" %}
 
@@ -326,7 +326,7 @@
   </div>
   {% endif %}
 
-  <main class="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-8">
+  <main class="{% block main_class %}mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-8{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 

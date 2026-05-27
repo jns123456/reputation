@@ -1,27 +1,136 @@
 """Forum feed read queries."""
 
-from django.db.models import Count
+from django.db.models import Count, IntegerField, OuterRef, Prefetch, Subquery, Value
+from django.db.models.functions import Coalesce
 
 from accounts.bookmark_selectors import get_user_bookmarked_ids
 from accounts.models import Bookmark
 from comments.models import Vote
 from comments.selectors import build_comment_forest, collect_comment_ids
-from pulse.models import Post
-from reputation.display_ranking import DISPLAY_RANK_ORM_FIELDS
+from pulse.models import Poll, PollOption, PollVote, Post
 
 
-def get_pulse_posts(*, limit=50):
+def _vote_count_subquery(*, target_type, value):
     return (
+        Vote.objects.filter(
+            target_type=target_type,
+            target_id=OuterRef("pk"),
+            value=value,
+        )
+        .values("target_id")
+        .annotate(c=Count("pk"))
+        .values("c")
+    )
+
+
+def _post_vote_count_subquery(value):
+    return _vote_count_subquery(
+        target_type=Vote.TargetType.PULSE_POST,
+        value=value,
+    )
+
+
+def _pulse_comment_vote_count_subquery(value):
+    return _vote_count_subquery(
+        target_type=Vote.TargetType.PULSE_COMMENT,
+        value=value,
+    )
+
+
+def annotate_post_interactions(qs):
+    return qs.annotate(
+        like_count=Coalesce(
+            Subquery(_post_vote_count_subquery(1), output_field=IntegerField()),
+            Value(0),
+        ),
+        dislike_count=Coalesce(
+            Subquery(_post_vote_count_subquery(-1), output_field=IntegerField()),
+            Value(0),
+        ),
+    )
+
+
+FORUM_FEED_ORDER = ("-created_at",)
+
+
+def _poll_options_queryset():
+    return PollOption.objects.annotate(
+        vote_count=Count("votes", distinct=True),
+    ).order_by("position", "id")
+
+
+def _poll_options_prefetch(path="poll"):
+    return Prefetch(
+        f"{path}__options",
+        queryset=_poll_options_queryset(),
+    )
+
+
+def _post_queryset_base():
+    return annotate_post_interactions(
         Post.objects.select_related(
             "user",
             "user__profile",
             "reposted_from",
             "reposted_from__user",
             "reposted_from__user__profile",
+            "poll",
+            "reposted_from__poll",
+        ).prefetch_related(
+            _poll_options_prefetch("poll"),
+            _poll_options_prefetch("reposted_from__poll"),
         )
-        .annotate(comment_count=Count("comments", distinct=True))
-        .order_by(*DISPLAY_RANK_ORM_FIELDS)[:limit]
     )
+
+
+def get_user_poll_votes(user, poll_ids):
+    if not user.is_authenticated or not poll_ids:
+        return {}
+
+    votes = PollVote.objects.filter(user=user, poll_id__in=poll_ids).select_related("option")
+    return {vote.poll_id: vote.option_id for vote in votes}
+
+
+def build_poll_context(*, post, user, user_poll_votes=None):
+    try:
+        poll = post.poll
+    except Poll.DoesNotExist:
+        return None
+
+    if user_poll_votes is None:
+        user_poll_votes = get_user_poll_votes(user, [poll.id])
+
+    options = list(
+        _poll_options_queryset().filter(poll=poll),
+    )
+    total_votes = sum(getattr(option, "vote_count", 0) for option in options)
+    user_option_id = user_poll_votes.get(poll.id)
+    is_author = user.is_authenticated and user.id == post.user_id
+    show_results = poll.is_closed or user_option_id is not None or is_author
+
+    for option in options:
+        vote_count = getattr(option, "vote_count", 0)
+        option.vote_pct = round(vote_count * 100 / total_votes) if total_votes else 0
+
+    return {
+        "poll": poll,
+        "poll_options": options,
+        "poll_total_votes": total_votes,
+        "poll_user_option_id": user_option_id,
+        "poll_show_results": show_results,
+    }
+
+
+def get_pulse_posts(*, limit=50):
+    return (
+        _post_queryset_base()
+        .annotate(comment_count=Count("comments", distinct=True))
+        .order_by(*FORUM_FEED_ORDER)[:limit]
+    )
+
+
+def get_post_with_interactions(pk):
+    return _post_queryset_base().filter(pk=pk).first()
 
 
 def get_user_pulse_post_votes(user, post_ids):
@@ -60,10 +169,23 @@ def _get_user_reposted_original_ids(user, original_post_ids):
     )
 
 
-def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, user_reposted_ids):
+def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, user_reposted_ids, user_poll_votes=None):
     original_post = post.original_post
     original_id = original_post.id
-    return {
+    content_post = original_post if post.is_repost else post
+    poll_ids = []
+    try:
+        poll_ids.append(content_post.poll.id)
+    except Poll.DoesNotExist:
+        pass
+    if user_poll_votes is None:
+        user_poll_votes = get_user_poll_votes(user, poll_ids)
+    poll_context = build_poll_context(
+        post=content_post,
+        user=user,
+        user_poll_votes=user_poll_votes,
+    )
+    item = {
         "post": post,
         "original_post": original_post,
         "comment_count": post.comment_count,
@@ -72,6 +194,9 @@ def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, us
         "repost_count": repost_counts.get(original_id, 0),
         "is_reposted": original_id in user_reposted_ids,
     }
+    if poll_context:
+        item.update(poll_context)
+    return item
 
 
 def build_pulse_feed(*, user, limit=50):
@@ -86,6 +211,14 @@ def build_pulse_feed(*, user, limit=50):
     )
     repost_counts = _get_repost_counts(original_post_ids)
     user_reposted_ids = _get_user_reposted_original_ids(user, original_post_ids)
+    poll_ids = []
+    for post in posts:
+        content_post = post.original_post if post.is_repost else post
+        try:
+            poll_ids.append(content_post.poll.id)
+        except Poll.DoesNotExist:
+            continue
+    user_poll_votes = get_user_poll_votes(user, poll_ids)
 
     return [
         build_feed_item(
@@ -95,19 +228,49 @@ def build_pulse_feed(*, user, limit=50):
             bookmarked_ids=bookmarked_ids,
             repost_counts=repost_counts,
             user_reposted_ids=user_reposted_ids,
+            user_poll_votes=user_poll_votes,
         )
         for post in posts
     ]
 
 
+def annotate_comment_interactions(qs):
+    return qs.annotate(
+        like_count=Coalesce(
+            Subquery(
+                _pulse_comment_vote_count_subquery(1),
+                output_field=IntegerField(),
+            ),
+            Value(0),
+        ),
+        dislike_count=Coalesce(
+            Subquery(
+                _pulse_comment_vote_count_subquery(-1),
+                output_field=IntegerField(),
+            ),
+            Value(0),
+        ),
+        reply_count=Count("replies", distinct=True),
+    )
+
+
+def get_comment_with_interactions(pk):
+    from pulse.models import Comment
+
+    return annotate_comment_interactions(
+        Comment.objects.select_related("user", "user__profile", "post")
+    ).filter(pk=pk).first()
+
+
 def get_post_comment_threads(post):
     from pulse.models import Comment
 
-    comments = (
-        Comment.objects.filter(post=post)
-        .select_related("user", "user__profile")
-        .order_by("created_at")
-    )
+    comments = annotate_comment_interactions(
+        Comment.objects.filter(post=post).select_related(
+            "user",
+            "user__profile",
+        )
+    ).order_by("created_at")
     return build_comment_forest(comments)
 
 
@@ -126,17 +289,9 @@ def get_user_pulse_comment_votes(user, comment_ids):
 def build_post_discussion(*, user, post):
     from pulse.models import Comment
 
-    post = (
-        Post.objects.select_related(
-            "user",
-            "user__profile",
-            "reposted_from",
-            "reposted_from__user",
-            "reposted_from__user__profile",
-        )
-        .filter(pk=post.pk)
-        .first()
-    )
+    post = get_post_with_interactions(post.pk)
+    if post is None:
+        return None
     threads = get_post_comment_threads(post)
     comment_ids = collect_comment_ids(threads)
     vote_map = get_user_pulse_comment_votes(user, comment_ids)
@@ -150,7 +305,9 @@ def build_post_discussion(*, user, post):
             walk(getattr(node, "thread_replies", []))
 
     walk(threads)
-    return {
+    content_post = original_post if post.is_repost else post
+    poll_context = build_poll_context(post=content_post, user=user)
+    context = {
         "post": post,
         "original_post": original_post,
         "threads": threads,
@@ -161,3 +318,6 @@ def build_post_discussion(*, user, post):
         "repost_count": repost_counts.get(original_post.id, 0),
         "is_reposted": original_post.id in user_reposted_ids,
     }
+    if poll_context:
+        context.update(poll_context)
+    return context

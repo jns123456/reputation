@@ -3,7 +3,7 @@
 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
   <button type="button"
           @click="open = !open"
-          class="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-400"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-white hover:text-brand-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:hover:text-brand-400"
           :aria-expanded="open"
           aria-label="{% trans 'Language' %}">
     <span class="text-lg leading-none" aria-hidden="true">{{ CURRENT_LANGUAGE|language_flag }}</span>

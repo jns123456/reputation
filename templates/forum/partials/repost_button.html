@@ -7,39 +7,39 @@
         hx-swap="outerHTML">
     {% csrf_token %}
     <button type="submit"
-            class="forum-action forum-action-repost flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if is_reposted %}is-active{% endif %}"
+            class="x-tweet-action x-tweet-action--repost {% if is_reposted %}is-active{% endif %}"
             title="{% if is_reposted %}{% trans 'Undo repost' %}{% else %}{% trans 'Repost' %}{% endif %}"
             aria-label="{% if is_reposted %}{% trans 'Undo repost' %}{% else %}{% trans 'Repost' %}{% endif %}">
-      <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
         <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      {% if repost_count %}<span class="text-xs font-medium tabular-nums">{{ repost_count }}</span>{% endif %}
+      {% if repost_count %}<span class="x-tweet-action-count">{{ repost_count }}</span>{% endif %}
     </button>
   </form>
   {% elif user.is_authenticated %}
-  <span class="forum-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="{% trans "You can't repost your own post" %}">
-    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+  <span class="x-tweet-action x-tweet-action--repost is-disabled" title="{% trans "You can't repost your own post" %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
       <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    {% if repost_count %}<span class="text-xs font-medium tabular-nums">{{ repost_count }}</span>{% endif %}
+    {% if repost_count %}<span class="x-tweet-action-count">{{ repost_count }}</span>{% endif %}
   </span>
   {% else %}
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
-     class="forum-action forum-action-repost flex items-center gap-1 rounded-full px-2 py-1.5 transition"
+     class="x-tweet-action x-tweet-action--repost"
      title="{% trans 'Log in to repost' %}">
-    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
       <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    {% if repost_count %}<span class="text-xs font-medium tabular-nums">{{ repost_count }}</span>{% endif %}
+    {% if repost_count %}<span class="x-tweet-action-count">{{ repost_count }}</span>{% endif %}
   </a>
   {% endif %}
 </div>

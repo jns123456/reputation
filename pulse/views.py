@@ -1,14 +1,27 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from pulse.context import get_forum_page_context
 from pulse.forms import CommentForm, PostForm
 from pulse.models import Post
-from pulse.selectors import build_feed_item, build_post_discussion
-from pulse.services import create_post, create_pulse_comment, toggle_repost
+from pulse.selectors import (
+    build_feed_item,
+    build_poll_context,
+    build_post_discussion,
+    get_post_with_interactions,
+)
+from pulse.services import (
+    create_post,
+    create_pulse_comment,
+    delete_post,
+    delete_pulse_comment,
+    toggle_repost,
+    vote_on_poll,
+)
 
 
 @require_GET
@@ -42,16 +55,11 @@ def create_post_view(request):
         user=request.user,
         body=form.cleaned_data["body"],
         image=form.cleaned_data.get("image"),
+        poll_payload=form.cleaned_data.get("poll_payload"),
     )
 
     if request.headers.get("HX-Request"):
-        post = Post.objects.select_related(
-            "user",
-            "user__profile",
-            "reposted_from",
-            "reposted_from__user",
-            "reposted_from__user__profile",
-        ).get(pk=post.id)
+        post = get_post_with_interactions(post.id)
         post.comment_count = 0
         item = build_feed_item(
             post=post,
@@ -63,8 +71,8 @@ def create_post_view(request):
         )
         return render(
             request,
-            "forum/partials/post_card.html",
-            item,
+            "forum/partials/post_card_from_item.html",
+            {"item": item},
         )
 
     return redirect("forum:feed")
@@ -108,6 +116,44 @@ def create_comment_view(request, post_id):
             body=form.cleaned_data["body"],
             parent_comment=parent,
         )
+    except ValueError as exc:
+        return HttpResponseBadRequest(str(exc))
+
+    if request.headers.get("HX-Request"):
+        reply_context = request.POST.get("reply_context", "detail")
+        context = build_post_discussion(user=request.user, post=post)
+        if reply_context == "feed":
+            return render(
+                request,
+                "forum/partials/comment_feed_response.html",
+                {
+                    "post": context["post"],
+                    "original_post": context["original_post"],
+                    "comment_count": context["comment_count"],
+                    "post_vote": context["post_vote"],
+                    "is_bookmarked": context["is_bookmarked"],
+                    "repost_count": context["repost_count"],
+                    "is_reposted": context["is_reposted"],
+                },
+            )
+        return render(
+            request,
+            "forum/partials/post_discussion_inner.html",
+            context,
+        )
+
+    return redirect("forum:detail", post_id=post.id)
+
+
+@login_required
+@require_POST
+def delete_comment_view(request, post_id, comment_id):
+    post = get_object_or_404(Post, pk=post_id)
+    from pulse.models import Comment
+
+    comment = get_object_or_404(Comment, pk=comment_id, post=post)
+    try:
+        delete_pulse_comment(user=request.user, comment=comment)
     except ValueError as exc:
         return HttpResponseBadRequest(str(exc))
 
@@ -175,3 +221,54 @@ def repost_toggle(request, post_id):
         return render(request, "forum/partials/repost_response.html", context)
 
     return redirect(request.META.get("HTTP_REFERER", "/forum/"))
+
+
+@login_required
+@require_POST
+def delete_post_view(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    try:
+        delete_post(user=request.user, post=post)
+    except ValueError as exc:
+        return HttpResponseBadRequest(str(exc))
+
+    if request.headers.get("HX-Request"):
+        response = HttpResponse(status=200)
+        if request.POST.get("redirect") == "1":
+            response["HX-Redirect"] = reverse("forum:feed")
+        return response
+
+    return redirect("forum:feed")
+
+
+@login_required
+@require_POST
+def poll_vote_view(request, post_id):
+    from pulse.models import Poll, PollOption
+
+    post = get_object_or_404(Post, pk=post_id)
+    content_post = post.original_post
+    poll = get_object_or_404(Poll, post=content_post)
+    option_id = request.POST.get("option_id")
+    option = get_object_or_404(PollOption, pk=option_id, poll=poll)
+
+    try:
+        vote_on_poll(user=request.user, poll=poll, option=option)
+    except ValueError as exc:
+        return HttpResponseBadRequest(str(exc))
+
+    if request.headers.get("HX-Request"):
+        refreshed_post = get_post_with_interactions(content_post.id)
+        poll_context = build_poll_context(post=refreshed_post, user=request.user)
+        if poll_context is None:
+            return HttpResponseBadRequest("Poll not found")
+        return render(
+            request,
+            "forum/partials/post_poll.html",
+            {
+                "post": refreshed_post,
+                **poll_context,
+            },
+        )
+
+    return redirect("forum:detail", post_id=post.id)

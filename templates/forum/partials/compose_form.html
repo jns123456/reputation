@@ -6,13 +6,58 @@
       hx-target="#forum-feed"
       hx-swap="afterbegin"
       hx-encoding="multipart/form-data"
-      hx-on::after-request="if (event.detail.successful) { $el.reset(); preview = null; chars = 0; }"
       class="flex gap-3"
-      x-data="{ chars: {{ post_form.body.value|default:''|length }}, preview: null }">
+      x-data="{
+        chars: {{ post_form.body.value|default:''|length }},
+        preview: null,
+        showPoll: false,
+        pollOptions: ['', ''],
+        pollDays: '1',
+        pollReady() {
+          return this.showPoll && this.pollOptions.filter(function (o) { return o.trim(); }).length >= 2;
+        },
+        canPost() {
+          if (this.chars > 200) return false;
+          if (this.preview) return true;
+          if (this.pollReady()) return true;
+          return this.chars > 0;
+        },
+        togglePoll() {
+          this.showPoll = !this.showPoll;
+          if (this.showPoll) {
+            this.preview = null;
+            if (this.$refs.imageInput) {
+              this.$refs.imageInput.value = '';
+            }
+          }
+        },
+        addPollOption() {
+          if (this.pollOptions.length < 4) {
+            this.pollOptions.push('');
+          }
+        },
+        removePollOption(index) {
+          if (this.pollOptions.length > 2) {
+            this.pollOptions.splice(index, 1);
+          }
+        },
+        resetCompose() {
+          this.chars = 0;
+          this.preview = null;
+          this.showPoll = false;
+          this.pollOptions = ['', ''];
+          this.pollDays = '1';
+          this.$el.reset();
+          if (this.$refs.imageInput) {
+            this.$refs.imageInput.value = '';
+          }
+        }
+      }"
+      @htmx:after-request="if ($event.detail.successful) resetCompose()">
   {% csrf_token %}
-  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
+  <a href="{% url 'accounts:profile' username=user.username %}" class="x-tweet-avatar shrink-0" aria-hidden="true">
     {{ user.public_name|slice:":1"|upper }}
-  </div>
+  </a>
   <div class="min-w-0 flex-1" @input="if ($event.target.name === 'body') chars = $event.target.value.length">
     {{ post_form.body }}
     {% if post_form.body.errors %}
@@ -22,7 +67,7 @@
     <p class="mt-1 text-xs text-red-600">{{ post_form.non_field_errors.0 }}</p>
     {% endif %}
 
-    <div x-show="preview" x-cloak class="relative mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+    <div x-show="preview" x-cloak class="relative mt-3 overflow-hidden rounded-2xl border border-[var(--x-border)]">
       <img :src="preview" alt="" class="max-h-64 w-full object-cover">
       <button type="button"
               @click="preview = null; $refs.imageInput.value = ''"
@@ -35,24 +80,88 @@
     <p class="mt-1 text-xs text-red-600">{{ post_form.image.errors.0 }}</p>
     {% endif %}
 
-    <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
-      <label class="pr-touch-target inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-slate-500 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-800">
-        <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-          <circle cx="8.5" cy="8.5" r="1.5"/>
-          <polyline points="21 15 16 10 5 21"/>
-        </svg>
-        <span class="text-xs font-medium">{% trans "Photo" %}</span>
-        <input type="file"
-               name="image"
-               accept="image/jpeg,image/png,image/webp,image/gif"
-               class="sr-only"
-               x-ref="imageInput"
-               @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => preview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
-      </label>
+    <div x-show="showPoll"
+         x-cloak
+         x-transition
+         class="x-compose-poll"
+         @click.stop>
+      <input type="hidden" name="enable_poll" :value="showPoll ? '1' : ''">
+      <input type="hidden" name="poll_days" :value="pollDays">
+      <div class="x-compose-poll-options">
+        <template x-for="(option, index) in pollOptions" :key="index">
+          <div class="x-compose-poll-option-row">
+            <input type="text"
+                   :name="'poll_option_' + index"
+                   x-model="pollOptions[index]"
+                   maxlength="50"
+                   class="x-compose-poll-input"
+                   :placeholder="'{% trans "Choice" %} ' + (index + 1)"
+                   :aria-label="'{% trans "Poll choice" %} ' + (index + 1)">
+            <button type="button"
+                    class="x-compose-poll-remove"
+                    x-show="pollOptions.length > 2"
+                    @click="removePollOption(index)"
+                    :aria-label="'{% trans "Remove choice" %} ' + (index + 1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </template>
+      </div>
+      <div class="x-compose-poll-footer">
+        <button type="button"
+                class="x-compose-poll-add"
+                x-show="pollOptions.length < 4"
+                @click="addPollOption()">
+          {% trans "Add a choice" %}
+        </button>
+        <label class="x-compose-poll-duration">
+          <span>{% trans "Poll length" %}</span>
+          <select x-model="pollDays" class="x-compose-poll-select">
+            <option value="1">{% trans "1 day" %}</option>
+            <option value="3">{% trans "3 days" %}</option>
+            <option value="7">{% trans "7 days" %}</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="x-forum-compose-toolbar">
+      <div class="x-forum-compose-icons">
+        <label class="x-forum-compose-icon"
+               title="{% trans 'Photo' %}"
+               :class="{ 'is-disabled': showPoll }">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <input type="file"
+                 name="image"
+                 accept="image/jpeg,image/png,image/webp,image/gif"
+                 class="sr-only"
+                 x-ref="imageInput"
+                 :disabled="showPoll"
+                 @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => preview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+        </label>
+        <button type="button"
+                class="x-forum-compose-icon"
+                :class="{ 'is-active': showPoll }"
+                title="{% trans 'Poll' %}"
+                @click="togglePoll()"
+                aria-label="{% trans 'Poll' %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <line x1="6" y1="7" x2="18" y2="7" stroke-linecap="round"/>
+            <line x1="8" y1="12" x2="16" y2="12" stroke-linecap="round"/>
+            <line x1="10" y1="17" x2="14" y2="17" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
       <div class="flex items-center gap-3">
-        <span class="text-xs tabular-nums" :class="chars > 200 ? 'text-red-600' : 'text-slate-400'" x-text="chars + '/200'"></span>
-        <button type="submit" class="btn-primary min-h-[2.75rem] rounded-full px-5 py-2 text-sm" :disabled="chars > 200">{% trans "Post" %}</button>
+        <span class="text-xs tabular-nums" :class="chars > 200 ? 'text-red-600' : 'text-[var(--x-muted)]'" x-text="chars > 0 ? (200 - chars) : ''"></span>
+        <button type="submit"
+                class="x-forum-post-btn"
+                :class="{ 'x-forum-post-btn--ready': canPost() }"
+                :disabled="!canPost()">{% trans "Post" %}</button>
       </div>
     </div>
   </div>

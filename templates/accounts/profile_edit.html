@@ -3,23 +3,51 @@
 
 {% block title %}{% trans "Edit Profile" %}{% endblock %}
 
+{% block extra_head %}
+{% include "accounts/partials/identity_styles.html" %}
+{% endblock %}
+
 {% block content %}
 <div class="pr-page pb-8">
   {% trans "Settings" as hero_eyebrow %}
   {% trans "Edit profile" as hero_title %}
-  {% blocktrans asvar hero_description %}Update your display name, bio, and privacy preferences.{% endblocktrans %}
+  {% blocktrans asvar hero_description %}Update your email, bio, and how you appear publicly.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
 
-  <form method="post" class="pr-panel mx-auto max-w-lg space-y-4 p-6" data-pr-reveal>
+  <form method="post"
+        class="mx-auto max-w-3xl space-y-5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-8"
+        data-pr-reveal
+        x-data="{
+          mode: '{{ form.identity_mode.value|default:'public'|escapejs }}',
+          displayName: '{{ form.display_name.value|default:''|escapejs }}',
+          username: '{{ user.username|escapejs }}',
+          verified: {{ user.is_verified|yesno:'true,false' }},
+          labelAnonymous: '{% filter escapejs %}{% trans "Anonymous" %}{% endfilter %}',
+          labelYourName: '{% filter escapejs %}{% trans "Your name" %}{% endfilter %}',
+          labelUsername: '{% filter escapejs %}{% trans "username" %}{% endfilter %}'
+        }">
     {% csrf_token %}
-    {% for field in form %}
-    <div>
-      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ field.label }}</label>
-      {{ field }}
-      {% if field.errors %}<p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>{% endif %}
-    </div>
-    {% endfor %}
-    <button type="submit" class="btn-primary">{% trans "Save" %}</button>
+
+    <fieldset class="space-y-4">
+      <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{% trans "Basic info" %}</legend>
+      <div>
+        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.email.label }}</label>
+        <div class="mt-1.5">{{ form.email }}</div>
+        {% if form.email.errors %}<p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+      <div>
+        <label for="{{ form.bio.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.bio.label }}</label>
+        <div class="mt-1.5">{{ form.bio }}</div>
+        {% if form.bio.errors %}<p class="mt-1 text-sm text-red-600">{{ form.bio.errors.0 }}</p>{% endif %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-900/30 sm:p-5">
+      <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{% trans "Profile & identity" %}</legend>
+      {% include "accounts/partials/identity_profile_section.html" with profile_user=user %}
+    </fieldset>
+
+    <button type="submit" class="btn-primary">{% trans "Save changes" %}</button>
   </form>
 </div>
 {% endblock %}

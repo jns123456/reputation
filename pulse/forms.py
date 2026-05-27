@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from pulse.models import Post
+from pulse.poll_forms import PollValidationError, parse_poll_options_from_post, validate_poll_payload
 
 ALLOWED_IMAGE_CONTENT_TYPES = {
     "image/jpeg",
@@ -20,10 +21,10 @@ class PostForm(forms.ModelForm):
         widgets = {
             "body": forms.Textarea(
                 attrs={
-                    "rows": 3,
+                    "rows": 1,
                     "maxlength": "200",
-                    "placeholder": _("What's on your mind?"),
-                    "class": "form-textarea resize-none border-0 bg-transparent p-0 text-[15px] shadow-none focus:ring-0",
+                    "placeholder": _("What's happening?"),
+                    "class": "x-compose-textarea form-textarea resize-none border-0 bg-transparent p-0 shadow-none focus:ring-0",
                 }
             ),
         }
@@ -50,8 +51,21 @@ class PostForm(forms.ModelForm):
         cleaned = super().clean()
         body = cleaned.get("body", "")
         image = cleaned.get("image")
-        if not body and not image:
-            raise ValidationError(_("Add text or an image to your post."))
+        poll_payload = parse_poll_options_from_post(self.data)
+
+        try:
+            validate_poll_payload(
+                poll_payload=poll_payload,
+                body=body,
+                has_image=bool(image),
+            )
+        except PollValidationError as exc:
+            raise ValidationError(str(exc)) from exc
+
+        if poll_payload is None and not body and not image:
+            raise ValidationError(_("Add text, an image, or a poll to your post."))
+
+        cleaned["poll_payload"] = poll_payload
         return cleaned
 
 

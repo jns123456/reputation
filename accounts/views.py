@@ -13,7 +13,7 @@ from accounts.bookmark_services import toggle_bookmark
 from accounts.bookmarks_services import build_bookmarks_page_items
 from accounts.follow_selectors import get_follower_count, get_following_count, is_following
 from accounts.follow_services import toggle_follow
-from accounts.forms import NotificationPreferenceForm, ProfileEditForm, SignUpForm
+from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm
 from accounts.models import Bookmark, User
 from accounts.category_selectors import get_user_category_breakdown
 from accounts.notification_selectors import get_recent_notifications, get_user_notifications
@@ -30,6 +30,8 @@ class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
 
     def get_success_url(self):
+        if not self.request.user.onboarding_completed:
+            return reverse("accounts:profile_setup")
         return reverse("accounts:profile", kwargs={"username": self.request.user.username})
 
     def form_valid(self, form):
@@ -44,6 +46,8 @@ class CustomLogoutView(LogoutView):
 
 def signup(request):
     if request.user.is_authenticated:
+        if not request.user.onboarding_completed:
+            return redirect("accounts:profile_setup")
         return redirect("accounts:profile", username=request.user.username)
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -51,10 +55,28 @@ def signup(request):
             user = form.save()
             login(request, user)
             queue_login_notification_toast(request=request)
-            return redirect("accounts:profile", username=user.username)
+            return redirect("accounts:profile_setup")
     else:
         form = SignUpForm()
     return render(request, "accounts/signup.html", {"form": form})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def profile_setup(request):
+    if request.user.onboarding_completed:
+        return redirect("accounts:profile", username=request.user.username)
+    if request.method == "POST":
+        form = ProfileSetupForm(request.POST, instance=request.user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.onboarding_completed = True
+            user.save()
+            messages.success(request, _("Your profile is ready. Welcome to ProofRep!"))
+            return redirect("accounts:profile", username=user.username)
+    else:
+        form = ProfileSetupForm(instance=request.user)
+    return render(request, "accounts/profile_setup.html", {"form": form})
 
 
 @login_required

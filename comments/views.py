@@ -120,10 +120,25 @@ def vote_view(request):
                 },
             )
         if target_type == Vote.TargetType.PULSE_COMMENT:
-            from pulse.models import Comment as PulseComment
+            from pulse.selectors import get_comment_with_interactions
 
-            comment = get_object_or_404(PulseComment, pk=int(target_id))
+            comment = get_comment_with_interactions(int(target_id))
+            if comment is None:
+                from pulse.models import Comment as PulseComment
+
+                raise PulseComment.DoesNotExist
             user_vote = get_user_vote(request.user, target_type, int(target_id))
+            layout = request.POST.get("layout", "forum")
+            if layout == "forum":
+                return render(
+                    request,
+                    "forum/partials/comment_vote_actions.html",
+                    {
+                        "comment": comment,
+                        "post": comment.post,
+                        "comment_vote": user_vote.value if user_vote else 0,
+                    },
+                )
             return render(
                 request,
                 "comments/partials/vote_buttons.html",
@@ -132,14 +147,17 @@ def vote_view(request):
                     "target_id": comment.id,
                     "score": comment.popularity_score,
                     "user_vote": user_vote.value if user_vote else 0,
-                    "layout": request.POST.get("layout", "vertical"),
+                    "layout": layout,
                 },
             )
         if target_type == Vote.TargetType.PULSE_POST:
-            from pulse.models import Post
+            from pulse.selectors import get_post_with_interactions
 
-            post = get_object_or_404(Post, pk=int(target_id))
-            post.refresh_from_db()
+            post = get_post_with_interactions(int(target_id))
+            if post is None:
+                from pulse.models import Post
+
+                raise Post.DoesNotExist
             user_vote = get_user_vote(request.user, target_type, int(target_id))
             layout = request.POST.get("layout", "forum")
             if layout == "forum":

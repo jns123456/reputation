@@ -3,22 +3,34 @@
 <form method="post"
       action="{% url 'forum:comment' post_id=post.id %}"
       hx-post="{% url 'forum:comment' post_id=post.id %}"
-      hx-target="#pulse-discussion-inner-{{ post.id }}"
-      hx-swap="outerHTML"
-      class="{% if variant == 'composer' %}comment-composer{% endif %}">
+      hx-target="{% if reply_context == 'feed' %}body{% else %}#forum-discussion-inner-{{ post.id }}{% endif %}"
+      hx-swap="{% if reply_context == 'feed' %}none{% else %}outerHTML{% endif %}"
+      class="x-inline-reply-form {% if variant == 'composer' %}comment-composer{% endif %}"
+      @htmx:after-request="if ($event.detail.successful && typeof showReply !== 'undefined') { showReply = false; }">
   {% csrf_token %}
   {% if parent_comment %}
   <input type="hidden" name="parent_comment" value="{{ parent_comment.id }}">
   {% endif %}
+  {% if reply_context %}
+  <input type="hidden" name="reply_context" value="{{ reply_context }}">
+  {% endif %}
   <textarea name="body"
             rows="{% if variant == 'composer' %}3{% else %}2{% endif %}"
             placeholder="{{ placeholder|default:default_comment_placeholder }}"
-            class="form-textarea comment-composer-input w-full"
-            required></textarea>
-  <div class="mt-2 flex items-center gap-2">
-    <button type="submit" class="btn-primary text-sm">{% if parent_comment %}{% trans "Reply" %}{% else %}{% trans "Comment" %}{% endif %}</button>
+            class="x-inline-reply-input w-full resize-none border-0 bg-transparent p-0 text-[15px] leading-5 text-[var(--x-text)] placeholder:text-[var(--x-muted)] focus:outline-none focus:ring-0"
+            required
+            autofocus></textarea>
+  <div class="mt-3 flex items-center justify-end gap-2 border-t border-[var(--x-border)] pt-3">
     {% if show_cancel %}
-    <button type="button" class="btn-secondary text-sm" @click="{{ cancel_action }}">{% trans "Cancel" %}</button>
+    <button type="button"
+            class="x-inline-reply-cancel rounded-full px-4 py-1.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/30"
+            @click="{{ cancel_action }}">
+      {% trans "Cancel" %}
+    </button>
     {% endif %}
+    <button type="submit"
+            class="x-inline-reply-submit rounded-full bg-brand-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
+      {% if parent_comment %}{% trans "Reply" %}{% else %}{% trans "Reply" %}{% endif %}
+    </button>
   </div>
 </form>

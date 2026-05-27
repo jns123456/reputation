@@ -64,6 +64,63 @@ class ForumPageTests(TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_create_post_with_poll(self):
+        self.client.login(username="forumuser", password="pass")
+        response = self.client.post(
+            "/forum/create/",
+            {
+                "body": "Which team wins?",
+                "enable_poll": "1",
+                "poll_option_0": "Team A",
+                "poll_option_1": "Team B",
+                "poll_days": "3",
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        post = Post.objects.get(user=self.user, body="Which team wins?")
+        self.assertTrue(hasattr(post, "poll"))
+        self.assertEqual(post.poll.options.count(), 2)
+
+    def test_poll_vote(self):
+        from pulse.models import Poll
+
+        author = User.objects.create_user(username="author", password="pass")
+        post = create_post(
+            user=author,
+            body="Pick one",
+            poll_payload={"options": ["Red", "Blue"], "duration_days": 1},
+        )
+        poll = Poll.objects.get(post=post)
+        option = poll.options.first()
+        self.client.login(username="forumuser", password="pass")
+        response = self.client.post(
+            f"/forum/{post.id}/poll/vote/",
+            {"option_id": option.id},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Red")
+        self.assertContains(response, "%")
+
+    def test_poll_vote_blocks_author(self):
+        from pulse.models import Poll
+
+        post = create_post(
+            user=self.user,
+            body="My poll",
+            poll_payload={"options": ["Yes", "No"], "duration_days": 1},
+        )
+        poll = Poll.objects.get(post=post)
+        option = poll.options.first()
+        self.client.login(username="forumuser", password="pass")
+        response = self.client.post(
+            f"/forum/{post.id}/poll/vote/",
+            {"option_id": option.id},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_vote_on_forum_post(self):
         self.client.login(username="forumuser", password="pass")
         response = self.client.post(
@@ -145,3 +202,24 @@ class ForumPageTests(TestCase):
         self.client.login(username="other", password="pass")
         response = self.client.post(f"/forum/{self.post.id}/repost/")
         self.assertEqual(response.status_code, 400)
+
+    def test_delete_own_post(self):
+        own_post = create_post(user=self.user, body="Delete me")
+        self.client.login(username="forumuser", password="pass")
+        response = self.client.post(
+            f"/forum/{own_post.id}/delete/",
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Post.objects.filter(pk=own_post.id).exists())
+
+    def test_cannot_delete_other_users_post(self):
+        self.client.login(username="forumuser", password="pass")
+        response = self.client.post(f"/forum/{self.post.id}/delete/")
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Post.objects.filter(pk=self.post.id).exists())
+
+    def test_post_more_menu_on_feed(self):
+        response = self.client.get("/forum/")
+        self.assertContains(response, "x-tweet-menu")
+        self.assertContains(response, "Copy link")

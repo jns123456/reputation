@@ -1,0 +1,109 @@
+{% load i18n %}
+<div class="x-tweet-menu"
+     :class="{ 'is-open': menuOpen }"
+     x-data="{ menuOpen: false, confirmDelete: false }"
+     @click.outside="menuOpen = false"
+     @keydown.escape.window="menuOpen = false; confirmDelete = false">
+  <button type="button"
+          class="x-tweet-more"
+          aria-label="{% trans 'More' %}"
+          :aria-expanded="menuOpen"
+          @click.stop="menuOpen = !menuOpen">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+  </button>
+
+  <div x-show="menuOpen"
+       x-cloak
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-100"
+       x-transition:leave-start="opacity-100 scale-100"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="x-tweet-menu-dropdown"
+       role="menu"
+       @click.stop>
+    <button type="button"
+            class="x-tweet-menu-item"
+            role="menuitem"
+            data-copy-url="{{ request.scheme }}://{{ request.get_host }}{% url 'forum:detail' post_id=post.id %}#forum-comment-{{ comment.id }}"
+            @click="window.copyForumPostLink && window.copyForumPostLink($el); menuOpen = false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      {% trans "Copy link" %}
+    </button>
+
+    <button type="button"
+            class="x-tweet-menu-item"
+            role="menuitem"
+            data-share-url="{{ request.scheme }}://{{ request.get_host }}{% url 'forum:detail' post_id=post.id %}#forum-comment-{{ comment.id }}"
+            data-share-title="{% blocktrans with name=comment.user.public_name %}{{ name }} on Forum{% endblocktrans %}"
+            @click="window.shareForumPost && window.shareForumPost($el); menuOpen = false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16 6 12 2 8 6" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      {% trans "Share comment" %}
+    </button>
+
+    {% if user.is_authenticated and user == comment.user %}
+    <form x-ref="deleteForm"
+          method="post"
+          action="{% url 'forum:delete_comment' post_id=post.id comment_id=comment.id %}"
+          hx-post="{% url 'forum:delete_comment' post_id=post.id comment_id=comment.id %}"
+          hx-target="#forum-discussion-inner-{{ post.id }}"
+          hx-swap="outerHTML"
+          class="hidden"
+          @htmx:after-request="if ($event.detail.successful) { menuOpen = false; confirmDelete = false; }">
+      {% csrf_token %}
+    </form>
+
+    <button type="button"
+            class="x-tweet-menu-item x-tweet-menu-item--danger"
+            role="menuitem"
+            @click.stop="menuOpen = false; confirmDelete = true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><polyline points="3 6 5 6 21 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      {% trans "Delete comment" %}
+    </button>
+
+    <template x-teleport="body">
+    <div x-show="confirmDelete"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="x-confirm-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="delete-comment-title-{{ comment.id }}"
+         @click.stop>
+      <button type="button"
+              class="x-confirm-backdrop"
+              aria-label="{% trans 'Close' %}"
+              @click="confirmDelete = false"></button>
+      <div class="x-confirm-panel"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+           x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+           x-transition:leave="transition ease-in duration-150"
+           x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+           x-transition:leave-end="opacity-0 scale-95 translate-y-2">
+        <h2 id="delete-comment-title-{{ comment.id }}" class="x-confirm-title">{% trans "Delete comment?" %}</h2>
+        <p class="x-confirm-text">{% trans "This can't be undone and will remove your comment from the thread." %}</p>
+        <div class="x-confirm-actions">
+          <button type="button"
+                  class="x-confirm-btn x-confirm-btn--cancel"
+                  @click="confirmDelete = false">
+            {% trans "Cancel" %}
+          </button>
+          <button type="button"
+                  class="x-confirm-btn x-confirm-btn--danger"
+                  @click="confirmDelete = false; htmx.trigger($refs.deleteForm, 'submit')">
+            {% trans "Delete" %}
+          </button>
+        </div>
+      </div>
+    </div>
+    </template>
+    {% endif %}
+  </div>
+</div>

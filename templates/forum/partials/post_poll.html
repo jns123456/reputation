@@ -1,0 +1,46 @@
+{% load i18n %}
+{% if poll %}
+<div class="x-poll" id="forum-poll-{{ poll.id }}" onclick="event.stopPropagation()">
+  <div class="x-poll-options">
+    {% for option in poll_options %}
+      {% if poll_show_results %}
+        <div class="x-poll-option x-poll-option--result {% if poll_user_option_id == option.id %}is-selected{% endif %}">
+          <div class="x-poll-option-bar" style="width: {{ option.vote_pct }}%;" aria-hidden="true"></div>
+          <div class="x-poll-option-content">
+            <span class="x-poll-option-label">{{ option.text }}</span>
+            <span class="x-poll-option-pct">{{ option.vote_pct }}%</span>
+          </div>
+        </div>
+      {% elif user.is_authenticated %}
+        <form method="post"
+              action="{% url 'forum:poll_vote' post_id=poll.post_id %}"
+              hx-post="{% url 'forum:poll_vote' post_id=poll.post_id %}"
+              hx-target="#forum-poll-{{ poll.id }}"
+              hx-swap="outerHTML"
+              class="x-poll-option-form">
+          {% csrf_token %}
+          <input type="hidden" name="option_id" value="{{ option.id }}">
+          <button type="submit" class="x-poll-option">
+            <span class="x-poll-option-label">{{ option.text }}</span>
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}?next={{ request.path }}"
+           class="x-poll-option">
+          <span class="x-poll-option-label">{{ option.text }}</span>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <p class="x-poll-meta">
+    {% if poll.is_closed %}
+      {% blocktrans count counter=poll_total_votes %}{{ counter }} vote · Final results{% plural %}{{ counter }} votes · Final results{% endblocktrans %}
+    {% elif poll_show_results %}
+      {% blocktrans count counter=poll_total_votes %}{{ counter }} vote{% plural %}{{ counter }} votes{% endblocktrans %}
+      · {% blocktrans with time=poll.ends_at|timeuntil %}{{ time }} left{% endblocktrans %}
+    {% else %}
+      {% blocktrans with time=poll.ends_at|timeuntil %}{{ time }} left{% endblocktrans %}
+    {% endif %}
+  </p>
+</div>
+{% endif %}

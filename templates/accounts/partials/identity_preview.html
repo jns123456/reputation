@@ -1,0 +1,30 @@
+{% load i18n %}
+<div class="identity-preview rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+  <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{% trans "Preview" %}</p>
+  <div class="mt-3 flex items-start gap-3">
+    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-sm font-bold text-brand-700 dark:from-brand-900 dark:to-brand-800 dark:text-brand-300"
+          x-text="(displayName || username || '?').charAt(0).toUpperCase()"></span>
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="truncate font-semibold text-slate-900 dark:text-white"
+              x-text="displayName || (mode === 'anonymous' ? labelAnonymous : (username || labelYourName))"></span>
+        <span x-show="verified" x-cloak class="inline-flex shrink-0" title="{% trans 'Verified' %}">
+          {% include "accounts/partials/verified_badge.html" %}
+        </span>
+        <span class="badge-identity-public text-[10px]" x-show="mode === 'public'" x-cloak>{% trans "Public" %}</span>
+        <span class="badge-identity-pseudonym text-[10px]" x-show="mode === 'pseudonym'" x-cloak>{% trans "Pseudonym" %}</span>
+        <span class="badge-identity-anonymous text-[10px]" x-show="mode === 'anonymous'" x-cloak>{% trans "Anonymous" %}</span>
+      </div>
+      <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400"
+         x-show="mode !== 'anonymous'"
+         x-cloak>
+        @<span x-text="username || labelUsername"></span>
+      </p>
+      <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500"
+         x-show="mode === 'anonymous'"
+         x-cloak>
+        {% trans "@username hidden in posts and comments" %}
+      </p>
+    </div>
+  </div>
+</div>

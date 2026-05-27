@@ -1,4 +1,28 @@
 (function () {
+  window.copyForumPostLink = function (button) {
+    var url = button.getAttribute("data-copy-url");
+    if (!url) return;
+
+    var label = button.textContent.trim();
+    var copiedLabel = button.getAttribute("data-copied-label") || "Link copied!";
+
+    function showCopied() {
+      button.textContent = copiedLabel;
+      setTimeout(function () {
+        button.textContent = label;
+      }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(showCopied).catch(function () {
+        window.prompt("Copy this link:", url);
+      });
+      return;
+    }
+
+    window.prompt("Copy this link:", url);
+  };
+
   window.shareForumPost = function (button) {
     var url = button.getAttribute("data-share-url");
     var title = button.getAttribute("data-share-title") || "Forecast on ProofRep";

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.validators import MaxLengthValidator
 from django.db import models
+from django.utils import timezone
 
 
 class Post(models.Model):
@@ -87,3 +88,76 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Pulse comment by {self.user.username} on post {self.post_id}"
+
+
+class Poll(models.Model):
+    post = models.OneToOneField(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="poll",
+    )
+    ends_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @property
+    def is_closed(self):
+        return timezone.now() >= self.ends_at
+
+    def __str__(self):
+        return f"Poll on post {self.post_id}"
+
+
+class PollOption(models.Model):
+    poll = models.ForeignKey(
+        Poll,
+        on_delete=models.CASCADE,
+        related_name="options",
+    )
+    text = models.CharField(max_length=50)
+    position = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["position", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["poll", "position"],
+                name="pulse_unique_poll_option_position",
+            ),
+        ]
+
+    def __str__(self):
+        return self.text[:40]
+
+
+class PollVote(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="pulse_poll_votes",
+    )
+    poll = models.ForeignKey(
+        Poll,
+        on_delete=models.CASCADE,
+        related_name="votes",
+    )
+    option = models.ForeignKey(
+        PollOption,
+        on_delete=models.CASCADE,
+        related_name="votes",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "poll"],
+                name="pulse_unique_poll_vote_per_user",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} voted on poll {self.poll_id}"

@@ -1,6 +1,25 @@
 from django.contrib import admin
 
-from pulse.models import Comment, Post
+from pulse.models import Comment, Poll, PollOption, PollVote, Post
+
+
+class PollOptionInline(admin.TabularInline):
+    model = PollOption
+    extra = 0
+
+
+@admin.register(Poll)
+class PollAdmin(admin.ModelAdmin):
+    list_display = ("id", "post", "ends_at", "created_at")
+    list_filter = ("ends_at",)
+    raw_id_fields = ("post",)
+    inlines = [PollOptionInline]
+
+
+@admin.register(PollVote)
+class PollVoteAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "poll", "option", "updated_at")
+    raw_id_fields = ("user", "poll", "option")
 
 
 @admin.register(Post)

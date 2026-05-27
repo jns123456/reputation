@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="flex items-center gap-0.5" id="votes-pulse_post-{{ post.id }}">
+<div class="x-tweet-votes flex items-center gap-0.5" id="votes-pulse_post-{{ post.id }}">
   {% if user.is_authenticated and post.user != user %}
   <form method="post" action="{% url 'comments:vote' %}" class="inline"
         hx-post="{% url 'comments:vote' %}"
@@ -11,10 +11,10 @@
     <input type="hidden" name="value" value="1">
     <input type="hidden" name="layout" value="forum">
     <button type="submit"
-            class="forum-action forum-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition {% if post_vote == 1 %}is-active{% endif %}"
+            class="x-tweet-action x-tweet-action--like {% if post_vote == 1 %}is-active{% endif %}"
             title="{% trans 'Like' %}" aria-label="{% trans 'Like' %}">
       {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-      <span class="text-xs font-medium tabular-nums {% if post.popularity_score <= 0 %}sr-only{% endif %}" data-vote-score="{{ post.popularity_score }}">{% if post.popularity_score > 0 %}+{% endif %}{{ post.popularity_score }}</span>
+      <span class="x-tweet-action-count {% if post.like_count <= 0 %}sr-only{% endif %}" data-vote-like-count="{{ post.like_count }}">+{{ post.like_count }}</span>
     </button>
   </form>
   <form method="post" action="{% url 'comments:vote' %}" class="inline"
@@ -27,30 +27,33 @@
     <input type="hidden" name="value" value="-1">
     <input type="hidden" name="layout" value="forum">
     <button type="submit"
-            class="forum-action forum-action-dislike rounded-full px-2 py-1.5 transition {% if post_vote == -1 %}is-active{% endif %}"
+            class="x-tweet-action x-tweet-action--dislike {% if post_vote == -1 %}is-active{% endif %}"
             title="{% trans 'Dislike' %}" aria-label="{% trans 'Dislike' %}">
       {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
+      <span class="x-tweet-action-count {% if post.dislike_count <= 0 %}sr-only{% endif %}" data-vote-dislike-count="{{ post.dislike_count }}">-{{ post.dislike_count }}</span>
     </button>
   </form>
   {% elif user.is_authenticated %}
-  <span class="forum-action flex cursor-not-allowed items-center gap-1 rounded-full px-2 py-1.5 text-slate-300 opacity-60" title="{% trans "You can't vote on your own post" %}">
+  <span class="x-tweet-action x-tweet-action--like is-disabled" title="{% trans "You can't vote on your own post" %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-    {% if post.popularity_score > 0 %}<span class="text-xs font-medium tabular-nums" data-vote-score="{{ post.popularity_score }}">+{{ post.popularity_score }}</span>{% endif %}
+    {% if post.like_count > 0 %}<span class="x-tweet-action-count" data-vote-like-count="{{ post.like_count }}">+{{ post.like_count }}</span>{% endif %}
   </span>
-  <span class="forum-action cursor-not-allowed rounded-full px-2 py-1.5 text-slate-300 opacity-60">
+  <span class="x-tweet-action x-tweet-action--dislike is-disabled">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
+    {% if post.dislike_count > 0 %}<span class="x-tweet-action-count" data-vote-dislike-count="{{ post.dislike_count }}">-{{ post.dislike_count }}</span>{% endif %}
   </span>
   {% else %}
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
-     class="forum-action forum-action-like flex items-center gap-1 rounded-full px-2 py-1.5 transition"
+     class="x-tweet-action x-tweet-action--like"
      title="{% trans 'Log in to like' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
-    {% if post.popularity_score %}<span class="text-xs font-medium tabular-nums">{{ post.popularity_score }}</span>{% endif %}
+    {% if post.like_count > 0 %}<span class="x-tweet-action-count">+{{ post.like_count }}</span>{% endif %}
   </a>
   <a href="{% url 'accounts:login' %}?next={{ request.path }}"
-     class="forum-action forum-action-dislike rounded-full px-2 py-1.5 transition"
+     class="x-tweet-action x-tweet-action--dislike"
      title="{% trans 'Log in to dislike' %}">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
+    {% if post.dislike_count > 0 %}<span class="x-tweet-action-count">-{{ post.dislike_count }}</span>{% endif %}
   </a>
   {% endif %}
 </div>

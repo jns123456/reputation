@@ -22,7 +22,7 @@
         {% if item.kind == "prediction" %}
           {% include "dashboard/partials/forecast_post.html" with prediction=item.prediction market=item.market comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
         {% else %}
-          {% include "forum/partials/post_card.html" with post=item.post original_post=item.original_post comment_count=item.comment_count post_vote=item.post_vote is_bookmarked=item.is_bookmarked repost_count=item.repost_count is_reposted=item.is_reposted %}
+          {% include "forum/partials/post_card_from_item.html" with item=item %}
         {% endif %}
       {% empty %}
       <div class="pr-empty border-0 bg-transparent py-16">

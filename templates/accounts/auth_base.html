@@ -6,69 +6,173 @@
   .auth-field-help ul { margin-top: 0.375rem; list-style: none; padding: 0; }
   .auth-field-help li { position: relative; padding-left: 1rem; margin-top: 0.25rem; }
   .auth-field-help li::before { content: "•"; position: absolute; left: 0; color: rgb(148 163 184); }
-  .auth-card .form-input.pl-10 { padding-left: 2.5rem; }
+  .auth-form .form-input.pl-10,
+  .auth-form .form-textarea.pl-10 { padding-left: 2.5rem; }
+  .auth-benefit {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem 1.125rem;
+    backdrop-filter: blur(8px);
+  }
+  html.dark .auth-benefit {
+    border-color: rgba(71, 85, 105, 0.6);
+    background: rgba(30, 41, 59, 0.9);
+  }
+  .auth-benefit-icon {
+    display: flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.625rem;
+  }
+  .identity-mode-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    border-radius: 0.875rem;
+    border: 1.5px solid rgb(226 232 240);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.875rem;
+    transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
+  }
+  html.dark .identity-mode-card {
+    border-color: rgb(71 85 105);
+    background: rgba(30, 41, 59, 0.9);
+  }
+  .identity-mode-card--active,
+  .identity-mode-card:has(input:checked) {
+    border-color: rgb(99 102 241);
+    background: rgb(238 242 255 / 0.65);
+    box-shadow: 0 0 0 1px rgb(99 102 241 / 0.35);
+  }
+  html.dark .identity-mode-card--active,
+  html.dark .identity-mode-card:has(input:checked) {
+    border-color: rgb(129 140 248);
+    background: rgb(49 46 129 / 0.35);
+    box-shadow: 0 0 0 1px rgb(129 140 248 / 0.35);
+  }
+  .identity-mode-icon {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.625rem;
+  }
+  .identity-mode-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(15 23 42);
+  }
+  html.dark .identity-mode-title { color: rgb(248 250 252); }
+  .identity-mode-desc {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: rgb(100 116 139);
+  }
+  html.dark .identity-mode-desc { color: rgb(148 163 184); }
+  .badge-identity-public,
+  .badge-identity-pseudonym,
+  .badge-identity-anonymous {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .badge-identity-public { background: rgb(224 242 254); color: rgb(3 105 161); }
+  .badge-identity-pseudonym { background: rgb(237 233 254); color: rgb(109 40 217); }
+  .badge-identity-anonymous { background: rgb(241 245 249); color: rgb(71 85 105); }
+  html.dark .badge-identity-public { background: rgb(12 74 110 / 0.45); color: rgb(125 211 252); }
+  html.dark .badge-identity-pseudonym { background: rgb(76 29 149 / 0.45); color: rgb(196 181 253); }
+  html.dark .badge-identity-anonymous { background: rgb(51 65 85 / 0.6); color: rgb(203 213 225); }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
-  <section class="relative mx-auto max-w-5xl overflow-hidden">
-    <div class="pr-orb pr-orb--slow pointer-events-none absolute -right-24 -top-24 h-72 w-72 bg-brand-500/20" aria-hidden="true"></div>
-    <div class="pr-orb pointer-events-none absolute -bottom-32 -left-20 h-64 w-64 bg-emerald-400/15" aria-hidden="true"></div>
+  <section class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
+    <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
+    <div class="pr-orb pr-orb--slow pointer-events-none absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
+    <div class="pr-orb pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 bg-emerald-400/15" aria-hidden="true"></div>
 
-    <div class="relative grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
-      <div class="hidden lg:block" data-pr-reveal>
-        <p class="pr-eyebrow">{% block auth_eyebrow %}{% trans "Join the network" %}{% endblock %}</p>
-        <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-          {% block auth_headline %}{% trans "Build credibility through forecasts" %}{% endblock %}
+    <div class="relative pr-hero-row">
+      <div class="max-w-3xl">
+        <p class="pr-eyebrow">
+          <span class="pr-eyebrow-dot" aria-hidden="true"></span>
+          {% block auth_hero_eyebrow %}{% trans "Join the network" %}{% endblock %}
+        </p>
+        <h1 class="pr-hero-title">
+          {% block auth_hero_title %}{% trans "Build credibility" %}{% endblock %}{% block auth_hero_gradient %} <span class="pr-gradient-text">{% trans "through forecasts" %}</span>{% endblock %}
         </h1>
-        <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-          {% block auth_description %}
+        <p class="pr-hero-desc">
+          {% block auth_hero_description %}
           {% blocktrans %}Debate real-world events, publish formal predictions, and earn <span class="badge-rep">Reputation</span> when markets resolve — no betting, no wallets.{% endblocktrans %}
           {% endblock %}
         </p>
-        <ul class="mt-8 space-y-4">
-          <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
-            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            </span>
-            <span>{% blocktrans %}<strong class="font-medium text-slate-800 dark:text-slate-100">Reputation</strong> tracks predictive accuracy on resolved forecasts.{% endblocktrans %}</span>
-          </li>
-          <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
-            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            </span>
-            <span>{% blocktrans %}<strong class="font-medium text-slate-800 dark:text-slate-100">Popularity</strong> reflects social engagement — kept separate from credibility.{% endblocktrans %}</span>
-          </li>
-          <li class="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
-            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            </span>
-            <span>{% trans "Live odds from Polymarket. Pick Yes or No and explain your reasoning." %}</span>
-          </li>
-        </ul>
       </div>
+    </div>
+  </section>
 
-      <div class="mx-auto w-full max-w-md lg:max-w-none" data-pr-reveal data-delay="1">
-        <div class="auth-card pr-glass overflow-hidden rounded-2xl border border-slate-200/80 shadow-lg dark:border-slate-700">
-          <div class="border-b border-slate-100 bg-gradient-to-r from-brand-50/80 to-white px-4 py-4 sm:px-8 sm:py-5 dark:border-slate-700 dark:from-brand-950/30 dark:to-slate-800">
-            <div class="lg:hidden">
-              <p class="pr-eyebrow">{% block auth_mobile_eyebrow %}ProofRep{% endblock %}</p>
-            </div>
-            <h2 class="mt-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white lg:mt-0">
+  <div class="mx-auto mt-8 max-w-5xl" data-pr-reveal data-delay="1">
+    <div class="grid gap-6 lg:grid-cols-5 lg:items-start lg:gap-10">
+      <aside class="space-y-3 lg:col-span-2">
+        {% block auth_benefits %}
+        <div class="auth-benefit">
+          <span class="auth-benefit-icon shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Reputation" %}</p>
+            <p class="mt-0.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Predictive accuracy on resolved forecasts." %}</p>
+          </div>
+        </div>
+        <div class="auth-benefit">
+          <span class="auth-benefit-icon shrink-0 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Popularity" %}</p>
+            <p class="mt-0.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Social engagement, separate from credibility." %}</p>
+          </div>
+        </div>
+        <div class="auth-benefit">
+          <span class="auth-benefit-icon shrink-0 bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Real markets" %}</p>
+            <p class="mt-0.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Live odds from Polymarket — no betting." %}</p>
+          </div>
+        </div>
+        {% endblock %}
+      </aside>
+
+      <div class="lg:col-span-3">
+        <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
+          <div class="border-b border-slate-100 bg-gradient-to-r from-brand-50/80 to-white px-5 py-5 sm:px-8 dark:border-slate-700 dark:from-brand-950/30 dark:to-slate-800">
+            <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
               {% block auth_title %}{% endblock %}
             </h2>
             {% block auth_subtitle %}{% endblock %}
           </div>
-          <div class="px-4 py-5 sm:px-8 sm:py-7">
+          <div class="auth-form px-5 py-6 sm:px-8 sm:py-7">
             {% block auth_form %}{% endblock %}
           </div>
-          <div class="border-t border-slate-100 bg-slate-50/80 px-6 py-4 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-400 sm:px-8">
+          <div class="border-t border-slate-100 bg-slate-50/80 px-5 py-4 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400 sm:px-8">
             {% block auth_footer %}{% endblock %}
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </div>
 {% endblock %}

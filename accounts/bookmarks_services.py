@@ -10,6 +10,7 @@ from pulse.models import Post
 from pulse.selectors import (
     _get_repost_counts,
     _get_user_reposted_original_ids,
+    annotate_post_interactions,
     build_feed_item,
     get_user_pulse_post_votes,
 )
@@ -45,13 +46,15 @@ def build_bookmarks_page_items(*, user, target_type=None, limit=100):
     }
     posts_by_id = {
         post.id: post
-        for post in Post.objects.filter(id__in=post_ids)
-        .select_related(
-            "user",
-            "user__profile",
-            "reposted_from",
-            "reposted_from__user",
-            "reposted_from__user__profile",
+        for post in annotate_post_interactions(
+            Post.objects.filter(id__in=post_ids)
+            .select_related(
+                "user",
+                "user__profile",
+                "reposted_from",
+                "reposted_from__user",
+                "reposted_from__user__profile",
+            )
         )
         .annotate(comment_count=Count("comments", distinct=True))
     }

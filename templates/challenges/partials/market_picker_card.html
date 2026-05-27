@@ -5,79 +5,69 @@
          data-title="{{ market.title }}"
          class="peer sr-only"
          {% if market.id in selected_market_ids %}checked{% endif %}>
-  <div class="pointer-events-none absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 bg-white text-transparent transition peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white dark:border-slate-600 dark:bg-slate-800">
-    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+  <div class="challenge-market-card-check" aria-hidden="true">
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
     </svg>
   </div>
-  <div class="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md peer-checked:border-brand-500 peer-checked:ring-2 peer-checked:ring-brand-500/30 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 peer-checked:dark:border-brand-400">
-    <div class="flex gap-3 pr-8">
+  <article class="challenge-market-card-inner pr-card">
+    <div class="challenge-market-card-top">
       {% if market.image_url %}
-      <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-white p-1 dark:border-slate-500 dark:bg-white/90">
+      <div class="challenge-market-card-thumb">
         <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="lazy">
       </div>
       {% else %}
-      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 text-sm font-bold text-slate-500 dark:from-slate-700 dark:to-slate-600 dark:text-slate-300" aria-hidden="true">
+      <div class="challenge-market-card-thumb challenge-market-card-thumb--fallback" aria-hidden="true">
         {{ market.title|slice:":1"|upper }}
       </div>
       {% endif %}
-      <h3 class="line-clamp-3 min-h-[3.75rem] flex-1 text-sm font-semibold leading-snug text-slate-900 group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-400">
+      <h3 class="challenge-market-card-title" title="{{ market.title }}">
         {{ market.title }}
       </h3>
     </div>
 
     {% if market.current_probability %}
-    <div class="mt-4 flex gap-2">
+    <div class="challenge-market-card-odds">
       {% for label, prob in market.current_probability.items %}
-      <div class="flex flex-1 flex-col items-center rounded-lg border py-2.5 transition
-        {% if label|lower == 'yes' %}border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/35 dark:group-hover:border-emerald-700/60 dark:group-hover:bg-emerald-900/45{% elif label|lower == 'no' %}border-rose-200 bg-rose-50 group-hover:bg-rose-100 dark:border-rose-800/50 dark:bg-rose-950/35 dark:group-hover:border-rose-700/60 dark:group-hover:bg-rose-900/45{% else %}border-slate-200 bg-slate-50 group-hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/55 dark:group-hover:border-slate-500 dark:group-hover:bg-slate-700/70{% endif %}">
-        <span class="text-xs font-semibold uppercase tracking-wide {% if label|lower == 'yes' %}text-emerald-700 dark:text-emerald-300{% elif label|lower == 'no' %}text-rose-700 dark:text-rose-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
+      <div class="challenge-market-card-odd
+        {% if label|lower == 'yes' %}challenge-market-card-odd--yes{% elif label|lower == 'no' %}challenge-market-card-odd--no{% endif %}">
+        <span class="challenge-market-card-odd-label">
           {% if label|lower == 'yes' %}{% trans "Yes" %}{% elif label|lower == 'no' %}{% trans "No" %}{% else %}{{ label }}{% endif %}
         </span>
-        <span class="mt-0.5 text-xl font-bold tabular-nums {% if label|lower == 'yes' %}text-emerald-800 dark:text-emerald-200{% elif label|lower == 'no' %}text-rose-800 dark:text-rose-200{% else %}text-slate-800 dark:text-slate-100{% endif %}">
-          {{ prob|as_percent }}%
-        </span>
+        <span class="challenge-market-card-odd-value">{{ prob|as_percent }}%</span>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="mt-4 text-center text-sm text-slate-400">{% trans "Odds unavailable" %}</p>
+    <p class="challenge-market-card-no-odds">{% trans "Odds unavailable" %}</p>
     {% endif %}
 
-    <div class="mt-auto pt-4">
+    <footer class="challenge-market-card-foot">
       {% if market.close_date %}
-      <p class="mb-2 text-xs text-slate-500 dark:text-slate-400">
+      <p class="challenge-market-card-date">
         {% blocktrans with date=market.close_date|date:"M j, Y" %}Closes {{ date }}{% endblocktrans %}
       </p>
       {% endif %}
       {% with countdown=market.expiration_countdown %}
       {% if countdown %}
-      <p class="mb-2">
-        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums
-          {% if countdown.tone == 'urgent' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200
-          {% elif countdown.tone == 'soon' %}bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200
-          {% elif countdown.tone == 'past' %}bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400
-          {% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200{% endif %}">
-          {{ countdown.text }}
-        </span>
-      </p>
+      <span class="challenge-market-card-countdown challenge-market-card-countdown--{{ countdown.tone }}">
+        {{ countdown.text }}
+      </span>
       {% endif %}
       {% endwith %}
-      <div class="flex items-center justify-between gap-2 text-xs text-slate-400">
-      <span class="truncate font-medium">
-        {% if market.volume_label %}{{ market.volume_label }}{% endif %}
-      </span>
-      <div class="flex shrink-0 items-center gap-1.5">
-        {% if market.source == "kalshi" %}
-        <span class="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Kalshi</span>
-        {% elif market.source == "polymarket" %}
-        <span class="rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700">Polymarket</span>
-        {% endif %}
-        {% if market.category %}
-        <span class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500">{{ market.category }}</span>
-        {% endif %}
+      <div class="challenge-market-card-tags">
+        {% if market.volume_label %}<span class="challenge-market-card-volume">{{ market.volume_label }}</span>{% endif %}
+        <div class="challenge-market-card-badges">
+          {% if market.source == "kalshi" %}
+          <span class="challenge-market-card-badge challenge-market-card-badge--kalshi">Kalshi</span>
+          {% elif market.source == "polymarket" %}
+          <span class="challenge-market-card-badge challenge-market-card-badge--poly">Polymarket</span>
+          {% endif %}
+          {% if market.category %}
+          <span class="challenge-market-card-badge">{{ market.category }}</span>
+          {% endif %}
+        </div>
       </div>
-      </div>
-    </div>
-  </div>
+    </footer>
+  </article>
 </label>

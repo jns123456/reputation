@@ -3,83 +3,78 @@
 
 {% block title %}{% trans "Sign up" %}{% endblock %}
 
-{% block auth_eyebrow %}{% trans "Get started" %}{% endblock %}
-{% block auth_headline %}{% trans "Start building your track record" %}{% endblock %}
-{% block auth_description %}
-{% trans "Create a free account to publish forecasts on real-world markets, join discussions, and prove your predictive skill over time." %}
+{% block auth_hero_eyebrow %}{% trans "Get started" %}{% endblock %}
+{% block auth_hero_title %}{% trans "Build your" %}{% endblock %}
+{% block auth_hero_gradient %} <span class="pr-gradient-text">{% trans "track record" %}</span>{% endblock %}
+{% block auth_hero_description %}
+{% blocktrans %}Create your account in seconds. Next, choose how you want to appear publicly.{% endblocktrans %}
 {% endblock %}
-{% block auth_mobile_eyebrow %}{% trans "Get started" %}{% endblock %}
 
 {% block auth_title %}{% trans "Create account" %}{% endblock %}
 {% block auth_subtitle %}
-<p class="mt-1 text-sm text-slate-500">{% trans "Takes less than a minute. No payment required." %}</p>
+<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% trans "Step 1 of 2 — credentials only. No payment required." %}</p>
 {% endblock %}
 
 {% block auth_form %}
-<form method="post" class="space-y-6">
+<form method="post" class="space-y-5">
   {% csrf_token %}
 
-  <fieldset class="space-y-4">
-    <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500">{% trans "Account" %}</legend>
+  {% if form.non_field_errors %}
+  <div class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+    <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <div>{{ form.non_field_errors }}</div>
+  </div>
+  {% endif %}
 
-    {% for field in form %}
-      {% if field.name == "username" or field.name == "email" or field.name == "password1" or field.name == "password2" %}
-      <div>
-        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
-        <div class="mt-1.5">{{ field }}</div>
-        {% if field.errors %}
-        <p class="mt-1.5 flex items-center gap-1.5 text-sm text-red-600">
-          <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"/>
-          </svg>
-          {{ field.errors.0 }}
-        </p>
+  {% for field in form %}
+  <div>
+    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ field.label }}</label>
+    <div class="relative mt-1.5">
+      <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+        {% if field.name == "username" %}
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+        {% elif field.name == "email" %}
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        {% else %}
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
         {% endif %}
-        {% if field.help_text %}
-        <p class="mt-1.5 text-xs leading-relaxed text-slate-500 auth-field-help">{{ field.help_text|safe }}</p>
-        {% endif %}
+      </span>
+      {{ field }}
+    </div>
+    {% if field.name == "username" %}
+    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Your @handle on ProofRep." %}</p>
+    {% endif %}
+    {% if field.errors %}
+    <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ field.errors.0 }}</p>
+    {% endif %}
+    {% if field.name == "password1" and field.help_text %}
+    <details class="mt-2 rounded-lg border border-slate-200/80 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-900/40">
+      <summary class="cursor-pointer px-3 py-2 text-xs font-medium text-slate-600 marker:content-none dark:text-slate-400 [&::-webkit-details-marker]:hidden">
+        {% trans "Password requirements" %}
+      </summary>
+      <div class="auth-field-help border-t border-slate-200/80 px-3 py-2 text-xs leading-relaxed text-slate-500 dark:border-slate-700 dark:text-slate-400">
+        {{ field.help_text|safe }}
       </div>
-      {% endif %}
-    {% endfor %}
-  </fieldset>
+    </details>
+    {% endif %}
+  </div>
+  {% endfor %}
 
-  <fieldset class="space-y-4 border-t border-slate-100 pt-6">
-    <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500">{% trans "Profile" %} <span class="font-normal normal-case tracking-normal text-slate-400">({% trans "optional" %})</span></legend>
-
-    {% for field in form %}
-      {% if field.name == "display_name" or field.name == "bio" %}
-      <div>
-        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
-        <div class="mt-1.5">{{ field }}</div>
-        {% if field.errors %}
-        <p class="mt-1.5 text-sm text-red-600">{{ field.errors.0 }}</p>
-        {% endif %}
-        {% if field.help_text %}
-        <p class="mt-1.5 text-xs text-slate-500">{{ field.help_text }}</p>
-        {% endif %}
-      </div>
-      {% elif field.name == "is_anonymous_profile" %}
-      <div class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3">
-        <div class="pt-0.5">{{ field }}</div>
-        <div>
-          <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700">{{ field.label }}</label>
-          <p class="mt-0.5 text-xs leading-relaxed text-slate-500">
-            {% trans "Hide your real identity and use a pseudonym in public discussions." %}
-          </p>
-          {% if field.errors %}<p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>{% endif %}
-        </div>
-      </div>
-      {% endif %}
-    {% endfor %}
-  </fieldset>
-
-  <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm">
-    {% trans "Create account" %}
+  <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm shadow-brand-500/20">
+    {% trans "Continue" %}
   </button>
 </form>
 {% endblock %}
 
 {% block auth_footer %}
 {% trans "Already have an account?" %}
-<a href="{% url 'accounts:login' %}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline">{% trans "Log in" %}</a>
+<a href="{% url 'accounts:login' %}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline dark:text-brand-400">{% trans "Log in" %}</a>
 {% endblock %}

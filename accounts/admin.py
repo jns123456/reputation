@@ -21,15 +21,34 @@ class UserProfileInline(admin.StackedInline):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     inlines = [UserProfileInline]
-    list_display = ("username", "email", "display_name", "is_ai_agent", "is_staff")
-    list_filter = ("is_ai_agent", "is_anonymous_profile", "is_staff")
+    list_display = (
+        "username",
+        "email",
+        "display_name",
+        "identity_mode",
+        "is_verified",
+        "onboarding_completed",
+        "is_ai_agent",
+        "is_staff",
+    )
+    list_filter = (
+        "is_ai_agent",
+        "identity_mode",
+        "is_verified",
+        "verification_requested",
+        "onboarding_completed",
+        "is_staff",
+    )
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             "Profile",
             {
                 "fields": (
                     "display_name",
-                    "is_anonymous_profile",
+                    "identity_mode",
+                    "is_verified",
+                    "verification_requested",
+                    "onboarding_completed",
                     "is_ai_agent",
                     "bio",
                 )
@@ -39,7 +58,17 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (
             "Profile",
-            {"fields": ("display_name", "is_anonymous_profile", "is_ai_agent", "bio")},
+            {
+                "fields": (
+                    "display_name",
+                    "identity_mode",
+                    "is_verified",
+                    "verification_requested",
+                    "onboarding_completed",
+                    "is_ai_agent",
+                    "bio",
+                )
+            },
         ),
     )
 

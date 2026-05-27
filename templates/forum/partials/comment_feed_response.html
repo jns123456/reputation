@@ -1,0 +1,11 @@
+{% load i18n %}
+<div id="forum-inline-reply-{{ post.id }}" hx-swap-oob="true"></div>
+<div id="forum-actions-post-{{ post.id }}" hx-swap-oob="true">
+  {% include "forum/partials/post_actions.html" with post=post original_post=original_post comment_count=comment_count post_vote=post_vote is_bookmarked=is_bookmarked repost_count=repost_count is_reposted=is_reposted %}
+</div>
+<div id="forum-inline-reply-success-{{ post.id }}" class="x-inline-reply-success" hx-swap-oob="true">
+  <p class="text-sm text-[var(--x-muted)]">
+    {% trans "Reply posted." %}
+    <a href="{% url 'forum:detail' post_id=post.id %}" class="font-semibold text-brand-600 hover:underline">{% trans "View thread" %}</a>
+  </p>
+</div>

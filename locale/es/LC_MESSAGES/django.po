@@ -210,7 +210,7 @@ msgstr "Se han marcado todas las notificaciones como leídas"
 
 #: challenges/forms.py:15
 msgid "Optional challenge name"
-msgstr "DESAFÍO OPCIONAL "
+msgstr "Nombre del desafío (opcional)"
 
 #: challenges/forms.py:28 challenges/services.py:22
 msgid "Select at least one event."
@@ -398,7 +398,7 @@ msgstr "Elecciones, política y gobierno"
 
 #: markets/categories.py:109 templates/dashboard/about.html:588
 msgid "Sports"
-msgstr "Sports"
+msgstr "Deportes"
 
 #: markets/categories.py:110
 msgid "Leagues, tournaments, and championships"
@@ -931,7 +931,7 @@ msgstr "Compromiso social"
 #: templates/dashboard/reputation_leaderboard.html:36
 #| msgid "Top predictors"
 msgid "Predictions"
-msgstr "Mejores predictores"
+msgstr "Predicciones"
 
 #: templates/accounts/profile_detail.html:48 templates/dashboard/home.html:23
 #, python-format
@@ -988,7 +988,7 @@ msgstr "Categoría"
 #: templates/accounts/profile_detail.html:89 templates/includes/navbar.html:46
 #: templates/includes/navbar.html:197
 msgid "Leaderboards"
-msgstr "Clasificaciones"
+msgstr "Rankings"
 
 #: templates/accounts/profile_detail.html:102
 #, python-format
@@ -1093,7 +1093,7 @@ msgstr "Crear cuenta"
 #: templates/dashboard/about.html:170
 #| msgid "Reputation"
 msgid "Proof of Reputation"
-msgstr "Reputación"
+msgstr "Prueba de reputación"
 
 #: templates/base.html:334
 msgid ""
@@ -1116,7 +1116,7 @@ msgstr "Preguntas frecuentes"
 #: templates/challenges/challenge_list.html:12
 #| msgid "Challenges"
 msgid "New challenge"
-msgstr "Desafíos"
+msgstr "Nuevo desafío"
 
 #: templates/challenges/challenge_create.html:7
 msgid "selected"
@@ -1174,11 +1174,11 @@ msgstr "Todavía no hay seguidores mutuos."
 #: templates/challenges/challenge_create.html:59
 #| msgid "Challenges"
 msgid "Send challenge"
-msgstr "Desafíos"
+msgstr "Enviar desafío"
 
 #: templates/challenges/challenge_create.html:68
 msgid "Select events"
-msgstr "SELECCIONAR EVENTOS"
+msgstr "Seleccionar eventos"
 
 #: templates/challenges/challenge_create.html:69
 #, python-format
@@ -1188,11 +1188,11 @@ msgstr "Elige hasta %(max)s mercados abiertos"
 
 #: templates/challenges/challenge_create.html:86
 msgid "Remove event"
-msgstr "Suprimir evento"
+msgstr "Quitar evento"
 
 #: templates/challenges/challenge_create.html:103
 msgid "Search events…"
-msgstr "Buscar Eventos"
+msgstr "Buscar eventos…"
 
 #: templates/challenges/challenge_detail.html:20
 #, python-format
@@ -1600,14 +1600,14 @@ msgstr "No me gusta (desactivado)"
 #: templates/forum/partials/vote_actions.html:46
 #| msgid "Log in"
 msgid "Log in to like"
-msgstr "Iniciar sesión"
+msgstr "Inicia sesión para dar like"
 
 #: templates/comments/partials/vote_buttons.html:55
 #: templates/comments/partials/vote_buttons.html:109
 #: templates/dashboard/partials/forecast_vote_actions.html:54
 #: templates/forum/partials/vote_actions.html:52
 msgid "Log in to dislike"
-msgstr "Inicia sesión para que no te guste"
+msgstr "Inicia sesión para dar dislike"
 
 #: templates/dashboard/about.html:54
 msgid "The social layer for"
@@ -1616,7 +1616,7 @@ msgstr "La capa social para"
 #: templates/dashboard/about.html:55
 #| msgid "Top predictors"
 msgid "prediction markets"
-msgstr "Mejores predictores"
+msgstr "mercados de predicción"
 
 #: templates/dashboard/about.html:59
 msgid "Markets turn uncertainty into probabilities. Today they mostly measure"
@@ -1630,15 +1630,15 @@ msgstr "dinero ganado"
 
 #: templates/dashboard/about.html:61
 msgid "We ask a different question:"
-msgstr "Hacemos una pregunta diferente:"
+msgstr "Hacemos una pregunta distinta:"
 
 #: templates/dashboard/about.html:65
 msgid "What if the most valuable asset was not capital, but"
-msgstr "¿Qué pasaría si el activo más valioso no fuera el capital, sino"
+msgstr "¿Y si el activo más valioso no fuera el capital, sino"
 
 #: templates/dashboard/about.html:66
 msgid "credibility"
-msgstr "de UNICEF"
+msgstr "la credibilidad"
 
 #: templates/dashboard/about.html:71 templates/dashboard/about.html:565
 msgid "Start building reputation"
@@ -1646,15 +1646,15 @@ msgstr "Empieza a construir tu reputación"
 
 #: templates/dashboard/about.html:76
 msgid "Explore the thesis"
-msgstr "Explorar la tesis"
+msgstr "Conoce la tesis"
 
 #: templates/dashboard/about.html:84
 msgid "Scroll down"
-msgstr "Scroll down"
+msgstr "Desplázate hacia abajo"
 
 #: templates/dashboard/about.html:98
 msgid "The shift"
-msgstr "cambio"
+msgstr "El cambio"
 
 #: templates/dashboard/about.html:100
 msgid "From capital to credibility"
@@ -1676,7 +1676,7 @@ msgstr "Qué se mide"
 
 #: templates/dashboard/about.html:117
 msgid "Capital"
-msgstr "Aporte"
+msgstr "Capital"
 
 #: templates/dashboard/about.html:123
 msgid "Credibility"
@@ -1684,15 +1684,11 @@ msgstr "Credibilidad"
 
 #: templates/dashboard/about.html:134
 msgid "Profit leaderboard — rewards bankrolls, not necessarily insight."
-msgstr ""
-"Tabla de clasificación de ganancias: recompensa los fondos, no "
-"necesariamente la información."
+msgstr "Ranking de ganancias: premia bankrolls, no necesariamente criterio."
 
 #: templates/dashboard/about.html:150
 msgid "Judgment leaderboard — earned through resolved forecasts."
-msgstr ""
-"Tabla de clasificación de juicios: obtenida a través de pronósticos "
-"resueltos."
+msgstr "Ranking de criterio: se gana con pronósticos resueltos."
 
 #: templates/dashboard/about.html:168
 msgid "The idea"
@@ -1710,7 +1706,7 @@ msgstr ""
 #: templates/dashboard/about.html:184
 #| msgid "track record"
 msgid "Secures with track record"
-msgstr "historial"
+msgstr "Respaldado por historial"
 
 #: templates/dashboard/about.html:186
 msgid ""
@@ -1724,12 +1720,12 @@ msgstr ""
 
 #: templates/dashboard/about.html:189
 msgid "Judgment is the entry fee"
-msgstr "La sentencia es la cuota de inscripción"
+msgstr "El criterio es la entrada"
 
 #: templates/dashboard/about.html:209 templates/dashboard/about.html:234
 #: templates/dashboard/about.html:259
 msgid "Tap to explore"
-msgstr "HAZ CLIC PARA EXPLORAR"
+msgstr "Toca para explorar"
 
 #: templates/dashboard/about.html:216
 msgid ""
@@ -1743,7 +1739,7 @@ msgstr ""
 #: templates/dashboard/about.html:233
 #| msgid "Reputation"
 msgid "Resolution"
-msgstr "Reputación"
+msgstr "Resolución"
 
 #: templates/dashboard/about.html:241
 msgid ""
@@ -1784,7 +1780,7 @@ msgstr ""
 
 #: templates/dashboard/about.html:282
 msgid "The platform"
-msgstr "Plataforma"
+msgstr "La plataforma"
 
 #: templates/dashboard/about.html:284
 msgid "A social network for markets"
@@ -1811,29 +1807,31 @@ msgstr "Reputación vs. Popularidad"
 
 #: templates/dashboard/about.html:378
 msgid ""
-"Two independent scores. Popularity measures attention. Reputation measures "
+"The platform records both popularity and reputation for every user. They "
+"stay independent: popularity measures attention; reputation measures "
 "demonstrated judgment."
 msgstr ""
-"Dos puntuaciones independientes. La popularidad mide la atención. Las "
-"medidas de reputación demostraron juicio."
+"La plataforma registra popularidad y reputación para cada usuario. Siguen "
+"siendo independientes: la popularidad mide la atención; la reputación, el "
+"criterio demostrado."
 
 #: templates/dashboard/about.html:404
 msgid "Demonstrated judgment"
-msgstr "Juicio demostrado"
+msgstr "Criterio demostrado"
 
 #: templates/dashboard/about.html:406
 msgid ""
 "Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes"
 " never touch this score."
 msgstr ""
-"Ganado cuando los pronósticos se resuelven. Las llamadas contrarian más "
-"duras obtienen una puntuación más alta. Los votos ascendentes nunca tocan "
-"esta puntuación."
+"Se gana cuando los pronósticos se resuelven. Las predicciones a "
+"contracorriente más difíciles suman más. Los votos a favor no afectan esta "
+"puntuación."
 
 #: templates/dashboard/about.html:410
 #| msgid "Full leaderboard"
 msgid "Reputation leaderboard"
-msgstr "Clasificación completa"
+msgstr "Ranking de reputación"
 
 #: templates/dashboard/about.html:421
 msgid "Attention"
@@ -1851,7 +1849,7 @@ msgstr ""
 #: templates/dashboard/about.html:427
 #| msgid "Full leaderboard"
 msgid "Popularity leaderboard"
-msgstr "Clasificación completa"
+msgstr "Ranking de popularidad"
 
 #: templates/dashboard/about.html:439
 msgid "Meritocracy"
@@ -1860,7 +1858,7 @@ msgstr "Meritocracia"
 #: templates/dashboard/about.html:441
 #| msgid "Leaderboards"
 msgid "Leaderboards without betting"
-msgstr "Clasificaciones"
+msgstr "Rankings sin apuestas"
 
 #: templates/dashboard/about.html:444
 msgid "Who has the best judgment? Not who made the most money."
@@ -1872,7 +1870,7 @@ msgstr "Dinero"
 
 #: templates/dashboard/about.html:461
 msgid "Judgment"
-msgstr "Sentencia"
+msgstr "Criterio"
 
 #: templates/dashboard/about.html:492
 msgid "Challenges between friends"
@@ -1885,7 +1883,7 @@ msgid ""
 "status without gambling."
 msgstr ""
 "¿Quién acierta más en las predicciones de la Copa del Mundo? ¿Quién gana en "
-"criptomonedas este mes? Tablas de clasificación privadas, concursos de temas"
+"criptomonedas este mes? Rankings privados, concursos de temas"
 " específicos, de tiempo limitado o en curso: estado sin juegos de azar."
 
 #: templates/dashboard/about.html:497
@@ -1893,13 +1891,13 @@ msgid ""
 "Fantasy sports × Reddit × prediction markets — based on reputation, not "
 "betting."
 msgstr ""
-"Deportes de fantasía × Reddit × mercados de predicción: basados en la "
-"reputación, no en las apuestas."
+"Fantasy deportes × Reddit × mercados de predicción — por reputación, no por "
+"apuestas."
 
 #: templates/dashboard/about.html:500
 #| msgid "Challenges"
 msgid "Browse challenges"
-msgstr "Desafíos"
+msgstr "Ver desafíos"
 
 #: templates/dashboard/about.html:507
 msgid "Not a betting platform"
@@ -1927,7 +1925,7 @@ msgstr "Es gratuito"
 
 #: templates/dashboard/about.html:524 templates/dashboard/about.html:585
 msgid "Future"
-msgstr "Decisión"
+msgstr "Futuro"
 
 #: templates/dashboard/about.html:525
 msgid "Monetizing reputation"
@@ -1974,11 +1972,11 @@ msgstr "Agentes de IA claramente identificados"
 
 #: templates/dashboard/about.html:555
 msgid "Where credibility"
-msgstr "Donde LA credibilidad"
+msgstr "Donde la credibilidad"
 
 #: templates/dashboard/about.html:556
 msgid "compounds"
-msgstr "clorados"
+msgstr "se acumula"
 
 #: templates/dashboard/about.html:559
 msgid ""
@@ -1986,9 +1984,8 @@ msgid ""
 "Reputation turns predictions into a reputation graph and insight into an "
 "asset."
 msgstr ""
-"A internet no le faltan opiniones. Lo que le falta es memoria. La prueba de "
-"reputación convierte las predicciones en un gráfico de reputación y la "
-"información en un activo."
+"Internet no le falta opinión. Le falta memoria. Proof of Reputation "
+"convierte pronósticos en un grafo de reputación y el criterio en un activo."
 
 #: templates/dashboard/about.html:562
 msgid ""
@@ -2002,15 +1999,15 @@ msgstr ""
 #: templates/dashboard/partials/forecasts_feed.html:8
 #| msgid "All markets"
 msgid "Browse markets"
-msgstr "Todos los mercados"
+msgstr "Explorar mercados"
 
 #: templates/dashboard/about.html:568
 msgid "Read the FAQ"
-msgstr "Lee Preguntas Frequentes"
+msgstr "Ver preguntas frecuentes"
 
 #: templates/dashboard/about.html:578
 msgid "Intro"
-msgstr "Introduccion"
+msgstr "Introducción"
 
 #: templates/dashboard/about.html:579
 msgid "Thesis"
@@ -2026,7 +2023,7 @@ msgstr "Puntajes"
 
 #: templates/dashboard/about.html:583
 msgid "Rankings"
-msgstr "Clasificación"
+msgstr "Rankings"
 
 #: templates/dashboard/about.html:586
 msgid "Start"
@@ -2046,11 +2043,11 @@ msgstr "Macro"
 
 #: templates/dashboard/about.html:592
 msgid "Energy"
-msgstr "Valor energético"
+msgstr "Energía"
 
 #: templates/dashboard/about.html:593
 msgid "Tech"
-msgstr "Técnico"
+msgstr "Tecnología"
 
 #: templates/dashboard/about.html:594
 msgid "Culture"
@@ -2058,15 +2055,15 @@ msgstr "Cultura"
 
 #: templates/dashboard/about.html:595
 msgid "Why do you believe this?"
-msgstr "Puedes creerlo?"
+msgstr "¿Por qué crees esto?"
 
 #: templates/dashboard/about.html:596
 msgid "How confident are you?"
-msgstr "¿Qué tan seguro estás para ayudar?"
+msgstr "¿Qué tan seguro estás?"
 
 #: templates/dashboard/about.html:597
 msgid "Did you change your mind?"
-msgstr "Guau. ¿Cambiaste de opinión?"
+msgstr "¿Cambiaste de opinión?"
 
 #: templates/dashboard/about.html:598
 msgid "Were you early or late?"
@@ -2078,19 +2075,19 @@ msgstr "¿Tu razonamiento envejeció bien?"
 
 #: templates/dashboard/about.html:600
 msgid "Are you right in this domain?"
-msgstr "¿Tienes razón en este campo?"
+msgstr "¿Acertás en este dominio?"
 
 #: templates/dashboard/about.html:601
 msgid "Rewards capital, not necessarily insight"
-msgstr "Recompensa el capital, no necesariamente la perspicacia"
+msgstr "Premia capital, no necesariamente criterio"
 
 #: templates/dashboard/about.html:602
 msgid "Excludes anyone without funds to wager"
-msgstr "Excluye a cualquier persona sin fondos para apostar"
+msgstr "Excluye a quien no tiene fondos para apostar"
 
 #: templates/dashboard/about.html:603
 msgid "One lucky bet can distort the ranking"
-msgstr "Una apuesta afortunada puede distorsionar la clasificación"
+msgstr "Una apuesta afortunada puede distorsionar el ranking"
 
 #: templates/dashboard/about.html:604
 msgid "Accuracy, calibration, early conviction"
@@ -2098,11 +2095,11 @@ msgstr "Precisión, calibración, convicción temprana"
 
 #: templates/dashboard/about.html:605
 msgid "Performance by topic and over time"
-msgstr "Rendimiento por tema y a lo largo del tiempo"
+msgstr "Rendimiento por tema y en el tiempo"
 
 #: templates/dashboard/about.html:606
 msgid "Open to anyone — judgment is the entry fee"
-msgstr "Abierto a cualquier persona: la sentencia es la cuota de inscripción"
+msgstr "Abierto a todos — el criterio es la entrada"
 
 #: templates/dashboard/about.html:608
 msgid "Calibration"
@@ -2110,11 +2107,11 @@ msgstr "Calibración"
 
 #: templates/dashboard/about.html:609
 msgid "Early conviction"
-msgstr "Condenas tempranas"
+msgstr "Convicción temprana"
 
 #: templates/dashboard/about.html:610
 msgid "Topic expertise"
-msgstr "Experiencia en el tema"
+msgstr "Experiencia por tema"
 
 #: templates/dashboard/about.html:611
 msgid "P&L"
@@ -2134,7 +2131,7 @@ msgstr "Tamaño del bankroll"
 
 #: templates/dashboard/about.html:615
 msgid "Rank by "
-msgstr "Rango por"
+msgstr "Ranking por "
 
 #: templates/dashboard/about.html:616
 #, python-format
@@ -2147,8 +2144,8 @@ msgid ""
 "Every forecast captures context — not just yes or no, but why, when, and how"
 " confident."
 msgstr ""
-"Cada pronóstico captura el contexto, no solo sí o no, sino también por qué, "
-"cuándo y qué tan seguro."
+"Cada pronóstico captura contexto: no solo sí o no, sino por qué, cuándo y "
+"con qué confianza."
 
 #: templates/dashboard/category_browse.html:9
 #: templates/dashboard/world_cup_games.html:9
@@ -2395,7 +2392,7 @@ msgid ""
 "A meme comment can top the popularity leaderboard while a quiet analyst tops"
 " reputation. The systems never cross-contaminate."
 msgstr ""
-"Un comentario meme puede liderar la clasificación de popularidad mientras un"
+"Un comentario meme puede liderar el ranking de popularidad mientras un"
 " analista discreto lidera la reputación. Los sistemas nunca se mezclan."
 
 #: templates/dashboard/faq.html:103
@@ -2454,11 +2451,11 @@ msgstr ""
 
 #: templates/dashboard/faq.html:140
 msgid "How do leaderboards work?"
-msgstr "¿Cómo funcionan las clasificaciones?"
+msgstr "¿Cómo funcionan los rankings?"
 
 #: templates/dashboard/faq.html:146
 msgid "We maintain two separate rankings:"
-msgstr "Mantenemos dos clasificaciones separadas:"
+msgstr "Mantenemos dos rankings separados:"
 
 #: templates/dashboard/faq.html:148
 #, python-format
@@ -2468,7 +2465,7 @@ msgid ""
 "reputation points from resolved forecasts."
 msgstr ""
 "<a href=\"%(reputation_url)s\" class=\"font-medium text-emerald-700 "
-"hover:underline dark:text-emerald-400\">Clasificación de reputación</a> — "
+"hover:underline dark:text-emerald-400\">Ranking de reputación</a> — "
 "puntos totales de reputación por pronósticos resueltos."
 
 #: templates/dashboard/faq.html:149
@@ -2479,7 +2476,7 @@ msgid ""
 "popularity points from community votes."
 msgstr ""
 "<a href=\"%(popularity_url)s\" class=\"font-medium text-amber-700 "
-"hover:underline dark:text-amber-400\">Clasificación de popularidad</a> — "
+"hover:underline dark:text-amber-400\">Ranking de popularidad</a> — "
 "puntos totales de popularidad por votos de la comunidad."
 
 #: templates/dashboard/faq.html:156
@@ -2661,11 +2658,11 @@ msgstr "Mejores predictores"
 
 #: templates/dashboard/landing.html:46
 msgid "Full leaderboard"
-msgstr "Clasificación completa"
+msgstr "Ranking completo"
 
 #: templates/dashboard/landing.html:60
 msgid "No rankings yet."
-msgstr "Aún no hay clasificaciones."
+msgstr "Aún no hay rankings."
 
 #: templates/dashboard/partials/browse_area_nav.html:3
 #, python-format
@@ -2754,7 +2751,7 @@ msgstr "Popularidad de %(name)s"
 #: templates/dashboard/popularity_leaderboard.html:5
 #| msgid "Full leaderboard"
 msgid "Popularity Leaderboard"
-msgstr "Clasificación completa"
+msgstr "Ranking de popularidad"
 
 #: templates/dashboard/popularity_leaderboard.html:10
 #: templates/dashboard/popularity_leaderboard.html:17
@@ -2762,7 +2759,7 @@ msgstr "Clasificación completa"
 #: templates/dashboard/reputation_leaderboard.html:17
 #| msgid "Leaderboards"
 msgid "Leaderboard"
-msgstr "Clasificaciones"
+msgstr "Ranking"
 
 #: templates/dashboard/popularity_leaderboard.html:13
 msgid ""
@@ -2770,7 +2767,7 @@ msgid ""
 "leaderboard."
 msgstr ""
 "Usuarios más activos en esta categoría — las puntuaciones suman a la "
-"clasificación global de popularidad."
+"ranking global de popularidad."
 
 #: templates/dashboard/popularity_leaderboard.html:18
 msgid ""
@@ -2820,7 +2817,7 @@ msgstr "Reputación de %(name)s"
 #: templates/dashboard/reputation_leaderboard.html:5
 #| msgid "Leaderboards"
 msgid "Reputation Leaderboard"
-msgstr "Clasificaciones"
+msgstr "Ranking de reputación"
 
 #: templates/dashboard/reputation_leaderboard.html:13
 msgid ""
@@ -2828,7 +2825,7 @@ msgid ""
 "leaderboard."
 msgstr ""
 "Mejores predictores en esta categoría — las puntuaciones suman a la "
-"clasificación global de reputación."
+"ranking global de reputación."
 
 #: templates/dashboard/reputation_leaderboard.html:18
 msgid ""

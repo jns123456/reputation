@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Set up your profile" %}{% endblock %}
+
+{% block extra_head %}
+{% include "accounts/partials/identity_styles.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  <section class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
+    <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
+    <div class="pr-orb pr-orb--slow pointer-events-none absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
+    <div class="pr-orb pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 bg-emerald-400/15" aria-hidden="true"></div>
+
+    <div class="relative max-w-3xl">
+      <p class="pr-eyebrow">
+        <span class="pr-eyebrow-dot" aria-hidden="true"></span>
+        {% trans "Welcome" %}
+      </p>
+      <h1 class="pr-hero-title">
+        {% trans "Choose how you" %} <span class="pr-gradient-text">{% trans "appear" %}</span>
+      </h1>
+      <p class="pr-hero-desc">
+        {% blocktrans %}Step 2 of 2 — pick a public identity, preview how others will see you, and optionally request verification. You can change this anytime in settings.{% endblocktrans %}
+      </p>
+    </div>
+  </section>
+
+  <form method="post"
+        class="mx-auto max-w-3xl space-y-5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-8"
+        data-pr-reveal
+        data-delay="1"
+        x-data="{
+          mode: '{{ form.identity_mode.value|default:'public'|escapejs }}',
+          displayName: '{{ form.display_name.value|default:''|escapejs }}',
+          username: '{{ user.username|escapejs }}',
+          verified: {{ form.verification_requested.value|yesno:'true,false' }},
+          labelAnonymous: '{% filter escapejs %}{% trans "Anonymous" %}{% endfilter %}',
+          labelYourName: '{% filter escapejs %}{% trans "Your name" %}{% endfilter %}',
+          labelUsername: '{% filter escapejs %}{% trans "username" %}{% endfilter %}'
+        }">
+    {% csrf_token %}
+
+    <fieldset class="space-y-4">
+      <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{% trans "Profile & identity" %}</legend>
+      {% include "accounts/partials/identity_profile_section.html" with show_bio=True profile_user=user %}
+    </fieldset>
+
+    <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm shadow-brand-500/20 sm:w-auto sm:px-8">
+      {% trans "Finish setup" %}
+    </button>
+  </form>
+</div>
+{% endblock %}
