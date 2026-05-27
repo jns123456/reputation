@@ -1,5 +1,7 @@
 """Tests for user follow and prediction alert notifications."""
 
+from unittest.mock import patch
+
 from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -22,6 +24,17 @@ from predictions.services import create_prediction, resolve_market_predictions
 from reputation.services import calculate_reputation_delta
 
 
+class SkipMarketRefreshTestsMixin:
+    def setUp(self):
+        self._refresh_odds_patcher = patch(
+            "predictions.services._refresh_market_odds",
+            side_effect=lambda market: market,
+        )
+        self._refresh_odds_patcher.start()
+        self.addCleanup(self._refresh_odds_patcher.stop)
+        super().setUp()
+
+
 class FollowServiceTests(TestCase):
     def setUp(self):
         self.follower = create_user("follower")
@@ -42,8 +55,9 @@ class FollowServiceTests(TestCase):
             toggle_follow(follower=self.follower, following_user=self.follower)
 
 
-class PredictionNotificationTests(TestCase):
+class PredictionNotificationTests(SkipMarketRefreshTestsMixin, TestCase):
     def setUp(self):
+        super().setUp()
         self.follower = create_user("alertuser")
         self.predictor = create_user("predictor")
         self.market = create_market(slug="alert-market", external_id="alert-m1")
@@ -240,8 +254,9 @@ class VoteNotificationTests(TestCase):
         self.assertEqual(Notification.objects.filter(recipient=self.author).count(), 0)
 
 
-class PredictionResolvedNotificationTests(TestCase):
+class PredictionResolvedNotificationTests(SkipMarketRefreshTestsMixin, TestCase):
     def setUp(self):
+        super().setUp()
         self.user = create_user("resolver")
         self.market = create_market(slug="resolve-market", external_id="resolve-m1")
         self.prediction = create_prediction(

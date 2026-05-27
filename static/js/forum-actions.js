@@ -1,7 +1,7 @@
 (function () {
   window.shareForumPost = function (button) {
     var url = button.getAttribute("data-share-url");
-    var title = button.getAttribute("data-share-title") || "Forecast on Reputation";
+    var title = button.getAttribute("data-share-title") || "Forecast on ProofRep";
     if (!url) return;
 
     if (navigator.share) {

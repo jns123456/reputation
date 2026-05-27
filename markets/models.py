@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
-from integrations.kalshi.images import resolve_kalshi_market_image
 from integrations.kalshi.urls import resolve_kalshi_public_url
 from integrations.polymarket.urls import resolve_polymarket_public_url
 from markets.categories import resolve_market_category_slug
@@ -49,6 +48,8 @@ class Market(models.Model):
     kalshi_raw = models.JSONField(default=dict, blank=True)
     kalshi_event_raw = models.JSONField(default=dict, blank=True)
     kalshi_synced_at = models.DateTimeField(null=True, blank=True)
+    volume_total = models.FloatField(default=0.0, db_index=True)
+    card_image_url = models.URLField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -128,48 +129,19 @@ class Market(models.Model):
 
     @property
     def image_url(self):
-        """Market/event image from import payload."""
-        if self.source == self.Source.KALSHI:
-            kalshi_image = resolve_kalshi_market_image(self)
-            if kalshi_image:
-                return kalshi_image
+        """Market/event image from denormalized field or import payload."""
+        if self.card_image_url:
+            return self.card_image_url
+        from markets.display_metadata import extract_card_image_url_from_market
 
-        raw = self.polymarket_raw or self.kalshi_raw or {}
-        event = self.polymarket_event_raw or self.kalshi_event_raw or {}
-        event_data = event.get("event") if isinstance(event, dict) else {}
-        if not isinstance(event_data, dict):
-            event_data = event if isinstance(event, dict) else {}
-        return (
-            raw.get("image")
-            or raw.get("icon")
-            or raw.get("image_url")
-            or event.get("image")
-            or event.get("icon")
-            or event_data.get("image")
-            or event_data.get("icon")
-            or ""
-        )
+        return extract_card_image_url_from_market(self)
 
     @property
     def volume_label(self):
         """Human-readable volume string for card footers."""
-        raw = self.polymarket_raw or self.kalshi_raw or {}
-        event = self.polymarket_event_raw or self.kalshi_event_raw or {}
-        for source in (raw, event):
-            for key in ("volumeNum", "volume", "volume24hr", "volume_fp", "volume_24h_fp"):
-                value = source.get(key)
-                if value is None or value == "":
-                    continue
-                try:
-                    amount = float(value)
-                except (TypeError, ValueError):
-                    continue
-                if amount >= 1_000_000:
-                    return f"${amount / 1_000_000:.1f}M Vol."
-                if amount >= 1_000:
-                    return f"${amount / 1_000:.0f}K Vol."
-                return f"${amount:.0f} Vol."
-        return ""
+        from markets.display_metadata import format_volume_label, market_volume_for_sort
+
+        return format_volume_label(market_volume_for_sort(self))
 
     @property
     def expiration_countdown(self):

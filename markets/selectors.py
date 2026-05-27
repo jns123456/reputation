@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.conf import settings
 from django.db.models import Count, Q
 
 from markets.categories import (
@@ -17,24 +18,58 @@ from markets.models import Market
 from markets.sort_options import market_volume, normalize_sort_filter, sort_markets
 from markets.source_filters import kalshi_enabled
 
+MARKET_HUB_CATEGORY_SLUG_ORDER = (
+    "politics",
+    "sports",
+    "crypto",
+    "economy",
+    "science-tech",
+    "world",
+    "pop-culture",
+    "fifa-world-cup-2026",
+    "other",
+)
+
 SOURCE_DISPLAY_ORDER = (
     Market.Source.POLYMARKET,
     Market.Source.KALSHI,
-    Market.Source.MANUAL,
 )
 CATEGORY_BROWSE_LIMIT = 48
+MARKET_CARD_DEFER_FIELDS = (
+    "description",
+    "polymarket_raw",
+    "polymarket_event_raw",
+    "kalshi_raw",
+    "kalshi_event_raw",
+)
+
+
+def _market_card_queryset(qs):
+    return qs.defer(*MARKET_CARD_DEFER_FIELDS)
+
+
+def market_card_queryset(qs):
+    """Lightweight queryset for market cards (skips large text fields)."""
+    return _market_card_queryset(qs)
 
 
 def _exclude_disabled_sources(markets):
-    if kalshi_enabled():
-        return markets
+    excluded = {Market.Source.MANUAL}
+    if not kalshi_enabled():
+        excluded.add(Market.Source.KALSHI)
     if isinstance(markets, list):
-        return [market for market in markets if market.source != Market.Source.KALSHI]
-    return markets.exclude(source=Market.Source.KALSHI)
+        return [market for market in markets if market.source not in excluded]
+    return markets.exclude(source__in=excluded)
 
 
 def _sort_markets_by_volume(markets):
-    return sorted(markets, key=lambda market: (market_volume(market), market.updated_at), reverse=True)
+    if isinstance(markets, list):
+        return sorted(
+            markets,
+            key=lambda market: (market_volume(market), market.updated_at),
+            reverse=True,
+        )
+    return markets.order_by("-volume_total", "-updated_at")
 
 
 def blend_markets_by_source(markets, *, limit=CATEGORY_BROWSE_LIMIT):
@@ -100,17 +135,18 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
         return []
 
     qs = _exclude_disabled_sources(
-        Market.objects.filter(
-            status=Market.Status.OPEN,
-            canonical_category_slug=category.slug,
+        _market_card_queryset(
+            Market.objects.filter(
+                status=Market.Status.OPEN,
+                canonical_category_slug=category.slug,
+            )
         )
     )
-    markets = list(qs)
-    markets.sort(key=lambda market: (market_volume(market), market.updated_at), reverse=True)
+    qs = qs.order_by("-volume_total", "-updated_at")
 
     if limit is not None:
-        return markets[:limit]
-    return markets
+        return list(qs[:limit])
+    return list(qs)
 
 
 def get_browse_area_summaries(*, category_slug, markets=None):
@@ -163,27 +199,43 @@ def get_category_summaries(*, include_empty=False):
     summaries.sort(key=lambda item: item["count"], reverse=True)
     if include_empty:
         return summaries
-    return _pin_featured_world_cup_summary(summaries)
+    return _pin_featured_world_cup_summary(summaries, counts)
 
 
-def _pin_featured_world_cup_summary(summaries):
+def _pin_featured_world_cup_summary(summaries, counts):
     """Always show FIFA World Cup 2026 first on the landing page."""
     world_cup = get_category_for_slug(FIFA_WORLD_CUP_CATEGORY_SLUG)
     if world_cup is None:
         return summaries
 
     summaries = [item for item in summaries if item["category"].slug != world_cup.slug]
-    count = _exclude_disabled_sources(
-        Market.objects.filter(
-            status=Market.Status.OPEN,
-            canonical_category_slug=world_cup.slug,
-        )
-    ).count()
+    count = counts.get(world_cup.slug)
+    if count is None:
+        count = _exclude_disabled_sources(
+            Market.objects.filter(
+                status=Market.Status.OPEN,
+                canonical_category_slug=world_cup.slug,
+            )
+        ).count()
     return [{"category": world_cup, "count": count}, *summaries]
 
 
+def get_market_hub_category_summaries():
+    """Category cards for the markets hub — always shows main topics, Polymarket-like order."""
+    summaries = get_category_summaries(include_empty=True)
+    order = {slug: index for index, slug in enumerate(MARKET_HUB_CATEGORY_SLUG_ORDER)}
+    summaries.sort(
+        key=lambda item: (
+            order.get(item["category"].slug, len(MARKET_HUB_CATEGORY_SLUG_ORDER)),
+            -item["count"],
+            item["category"].name,
+        )
+    )
+    return summaries
+
+
 def get_markets_list(*, status=None, category=None, search=None, source=None):
-    qs = _exclude_disabled_sources(Market.objects.all())
+    qs = _market_card_queryset(_exclude_disabled_sources(Market.objects.all()))
     if status:
         qs = qs.filter(status=status)
     if category:
@@ -209,9 +261,14 @@ def get_markets_for_display(
     limit=100,
 ):
     """Return markets for list UI, blending sources when browsing open markets."""
+    from markets.sort_options import SORT_ENDING_SOON, SORT_NEWEST, SORT_TRENDING, SORT_VOLUME
+
     qs = get_markets_list(status=status, category=category, search=search, source=source)
     normalized_sort = normalize_sort_filter(sort)
     effective_status = status or Market.Status.OPEN
+    sorted_limit = limit
+    if normalized_sort:
+        sorted_limit = max(limit, getattr(settings, "MARKET_LIST_SORTED_LIMIT", 200))
 
     use_source_blend = (
         not normalized_sort
@@ -223,12 +280,41 @@ def get_markets_for_display(
         open_markets = list(qs.filter(status=Market.Status.OPEN))
         return blend_markets_by_source(open_markets, limit=limit)
 
+    if normalized_sort == SORT_VOLUME:
+        return list(
+            qs.order_by("-volume_total", "-updated_at")[:sorted_limit]
+        )
+
+    if normalized_sort == SORT_NEWEST:
+        return list(qs.order_by("-created_at", "-updated_at")[:sorted_limit])
+
+    if normalized_sort == SORT_ENDING_SOON:
+        markets = list(qs)
+        return sort_markets(markets, sort=normalized_sort)[:sorted_limit]
+
+    if normalized_sort == SORT_TRENDING:
+        markets = list(qs)
+        return sort_markets(markets, sort=normalized_sort)[:sorted_limit]
+
     markets = list(qs)
     if normalized_sort:
         markets = sort_markets(markets, sort=normalized_sort)
     else:
         markets.sort(key=lambda market: market.updated_at, reverse=True)
-    return markets[:limit]
+    return markets[:sorted_limit]
+
+
+def get_world_cup_match_markets_queryset(*, source=""):
+    """Open World Cup match markets ordered by kickoff."""
+    qs = _market_card_queryset(
+        Market.objects.filter(
+            status=Market.Status.OPEN,
+            canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
+        )
+    )
+    if source:
+        qs = qs.filter(source=source)
+    return qs.order_by("close_date", "title")
 
 
 def get_market_categories():

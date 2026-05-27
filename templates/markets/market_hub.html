@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Markets{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% include "includes/pr_page_hero.html" with eyebrow="Markets" compact=True title="Browse by" gradient="category" description="Pick a topic — Politics, Sports, Crypto, Economy, and more. Real forecasts from Polymarket, no betting." %}
+
+  <section data-pr-reveal data-delay="1">
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div class="pr-section-head mb-0">
+        <h2 class="pr-section-title">Categories</h2>
+        <p class="pr-section-desc">Tap a category to browse open forecasts.</p>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        {% include "markets/partials/source_filter_pills.html" %}
+        <a href="{% url 'markets:all' %}{% if active_source %}?source={{ active_source }}{% endif %}"
+           class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline">
+          All markets →
+        </a>
+      </div>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {% for item in category_summaries %}
+        {% include "dashboard/partials/category_card.html" with category=item.category count=item.count active_source=active_source large=True %}
+      {% empty %}
+      <div class="pr-empty col-span-full">
+        No categories yet. Run <code class="text-xs">sync_markets --top-volume</code> to import Polymarket markets.
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

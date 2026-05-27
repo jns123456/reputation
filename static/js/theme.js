@@ -1,5 +1,5 @@
 (function () {
-  var STORAGE_KEY = "reputation-theme";
+  var STORAGE_KEY = "proofrep-theme";
 
   function getStoredTheme() {
     try {
@@ -24,10 +24,10 @@
     var isDark = theme === "dark";
     document.documentElement.classList.toggle("dark", isDark);
     document.documentElement.dataset.theme = theme;
-    window.dispatchEvent(new CustomEvent("reputation-theme-change", { detail: { theme: theme } }));
+    window.dispatchEvent(new CustomEvent("proofrep-theme-change", { detail: { theme: theme } }));
   }
 
-  window.reputationTheme = {
+  window.proofrepTheme = {
     get: function () {
       return resolveTheme(getStoredTheme());
     },

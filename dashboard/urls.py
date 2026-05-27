@@ -1,12 +1,18 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from dashboard import views
 
 app_name = "dashboard"
 
 urlpatterns = [
-    path("", views.landing, name="landing"),
-    path("about/", views.about, name="about"),
+    path("", views.about, name="landing"),
+    path("explore/", views.explore, name="explore"),
+    path(
+        "about/",
+        RedirectView.as_view(pattern_name="dashboard:landing", permanent=False),
+        name="about",
+    ),
     path("faq/", views.faq, name="faq"),
     path("browse/<slug:slug>/", views.category_browse, name="category_browse"),
     path("world-cup/games/", views.world_cup_games, name="world_cup_games"),

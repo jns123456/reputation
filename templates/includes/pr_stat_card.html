@@ -1,0 +1,7 @@
+{# label, value, value_class, badge_text, badge_class, subtext, delay #}
+<div class="pr-stat-card pr-card" data-pr-reveal {% if delay %}data-delay="{{ delay }}"{% endif %}>
+  <p class="pr-stat-label">{{ label }}</p>
+  <p class="pr-stat-value {% if value_class %}{{ value_class }}{% endif %}">{{ value }}</p>
+  {% if badge_text %}<span class="{% if badge_class %}{{ badge_class }}{% else %}badge-rep{% endif %} mt-2">{{ badge_text }}</span>{% endif %}
+  {% if subtext %}<p class="mt-1 text-xs text-slate-500">{{ subtext }}</p>{% endif %}
+</div>

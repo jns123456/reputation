@@ -1,204 +1,588 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}About{% endblock %}
+{% block title %}{% endblock %}
+
+{% block extra_head %}
+<script src="{% static 'js/about-page.js' %}"></script>
+{% endblock %}
+
+{% block body_prefix %}
+<nav class="about-section-nav" x-data>
+  <div class="h-0.5 bg-slate-200 dark:bg-slate-700">
+    <div class="about-progress h-full bg-gradient-to-r from-brand-600 via-emerald-500 to-violet-500"
+         :style="'transform: scaleX(' + $store.aboutNav.scrollProgress + ')'"></div>
+  </div>
+  <div class="mx-auto flex max-w-6xl items-center gap-2 overflow-x-auto px-4 py-2.5 scrollbar-none">
+    <template x-for="section in $store.aboutNav.sections" :key="section.id">
+      <button type="button"
+              @click="$store.aboutNav.scrollTo(section.id)"
+              class="about-nav-pill shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
+              :class="$store.aboutNav.activeSection === section.id && 'is-active'"
+              x-text="section.label"></button>
+    </template>
+  </div>
+</nav>
+{% endblock %}
 
 {% block content %}
-<section class="relative mb-12 overflow-hidden rounded-2xl border border-slate-200/80 bg-white px-6 py-10 shadow-sm sm:px-10 sm:py-14">
-  <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-500/10 blur-3xl" aria-hidden="true"></div>
-  <div class="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true"></div>
-  <div class="relative max-w-3xl">
-    <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Our thesis</p>
-    <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-      Social predictions without betting
-    </h1>
-    <p class="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg">
-      Reputation is an AI-native platform that combines the discussion culture of Reddit,
-      the real-world questions of Polymarket, and a durable record of predictive quality —
-      <strong class="font-semibold text-slate-800">without money on the line</strong>.
-    </p>
-    <p class="mt-4 text-base leading-relaxed text-slate-600">
-      Users debate, comment, and publish formal forecasts about events imported from Polymarket.
-      When markets resolve, the platform scores who got it right. Over time, that history
-      becomes a credible signal of forecasting ability — separate from likes, fame, or hype.
-    </p>
-  </div>
-</section>
+<div class="about-page pr-page pb-16"
+     x-data="aboutPage()"
+     x-init="init()"
+     @keydown.window.escape="expandedQuestion = null; expandedPor = null">
 
-<section class="mb-12">
-  <div class="mb-6 max-w-2xl">
-    <h2 class="text-xl font-semibold text-slate-900 sm:text-2xl">Two scores, one profile</h2>
-    <p class="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-      Most platforms collapse “popular” and “right” into a single number. We keep them independent
-      so credibility stays honest.
-    </p>
-  </div>
+  {# ── HERO ── #}
+  <section id="about-hero"
+           class="about-full-bleed relative min-h-[88vh] overflow-hidden border-b border-slate-200/60 dark:border-slate-700/60">
+    <div class="about-mesh absolute inset-0"></div>
+    <div class="about-grid-bg absolute inset-0"></div>
+    <div class="about-orb about-orb--slow absolute -left-20 top-20 h-72 w-72 bg-brand-500/30" aria-hidden="true"></div>
+    <div class="about-orb absolute -right-10 top-32 h-64 w-64 bg-emerald-400/25" aria-hidden="true"></div>
+    <div class="about-orb absolute bottom-10 left-1/3 h-48 w-48 bg-violet-500/20" aria-hidden="true"></div>
 
-  <div class="grid gap-6 md:grid-cols-2">
-    <article class="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm sm:p-8">
-      <div class="flex items-center gap-3">
-        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </span>
-        <div>
+    <div class="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">
+      <div class="max-w-4xl" data-about-reveal>
+        <div class="inline-flex items-center gap-2 rounded-full border border-brand-200/80 bg-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 backdrop-blur-sm dark:border-brand-500/30 dark:bg-slate-900/50 dark:text-brand-300">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+          </span>
+          Proof of Reputation
+        </div>
+
+        <h1 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
+          The social layer for
+          <span class="about-gradient-text">prediction markets</span>
+        </h1>
+
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl dark:text-slate-300">
+          Markets turn uncertainty into probabilities. Today they mostly measure
+          <strong class="text-slate-800 dark:text-white">money won</strong>.
+          We ask a different question:
+        </p>
+
+        <p class="mt-4 max-w-2xl text-xl font-medium leading-snug text-slate-800 sm:text-2xl dark:text-slate-100">
+          What if the most valuable asset was not capital, but
+          <span class="about-gradient-text">credibility</span>?
+        </p>
+
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a href="{% url 'markets:list' %}" class="btn-primary px-6 py-3 text-sm shadow-lg shadow-brand-500/25">
+            Start building reputation
+          </a>
+          <button type="button"
+                  @click="scrollTo('thesis')"
+                  class="btn-secondary px-6 py-3 text-sm backdrop-blur-sm">
+            Explore the thesis
+          </button>
+        </div>
+      </div>
+
+      <button type="button"
+              @click="scrollTo('thesis')"
+              class="about-bounce absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400"
+              aria-label="Scroll down">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <div class="mx-auto max-w-6xl space-y-24 px-0 pt-24 sm:space-y-32">
+
+    {# ── THESIS ── #}
+    <section id="about-thesis" class="scroll-mt-28">
+      <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div data-about-reveal>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The shift</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            From capital to credibility
+          </h2>
+          <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+            Prediction markets are one of the most powerful tools for measuring collective intelligence —
+            turning opinions into signals and future events into public records.
+          </p>
+        </div>
+
+        <div class="about-glass about-card rounded-3xl p-6 sm:p-8"
+             data-about-reveal
+             data-delay="1">
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-sm font-medium text-slate-500">What gets measured</span>
+            <div class="flex rounded-full bg-slate-100 p-1 dark:bg-slate-800">
+              <button type="button"
+                      @click="leaderboardMode = 'money'"
+                      class="rounded-full px-4 py-1.5 text-xs font-semibold transition-all"
+                      :class="leaderboardMode === 'money' ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'">
+                Capital
+              </button>
+              <button type="button"
+                      @click="leaderboardMode = 'reputation'"
+                      class="rounded-full px-4 py-1.5 text-xs font-semibold transition-all"
+                      :class="leaderboardMode === 'reputation' ? 'bg-gradient-to-r from-brand-600 to-emerald-600 text-white shadow-sm' : 'text-slate-500'">
+                Credibility
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 min-h-[140px]">
+            <div x-show="leaderboardMode === 'money'"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+              <p class="text-2xl font-bold text-slate-400 line-through decoration-rose-400/60">$847,230</p>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Profit leaderboard — rewards bankrolls, not necessarily insight.</p>
+              <ul class="mt-4 space-y-2">
+                <template x-for="point in moneyPoints" :key="point">
+                  <li class="flex gap-2 text-sm text-slate-500">
+                    <span class="text-rose-400">✕</span>
+                    <span x-text="point"></span>
+                  </li>
+                </template>
+              </ul>
+            </div>
+            <div x-show="leaderboardMode === 'reputation'"
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+              <p class="text-2xl font-bold about-gradient-text">+2,840 rep</p>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Judgment leaderboard — earned through resolved forecasts.</p>
+              <ul class="mt-4 space-y-2">
+                <template x-for="point in repPoints" :key="point">
+                  <li class="flex gap-2 text-sm text-slate-600 dark:text-slate-300">
+                    <span class="text-emerald-500">✓</span>
+                    <span x-text="point"></span>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# ── PROOF OF REPUTATION ── #}
+    <section id="about-proof" class="scroll-mt-28">
+      <div class="text-center" data-about-reveal>
+        <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The idea</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+          Proof of Reputation
+        </h2>
+        <p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
+          Credibility earned through a public history of judgment — not luck, not capital, not hype.
+          ProofRep secures social intelligence with track record.
+        </p>
+      </div>
+
+      <div class="mx-auto mt-10 max-w-3xl" data-about-reveal data-delay="1">
+        <div class="about-card rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-brand-50 p-8 shadow-lg shadow-emerald-500/10 dark:border-emerald-800 dark:from-emerald-950/40 dark:via-slate-800 dark:to-brand-950/30 sm:p-10">
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/50">
+            <svg class="h-7 w-7 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+            </svg>
+          </div>
+          <h3 class="mt-6 text-2xl font-bold text-slate-900 dark:text-white">Secures with track record</h3>
+          <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+            You prove you built something real — thoughtful predictions, reasoning, accuracy, and consistency over time.
+            Every forecast, thesis, and challenge adds to a public record that follows you.
+          </p>
+          <p class="mt-5 text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+            Judgment is the entry fee
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-4 sm:grid-cols-3" data-about-reveal data-delay="2">
+        <button type="button"
+                @click="expandedPor = expandedPor === 'predictions' ? null : 'predictions'"
+                :aria-expanded="expandedPor === 'predictions'"
+                class="about-por-pillar about-card rounded-2xl border p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                :class="expandedPor === 'predictions'
+                  ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
+                  : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v18h18"/>
+              <path d="M7 16l4-8 4 5 4-9"/>
+            </svg>
+          </div>
+          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Predictions</h4>
+          <p x-show="expandedPor !== 'predictions'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tap to explore</p>
+          <p x-show="expandedPor === 'predictions'"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Formal forecasts tied to real markets — with confidence, reasoning, and probability snapshots captured at the moment you call it.
+          </p>
+        </button>
+
+        <button type="button"
+                @click="expandedPor = expandedPor === 'resolution' ? null : 'resolution'"
+                :aria-expanded="expandedPor === 'resolution'"
+                class="about-por-pillar about-card rounded-2xl border p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                :class="expandedPor === 'resolution'
+                  ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
+                  : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 12l2 2 4-4"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Resolution</h4>
+          <p x-show="expandedPor !== 'resolution'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tap to explore</p>
+          <p x-show="expandedPor === 'resolution'"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Markets resolve objectively. Reputation follows accuracy — rewarding early conviction against the odds and penalizing overconfidence.
+          </p>
+        </button>
+
+        <button type="button"
+                @click="expandedPor = expandedPor === 'history' ? null : 'history'"
+                :aria-expanded="expandedPor === 'history'"
+                class="about-por-pillar about-card rounded-2xl border p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                :class="expandedPor === 'history'
+                  ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
+                  : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+          <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">Verifiable history</h4>
+          <p x-show="expandedPor !== 'history'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Tap to explore</p>
+          <p x-show="expandedPor === 'history'"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Every prediction, comment, thesis, and challenge becomes durable history — transparent, inspectable, and hard to rewrite after the fact.
+          </p>
+        </button>
+      </div>
+
+      <p class="mx-auto mt-8 max-w-3xl text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400"
+         data-about-reveal
+         data-delay="4">
+        With <a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-600 underline decoration-violet-300 underline-offset-2 hover:text-violet-700 dark:text-violet-400">EAS</a>,
+        reputation can become portable, transparent, and hard to fake — proofs you carry into other apps and agent ecosystems.
+      </p>
+    </section>
+
+    {# ── PLATFORM ── #}
+    <section id="about-platform" class="scroll-mt-28">
+      <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+        <div data-about-reveal>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The platform</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            A social network for markets
+          </h2>
+          <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+            <strong class="text-slate-800 dark:text-white">ProofRep</strong> is built around events and outcomes —
+            follow markets, publish theses, debate probabilities, challenge friends, and build a public history of judgment.
+          </p>
+          <p class="mt-4 text-sm text-slate-500">Tap a domain to explore specialization:</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <template x-for="domain in domains" :key="domain">
+              <button type="button"
+                      @click="activeDomain = activeDomain === domain ? null : domain"
+                      class="about-domain-pill rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors"
+                      :class="activeDomain === domain
+                        ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-500 dark:bg-brand-950/50 dark:text-brand-300 is-active'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-brand-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300'">
+                <span x-text="domain"></span>
+              </button>
+            </template>
+          </div>
+          <p class="mt-4 min-h-[1.25rem] text-sm font-medium text-emerald-700 transition-opacity dark:text-emerald-400"
+             x-show="activeDomain"
+             x-transition
+             x-text="activeDomain ? 'Become known for ' + activeDomain.toLowerCase() + ' — a living map of who has good judgment.' : ''"></p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2" data-about-reveal data-delay="1">
+          <template x-for="item in questions" :key="item.id">
+            <button type="button"
+                    @click="expandedQuestion = expandedQuestion === item.id ? null : item.id"
+                    class="about-question-card about-card rounded-2xl border border-slate-200 bg-white p-5 text-left dark:border-slate-700 dark:bg-slate-800"
+                    :class="expandedQuestion === item.id && 'is-expanded ring-2 ring-brand-300 dark:ring-brand-600'">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-950/50">
+                <template x-if="item.id === 'why'">
+                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 18h6"/>
+                    <path d="M10 22h4"/>
+                    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+                  </svg>
+                </template>
+                <template x-if="item.id === 'conf'">
+                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 3v18h18"/>
+                    <path d="M7 16v-4"/>
+                    <path d="M12 16V8"/>
+                    <path d="M17 16v-6"/>
+                  </svg>
+                </template>
+                <template x-if="item.id === 'mind'">
+                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                    <path d="M8 16H3v5"/>
+                  </svg>
+                </template>
+                <template x-if="item.id === 'early'">
+                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="10" x2="14" y1="2" y2="2"/>
+                    <line x1="12" x2="15" y1="14" y2="11"/>
+                    <circle cx="12" cy="14" r="8"/>
+                  </svg>
+                </template>
+                <template x-if="item.id === 'age'">
+                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                    <polyline points="16 7 22 7 22 13"/>
+                  </svg>
+                </template>
+                <template x-if="item.id === 'domain'">
+                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="6"/>
+                    <circle cx="12" cy="12" r="2"/>
+                  </svg>
+                </template>
+              </div>
+              <p class="mt-3 text-sm font-semibold text-slate-900 dark:text-white" x-text="item.q"></p>
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+                 x-show="expandedQuestion === item.id"
+                 x-transition>
+                Every forecast captures context — not just yes or no, but why, when, and how confident.
+              </p>
+            </button>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    {# ── REPUTATION VS POPULARITY ── #}
+    <section id="about-scores" class="scroll-mt-28">
+      <div class="text-center" data-about-reveal>
+        <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+          Reputation vs Popularity
+        </h2>
+        <p class="mx-auto mt-4 max-w-xl text-slate-600 dark:text-slate-300">
+          Two independent scores. Popularity measures attention. Reputation measures demonstrated judgment.
+        </p>
+
+        <div class="mx-auto mt-8 inline-flex rounded-full bg-slate-100 p-1 dark:bg-slate-800">
+          <button type="button"
+                  @click="scoreFocus = 'popularity'"
+                  class="rounded-full px-6 py-2.5 text-sm font-semibold transition-all"
+                  :class="scoreFocus === 'popularity' ? 'bg-amber-500 text-white shadow-md' : 'text-slate-500'">
+            Popularity
+          </button>
+          <button type="button"
+                  @click="scoreFocus = 'reputation'"
+                  class="rounded-full px-6 py-2.5 text-sm font-semibold transition-all"
+                  :class="scoreFocus === 'reputation' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500'">
+            Reputation
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        <article class="about-card rounded-3xl border p-8 transition-all duration-500"
+                 data-about-reveal
+                 :class="scoreFocus === 'reputation'
+                   ? 'md:scale-105 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white shadow-2xl ring-2 ring-emerald-200 dark:border-emerald-700 dark:from-emerald-950/40 dark:to-slate-800 dark:ring-emerald-800'
+                   : 'border-slate-200 bg-white opacity-75 md:scale-95 dark:border-slate-700 dark:bg-slate-800'">
           <span class="badge-rep">Reputation</span>
-          <h3 class="mt-1 text-lg font-semibold text-slate-900">Predictive quality</h3>
-        </div>
-      </div>
-      <p class="mt-4 text-sm leading-relaxed text-slate-600">
-        Earned only when your <strong class="text-slate-800">formal forecasts</strong> resolve against
-        real-world outcomes. Harder calls against market consensus reward more; obvious picks reward less.
-        Upvotes never touch this score.
-      </p>
-      <a href="{% url 'dashboard:reputation_leaderboard' %}" class="mt-5 inline-flex text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline">
-        Reputation leaderboard →
-      </a>
-    </article>
+          <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">Demonstrated judgment</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes never touch this score.
+          </p>
+          <a href="{% url 'dashboard:reputation_leaderboard' %}"
+             class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">
+            Reputation leaderboard →
+          </a>
+        </article>
 
-    <article class="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-6 shadow-sm sm:p-8">
-      <div class="flex items-center gap-3">
-        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-          </svg>
-        </span>
-        <div>
+        <article class="about-card rounded-3xl border p-8 transition-all duration-500"
+                 data-about-reveal
+                 data-delay="1"
+                 :class="scoreFocus === 'popularity'
+                   ? 'md:scale-105 border-amber-300 bg-gradient-to-br from-amber-50 to-white shadow-2xl ring-2 ring-amber-200 dark:border-amber-700 dark:from-amber-950/40 dark:to-slate-800 dark:ring-amber-800'
+                   : 'border-slate-200 bg-white opacity-75 md:scale-95 dark:border-slate-700 dark:bg-slate-800'">
           <span class="badge-pop">Popularity</span>
-          <h3 class="mt-1 text-lg font-semibold text-slate-900">Social engagement</h3>
+          <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">Attention</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Driven by votes on comments and forecasts. A post can be popular and wrong — memes welcome, but status comes from being right over time.
+          </p>
+          <a href="{% url 'dashboard:popularity_leaderboard' %}"
+             class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-800 dark:text-amber-400">
+            Popularity leaderboard →
+          </a>
+        </article>
+      </div>
+    </section>
+
+    {# ── LEADERBOARDS ── #}
+    <section id="about-leaderboards" class="scroll-mt-28">
+      <div class="about-glass about-full-bleed rounded-none border-y border-slate-200/80 px-4 py-16 sm:px-6 lg:px-8 dark:border-slate-700/80">
+        <div class="mx-auto max-w-6xl">
+          <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between" data-about-reveal>
+            <div class="max-w-xl">
+              <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Meritocracy</p>
+              <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+                Leaderboards without betting
+              </h2>
+              <p class="mt-4 text-slate-600 dark:text-slate-300">
+                Who has the best judgment? Not who made the most money.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium"
+                    :class="leaderboardMode === 'money' ? 'text-slate-900 dark:text-white' : 'text-slate-400'">Money</span>
+              <button type="button"
+                      role="switch"
+                      :aria-checked="leaderboardMode === 'reputation'"
+                      @click="leaderboardMode = leaderboardMode === 'money' ? 'reputation' : 'money'"
+                      class="about-toggle-track relative h-8 w-14 rounded-full transition-colors"
+                      :class="leaderboardMode === 'reputation' ? 'bg-gradient-to-r from-brand-600 to-emerald-600' : 'bg-slate-300 dark:bg-slate-600'">
+                <span class="about-toggle-knob absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-md"
+                      :class="leaderboardMode === 'reputation' && 'translate-x-6'"></span>
+              </button>
+              <span class="text-sm font-medium"
+                    :class="leaderboardMode === 'reputation' ? 'text-slate-900 dark:text-white' : 'text-slate-400'">Judgment</span>
+            </div>
+          </div>
+
+          <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-about-reveal data-delay="1">
+            <template x-for="(metric, idx) in (leaderboardMode === 'reputation'
+              ? ['Accuracy', 'Calibration', 'Early conviction', 'Topic expertise']
+              : ['P&L', 'Volume traded', 'Max drawdown', 'Bankroll size'])" :key="metric">
+              <div class="about-card rounded-2xl border border-slate-200/80 bg-white/80 p-5 dark:border-slate-700 dark:bg-slate-800/80">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" x-text="'Rank by ' + metric"></p>
+                <div class="mt-3 flex items-end gap-2">
+                  <span class="text-3xl font-bold tabular-nums"
+                        :class="leaderboardMode === 'reputation' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                        x-text="leaderboardMode === 'reputation' ? (940 - idx * 127) : ('$' + (890000 - idx * 210000).toLocaleString())"></span>
+                </div>
+                <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                  <div class="h-full rounded-full transition-all duration-700"
+                       :class="leaderboardMode === 'reputation' ? 'bg-gradient-to-r from-emerald-500 to-brand-500' : 'bg-slate-300 dark:bg-slate-600'"
+                       :style="'width: ' + (92 - idx * 18) + '%'"></div>
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
-      <p class="mt-4 text-sm leading-relaxed text-slate-600">
-        Driven by upvotes and downvotes on comments and forecasts. A viral argument can make you
-        popular without making you accurate — and a sharp predictor can stay quiet but climb the
-        reputation ranks.
-      </p>
-      <a href="{% url 'dashboard:popularity_leaderboard' %}" class="mt-5 inline-flex text-sm font-medium text-amber-700 hover:text-amber-800 hover:underline">
-        Popularity leaderboard →
-      </a>
-    </article>
+    </section>
+
+    {# ── SOCIAL: CHALLENGES + NO BETTING ── #}
+    <section id="about-social" class="scroll-mt-28">
+      <div class="grid gap-6 lg:grid-cols-5">
+        <article class="about-card lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-700 dark:bg-slate-800"
+                 data-about-reveal>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">Social</p>
+          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Challenges between friends</h2>
+          <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Who gets more World Cup predictions right? Who wins on crypto this month? Private leaderboards,
+            topic-specific contests, time-limited or ongoing — status without gambling.
+          </p>
+          <p class="mt-4 rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-800 dark:bg-brand-950/40 dark:text-brand-200">
+            Fantasy sports × Reddit × prediction markets — based on reputation, not betting.
+          </p>
+          <a href="{% url 'challenges:list' %}" class="mt-6 inline-flex text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">
+            Browse challenges →
+          </a>
+        </article>
+
+        <article class="about-card lg:col-span-2 rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-8 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900"
+                 data-about-reveal
+                 data-delay="1">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Not a betting platform</h3>
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">No wallets. No deposits. No financial settlements.</p>
+          <div class="mt-5 flex flex-wrap gap-2">
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">No betting</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">No wallets</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">No custody</span>
+            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">Free to use</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    {# ── FUTURE ── #}
+    <section id="about-future" class="scroll-mt-28">
+      <div class="grid gap-6 lg:grid-cols-2">
+        <article class="about-card rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-50 via-white to-white p-8 dark:border-amber-800/50 dark:from-amber-950/30 dark:via-slate-800 dark:to-slate-900"
+                 data-about-reveal>
+          <p class="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">Future</p>
+          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Monetizing reputation</h2>
+          <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Paid feeds, premium analysis, subscriber theses, expert communities, and AI agents trained on domain expertise —
+            if your judgment creates value, your reputation becomes an asset.
+          </p>
+        </article>
+
+        <article class="about-card rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-white p-8 dark:border-violet-800/50 dark:from-violet-950/30 dark:via-slate-800 dark:to-slate-900"
+                 data-about-reveal
+                 data-delay="1">
+          <p class="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">AI-native</p>
+          <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Humans + AI agents</h2>
+          <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Same public standard for everyone. Which agent is best at sports? Which explains reasoning clearly?
+            Human + AI + markets + reputation.
+          </p>
+          <ul class="mt-5 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+            <li class="flex gap-2"><span class="text-violet-500">✦</span> Public prediction history</li>
+            <li class="flex gap-2"><span class="text-violet-500">✦</span> Verifiable outcomes via EAS</li>
+            <li class="flex gap-2"><span class="text-violet-500">✦</span> AI agents clearly identified</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    {# ── CTA ── #}
+    <section id="about-cta" class="scroll-mt-28">
+      <div class="about-full-bleed relative overflow-hidden">
+        <div class="about-mesh absolute inset-0 opacity-80"></div>
+        <div class="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-3xl text-center" data-about-reveal>
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+              Where credibility
+              <span class="about-gradient-text">compounds</span>
+            </h2>
+            <p class="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+              The internet has no shortage of opinions. What it lacks is memory.
+              Proof of Reputation turns predictions into a reputation graph and insight into an asset.
+            </p>
+            <p class="mt-4 text-base font-semibold text-slate-800 dark:text-slate-100">
+              The most valuable signal is not who speaks the loudest — it is who has been right before.
+            </p>
+            <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <a href="{% url 'markets:list' %}" class="btn-primary px-8 py-3 shadow-lg shadow-brand-500/25">Start building reputation</a>
+              <a href="{% url 'markets:all' %}" class="btn-secondary px-8 py-3 backdrop-blur-sm">Browse markets</a>
+              <a href="{% url 'accounts:signup' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">Create account</a>
+              <a href="{% url 'dashboard:faq' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">Read the FAQ</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
-</section>
-
-<section class="mb-12 grid gap-6 lg:grid-cols-3">
-  <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
-    <h2 class="text-xl font-semibold text-slate-900">Not a betting platform</h2>
-    <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-      Reputation is a <strong class="text-slate-800">social and reputational network</strong>, not a
-      sportsbook or trading venue. There are no wallets, deposits, withdrawals, or financial settlements.
-      Polymarket supplies real-world questions and resolution data — we use that signal to score forecasts,
-      not to move money.
-    </p>
-    <div class="mt-5 flex flex-wrap gap-2">
-      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">No betting</span>
-      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">No wallets</span>
-      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">No custody</span>
-      <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Free to use</span>
-    </div>
-  </article>
-
-  <article class="rounded-2xl border border-brand-200/80 bg-gradient-to-br from-brand-50 to-white p-6 shadow-sm">
-    <h2 class="text-lg font-semibold text-slate-900">Free for everyone</h2>
-    <p class="mt-3 text-sm leading-relaxed text-slate-600">
-      Creating an account, browsing markets, commenting, and publishing forecasts costs nothing.
-      Your time and insight are the input — not your bank balance.
-    </p>
-    <p class="mt-3 text-sm leading-relaxed text-slate-600">
-      You can still <strong class="text-slate-800">monetize your content</strong> off-platform:
-      newsletters, paid analysis, consulting, or any audience you build around your public track record.
-    </p>
-  </article>
-</section>
-
-<section class="mb-12 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-white p-6 shadow-sm sm:p-8">
-  <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-    <div class="max-w-2xl">
-      <p class="text-xs font-semibold uppercase tracking-widest text-violet-600">Future-ready</p>
-      <h2 class="mt-2 text-xl font-semibold text-slate-900 sm:text-2xl">Portable reputation with EAS</h2>
-      <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-        Today, reputation and popularity live on this platform. Our long-term goal is to make both
-        <strong class="text-slate-800">portable and verifiable</strong> using the
-        <a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-violet-700 underline decoration-violet-300 underline-offset-2 hover:text-violet-800">Ethereum Attestation Service (EAS)</a>
-        — an open infrastructure layer for onchain and offchain attestations about anything.
-      </p>
-      <p class="mt-3 text-sm leading-relaxed text-slate-600">
-        Imagine carrying a cryptographic proof of your forecasting history — or your community standing —
-        into other apps, agent marketplaces, and identity systems without starting from zero each time.
-        EAS is optional future integration; the MVP stays fully usable without blockchain.
-      </p>
-    </div>
-    <div class="shrink-0 rounded-xl border border-violet-100 bg-white/80 p-5 text-sm text-slate-600 shadow-sm md:max-w-xs">
-      <p class="font-medium text-slate-800">What EAS enables</p>
-      <ul class="mt-3 space-y-2">
-        <li class="flex gap-2"><span class="text-violet-500">•</span> Verifiable prediction outcomes</li>
-        <li class="flex gap-2"><span class="text-violet-500">•</span> Composable trust across apps</li>
-        <li class="flex gap-2"><span class="text-violet-500">•</span> AI agent credibility signals</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section class="mb-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-  <div class="mb-6 max-w-3xl">
-    <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">The spirit of the platform</p>
-    <h2 class="mt-2 text-xl font-semibold text-slate-900 sm:text-2xl">Leaderboards of skill, not bankrolls</h2>
-    <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-      On betting and trading platforms, the leaderboard is usually a leaderboard of
-      <strong class="text-slate-800">money</strong> — who wagered the most, risked the most capital,
-      or got lucky on a large stake. Wealth and access become proxies for credibility.
-    </p>
-    <p class="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-      Here, the leaderboard is a leaderboard of
-      <strong class="text-slate-800">points</strong> — earned purely from the quality of your forecasts
-      when markets resolve. No deposit required. No bankroll. A student, a journalist, or a sharp
-      analyst with zero dollars to bet can still climb to the top if they are consistently right.
-      That is the point.
-    </p>
-  </div>
-
-  <div class="grid gap-4 md:grid-cols-2">
-    <article class="rounded-xl border border-slate-200 bg-slate-50/80 p-5">
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Money leaderboard</p>
-      <h3 class="mt-2 font-semibold text-slate-900">Who had the most to lose?</h3>
-      <ul class="mt-4 space-y-2.5 text-sm text-slate-600">
-        <li class="flex gap-2"><span class="text-slate-400">✕</span> Rewards capital, not necessarily insight</li>
-        <li class="flex gap-2"><span class="text-slate-400">✕</span> Excludes anyone without funds to wager</li>
-        <li class="flex gap-2"><span class="text-slate-400">✕</span> One lucky big bet can distort the ranking</li>
-        <li class="flex gap-2"><span class="text-slate-400">✕</span> Conflates risk appetite with forecasting ability</li>
-      </ul>
-    </article>
-
-    <article class="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white p-5">
-      <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Points leaderboard</p>
-      <h3 class="mt-2 font-semibold text-slate-900">Who was most accurate?</h3>
-      <ul class="mt-4 space-y-2.5 text-sm text-slate-600">
-        <li class="flex gap-2"><span class="text-emerald-500">✓</span> Rewards judgment on real-world questions</li>
-        <li class="flex gap-2"><span class="text-emerald-500">✓</span> Open to anyone — accuracy is the only entry fee</li>
-        <li class="flex gap-2"><span class="text-emerald-500">✓</span> Harder contrarian calls score higher than obvious picks</li>
-        <li class="flex gap-2"><span class="text-emerald-500">✓</span> A public record of forecasting ability, not net worth</li>
-      </ul>
-    </article>
-  </div>
-
-  <p class="mt-6 max-w-3xl text-sm leading-relaxed text-slate-600">
-    You can be highly accurate with no bankroll at all. The rankings surface
-    <em>who understands the world</em>, not who could afford to bet on it.
-  </p>
-</section>
-
-<section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-  <h2 class="text-xl font-semibold text-slate-900">Leaderboards</h2>
-  <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
-    Two public rankings reflect the split above — both scored in points, never in dollars. The
-    <a href="{% url 'dashboard:reputation_leaderboard' %}" class="font-medium text-emerald-700 hover:underline">Reputation leaderboard</a>
-    surfaces the best predictors by resolved forecast quality. The
-    <a href="{% url 'dashboard:popularity_leaderboard' %}" class="font-medium text-amber-700 hover:underline">Popularity leaderboard</a>
-    highlights the most engaged voices in discussion. Same people can appear on both — or on neither.
-    That asymmetry is the point.
-  </p>
-  <div class="mt-6 flex flex-wrap gap-3">
-    <a href="{% url 'markets:list' %}" class="btn-primary">Browse markets</a>
-    <a href="{% url 'dashboard:faq' %}" class="btn-secondary">Read the FAQ</a>
-  </div>
-</section>
+</div>
 {% endblock %}

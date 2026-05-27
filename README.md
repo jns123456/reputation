@@ -1,4 +1,4 @@
-# Reputational Prediction Social Network
+# ProofRep — Proof of Reputation
 
 AI-native social platform for public predictions on real-world events (imported from Polymarket and Kalshi) — **without betting money**. Tracks separate **Reputation** (predictive quality) and **Popularity** (social engagement) scores.
 

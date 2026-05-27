@@ -64,6 +64,22 @@ def sync_all_category_markets_task(self):
 
 
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
+def refresh_market_task(self, market_id):
+    """Background refresh of a single market from its external source."""
+    from integrations.sync import refresh_market
+    from markets.models import Market
+
+    market = Market.objects.filter(pk=market_id).first()
+    if market is None:
+        return
+    try:
+        refresh_market(market)
+    except Exception as exc:
+        logger.exception("refresh_market_task failed for market %s", market_id)
+        raise self.retry(exc=exc) from exc
+
+
+@shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
 def refresh_stale_open_markets_task(self):
     """Periodic refresh of stale open markets from external APIs."""
     try:

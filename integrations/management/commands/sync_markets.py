@@ -5,6 +5,7 @@ from integrations.services import (
     import_markets_from_kalshi,
     import_markets_from_polymarket,
     refresh_kalshi_market_images,
+    sync_top_volume_polymarket_markets,
 )
 from markets.source_filters import kalshi_enabled
 
@@ -32,6 +33,11 @@ class Command(BaseCommand):
             "--polymarket",
             action="store_true",
             help="Import open markets from Polymarket",
+        )
+        parser.add_argument(
+            "--top-volume",
+            action="store_true",
+            help="Import high-volume Polymarket markets (aligned with Polymarket volume rankings)",
         )
         parser.add_argument(
             "--kalshi-images",
@@ -88,6 +94,11 @@ class Command(BaseCommand):
             self._print_import_result("Kalshi discovery", result)
             return
 
+        if options["top_volume"]:
+            result = sync_top_volume_polymarket_markets(max_markets=options["limit"])
+            self._print_import_result("Polymarket top-volume sync", result)
+            return
+
         if options["polymarket"]:
             result = import_markets_from_polymarket(limit=options["limit"])
             self._print_import_result("Polymarket import", result)
@@ -108,8 +119,8 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.WARNING(
-                "No action selected. Use --categories, --if-due, --stale, --kalshi-discovery, "
-                "--kalshi-images, or --polymarket."
+                "No action selected. Use --categories, --top-volume, --if-due, --stale, "
+                "--kalshi-discovery, --kalshi-images, or --polymarket."
             )
         )
 

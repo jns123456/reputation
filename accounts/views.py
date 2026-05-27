@@ -219,11 +219,16 @@ def notifications_list(request):
 
 @login_required
 def notifications_dropdown(request):
+    from accounts.nav_cache import get_cached_unread_notification_count
+
     notifications = get_recent_notifications(user=request.user, limit=8)
     return render(
         request,
         "accounts/partials/notifications_dropdown.html",
-        {"recent_notifications": notifications},
+        {
+            "recent_notifications": notifications,
+            "unread_notification_count": get_cached_unread_notification_count(user=request.user),
+        },
     )
 
 

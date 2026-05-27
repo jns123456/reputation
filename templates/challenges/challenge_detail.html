@@ -3,11 +3,18 @@
 {% block title %}{{ challenge.display_title }}{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-  <a href="{% url 'challenges:list' %}" class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400">&larr; All challenges</a>
-  <div class="mt-2 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+<div class="pr-page pb-8">
+<div class="pr-breadcrumbs">
+  <a href="{% url 'challenges:list' %}">Challenges</a>
+  <svg class="h-4 w-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+  <span class="font-medium text-slate-800 dark:text-slate-200">{{ challenge.display_title }}</span>
+</div>
+
+<section class="pr-hero pr-hero--compact relative mb-6 overflow-hidden" data-pr-reveal>
+  <div class="pr-mesh pointer-events-none absolute inset-0 opacity-50" aria-hidden="true"></div>
+  <div class="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ challenge.display_title }}</h1>
+      <h1 class="pr-hero-title mt-0">{{ challenge.display_title }}</h1>
       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Created by @{{ challenge.creator.username }}
         {% if challenge.started_at %}· Started {{ challenge.started_at|date:"M j, Y" }}{% endif %}
@@ -33,7 +40,7 @@
       {{ challenge.get_status_display }}
     </span>
   </div>
-</div>
+</section>
 
 {% if participation and participation.status == 'invited' %}
 <div class="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-800 dark:bg-brand-950/30">
@@ -161,5 +168,6 @@
       </ul>
     </section>
   </aside>
+</div>
 </div>
 {% endblock %}

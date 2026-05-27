@@ -16,7 +16,10 @@ class ChallengeCreateForm(forms.Form):
         ),
     )
     markets = forms.ModelMultipleChoiceField(
-        queryset=Market.objects.filter(status=Market.Status.OPEN).order_by("title"),
+        queryset=Market.objects.filter(
+            status=Market.Status.OPEN,
+            source=Market.Source.POLYMARKET,
+        ).order_by("title"),
         widget=forms.CheckboxSelectMultiple(
             attrs={"class": "challenge-market-checkbox"},
         ),

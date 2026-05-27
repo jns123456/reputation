@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.cache import cache
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect, render
@@ -7,16 +8,14 @@ from django.urls import reverse
 import logging
 
 from accounts.category_selectors import (
-    get_top_popular_users_by_category,
-    get_top_predictors_by_category,
     validate_category_slug,
 )
-from accounts.selectors import get_top_popular_users, get_top_predictors
+from accounts.selectors import get_top_predictors
 from dashboard.forecasts_context import get_forecasts_page_context
+from dashboard.leaderboard_cache import get_cached_top_popular_users, get_cached_top_predictors
 from integrations.celery_utils import celery_broker_available, enqueue_category_sync
 from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
-from markets.models import Market
 from markets.source_filters import build_source_filter_urls, kalshi_enabled, normalize_source_filter
 from markets.selectors import (
     filter_markets_by_browse_area,
@@ -24,6 +23,7 @@ from markets.selectors import (
     get_category_display_markets,
     get_category_summaries,
     get_open_markets_by_canonical_category,
+    get_world_cup_match_markets_queryset,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
 WORLD_CUP_SYNC_CACHE_KEY = f"{CATEGORY_SYNC_CACHE_PREFIX}polymarket:world-cup-games"
+LANDING_TOP_PREDICTORS_CACHE_KEY = "landing_top_predictors"
+LANDING_TOP_PREDICTORS_LIMIT = 5
 
 
 def _load_category_summaries():
@@ -41,24 +43,26 @@ def _load_category_summaries():
     return summaries
 
 
-def landing(request):
-    category_summaries = _load_category_summaries()
-    top_predictors = get_top_predictors(5)
-    source = normalize_source_filter(request.GET.get("source", ""))
-    landing_source_filter_urls = build_source_filter_urls(
-        base_url=reverse("dashboard:landing"),
-        active_source=source,
-    )
-    return render(
-        request,
-        "dashboard/landing.html",
-        {
-            "category_summaries": category_summaries,
-            "top_predictors": top_predictors,
-            "landing_source_filter_urls": landing_source_filter_urls,
-            "active_source": source,
-        },
-    )
+def _load_top_predictors(limit=LANDING_TOP_PREDICTORS_LIMIT):
+    leaders = cache.get(LANDING_TOP_PREDICTORS_CACHE_KEY)
+    if leaders is None:
+        leaders = list(get_top_predictors(limit))
+        cache.set(
+            LANDING_TOP_PREDICTORS_CACHE_KEY,
+            leaders,
+            settings.LEADERBOARD_CACHE_SECONDS,
+        )
+    return leaders
+
+
+def explore(request):
+    from django.shortcuts import redirect
+
+    query = request.GET.urlencode()
+    target = reverse("markets:list")
+    if query:
+        target = f"{target}?{query}"
+    return redirect(target)
 
 
 def _enqueue_category_sync_if_needed(category):
@@ -144,14 +148,11 @@ def category_browse(request, slug):
     )
 
 
-def _world_cup_match_markets(*, source=""):
-    qs = Market.objects.filter(
-        status=Market.Status.OPEN,
-        canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
-    )
-    if source:
-        qs = qs.filter(source=source)
-    return list(qs.order_by("close_date", "title"))
+def _pagination_extra_query(request, *, exclude=("page",)):
+    query = request.GET.copy()
+    for key in exclude:
+        query.pop(key, None)
+    return query.urlencode()
 
 
 def _world_cup_games_context(request, *, category=None):
@@ -159,15 +160,20 @@ def _world_cup_games_context(request, *, category=None):
     _enqueue_category_sync_if_needed(category)
 
     source = normalize_source_filter(request.GET.get("source", ""))
-    matches = _world_cup_match_markets(source=source)
+    queryset = get_world_cup_match_markets_queryset(source=source)
+    total_count = queryset.count()
+    paginator = Paginator(queryset, settings.WORLD_CUP_MATCHES_PER_PAGE)
+    page_obj = paginator.get_page(request.GET.get("page"))
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("dashboard:category_browse", kwargs={"slug": FIFA_WORLD_CUP_CATEGORY_SLUG}),
         active_source=source,
     )
     return {
         "category": category,
-        "markets": matches,
-        "market_count": len(matches),
+        "markets": page_obj.object_list,
+        "market_count": total_count,
+        "page_obj": page_obj,
+        "pagination_query": _pagination_extra_query(request),
         "active_source": source,
         "source_filter_urls": source_filter_urls,
     }
@@ -194,9 +200,9 @@ def reputation_leaderboard(request):
         raise Http404("Category not found")
 
     if category:
-        leaders = get_top_predictors_by_category(category.slug, 50)
+        leaders = get_cached_top_predictors(category_slug=category.slug, limit=50)
     else:
-        leaders = get_top_predictors(50)
+        leaders = get_cached_top_predictors(limit=50)
 
     return render(
         request,
@@ -217,9 +223,9 @@ def popularity_leaderboard(request):
         raise Http404("Category not found")
 
     if category:
-        leaders = get_top_popular_users_by_category(category.slug, 50)
+        leaders = get_cached_top_popular_users(category_slug=category.slug, limit=50)
     else:
-        leaders = get_top_popular_users(50)
+        leaders = get_cached_top_popular_users(limit=50)
 
     return render(
         request,
@@ -237,7 +243,7 @@ def reputation_leaderboard_category(request, slug):
     category = get_category_for_slug(slug)
     if category is None:
         raise Http404("Category not found")
-    leaders = get_top_predictors_by_category(category.slug, 50)
+    leaders = get_cached_top_predictors(category_slug=category.slug, limit=50)
     return render(
         request,
         "dashboard/reputation_leaderboard.html",
@@ -254,7 +260,7 @@ def popularity_leaderboard_category(request, slug):
     category = get_category_for_slug(slug)
     if category is None:
         raise Http404("Category not found")
-    leaders = get_top_popular_users_by_category(category.slug, 50)
+    leaders = get_cached_top_popular_users(category_slug=category.slug, limit=50)
     return render(
         request,
         "dashboard/popularity_leaderboard.html",

@@ -26,30 +26,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-xl">
-  <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur px-4 py-4 dark:border-slate-700 dark:bg-slate-900/95">
-    <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Forum</h1>
-    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Short posts from the community — text and photos, up to 200 characters.</p>
-  </header>
+<div class="pr-page pb-8">
+  <div class="pr-feed-shell">
+    <header class="pr-feed-header rounded-t-2xl" data-pr-reveal>
+      <p class="pr-eyebrow">Community</p>
+      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">Forum</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Short posts from the community — text and photos, up to 200 characters.</p>
+    </header>
 
-  {% if user.is_authenticated %}
-  <div id="forum-compose" class="border-x border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
-    {% include "forum/partials/compose_form.html" with post_form=post_form %}
-  </div>
-  {% else %}
-  <div class="border-x border-b border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-    <a href="{% url 'accounts:login' %}?next={% url 'forum:feed' %}" class="font-semibold text-brand-600 hover:underline">Log in</a>
-    to post on Forum.
-  </div>
-  {% endif %}
+    {% if user.is_authenticated %}
+    <div id="forum-compose" class="border-x border-slate-200 bg-white/95 px-4 py-4 dark:border-slate-700 dark:bg-slate-900/95">
+      {% include "forum/partials/compose_form.html" with post_form=post_form %}
+    </div>
+    {% else %}
+    <div class="border-x border-slate-200 bg-slate-50/90 px-4 py-4 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-300">
+      <a href="{% url 'accounts:login' %}?next={% url 'forum:feed' %}" class="font-semibold text-brand-600 hover:underline">Log in</a>
+      to post on Forum.
+    </div>
+    {% endif %}
 
-  <div id="forum-feed"
-       class="min-h-[50vh] divide-y divide-slate-200 border-x border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-900"
-       data-popularity-sort
-       hx-get="{% url 'forum:feed_partial' %}"
-       hx-trigger="every 30s"
-       hx-swap="innerHTML">
-    {% include "forum/partials/feed.html" %}
+    <div id="forum-feed"
+         class="pr-feed-body rounded-b-2xl"
+         data-popularity-sort
+         hx-get="{% url 'forum:feed_partial' %}"
+         hx-trigger="every 30s"
+         hx-swap="innerHTML">
+      {% include "forum/partials/feed.html" %}
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -3,7 +3,9 @@
   <div class="border-b border-brand-100 px-6 py-5 dark:border-slate-700/80">
     <div class="flex gap-3">
       {% if market.image_url %}
-      <img src="{{ market.image_url }}" alt="" class="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover dark:border-slate-600" loading="lazy">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-500 dark:bg-white/90">
+        <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="lazy">
+      </div>
       {% endif %}
       <div class="min-w-0 flex-1">
         <p class="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">

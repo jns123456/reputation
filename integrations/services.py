@@ -14,8 +14,11 @@ from predictions.services import resolve_market_predictions
 logger = logging.getLogger(__name__)
 
 
-def _fetch_event_for_market(client, raw_market):
+def _fetch_event_for_market(client, raw_market, raw_event=None):
     """Resolve parent event payload for a Polymarket market record."""
+    if raw_event:
+        return raw_event
+
     raw_event = None
     events = raw_market.get("events") or []
     event_slug = None
@@ -26,15 +29,22 @@ def _fetch_event_for_market(client, raw_market):
     else:
         event_slug = raw_market.get("slug")
 
-    if event_slug and (not raw_event or not raw_event.get("markets")):
+    if event_slug and not raw_event:
         try:
             fetched = client.fetch_event_by_slug(event_slug)
             if fetched and fetched.get("slug"):
                 raw_event = fetched
         except Exception:
             logger.exception("Failed to fetch Polymarket event %s", event_slug)
+    elif event_slug and raw_event and not raw_event.get("markets"):
+        try:
+            fetched = client.fetch_event_by_slug(event_slug)
+            if fetched and fetched.get("markets"):
+                raw_event = fetched
+        except Exception:
+            logger.exception("Failed to fetch Polymarket event %s", event_slug)
 
-    return raw_event
+    return raw_event or {}
 
 
 def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
@@ -89,6 +99,10 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
         if market.status == Market.Status.RESOLVED and market.resolved_outcome:
             resolve_market_predictions(market)
 
+        from markets.display_metadata import sync_market_display_metadata
+
+        sync_market_display_metadata(market, save=True)
+
     return market, created
 
 
@@ -110,6 +124,12 @@ def refresh_market_from_polymarket(market):
         return market
 
     raw_event = _fetch_event_for_market(client, raw_market)
+    if raw_event and not raw_market.get("volumeNum") and not raw_market.get("volume"):
+        market_id = str(raw_market.get("id") or market.external_id)
+        for candidate in raw_event.get("markets") or []:
+            if str(candidate.get("id")) == market_id:
+                raw_market = candidate
+                break
 
     normalized = normalize_polymarket_record(
         raw_market,
@@ -125,7 +145,13 @@ def refresh_market_from_polymarket(market):
 
 def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
     client = PolymarketClient()
-    raw_markets = client.fetch_markets(limit=limit, offset=offset, active=active)
+    raw_markets = client.fetch_markets(
+        limit=limit,
+        offset=offset,
+        active=active,
+        closed=False if active else None,
+        order="volumeNum",
+    )
 
     imported = []
     errors = []
@@ -147,6 +173,72 @@ def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
     return {"imported": imported, "errors": errors}
 
 
+def _import_polymarket_market_pairs(client, pairs, *, default_category=""):
+    imported = []
+    errors = []
+    event_cache = {}
+
+    for raw_market, raw_event in pairs:
+        try:
+            if not raw_market.get("id"):
+                continue
+
+            event_slug = (raw_event or {}).get("slug")
+            if event_slug:
+                if event_slug not in event_cache:
+                    needs_full_event = not raw_market.get("volumeNum") and not raw_market.get("volume")
+                    if needs_full_event:
+                        try:
+                            fetched = client.fetch_event_by_slug(event_slug)
+                            event_cache[event_slug] = fetched if fetched else (raw_event or {})
+                        except Exception:
+                            logger.exception("Failed to fetch Polymarket event %s", event_slug)
+                            event_cache[event_slug] = raw_event or {}
+                    else:
+                        event_cache[event_slug] = raw_event or {}
+
+                cached_event = event_cache[event_slug]
+                market_id = str(raw_market.get("id"))
+                for candidate in cached_event.get("markets") or []:
+                    if str(candidate.get("id")) == market_id:
+                        raw_market = candidate
+                        raw_event = cached_event
+                        break
+
+            normalized = normalize_polymarket_record(
+                raw_market,
+                default_category=default_category or raw_market.get("category") or "",
+            )
+            market, created = import_market_from_normalized(
+                normalized,
+                raw_market=raw_market,
+                raw_event=raw_event or _fetch_event_for_market(client, raw_market),
+            )
+            imported.append({"market": market, "created": created, "raw": raw_market})
+        except Exception as exc:
+            logger.exception("Failed to import Polymarket market: %s", raw_market.get("id"))
+            errors.append({"raw_id": raw_market.get("id"), "error": str(exc)})
+
+    return {"imported": imported, "errors": errors}
+
+
+def sync_top_volume_polymarket_markets(*, min_volume_share=None, max_markets=None):
+    """Import high-volume Polymarket markets aligned with Polymarket browse rankings."""
+    from django.conf import settings
+
+    client = PolymarketClient()
+    pairs = client.fetch_top_volume_market_pairs(
+        min_volume_share=min_volume_share
+        if min_volume_share is not None
+        else getattr(settings, "POLYMARKET_TOP_VOLUME_MIN_SHARE", 0.5),
+        max_markets=max_markets
+        if max_markets is not None
+        else getattr(settings, "POLYMARKET_TOP_VOLUME_MAX_MARKETS", 500),
+        max_event_pages=getattr(settings, "POLYMARKET_TOP_VOLUME_MAX_EVENT_PAGES", 15),
+    )
+    return _import_polymarket_market_pairs(client, pairs)
+
+
 def sync_market_by_external_id(external_id):
     client = PolymarketClient()
     raw = client.fetch_market_by_id(external_id)
@@ -162,33 +254,17 @@ def sync_market_by_external_id(external_id):
 def sync_binary_markets_by_tag(*, tag_slug, default_category, limit=48):
     """Fetch binary Yes/No markets for a Polymarket tag and upsert locally."""
     client = PolymarketClient()
-    raw_markets = client.fetch_binary_markets_by_tag(
+    pairs = client.fetch_binary_market_pairs_by_tag(
         tag_slug,
         limit=limit,
         default_category=default_category,
         fallback_tag_in_payload=tag_slug,
     )
-
-    imported = []
-    errors = []
-
-    for raw in raw_markets:
-        try:
-            if not raw.get("id"):
-                continue
-            normalized = normalize_polymarket_record(raw, default_category=default_category)
-            raw_event = _fetch_event_for_market(client, raw)
-            market, created = import_market_from_normalized(
-                normalized,
-                raw_market=raw,
-                raw_event=raw_event,
-            )
-            imported.append({"market": market, "created": created, "raw": raw})
-        except Exception as exc:
-            logger.exception("Failed to import %s market: %s", tag_slug, raw.get("id"))
-            errors.append({"raw_id": raw.get("id"), "error": str(exc)})
-
-    return {"imported": imported, "errors": errors}
+    return _import_polymarket_market_pairs(
+        client,
+        pairs,
+        default_category=default_category,
+    )
 
 
 def sync_economy_binary_markets(*, limit=12):

@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 
 from markets.models import Market
@@ -45,6 +45,17 @@ class MarketSortMetricTests(TestCase):
             polymarket_event_raw={"liquidity": 12000},
         )
         self.assertEqual(market_sort_metric(market, SORT_LIQUIDITY), 12000.0)
+
+    def test_volume_does_not_use_event_total_as_fallback(self):
+        market = Market(
+            external_id="sort-3",
+            title="Volume test",
+            slug="volume-event-fallback",
+            polymarket_raw={},
+            polymarket_event_raw={"volumeNum": 999999, "volume": 999999},
+        )
+        self.assertEqual(market_sort_metric(market, SORT_VOLUME), 0.0)
+        self.assertEqual(market_volume(market), 0.0)
 
 
 class SortMarketsTests(TestCase):
@@ -121,6 +132,7 @@ class SortMarketsTests(TestCase):
 
 
 class GetMarketsForDisplaySortTests(TestCase):
+    @override_settings(KALSHI_ENABLED=True)
     def test_explicit_sort_overrides_source_blend(self):
         poly = Market.objects.create(
             external_id="display-poly",

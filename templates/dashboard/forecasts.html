@@ -21,33 +21,34 @@
 {% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-xl">
-  <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur px-4 py-4">
-    <h1 class="text-xl font-bold text-slate-900">Forecasts</h1>
-    <p class="mt-1 text-sm text-slate-500">Live forecasts from the community — formal predictions tied to real markets.</p>
+<div class="pr-page pb-8">
+  <div class="pr-feed-shell">
+    <header class="pr-feed-header rounded-t-2xl" data-pr-reveal>
+      <p class="pr-eyebrow">Community</p>
+      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">Forecasts</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Live forecasts from the community — formal predictions tied to real markets.</p>
 
-    <form method="get" action="{% url 'dashboard:forecasts' %}" class="mt-4">
-      <label for="forecasts-market-filter" class="sr-only">Filter by market</label>
-      <select id="forecasts-market-filter"
-              name="market"
-              class="form-select w-full rounded-xl border-slate-300 bg-slate-50 text-sm font-medium"
-              onchange="this.form.submit()">
-        <option value="">All markets</option>
-        {% for market in market_options %}
-        <option value="{{ market.slug }}" {% if active_market_slug == market.slug %}selected{% endif %}>
-          {{ market.title }}
-        </option>
-        {% endfor %}
-      </select>
-    </form>
-  </header>
+      <form method="get" action="{% url 'dashboard:forecasts' %}" class="mt-4">
+        <label for="forecasts-market-filter" class="sr-only">Filter by market</label>
+        <select id="forecasts-market-filter"
+                name="market"
+                class="form-select w-full rounded-xl border-slate-300 bg-slate-50/80 text-sm font-medium dark:border-slate-600 dark:bg-slate-800/80"
+                onchange="this.form.submit()">
+          <option value="">All markets</option>
+          {% for market in market_options %}
+          <option value="{{ market.slug }}" {% if active_market_slug == market.slug %}selected{% endif %}>{{ market.title }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </header>
 
-  <div id="forecasts-feed"
-       class="min-h-[50vh] divide-y divide-slate-200 border-x border-slate-200 bg-white"
-       hx-get="{% url 'dashboard:forecasts_feed' %}{% if active_market_slug %}?market={{ active_market_slug }}{% endif %}"
-       hx-trigger="every 20s"
-       hx-swap="innerHTML">
-    {% include "dashboard/partials/forecasts_feed.html" %}
+    <div id="forecasts-feed"
+         class="pr-feed-body rounded-b-2xl"
+         hx-get="{% url 'dashboard:forecasts_feed' %}{% if active_market_slug %}?market={{ active_market_slug }}{% endif %}"
+         hx-trigger="every 20s"
+         hx-swap="innerHTML">
+      {% include "dashboard/partials/forecasts_feed.html" %}
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -129,10 +129,10 @@ class CategoryBrowseViewTests(TestCase):
             category="Economy",
             status=Market.Status.OPEN,
         )
-        response = self.client.get(reverse("dashboard:landing"))
+        response = self.client.get(reverse("markets:list"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Explore by category")
-        self.assertContains(response, "FIFA World Cup 2026")
+        self.assertContains(response, "Categories")
+        self.assertContains(response, "Politics")
 
     @patch("dashboard.views.enqueue_category_sync")
     def test_category_browse_page(self, mock_enqueue):

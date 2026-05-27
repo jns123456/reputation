@@ -195,7 +195,15 @@ def get_pending_challenge_invitations(user):
 
 
 def get_pending_challenge_invitations_count(user):
-    return get_pending_challenge_invitations(user).count()
+    from challenges.models import Challenge, ChallengeParticipant
+
+    if not user or not user.is_authenticated:
+        return 0
+    return ChallengeParticipant.objects.filter(
+        user=user,
+        status=ChallengeParticipant.Status.INVITED,
+        challenge__status=Challenge.Status.PENDING,
+    ).count()
 
 
 def user_can_view_challenge(*, challenge, user):

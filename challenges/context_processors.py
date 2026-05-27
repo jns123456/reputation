@@ -1,5 +1,7 @@
 """Template context for challenge invitations in navigation."""
 
+from accounts.nav_cache import get_cached_pending_challenge_invites_count
+
 
 def challenge_context(request):
     if not request.user.is_authenticated:
@@ -7,10 +9,8 @@ def challenge_context(request):
             "pending_challenge_invites_count": 0,
         }
 
-    from challenges.selectors import get_pending_challenge_invitations_count
-
     return {
-        "pending_challenge_invites_count": get_pending_challenge_invitations_count(
-            request.user,
+        "pending_challenge_invites_count": get_cached_pending_challenge_invites_count(
+            user=request.user,
         ),
     }

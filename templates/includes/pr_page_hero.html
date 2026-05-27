@@ -1,0 +1,33 @@
+{# eyebrow, title, gradient (optional highlighted phrase), description, compact (bool), action_url, action_label, secondary_url, secondary_label #}
+<section class="pr-hero {% if compact %}pr-hero--compact{% endif %} relative overflow-hidden" data-pr-reveal>
+  <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
+  <div class="pr-orb pr-orb--slow absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
+  <div class="pr-orb absolute -bottom-12 -left-8 h-36 w-36 bg-emerald-400/15" aria-hidden="true"></div>
+
+  <div class="relative pr-hero-row">
+    <div class="max-w-3xl">
+      {% if eyebrow %}
+      <p class="pr-eyebrow">
+        {% if show_dot %}<span class="pr-eyebrow-dot" aria-hidden="true"></span>{% endif %}
+        {{ eyebrow }}
+      </p>
+      {% endif %}
+      <h1 class="pr-hero-title">
+        {{ title }}{% if gradient %} <span class="pr-gradient-text">{{ gradient }}</span>{% endif %}
+      </h1>
+      {% if description %}
+      <p class="pr-hero-desc">{{ description|safe }}</p>
+      {% endif %}
+    </div>
+    {% if action_url or secondary_url %}
+    <div class="pr-hero-actions shrink-0">
+      {% if action_url %}
+      <a href="{{ action_url }}" class="btn-primary px-5 py-2.5 text-sm">{{ action_label|default:"Get started" }}</a>
+      {% endif %}
+      {% if secondary_url %}
+      <a href="{{ secondary_url }}" class="btn-secondary px-5 py-2.5 text-sm backdrop-blur-sm">{{ secondary_label|default:"Learn more" }}</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>

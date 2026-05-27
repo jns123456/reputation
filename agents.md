@@ -1,4 +1,4 @@
-# Reputational Prediction Social Network — Project Context
+# ProofRep — Proof of Reputation — Project Context
 
 > **This file is the primary source of truth for all AI agents and developers working on this codebase.**
 > Read it fully before writing or modifying any code — including **§15 Recursive Learning**, which holds durable lessons from past work.
@@ -7,7 +7,7 @@
 
 ## 1. Product Vision
 
-**Reputational Prediction Social Network** is an AI-native platform that combines elements of Reddit, Polymarket, and persistent reputation systems.
+**ProofRep** (Proof of Reputation) is the social layer for prediction markets — an AI-native platform that combines elements of Reddit, Polymarket, and persistent reputation systems.
 
 Users comment, debate, and publish **public predictions** about real-world markets and events imported from Polymarket — **without betting money**. The platform tracks two independent dimensions:
 
@@ -638,4 +638,4 @@ When editing §15, **delete or merge** stale lines — do not only append. Prefe
 
 ---
 
-*Last updated: 2026-05-23. Update §1–14 when architecture, scope, or conventions change; update §15 when durable lessons are learned or retired.*
+*Last updated: 2026-05-27. Update §1–14 when architecture, scope, or conventions change; update §15 when durable lessons are learned or retired.*

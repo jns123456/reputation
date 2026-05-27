@@ -18,6 +18,10 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 KALSHI_ENABLED = env.bool("KALSHI_ENABLED", default=False)
+DEV_FAST_MODE = env.bool("DEV_FAST_MODE", default=False)
+NAV_BADGE_CACHE_SECONDS = env.int("NAV_BADGE_CACHE_SECONDS", default=60)
+LEADERBOARD_CACHE_SECONDS = env.int("LEADERBOARD_CACHE_SECONDS", default=120)
+WORLD_CUP_MATCHES_PER_PAGE = env.int("WORLD_CUP_MATCHES_PER_PAGE", default=24)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -55,10 +59,9 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
+        "APP_DIRS": not DEV_FAST_MODE,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -69,6 +72,22 @@ TEMPLATES = [
     },
 ]
 
+if DEV_FAST_MODE:
+    TEMPLATES[0]["OPTIONS"]["loaders"] = [
+        (
+            "django.template.loaders.cached.Loader",
+            [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
+        ),
+    ]
+elif DEBUG:
+    TEMPLATES[0]["OPTIONS"]["context_processors"].insert(
+        0,
+        "django.template.context_processors.debug",
+    )
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
@@ -77,6 +96,10 @@ DATABASES = {
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
     )
 }
+
+if not DEBUG:
+    DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=600)
+    DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -140,7 +163,11 @@ else:
 
 POLYMARKET_ECONOMY_CACHE_SECONDS = env.int("POLYMARKET_ECONOMY_CACHE_SECONDS", default=300)
 MARKET_SYNC_CACHE_SECONDS = env.int("MARKET_SYNC_CACHE_SECONDS", default=POLYMARKET_ECONOMY_CACHE_SECONDS)
-MARKET_SYNC_CATEGORY_LIMIT = env.int("MARKET_SYNC_CATEGORY_LIMIT", default=48)
+MARKET_SYNC_CATEGORY_LIMIT = env.int("MARKET_SYNC_CATEGORY_LIMIT", default=100)
+MARKET_LIST_SORTED_LIMIT = env.int("MARKET_LIST_SORTED_LIMIT", default=200)
+POLYMARKET_TOP_VOLUME_MIN_SHARE = env.float("POLYMARKET_TOP_VOLUME_MIN_SHARE", default=0.5)
+POLYMARKET_TOP_VOLUME_MAX_MARKETS = env.int("POLYMARKET_TOP_VOLUME_MAX_MARKETS", default=500)
+POLYMARKET_TOP_VOLUME_MAX_EVENT_PAGES = env.int("POLYMARKET_TOP_VOLUME_MAX_EVENT_PAGES", default=15)
 MARKET_FULL_SYNC_INTERVAL_HOURS = env.int("MARKET_FULL_SYNC_INTERVAL_HOURS", default=6)
 ENABLE_EMBEDDED_MARKET_SYNC = env.bool("ENABLE_EMBEDDED_MARKET_SYNC", default=False)
 # 0 = import every available World Cup group-stage match from Polymarket.
@@ -203,6 +230,11 @@ if KALSHI_ENABLED:
 POLYMARKET_EMBED_BASE_URL = env(
     "POLYMARKET_EMBED_BASE_URL",
     default="https://embed.polymarket.com/market",
+)
+# Sports match events (e.g. FIFA World Cup 3-way moneyline) use /sports, not /market.
+POLYMARKET_SPORTS_EMBED_BASE_URL = env(
+    "POLYMARKET_SPORTS_EMBED_BASE_URL",
+    default="https://embed.polymarket.com/sports",
 )
 POLYMARKET_EMBED_THEME = env("POLYMARKET_EMBED_THEME", default="light")
 POLYMARKET_EMBED_FEATURES = env(

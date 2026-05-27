@@ -22,7 +22,11 @@ def _should_notify_in_app(*, user_id):
 def _create_notification(*, recipient, **fields):
     if not _should_notify_in_app(user_id=recipient.id):
         return None
-    return Notification.objects.create(recipient=recipient, **fields)
+    notification = Notification.objects.create(recipient=recipient, **fields)
+    from accounts.nav_cache import invalidate_notification_nav_cache
+
+    invalidate_notification_nav_cache(recipient.id)
+    return notification
 
 
 def notify_followers_of_prediction(*, prediction):
@@ -59,6 +63,9 @@ def notify_followers_of_prediction(*, prediction):
         )
         if was_created:
             created.append(notification)
+            from accounts.nav_cache import invalidate_notification_nav_cache
+
+            invalidate_notification_nav_cache(follower_id)
 
     return created
 
@@ -74,12 +81,16 @@ def notify_new_follower(*, follow):
     if not _should_notify_in_app(user_id=recipient.id):
         return None
 
-    return Notification.objects.create(
+    notification = Notification.objects.create(
         recipient=recipient,
         actor=actor,
         notification_type=Notification.NotificationType.NEW_FOLLOWER,
         user_follow=follow,
     )
+    from accounts.nav_cache import invalidate_notification_nav_cache
+
+    invalidate_notification_nav_cache(recipient.id)
+    return notification
 
 
 def notify_vote_received(*, actor, recipient, target, target_type, value):
@@ -165,12 +176,19 @@ def mark_notification_read(*, notification, user):
     if notification.read_at is None:
         notification.read_at = timezone.now()
         notification.save(update_fields=["read_at"])
+        from accounts.nav_cache import invalidate_notification_nav_cache
+
+        invalidate_notification_nav_cache(user.id)
 
 
 def mark_all_notifications_read(*, user):
-    Notification.objects.filter(recipient=user, read_at__isnull=True).update(
+    updated = Notification.objects.filter(recipient=user, read_at__isnull=True).update(
         read_at=timezone.now()
     )
+    if updated:
+        from accounts.nav_cache import invalidate_notification_nav_cache
+
+        invalidate_notification_nav_cache(user.id)
 
 
 def get_unread_notification_count(*, user):

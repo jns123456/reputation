@@ -1,5 +1,14 @@
 {# Official Polymarket embed — https://embed.polymarket.com/ #}
-<section class="mt-8">
+<section
+  class="mt-8"
+  x-data="{
+    theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+    lightUrl: '{{ polymarket_embed.embed_url_light|escapejs }}',
+    darkUrl: '{{ polymarket_embed.embed_url_dark|escapejs }}',
+    get iframeSrc() { return this.theme === 'dark' ? this.darkUrl : this.lightUrl; }
+  }"
+  @proofrep-theme-change.window="theme = $event.detail.theme"
+>
   <div class="flex flex-wrap items-end justify-between gap-3">
     <div>
       <h2 class="text-xl font-semibold text-slate-900">Live Polymarket Chart</h2>
@@ -30,7 +39,7 @@
   >
     <iframe
       title="Polymarket market chart — {{ market.title }}"
-      src="{{ polymarket_embed.embed_url }}"
+      x-bind:src="iframeSrc"
       width="{{ polymarket_embed.embed_width }}"
       height="{{ polymarket_embed.embed_height }}"
       class="block w-full max-w-full border-0"

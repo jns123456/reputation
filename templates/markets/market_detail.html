@@ -4,78 +4,80 @@
 {% block title %}{{ market.title }}{% endblock %}
 
 {% block content %}
-<article>
-  <div class="flex flex-wrap items-start justify-between gap-4">
-    <div class="flex-1">
-      <div class="flex flex-wrap gap-2">
-        <span class="badge-status-{{ market.status }}">{{ market.get_status_display }}</span>
-        {% if market.category %}<span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{{ market.category }}</span>{% endif %}
-        {% if market.source == "polymarket" %}<span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">Polymarket</span>{% endif %}
-        {% if market.source == "kalshi" %}<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">Kalshi</span>{% endif %}
+<div class="pr-page pb-8">
+  <article class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
+    <div class="pr-mesh pointer-events-none absolute inset-0 opacity-50" aria-hidden="true"></div>
+    <div class="relative flex flex-wrap items-start justify-between gap-4">
+      <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap gap-2">
+          <span class="badge-status-{{ market.status }}">{{ market.get_status_display }}</span>
+          {% if market.category %}<span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.category }}</span>{% endif %}
+          {% if market.source == "polymarket" %}<span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Polymarket</span>{% endif %}
+          {% if market.source == "kalshi" %}<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Kalshi</span>{% endif %}
+        </div>
+        <h1 class="pr-hero-title mt-3">{{ market.title }}</h1>
+        {% if market.description %}
+        <p class="mt-3 text-slate-600 dark:text-slate-300">{{ market.description }}</p>
+        {% endif %}
+        {% if market.polymarket_url %}
+        <div class="mt-3">
+          <a href="{{ market.polymarket_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">View on Polymarket ↗</a>
+        </div>
+        {% elif market.kalshi_url %}
+        <div class="mt-3">
+          <a href="{{ market.kalshi_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">View on Kalshi ↗</a>
+        </div>
+        {% endif %}
       </div>
-      <h1 class="mt-2 text-2xl font-bold text-slate-900">{{ market.title }}</h1>
-      {% if market.description %}
-      <p class="mt-3 text-slate-600">{{ market.description }}</p>
-      {% endif %}
-      {% if market.polymarket_url %}
-      <div class="mt-3">
-        <a href="{{ market.polymarket_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">View on Polymarket ↗</a>
-      </div>
-      {% elif market.kalshi_url %}
-      <div class="mt-3">
-        <a href="{{ market.kalshi_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">View on Kalshi ↗</a>
+      {% if market.current_probability %}
+      <div class="pr-panel min-w-[200px] p-4">
+        <p class="text-xs font-medium uppercase text-slate-500">Live odds</p>
+        {% for label, prob in market.current_probability.items %}
+        <div class="mt-2 flex justify-between text-sm">
+          <span>{{ label }}</span>
+          <strong>{{ prob|as_percent }}%</strong>
+        </div>
+        {% endfor %}
       </div>
       {% endif %}
     </div>
-    {% if market.current_probability %}
-    <div class="rounded-xl border border-slate-200 bg-white p-4 min-w-[200px]">
-      <p class="text-xs font-medium uppercase text-slate-500">Live odds</p>
-      {% for label, prob in market.current_probability.items %}
-      <div class="mt-2 flex justify-between text-sm">
-        <span>{{ label }}</span>
-        <strong>{{ prob|as_percent }}%</strong>
-      </div>
-      {% endfor %}
+
+    {% if market.polymarket_raw.image %}
+    <img src="{{ market.polymarket_raw.image }}" alt="" class="relative mt-4 max-h-32 rounded-lg border border-slate-200 object-cover dark:border-slate-700">
+    {% endif %}
+
+    {% if market.status == "resolved" and market.resolved_outcome %}
+    <div class="relative mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200">
+      Resolved outcome: <strong>{{ market.resolved_outcome }}</strong>
     </div>
     {% endif %}
-  </div>
+  </article>
 
-  {% if market.polymarket_raw.image %}
-  <img src="{{ market.polymarket_raw.image }}" alt="" class="mt-4 max-h-32 rounded-lg border border-slate-200 object-cover">
+  {% if polymarket_embed %}
+    {% include "markets/partials/polymarket_embed.html" %}
+  {% elif kalshi_embed %}
+    {% include "markets/partials/kalshi_embed.html" %}
   {% endif %}
 
-  {% if market.status == "resolved" and market.resolved_outcome %}
-  <div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-    Resolved outcome: <strong>{{ market.resolved_outcome }}</strong>
-  </div>
+  {% if market.is_open %}
+    <div data-pr-reveal data-delay="1">
+      {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
+    </div>
   {% endif %}
-</article>
 
-{% if polymarket_embed %}
-  {% include "markets/partials/polymarket_embed.html" %}
-{% elif kalshi_embed %}
-  {% include "markets/partials/kalshi_embed.html" %}
-{% endif %}
-
-{% if market.is_open %}
-  {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
-{% endif %}
-
-<section id="forecasts" class="mt-10">
-  <h2 class="text-lg font-semibold">Public forecast history</h2>
-  <p class="text-sm text-slate-500">
-    All forecasts on this market — scored on <span class="badge-rep">Reputation</span> when resolved.
-    Earn <span class="badge-pop">Popularity</span> when others like your forecast (especially your reasoning)
-    or your comments on other people's forecasts.
-  </p>
-  <div id="forecast-list" class="mt-4 divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white" data-popularity-sort>
-    {% for item in prediction_sections %}
-      {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
-    {% empty %}
-    <p class="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-slate-500">
-      No forecasts yet. Be the first to place one.
+  <section id="forecasts" class="mt-10" data-pr-reveal data-delay="2">
+    <h2 class="pr-section-title">Public forecast history</h2>
+    <p class="pr-section-desc">
+      All forecasts on this market — scored on <span class="badge-rep">Reputation</span> when resolved.
+      Earn <span class="badge-pop">Popularity</span> when others like your forecast or comments.
     </p>
-    {% endfor %}
-  </div>
-</section>
+    <div id="forecast-list" class="pr-panel mt-4 divide-y divide-slate-200 dark:divide-slate-700" data-popularity-sort>
+      {% for item in prediction_sections %}
+        {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
+      {% empty %}
+      <p class="px-4 py-8 text-center text-slate-500">No forecasts yet. Be the first to place one.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
 {% endblock %}

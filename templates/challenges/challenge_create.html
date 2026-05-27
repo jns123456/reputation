@@ -3,13 +3,9 @@
 {% block title %}New challenge{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-  <a href="{% url 'challenges:list' %}" class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400">&larr; Back to challenges</a>
-  <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Create a challenge</h1>
-  <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-    Pick up to 10 open events and challenge users you follow mutually.
-  </p>
-</div>
+<div class="pr-page pb-8">
+  {% url 'challenges:list' as list_url %}
+  {% include "includes/pr_page_hero.html" with eyebrow="Challenges" compact=True title="Create a" gradient="challenge" description="Pick up to 10 open events and challenge users you follow mutually." secondary_url=list_url secondary_label="Back to challenges" %}
 
 {% if not mutual_followers %}
 <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
@@ -122,6 +118,8 @@
     </section>
   </div>
 </form>
+
+</div>
 
 <script>
   function challengeMarketPicker(maxMarkets, initialSelectedIds, initialTitles) {

@@ -1,10 +1,10 @@
-<nav class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-slate-700/80 dark:bg-slate-900/95 dark:supports-[backdrop-filter]:bg-slate-900/80"
+<nav class="site-header sticky top-0 z-40 border-b border-slate-200/60 bg-white/85 backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/85"
      x-data="{ mobileOpen: false }">
   <div class="mx-auto max-w-6xl px-4">
     <div class="flex h-14 items-center justify-between gap-4">
       <div class="flex min-w-0 items-center gap-6">
         <a href="{% url 'dashboard:landing' %}" class="shrink-0 text-lg font-bold tracking-tight text-brand-700 dark:text-brand-400">
-          Reputation
+          ProofRep
         </a>
 
         <div class="hidden items-center gap-1 md:flex">
@@ -59,10 +59,10 @@
         <div x-data="{
                isDark: document.documentElement.classList.contains('dark'),
                toggleTheme() {
-                 this.isDark = window.reputationTheme.toggle() === 'dark';
+                 this.isDark = window.proofrepTheme.toggle() === 'dark';
                }
              }"
-             @reputation-theme-change.window="isDark = $event.detail.theme === 'dark'">
+             @proofrep-theme-change.window="isDark = $event.detail.theme === 'dark'">
           <button type="button"
                   @click="toggleTheme()"
                   class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400"
@@ -83,6 +83,7 @@
         <div class="hidden items-center gap-1 md:flex">
           <div class="relative" x-data="{ open: false }" @click.outside="open = false">
             <button type="button"
+                    id="notifications-bell-btn"
                     @click="open = !open"
                     class="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400"
                     aria-label="Notifications"
@@ -98,8 +99,12 @@
               {% endif %}
             </button>
             <div x-show="open" x-cloak x-transition
-                 class="absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
-              {% include "accounts/partials/notifications_dropdown.html" %}
+                 id="notifications-dropdown-panel"
+                 class="absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800"
+                 hx-get="{% url 'accounts:notifications_dropdown' %}"
+                 hx-trigger="click from:#notifications-bell-btn once"
+                 hx-swap="innerHTML">
+              <div class="px-4 py-6 text-center text-sm text-slate-500">Loading notifications…</div>
             </div>
           </div>
 

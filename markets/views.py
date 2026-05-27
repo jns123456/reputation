@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
@@ -12,14 +14,46 @@ from comments.selectors import (
 )
 from integrations.kalshi.embed import build_kalshi_embed_context
 from integrations.polymarket.embed import build_polymarket_embed_context
-from integrations.sync import refresh_market
+from integrations.celery_utils import enqueue_market_refresh_if_stale
 from markets.models import Market
-from markets.selectors import get_market_categories, get_markets_for_display
+from markets.selectors import get_market_categories, get_market_hub_category_summaries, get_markets_for_display
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
 from markets.source_filters import build_source_filter_urls, kalshi_enabled, normalize_source_filter
 from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction
 from reputation.services import calculate_reputation_stakes
+
+MARKET_HUB_SUMMARIES_CACHE_KEY = "market_hub_category_summaries"
+
+
+def _load_market_hub_summaries():
+    summaries = cache.get(MARKET_HUB_SUMMARIES_CACHE_KEY)
+    if summaries is None:
+        summaries = get_market_hub_category_summaries()
+        cache.set(
+            MARKET_HUB_SUMMARIES_CACHE_KEY,
+            summaries,
+            settings.MARKET_SYNC_CACHE_SECONDS,
+        )
+    return summaries
+
+
+def market_hub(request):
+    """Category landing page — browse markets by topic (Politics, Sports, Crypto, etc.)."""
+    source = normalize_source_filter(request.GET.get("source", ""))
+    source_filter_urls = build_source_filter_urls(
+        base_url=reverse("markets:list"),
+        active_source=source,
+    )
+    return render(
+        request,
+        "markets/market_hub.html",
+        {
+            "category_summaries": _load_market_hub_summaries(),
+            "active_source": source,
+            "source_filter_urls": source_filter_urls,
+        },
+    )
 
 
 def market_list(request):
@@ -37,7 +71,7 @@ def market_list(request):
         sort=sort or None,
     )
     source_filter_urls = build_source_filter_urls(
-        base_url=reverse("markets:list"),
+        base_url=reverse("markets:all"),
         active_source=source,
         extra={"q": search, "status": status, "category": category, "sort": sort},
     )
@@ -60,7 +94,7 @@ def market_list(request):
 
 def market_detail(request, slug):
     market = get_object_or_404(Market, slug=slug)
-    market = refresh_market(market)
+    enqueue_market_refresh_if_stale(market)
 
     predictions = get_market_predictions(market)
     discussions = get_market_prediction_discussions(market=market, predictions=predictions)

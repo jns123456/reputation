@@ -6,11 +6,14 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.cache import cache
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
 CELERY_BROKER_AVAILABLE_CACHE_KEY = "celery_broker_available"
 CELERY_BROKER_CHECK_SECONDS = 60
+MARKET_REFRESH_ENQUEUE_PREFIX = "market_refresh_queued:"
+MARKET_REFRESH_ENQUEUE_SECONDS = 300
 
 
 def celery_broker_available(*, force_check=False) -> bool:
@@ -49,4 +52,51 @@ def enqueue_category_sync(category_slug: str) -> bool:
         logger.exception("Failed to enqueue category sync for %s", category_slug)
         return False
 
+    return True
+
+
+def market_is_stale(market) -> bool:
+    """True when an imported open market has not synced recently."""
+    from markets.models import Market
+    from markets.source_filters import kalshi_enabled
+
+    if market.source == Market.Source.MANUAL:
+        return False
+    if market.source == Market.Source.KALSHI and not kalshi_enabled():
+        return False
+    if market.status != Market.Status.OPEN:
+        return False
+
+    stale_minutes = getattr(settings, "MARKET_SYNC_STALE_MINUTES", 30)
+    cutoff = timezone.now() - timezone.timedelta(minutes=stale_minutes)
+    if market.source == Market.Source.POLYMARKET:
+        synced_at = market.polymarket_synced_at
+    else:
+        synced_at = market.kalshi_synced_at
+    return synced_at is None or synced_at <= cutoff
+
+
+def enqueue_market_refresh_if_stale(market) -> bool:
+    """Queue a single-market refresh without blocking the HTTP response."""
+    if not market_is_stale(market):
+        return False
+
+    cache_key = f"{MARKET_REFRESH_ENQUEUE_PREFIX}{market.pk}"
+    if cache.get(cache_key):
+        return False
+
+    if not celery_broker_available():
+        logger.debug("Skipping market refresh enqueue; Celery broker unavailable")
+        return False
+
+    from integrations.tasks import refresh_market_task
+
+    try:
+        refresh_market_task.delay(market.pk)
+    except Exception:
+        cache.set(CELERY_BROKER_AVAILABLE_CACHE_KEY, False, CELERY_BROKER_CHECK_SECONDS)
+        logger.exception("Failed to enqueue market refresh for %s", market.pk)
+        return False
+
+    cache.set(cache_key, True, MARKET_REFRESH_ENQUEUE_SECONDS)
     return True

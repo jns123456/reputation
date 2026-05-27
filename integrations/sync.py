@@ -13,6 +13,7 @@ from integrations.services import (
     refresh_market_from_polymarket,
     sync_binary_markets_by_tag,
     sync_kalshi_markets_by_series,
+    sync_top_volume_polymarket_markets,
 )
 from markets.categories import CANONICAL_CATEGORIES, CanonicalCategory, FIFA_WORLD_CUP_CATEGORY_SLUG
 from markets.models import Market
@@ -128,6 +129,11 @@ def sync_all_category_markets(*, limit=None) -> dict:
     limit = limit or settings.MARKET_SYNC_CATEGORY_LIMIT
     totals = SyncSummary()
     per_category = {}
+
+    try:
+        totals.absorb(sync_top_volume_polymarket_markets())
+    except Exception:
+        logger.exception("Polymarket top-volume sync failed")
 
     for category in CANONICAL_CATEGORIES:
         has_poly = bool(category.polymarket_tag)

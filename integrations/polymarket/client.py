@@ -21,10 +21,22 @@ class PolymarketClient:
         self.session = requests.Session()
         self.session.headers.update({"Accept": "application/json"})
 
-    def fetch_markets(self, limit=50, offset=0, active=True):
+    def fetch_markets(
+        self,
+        limit=50,
+        offset=0,
+        active=True,
+        closed=None,
+        order=None,
+    ):
         params = {"limit": limit, "offset": offset}
         if active is not None:
             params["active"] = str(active).lower()
+        if closed is not None:
+            params["closed"] = str(closed).lower()
+        if order:
+            params["order"] = order
+            params["ascending"] = "false"
         url = f"{self.base_url}/markets"
         response = self.session.get(url, params=params, timeout=30)
         response.raise_for_status()
@@ -84,7 +96,7 @@ class PolymarketClient:
 
         return all_events
 
-    def fetch_binary_markets_by_tag(
+    def fetch_binary_market_pairs_by_tag(
         self,
         tag_slug,
         *,
@@ -100,28 +112,22 @@ class PolymarketClient:
             closed=False,
             order="volume24hr",
         )
-        binary_markets = []
         seen_ids = set()
-
-        for event in events:
-            for market in event.get("markets") or []:
-                if not is_binary_market_record(market) or market.get("closed"):
-                    continue
-                market_id = market.get("id")
-                if market_id in seen_ids:
-                    continue
-                enriched = dict(market)
-                if default_category:
-                    enriched.setdefault("category", default_category)
-                enriched["volume24hr"] = market.get("volume24hr") or event.get("volume24hr")
-                binary_markets.append(enriched)
-                seen_ids.add(market_id)
-                if len(binary_markets) >= limit:
-                    return binary_markets[:limit]
+        pairs = collect_binary_market_pairs_from_events(
+            events,
+            seen_ids=seen_ids,
+            limit=limit,
+            default_category=default_category,
+        )
 
         fallback_token = (fallback_tag_in_payload or tag_slug).lower()
-        if len(binary_markets) < limit:
-            standalone = self.fetch_markets(limit=limit * 3, active=True)
+        if len(pairs) < limit:
+            standalone = self.fetch_markets(
+                limit=limit * 3,
+                active=True,
+                closed=False,
+                order="volumeNum",
+            )
             for market in standalone:
                 if not is_binary_market_record(market) or market.get("closed"):
                     continue
@@ -134,12 +140,106 @@ class PolymarketClient:
                     enriched = dict(market)
                     if default_category:
                         enriched.setdefault("category", default_category)
-                    binary_markets.append(enriched)
+                    raw_event = _embedded_event_for_market(enriched)
+                    pairs.append((enriched, raw_event))
                     seen_ids.add(market_id)
-                    if len(binary_markets) >= limit:
+                    if len(pairs) >= limit:
                         break
 
-        return binary_markets[:limit]
+        return pairs[:limit]
+
+    def fetch_binary_markets_by_tag(
+        self,
+        tag_slug,
+        *,
+        limit=20,
+        default_category="",
+        fallback_tag_in_payload=None,
+    ):
+        """Fetch active binary Yes/No markets for a Polymarket tag slug."""
+        pairs = self.fetch_binary_market_pairs_by_tag(
+            tag_slug,
+            limit=limit,
+            default_category=default_category,
+            fallback_tag_in_payload=fallback_tag_in_payload,
+        )
+        return [market for market, _event in pairs]
+
+    def fetch_top_volume_market_pairs(
+        self,
+        *,
+        min_volume_share=0.5,
+        max_markets=500,
+        max_event_pages=15,
+        page_size=100,
+    ):
+        """
+        Return (market, event) pairs from the highest-volume Polymarket events.
+
+        Keeps importing events until their combined volume reaches ``min_volume_share``
+        of the scanned catalog, then adds 24h-volume leaders not already included.
+        """
+        pairs = []
+        seen_ids = set()
+
+        standalone_cap = min(100, max(20, max_markets // 5))
+        standalone_markets = self.fetch_markets(
+            limit=standalone_cap,
+            active=True,
+            closed=False,
+            order="volumeNum",
+        )
+        for market in standalone_markets:
+            if not is_binary_market_record(market) or market.get("closed"):
+                continue
+            market_id = market.get("id")
+            if not market_id or market_id in seen_ids:
+                continue
+            pairs.append((market, _embedded_event_for_market(market)))
+            seen_ids.add(market_id)
+
+        volume_events = self.fetch_events_paginated(
+            page_size=page_size,
+            max_pages=max_event_pages,
+            active=True,
+            closed=False,
+            order="volume",
+        )
+        total_volume = sum(float(event.get("volume") or 0) for event in volume_events)
+        target_volume = total_volume * min_volume_share if total_volume else 0
+        cumulative_volume = 0.0
+
+        for event in volume_events:
+            batch = collect_binary_market_pairs_from_events(
+                [event],
+                seen_ids=seen_ids,
+                default_category="",
+            )
+            pairs.extend(batch)
+            cumulative_volume += float(event.get("volume") or 0)
+            if len(pairs) >= max_markets:
+                return pairs[:max_markets]
+            if target_volume and cumulative_volume >= target_volume:
+                break
+
+        volume24_events = self.fetch_events_paginated(
+            page_size=page_size,
+            max_pages=max(5, max_event_pages // 3),
+            active=True,
+            closed=False,
+            order="volume24hr",
+        )
+        for event in volume24_events:
+            batch = collect_binary_market_pairs_from_events(
+                [event],
+                seen_ids=seen_ids,
+                default_category="",
+            )
+            pairs.extend(batch)
+            if len(pairs) >= max_markets:
+                return pairs[:max_markets]
+
+        return pairs[:max_markets]
 
     def fetch_economy_binary_markets(self, limit=20):
         """Fetch active binary Yes/No markets from Polymarket Economy category."""
@@ -229,6 +329,43 @@ class PolymarketClient:
             return None
         response.raise_for_status()
         return response.json()
+
+
+def _embedded_event_for_market(raw_market):
+    events = raw_market.get("events") or []
+    if events and isinstance(events[0], dict):
+        return events[0]
+    return {}
+
+
+def collect_binary_market_pairs_from_events(
+    events,
+    *,
+    seen_ids=None,
+    limit=None,
+    default_category="",
+):
+    """Extract active binary markets from Polymarket events with parent event attached."""
+    if seen_ids is None:
+        seen_ids = set()
+
+    pairs = []
+    for event in events:
+        for market in event.get("markets") or []:
+            if not is_binary_market_record(market) or market.get("closed"):
+                continue
+            market_id = market.get("id")
+            if not market_id or market_id in seen_ids:
+                continue
+            enriched = dict(market)
+            if default_category:
+                enriched.setdefault("category", default_category)
+            enriched["volume24hr"] = market.get("volume24hr") or event.get("volume24hr")
+            pairs.append((enriched, event))
+            seen_ids.add(market_id)
+            if limit is not None and len(pairs) >= limit:
+                return pairs
+    return pairs
 
 
 def _parse_json_field(value):

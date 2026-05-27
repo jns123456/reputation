@@ -41,18 +41,25 @@ def normalize_sort_filter(value: str) -> str:
     return ""
 
 
-def _market_payloads(market):
-    return (
+def _market_payloads(market, *, include_event_payloads=False):
+    payloads = (
         market.polymarket_raw or {},
-        market.polymarket_event_raw or {},
         market.kalshi_raw or {},
     )
+    if include_event_payloads:
+        payloads = (
+            *payloads,
+            market.polymarket_event_raw or {},
+            market.kalshi_event_raw or {},
+        )
+    return payloads
 
 
 def market_sort_metric(market, sort: str) -> float:
     """Numeric metric from imported Polymarket/Kalshi payload for ranking."""
     keys = _METRIC_KEYS.get(sort, _METRIC_KEYS[SORT_VOLUME])
-    for payload in _market_payloads(market):
+    include_event_payloads = sort != SORT_VOLUME
+    for payload in _market_payloads(market, include_event_payloads=include_event_payloads):
         for key in keys:
             value = payload.get(key)
             if value is None or value == "":
@@ -66,7 +73,9 @@ def market_sort_metric(market, sort: str) -> float:
 
 def market_volume(market) -> float:
     """Total traded volume — used for default cards and source blending."""
-    return market_sort_metric(market, SORT_VOLUME)
+    from markets.display_metadata import market_volume_for_sort
+
+    return market_volume_for_sort(market)
 
 
 def sort_markets(markets, *, sort: str):
