@@ -95,6 +95,41 @@ FIXES: dict[str, str] = {
     "Enter at least 2 characters.": "Introduce al menos 2 caracteres.",
     "Enter at least 2 characters to search.": "Introduce al menos 2 caracteres para buscar.",
     "Start typing to find people on PredictStamp.": "Empieza a escribir para encontrar personas en PredictStamp.",
+    "The social layer for prediction markets": "La capa social para mercados de predicción",
+    "Public predictions and earned reputation for real-world markets.": (
+        "Predicciones públicas y reputación ganada en mercados del mundo real."
+    ),
+    "Public predictions and earned reputation for real-world markets. No betting — just credibility.": (
+        "Predicciones públicas y reputación ganada en mercados del mundo real. "
+        "Sin apuestas — solo credibilidad."
+    ),
+    "PredictStamp — The social layer for prediction markets. Popularity ≠ Reputation.": (
+        "PredictStamp — La capa social para mercados de predicción. Popularidad ≠ Reputación."
+    ),
+    "Company": "Empresa",
+    "Legal information": "Información legal",
+    "Terms & Conditions": "Términos y condiciones",
+    "Legal": "Legal",
+    "Terms": "Términos",
+    "PredictStamp is operated by TAO FACTORY LLC, a Delaware limited liability company. For operational, legal, or partnership inquiries, contact us at <a href=\"mailto:ops@predictstamp.com\" class=\"font-medium text-brand-600 hover:underline dark:text-brand-400\">ops@predictstamp.com</a>.": (
+        "PredictStamp es operado por TAO FACTORY LLC, una sociedad de responsabilidad "
+        "limitada de Delaware. Para consultas operativas, legales o de alianzas, "
+        "contáctanos en <a href=\"mailto:ops@predictstamp.com\" class=\"font-medium "
+        "text-brand-600 hover:underline dark:text-brand-400\">ops@predictstamp.com</a>."
+    ),
+    "The internet has no shortage of opinions. What it lacks is memory. PredictStamp turns predictions into a reputation graph and insight into an asset.": (
+        "Internet no le falta opinión. Le falta memoria. PredictStamp convierte "
+        "pronósticos en un grafo de reputación y el criterio en un activo."
+    ),
+    "<strong class=\"text-slate-800 dark:text-white\">PredictStamp</strong> is built around events and outcomes — follow markets, publish theses, debate probabilities, challenge friends, and build a public history of judgment.": (
+        "<strong class=\"text-slate-800 dark:text-white\">PredictStamp</strong> se basa "
+        "en eventos y resultados — sigue mercados, publica tesis, debate probabilidades, "
+        "desafía amigos y construye un historial público de criterio."
+    ),
+    "Credibility earned through a public history of judgment — not luck, not capital, not hype. PredictStamp secures social intelligence with track record.": (
+        "Credibilidad ganada con un historial público de criterio — no suerte, "
+        "ni capital, ni hype. PredictStamp respalda la inteligencia social con historial."
+    ),
     "Name your challenge and pick opponents.": "Pon nombre al desafío y elige oponentes.",
     "open forecast": "pronóstico abierto",
     "No open events match “%(search_query)s” in this category. Try another keyword.": (

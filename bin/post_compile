@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Heroku post-build: compile gettext catalogs so Spanish UI works in production.
+set -euo pipefail
+python manage.py compilemessages
