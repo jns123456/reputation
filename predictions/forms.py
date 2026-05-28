@@ -9,9 +9,10 @@ class ForecastForm(forms.ModelForm):
 
     class Meta:
         model = Prediction
-        fields = ("predicted_outcome", "reasoning")
+        fields = ("predicted_outcome", "predicted_direction", "reasoning")
         widgets = {
             "predicted_outcome": forms.RadioSelect,
+            "predicted_direction": forms.HiddenInput,
             "reasoning": forms.Textarea(
                 attrs={
                     "class": "forecast-reasoning-input",
@@ -30,6 +31,13 @@ class ForecastForm(forms.ModelForm):
             choices=[(label, label) for label in labels],
             widget=forms.RadioSelect,
             label=_("Your forecast"),
+        )
+        self.fields["predicted_direction"] = forms.ChoiceField(
+            choices=Prediction.Direction.choices,
+            widget=forms.HiddenInput,
+            initial=Prediction.Direction.YES,
+            required=False,
+            label=_("Forecast side"),
         )
         self.fields["reasoning"].required = False
         self.fields["reasoning"].label = _("Explain your forecast")
@@ -55,6 +63,12 @@ class ForecastForm(forms.ModelForm):
         if outcome not in allowed:
             raise forms.ValidationError(_("Choose a valid outcome for this market."))
         return outcome
+
+    def clean_predicted_direction(self):
+        direction = self.cleaned_data.get("predicted_direction") or Prediction.Direction.YES
+        if direction not in Prediction.Direction.values:
+            raise forms.ValidationError(_("Choose Yes or No for this outcome."))
+        return direction
 
     def clean(self):
         cleaned = super().clean()

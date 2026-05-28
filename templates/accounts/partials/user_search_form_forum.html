@@ -1,0 +1,18 @@
+{% load i18n %}
+<div class="x-search-box">
+  <form method="get" action="{% url 'accounts:user_search' %}" class="x-user-search-form">
+    <i data-lucide="search" class="x-user-search-icon" stroke-width="2" aria-hidden="true"></i>
+    <input type="search"
+           name="q"
+           class="x-search-input"
+           placeholder="{% trans 'Search users…' %}"
+           aria-label="{% trans 'Search users' %}"
+           autocomplete="off"
+           hx-get="{% url 'accounts:user_search_partial' %}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#user-search-dropdown"
+           hx-swap="innerHTML"
+           hx-include="closest form">
+  </form>
+  <div id="user-search-dropdown"></div>
+</div>

@@ -9,40 +9,7 @@
 
 {% block content %}
 <div class="pr-page pb-8">
-  <section class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
-    <div class="pr-mesh pointer-events-none absolute inset-0 opacity-60" aria-hidden="true"></div>
-    <div class="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <p class="pr-eyebrow">{% trans "Profile" %}</p>
-        <h1 class="pr-hero-title mt-2 inline-flex flex-wrap items-center gap-2">
-          {% include "accounts/partials/user_display_name.html" with user=profile_user %}
-        </h1>
-        <div class="mt-2 flex flex-wrap items-center gap-2">
-          {% if profile_user.show_username_publicly %}
-          <p class="text-slate-500 dark:text-slate-400">@{{ profile_user.username }}</p>
-          {% endif %}
-          <span class="{{ profile_user.identity_mode_badge_class }}">{{ profile_user.get_identity_mode_display }}</span>
-          {% if profile_user.verification_requested and not profile_user.is_verified %}
-          <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">{% trans "Verification pending" %}</span>
-          {% endif %}
-        </div>
-        <p class="mt-1 text-sm text-slate-500">
-          {% blocktrans count counter=follower_count %}{{ counter }} follower{% plural %}{{ counter }} followers{% endblocktrans %}
-          ·
-          {% blocktrans count counter=following_count %}{{ counter }} following{% plural %}{{ counter }} following{% endblocktrans %}
-        </p>
-        {% if profile_user.is_ai_agent %}<span class="badge-agent mt-2">{% trans "AI Agent" %}</span>{% endif %}
-        {% if profile_user.bio %}<p class="mt-3 max-w-xl text-slate-600 dark:text-slate-300">{{ profile_user.bio }}</p>{% endif %}
-      </div>
-      <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-        {% include "accounts/partials/follow_button.html" %}
-        {% if user == profile_user %}
-        <a href="{% url 'accounts:profile_edit' %}" class="btn-secondary">{% trans "Edit Profile" %}</a>
-        <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary">{% trans "Alert Settings" %}</a>
-        {% endif %}
-      </div>
-    </div>
-  </section>
+  {% include "accounts/partials/profile_header.html" %}
 
   {% trans "Reputation" as rep_label %}
   {% trans "Predictive quality" as rep_badge %}

@@ -29,6 +29,8 @@
     }
   </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/lucide@latest"></script>
+  <script defer src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/proofrep-ui.css' %}">
@@ -120,6 +122,9 @@
     }
     .forecast-action.is-bookmarked {
       color: rgb(79 70 229);
+    }
+    .forecast-action.is-bookmarked svg {
+      fill: currentColor;
     }
 
     /* Dark mode — global overrides for existing Tailwind utility classes */
@@ -342,6 +347,7 @@
   {% include "includes/mobile_bottom_nav.html" %}
   {% block extra_js %}{% endblock %}
   <script src="{% static 'js/proofrep-ui.js' %}"></script>
+  <script src="{% static 'js/lucide-icons.js' %}"></script>
   <script src="{% static 'js/theme.js' %}"></script>
   <script>window.proofrepTheme && window.proofrepTheme.init();</script>
   <script src="{% static 'js/forum-actions.js' %}"></script>

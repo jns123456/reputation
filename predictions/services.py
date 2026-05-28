@@ -3,6 +3,10 @@
 from django.db import transaction
 from django.utils import timezone
 
+from integrations.attestation_services import (
+    record_prediction_claim_attestation_safely,
+    record_prediction_resolution_attestation_safely,
+)
 from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import get_user_active_prediction
@@ -18,7 +22,7 @@ def _refresh_market_odds(market):
     return market
 
 
-def create_prediction(*, user, market, predicted_outcome, reasoning=""):
+def create_prediction(*, user, market, predicted_outcome, predicted_direction=Prediction.Direction.YES, reasoning=""):
     market = _refresh_market_odds(market)
     if not market.is_open:
         raise ValueError("Cannot predict on a closed or resolved market.")
@@ -32,6 +36,7 @@ def create_prediction(*, user, market, predicted_outcome, reasoning=""):
             user=user,
             market=market,
             predicted_outcome=predicted_outcome,
+            predicted_direction=predicted_direction,
             probability_at_prediction_time=probability_snapshot,
             reasoning=reasoning,
         )
@@ -47,6 +52,8 @@ def create_prediction(*, user, market, predicted_outcome, reasoning=""):
 
         apply_category_prediction_created(user, resolve_category_from_market(market))
 
+        transaction.on_commit(lambda: record_prediction_claim_attestation_safely(prediction))
+
     from accounts.notification_services import notify_followers_of_prediction
 
     notify_followers_of_prediction(prediction=prediction)
@@ -54,7 +61,7 @@ def create_prediction(*, user, market, predicted_outcome, reasoning=""):
     return prediction
 
 
-def update_prediction(*, prediction, user, predicted_outcome, reasoning=""):
+def update_prediction(*, prediction, user, predicted_outcome, predicted_direction=Prediction.Direction.YES, reasoning=""):
     """Create a new prediction record superseding the old one for traceability."""
     if prediction.user_id != user.id:
         raise PermissionError("Cannot edit another user's prediction.")
@@ -68,6 +75,7 @@ def update_prediction(*, prediction, user, predicted_outcome, reasoning=""):
             user=user,
             market=market,
             predicted_outcome=predicted_outcome,
+            predicted_direction=predicted_direction,
             probability_at_prediction_time=dict(market.current_probability or {}),
             reasoning=reasoning,
         )
@@ -105,7 +113,8 @@ def resolve_market_predictions(market):
     ).select_related("user", "user__profile")
 
     for prediction in predictions:
-        is_correct = prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
+        outcome_matches = prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
+        is_correct = outcome_matches if prediction.predicted_direction == Prediction.Direction.YES else not outcome_matches
         prediction.status = Prediction.Status.RESOLVED
         prediction.is_correct = is_correct
         prediction.resolved_at = timezone.now()
@@ -118,6 +127,7 @@ def resolve_market_predictions(market):
         profile.save(update_fields=["neutral_prediction_count", "updated_at"])
 
         apply_reputation_for_prediction(prediction)
+        transaction.on_commit(lambda p=prediction: record_prediction_resolution_attestation_safely(p))
         resolved.append(prediction)
 
     from challenges.services import check_challenge_completion

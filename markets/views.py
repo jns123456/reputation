@@ -18,7 +18,7 @@ from integrations.celery_utils import enqueue_market_refresh_if_stale
 from markets.models import Market
 from markets.selectors import get_market_categories, get_market_hub_category_summaries, get_markets_for_display
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
-from markets.source_filters import build_source_filter_urls, kalshi_enabled, normalize_source_filter
+from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, kalshi_enabled, normalize_source_filter
 from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction
 from reputation.services import calculate_reputation_stakes
@@ -40,11 +40,20 @@ def _load_market_hub_summaries():
 
 def market_hub(request):
     """Category landing page — browse markets by topic (Politics, Sports, Crypto, etc.)."""
+    search = request.GET.get("q", "").strip()
     source = normalize_source_filter(request.GET.get("source", ""))
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("markets:list"),
         active_source=source,
+        extra={"q": search},
     )
+    search_results = []
+    if search:
+        search_results = get_markets_for_display(
+            status=Market.Status.OPEN,
+            search=search,
+            source=source or None,
+        )
     return render(
         request,
         "markets/market_hub.html",
@@ -52,6 +61,12 @@ def market_hub(request):
             "category_summaries": _load_market_hub_summaries(),
             "active_source": source,
             "source_filter_urls": source_filter_urls,
+            "search_query": search,
+            "search_results": search_results,
+            "clear_search_url": build_browse_clear_search_url(
+                base_url=reverse("markets:list"),
+                source=source,
+            ),
         },
     )
 
@@ -129,6 +144,7 @@ def market_detail(request, slug):
             "reputation_stakes": calculate_reputation_stakes(
                 predicted_outcome=p.predicted_outcome,
                 probability_snapshot=p.probability_at_prediction_time,
+                predicted_direction=p.predicted_direction,
             ),
         }
         for p in predictions

@@ -30,6 +30,7 @@ class User(AbstractUser):
     )
     is_ai_agent = models.BooleanField(default=False)
     bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to="avatars/%Y/%m/", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

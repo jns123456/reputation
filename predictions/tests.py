@@ -8,7 +8,7 @@ from comments.services import cast_vote
 from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import get_market_predictions
-from predictions.services import create_prediction, update_prediction
+from predictions.services import create_prediction, resolve_market_predictions, update_prediction
 from predictions.forms import ForecastForm
 
 
@@ -64,6 +64,33 @@ class PredictionPermissionTests(TestCase):
         )
         self.assertEqual(prediction.probability_at_prediction_time["Yes"], 0.35)
         self.assertEqual(prediction.probability_at_prediction_time["No"], 0.65)
+
+    def test_create_prediction_stores_no_direction(self):
+        prediction = create_prediction(
+            user=self.other,
+            market=self.market,
+            predicted_outcome="Yes",
+            predicted_direction=Prediction.Direction.NO,
+        )
+
+        self.assertEqual(prediction.predicted_outcome, "Yes")
+        self.assertEqual(prediction.predicted_direction, Prediction.Direction.NO)
+
+    def test_no_direction_resolves_correct_when_other_outcome_wins(self):
+        prediction = create_prediction(
+            user=self.other,
+            market=self.market,
+            predicted_outcome="Yes",
+            predicted_direction=Prediction.Direction.NO,
+        )
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "No"
+        self.market.save(update_fields=["status", "resolved_outcome"])
+
+        resolve_market_predictions(self.market)
+
+        prediction.refresh_from_db()
+        self.assertTrue(prediction.is_correct)
 
     def test_market_predictions_sorted_by_popularity(self):
         market = Market.objects.create(
@@ -171,3 +198,26 @@ class ForecastFormTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["predicted_outcome"], "Draw")
         self.assertEqual(form.outcome_count, 3)
+
+    def test_multi_outcome_form_accepts_no_direction(self):
+        market = Market.objects.create(
+            external_id="pm-event:test-winner",
+            title="Tournament Winner",
+            slug="tournament-winner-form",
+            status=Market.Status.OPEN,
+            outcomes=[
+                {"label": "Spain"},
+                {"label": "France"},
+                {"label": "England"},
+            ],
+            current_probability={"Spain": 0.17, "France": 0.16, "England": 0.11},
+            polymarket_raw={"market_kind": "polymarket_multi_outcome_event"},
+        )
+
+        form = ForecastForm(
+            data={"predicted_outcome": "Spain", "predicted_direction": "no"},
+            market=market,
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["predicted_direction"], "no")

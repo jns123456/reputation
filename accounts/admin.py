@@ -51,6 +51,7 @@ class UserAdmin(BaseUserAdmin):
                     "onboarding_completed",
                     "is_ai_agent",
                     "bio",
+                    "avatar",
                 )
             },
         ),
@@ -67,6 +68,7 @@ class UserAdmin(BaseUserAdmin):
                     "onboarding_completed",
                     "is_ai_agent",
                     "bio",
+                    "avatar",
                 )
             },
         ),

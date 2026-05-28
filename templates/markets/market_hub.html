@@ -11,14 +11,50 @@
   {% blocktrans asvar hero_description %}Pick a topic — Politics, Sports, Crypto, Economy, and more. Real forecasts from Polymarket, no betting.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
 
-  <section data-pr-reveal data-delay="1">
+  <div class="pr-panel mb-6 p-3 sm:p-4" data-pr-reveal data-delay="1">
+    {% include "markets/partials/market_search_form.html" with preserve_source=True current_source=active_source clear_search_url=clear_search_url %}
+    <div class="mt-4">
+      {% include "markets/partials/source_filter_pills.html" %}
+    </div>
+  </div>
+
+  {% if search_query %}
+  <section class="mb-10" data-pr-reveal data-delay="2">
+    <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+      <div class="pr-section-head mb-0">
+        <h2 class="pr-section-title">{% trans "Search results" %}</h2>
+        <p class="pr-section-desc">
+          {% blocktrans count counter=search_results|length %}
+            {{ counter }} open event matches “{{ search_query }}”
+          {% plural %}
+            {{ counter }} open events match “{{ search_query }}”
+          {% endblocktrans %}
+        </p>
+      </div>
+      <a href="{% url 'markets:all' %}?q={{ search_query|urlencode }}{% if active_source %}&source={{ active_source }}{% endif %}"
+         class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline">
+        {% trans "Advanced filters" %} →
+      </a>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {% for market in search_results %}
+        {% include "markets/partials/market_grid_card.html" %}
+      {% empty %}
+      <div class="pr-empty col-span-full">
+        {% blocktrans %}No open events match “{{ search_query }}”. Try another keyword or browse by category below.{% endblocktrans %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section data-pr-reveal data-delay="{% if search_query %}3{% else %}1{% endif %}">
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
       <div class="pr-section-head mb-0">
         <h2 class="pr-section-title">{% trans "Categories" %}</h2>
         <p class="pr-section-desc">{% trans "Tap a category to browse open forecasts." %}</p>
       </div>
       <div class="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-        {% include "markets/partials/source_filter_pills.html" %}
         <a href="{% url 'markets:all' %}{% if active_source %}?source={{ active_source }}{% endif %}"
            class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline">
           {% trans "All markets" %} →

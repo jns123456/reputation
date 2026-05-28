@@ -13,7 +13,7 @@ from accounts.bookmark_services import toggle_bookmark
 from accounts.bookmarks_services import build_bookmarks_page_items
 from accounts.follow_selectors import get_follower_count, get_following_count, is_following
 from accounts.follow_services import toggle_follow
-from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm
+from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm, AvatarUploadForm
 from accounts.models import Bookmark, User
 from accounts.category_selectors import get_user_category_breakdown
 from accounts.notification_selectors import get_recent_notifications, get_user_notifications
@@ -23,7 +23,7 @@ from accounts.notification_services import (
     mark_notification_read,
     queue_login_notification_toast,
 )
-from accounts.selectors import get_user_prediction_history
+from accounts.selectors import get_user_prediction_history, search_users
 
 
 class CustomLoginView(LoginView):
@@ -83,13 +83,61 @@ def profile_setup(request):
 @require_http_methods(["GET", "POST"])
 def profile_edit(request):
     if request.method == "POST":
-        form = ProfileEditForm(request.POST, instance=request.user)
+        form = ProfileEditForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
+            messages.success(request, _("Profile updated."))
             return redirect("accounts:profile", username=request.user.username)
     else:
         form = ProfileEditForm(instance=request.user)
     return render(request, "accounts/profile_edit.html", {"form": form})
+
+
+@login_required
+@require_POST
+def avatar_upload(request):
+    form = AvatarUploadForm(request.POST, request.FILES)
+    if form.is_valid():
+        from accounts.avatar_services import update_user_avatar
+
+        update_user_avatar(user=request.user, avatar=form.cleaned_data["avatar"])
+        messages.success(request, _("Profile photo updated."))
+    else:
+        messages.error(request, form.errors.get("avatar", [_("Invalid profile photo.")])[0])
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "accounts/partials/profile_avatar_upload.html",
+            {"profile_user": request.user},
+        )
+    return redirect("accounts:profile", username=request.user.username)
+
+
+def user_search(request):
+    query = request.GET.get("q", "").strip()
+    users = search_users(query=query) if query else []
+    return render(
+        request,
+        "accounts/user_search.html",
+        {
+            "search_query": query,
+            "users": users,
+        },
+    )
+
+
+def user_search_partial(request):
+    query = request.GET.get("q", "").strip()
+    users = search_users(query=query, limit=8)
+    return render(
+        request,
+        "accounts/partials/user_search_dropdown.html",
+        {
+            "search_query": query,
+            "users": users,
+        },
+    )
 
 
 def profile_detail(request, username):

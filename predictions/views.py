@@ -31,6 +31,7 @@ def create_prediction_view(request, slug):
                 user=request.user,
                 market=market,
                 predicted_outcome=form.cleaned_data["predicted_outcome"],
+                predicted_direction=form.cleaned_data["predicted_direction"],
                 reasoning=form.cleaned_data.get("reasoning", ""),
             )
             messages.success(request, _("Your forecast was posted."))

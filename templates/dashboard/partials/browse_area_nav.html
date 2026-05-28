@@ -7,7 +7,7 @@
 
   <ul class="space-y-0.5">
     <li>
-      <a href="{% url 'dashboard:category_browse' slug=category.slug %}"
+      <a href="{% url 'dashboard:category_browse' slug=category.slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
          class="group flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm transition {% if not active_area_slug %}bg-slate-100 font-semibold text-slate-900{% else %}text-slate-700 hover:bg-slate-50 hover:text-slate-900{% endif %}">
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
           {% include "dashboard/partials/category_icon.html" with slug=category.slug class=category.icon_fg %}
@@ -21,7 +21,7 @@
 
     {% for item in area_summaries %}
     <li>
-      <a href="{% url 'dashboard:category_browse' slug=category.slug %}?area={{ item.area.slug }}"
+      <a href="{% url 'dashboard:category_browse' slug=category.slug %}?area={{ item.area.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
          class="group flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm transition {% if active_area_slug == item.area.slug %}bg-slate-100 font-semibold text-slate-900{% else %}text-slate-700 hover:bg-slate-50 hover:text-slate-900{% endif %}">
         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
           {% include "dashboard/partials/browse_area_icon.html" with slug=item.area.slug %}

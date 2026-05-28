@@ -51,6 +51,7 @@ class Market(models.Model):
     kalshi_event_raw = models.JSONField(default=dict, blank=True)
     kalshi_synced_at = models.DateTimeField(null=True, blank=True)
     volume_total = models.FloatField(default=0.0, db_index=True)
+    volume_24h = models.FloatField(default=0.0, db_index=True)
     card_image_url = models.URLField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

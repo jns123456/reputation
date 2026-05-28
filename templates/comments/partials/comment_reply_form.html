@@ -15,8 +15,10 @@
 
   {% if variant == 'composer' %}
   <div class="flex gap-3">
-    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700" aria-hidden="true">
-      {{ user.public_name|slice:":1"|upper }}
+    <div class="flex h-9 w-9 shrink-0 overflow-hidden rounded-full" aria-hidden="true">
+      <span class="pr-user-avatar-ring pr-user-avatar-ring--sm">
+        {% include "accounts/partials/user_avatar.html" with user=user %}
+      </span>
     </div>
     <div class="min-w-0 flex-1">
       <label for="comment-body-{{ prediction.id }}-{% if parent_comment %}{{ parent_comment.id }}{% else %}top{% endif %}" class="sr-only">
@@ -26,15 +28,15 @@
         id="comment-body-{{ prediction.id }}-{% if parent_comment %}{{ parent_comment.id }}{% else %}top{% endif %}"
         name="body"
         rows="3"
-        class="comment-composer-input w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+        class="comment-composer-input w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-brand-500 dark:focus:ring-brand-900/50"
         placeholder="{{ placeholder|default:default_composer_placeholder }}"
         required
       ></textarea>
       <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <p class="text-xs text-slate-400">{% blocktrans %}Comments earn <span class="badge-pop">Popularity</span> — not Reputation.{% endblocktrans %}</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500">{% blocktrans %}Comments earn <span class="badge-pop">Popularity</span> — not Reputation.{% endblocktrans %}</p>
         <div class="flex gap-2">
           {% if show_cancel %}
-          <button type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100" @click="{{ cancel_action }}">
+          <button type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700" @click="{{ cancel_action }}">
             {% trans "Cancel" %}
           </button>
           {% endif %}
@@ -50,7 +52,7 @@
   <textarea
     name="body"
     rows="{{ rows|default:2 }}"
-    class="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+    class="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-brand-500 dark:focus:ring-brand-900/50"
     placeholder="{{ placeholder|default:default_reply_placeholder }}"
     required
   ></textarea>
@@ -59,7 +61,7 @@
       {% trans "Reply" %}
     </button>
     {% if show_cancel %}
-    <button type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100" @click="{{ cancel_action }}">
+    <button type="button" class="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700" @click="{{ cancel_action }}">
       {% trans "Cancel" %}
     </button>
     {% endif %}

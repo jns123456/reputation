@@ -48,9 +48,9 @@
                     class="pr-nav-link gap-1 {% if 'reputation_leaderboard' in request.resolver_match.url_name or 'popularity_leaderboard' in request.resolver_match.url_name %}is-active{% endif %}"
                     :aria-expanded="open">
               {% trans "Leaderboards" %}
-              <svg class="h-4 w-4 transition" :class="open && 'rotate-180'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-              </svg>
+              <span class="inline-flex transition" :class="open && 'rotate-180'">
+                <i data-lucide="chevron-down" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+              </span>
             </button>
             <div x-show="open" x-cloak x-transition
                  class="absolute left-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
@@ -70,9 +70,7 @@
       </div>
 
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <div class="hidden md:block">
-          {% include "includes/language_switcher.html" %}
-        </div>
+        {% include "includes/language_switcher.html" %}
 
         <div x-data="{
                isDark: document.documentElement.classList.contains('dark'),
@@ -86,14 +84,8 @@
                   class="pr-nav-icon-btn"
                   :aria-label="isDark ? '{% trans "Switch to light mode" %}' : '{% trans "Switch to dark mode" %}'"
                   :title="isDark ? '{% trans "Light mode" %}' : '{% trans "Dark mode" %}'">
-            <svg x-show="!isDark" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <svg x-show="isDark" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
+            <span x-show="!isDark"><i data-lucide="sun" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i></span>
+            <span x-show="isDark" x-cloak><i data-lucide="moon" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i></span>
           </button>
         </div>
 
@@ -106,10 +98,7 @@
                     class="relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-400"
                     aria-label="{% trans 'Notifications' %}"
                     :aria-expanded="open">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
+              <i data-lucide="bell" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i>
               {% if unread_notification_count %}
               <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-slate-800">
                 {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
@@ -131,13 +120,11 @@
                     @click="open = !open"
                     class="inline-flex max-w-[10rem] items-center gap-2 rounded-lg py-1.5 pl-1.5 pr-2.5 transition hover:bg-slate-100 dark:hover:bg-slate-800"
                     :aria-expanded="open">
-              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
-                {{ user.public_name|slice:":1"|upper }}
+              <span class="navbar-user-avatar flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-sm font-semibold text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
+                {% include "accounts/partials/user_avatar.html" with user=user %}
               </span>
               <span class="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{{ user.public_name }}</span>
-              <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-              </svg>
+              <i data-lucide="chevron-down" class="h-4 w-4 shrink-0 text-slate-400" stroke-width="2" aria-hidden="true"></i>
             </button>
             <div x-show="open" x-cloak x-transition
                  class="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800">
@@ -180,10 +167,7 @@
         <a href="{% url 'accounts:notifications' %}"
            class="relative pr-nav-icon-btn md:hidden"
            aria-label="{% trans 'Notifications' %}">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-          </svg>
+          <i data-lucide="bell" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i>
           {% if unread_notification_count %}
           <span class="pr-nav-badge">
             {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
@@ -198,12 +182,8 @@
                 @click="toggleMobile()"
                 :aria-expanded="mobileOpen"
                 aria-label="{% trans 'Toggle navigation' %}">
-          <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-          <svg x-show="mobileOpen" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
+          <span x-show="!mobileOpen"><i data-lucide="menu" class="h-6 w-6" stroke-width="2" aria-hidden="true"></i></span>
+          <span x-show="mobileOpen" x-cloak><i data-lucide="x" class="h-6 w-6" stroke-width="2" aria-hidden="true"></i></span>
         </button>
       </div>
     </div>
@@ -241,23 +221,21 @@
                   @click="closeMobile()"
                   class="pr-nav-icon-btn"
                   aria-label="{% trans 'Close menu' %}">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
+            <i data-lucide="x" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
           </button>
         </div>
 
         <div class="pr-mobile-nav-body">
           {% if user.is_authenticated %}
           <a href="{% url 'accounts:profile' username=user.username %}" @click="closeMobile()" class="pr-mobile-nav-user">
-            <span class="pr-mobile-nav-user-avatar">{{ user.public_name|slice:":1"|upper }}</span>
+            <span class="pr-mobile-nav-user-avatar">
+              {% include "accounts/partials/user_avatar.html" with user=user %}
+            </span>
             <span class="min-w-0 flex-1">
               <span class="block truncate text-sm font-bold text-slate-900 dark:text-white">{{ user.public_name }}</span>
               <span class="block truncate text-xs text-slate-500 dark:text-slate-400">@{{ user.username }}</span>
             </span>
-            <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
+            <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-400" stroke-width="2" aria-hidden="true"></i>
           </a>
           {% endif %}
 
@@ -267,28 +245,28 @@
               <a href="{% url 'markets:list' %}" @click="closeMobile()"
                  class="pr-mobile-nav-link {% if request.resolver_match.app_name == 'markets' %}is-active{% endif %}">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                  <i data-lucide="house" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Markets" %}
               </a>
               <a href="{% url 'dashboard:forecasts' %}" @click="closeMobile()"
                  class="pr-mobile-nav-link {% if request.resolver_match.url_name == 'forecasts' or request.resolver_match.url_name == 'forecasts_feed' %}is-active{% endif %}">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                  <i data-lucide="trending-up" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Forecasts" %}
               </a>
               <a href="{% url 'forum:feed' %}" @click="closeMobile()"
                  class="pr-mobile-nav-link {% if request.resolver_match.app_name == 'forum' %}is-active{% endif %}">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+                  <i data-lucide="message-circle" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Forum" %}
               </a>
               <a href="{% url 'challenges:list' %}" @click="closeMobile()"
                  class="pr-mobile-nav-link {% if request.resolver_match.app_name == 'challenges' %}is-active{% endif %}">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                  <i data-lucide="badge-check" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Challenges" %}
                 {% if pending_challenge_invites_count %}
@@ -304,14 +282,14 @@
               <a href="{% url 'dashboard:reputation_leaderboard' %}" @click="closeMobile()"
                  class="pr-mobile-nav-link {% if 'reputation_leaderboard' in request.resolver_match.url_name %}is-active{% endif %}">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                  <i data-lucide="chart-column" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 <span class="badge-rep mr-1.5">Rep</span> {% trans "Reputation" %}
               </a>
               <a href="{% url 'dashboard:popularity_leaderboard' %}" @click="closeMobile()"
                  class="pr-mobile-nav-link {% if 'popularity_leaderboard' in request.resolver_match.url_name %}is-active{% endif %}">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                  <i data-lucide="star" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 <span class="badge-pop mr-1.5">Pop</span> {% trans "Popularity" %}
               </a>
@@ -324,7 +302,7 @@
             <nav class="flex flex-col gap-0.5">
               <a href="{% url 'accounts:notifications' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                  <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Notifications" %}
                 {% if unread_notification_count %}
@@ -333,13 +311,13 @@
               </a>
               <a href="{% url 'accounts:bookmarks' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+                  <i data-lucide="bookmark" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Saved" %}
               </a>
               <a href="{% url 'accounts:alert_settings' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <i data-lucide="settings" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Alert settings" %}
               </a>
@@ -352,13 +330,13 @@
             <nav class="flex flex-col gap-0.5">
               <a href="{% url 'dashboard:about' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <i data-lucide="info" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "About" %}
               </a>
               <a href="{% url 'dashboard:faq' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <i data-lucide="circle-help" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "FAQ" %}
               </a>

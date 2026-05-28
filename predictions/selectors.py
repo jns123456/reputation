@@ -1,7 +1,8 @@
-from django.db.models import Count, IntegerField, OuterRef, Subquery, Value
+from django.db.models import Count, IntegerField, OuterRef, Prefetch, Subquery, Value
 from django.db.models.functions import Coalesce
 
 from comments.models import Vote
+from integrations.models import OffchainAttestation
 from markets.models import Market
 from predictions.models import Prediction
 from reputation.display_ranking import DISPLAY_RANK_ORM_FIELDS
@@ -33,6 +34,18 @@ def annotate_prediction_interactions(qs):
         ),
     )
 
+
+def prefetch_verified_prediction_attestations(qs):
+    return qs.prefetch_related(
+        Prefetch(
+            "attestations",
+            queryset=OffchainAttestation.objects.filter(
+                schema__kind="prediction_claim",
+                status=OffchainAttestation.Status.VERIFIED,
+            ).select_related("schema"),
+        )
+    )
+
 def get_market_predictions(market, limit=50):
     qs = (
         Prediction.objects.filter(
@@ -43,12 +56,14 @@ def get_market_predictions(market, limit=50):
         .select_related("user", "user__profile")
         .order_by(*DISPLAY_RANK_ORM_FIELDS)
     )
-    return annotate_prediction_interactions(qs)[:limit]
+    return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
 
 
 def get_prediction_with_interactions(pk):
     return annotate_prediction_interactions(
-        Prediction.objects.filter(pk=pk).select_related("user", "user__profile")
+        prefetch_verified_prediction_attestations(
+            Prediction.objects.filter(pk=pk).select_related("user", "user__profile")
+        )
     ).first()
 
 
@@ -75,7 +90,7 @@ def get_forecasts_feed(*, market_slug=None, limit=50):
     )
     if market_slug:
         qs = qs.filter(market__slug=market_slug)
-    return annotate_prediction_interactions(qs)[:limit]
+    return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
 
 
 def get_forecasts_market_options():

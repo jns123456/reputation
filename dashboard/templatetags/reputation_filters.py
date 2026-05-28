@@ -39,6 +39,7 @@ def prediction_stakes(prediction):
     return calculate_reputation_stakes(
         predicted_outcome=prediction.predicted_outcome,
         probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
     )
 
 
@@ -53,6 +54,7 @@ def prediction_reputation_delta(prediction):
         is_correct=prediction.is_correct,
         predicted_outcome=prediction.predicted_outcome,
         probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
     )
 
 
@@ -66,11 +68,64 @@ def market_source_label(market):
     return _("Market")
 
 
+def _sorted_probability_items(market):
+    probability = getattr(market, "current_probability", None) or {}
+    items = []
+    for label, value in probability.items():
+        try:
+            prob = float(value)
+        except (TypeError, ValueError):
+            continue
+        if prob > 1:
+            prob = prob / 100
+        prob = max(0.0, min(1.0, prob))
+        items.append(
+            {
+                "label": label,
+                "probability": prob,
+                "prob_percent": int(round(prob * 100)),
+                "no_percent": int(round((1 - prob) * 100)),
+            }
+        )
+    return sorted(items, key=lambda item: item["probability"], reverse=True)
+
+
+@register.filter
+def probability_items_sorted(market):
+    """Outcomes sorted by highest current probability first."""
+    return _sorted_probability_items(market)
+
+
+@register.filter
+def top_probability_items(market, limit=2):
+    """Top N outcomes for compact multi-outcome cards."""
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        limit = 2
+    return _sorted_probability_items(market)[:limit]
+
+
+@register.filter
+def remaining_probability_count(market, shown=2):
+    try:
+        shown = int(shown)
+    except (TypeError, ValueError):
+        shown = 2
+    return max(0, len(_sorted_probability_items(market)) - shown)
+
+
+@register.filter
+def is_multi_outcome_market(market):
+    return len(getattr(market, "outcome_labels", []) or []) > 2
+
+
 @register.simple_tag
-def outcome_stakes(market, outcome_label):
+def outcome_stakes(market, outcome_label, predicted_direction="yes"):
     from reputation.services import calculate_reputation_stakes
 
     return calculate_reputation_stakes(
         predicted_outcome=outcome_label,
         probability_snapshot=market.current_probability or {},
+        predicted_direction=predicted_direction,
     )

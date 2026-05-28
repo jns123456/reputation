@@ -16,9 +16,10 @@ from dashboard.leaderboard_cache import get_cached_top_popular_users, get_cached
 from integrations.celery_utils import celery_broker_available, enqueue_category_sync
 from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
-from markets.source_filters import build_source_filter_urls, kalshi_enabled, normalize_source_filter
+from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, kalshi_enabled, normalize_source_filter
 from markets.selectors import (
     filter_markets_by_browse_area,
+    filter_markets_by_search,
     get_browse_area_summaries,
     get_category_display_markets,
     get_category_summaries,
@@ -104,6 +105,7 @@ def category_browse(request, slug):
     _enqueue_category_sync_if_needed(category)
 
     area_slug = request.GET.get("area", "").strip()
+    search = request.GET.get("q", "").strip()
     source = normalize_source_filter(request.GET.get("source", ""))
 
     total_markets = get_open_markets_by_canonical_category(category_slug=slug)
@@ -119,17 +121,20 @@ def category_browse(request, slug):
         )
     if source:
         display_markets = [market for market in display_markets if market.source == source]
+    if search:
+        display_markets = filter_markets_by_search(markets=display_markets, search=search)
 
     markets = get_category_display_markets(
         category_slug=slug,
         source=source or None,
         area_slug=area_slug or None,
+        search=search or None,
         markets=total_markets,
     )
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("dashboard:category_browse", kwargs={"slug": slug}),
         active_source=source,
-        extra={"area": area_slug},
+        extra={"area": area_slug, "q": search},
     )
     return render(
         request,
@@ -143,7 +148,13 @@ def category_browse(request, slug):
             "active_area": active_area,
             "active_area_slug": active_area.slug if active_area else "",
             "active_source": source,
+            "search_query": search,
             "source_filter_urls": source_filter_urls,
+            "clear_search_url": build_browse_clear_search_url(
+                base_url=reverse("dashboard:category_browse", kwargs={"slug": slug}),
+                source=source,
+                area=area_slug,
+            ),
         },
     )
 

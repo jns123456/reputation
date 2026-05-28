@@ -27,6 +27,7 @@ def build_forecasts_feed(*, user, market_slug=None, limit=50):
             "reputation_stakes": calculate_reputation_stakes(
                 predicted_outcome=prediction.predicted_outcome,
                 probability_snapshot=prediction.probability_at_prediction_time,
+                predicted_direction=prediction.predicted_direction,
             ),
         }
         for prediction in predictions

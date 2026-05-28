@@ -105,12 +105,33 @@ def blend_markets_by_source(markets, *, limit=CATEGORY_BROWSE_LIMIT):
     return blended
 
 
+def filter_markets_by_search(*, markets, search):
+    """Filter an in-memory market list by title, description, or category text."""
+    query = (search or "").strip()
+    if not query:
+        return markets
+    needle = query.casefold()
+    filtered = []
+    for market in markets:
+        if (
+            needle in (market.title or "").casefold()
+            or needle in (market.category or "").casefold()
+        ):
+            filtered.append(market)
+            continue
+        description = getattr(market, "description", None) or ""
+        if needle in description.casefold():
+            filtered.append(market)
+    return filtered
+
+
 def get_category_display_markets(
     *,
     category_slug,
     limit=CATEGORY_BROWSE_LIMIT,
     source=None,
     area_slug=None,
+    search=None,
     markets=None,
 ):
     """Markets for category browse cards, balanced across external sources."""
@@ -122,8 +143,12 @@ def get_category_display_markets(
             category_slug=category_slug,
             area_slug=area_slug,
         )
+    if search:
+        markets = filter_markets_by_search(markets=markets, search=search)
     if source:
         markets = [market for market in markets if market.source == source]
+        return _sort_markets_by_volume(markets)[:limit]
+    if search:
         return _sort_markets_by_volume(markets)[:limit]
     return blend_markets_by_source(markets, limit=limit)
 

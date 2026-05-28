@@ -1,7 +1,5 @@
 {% load i18n %}
-<div class="x-search-box">
-  <input type="search" class="x-search-input" placeholder="{% trans 'Search' %}" aria-label="{% trans 'Search' %}">
-</div>
+{% include "accounts/partials/user_search_form_forum.html" %}
 
 <div class="x-widget">
   <h2 class="x-widget-head">{% trans "What's happening" %}</h2>

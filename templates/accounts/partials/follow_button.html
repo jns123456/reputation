@@ -1,5 +1,5 @@
 {% load i18n %}
-<div id="follow-user-{{ profile_user.username }}">
+<div id="follow-user-{{ profile_user.username }}" class="pr-profile-follow">
 {% if user.is_authenticated and user != profile_user %}
 <form method="post" action="{% url 'accounts:follow_toggle' %}" class="inline"
       hx-post="{% url 'accounts:follow_toggle' %}"

@@ -13,6 +13,7 @@ class PredictionSerializer(serializers.ModelSerializer):
             "username",
             "market",
             "predicted_outcome",
+            "predicted_direction",
             "confidence",
             "probability_at_prediction_time",
             "reasoning",

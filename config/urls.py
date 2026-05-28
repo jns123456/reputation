@@ -13,6 +13,7 @@ urlpatterns = [
     path("comments/", include("comments.urls")),
     path("challenges/", include("challenges.urls")),
     path("forum/", include("pulse.urls")),
+    path("proof/", include("integrations.urls")),
     path("api/", include("config.api_urls")),
 ]
 

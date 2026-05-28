@@ -7,7 +7,7 @@
          data-sort-reputation="{{ comment.user.profile.reputation_score }}"
          data-sort-user-popularity="{{ comment.user.profile.popularity_score }}">
   <a href="{% url 'accounts:profile' username=comment.user.username %}" class="x-tweet-avatar" tabindex="-1" aria-hidden="true">
-    {{ comment.user.public_name|slice:":1"|upper }}
+    {% include "accounts/partials/user_avatar.html" with user=comment.user %}
   </a>
 
   <div class="x-tweet-body">

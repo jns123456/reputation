@@ -20,9 +20,7 @@
   {% csrf_token %}
   {% if form.non_field_errors %}
   <div class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
-    <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
+    <i data-lucide="circle-alert" class="mt-0.5 h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
     <div>{{ form.non_field_errors }}</div>
   </div>
   {% endif %}
@@ -31,9 +29,7 @@
     <label for="id_username" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Username" %}</label>
     <div class="relative mt-1.5">
       <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-        </svg>
+        <i data-lucide="user" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
       </span>
       <input type="text"
              name="username"
@@ -49,9 +45,7 @@
     <label for="id_password" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Password" %}</label>
     <div class="relative mt-1.5">
       <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-        </svg>
+        <i data-lucide="lock" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
       </span>
       <input type="password"
              name="password"

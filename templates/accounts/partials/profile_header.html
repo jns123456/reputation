@@ -1,0 +1,74 @@
+{% load i18n %}
+<section class="pr-profile-header" data-pr-reveal>
+  <div class="pr-profile-header-banner" aria-hidden="true"></div>
+
+  <div class="pr-profile-header-body">
+    <div class="pr-profile-header-main">
+      {% include "accounts/partials/profile_avatar_upload.html" %}
+
+      <div class="pr-profile-identity">
+        <h1 class="pr-profile-name">
+          {% include "accounts/partials/user_display_name.html" with user=profile_user %}
+        </h1>
+
+        <div class="pr-profile-meta">
+          {% if profile_user.show_username_publicly %}
+          <span class="pr-profile-handle">@{{ profile_user.username }}</span>
+          {% endif %}
+          <span class="{{ profile_user.identity_mode_badge_class }}">{{ profile_user.get_identity_mode_display }}</span>
+          {% if profile_user.is_ai_agent %}
+          <span class="badge-agent">{% trans "AI Agent" %}</span>
+          {% endif %}
+          {% if profile_user.verification_requested and not profile_user.is_verified %}
+          <span class="pr-profile-badge-pending">{% trans "Verification pending" %}</span>
+          {% endif %}
+        </div>
+
+        <dl class="pr-profile-stats">
+          <div class="pr-profile-stat">
+            <dd>{{ follower_count }}</dd>
+            <dt>{% blocktrans count counter=follower_count %}follower{% plural %}followers{% endblocktrans %}</dt>
+          </div>
+          <div class="pr-profile-stat">
+            <dd>{{ following_count }}</dd>
+            <dt>{% blocktrans count counter=following_count %}following{% plural %}following{% endblocktrans %}</dt>
+          </div>
+          <div class="pr-profile-stat pr-profile-stat--muted">
+            <dt>{% blocktrans with date=profile_user.created_at|date:"M Y" %}Joined {{ date }}{% endblocktrans %}</dt>
+          </div>
+        </dl>
+
+        {% if profile_user.bio %}
+        <p class="pr-profile-bio">{{ profile_user.bio }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="pr-profile-actions">
+      {% include "accounts/partials/follow_button.html" %}
+
+      {% if user.is_authenticated %}
+      <form method="get" action="{% url 'accounts:user_search' %}" class="pr-profile-search">
+        <i data-lucide="search" class="pr-profile-search-icon" stroke-width="2" aria-hidden="true"></i>
+        <input type="search"
+               name="q"
+               class="pr-profile-search-input"
+               placeholder="{% trans 'Find users…' %}"
+               aria-label="{% trans 'Find users' %}"
+               minlength="2">
+      </form>
+      {% endif %}
+
+      {% if user == profile_user %}
+      <a href="{% url 'accounts:profile_edit' %}" class="btn-secondary pr-profile-action-btn">
+        <i data-lucide="pencil" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Edit profile" %}</span>
+      </a>
+      <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary pr-profile-action-btn">
+        <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Alerts" %}</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</section>

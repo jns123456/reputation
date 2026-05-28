@@ -20,6 +20,10 @@ def extract_volume_total_from_market(market) -> float:
     return market_sort_metric(market, SORT_VOLUME)
 
 
+def extract_volume_24h_from_market(market) -> float:
+    return market_sort_metric(market, "trending")
+
+
 def extract_card_image_url_from_market(market) -> str:
     if getattr(market, "source", "") == "kalshi":
         kalshi_image = resolve_kalshi_market_image(market)
@@ -46,9 +50,10 @@ def extract_card_image_url_from_market(market) -> str:
 def sync_market_display_metadata(market, *, save: bool = False) -> None:
     """Refresh denormalized card/sort fields from the market's import payloads."""
     market.volume_total = extract_volume_total_from_market(market)
+    market.volume_24h = extract_volume_24h_from_market(market)
     market.card_image_url = extract_card_image_url_from_market(market)
     if save:
-        market.save(update_fields=["volume_total", "card_image_url", "updated_at"])
+        market.save(update_fields=["volume_total", "volume_24h", "card_image_url", "updated_at"])
 
 
 def market_volume_for_sort(market) -> float:

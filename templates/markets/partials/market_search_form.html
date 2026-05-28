@@ -1,0 +1,32 @@
+{% load i18n %}
+<form method="get" class="flex flex-col gap-2 sm:flex-row sm:items-end" role="search">
+  <div class="min-w-0 flex-1">
+    <label for="{{ form_id|default:'market-search' }}" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+      {% trans "Search events" %}
+    </label>
+    <input type="search"
+           id="{{ form_id|default:'market-search' }}"
+           name="q"
+           value="{{ search_query }}"
+           placeholder="{% trans 'Search events…' %}"
+           class="form-input w-full"
+           aria-label="{% trans 'Search events' %}"
+           autocomplete="off">
+  </div>
+  {% if preserve_area and active_area_slug %}
+  <input type="hidden" name="area" value="{{ active_area_slug }}">
+  {% endif %}
+  {% if preserve_source and current_source %}
+  <input type="hidden" name="source" value="{{ current_source }}">
+  {% endif %}
+  <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+    <button type="submit" class="btn-primary w-full sm:w-auto">
+      {% trans "Search" %}
+    </button>
+    {% if search_query and clear_search_url %}
+    <a href="{{ clear_search_url }}" class="btn-secondary w-full sm:w-auto">
+      {% trans "Clear" %}
+    </a>
+    {% endif %}
+  </div>
+</form>

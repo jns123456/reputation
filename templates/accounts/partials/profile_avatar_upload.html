@@ -1,0 +1,35 @@
+{% load i18n %}
+<div id="profile-avatar-{{ profile_user.username }}" class="pr-profile-avatar-wrap">
+  {% if user.is_authenticated and user == profile_user %}
+  <form method="post"
+        enctype="multipart/form-data"
+        action="{% url 'accounts:avatar_upload' %}"
+        class="pr-profile-avatar-form"
+        hx-post="{% url 'accounts:avatar_upload' %}"
+        hx-target="#profile-avatar-{{ profile_user.username }}"
+        hx-swap="outerHTML"
+        hx-encoding="multipart/form-data">
+    {% csrf_token %}
+    <label class="pr-profile-avatar pr-profile-avatar--editable">
+      <span class="pr-profile-avatar-inner">
+        {% include "accounts/partials/user_avatar.html" with user=profile_user extra_class="pr-profile-avatar-media" %}
+      </span>
+      <span class="pr-profile-avatar-edit" aria-hidden="true">
+        <i data-lucide="camera" stroke-width="1.75" aria-hidden="true"></i>
+      </span>
+      <span class="sr-only">{% trans "Change profile photo" %}</span>
+      <input type="file"
+             name="avatar"
+             accept="image/jpeg,image/png,image/webp,image/gif"
+             class="sr-only"
+             onchange="if (window.htmx) { htmx.trigger(this.closest('form'), 'submit'); } else { this.form.submit(); }">
+    </label>
+  </form>
+  {% else %}
+  <div class="pr-profile-avatar" aria-hidden="true">
+    <span class="pr-profile-avatar-inner">
+      {% include "accounts/partials/user_avatar.html" with user=profile_user extra_class="pr-profile-avatar-media" %}
+    </span>
+  </div>
+  {% endif %}
+</div>

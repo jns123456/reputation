@@ -9,7 +9,7 @@
          data-sort-user-popularity="{{ post.user.profile.popularity_score }}"
          onclick="if (!event.target.closest('.x-tweet-actions, .x-tweet-menu, .x-inline-reply, a')) { window.location='{% url 'forum:detail' post_id=post.id %}'; }">
   <a href="{% url 'accounts:profile' username=post.user.username %}" class="x-tweet-avatar" tabindex="-1" aria-hidden="true">
-    {{ post.user.public_name|slice:":1"|upper }}
+    {% include "accounts/partials/user_avatar.html" with user=post.user %}
   </a>
 
   <div class="x-tweet-body">
@@ -30,12 +30,7 @@
 
     {% if post.is_repost %}
     <p class="x-tweet-repost-label">
-      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-        <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <i data-lucide="repeat-2" class="h-3.5 w-3.5" stroke-width="1.75" aria-hidden="true"></i>
       {% trans "Reposted" %}
     </p>
     {% include "forum/partials/original_post_embed.html" %}

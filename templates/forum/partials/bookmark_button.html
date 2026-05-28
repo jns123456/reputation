@@ -11,17 +11,13 @@
           class="x-tweet-action x-tweet-action--bookmark {% if is_bookmarked %}is-active{% endif %}"
           title="{% if is_bookmarked %}{% trans 'Remove bookmark' %}{% else %}{% trans 'Bookmark' %}{% endif %}"
           aria-label="{% if is_bookmarked %}{% trans 'Remove bookmark' %}{% else %}{% trans 'Bookmark' %}{% endif %}">
-    <svg viewBox="0 0 24 24" fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-      <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <i data-lucide="bookmark" stroke-width="1.75" aria-hidden="true"></i>
   </button>
 </form>
 {% else %}
 <a href="{% url 'accounts:login' %}?next={{ request.path }}"
    class="x-tweet-action x-tweet-action--bookmark"
    title="{% trans 'Log in to bookmark' %}">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-    <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
+  <i data-lucide="bookmark" stroke-width="1.75" aria-hidden="true"></i>
 </a>
 {% endif %}

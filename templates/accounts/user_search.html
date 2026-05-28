@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Find users" %}{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% trans "Community" as hero_eyebrow %}
+  {% trans "Find users" as hero_title %}
+  {% blocktrans asvar hero_description %}Search by name, username, or bio to discover predictors and voices on the platform.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
+
+  <div class="pr-panel mb-6 p-4 sm:p-5" data-pr-reveal data-delay="1">
+    <form method="get" action="{% url 'accounts:user_search' %}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div class="min-w-0 flex-1">
+        <label for="user-search-q" class="mb-1 block text-xs font-medium text-slate-500">{% trans "Search" %}</label>
+        <input type="search"
+               id="user-search-q"
+               name="q"
+               value="{{ search_query }}"
+               placeholder="{% trans 'Search users…' %}"
+               class="form-input"
+               autofocus
+               minlength="2">
+      </div>
+      <button type="submit" class="btn-primary shrink-0">{% trans "Search" %}</button>
+    </form>
+    <p class="mt-2 text-xs text-slate-500">{% trans "Enter at least 2 characters." %}</p>
+  </div>
+
+  <div data-pr-reveal data-delay="2">
+    {% if search_query %}
+      {% if search_query|length < 2 %}
+      <div class="pr-empty py-10">{% trans "Enter at least 2 characters to search." %}</div>
+      {% else %}
+      {% include "accounts/partials/user_search_results.html" %}
+      {% endif %}
+    {% else %}
+    <div class="pr-empty py-10">{% trans "Start typing to find people on ProofRep." %}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

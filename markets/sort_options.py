@@ -60,8 +60,7 @@ def _market_payloads(market, *, include_event_payloads=False):
 def market_sort_metric(market, sort: str) -> float:
     """Numeric metric from imported Polymarket/Kalshi payload for ranking."""
     keys = _METRIC_KEYS.get(sort, _METRIC_KEYS[SORT_VOLUME])
-    include_event_payloads = sort != SORT_VOLUME
-    for payload in _market_payloads(market, include_event_payloads=include_event_payloads):
+    for payload in _market_payloads(market, include_event_payloads=True):
         for key in keys:
             value = payload.get(key)
             if value is None or value == "":

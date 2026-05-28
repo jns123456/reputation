@@ -8,6 +8,7 @@ from markets.models import Market
 from markets.selectors import (
     blend_markets_by_source,
     filter_markets_by_browse_area,
+    filter_markets_by_search,
     get_browse_area_summaries,
     get_category_summaries,
     get_open_markets_by_canonical_category,
@@ -133,6 +134,54 @@ class CategoryBrowseViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Categories")
         self.assertContains(response, "Politics")
+        self.assertContains(response, 'name="q"')
+
+    def test_market_hub_search_filters_open_events(self):
+        Market.objects.create(
+            external_id="hub-btc",
+            title="Bitcoin hits 100k",
+            slug="bitcoin-100k",
+            status=Market.Status.OPEN,
+        )
+        Market.objects.create(
+            external_id="hub-fed",
+            title="Fed rate cut",
+            slug="fed-rate-cut",
+            status=Market.Status.OPEN,
+        )
+        response = self.client.get(reverse("markets:list"), {"q": "bitcoin"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bitcoin hits 100k")
+        self.assertNotContains(response, "Fed rate cut")
+
+    def test_market_hub_clear_search_returns_to_hub(self):
+        Market.objects.create(
+            external_id="hub-clear-btc",
+            title="Bitcoin hits 100k",
+            slug="bitcoin-clear-100k",
+            status=Market.Status.OPEN,
+        )
+        response = self.client.get(reverse("markets:list"), {"q": "bitcoin"})
+        self.assertContains(response, "Clear")
+        clear_response = self.client.get(reverse("markets:list"))
+        self.assertEqual(clear_response.status_code, 200)
+        self.assertNotContains(clear_response, "Search results")
+
+    def test_filter_markets_by_search(self):
+        bitcoin = Market(
+            external_id="search-btc",
+            title="Bitcoin rally",
+            slug="bitcoin-rally",
+            category="Crypto",
+        )
+        fed = Market(
+            external_id="search-fed",
+            title="Fed decision",
+            slug="fed-decision",
+            category="Economy",
+        )
+        results = filter_markets_by_search(markets=[bitcoin, fed], search="bitcoin")
+        self.assertEqual([market.slug for market in results], ["bitcoin-rally"])
 
     @patch("dashboard.views.enqueue_category_sync")
     def test_category_browse_page(self, mock_enqueue):
@@ -172,6 +221,30 @@ class CategoryBrowseViewTests(TestCase):
         self.assertContains(response, "World Cup final")
         self.assertNotContains(response, "NBA champion")
         self.assertContains(response, "Soccer")
+
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_category_browse_search_filters_events(self, mock_enqueue):
+        Market.objects.create(
+            external_id="sport-soccer-search",
+            title="World Cup final",
+            slug="world-cup-final-search",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "soccer"}]},
+        )
+        Market.objects.create(
+            external_id="sport-nba-search",
+            title="NBA champion",
+            slug="nba-champion-search",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+        )
+        response = self.client.get(
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"q": "world cup"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "World Cup final")
+        self.assertNotContains(response, "NBA champion")
 
     def test_browse_area_summaries(self):
         Market.objects.create(

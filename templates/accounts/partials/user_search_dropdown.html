@@ -1,0 +1,31 @@
+{% load i18n %}
+{% if search_query|length >= 2 %}
+<div class="x-user-search-dropdown" role="listbox" aria-label="{% trans 'User search results' %}">
+  {% if users %}
+  <ul class="x-user-search-list">
+    {% for profile_user in users %}
+    <li>
+      <a href="{% url 'accounts:profile' username=profile_user.username %}" class="x-user-search-item" role="option">
+        <span class="x-user-search-avatar">
+          {% include "accounts/partials/user_avatar.html" with user=profile_user %}
+        </span>
+        <span class="x-user-search-meta">
+          <span class="x-user-search-name">{{ profile_user.public_name }}</span>
+          {% if profile_user.show_username_publicly %}
+          <span class="x-user-search-handle">@{{ profile_user.username }}</span>
+          {% endif %}
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'accounts:user_search' %}?q={{ search_query|urlencode }}" class="x-user-search-more">
+    {% blocktrans with query=search_query %}See all results for "{{ query }}"{% endblocktrans %}
+  </a>
+  {% else %}
+  <p class="x-user-search-empty">
+    {% blocktrans with query=search_query %}No users match "{{ query }}".{% endblocktrans %}
+  </p>
+  {% endif %}
+</div>
+{% endif %}

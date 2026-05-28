@@ -1,0 +1,178 @@
+from unittest.mock import patch
+
+from django.test import SimpleTestCase, TestCase
+from django.utils import timezone
+
+from integrations.polymarket.chart import build_polymarket_multi_outcome_chart_payload
+from integrations.polymarket.client import (
+    MULTI_OUTCOME_EVENT_KIND,
+    build_polymarket_event_raw,
+    normalize_polymarket_event_record,
+    select_top_chart_outcomes,
+)
+from integrations.polymarket.embed import build_polymarket_embed_context
+from markets.models import Market
+
+
+def _grouped_market(label, market_id, yes_price, token_id):
+    return {
+        "id": market_id,
+        "groupItemTitle": label,
+        "groupItemThreshold": str(market_id),
+        "closed": False,
+        "outcomes": '["Yes", "No"]',
+        "outcomePrices": f'["{yes_price}", "{1 - yes_price}"]',
+        "clobTokenIds": f'["{token_id}"]',
+        "slug": f"will-{label.lower()}-win",
+    }
+
+
+class BuildPolymarketEventRawChartTests(SimpleTestCase):
+    def test_stores_top_four_chart_outcomes_by_probability(self):
+        event = {
+            "slug": "tournament-winner",
+            "title": "Tournament Winner",
+            "volume": 1_000_000,
+            "markets": [
+                _grouped_market("Alpha", 1, 0.40, "token-a"),
+                _grouped_market("Bravo", 2, 0.25, "token-b"),
+                _grouped_market("Charlie", 3, 0.15, "token-c"),
+                _grouped_market("Delta", 4, 0.10, "token-d"),
+                _grouped_market("Echo", 5, 0.05, "token-e"),
+                _grouped_market("Foxtrot", 6, 0.03, "token-f"),
+            ],
+        }
+        normalized = normalize_polymarket_event_record(event)
+        raw = build_polymarket_event_raw(event, normalized=normalized)
+
+        self.assertEqual(len(raw["chart_outcomes"]), 4)
+        self.assertEqual(
+            [item["label"] for item in raw["chart_outcomes"]],
+            ["Alpha", "Bravo", "Charlie", "Delta"],
+        )
+        self.assertEqual(raw["chart_outcomes"][0]["yes_token_id"], "token-a")
+        self.assertEqual(raw["outcome_markets"]["Echo"]["yes_token_id"], "token-e")
+
+
+class PolymarketMultiOutcomeChartTests(TestCase):
+    def setUp(self):
+        self.market = Market.objects.create(
+            external_id="pm-event:tournament-winner",
+            title="Tournament Winner",
+            slug="tournament-winner",
+            polymarket_slug="tournament-winner",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[
+                {"label": "Alpha"},
+                {"label": "Bravo"},
+                {"label": "Charlie"},
+                {"label": "Delta"},
+                {"label": "Echo"},
+            ],
+            current_probability={
+                "Alpha": 0.40,
+                "Bravo": 0.25,
+                "Charlie": 0.15,
+                "Delta": 0.10,
+                "Echo": 0.05,
+            },
+            polymarket_raw={
+                "market_kind": MULTI_OUTCOME_EVENT_KIND,
+                "chart_outcomes": [
+                    {"label": "Alpha", "probability": 0.40, "slug": "alpha", "yes_token_id": "token-a"},
+                    {"label": "Bravo", "probability": 0.25, "slug": "bravo", "yes_token_id": "token-b"},
+                    {"label": "Charlie", "probability": 0.15, "slug": "charlie", "yes_token_id": "token-c"},
+                    {"label": "Delta", "probability": 0.10, "slug": "delta", "yes_token_id": "token-d"},
+                ],
+                "volumeNum": 1_300_000_000,
+            },
+        )
+
+    def test_select_top_chart_outcomes_uses_stored_payload(self):
+        outcomes = select_top_chart_outcomes(self.market, limit=4)
+        self.assertEqual([item["label"] for item in outcomes], ["Alpha", "Bravo", "Charlie", "Delta"])
+
+    @patch("integrations.polymarket.chart._fetch_price_points")
+    def test_build_multi_outcome_chart_payload(self, mock_fetch):
+        now = timezone.now()
+        mock_fetch.side_effect = [
+            [{"ts": now, "value": 40.0}],
+            [{"ts": now, "value": 25.0}],
+            [{"ts": now, "value": 15.0}],
+            [{"ts": now, "value": 10.0}],
+        ]
+
+        payload = build_polymarket_multi_outcome_chart_payload(self.market)
+        self.assertIsNotNone(payload)
+        self.assertEqual(len(payload["series"]), 4)
+        self.assertEqual(payload["series"][0]["label"], "Alpha")
+        self.assertEqual(payload["volume_label"], "$1.3b Vol.")
+
+    @patch("integrations.polymarket.embed.build_polymarket_multi_outcome_chart_payload")
+    def test_embed_context_uses_multi_outcome_chart(self, mock_chart):
+        mock_chart.return_value = {"series": [{"label": "Alpha", "points": []}]}
+        ctx = build_polymarket_embed_context(self.market)
+        self.assertEqual(ctx["embed_kind"], "multi_outcome_chart")
+        self.assertIn("chart_data", ctx)
+        self.assertNotIn("embed_url", ctx)
+
+    @patch("integrations.polymarket.chart._fetch_price_points")
+    @patch("integrations.polymarket.chart.PolymarketClient")
+    def test_chart_backfills_older_multi_outcome_imports(self, mock_client_class, mock_fetch):
+        old_market = Market.objects.create(
+            external_id="pm-event:nba-champion",
+            title="NBA Champion",
+            slug="nba-champion",
+            polymarket_slug="nba-champion",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[
+                {"label": "Alpha"},
+                {"label": "Bravo"},
+                {"label": "Charlie"},
+                {"label": "Delta"},
+            ],
+            current_probability={
+                "Alpha": 0.40,
+                "Bravo": 0.25,
+                "Charlie": 0.15,
+                "Delta": 0.10,
+            },
+            polymarket_raw={
+                "market_kind": MULTI_OUTCOME_EVENT_KIND,
+                "event_slug": "nba-champion",
+                "outcome_markets": {
+                    "Alpha": {"slug": "alpha"},
+                    "Bravo": {"slug": "bravo"},
+                    "Charlie": {"slug": "charlie"},
+                    "Delta": {"slug": "delta"},
+                },
+            },
+        )
+        mock_client = mock_client_class.return_value
+        mock_client.fetch_event_by_slug.return_value = {
+            "slug": "nba-champion",
+            "title": "NBA Champion",
+            "volume": 250_000_000,
+            "markets": [
+                _grouped_market("Alpha", 1, 0.40, "token-a"),
+                _grouped_market("Bravo", 2, 0.25, "token-b"),
+                _grouped_market("Charlie", 3, 0.15, "token-c"),
+                _grouped_market("Delta", 4, 0.10, "token-d"),
+                _grouped_market("Echo", 5, 0.05, "token-e"),
+            ],
+        }
+        now = timezone.now()
+        mock_fetch.return_value = [{"ts": now, "value": 40.0}]
+
+        payload = build_polymarket_multi_outcome_chart_payload(old_market)
+        old_market.refresh_from_db()
+
+        self.assertIsNotNone(payload)
+        self.assertEqual(len(payload["series"]), 4)
+        self.assertEqual(
+            [item["label"] for item in old_market.polymarket_raw["chart_outcomes"]],
+            ["Alpha", "Bravo", "Charlie", "Delta"],
+        )
+        self.assertEqual(old_market.polymarket_raw["outcome_markets"]["Alpha"]["yes_token_id"], "token-a")

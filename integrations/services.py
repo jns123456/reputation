@@ -7,7 +7,14 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from integrations.kalshi.client import KalshiClient, is_binary_kalshi_market, normalize_kalshi_record
-from integrations.polymarket.client import PolymarketClient, normalize_polymarket_record
+from integrations.polymarket.client import (
+    MULTI_OUTCOME_EVENT_KIND,
+    POLYMARKET_EVENT_EXTERNAL_PREFIX,
+    PolymarketClient,
+    build_polymarket_event_raw,
+    normalize_polymarket_event_record,
+    normalize_polymarket_record,
+)
 from markets.models import Market
 from predictions.services import resolve_market_predictions
 
@@ -116,6 +123,12 @@ def refresh_market_from_polymarket(market):
     if is_world_cup_match_market(market):
         return refresh_world_cup_match_market(market)
 
+    if (
+        market.external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX)
+        or (market.polymarket_raw or {}).get("market_kind") == MULTI_OUTCOME_EVENT_KIND
+    ):
+        return refresh_polymarket_multi_outcome_market(market)
+
     client = PolymarketClient()
     try:
         raw_market = client.fetch_market_by_id(market.external_id)
@@ -139,6 +152,40 @@ def refresh_market_from_polymarket(market):
         normalized,
         raw_market=raw_market,
         raw_event=raw_event or {},
+    )
+    return market
+
+
+def refresh_polymarket_multi_outcome_market(market):
+    """Refresh a composite Polymarket event represented as a multi-outcome market."""
+    client = PolymarketClient()
+    slug = market.polymarket_slug or (market.polymarket_raw or {}).get("event_slug")
+    if not slug and market.external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX):
+        slug = market.external_id.removeprefix(POLYMARKET_EVENT_EXTERNAL_PREFIX)
+    if not slug:
+        return market
+
+    try:
+        event = client.fetch_event_by_slug(slug)
+    except Exception:
+        logger.exception("Failed to fetch Polymarket event %s", slug)
+        return market
+    if not event:
+        return market
+
+    normalized = normalize_polymarket_event_record(
+        event,
+        default_category=market.category or "",
+        require_open=False,
+    )
+    if not normalized:
+        return market
+
+    raw_market = build_polymarket_event_raw(event, normalized=normalized)
+    market, _ = import_market_from_normalized(
+        normalized,
+        raw_market=raw_market,
+        raw_event=event,
     )
     return market
 
@@ -205,10 +252,18 @@ def _import_polymarket_market_pairs(client, pairs, *, default_category=""):
                         raw_event = cached_event
                         break
 
-            normalized = normalize_polymarket_record(
-                raw_market,
-                default_category=default_category or raw_market.get("category") or "",
-            )
+            if raw_market.get("market_kind") == MULTI_OUTCOME_EVENT_KIND:
+                normalized = normalize_polymarket_event_record(
+                    raw_event or {},
+                    default_category=default_category or raw_market.get("category") or "",
+                )
+                if not normalized:
+                    continue
+            else:
+                normalized = normalize_polymarket_record(
+                    raw_market,
+                    default_category=default_category or raw_market.get("category") or "",
+                )
             market, created = import_market_from_normalized(
                 normalized,
                 raw_market=raw_market,
@@ -252,13 +307,15 @@ def sync_market_by_external_id(external_id):
 
 
 def sync_binary_markets_by_tag(*, tag_slug, default_category, limit=48):
-    """Fetch binary Yes/No markets for a Polymarket tag and upsert locally."""
+    """Fetch importable markets for a Polymarket tag and upsert locally."""
+    from django.conf import settings
+
     client = PolymarketClient()
-    pairs = client.fetch_binary_market_pairs_by_tag(
+    pairs = client.fetch_market_pairs_by_tag(
         tag_slug,
         limit=limit,
         default_category=default_category,
-        fallback_tag_in_payload=tag_slug,
+        max_event_pages=getattr(settings, "POLYMARKET_TAG_SYNC_MAX_EVENT_PAGES", 10),
     )
     return _import_polymarket_market_pairs(
         client,

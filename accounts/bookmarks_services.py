@@ -83,6 +83,7 @@ def build_bookmarks_page_items(*, user, target_type=None, limit=100):
                     "reputation_stakes": calculate_reputation_stakes(
                         predicted_outcome=prediction.predicted_outcome,
                         probability_snapshot=prediction.probability_at_prediction_time,
+                        predicted_direction=prediction.predicted_direction,
                     ),
                 }
             )

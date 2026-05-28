@@ -7,14 +7,10 @@
 <div class="pr-page pb-8">
 <nav class="pr-breadcrumbs">
   <a href="{% url 'markets:list' %}" class="font-medium hover:text-brand-600">{% trans "Markets" %}</a>
-  <svg class="h-4 w-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-  </svg>
+  <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-300" stroke-width="2" aria-hidden="true"></i>
   <a href="{% url 'dashboard:category_browse' slug=category.slug %}" class="font-medium hover:text-brand-600">{{ category.name }}</a>
   {% if active_area %}
-  <svg class="h-4 w-4 shrink-0 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-  </svg>
+  <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-300" stroke-width="2" aria-hidden="true"></i>
   <span class="font-medium text-slate-800">{{ active_area.name }}</span>
   {% endif %}
 </nav>
@@ -70,12 +66,12 @@
 <div class="mb-6 lg:hidden">
   <p class="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{% trans "Filter by topic" %}</p>
   <div class="pr-scroll-x">
-    <a href="{% url 'dashboard:category_browse' slug=category.slug %}"
+    <a href="{% url 'dashboard:category_browse' slug=category.slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}"
        class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2.5 text-sm font-medium transition {% if not active_area_slug %}border-brand-200 bg-brand-50 text-brand-700{% else %}border-slate-200 bg-white text-slate-600 hover:border-slate-300{% endif %}">
       {% trans "All" %} <span class="tabular-nums text-xs opacity-70">{{ total_market_count }}</span>
     </a>
     {% for item in area_summaries %}
-    <a href="{% url 'dashboard:category_browse' slug=category.slug %}?area={{ item.area.slug }}"
+    <a href="{% url 'dashboard:category_browse' slug=category.slug %}?area={{ item.area.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
        class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2.5 text-sm font-medium transition {% if active_area_slug == item.area.slug %}border-brand-200 bg-brand-50 text-brand-700{% else %}border-slate-200 bg-white text-slate-600 hover:border-slate-300{% endif %}">
       <span class="flex h-5 w-5 items-center justify-center">
         {% include "dashboard/partials/browse_area_icon.html" with slug=item.area.slug %}
@@ -98,11 +94,15 @@
   {% endif %}
 
   <section class="min-w-0 flex-1">
+    <div class="pr-panel mb-4 p-3 sm:p-4">
+      {% include "markets/partials/market_search_form.html" with form_id="category-market-search" preserve_area=True preserve_source=True active_area_slug=active_area_slug current_source=active_source clear_search_url=clear_search_url %}
+    </div>
+
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-lg font-semibold text-slate-900">
         {% if active_area %}{% blocktrans with name=active_area.name %}Trending in {{ name }}{% endblocktrans %}{% else %}{% blocktrans with name=category.name %}Trending in {{ name }}{% endblocktrans %}{% endif %}
       </h2>
-      <a href="{% url 'markets:all' %}?category={{ category.name|urlencode }}{% if source_filter_urls.active_source %}&source={{ source_filter_urls.active_source }}{% endif %}" class="text-sm font-medium text-brand-600 hover:underline">
+      <a href="{% url 'markets:all' %}?category={{ category.name|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if source_filter_urls.active_source %}&source={{ source_filter_urls.active_source }}{% endif %}" class="text-sm font-medium text-brand-600 hover:underline">
         {% trans "Advanced filters" %} →
       </a>
     </div>
@@ -114,7 +114,9 @@
         {% include "markets/partials/market_grid_card.html" %}
       {% empty %}
       <div class="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500">
-        {% if active_area %}
+        {% if search_query %}
+          {% blocktrans %}No open events match “{{ search_query }}” in this category. Try another keyword.{% endblocktrans %}
+        {% elif active_area %}
           {% blocktrans with name=active_area.name %}No open forecasts in {{ name }} yet.{% endblocktrans %}
         {% else %}
           {% trans "No open forecasts in this category yet. Check back after the next market sync." %}

@@ -13,6 +13,14 @@ logger = logging.getLogger(__name__)
 
 ECONOMY_TAG_SLUG = "economy"
 CRYPTO_TAG_SLUG = "crypto"
+POLYMARKET_EVENT_EXTERNAL_PREFIX = "pm-event:"
+MULTI_OUTCOME_EVENT_KIND = "polymarket_multi_outcome_event"
+MULTI_OUTCOME_CHART_OUTCOMES = 4
+
+
+def is_multi_outcome_event_market(market) -> bool:
+    """True for composite Polymarket grouped events stored as one internal market."""
+    return (market.polymarket_raw or {}).get("market_kind") == MULTI_OUTCOME_EVENT_KIND
 
 
 class PolymarketClient:
@@ -148,6 +156,39 @@ class PolymarketClient:
 
         return pairs[:limit]
 
+    def fetch_market_pairs_by_tag(
+        self,
+        tag_slug,
+        *,
+        limit=20,
+        default_category="",
+        max_event_pages=10,
+    ):
+        """Fetch importable markets for a tag, prioritizing total volume then 24h volume."""
+        pairs = []
+        seen_ids = set()
+
+        for order in ("volume", "volume24hr"):
+            events = self.fetch_events_paginated(
+                tag_slug=tag_slug,
+                page_size=100,
+                max_pages=max_event_pages,
+                active=True,
+                closed=False,
+                order=order,
+            )
+            batch = collect_importable_market_pairs_from_events(
+                events,
+                seen_ids=seen_ids,
+                limit=limit - len(pairs),
+                default_category=default_category,
+            )
+            pairs.extend(batch)
+            if len(pairs) >= limit:
+                break
+
+        return pairs[:limit]
+
     def fetch_binary_markets_by_tag(
         self,
         tag_slug,
@@ -210,7 +251,7 @@ class PolymarketClient:
         cumulative_volume = 0.0
 
         for event in volume_events:
-            batch = collect_binary_market_pairs_from_events(
+            batch = collect_importable_market_pairs_from_events(
                 [event],
                 seen_ids=seen_ids,
                 default_category="",
@@ -230,7 +271,7 @@ class PolymarketClient:
             order="volume24hr",
         )
         for event in volume24_events:
-            batch = collect_binary_market_pairs_from_events(
+            batch = collect_importable_market_pairs_from_events(
                 [event],
                 seen_ids=seen_ids,
                 default_category="",
@@ -368,6 +409,42 @@ def collect_binary_market_pairs_from_events(
     return pairs
 
 
+def collect_importable_market_pairs_from_events(
+    events,
+    *,
+    seen_ids=None,
+    limit=None,
+    default_category="",
+):
+    """Extract composite multi-outcome events or individual binary markets."""
+    if seen_ids is None:
+        seen_ids = set()
+
+    pairs = []
+    for event in events:
+        composite = normalize_polymarket_event_record(event, default_category=default_category)
+        if composite:
+            external_id = composite["external_id"]
+            if external_id not in seen_ids:
+                pairs.append((build_polymarket_event_raw(event, normalized=composite), event))
+                seen_ids.add(external_id)
+                if limit is not None and len(pairs) >= limit:
+                    return pairs
+            continue
+
+        batch = collect_binary_market_pairs_from_events(
+            [event],
+            seen_ids=seen_ids,
+            limit=None if limit is None else limit - len(pairs),
+            default_category=default_category,
+        )
+        pairs.extend(batch)
+        if limit is not None and len(pairs) >= limit:
+            return pairs
+
+    return pairs
+
+
 def _parse_json_field(value):
     if value is None:
         return None
@@ -417,6 +494,241 @@ def _extract_outcome_labels(raw):
         return labels
 
     return []
+
+
+def _yes_token_id(raw_market: dict) -> str:
+    ids = _parse_json_field(raw_market.get("clobTokenIds"))
+    if isinstance(ids, list) and ids:
+        return str(ids[0])
+    for token in raw_market.get("tokens") or []:
+        if not isinstance(token, dict):
+            continue
+        label = str(token.get("outcome") or token.get("name") or "").strip().lower()
+        if label == "yes":
+            token_id = token.get("token_id") or token.get("tokenId")
+            if token_id:
+                return str(token_id)
+    return ""
+
+
+def _outcome_market_meta(raw_market: dict) -> dict:
+    return {
+        "id": raw_market.get("id"),
+        "conditionId": raw_market.get("conditionId"),
+        "slug": raw_market.get("slug"),
+        "yes_token_id": _yes_token_id(raw_market),
+    }
+
+
+def select_top_chart_outcomes(
+    market,
+    *,
+    limit=MULTI_OUTCOME_CHART_OUTCOMES,
+) -> list[dict]:
+    """Top-N outcome markets by Yes probability for multi-outcome charts."""
+    raw = market.polymarket_raw or {}
+    stored = raw.get("chart_outcomes") or []
+    if stored:
+        return stored[:limit]
+
+    probs = market.current_probability or {}
+    outcome_markets = raw.get("outcome_markets") or {}
+    items = []
+    for label, probability in probs.items():
+        meta = outcome_markets.get(label) or {}
+        yes_token_id = meta.get("yes_token_id") or ""
+        if not yes_token_id:
+            continue
+        try:
+            prob = float(probability)
+        except (TypeError, ValueError):
+            continue
+        items.append(
+            {
+                "label": label,
+                "probability": prob,
+                "slug": meta.get("slug") or "",
+                "yes_token_id": yes_token_id,
+            }
+        )
+    items.sort(key=lambda item: item["probability"], reverse=True)
+    return items[:limit]
+
+
+def _yes_price(raw_market: dict) -> float | None:
+    labels = _extract_outcome_labels(raw_market)
+    prices = _parse_json_field(raw_market.get("outcomePrices"))
+    if not isinstance(prices, list) or not labels:
+        return None
+    for label, price in zip(labels, prices):
+        if str(label).strip().lower() != "yes":
+            continue
+        try:
+            return float(price)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+def _market_is_resolved_yes(raw_market: dict) -> bool:
+    resolved = raw_market.get("resolved") or raw_market.get("automaticallyResolved")
+    if not resolved:
+        return False
+    winning = str(raw_market.get("resolvedOutcome") or raw_market.get("winning_outcome") or "").lower()
+    if winning == "yes":
+        return True
+    for token in raw_market.get("tokens") or []:
+        if isinstance(token, dict) and token.get("winner"):
+            label = str(token.get("outcome") or token.get("name") or "").lower()
+            if label == "yes":
+                return True
+    return False
+
+
+def _grouped_outcome_markets(event: dict, *, open_only: bool) -> list[dict]:
+    markets = []
+    seen_labels = set()
+    for raw_market in event.get("markets") or []:
+        if open_only and raw_market.get("closed"):
+            continue
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        if not label or label in seen_labels:
+            continue
+        if raw_market.get("sportsMarketType"):
+            continue
+        if not is_binary_market_record(raw_market):
+            continue
+        markets.append(raw_market)
+        seen_labels.add(label)
+    return markets
+
+
+def is_multi_outcome_event_record(
+    event: dict,
+    *,
+    min_outcomes: int = 3,
+    require_open: bool = True,
+) -> bool:
+    """True for Polymarket grouped events that can be represented as one forecast."""
+    slug = event.get("slug") or event.get("id")
+    if not slug:
+        return False
+    return len(_grouped_outcome_markets(event, open_only=require_open)) >= min_outcomes
+
+
+def normalize_polymarket_event_record(
+    event: dict,
+    *,
+    default_category: str = "",
+    require_open: bool = True,
+) -> dict | None:
+    """Convert a grouped Polymarket event into one internal multi-outcome market."""
+    if not is_multi_outcome_event_record(event, require_open=require_open):
+        return None
+
+    slug = str(event.get("slug") or event.get("id"))
+    title = event.get("title") or event.get("ticker") or "Untitled Event"
+    description = event.get("description") or ""
+    open_markets = _grouped_outcome_markets(event, open_only=True)
+    all_grouped_markets = _grouped_outcome_markets(event, open_only=False)
+
+    def sort_key(raw_market):
+        threshold = raw_market.get("groupItemThreshold")
+        try:
+            return (0, int(threshold))
+        except (TypeError, ValueError):
+            return (1, str(raw_market.get("groupItemTitle") or ""))
+
+    open_markets.sort(key=sort_key)
+    all_grouped_markets.sort(key=sort_key)
+
+    probabilities = {}
+    outcome_markets = {}
+    resolved_outcome = ""
+    for raw_market in all_grouped_markets:
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        if not label:
+            continue
+        yes_price = _yes_price(raw_market)
+        if yes_price is not None and not raw_market.get("closed"):
+            probabilities[label] = yes_price
+        outcome_markets[label] = _outcome_market_meta(raw_market)
+        if _market_is_resolved_yes(raw_market):
+            resolved_outcome = label
+
+    if resolved_outcome:
+        status = "resolved"
+    elif not open_markets:
+        status = "closed"
+    else:
+        status = "open"
+
+    close_date = _parse_date(event.get("endDate") or event.get("closedTime") or event.get("startDate"))
+    category = event.get("category") or default_category
+    if isinstance(category, list):
+        category = category[0] if category else default_category
+
+    label_markets = open_markets if open_markets else all_grouped_markets
+    outcome_labels = [str(raw_market.get("groupItemTitle")).strip() for raw_market in label_markets]
+    return {
+        "external_id": f"{POLYMARKET_EVENT_EXTERNAL_PREFIX}{slug}",
+        "title": str(title)[:500],
+        "description": description,
+        "category": str(category or "")[:100],
+        "source": "polymarket",
+        "status": status,
+        "outcomes": [{"label": label} for label in outcome_labels],
+        "current_probability": probabilities,
+        "close_date": close_date,
+        "resolution_date": close_date if status == "resolved" else None,
+        "resolved_outcome": resolved_outcome,
+        "polymarket_slug": slug[:550],
+    }
+
+
+def build_polymarket_event_raw(event: dict, *, normalized: dict) -> dict:
+    """Composite payload stored for grouped Polymarket multi-outcome events."""
+    outcome_markets = {}
+    chart_candidates = []
+    for raw_market in _grouped_outcome_markets(event, open_only=False):
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        if not label:
+            continue
+        meta = _outcome_market_meta(raw_market)
+        outcome_markets[label] = meta
+        yes_price = _yes_price(raw_market)
+        if yes_price is not None and not raw_market.get("closed") and meta.get("yes_token_id"):
+            chart_candidates.append(
+                {
+                    "label": label,
+                    "probability": yes_price,
+                    "slug": meta.get("slug") or "",
+                    "yes_token_id": meta["yes_token_id"],
+                }
+            )
+
+    chart_candidates.sort(key=lambda item: item["probability"], reverse=True)
+    chart_outcomes = chart_candidates[:MULTI_OUTCOME_CHART_OUTCOMES]
+
+    return {
+        "id": normalized["external_id"],
+        "market_kind": MULTI_OUTCOME_EVENT_KIND,
+        "event_id": event.get("id"),
+        "event_slug": event.get("slug"),
+        "slug": event.get("slug"),
+        "question": normalized["title"],
+        "title": normalized["title"],
+        "description": normalized.get("description", ""),
+        "category": normalized.get("category", ""),
+        "volume": event.get("volume"),
+        "volumeNum": event.get("volume"),
+        "volume24hr": event.get("volume24hr"),
+        "liquidity": event.get("liquidity"),
+        "image": event.get("image") or event.get("icon"),
+        "icon": event.get("icon") or event.get("image"),
+        "outcome_markets": outcome_markets,
+        "chart_outcomes": chart_outcomes,
+    }
 
 
 def normalize_polymarket_record(raw, *, default_category=""):

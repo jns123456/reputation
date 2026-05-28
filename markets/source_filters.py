@@ -22,6 +22,17 @@ def normalize_source_filter(value: str) -> str:
     return ""
 
 
+def build_browse_clear_search_url(*, base_url: str, source: str = "", area: str = "") -> str:
+    """Same browse page without an active search query."""
+    params = {}
+    if area:
+        params["area"] = area
+    if source:
+        params["source"] = source
+    query = urlencode(params)
+    return f"{base_url}?{query}" if query else base_url
+
+
 def build_source_filter_urls(*, base_url: str, active_source: str = "", extra: dict | None = None) -> dict:
     """Build All / Polymarket / Kalshi URLs preserving other query params."""
     extra = extra or {}

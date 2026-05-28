@@ -82,9 +82,7 @@
               @click="scrollTo('thesis')"
               class="about-bounce absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400"
               aria-label="{% trans 'Scroll down' %}">
-        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-        </svg>
+        <i data-lucide="arrow-down" class="h-6 w-6" stroke-width="2" aria-hidden="true"></i>
       </button>
     </div>
   </section>
@@ -177,9 +175,7 @@
       <div class="mx-auto mt-10 max-w-3xl" data-about-reveal data-delay="1">
         <div class="about-card rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-brand-50 p-8 shadow-lg shadow-emerald-500/10 dark:border-emerald-800 dark:from-emerald-950/40 dark:via-slate-800 dark:to-brand-950/30 sm:p-10">
           <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/50">
-            <svg class="h-7 w-7 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-            </svg>
+            <i data-lucide="sparkles" class="h-7 w-7 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h3 class="mt-6 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Secures with track record" %}</h3>
           <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
@@ -200,10 +196,7 @@
                   ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
                   : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
           <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
-            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 3v18h18"/>
-              <path d="M7 16l4-8 4 5 4-9"/>
-            </svg>
+            <i data-lucide="chart-line" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Predictions" %}</h4>
           <p x-show="expandedPor !== 'predictions'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Tap to explore" %}</p>
@@ -225,10 +218,7 @@
                   ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
                   : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
           <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
-            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 12l2 2 4-4"/>
-              <circle cx="12" cy="12" r="10"/>
-            </svg>
+            <i data-lucide="circle-check" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Resolution" %}</h4>
           <p x-show="expandedPor !== 'resolution'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Tap to explore" %}</p>
@@ -250,10 +240,7 @@
                   ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
                   : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
           <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
-            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 8v4l3 3"/>
-              <circle cx="12" cy="12" r="10"/>
-            </svg>
+            <i data-lucide="clock" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Verifiable history" %}</h4>
           <p x-show="expandedPor !== 'history'" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Tap to explore" %}</p>
@@ -313,47 +300,22 @@
                     :class="expandedQuestion === item.id && 'is-expanded ring-2 ring-brand-300 dark:ring-brand-600'">
               <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-950/50">
                 <template x-if="item.id === 'why'">
-                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M9 18h6"/>
-                    <path d="M10 22h4"/>
-                    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
-                  </svg>
+                  <i data-lucide="lightbulb" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
                 </template>
                 <template x-if="item.id === 'conf'">
-                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M3 3v18h18"/>
-                    <path d="M7 16v-4"/>
-                    <path d="M12 16V8"/>
-                    <path d="M17 16v-6"/>
-                  </svg>
+                  <i data-lucide="chart-column" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
                 </template>
                 <template x-if="item.id === 'mind'">
-                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                    <path d="M21 3v5h-5"/>
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                    <path d="M8 16H3v5"/>
-                  </svg>
+                  <i data-lucide="refresh-cw" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
                 </template>
                 <template x-if="item.id === 'early'">
-                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="10" x2="14" y1="2" y2="2"/>
-                    <line x1="12" x2="15" y1="14" y2="11"/>
-                    <circle cx="12" cy="14" r="8"/>
-                  </svg>
+                  <i data-lucide="timer" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
                 </template>
                 <template x-if="item.id === 'age'">
-                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-                    <polyline points="16 7 22 7 22 13"/>
-                  </svg>
+                  <i data-lucide="trending-up" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
                 </template>
                 <template x-if="item.id === 'domain'">
-                  <svg class="h-5 w-5 text-brand-600 dark:text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"/>
-                    <circle cx="12" cy="12" r="6"/>
-                    <circle cx="12" cy="12" r="2"/>
-                  </svg>
+                  <i data-lucide="target" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
                 </template>
               </div>
               <p class="mt-3 text-sm font-semibold text-slate-900 dark:text-white" x-text="item.q"></p>

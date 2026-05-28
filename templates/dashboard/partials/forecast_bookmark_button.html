@@ -12,13 +12,9 @@
           title="{% if is_bookmarked %}{% trans 'Remove bookmark' %}{% else %}{% trans 'Bookmark' %}{% endif %}"
           aria-label="{% if is_bookmarked %}{% trans 'Remove bookmark' %}{% else %}{% trans 'Bookmark' %}{% endif %}">
     {% if is_bookmarked %}
-    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z"/>
-    </svg>
+    <i data-lucide="bookmark" class="h-[18px] w-[18px]" aria-hidden="true"></i>
     {% else %}
-    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-      <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <i data-lucide="bookmark" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
     {% endif %}
   </button>
 </form>
@@ -26,8 +22,6 @@
 <a href="{% url 'accounts:login' %}?next={{ request.path }}"
    class="forecast-action rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600"
    title="{% trans 'Log in to bookmark' %}">
-  <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-    <path d="M6 2a2 2 0 0 0-2 2v16l8-4.5 8 4.5V4a2 2 0 0 0-2-2H6z" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
+  <i data-lucide="bookmark" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
 </a>
 {% endif %}

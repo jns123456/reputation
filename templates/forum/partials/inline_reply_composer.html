@@ -8,7 +8,7 @@
   {% if user.is_authenticated %}
   <div class="x-inline-reply-inner">
     <a href="{% url 'accounts:profile' username=user.username %}" class="x-tweet-avatar shrink-0" tabindex="-1" aria-hidden="true">
-      {{ user.public_name|slice:":1"|upper }}
+      {% include "accounts/partials/user_avatar.html" with user=user %}
     </a>
     <div class="min-w-0 flex-1">
       {% trans "Post your reply" as reply_placeholder %}

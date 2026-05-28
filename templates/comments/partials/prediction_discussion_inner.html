@@ -4,7 +4,7 @@
      @open-composer="showComposer = true">
   {% if user.is_authenticated %}
     {% if user == prediction.user %}
-  <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500">
+  <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-400">
     {% trans "You can't start a thread on your own forecast. Like, dislike, or reply to comments from others below — or share your post." %}
   </div>
     {% else %}
@@ -12,9 +12,9 @@
     <button type="button"
             x-show="!showComposer"
             @click="showComposer = true"
-            class="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-500 shadow-sm transition hover:border-brand-200 hover:bg-brand-50/40 hover:text-slate-700">
-      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700" aria-hidden="true">
-        {{ user.public_name|slice:":1"|upper }}
+            class="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-500 shadow-sm transition hover:border-brand-200 hover:bg-brand-50/40 hover:text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-brand-700/60 dark:hover:bg-brand-950/35 dark:hover:text-slate-200">
+      <span class="pr-user-avatar-ring pr-user-avatar-ring--sm" aria-hidden="true">
+        {% include "accounts/partials/user_avatar.html" with user=user %}
       </span>
       <span>
         {% if prediction_vote == 1 %}
@@ -27,9 +27,9 @@
       </span>
     </button>
 
-    <div x-show="showComposer" x-cloak class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100">
+    <div x-show="showComposer" x-cloak class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:ring-slate-700/80">
       <div class="mb-3 flex items-center justify-between gap-2">
-        <p class="text-sm font-medium text-slate-700">
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
           {% if prediction_vote == 1 %}
           {% trans "You liked this forecast — add your perspective" %}
           {% elif prediction_vote == -1 %}
@@ -40,7 +40,7 @@
         </p>
         <button type="button"
                 @click="showComposer = false"
-                class="rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                class="rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
                 aria-label="{% trans 'Close comment form' %}">
           {% trans "Cancel" %}
         </button>
@@ -51,8 +51,8 @@
   </div>
     {% endif %}
   {% else %}
-  <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500">
-    <a href="{% url 'accounts:login' %}?next={{ request.path }}#forecast-{{ prediction.id }}" class="font-semibold text-brand-600 hover:underline">{% trans "Log in" %}</a>
+  <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-400">
+    <a href="{% url 'accounts:login' %}?next={{ request.path }}#forecast-{{ prediction.id }}" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "Log in" %}</a>
     {% trans "to comment on this forecast." %}
   </div>
   {% endif %}
@@ -62,7 +62,7 @@
     {% include "comments/partials/comment_thread_list.html" %}
   </div>
   {% else %}
-  <p class="rounded-lg border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500">
+  <p class="rounded-lg border border-dashed border-slate-200 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/40 dark:text-slate-400">
     {% if user == prediction.user %}
     {% trans "No comments yet — when others respond, you can reply here." %}
     {% else %}

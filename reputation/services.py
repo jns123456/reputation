@@ -3,7 +3,7 @@
 from reputation.models import ReputationEvent
 
 
-def get_predicted_outcome_probability(predicted_outcome, probability_snapshot):
+def get_predicted_outcome_probability(predicted_outcome, probability_snapshot, predicted_direction="yes"):
     """Return market probability (0–1) for the user's chosen outcome at forecast time."""
     if not probability_snapshot:
         return 0.5
@@ -18,10 +18,13 @@ def get_predicted_outcome_probability(predicted_outcome, probability_snapshot):
     if prob is None:
         return 0.5
 
-    return max(0.0, min(1.0, float(prob)))
+    probability = max(0.0, min(1.0, float(prob)))
+    if str(predicted_direction).lower() == "no":
+        return 1.0 - probability
+    return probability
 
 
-def calculate_reputation_stakes(*, predicted_outcome, probability_snapshot):
+def calculate_reputation_stakes(*, predicted_outcome, probability_snapshot, predicted_direction="yes"):
     """
     Points at stake from Polymarket odds at forecast time.
 
@@ -30,7 +33,16 @@ def calculate_reputation_stakes(*, predicted_outcome, probability_snapshot):
 
     Example: Yes at 90% → win +10, lose −90.
     """
-    prob_percent = int(round(get_predicted_outcome_probability(predicted_outcome, probability_snapshot) * 100))
+    prob_percent = int(
+        round(
+            get_predicted_outcome_probability(
+                predicted_outcome,
+                probability_snapshot,
+                predicted_direction=predicted_direction,
+            )
+            * 100
+        )
+    )
     return {
         "prob_percent": prob_percent,
         "win_points": 100 - prob_percent,
@@ -38,10 +50,11 @@ def calculate_reputation_stakes(*, predicted_outcome, probability_snapshot):
     }
 
 
-def calculate_reputation_delta(*, is_correct, predicted_outcome, probability_snapshot):
+def calculate_reputation_delta(*, is_correct, predicted_outcome, probability_snapshot, predicted_direction="yes"):
     stakes = calculate_reputation_stakes(
         predicted_outcome=predicted_outcome,
         probability_snapshot=probability_snapshot,
+        predicted_direction=predicted_direction,
     )
     if is_correct:
         return stakes["win_points"]
@@ -71,11 +84,13 @@ def apply_reputation_for_prediction(prediction):
     stakes = calculate_reputation_stakes(
         predicted_outcome=prediction.predicted_outcome,
         probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
     )
     delta = calculate_reputation_delta(
         is_correct=is_correct,
         predicted_outcome=prediction.predicted_outcome,
         probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
     )
 
     event_type = (
@@ -87,7 +102,7 @@ def apply_reputation_for_prediction(prediction):
     reason = (
         f"Forecast on '{prediction.market.title}' was "
         f"{'correct' if is_correct else 'incorrect'} "
-        f"(outcome: {prediction.predicted_outcome}, "
+        f"(forecast: {prediction.get_predicted_direction_display()} {prediction.predicted_outcome}, "
         f"Polymarket was {stakes['prob_percent']}% at forecast time, "
         f"{'+' if delta >= 0 else ''}{delta} reputation)."
     )
@@ -99,6 +114,10 @@ def apply_reputation_for_prediction(prediction):
         points_delta=delta,
         reason=reason,
     )
+
+    from integrations.attestation_services import record_reputation_event_attestation_safely
+
+    record_reputation_event_attestation_safely(event)
 
     profile = prediction.user.profile
     profile.reputation_points += delta

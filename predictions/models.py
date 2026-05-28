@@ -8,6 +8,10 @@ class Prediction(models.Model):
         RESOLVED = "resolved", "Resolved"
         VOID = "void", "Void"
 
+    class Direction(models.TextChoices):
+        YES = "yes", "Yes"
+        NO = "no", "No"
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -19,6 +23,11 @@ class Prediction(models.Model):
         related_name="predictions",
     )
     predicted_outcome = models.CharField(max_length=255)
+    predicted_direction = models.CharField(
+        max_length=10,
+        choices=Direction.choices,
+        default=Direction.YES,
+    )
     confidence = models.FloatField(default=0.5)
     probability_at_prediction_time = models.JSONField(default=dict, blank=True)
     reasoning = models.TextField(blank=True)
@@ -49,7 +58,8 @@ class Prediction(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user.username} → {self.predicted_outcome} on {self.market.title}"
+        direction = self.get_predicted_direction_display()
+        return f"{self.user.username} → {direction} {self.predicted_outcome} on {self.market.title}"
 
     @property
     def is_resolved(self):
@@ -58,3 +68,26 @@ class Prediction(models.Model):
     @property
     def is_editable(self):
         return False
+
+    @property
+    def verified_attestation(self):
+        """Return the subtle proof receipt shown in forecast UI when available."""
+        prefetched = getattr(self, "_prefetched_objects_cache", {}).get("attestations")
+        if prefetched is not None:
+            for attestation in prefetched:
+                if (
+                    attestation.status == "verified"
+                    and attestation.schema.kind == "prediction_claim"
+                ):
+                    return attestation
+            return None
+
+        return (
+            self.attestations.filter(
+                schema__kind="prediction_claim",
+                status="verified",
+            )
+            .select_related("schema")
+            .order_by("-created_at")
+            .first()
+        )

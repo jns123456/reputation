@@ -9,11 +9,12 @@ class PredictionAdmin(admin.ModelAdmin):
         "user",
         "market",
         "predicted_outcome",
+        "predicted_direction",
         "confidence",
         "status",
         "is_correct",
         "created_at",
     )
     list_filter = ("status", "is_correct")
-    search_fields = ("user__username", "market__title", "predicted_outcome")
+    search_fields = ("user__username", "market__title", "predicted_outcome", "predicted_direction")
     readonly_fields = ("created_at", "updated_at", "resolved_at", "probability_at_prediction_time")

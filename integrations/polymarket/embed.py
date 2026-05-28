@@ -4,6 +4,8 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 
+from integrations.polymarket.chart import build_polymarket_multi_outcome_chart_payload
+from integrations.polymarket.client import is_multi_outcome_event_market
 from integrations.polymarket.soccer_matches import is_world_cup_match_market
 from integrations.polymarket.urls import (
     get_polymarket_embed_slug,
@@ -37,10 +39,11 @@ def build_polymarket_embed_url(market_slug, **overrides):
 
 def build_polymarket_sports_embed_url(event_slug, **overrides):
     """
-    Build iframe src for a Polymarket sports match event embed.
+    Build iframe src for Polymarket event-page embeds (embed.polymarket.com/sports).
 
-    FIFA World Cup and other 3-way moneyline events are event pages on
-    polymarket.com — the /market embed returns "Market not found" for them.
+    Used for FIFA match moneylines and grouped multi-outcome events (e.g. tournament
+    winners, league champions). Those live at polymarket.com/event/{slug}; the /market
+    embed returns "Market not found" when given an event slug.
     """
     params = {
         "market": event_slug,
@@ -60,7 +63,25 @@ def build_polymarket_embed_context(market):
     if not slug or market.source != market.Source.POLYMARKET:
         return None
 
-    if is_world_cup_match_market(market):
+    polymarket_url = resolve_polymarket_public_url(market)
+    base_context = {
+        "embed_slug": slug,
+        "embed_width": settings.POLYMARKET_EMBED_WIDTH,
+        "embed_height": settings.POLYMARKET_EMBED_HEIGHT,
+        "polymarket_url": polymarket_url,
+        "embed_generator_url": "https://embed.polymarket.com/",
+    }
+
+    if is_multi_outcome_event_market(market):
+        chart_data = build_polymarket_multi_outcome_chart_payload(market)
+        if chart_data:
+            return {
+                **base_context,
+                "embed_kind": "multi_outcome_chart",
+                "chart_data": chart_data,
+            }
+
+    if is_world_cup_match_market(market) or is_multi_outcome_event_market(market):
         build_url = build_polymarket_sports_embed_url
     else:
         build_url = build_polymarket_embed_url
@@ -69,12 +90,9 @@ def build_polymarket_embed_context(market):
     embed_url_dark = build_url(slug, theme="dark")
 
     return {
+        **base_context,
+        "embed_kind": "iframe",
         "embed_url": embed_url_light,
         "embed_url_light": embed_url_light,
         "embed_url_dark": embed_url_dark,
-        "embed_slug": slug,
-        "embed_width": settings.POLYMARKET_EMBED_WIDTH,
-        "embed_height": settings.POLYMARKET_EMBED_HEIGHT,
-        "polymarket_url": resolve_polymarket_public_url(market),
-        "embed_generator_url": "https://embed.polymarket.com/",
     }

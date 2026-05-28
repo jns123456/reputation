@@ -4,7 +4,9 @@ from django.test import SimpleTestCase, override_settings
 
 from integrations.polymarket.client import (
     collect_binary_market_pairs_from_events,
+    collect_importable_market_pairs_from_events,
     is_binary_market_record,
+    normalize_polymarket_event_record,
 )
 from integrations.services import sync_top_volume_polymarket_markets
 
@@ -52,6 +54,59 @@ class CollectBinaryMarketPairsTests(SimpleTestCase):
 
         self.assertEqual(len(pairs), 1)
         self.assertEqual(pairs[0][0]["id"], "1")
+
+    def test_collects_grouped_multi_outcome_event_before_child_markets(self):
+        event = {
+            "slug": "league-winner",
+            "title": "League Winner",
+            "volume": 50_000,
+            "volume24hr": 1_200,
+            "markets": [
+                _binary_market("a", question="Will Team A win?") | {"groupItemTitle": "Team A", "groupItemThreshold": "0"},
+                _binary_market("b", question="Will Team B win?") | {"groupItemTitle": "Team B", "groupItemThreshold": "1"},
+                _binary_market("c", question="Will Team C win?") | {"groupItemTitle": "Team C", "groupItemThreshold": "2"},
+            ],
+        }
+
+        pairs = collect_importable_market_pairs_from_events([event], default_category="Sports")
+
+        self.assertEqual(len(pairs), 1)
+        raw_market, parent = pairs[0]
+        self.assertEqual(raw_market["market_kind"], "polymarket_multi_outcome_event")
+        self.assertEqual(raw_market["id"], "pm-event:league-winner")
+        self.assertEqual(parent["slug"], "league-winner")
+
+    def test_normalizes_grouped_multi_outcome_event(self):
+        event = {
+            "slug": "democratic-nominee",
+            "title": "Democratic Presidential Nominee 2028",
+            "category": "Politics",
+            "endDate": "2028-11-07T00:00:00Z",
+            "markets": [
+                _binary_market("1", question="Will Alice win?") | {
+                    "groupItemTitle": "Alice",
+                    "groupItemThreshold": "1",
+                    "outcomePrices": '["0.25", "0.75"]',
+                },
+                _binary_market("2", question="Will Bob win?") | {
+                    "groupItemTitle": "Bob",
+                    "groupItemThreshold": "0",
+                    "outcomePrices": '["0.4", "0.6"]',
+                },
+                _binary_market("3", question="Will Carol win?") | {
+                    "groupItemTitle": "Carol",
+                    "groupItemThreshold": "2",
+                    "outcomePrices": '["0.1", "0.9"]',
+                },
+            ],
+        }
+
+        normalized = normalize_polymarket_event_record(event)
+
+        self.assertEqual(normalized["external_id"], "pm-event:democratic-nominee")
+        self.assertEqual([item["label"] for item in normalized["outcomes"]], ["Bob", "Alice", "Carol"])
+        self.assertAlmostEqual(normalized["current_probability"]["Bob"], 0.4)
+        self.assertEqual(normalized["category"], "Politics")
 
 
 class FetchTopVolumeMarketPairsTests(SimpleTestCase):

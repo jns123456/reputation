@@ -1,0 +1,5 @@
+{% if user.avatar %}
+<img src="{{ user.avatar.url }}" alt="" class="pr-user-avatar-img{% if extra_class %} {{ extra_class }}{% endif %}">
+{% else %}
+<span class="pr-user-avatar-fallback{% if extra_class %} {{ extra_class }}{% endif %}">{{ user.public_name|slice:":1"|upper }}</span>
+{% endif %}

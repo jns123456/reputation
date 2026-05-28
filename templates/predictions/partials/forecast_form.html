@@ -71,6 +71,9 @@
           {% trans "This forecast is locked until the market resolves." %}
           <a href="#forecasts" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "View in public feed" %}</a>
         </p>
+        <div>
+          {% include "integrations/partials/attestation_badge.html" with attestation=existing.verified_attestation %}
+        </div>
       </div>
       {% else %}
       <form method="post" action="{% url 'predictions:create' slug=market.slug %}" class="space-y-5">
@@ -90,11 +93,13 @@
             {% blocktrans %}Reputation at stake based on current Polymarket odds.{% endblocktrans %}
             {% endif %}
           </p>
-          <div class="mt-3 grid gap-3 {% if form.outcome_count >= 3 %}grid-cols-1 sm:grid-cols-3{% else %}grid-cols-2{% endif %}">
+          <div class="mt-3 grid gap-3 {% if form.outcome_count > 6 %}grid-cols-1 sm:grid-cols-2 lg:grid-cols-3{% elif form.outcome_count >= 3 %}grid-cols-1 sm:grid-cols-3{% else %}grid-cols-2{% endif %}">
             {% for radio in form.predicted_outcome %}
             {% outcome_stakes market radio.choice_label as stakes %}
             <label class="relative cursor-pointer
-              {% if form.outcome_count >= 3 %}
+              {% if form.outcome_count > 3 %}
+                forecast-option-generic
+              {% elif form.outcome_count == 3 %}
                 {% if forloop.counter0 == 0 %}forecast-option-yes{% elif forloop.counter0 == 1 %}forecast-option-draw{% else %}forecast-option-away{% endif %}
               {% else %}
                 {% if forloop.counter0 == 0 %}forecast-option-yes{% else %}forecast-option-no{% endif %}
@@ -345,6 +350,38 @@
   }
   html.dark .forecast-option-away:has(input[type="radio"]:checked) .forecast-choice .text-lg {
     color: rgb(226 232 240);
+  }
+
+  /* Generic multi-outcome events */
+  .forecast-option-generic .forecast-choice:hover {
+    border-color: rgb(79 70 229);
+    background-color: rgb(238 242 255);
+  }
+  .forecast-option-generic .forecast-choice:hover .text-lg {
+    color: rgb(67 56 202);
+  }
+  .forecast-option-generic:has(input[type="radio"]:checked) .forecast-choice {
+    border-color: rgb(79 70 229);
+    background-color: rgb(224 231 255);
+    box-shadow: 0 0 0 1px rgb(79 70 229);
+  }
+  .forecast-option-generic:has(input[type="radio"]:checked) .forecast-choice .text-lg {
+    color: rgb(55 48 163);
+  }
+  html.dark .forecast-option-generic .forecast-choice:hover {
+    border-color: rgb(129 140 248);
+    background-color: rgb(49 46 129 / 0.35);
+  }
+  html.dark .forecast-option-generic .forecast-choice:hover .text-lg {
+    color: rgb(199 210 254);
+  }
+  html.dark .forecast-option-generic:has(input[type="radio"]:checked) .forecast-choice {
+    border-color: rgb(129 140 248);
+    background-color: rgb(49 46 129 / 0.55);
+    box-shadow: 0 0 0 2px rgb(99 102 241 / 0.45);
+  }
+  html.dark .forecast-option-generic:has(input[type="radio"]:checked) .forecast-choice .text-lg {
+    color: rgb(224 231 255);
   }
 
   .forecast-reasoning-input {
