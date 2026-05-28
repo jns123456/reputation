@@ -21,6 +21,7 @@ from accounts.models import (
 )
 from accounts.notification_services import notify_market_resolving
 from accounts.push_services import (
+    get_vapid_public_key,
     is_enabled,
     save_subscription,
     send_push_to_user,
@@ -249,6 +250,16 @@ class LinkifyMentionsTests(TestCase):
 
     def test_empty(self):
         self.assertEqual(linkify_mentions(""), "")
+
+
+class VapidPublicKeyTests(TestCase):
+    @override_settings(VAPID_PUBLIC_KEY="Application Server Key = abc123")
+    def test_strips_cli_prefix(self):
+        self.assertEqual(get_vapid_public_key(), "abc123")
+
+    @override_settings(VAPID_PUBLIC_KEY="  raw-key  ")
+    def test_strips_whitespace(self):
+        self.assertEqual(get_vapid_public_key(), "raw-key")
 
 
 class PushSubscriptionServiceTests(TestCase):

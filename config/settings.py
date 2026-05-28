@@ -1,8 +1,12 @@
 import os
+import sys
 from pathlib import Path
 
 import environ
 import ssl
+
+# ``manage.py test`` / pytest should not require a local Redis for Django cache.
+_RUNNING_TESTS = "test" in sys.argv or "pytest" in sys.argv[0]
 
 from celery.schedules import crontab
 
@@ -243,6 +247,14 @@ else:
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             "LOCATION": "reputation-cache",
+        }
+    }
+
+if _RUNNING_TESTS:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "reputation-test-cache",
         }
     }
 

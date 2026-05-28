@@ -10,6 +10,7 @@ def create_user(username="testuser", **kwargs):
     email = kwargs.pop("email", f"{username}@example.com")
     if email and "email_verified_at" not in kwargs:
         kwargs.setdefault("email_verified_at", timezone.now())
+    kwargs.setdefault("onboarding_completed", True)
     user = User.objects.create_user(
         username=username,
         email=email,
