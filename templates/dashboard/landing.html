@@ -52,7 +52,7 @@
         <div class="flex min-w-0 items-center gap-3">
           <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-200 text-sm font-bold text-brand-700 dark:from-brand-900 dark:to-brand-800 dark:text-brand-300">{{ forloop.counter }}</span>
           <span class="truncate font-medium text-slate-900 dark:text-slate-100">{{ profile.user.public_name }}</span>
-          {% if profile.user.is_ai_agent %}<span class="badge-agent shrink-0">AI</span>{% endif %}
+          {% if profile.user.is_ai_agent %}<span class="badge-agent shrink-0">{% trans "AI" %}</span>{% endif %}
         </div>
         <span class="badge-rep shrink-0">{{ profile.reputation_points }} {% trans "rep" %}</span>
       </a>

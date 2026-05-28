@@ -1,0 +1,72 @@
+{% load i18n %}
+{% if like_count > 0 or dislike_count > 0 %}
+<div class="pr-vote-reactions-preview" id="vote-preview-{{ target_type }}-{{ target_id }}">
+  {% if like_count > 0 %}
+  <button type="button"
+          class="pr-vote-reactions-row pr-vote-reactions-row--likes"
+          hx-get="{% url 'comments:vote_reactions' %}?target_type={{ target_type }}&target_id={{ target_id }}&tab=likes"
+          hx-target="#vote-reactions-portal"
+          hx-swap="innerHTML"
+          aria-label="{% blocktrans count counter=like_count %}{{ counter }} like — view who liked{% plural %}{{ counter }} likes — view who liked{% endblocktrans %}">
+    {% if like_preview %}
+    <span class="pr-vote-avatar-stack" aria-hidden="true">
+      {% for voter in like_preview %}
+      <span class="pr-vote-avatar-stack-item">
+        <span class="pr-user-avatar-ring pr-user-avatar-ring--xs">
+          {% include "accounts/partials/user_avatar.html" with user=voter %}
+        </span>
+      </span>
+      {% endfor %}
+    </span>
+    {% endif %}
+    <span class="pr-vote-reactions-text">
+      {% if like_count == 1 and like_preview %}
+      {% blocktrans with name=like_preview.0.public_name %}Liked by <strong>{{ name }}</strong>{% endblocktrans %}
+      {% elif like_count == 2 and like_preview|length >= 2 %}
+      {% blocktrans with name1=like_preview.0.public_name name2=like_preview.1.public_name %}Liked by <strong>{{ name1 }}</strong> and <strong>{{ name2 }}</strong>{% endblocktrans %}
+      {% elif like_preview|length >= 2 %}
+      {% with others=like_count|add:"-2" %}
+      {% blocktrans with name1=like_preview.0.public_name name2=like_preview.1.public_name others=others %}Liked by <strong>{{ name1 }}</strong>, <strong>{{ name2 }}</strong> and <strong>{{ others }} others</strong>{% endblocktrans %}
+      {% endwith %}
+      {% else %}
+      {% blocktrans count counter=like_count %}{{ counter }} like{% plural %}{{ counter }} likes{% endblocktrans %}
+      {% endif %}
+    </span>
+  </button>
+  {% endif %}
+
+  {% if dislike_count > 0 %}
+  <button type="button"
+          class="pr-vote-reactions-row pr-vote-reactions-row--dislikes"
+          hx-get="{% url 'comments:vote_reactions' %}?target_type={{ target_type }}&target_id={{ target_id }}&tab=dislikes"
+          hx-target="#vote-reactions-portal"
+          hx-swap="innerHTML"
+          aria-label="{% blocktrans count counter=dislike_count %}{{ counter }} dislike — view who disliked{% plural %}{{ counter }} dislikes — view who disliked{% endblocktrans %}">
+    {% if dislike_preview %}
+    <span class="pr-vote-avatar-stack" aria-hidden="true">
+      {% for voter in dislike_preview %}
+      <span class="pr-vote-avatar-stack-item">
+        <span class="pr-user-avatar-ring pr-user-avatar-ring--xs">
+          {% include "accounts/partials/user_avatar.html" with user=voter %}
+        </span>
+      </span>
+      {% endfor %}
+    </span>
+    {% endif %}
+    <span class="pr-vote-reactions-text">
+      {% if dislike_count == 1 and dislike_preview %}
+      {% blocktrans with name=dislike_preview.0.public_name %}Disliked by <strong>{{ name }}</strong>{% endblocktrans %}
+      {% elif dislike_count == 2 and dislike_preview|length >= 2 %}
+      {% blocktrans with name1=dislike_preview.0.public_name name2=dislike_preview.1.public_name %}Disliked by <strong>{{ name1 }}</strong> and <strong>{{ name2 }}</strong>{% endblocktrans %}
+      {% elif dislike_preview|length >= 2 %}
+      {% with others=dislike_count|add:"-2" %}
+      {% blocktrans with name1=dislike_preview.0.public_name name2=dislike_preview.1.public_name others=others %}Disliked by <strong>{{ name1 }}</strong>, <strong>{{ name2 }}</strong> and <strong>{{ others }} others</strong>{% endblocktrans %}
+      {% endwith %}
+      {% else %}
+      {% blocktrans count counter=dislike_count %}{{ counter }} dislike{% plural %}{{ counter }} dislikes{% endblocktrans %}
+      {% endif %}
+    </span>
+  </button>
+  {% endif %}
+</div>
+{% endif %}

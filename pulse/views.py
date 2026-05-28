@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 
 from pulse.context import get_forum_page_context
@@ -103,7 +104,7 @@ def create_comment_view(request, post_id):
     parent_id = request.POST.get("parent_comment")
 
     if not form.is_valid():
-        return HttpResponseBadRequest("Invalid comment")
+        return HttpResponseBadRequest(_("Invalid comment"))
 
     parent = None
     if parent_id:
@@ -261,7 +262,7 @@ def poll_vote_view(request, post_id):
         refreshed_post = get_post_with_interactions(content_post.id)
         poll_context = build_poll_context(post=refreshed_post, user=request.user)
         if poll_context is None:
-            return HttpResponseBadRequest("Poll not found")
+            return HttpResponseBadRequest(_("Poll not found"))
         return render(
             request,
             "forum/partials/post_poll.html",

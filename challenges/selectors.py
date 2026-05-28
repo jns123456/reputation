@@ -6,9 +6,24 @@ from challenges.models import Challenge, ChallengeParticipant
 from markets.models import Market
 from reputation.models import ReputationEvent
 
+REALIZED_REPUTATION_EVENT_TYPES = [
+    ReputationEvent.EventType.CORRECT_PREDICTION,
+    ReputationEvent.EventType.INCORRECT_PREDICTION,
+    ReputationEvent.EventType.EXITED_PREDICTION,
+]
+
 
 def get_participant_challenge_reputation(*, challenge, user, market_ids=None):
-    """Total reputation from challenge markets, including pre-existing forecasts."""
+    """Total realized reputation from challenge markets (resolved + exited)."""
+    return get_participant_challenge_realized_points(
+        challenge=challenge,
+        user=user,
+        market_ids=market_ids,
+    )
+
+
+def get_participant_challenge_realized_points(*, challenge, user, market_ids=None):
+    """Sum of realized reputation events on the given challenge markets."""
     if not challenge.started_at:
         return 0
 
@@ -24,58 +39,112 @@ def get_participant_challenge_reputation(*, challenge, user, market_ids=None):
         ReputationEvent.objects.filter(
             user=user,
             prediction__market_id__in=market_ids,
-            event_type__in=[
-                ReputationEvent.EventType.CORRECT_PREDICTION,
-                ReputationEvent.EventType.INCORRECT_PREDICTION,
-            ],
+            event_type__in=REALIZED_REPUTATION_EVENT_TYPES,
         ).aggregate(total=Sum("points_delta"))["total"]
         or 0
     )
 
 
-def _rank_standings(standings):
-    standings.sort(key=lambda row: row["reputation_points"], reverse=True)
+def get_participant_challenge_unrealized_points(*, challenge, user, open_market_ids=None):
+    """Estimated reputation P&L on open challenge markets (same logic as open forecasts).
+
+    Includes pending forecasts placed before the challenge started — the user's
+    existing position on a challenge event counts immediately once the challenge is live.
+    """
+    if not challenge.started_at:
+        return 0
+
+    from predictions.models import Prediction
+    from reputation.services import calculate_exit_reputation_delta
+
+    if open_market_ids is None:
+        open_market_ids = [
+            market.id
+            for market in get_challenge_markets(challenge)
+            if market.status == Market.Status.OPEN
+        ]
+    else:
+        open_market_ids = list(open_market_ids)
+
+    if not open_market_ids:
+        return 0
+
+    total = 0
+    predictions = Prediction.objects.filter(
+        user=user,
+        market_id__in=open_market_ids,
+        status=Prediction.Status.PENDING,
+    ).select_related("market")
+
+    for prediction in predictions:
+        total += calculate_exit_reputation_delta(
+            predicted_outcome=prediction.predicted_outcome,
+            entry_probability_snapshot=prediction.probability_at_prediction_time,
+            exit_probability_snapshot=prediction.market.current_probability or {},
+            predicted_direction=prediction.predicted_direction,
+        )
+    return total
+
+
+def _build_standing_row(*, participant, realized_points, unrealized_points):
+    total_points = realized_points + unrealized_points
+    return {
+        "participant": participant,
+        "realized_points": realized_points,
+        "unrealized_points": unrealized_points,
+        "total_points": total_points,
+        "reputation_points": total_points,
+        "rank": None,
+    }
+
+
+def _rank_standings(standings, *, score_key="total_points"):
+    standings.sort(key=lambda row: row[score_key], reverse=True)
     if not standings:
         return standings
 
     current_rank = 1
     prev_points = None
     for index, row in enumerate(standings):
-        if prev_points is not None and row["reputation_points"] < prev_points:
+        if prev_points is not None and row[score_key] < prev_points:
             current_rank = index + 1
         row["rank"] = current_rank
-        prev_points = row["reputation_points"]
+        prev_points = row[score_key]
     return standings
 
 
 def get_challenge_standings_for_markets(*, challenge, market_ids):
-    """Leaderboard using only reputation earned on the given challenge markets."""
+    """Leaderboard snapshot using only realized reputation on the given markets."""
     participants = challenge.participants.filter(
         status=ChallengeParticipant.Status.ACCEPTED,
     ).select_related("user", "user__profile")
 
     if not challenge.started_at:
         return [
-            {"participant": participant, "reputation_points": 0, "rank": None}
+            _build_standing_row(
+                participant=participant,
+                realized_points=0,
+                unrealized_points=0,
+            )
             for participant in participants
         ]
 
     market_ids = list(market_ids)
     standings = []
     for participant in participants:
-        total = get_participant_challenge_reputation(
+        realized = get_participant_challenge_realized_points(
             challenge=challenge,
             user=participant.user,
             market_ids=market_ids,
         )
         standings.append(
-            {
-                "participant": participant,
-                "reputation_points": total,
-                "rank": None,
-            }
+            _build_standing_row(
+                participant=participant,
+                realized_points=realized,
+                unrealized_points=0,
+            )
         )
-    return _rank_standings(standings)
+    return _rank_standings(standings, score_key="realized_points")
 
 
 def get_cumulative_resolved_market_ids(*, challenge, through_market):
@@ -134,15 +203,81 @@ def get_challenge_resolution_snapshots(challenge):
 
 
 def get_challenge_standings(challenge):
-    """Current challenge leaderboard across all resolved events so far."""
-    resolved_market_ids = [
-        market.id
-        for market in get_challenge_markets(challenge)
-        if market.status == Market.Status.RESOLVED
+    """Live challenge leaderboard with realized and unrealized reputation columns."""
+    participants = challenge.participants.filter(
+        status=ChallengeParticipant.Status.ACCEPTED,
+    ).select_related("user", "user__profile")
+
+    if not challenge.started_at:
+        return [
+            _build_standing_row(
+                participant=participant,
+                realized_points=0,
+                unrealized_points=0,
+            )
+            for participant in participants
+        ]
+
+    markets = get_challenge_markets(challenge)
+    all_market_ids = [market.id for market in markets]
+    open_market_ids = [
+        market.id for market in markets if market.status == Market.Status.OPEN
     ]
-    return get_challenge_standings_for_markets(
-        challenge=challenge,
-        market_ids=resolved_market_ids,
+
+    standings = []
+    for participant in participants:
+        realized = get_participant_challenge_realized_points(
+            challenge=challenge,
+            user=participant.user,
+            market_ids=all_market_ids,
+        )
+        unrealized = get_participant_challenge_unrealized_points(
+            challenge=challenge,
+            user=participant.user,
+            open_market_ids=open_market_ids,
+        )
+        standings.append(
+            _build_standing_row(
+                participant=participant,
+                realized_points=realized,
+                unrealized_points=unrealized,
+            )
+        )
+    return _rank_standings(standings)
+
+
+def get_challenge_leaderboard(challenge):
+    """Leaderboard rows for challenge detail UI (includes invited players before start)."""
+    if not challenge.started_at:
+        participants = challenge.participants.select_related(
+            "user",
+            "user__profile",
+        ).order_by("created_at")
+        return [
+            _build_standing_row(
+                participant=participant,
+                realized_points=0,
+                unrealized_points=0,
+            )
+            for participant in participants
+        ]
+    return get_challenge_standings(challenge)
+
+
+def get_active_challenge_contexts_for_market(*, user, market):
+    """Pending/active challenges the user is in that include this market."""
+    if not user or not user.is_authenticated:
+        return []
+
+    return list(
+        Challenge.objects.filter(
+            Q(participants__user=user)
+            & ~Q(participants__status=ChallengeParticipant.Status.DECLINED),
+            status__in=[Challenge.Status.PENDING, Challenge.Status.ACTIVE],
+            challenge_markets__market=market,
+        )
+        .distinct()
+        .order_by("-created_at")
     )
 
 
@@ -195,8 +330,6 @@ def get_pending_challenge_invitations(user):
 
 
 def get_pending_challenge_invitations_count(user):
-    from challenges.models import Challenge, ChallengeParticipant
-
     if not user or not user.is_authenticated:
         return 0
     return ChallengeParticipant.objects.filter(
@@ -216,7 +349,6 @@ def user_can_view_challenge(*, challenge, user):
 
 def search_open_markets_for_challenge(*, query="", limit=50, selected_ids=None):
     """Open markets for challenge picker, optionally filtered by search text."""
-    from markets.models import Market
     from markets.selectors import get_markets_list
 
     qs = get_markets_list(status=Market.Status.OPEN, search=query or None).order_by("title")

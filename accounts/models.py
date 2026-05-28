@@ -1,13 +1,16 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
 
 
 class User(AbstractUser):
     class IdentityMode(models.TextChoices):
-        PUBLIC = "public", "Public"
-        PSEUDONYM = "pseudonym", "Pseudonym"
-        ANONYMOUS = "anonymous", "Anonymous"
+        PUBLIC = "public", _lazy("Public")
+        PSEUDONYM = "pseudonym", _lazy("Pseudonym")
+        ANONYMOUS = "anonymous", _lazy("Anonymous")
 
     display_name = models.CharField(max_length=150, blank=True)
     identity_mode = models.CharField(
@@ -45,7 +48,7 @@ class User(AbstractUser):
         if self.display_name:
             return self.display_name
         if self.identity_mode == self.IdentityMode.ANONYMOUS:
-            return "Anonymous"
+            return _("Anonymous")
         return self.username
 
     @property
@@ -188,7 +191,7 @@ class UserFollow(models.Model):
         from django.core.exceptions import ValidationError
 
         if self.follower_id and self.following_id and self.follower_id == self.following_id:
-            raise ValidationError("Users cannot follow themselves.")
+            raise ValidationError(_("Users cannot follow themselves."))
 
 
 class NotificationPreference(models.Model):

@@ -1,0 +1,100 @@
+{% load i18n reputation_filters %}
+<article class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
+  <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
+  <div class="pr-orb pr-orb--slow absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
+  <div class="pr-orb absolute -bottom-12 -left-8 h-36 w-36 bg-emerald-400/15" aria-hidden="true"></div>
+
+  <div class="relative">
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div class="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-start">
+        {% if market.image_url %}
+        <div class="pr-market-hero-image shrink-0">
+          <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="eager">
+        </div>
+        {% else %}
+        <div class="pr-market-hero-image pr-market-hero-image--fallback shrink-0" aria-hidden="true">
+          <span class="text-2xl font-bold text-slate-400 dark:text-slate-500">{{ market.display_title|slice:":1"|upper }}</span>
+        </div>
+        {% endif %}
+
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="badge-status-{{ market.status }}">{{ market.get_status_display }}</span>
+            {% if market.category %}
+            <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.display_category }}</span>
+            {% endif %}
+            {% if market.source == "polymarket" %}
+            <span class="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950/45 dark:text-indigo-300">{{ market.display_source }}</span>
+            {% elif market.source == "kalshi" %}
+            <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300">{{ market.display_source }}</span>
+            {% endif %}
+          </div>
+
+          <h1 class="pr-hero-title mt-3">{{ market.display_title }}</h1>
+
+          {% if market.display_description %}
+          <p class="pr-hero-desc">{{ market.display_description }}</p>
+          {% endif %}
+
+          <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            {% if market.polymarket_url %}
+            <a href="{{ market.polymarket_url }}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition hover:text-brand-700 hover:underline dark:text-brand-400 dark:hover:text-brand-300">
+              {% trans "View on Polymarket" %}
+              <i data-lucide="external-link" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+            </a>
+            {% elif market.kalshi_url %}
+            <a href="{{ market.kalshi_url }}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition hover:text-brand-700 hover:underline dark:text-brand-400 dark:hover:text-brand-300">
+              {% trans "View on Kalshi" %}
+              <i data-lucide="external-link" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+            </a>
+            {% endif %}
+          </div>
+
+          {% if market.volume_label or market.close_date %}
+          <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-100 pt-4 text-sm text-slate-500 dark:border-slate-700/80 dark:text-slate-400">
+            {% if market.volume_label %}
+            <span class="inline-flex items-center gap-1.5 font-medium">
+              <i data-lucide="bar-chart-2" class="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" stroke-width="2" aria-hidden="true"></i>
+              {{ market.volume_label }}
+            </span>
+            {% endif %}
+            {% if market.close_date %}
+            <span class="inline-flex items-center gap-1.5">
+              <i data-lucide="calendar" class="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" stroke-width="2" aria-hidden="true"></i>
+              {% blocktrans with date=market.close_date|date:"M j, Y" %}Closes {{ date }}{% endblocktrans %}
+            </span>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if market.current_probability and not market|is_multi_outcome_market %}
+      <div class="pr-panel w-full shrink-0 p-4 lg:min-w-[220px] lg:max-w-[260px] lg:w-auto">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Live odds" %}</p>
+        <div class="mt-3 space-y-2">
+          {% for label, prob in market.current_probability.items %}
+          <div class="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm
+            {% if label|lower == 'yes' %}border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-950/35
+            {% elif label|lower == 'no' %}border-rose-200 bg-rose-50 dark:border-rose-800/50 dark:bg-rose-950/35
+            {% else %}border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/55{% endif %}">
+            <span class="font-medium {% if label|lower == 'yes' %}text-emerald-700 dark:text-emerald-300{% elif label|lower == 'no' %}text-rose-700 dark:text-rose-300{% else %}text-slate-700 dark:text-slate-200{% endif %}">
+              {% if label|lower == 'yes' %}{% trans "Yes" %}{% elif label|lower == 'no' %}{% trans "No" %}{% else %}{{ label }}{% endif %}
+            </span>
+            <strong class="text-lg tabular-nums {% if label|lower == 'yes' %}text-emerald-800 dark:text-emerald-200{% elif label|lower == 'no' %}text-rose-800 dark:text-rose-200{% else %}text-slate-900 dark:text-slate-50{% endif %}">{{ prob|as_percent }}%</strong>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if market.status == "resolved" and market.resolved_outcome %}
+    <div class="relative mt-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200">
+      {% blocktrans with outcome=market.resolved_outcome %}Resolved outcome: <strong>{{ outcome }}</strong>{% endblocktrans %}
+    </div>
+    {% endif %}
+  </div>
+</article>

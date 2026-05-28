@@ -1,16 +1,19 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 
 class Prediction(models.Model):
     class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
-        RESOLVED = "resolved", "Resolved"
-        VOID = "void", "Void"
+        PENDING = "pending", _("Pending")
+        RESOLVED = "resolved", _("Resolved")
+        EXITED = "exited", _("Exited")
+        VOID = "void", _("Void")
 
     class Direction(models.TextChoices):
-        YES = "yes", "Yes"
-        NO = "no", "No"
+        YES = "yes", _("Yes")
+        NO = "no", _("No")
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -49,12 +52,21 @@ class Prediction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
+    probability_at_exit_time = models.JSONField(default=dict, blank=True)
+    exited_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["market", "status"]),
             models.Index(fields=["user", "status"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "market"],
+                condition=Q(status="pending"),
+                name="unique_pending_prediction_per_user_market",
+            ),
         ]
 
     def __str__(self):

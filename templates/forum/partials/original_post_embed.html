@@ -6,7 +6,7 @@
     <a href="{% url 'accounts:profile' username=original_post.user.username %}" class="x-tweet-handle">@{{ original_post.user.username }}</a>
     <span class="x-tweet-dot">·</span>
     <a href="{% url 'forum:detail' post_id=original_post.id %}" class="x-tweet-time">
-      <time datetime="{{ original_post.created_at|date:'c' }}">{{ original_post.created_at|timesince }}</time>
+      <time datetime="{{ original_post.created_at|date:'c' }}">{% blocktrans with time=original_post.created_at|timesince %}{{ time }} ago{% endblocktrans %}</time>
     </a>
   </div>
   {% include "forum/partials/post_content.html" with post=original_post embedded=True %}

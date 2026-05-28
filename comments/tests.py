@@ -284,3 +284,66 @@ class PredictionThreadTests(TestCase):
 
         threads = get_prediction_comment_threads(self.prediction)
         self.assertEqual([thread.id for thread in threads], [high_rep.id, low_rep.id])
+
+
+class VoteReactionsSheetTests(TestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(
+            username="forecaster",
+            password="pass",
+            onboarding_completed=True,
+        )
+        self.voter = User.objects.create_user(
+            username="debater",
+            password="pass",
+            onboarding_completed=True,
+        )
+        self.market = Market.objects.create(
+            external_id="reactions-m1",
+            title="Reactions test market",
+            slug="reactions-test-market",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+        )
+        self.prediction = Prediction.objects.create(
+            user=self.author,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.client = Client()
+
+    def test_vote_reactions_sheet_lists_likers(self):
+        cast_vote(
+            user=self.voter,
+            target_type=Vote.TargetType.PREDICTION,
+            target_id=self.prediction.id,
+            value=1,
+        )
+        response = self.client.get(
+            "/comments/votes/reactions/",
+            {
+                "target_type": Vote.TargetType.PREDICTION,
+                "target_id": self.prediction.id,
+                "tab": "likes",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.voter.public_name)
+        self.assertContains(response, "Reactions")
+
+    def test_forecast_vote_htmx_returns_reactions_preview(self):
+        self.client.login(username="debater", password="pass")
+        response = self.client.post(
+            "/comments/vote/",
+            {
+                "target_type": Vote.TargetType.PREDICTION,
+                "target_id": self.prediction.id,
+                "value": "1",
+                "layout": "forecasts",
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Liked by")
+        self.assertContains(response, self.voter.public_name)
+

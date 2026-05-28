@@ -8,6 +8,7 @@ from predictions.models import Prediction
 from predictions.services import create_prediction, resolve_market_predictions
 from reputation.models import PopularityEvent, ReputationEvent
 from reputation.services import (
+    calculate_exit_reputation_delta,
     calculate_reputation_delta,
     calculate_reputation_stakes,
 )
@@ -56,6 +57,27 @@ class ReputationScoringTests(TestCase):
         )
         self.assertEqual(stakes["win_points"], 50)
         self.assertEqual(stakes["loss_points"], 50)
+
+    def test_exit_delta_uses_percentage_point_difference(self):
+        self.assertEqual(
+            calculate_exit_reputation_delta(
+                predicted_outcome="Yes",
+                entry_probability_snapshot={"Yes": 0.4, "No": 0.6},
+                exit_probability_snapshot={"Yes": 0.55, "No": 0.45},
+            ),
+            15,
+        )
+
+    def test_exit_delta_respects_no_direction(self):
+        self.assertEqual(
+            calculate_exit_reputation_delta(
+                predicted_outcome="Yes",
+                predicted_direction=Prediction.Direction.NO,
+                entry_probability_snapshot={"Yes": 0.4, "No": 0.6},
+                exit_probability_snapshot={"Yes": 0.7, "No": 0.3},
+            ),
+            -30,
+        )
 
 
 class PopularityReputationSeparationTests(TestCase):

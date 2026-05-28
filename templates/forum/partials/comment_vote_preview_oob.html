@@ -1,0 +1,7 @@
+{% load i18n %}
+<div id="forum-vote-preview-pulse_comment-{{ comment.id }}" class="x-tweet-reactions">
+  {% include "comments/partials/vote_reactions_preview.html" with target_type="pulse_comment" target_id=comment.id like_count=comment.like_count dislike_count=comment.dislike_count like_preview=like_preview dislike_preview=dislike_preview %}
+</div>
+{% if vote_oob %}
+{% include "forum/partials/comment_vote_actions.html" with hx_swap_oob=True %}
+{% endif %}

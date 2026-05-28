@@ -7,5 +7,6 @@ app_name = "comments"
 urlpatterns = [
     path("markets/<slug:slug>/create/", views.create_comment_view, name="create"),
     path("vote/", views.vote_view, name="vote"),
+    path("votes/reactions/", views.vote_reactions_sheet, name="vote_reactions"),
     path("<int:comment_id>/votes/", views.comment_vote_partial, name="vote_partial"),
 ]

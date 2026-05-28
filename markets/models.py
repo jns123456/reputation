@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 
@@ -22,7 +23,9 @@ class Market(models.Model):
 
     external_id = models.CharField(max_length=255, unique=True, db_index=True)
     title = models.CharField(max_length=500)
+    title_es = models.CharField(max_length=500, blank=True)
     description = models.TextField(blank=True)
+    description_es = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True, db_index=True)
     canonical_category_slug = models.CharField(max_length=50, blank=True, db_index=True)
     slug = models.SlugField(max_length=550, unique=True)
@@ -63,7 +66,33 @@ class Market(models.Model):
         ]
 
     def __str__(self):
+        return self.display_title
+
+    @property
+    def display_title(self) -> str:
+        if get_language() == "es" and self.title_es:
+            return self.title_es
         return self.title
+
+    @property
+    def display_description(self) -> str:
+        if get_language() == "es" and self.description_es:
+            return self.description_es
+        return self.description
+
+    @property
+    def display_category(self) -> str:
+        from markets.localization import localize_category_label
+
+        return localize_category_label(self.category)
+
+    @property
+    def display_source(self) -> str:
+        if self.source == self.Source.POLYMARKET:
+            return _("Polymarket")
+        if self.source == self.Source.KALSHI:
+            return _("Kalshi")
+        return _("Market")
 
     def save(self, *args, **kwargs):
         self.canonical_category_slug = resolve_market_category_slug(self)

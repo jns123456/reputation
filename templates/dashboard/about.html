@@ -47,7 +47,7 @@
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
           </span>
-          {% trans "Proof of Reputation" %}
+          {% trans "PredictStamp" %}
         </div>
 
         <h1 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
@@ -165,10 +165,10 @@
       <div class="text-center" data-about-reveal>
         <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "The idea" %}</p>
         <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-          {% trans "Proof of Reputation" %}
+          {% trans "PredictStamp" %}
         </h2>
         <p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
-          {% trans "Credibility earned through a public history of judgment — not luck, not capital, not hype. ProofRep secures social intelligence with track record." %}
+          {% trans "Credibility earned through a public history of judgment — not luck, not capital, not hype. PredictStamp secures social intelligence with track record." %}
         </p>
       </div>
 
@@ -271,7 +271,7 @@
             {% trans "A social network for markets" %}
           </h2>
           <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            {% blocktrans %}<strong class="text-slate-800 dark:text-white">ProofRep</strong> is built around events and outcomes — follow markets, publish theses, debate probabilities, challenge friends, and build a public history of judgment.{% endblocktrans %}
+            {% blocktrans %}<strong class="text-slate-800 dark:text-white">PredictStamp</strong> is built around events and outcomes — follow markets, publish theses, debate probabilities, challenge friends, and build a public history of judgment.{% endblocktrans %}
           </p>
           <p class="mt-4 text-sm text-slate-500">{% trans "Tap a domain to explore specialization:" %}</p>
           <div class="mt-4 flex flex-wrap gap-2">
@@ -507,6 +507,22 @@
       </div>
     </section>
 
+    {# -- COMPANY -- #}
+    <section id="about-company" class="scroll-mt-28">
+      <div class="about-card rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-700 dark:bg-slate-800"
+           data-about-reveal>
+        <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "Company" %}</p>
+        <h2 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">TAO FACTORY LLC</h2>
+        <p class="mt-4 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+          {% blocktrans %}PredictStamp is operated by TAO FACTORY LLC, a Delaware limited liability company. For operational, legal, or partnership inquiries, contact us at <a href="mailto:ops@predictstamp.com" class="font-medium text-brand-600 hover:underline dark:text-brand-400">ops@predictstamp.com</a>.{% endblocktrans %}
+        </p>
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a href="{% url 'dashboard:legal' %}" class="btn-secondary">{% trans "Legal information" %}</a>
+          <a href="{% url 'dashboard:terms' %}" class="btn-secondary">{% trans "Terms & Conditions" %}</a>
+        </div>
+      </div>
+    </section>
+
     {# ── CTA ── #}
     <section id="about-cta" class="scroll-mt-28">
       <div class="about-full-bleed relative overflow-hidden">
@@ -518,7 +534,7 @@
               <span class="about-gradient-text">{% trans "compounds" %}</span>
             </h2>
             <p class="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-              {% trans "The internet has no shortage of opinions. What it lacks is memory. Proof of Reputation turns predictions into a reputation graph and insight into an asset." %}
+              {% trans "The internet has no shortage of opinions. What it lacks is memory. PredictStamp turns predictions into a reputation graph and insight into an asset." %}
             </p>
             <p class="mt-4 text-base font-semibold text-slate-800 dark:text-slate-100">
               {% trans "The most valuable signal is not who speaks the loudest — it is who has been right before." %}
@@ -545,6 +561,7 @@
 {% trans "Rankings" as about_nav_leaderboards %}
 {% trans "Social" as about_nav_social %}
 {% trans "Future" as about_nav_future %}
+{% trans "Company" as about_nav_company %}
 {% trans "Start" as about_nav_cta %}
 {% trans "Geopolitics" as about_domain_geopolitics %}
 {% trans "Sports" as about_domain_sports %}
@@ -588,6 +605,7 @@ window.ABOUT_PAGE_I18N = {
     { id: "leaderboards", label: "{{ about_nav_leaderboards|escapejs }}" },
     { id: "social", label: "{{ about_nav_social|escapejs }}" },
     { id: "future", label: "{{ about_nav_future|escapejs }}" },
+    { id: "company", label: "{{ about_nav_company|escapejs }}" },
     { id: "cta", label: "{{ about_nav_cta|escapejs }}" }
   ],
   domains: [

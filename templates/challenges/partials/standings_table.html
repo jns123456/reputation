@@ -6,7 +6,11 @@
       <tr class="border-b border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-400">
         <th class="pb-1.5 pr-2 font-medium">#</th>
         <th class="pb-1.5 pr-2 font-medium">{% trans "Player" %}</th>
-        <th class="pb-1.5 text-right font-medium">{% trans "Rep" %}</th>
+        <th class="pb-1.5 pr-2 text-right font-medium">{% trans "Realized" %}</th>
+        {% if not compact %}
+        <th class="pb-1.5 pr-2 text-right font-medium">{% trans "Unrealized" %}</th>
+        {% endif %}
+        <th class="pb-1.5 text-right font-medium">{% trans "Total" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -14,8 +18,16 @@
       <tr class="border-b border-slate-100 last:border-0 dark:border-slate-700">
         <td class="py-1.5 pr-2 tabular-nums text-slate-500 dark:text-slate-400">{{ row.rank }}</td>
         <td class="py-1.5 pr-2 font-medium text-slate-800 dark:text-slate-100">{{ row.participant.user.public_name }}</td>
-        <td class="py-1.5 text-right font-semibold tabular-nums {% if row.reputation_points >= 0 %}text-emerald-700 dark:text-emerald-400{% else %}text-rose-700 dark:text-rose-400{% endif %}">
-          {% if row.reputation_points >= 0 %}+{% endif %}{{ row.reputation_points }}
+        <td class="py-1.5 pr-2 text-right font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+          {% if row.realized_points >= 0 %}+{% endif %}{{ row.realized_points }}
+        </td>
+        {% if not compact %}
+        <td class="py-1.5 pr-2 text-right font-semibold tabular-nums {% if row.unrealized_points >= 0 %}text-emerald-700 dark:text-emerald-400{% else %}text-rose-700 dark:text-rose-400{% endif %}">
+          {% if row.unrealized_points >= 0 %}+{% endif %}{{ row.unrealized_points }}
+        </td>
+        {% endif %}
+        <td class="py-1.5 text-right font-semibold tabular-nums {% if row.total_points >= 0 %}text-emerald-700 dark:text-emerald-400{% else %}text-rose-700 dark:text-rose-400{% endif %}">
+          {% if row.total_points >= 0 %}+{% endif %}{{ row.total_points }}
         </td>
       </tr>
       {% endfor %}

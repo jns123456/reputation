@@ -288,6 +288,14 @@ def about(request):
     return render(request, "dashboard/about.html")
 
 
+def legal(request):
+    return render(request, "dashboard/legal.html")
+
+
+def terms(request):
+    return render(request, "dashboard/terms.html")
+
+
 def faq(request):
     return render(request, "dashboard/faq.html")
 

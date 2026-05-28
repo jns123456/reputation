@@ -101,7 +101,7 @@ def notification_message(notification, compact=False):
             "markets:detail",
             kwargs={"slug": notification.prediction.market.slug},
         )
-        market_title = notification.prediction.market.title
+        market_title = notification.prediction.market.display_title
         return format_html(
             "{} {} <a href=\"{}\" class=\"text-brand-600 hover:underline\">{}</a>",
             actor,
@@ -123,7 +123,7 @@ def notification_message(notification, compact=False):
             "markets:detail",
             kwargs={"slug": notification.prediction.market.slug},
         )
-        market_title = notification.prediction.market.title
+        market_title = notification.prediction.market.display_title
         delta = notification.reputation_event.points_delta if notification.reputation_event_id else 0
         outcome_label = _("correct") if notification.prediction.is_correct else _("incorrect")
         delta_label = f"+{delta}" if delta >= 0 else str(delta)
@@ -165,7 +165,7 @@ def notification_message(notification, compact=False):
     if t == Notification.NotificationType.CHALLENGE_MARKET_RESOLVED and notification.challenge_id:
         challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
         challenge_title = notification.challenge.display_title
-        market_title = notification.market.title if notification.market_id else _("An event")
+        market_title = notification.market.display_title if notification.market_id else _("An event")
         outcome = notification.market.resolved_outcome if notification.market_id else ""
         outcome_html = (
             format_html(' {}: <span class="font-semibold">{}</span>.', _("Result"), outcome)

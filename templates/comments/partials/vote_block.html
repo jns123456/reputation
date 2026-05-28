@@ -1,0 +1,5 @@
+{% load i18n %}
+<div class="vote-block vote-block--{{ layout|default:'horizontal' }}" id="votes-block-{{ target_type }}-{{ target_id }}">
+  {% include "comments/partials/vote_buttons.html" %}
+  {% include "comments/partials/vote_reactions_preview.html" %}
+</div>

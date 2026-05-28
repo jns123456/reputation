@@ -6,7 +6,7 @@ from django.db.models.functions import Coalesce
 from accounts.bookmark_selectors import get_user_bookmarked_ids
 from accounts.models import Bookmark
 from comments.models import Vote
-from comments.selectors import build_comment_forest, collect_comment_ids
+from comments.selectors import build_comment_forest, collect_comment_ids, get_vote_previews_for_targets, get_vote_summaries_for_targets, attach_vote_summaries_to_comments
 from pulse.models import Poll, PollOption, PollVote, Post
 
 
@@ -169,7 +169,7 @@ def _get_user_reposted_original_ids(user, original_post_ids):
     )
 
 
-def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, user_reposted_ids, user_poll_votes=None):
+def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, user_reposted_ids, user_poll_votes=None, vote_previews=None):
     original_post = post.original_post
     original_id = original_post.id
     content_post = original_post if post.is_repost else post
@@ -185,6 +185,7 @@ def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, us
         user=user,
         user_poll_votes=user_poll_votes,
     )
+    preview = (vote_previews or {}).get(post.id, {})
     item = {
         "post": post,
         "original_post": original_post,
@@ -193,6 +194,8 @@ def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, us
         "is_bookmarked": post.id in bookmarked_ids,
         "repost_count": repost_counts.get(original_id, 0),
         "is_reposted": original_id in user_reposted_ids,
+        "like_preview": preview.get("likes", []),
+        "dislike_preview": preview.get("dislikes", []),
     }
     if poll_context:
         item.update(poll_context)
@@ -219,6 +222,10 @@ def build_pulse_feed(*, user, limit=50):
         except Poll.DoesNotExist:
             continue
     user_poll_votes = get_user_poll_votes(user, poll_ids)
+    vote_previews = get_vote_previews_for_targets(
+        target_type=Vote.TargetType.PULSE_POST,
+        target_ids=post_ids,
+    )
 
     return [
         build_feed_item(
@@ -229,6 +236,7 @@ def build_pulse_feed(*, user, limit=50):
             repost_counts=repost_counts,
             user_reposted_ids=user_reposted_ids,
             user_poll_votes=user_poll_votes,
+            vote_previews=vote_previews,
         )
         for post in posts
     ]
@@ -295,6 +303,14 @@ def build_post_discussion(*, user, post):
     threads = get_post_comment_threads(post)
     comment_ids = collect_comment_ids(threads)
     vote_map = get_user_pulse_comment_votes(user, comment_ids)
+    comment_vote_summaries = get_vote_summaries_for_targets(
+        target_type=Vote.TargetType.PULSE_COMMENT,
+        target_ids=comment_ids,
+    )
+    post_vote_previews = get_vote_previews_for_targets(
+        target_type=Vote.TargetType.PULSE_POST,
+        target_ids=[post.id],
+    )
     original_post = post.original_post
     repost_counts = _get_repost_counts([original_post.id])
     user_reposted_ids = _get_user_reposted_original_ids(user, [original_post.id])
@@ -305,6 +321,7 @@ def build_post_discussion(*, user, post):
             walk(getattr(node, "thread_replies", []))
 
     walk(threads)
+    attach_vote_summaries_to_comments(threads, comment_vote_summaries)
     content_post = original_post if post.is_repost else post
     poll_context = build_poll_context(post=content_post, user=user)
     context = {
@@ -317,6 +334,8 @@ def build_post_discussion(*, user, post):
         "comment_count": Comment.objects.filter(post=post).count(),
         "repost_count": repost_counts.get(original_post.id, 0),
         "is_reposted": original_post.id in user_reposted_ids,
+        "like_preview": post_vote_previews.get(post.id, {}).get("likes", []),
+        "dislike_preview": post_vote_previews.get(post.id, {}).get("dislikes", []),
     }
     if poll_context:
         context.update(poll_context)

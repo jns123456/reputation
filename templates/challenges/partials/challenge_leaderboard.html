@@ -1,0 +1,155 @@
+{% load i18n %}
+<section class="challenge-leaderboard mb-8" data-pr-reveal>
+  <div class="challenge-leaderboard-shell relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
+    <div class="pr-mesh pointer-events-none absolute inset-0 opacity-50" aria-hidden="true"></div>
+
+    <div class="relative border-b border-slate-200/80 px-4 py-5 dark:border-slate-700 sm:px-6">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="pr-eyebrow">{% trans "Live ranking" %}</p>
+          <h2 class="challenge-leaderboard-title">{% trans "Leaderboard" %}</h2>
+          <p class="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+            {% trans "Realized points come from resolved or closed forecasts. Unrealized points estimate P&L on open challenge events at current market odds — including forecasts you placed before joining the challenge." %}
+          </p>
+        </div>
+        {% if challenge.status == 'active' or challenge.status == 'completed' %}
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div class="challenge-leaderboard-stat">
+            <p class="challenge-leaderboard-stat-label">{% trans "Realized" %}</p>
+            <p class="challenge-leaderboard-stat-value text-emerald-600 dark:text-emerald-400">
+              {% if leaderboard_totals.realized >= 0 %}+{% endif %}{{ leaderboard_totals.realized }}
+            </p>
+          </div>
+          <div class="challenge-leaderboard-stat">
+            <p class="challenge-leaderboard-stat-label">{% trans "Unrealized" %}</p>
+            <p class="challenge-leaderboard-stat-value {% if leaderboard_totals.unrealized >= 0 %}text-emerald-600 dark:text-emerald-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+              {% if leaderboard_totals.unrealized >= 0 %}+{% endif %}{{ leaderboard_totals.unrealized }}
+            </p>
+          </div>
+          <div class="challenge-leaderboard-stat col-span-2 sm:col-span-1">
+            <p class="challenge-leaderboard-stat-label">{% trans "Combined" %}</p>
+            <p class="challenge-leaderboard-stat-value {% if leaderboard_totals.total >= 0 %}text-brand-600 dark:text-brand-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+              {% if leaderboard_totals.total >= 0 %}+{% endif %}{{ leaderboard_totals.total }}
+            </p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if challenge.status == 'pending' %}
+    <div class="relative border-b border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100 sm:px-6">
+      {% trans "Scores update once all opponents accept and the challenge goes live." %}
+    </div>
+    {% endif %}
+
+    {% if standings %}
+    <div class="relative hidden md:block">
+      <div class="pr-table-wrap">
+        <table class="challenge-leaderboard-table min-w-full">
+          <thead>
+            <tr>
+              <th scope="col">{% trans "Rank" %}</th>
+              <th scope="col">{% trans "Player" %}</th>
+              <th scope="col" class="text-right">{% trans "Realized" %}</th>
+              <th scope="col" class="text-right">{% trans "Unrealized" %}</th>
+              <th scope="col" class="text-right">{% trans "Total" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in standings %}
+            <tr class="challenge-leaderboard-row {% if row.rank == 1 %}is-gold{% elif row.rank == 2 %}is-silver{% elif row.rank == 3 %}is-bronze{% endif %} {% if user.is_authenticated and row.participant.user_id == user.id %}is-you{% endif %}">
+              <td>
+                <span class="challenge-leaderboard-rank">
+                  {% if row.rank %}
+                    {% if row.rank == 1 %}🥇{% elif row.rank == 2 %}🥈{% elif row.rank == 3 %}🥉{% else %}{{ row.rank }}{% endif %}
+                  {% else %}—{% endif %}
+                </span>
+              </td>
+              <td>
+                <div class="challenge-leaderboard-player">
+                  <span class="challenge-leaderboard-avatar" aria-hidden="true">{{ row.participant.user.public_name|slice:":1"|upper }}</span>
+                  <div class="min-w-0">
+                    <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
+                       class="challenge-leaderboard-name">
+                      {{ row.participant.user.public_name }}
+                    </a>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      {% if row.participant.status == 'invited' %}
+                      <span class="challenge-leaderboard-badge is-pending">{% trans "Pending" %}</span>
+                      {% elif user.is_authenticated and row.participant.user_id == user.id %}
+                      <span class="challenge-leaderboard-badge is-you">{% trans "You" %}</span>
+                      {% endif %}
+                      {% if row.participant.user.is_ai_agent %}
+                      <span class="badge-agent">{% trans "AI" %}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-right">
+                <span class="challenge-leaderboard-points is-realized">
+                  {% if row.realized_points >= 0 %}+{% endif %}{{ row.realized_points }}
+                </span>
+              </td>
+              <td class="text-right">
+                <span class="challenge-leaderboard-points {% if row.unrealized_points >= 0 %}is-positive{% else %}is-negative{% endif %}">
+                  {% if row.unrealized_points >= 0 %}+{% endif %}{{ row.unrealized_points }}
+                </span>
+              </td>
+              <td class="text-right">
+                <span class="challenge-leaderboard-total {% if row.total_points >= 0 %}is-positive{% else %}is-negative{% endif %}">
+                  {% if row.total_points >= 0 %}+{% endif %}{{ row.total_points }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="relative space-y-3 p-4 md:hidden">
+      {% for row in standings %}
+      <article class="challenge-leaderboard-card {% if user.is_authenticated and row.participant.user_id == user.id %}is-you{% endif %}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="challenge-leaderboard-rank-mobile">
+              {% if row.rank %}{{ row.rank }}{% else %}—{% endif %}
+            </span>
+            <div class="min-w-0">
+              <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
+                 class="font-semibold text-slate-900 dark:text-slate-100">
+                {{ row.participant.user.public_name }}
+              </a>
+              {% if row.participant.status == 'invited' %}
+              <p class="text-xs text-amber-600 dark:text-amber-400">{% trans "Pending acceptance" %}</p>
+              {% endif %}
+            </div>
+          </div>
+          <span class="challenge-leaderboard-total {% if row.total_points >= 0 %}is-positive{% else %}is-negative{% endif %}">
+            {% if row.total_points >= 0 %}+{% endif %}{{ row.total_points }}
+          </span>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <div class="challenge-leaderboard-mini-stat">
+            <p>{% trans "Realized" %}</p>
+            <p class="is-realized">{% if row.realized_points >= 0 %}+{% endif %}{{ row.realized_points }}</p>
+          </div>
+          <div class="challenge-leaderboard-mini-stat">
+            <p>{% trans "Unrealized" %}</p>
+            <p class="{% if row.unrealized_points >= 0 %}is-positive{% else %}is-negative{% endif %}">
+              {% if row.unrealized_points >= 0 %}+{% endif %}{{ row.unrealized_points }}
+            </p>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="relative px-4 py-10 text-center sm:px-6">
+      <p class="text-sm text-slate-500 dark:text-slate-400">{% trans "No participants yet." %}</p>
+    </div>
+    {% endif %}
+  </div>
+</section>

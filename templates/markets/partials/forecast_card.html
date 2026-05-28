@@ -22,7 +22,7 @@
             {% if prediction.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
             <span class="text-slate-500 dark:text-slate-400">@{{ prediction.user.username }}</span>
             <span class="text-slate-400 dark:text-slate-600">·</span>
-            <time datetime="{{ prediction.created_at|date:'c' }}" class="text-slate-500 dark:text-slate-400">{{ prediction.created_at|timesince }}</time>
+            <time datetime="{{ prediction.created_at|date:'c' }}" class="text-slate-500 dark:text-slate-400">{% blocktrans with time=prediction.created_at|timesince %}{{ time }} ago{% endblocktrans %}</time>
             {% include "integrations/partials/attestation_badge.html" with attestation=prediction.verified_attestation %}
           </div>
 
@@ -30,7 +30,7 @@
             <span class="text-slate-600 dark:text-slate-400">{% trans "Forecast" %} </span>
             <strong class="{% if prediction.predicted_outcome|lower == 'yes' %}text-emerald-700 dark:text-emerald-400{% elif prediction.predicted_outcome|lower == 'no' %}text-red-700 dark:text-red-400{% else %}text-brand-700 dark:text-brand-400{% endif %}">
               {% if prediction.predicted_direction == "no" %}{% trans "No" %} {% endif %}
-              {{ prediction.predicted_outcome }}
+              {{ prediction.predicted_outcome|localized_outcome }}
             </strong>
             {% if reputation_stakes %}
             <span class="text-sm text-slate-500 dark:text-slate-400">
@@ -52,15 +52,29 @@
           <p class="mt-2 text-xs font-semibold {% if prediction.is_correct %}text-emerald-700 dark:text-emerald-400{% else %}text-red-700 dark:text-red-400{% endif %}">
             {% if prediction.is_correct %}{% trans "✓ Correct forecast" %}{% else %}{% trans "✗ Incorrect forecast" %}{% endif %}
           </p>
+          {% elif prediction.status == "exited" %}
+          {% with delta=prediction|prediction_reputation_delta %}
+          {% if delta != None %}
+          <p class="mt-2 text-xs font-semibold {% if delta >= 0 %}text-emerald-700 dark:text-emerald-400{% else %}text-red-700 dark:text-red-400{% endif %}">
+            {% if delta >= 0 %}
+            {% blocktrans with points=delta %}Exited forecast, +{{ points }} reputation realized{% endblocktrans %}
+            {% else %}
+            {% blocktrans with points=delta %}Exited forecast, {{ points }} reputation realized{% endblocktrans %}
+            {% endif %}
+          </p>
+          {% endif %}
+          {% endwith %}
           {% endif %}
 
-          {% include "dashboard/partials/forecast_post_actions.html" %}
+  {% include "dashboard/partials/forecast_post_actions.html" with like_preview=like_preview dislike_preview=dislike_preview %}
         </div>
 
         {% if prediction.status == "resolved" %}
         <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {% if prediction.is_correct %}bg-green-100 text-green-800 dark:bg-emerald-950/45 dark:text-emerald-300{% else %}bg-red-100 text-red-800 dark:bg-red-950/45 dark:text-red-300{% endif %}">
           {% if prediction.is_correct %}{% trans "Correct" %}{% else %}{% trans "Incorrect" %}{% endif %}
         </span>
+        {% elif prediction.status == "exited" %}
+        <span class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-950/45 dark:text-amber-300">{% trans "Exited" %}</span>
         {% else %}
         <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">{% trans "Pending" %}</span>
         {% endif %}

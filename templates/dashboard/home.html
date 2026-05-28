@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n reputation_filters %}
 
 {% block title %}{% trans "Dashboard" %}{% endblock %}
 
@@ -33,13 +33,16 @@
   <section class="mt-10" data-pr-reveal>
     <div class="flex items-center justify-between">
       <h2 class="pr-section-title">{% trans "Recent Predictions" %}</h2>
-      <a href="{% url 'predictions:history' username=user.username %}" class="text-sm text-brand-600 hover:underline">{% trans "Full history" %}</a>
+      <div class="flex items-center gap-3">
+        <a href="{% url 'predictions:open' %}" class="text-sm text-brand-600 hover:underline">{% trans "Open forecasts" %}</a>
+        <a href="{% url 'predictions:history' username=user.username %}" class="text-sm text-brand-600 hover:underline">{% trans "Full history" %}</a>
+      </div>
     </div>
     <div class="mt-4 space-y-3">
       {% for prediction in recent_predictions %}
       <div class="pr-panel p-4">
-        <a href="{% url 'markets:detail' slug=prediction.market.slug %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ prediction.market.title }}</a>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% trans "Forecast:" %} <strong>{{ prediction.predicted_outcome }}</strong></p>
+        <a href="{% url 'markets:detail' slug=prediction.market.slug %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ prediction.market.display_title }}</a>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% trans "Forecast:" %} <strong>{{ prediction.predicted_outcome|localized_outcome }}</strong></p>
         <span class="mt-2 inline-block rounded-full px-2 py-0.5 text-xs {% if prediction.status == 'resolved' %}{% if prediction.is_correct %}bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300{% endif %}{% else %}bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300{% endif %}">
           {{ prediction.get_status_display }}{% if prediction.is_correct != None %} — {% if prediction.is_correct %}{% trans "Correct" %}{% else %}{% trans "Incorrect" %}{% endif %}{% endif %}
         </span>

@@ -7,22 +7,34 @@
     <span class="text-xs font-medium tabular-nums">{{ prediction.comment_count }}</span>
   </a>
 
-  <span class="flex items-center gap-1.5" title="{% trans 'Likes' %}">
+  <button type="button"
+          class="group flex items-center gap-1.5 rounded-full px-1 py-0.5 transition hover:text-emerald-700"
+          title="{% trans 'Likes' %}"
+          hx-get="{% url 'comments:vote_reactions' %}?target_type=prediction&target_id={{ prediction.id }}&tab=likes"
+          hx-target="#vote-reactions-portal"
+          hx-swap="innerHTML">
     {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-[18px] w-[18px]" %}
     <span class="text-xs font-medium tabular-nums text-emerald-700">{{ prediction.like_count }}</span>
-  </span>
+  </button>
 
-  <span class="flex items-center gap-1.5" title="{% trans 'Dislikes' %}">
+  <button type="button"
+          class="group flex items-center gap-1.5 rounded-full px-1 py-0.5 transition hover:text-red-700"
+          title="{% trans 'Dislikes' %}"
+          hx-get="{% url 'comments:vote_reactions' %}?target_type=prediction&target_id={{ prediction.id }}&tab=dislikes"
+          hx-target="#vote-reactions-portal"
+          hx-swap="innerHTML">
     {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-[18px] w-[18px]" %}
     <span class="text-xs font-medium tabular-nums text-red-700">{{ prediction.dislike_count }}</span>
-  </span>
+  </button>
 
   <button type="button"
           class="group flex items-center rounded-full px-1 py-0.5 transition hover:text-brand-600"
           title="{% trans 'Share forecast' %}"
           data-share-url="{{ request.scheme }}://{{ request.get_host }}{% url 'markets:detail' slug=prediction.market.slug %}#forecast-{{ prediction.id }}"
-          data-share-title="{% blocktrans with name=prediction.user.public_name title=prediction.market.title|truncatechars:40 %}{{ name }} on {{ title }}{% endblocktrans %}"
+          data-share-title="{% blocktrans with name=prediction.user.public_name title=prediction.market.display_title|truncatechars:40 %}{{ name }} on {{ title }}{% endblocktrans %}"
           onclick="window.shareForumPost && window.shareForumPost(this)">
     <i data-lucide="share" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
   </button>
 </div>
+
+{% include "comments/partials/vote_reactions_preview.html" with target_type="prediction" target_id=prediction.id like_count=prediction.like_count dislike_count=prediction.dislike_count like_preview=like_preview dislike_preview=dislike_preview %}

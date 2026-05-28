@@ -22,7 +22,7 @@
         {% endif %}
         <span class="x-tweet-dot">·</span>
         <a href="{% url 'forum:detail' post_id=post.id %}" class="x-tweet-time">
-          <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }}</time>
+          <time datetime="{{ post.created_at|date:'c' }}">{% blocktrans with time=post.created_at|timesince %}{{ time }} ago{% endblocktrans %}</time>
         </a>
       </div>
       {% include "forum/partials/post_more_menu.html" with redirect_after_delete=False %}
@@ -38,7 +38,7 @@
     {% include "forum/partials/post_content.html" with post=post %}
     {% endif %}
 
-    {% include "forum/partials/post_actions.html" %}
+    {% include "forum/partials/post_actions.html" with like_preview=like_preview dislike_preview=dislike_preview %}
 
     {% if user.is_authenticated and user != post.user %}
     {% include "forum/partials/inline_reply_composer.html" with reply_context="feed" %}

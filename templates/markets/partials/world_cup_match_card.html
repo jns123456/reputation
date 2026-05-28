@@ -9,7 +9,7 @@
       </p>
       {% endif %}
       <h3 class="mt-1 text-base font-bold leading-snug text-slate-900 group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-400 sm:text-lg">
-        {{ market.title }}
+        {{ market.display_title }}
       </h3>
     </div>
     {% if market.image_url %}
@@ -47,6 +47,6 @@
     <span class="truncate font-medium">
       {% if market.volume_label %}{{ market.volume_label }}{% else %}{% trans "3-way result" %}{% endif %}
     </span>
-    <span class="shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700 dark:bg-indigo-950/45 dark:text-indigo-300">Polymarket</span>
+    <span class="shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700 dark:bg-indigo-950/45 dark:text-indigo-300">{% trans "Polymarket" %}</span>
   </div>
 </a>

@@ -1,0 +1,35 @@
+{% load i18n %}
+{% if active_challenges %}
+<div class="{% if compact %}mb-4{% else %}mb-5{% endif %} rounded-xl border border-indigo-200 bg-indigo-50/90 px-4 py-3 dark:border-indigo-800/60 dark:bg-indigo-950/35">
+  <div class="flex items-start gap-3">
+    <i data-lucide="swords" class="mt-0.5 h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-300" stroke-width="2" aria-hidden="true"></i>
+    <div class="min-w-0 text-sm text-indigo-950 dark:text-indigo-100">
+      {% if existing %}
+      <p class="font-semibold">{% trans "Challenge event — forecast already placed" %}</p>
+      <p class="mt-1 text-indigo-900/90 dark:text-indigo-200/90">
+        {% blocktrans count counter=active_challenges|length %}
+        Your open forecast on this event already counts for <strong>{{ counter }}</strong> active challenge and your global reputation — even if you placed it before the challenge started. You cannot open a second position on the same event.
+        {% plural %}
+        Your open forecast on this event already counts for <strong>{{ counter }}</strong> active challenges and your global reputation — even if you placed it before they started. You cannot open a second position on the same event.
+        {% endblocktrans %}
+      </p>
+      {% else %}
+      <p class="font-semibold">{% trans "Challenge event" %}</p>
+      <p class="mt-1 text-indigo-900/90 dark:text-indigo-200/90">
+        {% trans "This market is part of an active challenge. Your forecast will count toward the challenge leaderboard and your global reputation. Only one open forecast is allowed per event." %}
+      </p>
+      {% endif %}
+      <ul class="mt-2 space-y-1">
+        {% for challenge in active_challenges %}
+        <li>
+          <a href="{% url 'challenges:detail' pk=challenge.pk %}"
+             class="font-medium text-indigo-700 underline decoration-indigo-300 underline-offset-2 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-100">
+            {{ challenge.display_title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}

@@ -17,24 +17,24 @@
         <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="font-bold text-slate-900 hover:underline">
           {{ prediction.user.public_name }}
         </a>
-        {% if prediction.user.is_ai_agent %}<span class="badge-agent">AI</span>{% endif %}
+        {% if prediction.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
         <span class="text-slate-500">@{{ prediction.user.username }}</span>
         <span class="text-slate-400">·</span>
         <a href="{% url 'markets:detail' slug=market.slug %}#forecast-{{ prediction.id }}" class="text-slate-500 hover:underline">
-          <time datetime="{{ prediction.created_at|date:'c' }}">{{ prediction.created_at|timesince }}</time>
+          <time datetime="{{ prediction.created_at|date:'c' }}">{% blocktrans with time=prediction.created_at|timesince %}{{ time }} ago{% endblocktrans %}</time>
         </a>
         {% include "integrations/partials/attestation_badge.html" with attestation=prediction.verified_attestation %}
       </div>
 
       <a href="{% url 'markets:detail' slug=market.slug %}" class="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-brand-700 hover:bg-brand-50">
-        {% if market.category %}<span class="text-slate-500">{{ market.category }} ·</span>{% endif %}
-        <span class="truncate">{{ market.title }}</span>
+        {% if market.category %}<span class="text-slate-500">{{ market.display_category }} ·</span>{% endif %}
+        <span class="truncate">{{ market.display_title }}</span>
       </a>
 
       <div class="mt-2 text-[15px] leading-relaxed text-slate-900">
         <span class="text-slate-600">{% trans "Forecast" %} </span>
         <strong class="{% if prediction.predicted_outcome|lower == 'yes' %}text-emerald-700{% elif prediction.predicted_outcome|lower == 'no' %}text-red-700{% else %}text-brand-700{% endif %}">
-          {{ prediction.predicted_outcome }}
+          {{ prediction.predicted_outcome|localized_outcome }}
         </strong>
         {% if reputation_stakes %}
         <span class="text-sm text-slate-500">
@@ -52,9 +52,21 @@
       <p class="mt-2 text-xs font-semibold {% if prediction.is_correct %}text-emerald-700{% else %}text-red-700{% endif %}">
         {% if prediction.is_correct %}{% trans "✓ Correct forecast" %}{% else %}{% trans "✗ Incorrect forecast" %}{% endif %}
       </p>
+      {% elif prediction.status == "exited" %}
+      {% with delta=prediction|prediction_reputation_delta %}
+      {% if delta != None %}
+      <p class="mt-2 text-xs font-semibold {% if delta >= 0 %}text-emerald-700{% else %}text-red-700{% endif %}">
+        {% if delta >= 0 %}
+        {% blocktrans with points=delta %}Exited forecast, +{{ points }} reputation realized{% endblocktrans %}
+        {% else %}
+        {% blocktrans with points=delta %}Exited forecast, {{ points }} reputation realized{% endblocktrans %}
+        {% endif %}
+      </p>
+      {% endif %}
+      {% endwith %}
       {% endif %}
 
-      {% include "dashboard/partials/forecast_post_actions.html" with share_path=market.slug %}
+      {% include "dashboard/partials/forecast_post_actions.html" with share_path=market.slug like_preview=like_preview dislike_preview=dislike_preview %}
     </div>
   </div>
 </article>

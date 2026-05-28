@@ -50,7 +50,11 @@ def get_market_predictions(market, limit=50):
     qs = (
         Prediction.objects.filter(
             market=market,
-            status__in=[Prediction.Status.PENDING, Prediction.Status.RESOLVED],
+            status__in=[
+                Prediction.Status.PENDING,
+                Prediction.Status.RESOLVED,
+                Prediction.Status.EXITED,
+            ],
         )
         .exclude(status=Prediction.Status.VOID)
         .select_related("user", "user__profile")
@@ -79,10 +83,27 @@ def get_user_active_prediction(user, market):
     )
 
 
+def get_user_open_predictions(user, limit=100):
+    qs = (
+        Prediction.objects.filter(
+            user=user,
+            status=Prediction.Status.PENDING,
+            market__status=Market.Status.OPEN,
+        )
+        .select_related("user", "user__profile", "market")
+        .order_by("market__close_date", "-created_at")
+    )
+    return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
+
+
 def get_forecasts_feed(*, market_slug=None, limit=50):
     qs = (
         Prediction.objects.filter(
-            status__in=[Prediction.Status.PENDING, Prediction.Status.RESOLVED],
+            status__in=[
+                Prediction.Status.PENDING,
+                Prediction.Status.RESOLVED,
+                Prediction.Status.EXITED,
+            ],
         )
         .exclude(status=Prediction.Status.VOID)
         .select_related("user", "user__profile", "market")

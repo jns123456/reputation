@@ -13,6 +13,8 @@ urlpatterns = [
         RedirectView.as_view(pattern_name="dashboard:landing", permanent=False),
         name="about",
     ),
+    path("legal/", views.legal, name="legal"),
+    path("terms/", views.terms, name="terms"),
     path("faq/", views.faq, name="faq"),
     path("browse/<slug:slug>/", views.category_browse, name="category_browse"),
     path("world-cup/games/", views.world_cup_games, name="world_cup_games"),

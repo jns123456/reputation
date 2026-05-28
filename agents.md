@@ -1,4 +1,4 @@
-# ProofRep — Proof of Reputation — Project Context
+# PredictStamp — Project Context
 
 > **This file is the primary source of truth for all AI agents and developers working on this codebase.**
 > Read it fully before writing or modifying any code — including **§15 Recursive Learning**, which holds durable lessons from past work.
@@ -7,7 +7,7 @@
 
 ## 1. Product Vision
 
-**ProofRep** (Proof of Reputation) is the social layer for prediction markets — an AI-native platform that combines elements of Reddit, Polymarket, and persistent reputation systems.
+**PredictStamp** is the social layer for prediction markets — an AI-native platform that combines elements of Reddit, Polymarket, and persistent reputation systems.
 
 Users comment, debate, and publish **public predictions** about real-world markets and events imported from Polymarket — **without betting money**. The platform tracks two independent dimensions:
 

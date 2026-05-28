@@ -1,16 +1,18 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from accounts.models import User, UserFollow
 from accounts.follow_selectors import are_mutual_followers, get_mutual_followers
 from challenges.models import Challenge, ChallengeParticipant, MAX_CHALLENGE_MARKETS
-from challenges.selectors import get_challenge_standings
+from challenges.selectors import get_challenge_leaderboard, get_challenge_standings
 from challenges.services import (
     accept_challenge,
     create_challenge,
     decline_challenge,
 )
 from markets.models import Market
+from predictions.services import create_prediction
 
 
 class MutualFollowTests(TestCase):
@@ -133,7 +135,9 @@ class ChallengeFlowTests(TestCase):
     def test_standings_zero_before_active(self):
         standings = get_challenge_standings(self.challenge)
         self.assertEqual(len(standings), 1)
-        self.assertEqual(standings[0]["reputation_points"], 0)
+        self.assertEqual(standings[0]["realized_points"], 0)
+        self.assertEqual(standings[0]["unrealized_points"], 0)
+        self.assertEqual(standings[0]["total_points"], 0)
 
 
 class PriorPredictionChallengeTests(TestCase):
@@ -182,7 +186,32 @@ class PriorPredictionChallengeTests(TestCase):
 
         standings = get_challenge_standings(challenge)
         bob_row = next(row for row in standings if row["participant"].user_id == self.bob.id)
-        self.assertEqual(bob_row["reputation_points"], 10)
+        self.assertEqual(bob_row["realized_points"], 10)
+        self.assertEqual(bob_row["unrealized_points"], 0)
+        self.assertEqual(bob_row["total_points"], 10)
+
+    def test_pre_challenge_forecast_counts_as_unrealized_while_open(self):
+        create_prediction(
+            user=self.bob,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.5, "No": 0.5}
+        self.market.save(update_fields=["current_probability"])
+
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Retroactive open",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=challenge, user=self.bob)
+
+        standings = get_challenge_standings(challenge)
+        bob_row = next(row for row in standings if row["participant"].user_id == self.bob.id)
+        self.assertEqual(bob_row["realized_points"], 0)
+        self.assertEqual(bob_row["unrealized_points"], -40)
+        self.assertEqual(bob_row["total_points"], -40)
 
 
 class ResolutionSnapshotTests(TestCase):
@@ -247,6 +276,147 @@ class ResolutionSnapshotTests(TestCase):
             if row["participant"].user_id == self.alice.id
         )
         self.assertGreater(alice_after_two["reputation_points"], 0)
+
+
+class ChallengeLeaderboardTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market = Market.objects.create(
+            external_id="m-open",
+            title="Open event",
+            slug="open-event",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+    def test_leaderboard_includes_invited_participants_before_start(self):
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Pending duel",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        leaderboard = get_challenge_leaderboard(challenge)
+        self.assertEqual(len(leaderboard), 2)
+        self.assertTrue(all(row["total_points"] == 0 for row in leaderboard))
+
+    def test_unrealized_points_use_open_forecast_logic(self):
+        from predictions.services import create_prediction
+
+        create_prediction(
+            user=self.alice,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.5, "No": 0.5}
+        self.market.save(update_fields=["current_probability"])
+
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Live duel",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=challenge, user=self.bob)
+
+        standings = get_challenge_standings(challenge)
+        alice_row = next(row for row in standings if row["participant"].user_id == self.alice.id)
+        self.assertEqual(alice_row["realized_points"], 0)
+        self.assertEqual(alice_row["unrealized_points"], 10)
+        self.assertEqual(alice_row["total_points"], 10)
+
+
+class ChallengeForecastRulesTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="pass")
+        self.bob = User.objects.create_user(username="bob", password="pass")
+        from accounts.models import UserFollow
+
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market = Market.objects.create(
+            external_id="cf-m1",
+            title="Challenge forecast event",
+            slug="challenge-forecast-event",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.challenge = create_challenge(
+            creator=self.alice,
+            title="Forecast rules duel",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=self.challenge, user=self.bob)
+
+    def test_duplicate_forecast_error_mentions_challenge(self):
+        create_prediction(
+            user=self.alice,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        from predictions.services import build_duplicate_forecast_error, resolve_market_predictions
+
+        message = build_duplicate_forecast_error(user=self.alice, market=self.market)
+        self.assertIn("Forecast rules duel", message)
+        self.assertIn("global reputation", message.lower())
+
+    def test_resolved_challenge_forecast_updates_global_and_standings(self):
+        from predictions.services import resolve_market_predictions
+
+        create_prediction(
+            user=self.alice,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        rep_before = self.alice.profile.reputation_points
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save()
+        resolve_market_predictions(self.market)
+
+        self.alice.profile.refresh_from_db()
+        self.assertGreater(self.alice.profile.reputation_points, rep_before)
+
+        standings = get_challenge_standings(self.challenge)
+        alice_row = next(row for row in standings if row["participant"].user_id == self.alice.id)
+        self.assertGreater(alice_row["realized_points"], 0)
+
+
+class ChallengeEventSortTests(TestCase):
+    def test_markets_sorted_by_soonest_close_date(self):
+        from datetime import timedelta
+
+        from challenges.views import _sort_challenge_markets_by_expiration
+
+        soon = Market.objects.create(
+            external_id="sort-soon",
+            title="Soon",
+            slug="sort-soon",
+            status=Market.Status.OPEN,
+            close_date=timezone.now() + timedelta(days=1),
+        )
+        later = Market.objects.create(
+            external_id="sort-later",
+            title="Later",
+            slug="sort-later",
+            status=Market.Status.OPEN,
+            close_date=timezone.now() + timedelta(days=30),
+        )
+        no_date = Market.objects.create(
+            external_id="sort-none",
+            title="No date",
+            slug="sort-none",
+            status=Market.Status.OPEN,
+        )
+
+        ordered = _sort_challenge_markets_by_expiration([later, no_date, soon])
+        self.assertEqual([market.slug for market in ordered], ["sort-soon", "sort-later", "sort-none"])
 
 
 class ChallengeNotificationTests(TestCase):

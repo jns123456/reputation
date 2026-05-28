@@ -72,7 +72,7 @@ def profile_setup(request):
             user = form.save(commit=False)
             user.onboarding_completed = True
             user.save()
-            messages.success(request, _("Your profile is ready. Welcome to ProofRep!"))
+            messages.success(request, _("Your profile is ready. Welcome to PredictStamp!"))
             return redirect("accounts:profile", username=user.username)
     else:
         form = ProfileSetupForm(instance=request.user)
@@ -165,7 +165,7 @@ def bookmark_toggle(request):
     target_id = request.POST.get("target_id")
 
     if target_type not in (Bookmark.TargetType.PREDICTION, Bookmark.TargetType.PULSE_POST):
-        return HttpResponseBadRequest("Invalid bookmark target")
+        return HttpResponseBadRequest(_("Invalid bookmark target"))
 
     if target_type == Bookmark.TargetType.PREDICTION:
         from predictions.models import Prediction
@@ -239,7 +239,7 @@ def bookmarks_list(request):
 def follow_toggle(request):
     username = request.POST.get("username")
     if not username:
-        return HttpResponseBadRequest("Missing username")
+        return HttpResponseBadRequest(_("Missing username"))
 
     target_user = get_object_or_404(User, username=username)
     toggle_follow(follower=request.user, following_user=target_user)

@@ -113,15 +113,23 @@ def filter_markets_by_search(*, markets, search):
     needle = query.casefold()
     filtered = []
     for market in markets:
-        if (
-            needle in (market.title or "").casefold()
-            or needle in (market.category or "").casefold()
-        ):
+        if needle in (market.display_title or "").casefold():
             filtered.append(market)
             continue
-        description = getattr(market, "description", None) or ""
-        if needle in description.casefold():
+        if needle in (market.title or "").casefold() or needle in (market.title_es or "").casefold():
             filtered.append(market)
+            continue
+        if needle in (market.category or "").casefold():
+            filtered.append(market)
+            continue
+        for description in (
+            getattr(market, "display_description", "") or "",
+            getattr(market, "description", "") or "",
+            getattr(market, "description_es", "") or "",
+        ):
+            if needle in description.casefold():
+                filtered.append(market)
+                break
     return filtered
 
 

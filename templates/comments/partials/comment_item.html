@@ -7,9 +7,9 @@
      data-sort-user-popularity="{{ comment.user.profile.popularity_score }}">
   <div class="shrink-0">
     {% if user.is_authenticated and user == comment.user %}
-      {% include "comments/partials/vote_buttons.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" can_vote=False %}
+      {% include "comments/partials/vote_block.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" can_vote=False like_count=comment.like_count dislike_count=comment.dislike_count like_preview=comment.like_preview dislike_preview=comment.dislike_preview %}
     {% else %}
-      {% include "comments/partials/vote_buttons.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" %}
+      {% include "comments/partials/vote_block.html" with target_type="comment" target_id=comment.id score=comment.popularity_score user_vote=comment.user_vote layout="vertical" like_count=comment.like_count dislike_count=comment.dislike_count like_preview=comment.like_preview dislike_preview=comment.dislike_preview %}
     {% endif %}
   </div>
 

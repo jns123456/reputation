@@ -13,6 +13,7 @@ document.addEventListener("alpine:init", function () {
       { id: "leaderboards", label: "Rankings" },
       { id: "social", label: "Social" },
       { id: "future", label: "Future" },
+      { id: "company", label: "Company" },
       { id: "cta", label: "Start" },
     ],
     scrollTo: function (id) {

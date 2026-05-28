@@ -5,13 +5,18 @@ from django.urls import reverse
 
 from accounts.bookmark_selectors import get_user_bookmarked_ids
 from accounts.models import Bookmark
+from comments.models import Vote
 from comments.selectors import (
     attach_comment_votes,
+    attach_vote_summaries_to_comments,
     collect_comment_ids,
     get_market_prediction_discussions,
     get_user_comment_votes,
     get_user_prediction_votes,
+    get_vote_previews_for_targets,
+    get_vote_summaries_for_targets,
 )
+from challenges.selectors import get_active_challenge_contexts_for_market
 from integrations.kalshi.embed import build_kalshi_embed_context
 from integrations.polymarket.embed import build_polymarket_embed_context
 from integrations.celery_utils import enqueue_market_refresh_if_stale
@@ -117,9 +122,18 @@ def market_detail(request, slug):
     for threads in discussions.values():
         all_comment_ids.extend(collect_comment_ids(threads))
     comment_votes = get_user_comment_votes(request.user, all_comment_ids)
+    comment_vote_summaries = get_vote_summaries_for_targets(
+        target_type=Vote.TargetType.COMMENT,
+        target_ids=all_comment_ids,
+    )
     for threads in discussions.values():
         attach_comment_votes(threads, comment_votes)
+        attach_vote_summaries_to_comments(threads, comment_vote_summaries)
     prediction_votes = get_user_prediction_votes(request.user, [p.id for p in predictions])
+    prediction_vote_previews = get_vote_previews_for_targets(
+        target_type=Vote.TargetType.PREDICTION,
+        target_ids=[p.id for p in predictions],
+    )
     bookmarked_ids = get_user_bookmarked_ids(
         request.user,
         Bookmark.TargetType.PREDICTION,
@@ -128,10 +142,15 @@ def market_detail(request, slug):
 
     existing_forecast = None
     forecast_form = None
+    active_challenges = []
     if request.user.is_authenticated and market.is_open:
         existing_forecast = get_user_active_prediction(request.user, market)
         forecast_form = (
             ForecastForm(market=market) if not existing_forecast else None
+        )
+        active_challenges = get_active_challenge_contexts_for_market(
+            user=request.user,
+            market=market,
         )
 
     prediction_sections = [
@@ -146,6 +165,8 @@ def market_detail(request, slug):
                 probability_snapshot=p.probability_at_prediction_time,
                 predicted_direction=p.predicted_direction,
             ),
+            "like_preview": prediction_vote_previews.get(p.id, {}).get("likes", []),
+            "dislike_preview": prediction_vote_previews.get(p.id, {}).get("dislikes", []),
         }
         for p in predictions
     ]
@@ -161,5 +182,6 @@ def market_detail(request, slug):
             "kalshi_embed": build_kalshi_embed_context(market) if kalshi_enabled() else None,
             "forecast_form": forecast_form,
             "existing_forecast": existing_forecast,
+            "active_challenges": active_challenges,
         },
     )

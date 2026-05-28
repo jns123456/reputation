@@ -7,6 +7,32 @@ from predictions.models import Prediction
 from predictions.services import create_prediction
 
 
+class StaticPageTests(TestCase):
+    def test_legal_page_shows_company_details(self):
+        response = self.client.get("/legal/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "TAO FACTORY LLC")
+        self.assertContains(response, "ops@predictstamp.com")
+        self.assertContains(response, "No financial services")
+
+    def test_terms_page_shows_operator_and_no_betting_notice(self):
+        response = self.client.get("/terms/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "TAO FACTORY LLC")
+        self.assertContains(response, "ops@predictstamp.com")
+        self.assertContains(response, "No betting or trading")
+
+    def test_landing_about_shows_company_links(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "TAO FACTORY LLC")
+        self.assertContains(response, "/legal/")
+        self.assertContains(response, "/terms/")
+
+
 class ForecastsPageTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="forecastsuser", password="pass")

@@ -7,9 +7,20 @@ from comments.models import Comment, Vote
 from comments.services import cast_vote
 from markets.models import Market
 from predictions.models import Prediction
-from predictions.selectors import get_market_predictions
-from predictions.services import create_prediction, resolve_market_predictions, update_prediction
+from predictions.selectors import (
+    get_market_predictions,
+    get_user_active_prediction,
+    get_user_open_predictions,
+)
+from predictions.services import (
+    create_prediction,
+    exit_prediction,
+    resolve_market_predictions,
+    update_prediction,
+)
 from predictions.forms import ForecastForm
+from reputation.models import ReputationEvent
+from reputation.services import apply_reputation_for_prediction_exit
 
 
 class PredictionPermissionTests(TestCase):
@@ -47,12 +58,13 @@ class PredictionPermissionTests(TestCase):
             )
 
     def test_cannot_create_duplicate_forecast(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as ctx:
             create_prediction(
                 user=self.user,
                 market=self.market,
                 predicted_outcome="No",
             )
+        self.assertIn("Only one open forecast", str(ctx.exception))
 
     def test_create_prediction_stores_probability_snapshot(self):
         self.market.current_probability = {"Yes": 0.35, "No": 0.65}
@@ -177,6 +189,195 @@ class PredictionPermissionTests(TestCase):
         self.assertEqual(prediction.comment_count, 1)
         self.assertEqual(prediction.like_count, 1)
         self.assertEqual(prediction.dislike_count, 1)
+
+
+class PredictionExitTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="exiter", password="pass")
+        self.other = User.objects.create_user(username="other-exiter", password="pass")
+        self.market = Market.objects.create(
+            external_id="exit-m1",
+            title="Exit test",
+            slug="exit-test",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+    def test_exit_prediction_realizes_positive_delta_and_frees_slot(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+
+        exited = exit_prediction(prediction=prediction, user=self.user)
+        exited.refresh_from_db()
+        self.user.profile.refresh_from_db()
+
+        self.assertEqual(exited.status, Prediction.Status.EXITED)
+        self.assertEqual(exited.probability_at_exit_time["Yes"], 0.55)
+        self.assertEqual(self.user.profile.reputation_points, 15)
+        self.assertEqual(self.user.profile.neutral_prediction_count, 0)
+        self.assertEqual(self.user.profile.correct_prediction_count, 0)
+        self.assertEqual(self.user.profile.incorrect_prediction_count, 0)
+        self.assertIsNone(get_user_active_prediction(self.user, self.market))
+        self.assertEqual(
+            ReputationEvent.objects.get(prediction=exited).event_type,
+            ReputationEvent.EventType.EXITED_PREDICTION,
+        )
+
+        next_prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="No",
+        )
+        self.assertEqual(next_prediction.status, Prediction.Status.PENDING)
+
+    def test_exit_prediction_realizes_negative_delta_for_no_side(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+            predicted_direction=Prediction.Direction.NO,
+        )
+        self.market.current_probability = {"Yes": 0.7, "No": 0.3}
+        self.market.save(update_fields=["current_probability"])
+
+        exit_prediction(prediction=prediction, user=self.user)
+        self.user.profile.refresh_from_db()
+
+        self.assertEqual(self.user.profile.reputation_points, -30)
+
+    def test_other_user_cannot_exit_prediction(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+
+        with self.assertRaises(PermissionError):
+            exit_prediction(prediction=prediction, user=self.other)
+
+    def test_cannot_exit_closed_market(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.status = Market.Status.CLOSED
+        self.market.save(update_fields=["status"])
+
+        with self.assertRaises(ValueError):
+            exit_prediction(prediction=prediction, user=self.user)
+
+    def test_exited_predictions_are_not_resolved_later(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.5, "No": 0.5}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save(update_fields=["status", "resolved_outcome"])
+        resolved = resolve_market_predictions(self.market)
+        prediction.refresh_from_db()
+        self.user.profile.refresh_from_db()
+
+        self.assertEqual(resolved, [])
+        self.assertEqual(prediction.status, Prediction.Status.EXITED)
+        self.assertEqual(self.user.profile.reputation_points, 10)
+        self.assertEqual(ReputationEvent.objects.filter(prediction=prediction).count(), 1)
+
+    def test_exit_reputation_application_is_idempotent(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+        prediction.refresh_from_db()
+
+        self.assertIsNone(apply_reputation_for_prediction_exit(prediction))
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.reputation_points, 15)
+        self.assertEqual(ReputationEvent.objects.filter(prediction=prediction).count(), 1)
+
+
+class OpenPredictionsPageTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="open-user",
+            password="pass",
+            onboarding_completed=True,
+        )
+        self.market = Market.objects.create(
+            external_id="open-m1",
+            title="Open forecast market",
+            slug="open-forecast-market",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+        self.prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+            reasoning="Open position",
+        )
+
+    def test_open_predictions_selector_returns_only_pending_open_market_forecasts(self):
+        closed_market = Market.objects.create(
+            external_id="open-m2",
+            title="Closed forecast market",
+            slug="closed-forecast-market",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        create_prediction(
+            user=self.user,
+            market=closed_market,
+            predicted_outcome="Yes",
+        )
+        closed_market.status = Market.Status.CLOSED
+        closed_market.save(update_fields=["status"])
+
+        open_predictions = list(get_user_open_predictions(self.user))
+
+        self.assertEqual(open_predictions, [self.prediction])
+
+    def test_open_predictions_page_shows_unrealized_reputation_and_exit_action(self):
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("predictions:open"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Open forecast market")
+        self.assertContains(response, "+15")
+        self.assertContains(response, reverse(
+            "predictions:exit",
+            kwargs={"slug": self.market.slug, "prediction_id": self.prediction.id},
+        ))
+
+    def test_open_predictions_page_requires_login(self):
+        response = self.client.get(reverse("predictions:open"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response["Location"])
 
 
 class ForecastFormTests(TestCase):

@@ -1,14 +1,14 @@
-# Spanish translations for ProofRep.
-# Copyright (C) 2026 ProofRep
+# Spanish translations for PredictStamp.
+# Copyright (C) 2026 PredictStamp
 # This file is distributed under the same license as the project.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ProofRep\n"
+"Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-27 16:49+0000\n"
+"POT-Creation-Date: 2026-05-28 19:06+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
-"Last-Translator: ProofRep\n"
+"Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -16,58 +16,99 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: accounts/forms.py:17
-msgid "Use anonymous profile"
-msgstr "Usar perfil anónimo"
+#, fuzzy
+#| msgid "Image must be 5 MB or smaller."
+msgid "Profile photo must be 5 MB or smaller."
+msgstr "La imagen debe tener 5 MB o menos."
 
-#: accounts/forms.py:91
+msgid "Upload a JPEG, PNG, WebP, or GIF image."
+msgstr "Sube una imagen JPEG, PNG, WebP o GIF."
+
+msgid "Users cannot follow themselves."
+msgstr "No puedes seguirte a ti mismo."
+
+msgid "How do you want to appear?"
+msgstr "¿Cómo quieres aparecer?"
+
+msgid "Display name"
+msgstr "Nombre para mostrar"
+
+msgid "How others will see you"
+msgstr "Cómo te verán los demás"
+
+msgid "Request verified identity"
+msgstr "Solicitar identidad verificada"
+
+msgid ""
+"Verified accounts get a badge on their profile and posts. Our team reviews "
+"requests — no payment required."
+msgstr ""
+"Las cuentas verificadas reciben una insignia en su perfil y publicaciones. "
+"Nuestro equipo revisa las solicitudes — sin pago."
+
+#, fuzzy
+#| msgid "(optional)"
+msgid "Short bio (optional)"
+msgstr "(opcional)"
+
+msgid "Bio"
+msgstr "Biografía"
+
+msgid "Choose a pseudonym — it becomes your public name."
+msgstr "Elige un seudónimo — será tu nombre público."
+
+msgid ""
+"Pick an alias so others can recognize you without seeing your username."
+msgstr "Elige un alias para que otros te reconozcan sin ver tu @usuario."
+
+#, fuzzy
+#| msgid "Profile"
+msgid "Profile photo"
+msgstr "Tu perfil"
+
+#, fuzzy
+#| msgid "Upload a JPEG, PNG, WebP, or GIF image."
+msgid "JPEG, PNG, WebP, or GIF. Max 5 MB."
+msgstr "Sube una imagen JPEG, PNG, WebP o GIF."
+
+msgid "Your account is already verified."
+msgstr "Tu cuenta ya está verificada."
+
 msgid "Forecasts from users you follow"
 msgstr "Pronósticos de los usuarios que sigues"
 
-#: accounts/forms.py:92
 msgid "When someone follows you"
-msgstr "Kur dikush ju ndjek"
+msgstr "Cuando alguien te sigue"
 
-#: accounts/forms.py:93
 msgid "Upvotes and downvotes on your content"
 msgstr "Upvotes y downvotes en tu contenido"
 
-#: accounts/forms.py:94
 msgid "When your forecasts are resolved"
 msgstr "Cuando se resuelvan tus previsiones"
 
-#: accounts/forms.py:95
 msgid "Challenge invitations and updates"
 msgstr "Invitaciones y actualizaciones del desafío"
 
-#: accounts/forms.py:96
-#| msgid "Notifications"
 msgid "In-app notifications"
 msgstr "Notificaciones"
 
-#: accounts/forms.py:97
-#| msgid "Notifications"
 msgid "Email notifications"
 msgstr "Notificaciones"
 
-#: accounts/forms.py:101
 msgid "Get notified when someone you follow makes a new prediction."
 msgstr ""
 "Recibe una notificación cuando alguien a quien sigues haga una nueva "
 "predicción."
 
-#: accounts/forms.py:103
 msgid "Get notified when a user starts following you."
 msgstr "Recibe notificaciones cuando un usuario empiece a seguirte."
 
-#: accounts/forms.py:105
 msgid ""
 "Get notified when someone likes or dislikes your comments or forecasts."
 msgstr ""
 "Recibe notificaciones cuando a alguien le gusten o disgusten tus comentarios"
 " o pronósticos."
 
-#: accounts/forms.py:108
 msgid ""
 "Get notified when a market closes and see the reputation points you gained "
 "or lost."
@@ -75,547 +116,562 @@ msgstr ""
 "Reciba notificaciones cuando cierre un mercado y vea los puntos de "
 "reputación que ganó o perdió."
 
-#: accounts/forms.py:111
 msgid ""
 "Get notified about challenge invites, resolved events, and final results."
 msgstr ""
 "Recibe notificaciones sobre las invitaciones al desafío, los eventos "
 "resueltos y los resultados finales."
 
-#: accounts/forms.py:113
 msgid "Show alerts in your notification bell."
 msgstr "Muestra alertas en tu timbre de notificación."
 
-#: accounts/forms.py:114
 msgid "Send alerts to your email address (when email is configured)."
 msgstr ""
 "Envíe alertas a su dirección de correo electrónico (cuando el correo "
 "electrónico esté configurado)."
 
-#: accounts/templatetags/notification_tags.py:97
+msgid "Anonymous"
+msgstr "Anónimo"
+
 msgid "started following you"
 msgstr "ha empezado a seguirte"
 
-#: accounts/templatetags/notification_tags.py:108
 msgid "published a forecast on"
 msgstr "publicó un pronóstico el"
 
-#: accounts/templatetags/notification_tags.py:115
-#| msgid "Build your"
 msgid "liked your"
 msgstr "Construye tu"
 
-#: accounts/templatetags/notification_tags.py:119
-#| msgid "Build your"
 msgid "disliked your"
 msgstr "Construye tu"
 
-#: accounts/templatetags/notification_tags.py:128
 msgid "correct"
 msgstr "corecto"
 
-#: accounts/templatetags/notification_tags.py:128
 msgid "incorrect"
-msgstr "incorrect"
+msgstr "incorrecto"
 
-#: accounts/templatetags/notification_tags.py:134
-#: dashboard/templatetags/reputation_filters.py:66
-#| msgid "Markets"
 msgid "Market"
-msgstr "Mercados"
+msgstr "Mercado"
 
-#: accounts/templatetags/notification_tags.py:137
 msgid "was resolved. Your forecast was"
 msgstr "se resolvió. Su pronóstico era"
 
-#: accounts/templatetags/notification_tags.py:140
-#| msgid "Reputation"
 msgid "reputation points"
 msgstr "Reputación"
 
-#: accounts/templatetags/notification_tags.py:149
 msgid "challenged you to"
 msgstr "te desafió a"
 
-#: accounts/templatetags/notification_tags.py:160
 msgid "accepted your challenge"
 msgstr "%@ ha aceptado tu desafío"
 
-#: accounts/templatetags/notification_tags.py:168
 msgid "An event"
 msgstr "Un evento"
 
-#: accounts/templatetags/notification_tags.py:171
 msgid "Result"
 msgstr "Resultado"
 
-#: accounts/templatetags/notification_tags.py:184
-#: accounts/templatetags/notification_tags.py:214
-#: templates/challenges/challenge_detail.html:126
 msgid "Standings"
 msgstr "Clasificación"
 
-#: accounts/templatetags/notification_tags.py:190
-#: accounts/templatetags/notification_tags.py:208
 msgid "In"
 msgstr "En"
 
-#: accounts/templatetags/notification_tags.py:193
-#: accounts/templatetags/notification_tags.py:212
 msgid "was resolved."
 msgstr "se resolvió."
 
-#: accounts/templatetags/notification_tags.py:227
 msgid "You won"
 msgstr "Has ganado"
 
-#: accounts/templatetags/notification_tags.py:237
 msgid "is complete. Winner:"
 msgstr "está completo. Ganador:"
 
-#: accounts/templatetags/notification_tags.py:245
 msgid "ended in a tie"
 msgstr "terminado en un empate"
 
-#: accounts/templatetags/notification_tags.py:250
-#: accounts/templatetags/notification_tags.py:262
 msgid "Final standings"
 msgstr "Posiciones finales"
 
-#: accounts/templatetags/notification_tags.py:267
-#| msgid "Loading notifications…"
 msgid "sent you a notification"
 msgstr "Cargando notificaciones…"
 
-#: accounts/templatetags/notification_tags.py:272
 msgid "comment"
 msgstr "Comentario"
 
-#: accounts/templatetags/notification_tags.py:274
-#| msgid "Forecasts"
 msgid "forecast"
 msgstr "Pronósticos"
 
-#: accounts/templatetags/notification_tags.py:275
 msgid "content"
 msgstr "contenido"
 
-#: accounts/views.py:200
+#| msgid "Your profile is ready. Welcome to ProofRep!"
+msgid "Your profile is ready. Welcome to PredictStamp!"
+msgstr "Tu perfil está listo. ¡Bienvenido a PredictStamp!"
+
+#, fuzzy
+#| msgid "Profile"
+msgid "Profile updated."
+msgstr "Tu perfil"
+
+msgid "Profile photo updated."
+msgstr "Foto de perfil actualizada."
+
+msgid "Invalid profile photo."
+msgstr "Foto de perfil no válida."
+
+msgid "Invalid bookmark target"
+msgstr "Destino de marcador no válido"
+
+msgid "Missing username"
+msgstr "Falta el nombre de usuario"
+
 msgid "Alert preferences saved."
 msgstr "Preferencias de alerta guardadas."
 
-#: accounts/views.py:257
 msgid "All notifications marked as read."
 msgstr "Se han marcado todas las notificaciones como leídas"
 
-#: challenges/forms.py:15
 msgid "Optional challenge name"
 msgstr "Nombre del desafío (opcional)"
 
-#: challenges/forms.py:28 challenges/services.py:22
 msgid "Select at least one event."
 msgstr "Selecciona al menos un evento."
 
-#: challenges/forms.py:36 challenges/services.py:31
 msgid "Select at least one user to challenge."
 msgstr "Seleccione al menos un usuario para desafiar."
 
-#: challenges/forms.py:56
 #, python-format
 msgid "You can select at most %(max)s events."
 msgstr "Puede seleccionar como máximo %(max)s eventos."
 
-#: challenges/forms.py:65 challenges/services.py:33
 msgid "You cannot challenge yourself."
 msgstr "No puedes desafiarte a ti mismo."
 
-#: challenges/models.py:11 templates/markets/partials/forecast_card.html:63
-#: templates/predictions/partials/prediction_history_item.html:62
 msgid "Pending"
 msgstr "Pendiente"
 
-#: challenges/models.py:12
 msgid "Active"
 msgstr "Activo"
 
-#: challenges/models.py:13
 msgid "Completed"
 msgstr "Completado"
 
-#: challenges/models.py:14
 msgid "Cancelled"
-msgstr "Cancelada"
+msgstr "Cancelado"
 
-#: challenges/notification_formatting.py:14
+#, python-format
+msgid "Challenge with %(count)s event"
+msgid_plural "Challenge with %(count)s events"
+msgstr[0] "Desafío con %(count)s evento"
+msgstr[1] "Desafío con %(count)s eventos"
+
+msgid "Invited"
+msgstr "Invitado"
+
+msgid "Accepted"
+msgstr "Aceptado"
+
+msgid "Declined"
+msgstr "Rechazado"
+
+msgid "The challenge creator cannot be invited."
+msgstr "El creador del desafío no puede ser invitado."
+
 #, python-format
 msgid " · +%(count)s more"
 msgstr "%(count)s Más ▼"
 
-#: challenges/services.py:25
 #, python-format
 msgid "A challenge can include at most %(max)s events."
 msgstr "Un desafío puede incluir como máximo %(max)s eventos."
 
-#: challenges/services.py:29
 msgid "Duplicate events are not allowed."
 msgstr "No se permiten eventos duplicados."
 
-#: challenges/services.py:37
 msgid "One or more selected events were not found."
 msgstr "No se han encontrado uno o más eventos seleccionados."
 
-#: challenges/services.py:44
 msgid "One or more selected users were not found."
 msgstr "No se han encontrado uno o más usuarios seleccionados."
 
-#: challenges/services.py:49
 #, python-format
 msgid "You and @%(username)s must follow each other to challenge them."
 msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
 
-#: challenges/services.py:93 challenges/services.py:118
 msgid "You are not part of this challenge."
 msgstr "No eres parte de este desafío."
 
-#: challenges/services.py:95
 msgid "You already declined this challenge."
 msgstr "Ya has rechazado este desafío."
 
-#: challenges/services.py:120
 msgid "The creator cannot decline their own challenge."
 msgstr "El creador no puede rechazar su propio desafío."
 
-#: challenges/services.py:135
 msgid "Only the creator can cancel a challenge."
 msgstr "Solo el creador puede cancelar un desafío."
 
-#: challenges/services.py:137
 msgid "Only pending challenges can be cancelled."
 msgstr "Solo se pueden cancelar los desafíos pendientes."
 
-#: challenges/views.py:70
 msgid "Challenge created. Waiting for opponents to accept."
 msgstr "Desafío creado. A la espera de que los oponentes acepten."
 
-#: challenges/views.py:162
 msgid "You joined the challenge."
 msgstr "¡Se acaba de unir al desafío!"
 
-#: challenges/views.py:174
 msgid "You declined the challenge."
 msgstr "Has rechazado el reto."
 
-#: challenges/views.py:186
-#| msgid "Challenges"
 msgid "Challenge cancelled."
 msgstr "Desafíos"
 
-#: comments/forms.py:16
 msgid "Share your thoughts…"
 msgstr "Comparte tus opiniones"
 
-#: comments/services.py:14
 msgid "Parent comment belongs to a different market."
 msgstr "El comentario de los padres pertenece a un mercado diferente."
 
-#: comments/services.py:16
 msgid "Parent comment belongs to a different forecast thread."
 msgstr "El comentario principal pertenece a un hilo de pronóstico diferente."
 
-#: comments/services.py:21
 msgid "Prediction belongs to a different market."
 msgstr "La predicción pertenece a un mercado diferente."
 
-#: comments/services.py:61
 msgid "Vote target not found."
 msgstr "Objetivo de voto no encontrado."
 
-#: comments/services.py:66
 msgid "You cannot vote on your own forecast."
 msgstr "No puede votar por su propio pronóstico."
 
-#: comments/services.py:68
 msgid "You cannot vote on your own post."
 msgstr "No puedes votar por tu propio post"
 
-#: comments/services.py:69
 msgid "Cannot vote on your own content."
 msgstr "No puedes votar sobre tu propio contenido."
 
-#: comments/services.py:129
 msgid "You cannot comment on your own forecast. Reply to others instead."
 msgstr ""
 "No puedes comentar tu propia previsión. Responde a los demás en su lugar."
 
-#: comments/services.py:132 pulse/services.py:118
 msgid "You cannot reply to your own comment."
 msgstr "No puede responder a su propio comentario."
 
-#: comments/views.py:41
 msgid "Invalid comment"
 msgstr "Comentario no válido"
 
-#: comments/views.py:54
 msgid "Comments must be posted on a forecast thread."
 msgstr "Los comentarios deben publicarse en un hilo de pronóstico."
 
-#: comments/views.py:89
 msgid "Invalid target type"
 msgstr "Tipo de destino no válido"
 
-#: dashboard/templatetags/reputation_filters.py:63
+#, fuzzy
+#| msgid "Invalid target type"
+msgid "Invalid target id"
+msgstr "Tipo de destino no válido"
+
 msgid "Kalshi"
 msgstr "Kalshi"
 
-#: dashboard/templatetags/reputation_filters.py:65
-#| msgid "All markets"
 msgid "Polymarket"
 msgstr "Todos los mercados"
 
-#: markets/categories.py:30 templates/dashboard/about.html:589
 msgid "Crypto"
 msgstr "Criptomonedas"
 
-#: markets/categories.py:31
 msgid "Bitcoin, Ethereum, and digital assets"
 msgstr "Bitcoin, Ethereum y activos digitales"
 
-#: markets/categories.py:56
 msgid "Economy"
 msgstr "Economía"
 
-#: markets/categories.py:57
 msgid "Rates, inflation, jobs, and macro trends"
 msgstr "Tasas, inflación, empleo y macrotendencias"
 
-#: markets/categories.py:82
 msgid "Politics"
 msgstr "Política"
 
-#: markets/categories.py:83
 msgid "Elections, policy, and government"
 msgstr "Elecciones, política y gobierno"
 
-#: markets/categories.py:109 templates/dashboard/about.html:588
 msgid "Sports"
 msgstr "Deportes"
 
-#: markets/categories.py:110
 msgid "Leagues, tournaments, and championships"
 msgstr "Ligas, torneos y campeonatos"
 
-#: markets/categories.py:139
 msgid "FIFA World Cup 2026"
 msgstr "Copa del Mundo"
 
-#: markets/categories.py:140
 msgid "Match forecasts — win, draw, or loss"
 msgstr "Pronósticos de partidos: ganar, empatar o perder"
 
-#: markets/categories.py:154
 msgid "Pop Culture"
 msgstr "Cultura Pop"
 
-#: markets/categories.py:155
 msgid "Movies, games, music, and entertainment"
 msgstr "Películas, juegos, música y entretenimiento"
 
-#: markets/categories.py:179
 msgid "Science & Tech"
 msgstr "Ciencia y tecnología"
 
-#: markets/categories.py:180
 msgid "AI, space, breakthroughs, and innovation"
 msgstr "La IA, el espacio, los avances y la innovación"
 
-#: markets/categories.py:203
 msgid "World"
 msgstr "Mundo"
 
-#: markets/categories.py:204
 msgid "Geopolitics, conflicts, and global events"
 msgstr "Geopolítica, conflictos y eventos globales"
 
-#: markets/categories.py:230
 msgid "Other"
 msgstr "Otros"
 
-#: markets/categories.py:231
 msgid "More markets across the platform"
 msgstr "Más mercados en toda la plataforma"
 
-#: markets/models.py:14 templates/markets/market_list.html:31
-msgid "Open"
-msgstr "Abrir"
+msgid "Yes"
+msgstr "Sí"
 
-#: markets/models.py:15 templates/markets/market_list.html:32
+msgid "No"
+msgstr "No"
+
+msgid "Draw"
+msgstr "Empate"
+
+msgid "Open"
+msgstr "Abierto"
+
 msgid "Closed"
 msgstr "Cerrado"
 
-#: markets/models.py:16 markets/models.py:158
-#: templates/markets/market_list.html:33
 msgid "Resolved"
 msgstr "Resuelto"
 
-#: markets/models.py:171
 #, python-format
 msgid "%(days)s day left"
 msgid_plural "%(days)s days left"
-msgstr[0] "%(days)s día restante"
-msgstr[1] "%(days)s días restantes"
+msgstr[0] "Queda %(days)s día"
+msgstr[1] "Quedan %(days)s días"
 
-#: markets/models.py:176
 msgid "1 day left"
-msgstr "1 day left"
+msgstr "Queda 1 día"
 
-#: markets/models.py:178
 msgid "Ends today"
 msgstr "Finaliza hoy"
 
-#: markets/models.py:181
 msgid "Ended yesterday"
 msgstr "Finalizó ayer"
 
-#: markets/models.py:183
 #, python-format
 msgid "Ended %(past)s day ago"
 msgid_plural "Ended %(past)s days ago"
 msgstr[0] "Terminó hace %(past)s día"
 msgstr[1] "Terminó hace %(past)s días"
 
-#: markets/sort_options.py:24
 msgid "Recommended mix"
 msgstr "Mezcla recomendada"
 
-#: markets/sort_options.py:25
 msgid "Trending"
 msgstr "Actualidad"
 
-#: markets/sort_options.py:26
 msgid "Volume"
 msgstr "Volumen"
 
-#: markets/sort_options.py:27
 msgid "Liquidity"
 msgstr "Liquidez"
 
-#: markets/sort_options.py:28
 msgid "Newest"
 msgstr "La más reciente"
 
-#: markets/sort_options.py:29
 msgid "Ending soon"
 msgstr "Termina pronto..."
 
-#: predictions/forms.py:20
 msgid "What data, news, or logic supports your pick?"
 msgstr "¿Qué datos, noticias o lógica respaldan su elección?"
 
-#: predictions/forms.py:32
-#: templates/predictions/partials/forecast_form.html:12
-#| msgid "Forecasts"
 msgid "Your forecast"
+msgstr "Tu pronóstico"
+
+#, fuzzy
+#| msgid "Forecasts"
+msgid "Forecast side"
 msgstr "Pronósticos"
 
-#: predictions/forms.py:35
 msgid "Explain your forecast"
 msgstr "Explica tu pronóstico"
 
-#: predictions/forms.py:37
 msgid "Optional — shown on your public forecast. Max 2,000 characters."
 msgstr ""
 "Opcional: se muestra en su pronóstico público. Máximo 2.000 caracteres."
 
-#: predictions/forms.py:56
 msgid "Choose a valid outcome for this market."
 msgstr "Elija un resultado válido para este mercado."
 
-#: predictions/forms.py:62
-#| msgid "Choose a topic to browse open forecasts."
+#, fuzzy
+#| msgid "Choose a valid outcome for this market."
+msgid "Choose Yes or No for this outcome."
+msgstr "Elija un resultado válido para este mercado."
+
 msgid "This market is no longer open for forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#: predictions/views.py:24
-msgid "Your forecast cannot be changed after it is posted."
-msgstr "Su pronóstico no se puede cambiar después de que se publique."
+msgid "Exited"
+msgstr "Salido"
 
-#: predictions/views.py:36
+msgid "Void"
+msgstr "Anulado"
+
+#, python-format
+msgid ""
+"You already have an open forecast on this challenge event (%(challenges)s). "
+"Only one open forecast is allowed per event — exit your current position "
+"first. It already counts toward the challenge leaderboard and your global "
+"reputation."
+msgstr ""
+
+msgid ""
+"You already have an open forecast on this market. Only one open forecast is "
+"allowed per event — exit it before placing another."
+msgstr ""
+
+msgid "Cannot predict on a closed or resolved market."
+msgstr "No puedes pronosticar en un mercado cerrado o resuelto."
+
+msgid "Cannot edit another user's prediction."
+msgstr "No puedes editar el pronóstico de otro usuario."
+
+msgid "This prediction cannot be edited."
+msgstr "Este pronóstico no se puede editar."
+
+msgid "Cannot exit another user's prediction."
+msgstr "No puedes cerrar el pronóstico de otro usuario."
+
+msgid "Only active forecasts can be exited."
+msgstr "Solo los pronósticos activos se pueden cerrar."
+
+msgid "Cannot exit a forecast after the market has closed."
+msgstr "No puedes cerrar un pronóstico después de que el mercado cierre."
+
 msgid "Your forecast was posted."
 msgstr "Tu pronóstico se ha publicado."
 
-#: pulse/forms.py:25
-msgid "What's on your mind?"
-msgstr "¿Qué tienes en mente?"
+#, fuzzy
+#| msgid "You cannot vote on your own forecast."
+msgid "You cannot exit another user's forecast."
+msgstr "No puede votar por su propio pronóstico."
 
-#: pulse/forms.py:41
+#, python-format
+msgid "Forecast exited. You earned +%(points)s reputation."
+msgstr "Pronóstico cerrado. Ganaste +%(points)s de reputación."
+
+#, python-format
+msgid "Forecast exited. You realized %(points)s reputation."
+msgstr "Pronóstico cerrado. Realizaste %(points)s de reputación."
+
+msgid "Forecast exited. You can enter again."
+msgstr "Pronóstico cerrado. Puedes volver a participar."
+
+msgid "What's happening?"
+msgstr "¿Qué está pasando?"
+
 msgid "Image must be 5 MB or smaller."
 msgstr "La imagen debe tener 5 MB o menos."
 
-#: pulse/forms.py:45
-msgid "Upload a JPEG, PNG, WebP, or GIF image."
-msgstr "Sube una imagen JPEG, PNG, WebP o GIF."
-
-#: pulse/forms.py:54
-msgid "Add text or an image to your post."
+#, fuzzy
+#| msgid "Add text or an image to your post."
+msgid "Add text, an image, or a poll to your post."
 msgstr "Añade texto o una imagen a tu publicación."
 
-#: pulse/forms.py:63 templates/forum/partials/comment_form.html:2
 msgid "Write a comment…"
 msgstr "Escribir un comentario..."
 
-#: pulse/services.py:32
+msgid "Polls can't include images."
+msgstr "Las encuestas no pueden incluir imágenes."
+
+msgid "Add at least two poll choices."
+msgstr "Añade al menos dos opciones."
+
+msgid "Polls can have at most four choices."
+msgstr "Las encuestas pueden tener como máximo cuatro opciones."
+
+#, python-format
+msgid "Each poll choice must be %(max)s characters or fewer."
+msgstr "Cada opción debe tener %(max)s caracteres o menos."
+
+#, fuzzy
+#| msgid "Add text or an image to your post."
+msgid "Add text or poll choices to your post."
+msgstr "Añade texto o una imagen a tu publicación."
+
+msgid "This poll has ended."
+msgstr "Esta encuesta ha terminado."
+
+#, fuzzy
+#| msgid "Invalid comment"
+msgid "Invalid poll choice."
+msgstr "Comentario no válido"
+
+#, fuzzy
+#| msgid "You can't vote on your own post"
+msgid "You can't vote on your own poll."
+msgstr "No puedes votar tu propia publicación"
+
 msgid "You cannot repost your own post."
 msgstr "No puedes volver a publicar tu propia publicación."
 
-#: pulse/services.py:81
+#, fuzzy
+#| msgid "You cannot repost your own post."
+msgid "You can only delete your own posts."
+msgstr "No puedes volver a publicar tu propia publicación."
+
 msgid "Parent comment belongs to a different post."
 msgstr "El comentario principal pertenece a una publicación diferente."
 
-#: pulse/services.py:116
+#, fuzzy
+#| msgid "You cannot reply to your own comment."
+msgid "You can only delete your own comments."
+msgstr "No puede responder a su propio comentario."
+
 msgid "You cannot comment on your own post. Reply to others instead."
 msgstr ""
 "No puedes comentar en tu propia publicación. Responde a los demás en su "
 "lugar."
 
-#: templates/accounts/alert_settings.html:4
-#: templates/accounts/alert_settings.html:9
-#: templates/accounts/profile_detail.html:31
-#| msgid "Alert settings"
+msgid "Poll not found"
+msgstr "Encuesta no encontrada"
+
 msgid "Alert Settings"
 msgstr "Configuración de alertas"
 
-#: templates/accounts/alert_settings.html:10
-#| msgid "Notifications"
 msgid "View notifications"
 msgstr "Notificaciones"
 
-#: templates/accounts/alert_settings.html:13
 msgid "Configure when and how you receive alerts about platform activity."
 msgstr ""
 "Configura cuándo y cómo recibirás las alertas sobre la actividad de la "
 "plataforma."
 
-#: templates/accounts/alert_settings.html:33
 msgid "Save preferences"
 msgstr "Guardar preferencias"
 
-#: templates/accounts/alert_settings.html:34
-#| msgid "Your profile"
 msgid "Back to profile"
 msgstr "Tu perfil"
 
-#: templates/accounts/auth_base.html:21
 msgid "Join the network"
 msgstr "Unirse a la red"
 
-#: templates/accounts/auth_base.html:23
-msgid "Build credibility through forecasts"
-msgstr "Generar credibilidad a través de los pronósticos"
+#, fuzzy
+#| msgid "credibility"
+msgid "Build credibility"
+msgstr "la credibilidad"
 
-#: templates/accounts/auth_base.html:27
-#| msgid ""
-#| "Choose a topic, browse open forecasts, and start earning <span "
-#| "class=\"badge-rep\">Reputation</span> — no betting, no wallets."
+#, fuzzy
+#| msgid "Your forecast"
+msgid "through forecasts"
+msgstr "Pronósticos"
+
 msgid ""
 "Debate real-world events, publish formal predictions, and earn <span "
 "class=\"badge-rep\">Reputation</span> when markets resolve — no betting, no "
@@ -624,105 +680,80 @@ msgstr ""
 "Elige un tema, explora pronósticos abiertos y empieza a ganar <span "
 "class=\"badge-rep\">Reputación</span> — sin apuestas ni billeteras."
 
-#: templates/accounts/auth_base.html:35
-msgid ""
-"<strong class=\"font-medium text-slate-800 dark:text-"
-"slate-100\">Reputation</strong> tracks predictive accuracy on resolved "
-"forecasts."
-msgstr ""
-"<strong class=\"font-medium text-slate-800 dark:text-slate-100\">La "
-"reputación</strong> rastrea la precisión predictiva en los pronósticos "
-"resueltos."
+msgid "Reputation"
+msgstr "Reputación"
 
-#: templates/accounts/auth_base.html:41
-msgid ""
-"<strong class=\"font-medium text-slate-800 dark:text-"
-"slate-100\">Popularity</strong> reflects social engagement — kept separate "
-"from credibility."
-msgstr ""
-"<strong class=\"font-medium text-slate-800 dark:text-slate-100\">La "
-"popularidad</strong> refleja el compromiso social, que se mantiene separado "
-"de la credibilidad."
+msgid "Predictive accuracy on resolved forecasts."
+msgstr "Precisión predictiva en pronósticos resueltos."
 
-#: templates/accounts/auth_base.html:47
-msgid "Live odds from Polymarket. Pick Yes or No and explain your reasoning."
+msgid "Popularity"
+msgstr "Popularidad"
+
+#, fuzzy
+#| msgid "Social engagement per category"
+msgid "Social engagement, separate from credibility."
+msgstr "Participación social por categoría"
+
+#, fuzzy
+#| msgid "All markets"
+msgid "Real markets"
+msgstr "Todos los mercados"
+
+#, fuzzy
+#| msgid ""
+#| "Live odds from Polymarket. Pick Yes or No and explain your reasoning."
+msgid "Live odds from Polymarket — no betting."
 msgstr ""
 "Probabilidades en vivo de Polymarket. Elige Sí o No y explica tu "
 "razonamiento."
 
-#: templates/accounts/bookmarks.html:4 templates/accounts/bookmarks.html:11
-#: templates/includes/navbar.html:143 templates/includes/navbar.html:229
 msgid "Saved"
 msgstr "Guardados"
 
-#: templates/accounts/bookmarks.html:10
 msgid "Your library"
 msgstr "Su catálogo"
 
-#: templates/accounts/bookmarks.html:12
 msgid "Forecasts and forum posts you bookmarked."
 msgstr ""
 "Previsiones y publicaciones en el foro que has marcado como favoritas."
 
-#: templates/accounts/bookmarks.html:14
-#: templates/challenges/challenge_list.html:32
-#: templates/dashboard/category_browse.html:75
-#: templates/dashboard/partials/browse_area_nav.html:15
-#: templates/markets/market_list.html:15
-#: templates/markets/partials/source_filter_pills.html:7
 msgid "All"
 msgstr "Todo"
 
-#: templates/accounts/bookmarks.html:15 templates/dashboard/forecasts.html:4
-#: templates/dashboard/forecasts.html:29
-#: templates/includes/mobile_bottom_nav.html:22
-#: templates/includes/navbar.html:25 templates/includes/navbar.html:189
 msgid "Forecasts"
 msgstr "Pronósticos"
 
-#: templates/accounts/bookmarks.html:16 templates/forum/forum.html:4
-#: templates/forum/forum.html:34 templates/forum/post_detail.html:34
-#: templates/includes/mobile_bottom_nav.html:31
-#: templates/includes/navbar.html:29 templates/includes/navbar.html:190
 msgid "Forum"
 msgstr "Foro"
 
-#: templates/accounts/bookmarks.html:32
-#| msgid "No rankings yet."
 msgid "Nothing saved yet"
 msgstr "Aún no hay clasificaciones."
 
-#: templates/accounts/bookmarks.html:33
 msgid "Tap the bookmark icon on a forecast or forum post to save it here."
 msgstr ""
 "Toca el icono de marcador en una publicación de pronóstico o de foro para "
 "guardarla aquí."
 
-#: templates/accounts/bookmarks.html:35
-#| msgid "Forecasts"
 msgid "Browse forecasts"
 msgstr "Pronósticos"
 
-#: templates/accounts/bookmarks.html:37
 msgid "Browse forum"
 msgstr "Investigue nuestro Foro:"
 
-#: templates/accounts/login.html:4
 msgid "Login"
 msgstr "Iniciar sesión"
 
-#: templates/accounts/login.html:6 templates/accounts/login.html:11
 msgid "Welcome back"
 msgstr "Bienvenido/a de nuevo"
 
-#: templates/accounts/login.html:7
-msgid "Pick up where you left off"
+#, fuzzy
+#| msgid "Pick up where you left off"
+msgid "Pick up where you"
 msgstr "Continúa donde lo dejaste."
 
-#: templates/accounts/login.html:9
-#| msgid ""
-#| "Choose a topic, browse open forecasts, and start earning <span "
-#| "class=\"badge-rep\">Reputation</span> — no betting, no wallets."
+msgid "left off"
+msgstr "retomar"
+
 msgid ""
 "Sign in to track your forecasts, follow top predictors, and climb the <span "
 "class=\"badge-rep\">Reputation</span> leaderboard."
@@ -730,80 +761,117 @@ msgstr ""
 "Elige un tema, explora pronósticos abiertos y empieza a ganar <span "
 "class=\"badge-rep\">Reputación</span> — sin apuestas ni billeteras."
 
-#: templates/accounts/login.html:13 templates/accounts/login.html:66
-#: templates/accounts/signup.html:84
-#: templates/comments/partials/prediction_discussion_inner.html:55
-#: templates/forum/forum.html:44
-#: templates/forum/partials/post_discussion_inner.html:25
-#: templates/includes/mobile_bottom_nav.html:50
-#: templates/includes/navbar.html:165 templates/includes/navbar.html:236
-#: templates/predictions/partials/forecast_form.html:146
 msgid "Log in"
 msgstr "Iniciar sesión"
 
-#: templates/accounts/login.html:15
 msgid "Enter your credentials to access your account."
 msgstr "Introduce tus credenciales para acceder a tu cuenta."
 
-#: templates/accounts/login.html:31
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#: templates/accounts/login.html:49
 msgid "Password"
 msgstr "Contraseña"
 
-#: templates/accounts/login.html:72
-#| msgid "Account"
 msgid "No account?"
 msgstr "Cuenta"
 
-#: templates/accounts/login.html:73
-#| msgid "Create account"
 msgid "Create one free"
 msgstr "Crear cuenta"
 
-#: templates/accounts/notifications.html:4
-#: templates/accounts/notifications.html:9
-#: templates/accounts/partials/notifications_dropdown.html:4
-#: templates/includes/navbar.html:99 templates/includes/navbar.html:148
-#: templates/includes/navbar.html:223
 msgid "Notifications"
 msgstr "Notificaciones"
 
-#: templates/accounts/notifications.html:8
 msgid "Activity"
 msgstr "Actividad"
 
-#: templates/accounts/notifications.html:10
 msgid "Follows, forecasts, likes and dislikes on your activity."
 msgstr "Sigue, pronostica, le gusta y le disgusta su actividad."
 
-#: templates/accounts/notifications.html:14
-#: templates/accounts/partials/notifications_dropdown.html:33
-#: templates/includes/navbar.html:145 templates/includes/navbar.html:230
 msgid "Alert settings"
 msgstr "Configuración de alertas"
 
-#: templates/accounts/notifications.html:18
 msgid "Mark all as read"
 msgstr "Marcar todo como leído"
 
-#: templates/accounts/notifications.html:27
-#| msgid "Notifications"
 msgid "No notifications yet."
 msgstr "Notificaciones"
 
-#: templates/accounts/partials/follow_button.html:12
 msgid "Following"
 msgstr "Siguiendo"
 
-#: templates/accounts/partials/follow_button.html:12
-#: templates/accounts/partials/follow_button.html:16
 msgid "Follow"
 msgstr "Seguir"
 
-#: templates/accounts/partials/login_notification_toast.html:26
+msgid "Public"
+msgstr "Público"
+
+msgid ""
+"Your name and @username are visible — best for building reputation under "
+"your real identity."
+msgstr ""
+"Tu nombre y @usuario son visibles — ideal para construir reputación con tu "
+"identidad real."
+
+msgid "Pseudonym"
+msgstr "Seudónimo"
+
+msgid ""
+"Use a creative alias as your main name. @username stays visible on your "
+"profile."
+msgstr ""
+"Usa un alias creativo como nombre principal. @usuario sigue visible en tu "
+"perfil."
+
+msgid ""
+"Hide @username in public posts. Use an alias so people can still recognize "
+"you."
+msgstr ""
+"Oculta @usuario en publicaciones. Usa un alias para que otros te reconozcan."
+
+#, fuzzy
+#| msgid "Previous"
+msgid "Preview"
+msgstr "Anterior"
+
+msgid "Verified"
+msgstr "Verificado"
+
+msgid "@username hidden in posts and comments"
+msgstr "@usuario oculto en publicaciones y comentarios"
+
+msgid "Public alias"
+msgstr "Alias público"
+
+msgid "e.g. MarketOracle"
+msgstr "p. ej. OráculoMercados"
+
+msgid "e.g. QuietPredictor"
+msgstr "p. ej. PredictorSilencioso"
+
+msgid "Your full name or nickname"
+msgstr "Tu nombre completo o apodo"
+
+msgid "Optional. Falls back to your username if empty."
+msgstr "Opcional. Si está vacío, se usa tu @usuario."
+
+#, fuzzy
+#| msgid "More markets across the platform"
+msgid "Required. Shown as your main name across the platform."
+msgstr "Más mercados en toda la plataforma"
+
+msgid ""
+"Required. The only name others see in posts — your @username stays hidden."
+msgstr ""
+"Obligatorio. El único nombre visible en publicaciones — tu @usuario queda "
+"oculto."
+
+msgid "Your account is verified."
+msgstr "Tu cuenta está verificada."
+
+msgid "Verification review in progress."
+msgstr "Verificación en revisión."
+
 #, python-format
 msgid ""
 "\n"
@@ -822,133 +890,126 @@ msgstr[1] ""
 "          Tienes %(counter)s alertas nuevas\n"
 "          "
 
-#: templates/accounts/partials/login_notification_toast.html:32
 msgid "While you were away"
 msgstr "Mientras no estabas"
 
-#: templates/accounts/partials/login_notification_toast.html:38
 msgid "Dismiss alerts"
 msgstr "Descartar alertas"
 
-#: templates/accounts/partials/login_notification_toast.html:54
-#: templates/accounts/partials/notifications_dropdown.html:29
-#| msgid "Notifications"
 msgid "View all notifications"
 msgstr "Notificaciones"
 
-#: templates/accounts/partials/notification_item.html:12
-#: templates/comments/partials/comment_item.html:23
-#: templates/comments/partials/comment_thread.html:11
-#: templates/forum/partials/comment_item.html:23
 #, python-format
 msgid "%(time)s ago"
-msgstr "Hace %(time)s"
+msgstr "hace %(time)s"
 
-#: templates/accounts/partials/notification_item.html:23
-#| msgid "Markets"
 msgid "Mark read"
 msgstr "Mercados"
 
-#: templates/accounts/partials/notification_item.html:30
-#| msgid "Notifications"
 msgid "View notification"
 msgstr "Notificaciones"
 
-#: templates/accounts/partials/notifications_dropdown.html:9
 msgid "Mark all read"
 msgstr "Marcar todas como leídas"
 
-#: templates/accounts/partials/notifications_dropdown.html:20
-#| msgid "Notifications"
 msgid "No notifications yet"
 msgstr "Notificaciones"
 
-#: templates/accounts/partials/notifications_dropdown.html:21
 msgid "Follow users and engage to see activity here."
 msgstr "Sigue a los usuarios y participa para ver la actividad aquí."
 
-#: templates/accounts/profile_detail.html:16 templates/accounts/signup.html:47
-#| msgid "Your profile"
-msgid "Profile"
-msgstr "Tu perfil"
+msgid "Change profile photo"
+msgstr "Cambiar foto de perfil"
 
-#: templates/accounts/profile_detail.html:20
-#, python-format
-msgid "%(counter)s follower"
-msgid_plural "%(counter)s followers"
-msgstr[0] "%(counter)s seguidor"
-msgstr[1] "%(counter)s seguidores"
-
-#: templates/accounts/profile_detail.html:22
-#, python-format
-msgid "%(counter)s following"
-msgid_plural "%(counter)s following"
-msgstr[0] "%(counter)s siguiendo"
-msgstr[1] "%(counter)s siguiendo"
-
-#: templates/accounts/profile_detail.html:24
 msgid "AI Agent"
 msgstr "\"Agente de IA\","
 
-#: templates/accounts/profile_detail.html:30
-#: templates/accounts/profile_edit.html:4 templates/dashboard/home.html:54
-msgid "Edit Profile"
-msgstr "Editar perfil"
+msgid "Verification pending"
+msgstr "Verificación pendiente"
 
-#: templates/accounts/profile_detail.html:37
-#: templates/accounts/profile_detail.html:86 templates/base.html:338
-#: templates/dashboard/about.html:392 templates/dashboard/about.html:403
-#: templates/dashboard/about.html:580 templates/dashboard/faq.html:22
-#: templates/dashboard/reputation_leaderboard.html:12
-#: templates/dashboard/reputation_leaderboard.html:16
-#: templates/dashboard/reputation_leaderboard.html:34
-#: templates/includes/navbar.html:55 templates/includes/navbar.html:198
-msgid "Reputation"
-msgstr "Reputación"
+msgid "follower"
+msgid_plural "followers"
+msgstr[0] "Seguir"
+msgstr[1] "Seguir"
 
-#: templates/accounts/profile_detail.html:38 templates/dashboard/home.html:15
+msgid "following"
+msgid_plural "following"
+msgstr[0] "Siguiendo"
+msgstr[1] "Siguiendo"
+
+#, fuzzy, python-format
+#| msgid "Finished %(date)s"
+msgid "Joined %(date)s"
+msgstr "Finalizado el %(date)s"
+
+msgid "Find users…"
+msgstr "Buscar usuarios…"
+
+msgid "Find users"
+msgstr "Buscar usuarios"
+
+msgid "Edit profile"
+msgstr "Tu perfil"
+
+#, fuzzy
+#| msgid "Alert Settings"
+msgid "Alerts"
+msgstr "Configuración de alertas"
+
+#, fuzzy
+#| msgid "Create account"
+msgid "Verified account"
+msgstr "Crear cuenta"
+
+msgid "User search results"
+msgstr "Resultados de búsqueda de usuarios"
+
+#, python-format
+msgid "See all results for \"%(query)s\""
+msgstr "Ver todos los resultados de «%(query)s»"
+
+#, fuzzy, python-format
+#| msgid "No events match \"%(query)s\"."
+msgid "No users match \"%(query)s\"."
+msgstr "Ningún evento coincide con \"%(query)s\"."
+
+#, fuzzy
+#| msgid "Search events…"
+msgid "Search users…"
+msgstr "Buscar eventos…"
+
+#, fuzzy
+#| msgid "Search"
+msgid "Search users"
+msgstr "Buscar"
+
+msgid "rep"
+msgstr "rep"
+
+#, fuzzy
+#| msgid "Pop"
+msgid "pop"
+msgstr "Pop"
+
 msgid "Predictive quality"
 msgstr "Calidad predictiva"
 
-#: templates/accounts/profile_detail.html:39
-#: templates/accounts/profile_detail.html:87 templates/base.html:339
-#: templates/dashboard/about.html:386 templates/dashboard/about.html:420
-#: templates/dashboard/faq.html:26
-#: templates/dashboard/popularity_leaderboard.html:12
-#: templates/dashboard/popularity_leaderboard.html:16
-#: templates/dashboard/popularity_leaderboard.html:34
-#: templates/includes/navbar.html:59 templates/includes/navbar.html:199
-msgid "Popularity"
-msgstr "Popularidad"
-
-#: templates/accounts/profile_detail.html:40 templates/dashboard/home.html:18
 msgid "Social engagement"
 msgstr "Compromiso social"
 
-#: templates/accounts/profile_detail.html:45
-#: templates/accounts/profile_detail.html:88
-#: templates/dashboard/about.html:208 templates/dashboard/home.html:21
-#: templates/dashboard/reputation_leaderboard.html:36
-#| msgid "Top predictors"
 msgid "Predictions"
 msgstr "Predicciones"
 
-#: templates/accounts/profile_detail.html:48 templates/dashboard/home.html:23
 #, python-format
 msgid "%(correct)s correct · %(incorrect)s incorrect"
 msgstr "%(correct)s correcto · %(incorrect)s incorrecto"
 
-#: templates/accounts/profile_detail.html:53
-#: templates/dashboard/about.html:607 templates/dashboard/home.html:27
 msgid "Accuracy"
 msgstr "Exactitud"
 
-#: templates/accounts/profile_detail.html:60
-#| msgid "Explore by category"
 msgid "Expertise by category"
 msgstr "Explorar por categoría"
 
-#: templates/accounts/profile_detail.html:61
 msgid ""
 "Reputation and popularity broken down by topic — spot specialists in crypto,"
 " politics, sports, and more."
@@ -956,202 +1017,222 @@ msgstr ""
 "Reputación y popularidad desglosadas por tema: encuentra especialistas en "
 "criptomonedas, política, deportes y más."
 
-#: templates/accounts/profile_detail.html:65
-#| msgid "Reputation"
 msgid "Reputation radar"
 msgstr "Reputación"
 
-#: templates/accounts/profile_detail.html:66
 msgid "Predictive quality per category"
 msgstr "Calidad predictiva por categoría"
 
-#: templates/accounts/profile_detail.html:72
-#| msgid "Popularity"
 msgid "Popularity radar"
 msgstr "Popularidad"
 
-#: templates/accounts/profile_detail.html:73
 msgid "Social engagement per category"
 msgstr "Participación social por categoría"
 
-#: templates/accounts/profile_detail.html:81
-#: templates/dashboard/popularity_leaderboard.html:27
-#: templates/dashboard/reputation_leaderboard.html:27
 msgid "Swipe to see all columns →"
 msgstr "Desliza para ver todas las columnas →"
 
-#: templates/accounts/profile_detail.html:85
-#: templates/markets/market_list.html:37
 msgid "Category"
 msgstr "Categoría"
 
-#: templates/accounts/profile_detail.html:89 templates/includes/navbar.html:46
-#: templates/includes/navbar.html:197
 msgid "Leaderboards"
 msgstr "Rankings"
 
-#: templates/accounts/profile_detail.html:102
 #, python-format
 msgid "%(correct)s/%(total)s correct"
 msgstr "%(correct)s/%(total)s correctos"
 
-#: templates/accounts/profile_detail.html:107
-#: templates/challenges/partials/standings_table.html:9
-#| msgid "rep"
 msgid "Rep"
-msgstr "rep"
+msgstr "Rep"
 
-#: templates/accounts/profile_detail.html:109
 msgid "Pop"
 msgstr "Pop"
 
-#: templates/accounts/profile_detail.html:120
-#: templates/predictions/prediction_history.html:4
 msgid "Prediction History"
 msgstr "Historial de predicciones"
 
-#: templates/accounts/profile_detail.html:121
 msgid "View all"
 msgstr "Ver todo"
 
-#: templates/accounts/profile_detail.html:127 templates/dashboard/home.html:48
-#: templates/predictions/prediction_history.html:17
-#| msgid "No rankings yet."
 msgid "No predictions yet."
 msgstr "Aún no hay clasificaciones."
 
-#: templates/accounts/profile_edit.html:8
-#| msgid "Alert settings"
+msgid "Edit Profile"
+msgstr "Editar perfil"
+
 msgid "Settings"
 msgstr "Configuración de alertas"
 
-#: templates/accounts/profile_edit.html:9
+msgid "Update your email, bio, and how you appear publicly."
+msgstr "Actualiza tu email, biografía y cómo apareces públicamente."
+
+msgid "Your name"
+msgstr "Tu nombre"
+
+#, fuzzy
+#| msgid "Username"
+msgid "username"
+msgstr "Nombre de usuario"
+
+msgid "Basic info"
+msgstr "Información básica"
+
+msgid "Profile & identity"
+msgstr "Perfil e identidad"
+
+#, fuzzy
+#| msgid "Send challenge"
+msgid "Save changes"
+msgstr "Enviar desafío"
+
+#, fuzzy
 #| msgid "Your profile"
-msgid "Edit profile"
+msgid "Set up your profile"
 msgstr "Tu perfil"
 
-#: templates/accounts/profile_edit.html:10
-msgid "Update your display name, bio, and privacy preferences."
+#, fuzzy
+#| msgid "Welcome back"
+msgid "Welcome"
+msgstr "Bienvenido/a de nuevo"
+
+msgid "Choose how you"
+msgstr "Elige cómo"
+
+msgid "appear"
+msgstr "aparecer"
+
+msgid ""
+"Step 2 of 2 — pick a public identity, preview how others will see you, and "
+"optionally request verification. You can change this anytime in settings."
 msgstr ""
-"Actualiza tu nombre para mostrar, biografía y preferencias de privacidad."
+"Paso 2 de 2 — elige tu identidad pública, previsualiza cómo te verán otros y"
+" opcionalmente solicita verificación. Puedes cambiarlo en ajustes."
 
-#: templates/accounts/profile_edit.html:22
-#| msgid "Saved"
-msgid "Save"
-msgstr "Guardados"
+msgid "Finish setup"
+msgstr "Finalizar configuración"
 
-#: templates/accounts/signup.html:4 templates/includes/navbar.html:167
-#: templates/includes/navbar.html:237
 msgid "Sign up"
 msgstr "Registrarse"
 
-#: templates/accounts/signup.html:6 templates/accounts/signup.html:11
-#: templates/includes/pr_page_hero.html:26
 msgid "Get started"
 msgstr "Comenzar"
 
-#: templates/accounts/signup.html:7
-msgid "Start building your track record"
-msgstr "Comienza a construir tu historial"
+msgid "Build your"
+msgstr "Construye tu"
 
-#: templates/accounts/signup.html:9
+msgid "track record"
+msgstr "historial"
+
 msgid ""
-"Create a free account to publish forecasts on real-world markets, join "
-"discussions, and prove your predictive skill over time."
+"Create your account in seconds. Next, choose how you want to appear "
+"publicly."
 msgstr ""
-"Cree una cuenta gratuita para publicar pronósticos sobre mercados del mundo "
-"real, unirse a discusiones y demostrar su habilidad predictiva a lo largo "
-"del tiempo."
+"Crea tu cuenta en segundos. Después, elige cómo quieres aparecer "
+"públicamente."
 
-#: templates/accounts/signup.html:13 templates/accounts/signup.html:77
-#: templates/dashboard/about.html:567 templates/dashboard/landing.html:11
 msgid "Create account"
 msgstr "Crear cuenta"
 
-#: templates/accounts/signup.html:15
-msgid "Takes less than a minute. No payment required."
-msgstr "Tarda menos de un minuto. No es necesario realizar ningún pago."
+msgid "Step 1 of 2 — credentials only. No payment required."
+msgstr "Paso 1 de 2 — solo credenciales. Sin pago."
 
-#: templates/accounts/signup.html:23 templates/includes/navbar.html:221
-msgid "Account"
-msgstr "Cuenta"
+#| msgid "Your @handle on ProofRep."
+msgid "Your @handle on PredictStamp."
+msgstr "Tu @usuario en PredictStamp."
 
-#: templates/accounts/signup.html:47
-msgid "optional"
-msgstr "opcional"
+msgid "Password requirements"
+msgstr "Requisitos de contraseña"
 
-#: templates/accounts/signup.html:67
-msgid "Hide your real identity and use a pseudonym in public discussions."
-msgstr "Oculta tu identidad real y usa un seudónimo en los debates públicos."
+msgid "Continue"
+msgstr "Continuar"
 
-#: templates/accounts/signup.html:83
-#| msgid "Create account"
 msgid "Already have an account?"
 msgstr "Crear cuenta"
 
-#: templates/base.html:7 templates/dashboard/about.html:50
-#: templates/dashboard/about.html:170
-#| msgid "Reputation"
-msgid "Proof of Reputation"
-msgstr "Prueba de reputación"
+msgid "Community"
+msgstr "Comunidad"
 
-#: templates/base.html:334
 msgid ""
-"ProofRep — The social layer for prediction markets. Popularity ≠ Reputation."
+"Search by name, username, or bio to discover predictors and voices on the "
+"platform."
 msgstr ""
-"ProofRep — La capa social para mercados de predicción. Popularidad ≠ "
+"Busca por nombre, usuario o biografía para descubrir predictores en la "
+"plataforma."
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Enter at least 2 characters."
+msgstr "Introduce al menos 2 caracteres."
+
+msgid "Enter at least 2 characters to search."
+msgstr "Introduce al menos 2 caracteres para buscar."
+
+#| msgid "Start typing to find people on ProofRep."
+msgid "Start typing to find people on PredictStamp."
+msgstr "Empieza a escribir para encontrar personas en PredictStamp."
+
+#, fuzzy
+#| msgid "The social layer for"
+msgid "The social layer for prediction markets"
+msgstr "La capa social para"
+
+#, fuzzy
+#| msgid ""
+#| "ProofRep — The social layer for prediction markets. Popularity ≠ Reputation."
+msgid ""
+"PredictStamp — The social layer for prediction markets. Popularity ≠ "
+"Reputation."
+msgstr ""
+"PredictStamp — La capa social para mercados de predicción. Popularidad ≠ "
 "Reputación."
 
-#: templates/base.html:336 templates/dashboard/about.html:4
-#: templates/includes/navbar.html:200
 msgid "About"
 msgstr "Acerca de"
 
-#: templates/base.html:337 templates/dashboard/faq.html:4
-#: templates/includes/navbar.html:201
 msgid "FAQ"
 msgstr "Preguntas frecuentes"
 
-#: templates/challenges/challenge_create.html:4
-#: templates/challenges/challenge_list.html:12
-#| msgid "Challenges"
+msgid "Link copied!"
+msgstr "¡Enlace copiado!"
+
+msgid "Copy this link:"
+msgstr "Copia este enlace:"
+
+#| msgid "Forecast on ProofRep"
+msgid "Forecast on PredictStamp"
+msgstr "Pronóstico en PredictStamp"
+
+msgid "Share forecast"
+msgstr "Pronósticos"
+
 msgid "New challenge"
 msgstr "Nuevo desafío"
 
-#: templates/challenges/challenge_create.html:7
 msgid "selected"
 msgstr "seleccionados"
 
-#: templates/challenges/challenge_create.html:10
-#: templates/challenges/challenge_detail.html:9
-#: templates/challenges/challenge_list.html:4
-#: templates/challenges/challenge_list.html:10
-#: templates/includes/navbar.html:33 templates/includes/navbar.html:192
+msgid "Breadcrumb"
+msgstr "Miga de pan"
+
 msgid "Challenges"
 msgstr "Desafíos"
 
-#: templates/challenges/challenge_create.html:11
-#| msgid "Create account"
 msgid "Create a"
-msgstr "Crear cuenta"
+msgstr "Crea un"
 
-#: templates/challenges/challenge_create.html:12
-#| msgid "Challenges"
 msgid "challenge"
-msgstr "Desafíos"
+msgstr "desafío"
 
-#: templates/challenges/challenge_create.html:13
-msgid "Pick up to 10 open events and challenge users you follow mutually."
+msgid ""
+"Choose who you want to challenge. You can only invite mutual followers."
 msgstr ""
-"Elige hasta 10 eventos abiertos y desafía a los usuarios que sigues "
-"mutuamente."
+"Elige a quién quieres desafiar. Solo puedes invitar a seguidores mutuos."
 
-#: templates/challenges/challenge_create.html:14
-#| msgid "Challenges"
-msgid "Back to challenges"
-msgstr "Desafíos"
+#, python-format
+msgid "Pick up to %(max)s open events for your challenge."
+msgstr "Elige hasta %(max)s eventos abiertos para tu desafío."
 
-#: templates/challenges/challenge_create.html:19
 msgid ""
 "You need mutual followers to create a challenge. Follow someone who follows "
 "you back."
@@ -1159,341 +1240,329 @@ msgstr ""
 "Necesitas seguidores mutuos para crear un desafío. Sigue a alguien que te "
 "siga."
 
-#: templates/challenges/challenge_create.html:35
-msgid "Name (optional)"
-msgstr "Nombre (opcional)"
+msgid "Challenge creation steps"
+msgstr "Pasos para crear el desafío"
 
-#: templates/challenges/challenge_create.html:40
+msgid "Users"
+msgstr "Usuarios"
+
+msgid "Events"
+msgstr "Eventos"
+
 msgid "Users to challenge"
 msgstr "Usuarios a desafiar"
 
-#: templates/challenges/challenge_create.html:54
+msgid "Select at least one mutual follower."
+msgstr "Selecciona al menos un seguidor mutuo."
+
+msgid "Name (optional)"
+msgstr "Nombre (opcional)"
+
+msgid "Opponents"
+msgstr "Oponentes"
+
+msgid "Select at least one user to continue."
+msgstr "Selecciona al menos un usuario para continuar."
+
+msgid "user(s) selected"
+msgstr "usuario(s) seleccionado(s)"
+
 msgid "No mutual followers yet."
 msgstr "Todavía no hay seguidores mutuos."
 
-#: templates/challenges/challenge_create.html:59
-#| msgid "Challenges"
-msgid "Send challenge"
-msgstr "Enviar desafío"
+msgid "Cancel"
+msgstr "Cancelar"
 
-#: templates/challenges/challenge_create.html:68
 msgid "Select events"
 msgstr "Seleccionar eventos"
 
-#: templates/challenges/challenge_create.html:69
 #, python-format
-#| msgid "Choose a topic to browse open forecasts."
 msgid "Choose up to %(max)s open markets"
 msgstr "Elige hasta %(max)s mercados abiertos"
 
-#: templates/challenges/challenge_create.html:86
 msgid "Remove event"
 msgstr "Quitar evento"
 
-#: templates/challenges/challenge_create.html:103
 msgid "Search events…"
 msgstr "Buscar eventos…"
 
-#: templates/challenges/challenge_detail.html:20
+msgid "Back"
+msgstr "Volver"
+
+msgid "Send challenge"
+msgstr "Enviar desafío"
+
 #, python-format
 msgid "Created by @%(username)s"
 msgstr "Creado por @%(username)s"
 
-#: templates/challenges/challenge_detail.html:21
 #, python-format
 msgid "Started %(date)s"
 msgstr "Iniciado el %(date)s"
 
-#: templates/challenges/challenge_detail.html:22
 #, python-format
 msgid "Finished %(date)s"
 msgstr "Finalizado el %(date)s"
 
-#: templates/challenges/challenge_detail.html:31
 #, python-format
 msgid "%(resolved)s of %(total)s events resolved"
 msgstr "%(resolved)s de %(total)s eventos resueltos"
 
-#: templates/challenges/challenge_detail.html:48
 msgid "You've been challenged! Accept to compete."
-msgstr "¡Has sido desafiado! Aceptar para competir."
+msgstr "¡Te han desafiado! Acepta para competir."
 
-#: templates/challenges/challenge_detail.html:51
-#| msgid "Challenges"
 msgid "Accept challenge"
-msgstr "Desafíos"
+msgstr "Aceptar desafío"
 
-#: templates/challenges/challenge_detail.html:55
-#: templates/challenges/partials/challenge_invitation_card.html:23
 msgid "Decline"
 msgstr "Rechazar"
 
-#: templates/challenges/challenge_detail.html:62
 msgid "Waiting for opponents to respond."
 msgstr "Esperando a que los oponentes respondan."
 
-#: templates/challenges/challenge_detail.html:65
-#: templates/comments/partials/comment_reply_form.html:38
-#: templates/comments/partials/comment_reply_form.html:63
-#: templates/comments/partials/prediction_discussion_inner.html:45
-#: templates/forum/partials/comment_form.html:21
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: templates/challenges/challenge_detail.html:73
-#: templates/challenges/challenge_list.html:61
 #, python-format
 msgid "Winner: %(name)s"
 msgstr "Ganador: %(name)s"
 
-#: templates/challenges/challenge_detail.html:75
 msgid "Highest total reputation score across all challenge events."
 msgstr ""
-"Puntuación de reputación total más alta en todos los eventos de desafío."
+"Mayor puntuación total de reputación en todos los eventos del desafío."
 
-#: templates/challenges/challenge_detail.html:79
 msgid "Tie — no winner"
 msgstr "Empate — sin ganador"
 
-#: templates/challenges/challenge_detail.html:87
 #, python-format
 msgid "Events (%(count)s)"
 msgstr "Eventos (%(count)s)"
 
-#: templates/challenges/challenge_detail.html:88
-msgid "Forecasts are private — only total scores are shown."
-msgstr ""
-"Los pronósticos son privados: solo se muestran las puntuaciones totales."
+#, fuzzy
+#| msgid "View event"
+msgid "Filter events"
+msgstr "Ver evento"
 
-#: templates/challenges/challenge_detail.html:99
+#, fuzzy
+#| msgid "Pending"
+msgid "Pending vote"
+msgstr "Pendiente"
+
+msgid "Already voted"
+msgstr ""
+
+#, fuzzy
+#| msgid ""
+#| "Existing open forecasts on these events count immediately — including "
+#| "forecasts placed before the challenge started."
+msgid ""
+"Sorted by soonest closing date. Existing open forecasts count immediately — "
+"including forecasts placed before the challenge started."
+msgstr ""
+"Los pronósticos abiertos en estos eventos cuentan de inmediato — incluidos "
+"los publicados antes de que empezara el desafío."
+
+#, fuzzy
+#| msgid "No open events available."
+msgid "No open events left to vote on."
+msgstr "No hay eventos disponibles."
+
+#, fuzzy
+#| msgid "You are not part of this challenge."
+msgid "You have not voted on any challenge events yet."
+msgstr "No eres parte de este desafío."
+
 msgid "Resolution updates"
 msgstr "Actualizaciones de la resolución"
 
-#: templates/challenges/challenge_detail.html:106
 msgid "Outcome:"
 msgstr "Resultado:"
 
-#: templates/challenges/challenge_detail.html:111
 msgid "View event"
 msgstr "Ver evento"
 
-#: templates/challenges/challenge_detail.html:115
 msgid "Standings after this event"
 msgstr "Posiciones después de este evento"
 
-#: templates/challenges/challenge_detail.html:128
-msgid "Scores appear once the challenge is active."
-msgstr "Las puntuaciones aparecen una vez que el desafío está activo."
-
-#: templates/challenges/challenge_detail.html:143
-msgid "pending"
-msgstr "pendiente"
-
-#: templates/challenges/challenge_detail.html:148
-#: templates/dashboard/landing.html:57
-msgid "rep"
-msgstr "rep"
-
-#: templates/challenges/challenge_detail.html:154
-#| msgid "No rankings yet."
-msgid "No participants yet."
-msgstr "Aún no hay clasificaciones."
-
-#: templates/challenges/challenge_detail.html:159
-msgid "Participants"
-msgstr "Participantes"
-
-#: templates/challenges/challenge_list.html:9
-#: templates/dashboard/about.html:491 templates/dashboard/about.html:584
 msgid "Social"
 msgstr "Social"
 
-#: templates/challenges/challenge_list.html:11
 msgid ""
 "Compete with mutual followers on up to 10 events. Highest reputation score "
 "wins."
 msgstr ""
-"Compite con seguidores mutuos en hasta 10 eventos. La puntuación de "
-"reputación más alta gana."
+"Compite con seguidores mutuos en hasta 10 eventos. Gana quien tenga más "
+"reputación."
 
-#: templates/challenges/challenge_list.html:19
-#| msgid "Loading notifications…"
 msgid "Pending invitations"
-msgstr "Cargando notificaciones…"
+msgstr "Invitaciones pendientes"
 
-#: templates/challenges/challenge_list.html:47
 #, python-format
 msgid "by @%(username)s"
 msgstr "Por %(username)s"
 
-#: templates/challenges/challenge_list.html:48
-#: templates/challenges/partials/challenge_invitation_card.html:13
 #, python-format
 msgid "%(counter)s event"
 msgid_plural "%(counter)s events"
 msgstr[0] "%(counter)s evento"
 msgstr[1] "%(counter)s eventos"
 
-#: templates/challenges/challenge_list.html:49
 #, python-format
 msgid "%(counter)s participant"
 msgid_plural "%(counter)s participants"
 msgstr[0] "%(counter)s participante"
 msgstr[1] "%(counter)s participantes"
 
-#: templates/challenges/challenge_list.html:70
-#| msgid "No rankings yet."
 msgid "No challenges yet."
-msgstr "Aún no hay clasificaciones."
+msgstr "Aún no hay desafíos."
 
-#: templates/challenges/challenge_list.html:71
 msgid "Follow users back to unlock head-to-head challenges."
 msgstr "Sigue a los usuarios para desbloquear desafíos cara a cara."
 
-#: templates/challenges/challenge_list.html:72
 msgid "Create your first challenge"
 msgstr "Crea tu primer desafío"
 
-#: templates/challenges/challenge_list.html:75
 msgid "No other challenges yet. Respond to your invitations above."
 msgstr "Todavía no hay otros retos. Responde a las invitaciones anteriores."
 
-#: templates/challenges/partials/challenge_invitation_card.html:5
-#| msgid "Challenges"
 msgid "Challenge invitation"
-msgstr "Desafíos"
+msgstr "Invitación al desafío"
 
-#: templates/challenges/partials/challenge_invitation_card.html:12
 #, python-format
 msgid "@%(username)s challenged you"
 msgstr "@%(username)s te ha desafiado"
 
-#: templates/challenges/partials/challenge_invitation_card.html:19
 msgid "Accept"
 msgstr "Aceptar"
 
-#: templates/challenges/partials/challenge_invitation_card.html:27
 msgid "View details"
 msgstr "Ver detalles"
 
-#: templates/challenges/partials/challenge_market_card.html:42
+msgid "Live ranking"
+msgstr "Clasificación en vivo"
+
+msgid "Leaderboard"
+msgstr "Tabla de posiciones"
+
+msgid ""
+"Realized points come from resolved or closed forecasts. Unrealized points "
+"estimate P&L on open challenge events at current market odds — including "
+"forecasts you placed before joining the challenge."
+msgstr ""
+"Los puntos realizados provienen de pronósticos resueltos o cerrados. Los no "
+"realizados estiman el P&L en eventos abiertos del desafío según las cuotas "
+"actuales — incluidos los pronósticos que hiciste antes de unirte."
+
+msgid "Realized"
+msgstr "Realizado"
+
+msgid "Unrealized"
+msgstr "No realizado"
+
+msgid "Combined"
+msgstr "Combinado"
+
+msgid "Scores update once all opponents accept and the challenge goes live."
+msgstr ""
+"Las puntuaciones se actualizan cuando todos los oponentes acepten y el "
+"desafío comience."
+
+msgid "Rank"
+msgstr "Puesto"
+
+msgid "Player"
+msgstr "Jugador"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "You"
+msgstr "Tú"
+
+msgid "AI"
+msgstr "AI"
+
+msgid "Pending acceptance"
+msgstr "Pendiente de aceptación"
+
+msgid "No participants yet."
+msgstr "Aún no hay participantes."
+
 msgid "Resolved outcome"
 msgstr "Resultado resuelto"
 
-#: templates/challenges/partials/challenge_market_card.html:51
-#: templates/challenges/partials/market_picker_card.html:35
-#: templates/markets/partials/market_grid_card.html:25
-msgid "Yes"
-msgstr "Sí"
+#, python-format
+msgid "+%(counter)s more outcome"
+msgid_plural "+%(counter)s more outcomes"
+msgstr[0] "+%(counter)s resultado más"
+msgstr[1] "+%(counter)s resultados más"
 
-#: templates/challenges/partials/challenge_market_card.html:51
-#: templates/challenges/partials/market_picker_card.html:35
-#: templates/markets/partials/market_grid_card.html:25
-msgid "No"
-msgstr "No"
-
-#: templates/challenges/partials/challenge_market_card.html:60
-#: templates/challenges/partials/market_picker_card.html:44
-#: templates/markets/partials/market_grid_card.html:34
-#: templates/markets/partials/world_cup_match_card.html:43
 msgid "Odds unavailable"
 msgstr "Probabilidades no disponibles"
 
-#: templates/challenges/partials/challenge_market_card.html:66
-#: templates/challenges/partials/market_picker_card.html:50
+msgid "Placed before this challenge — already in play"
+msgstr "Publicado antes de este desafío — ya cuenta"
+
+msgid "Unrealized:"
+msgstr "No realizado:"
+
+msgid "Counts for challenge + global rep"
+msgstr "Cuenta para el desafío y la rep global"
+
+msgid "No forecast yet — place one to score"
+msgstr "Sin pronóstico — publica uno para sumar puntos"
+
 #, python-format
 msgid "Closes %(date)s"
 msgstr "Cierra el %(date)s"
 
-#: templates/challenges/partials/market_picker_list.html:10
 #, python-format
 msgid "No events match \"%(query)s\"."
 msgstr "Ningún evento coincide con \"%(query)s\"."
 
-#: templates/challenges/partials/market_picker_list.html:14
 msgid "No open events available."
 msgstr "No hay eventos disponibles."
 
-#: templates/challenges/partials/standings_table.html:8
-msgid "Player"
-msgstr "Jugador"
-
-#: templates/comments/partials/comment_item.html:21
-#: templates/comments/partials/comment_thread.html:9
-#: templates/forum/partials/comment_item.html:21
-#: templates/forum/partials/original_post_embed.html:7
-#: templates/forum/partials/post_card.html:21
-#: templates/forum/post_detail.html:55
-#: templates/markets/partials/forecast_card.html:22
-msgid "AI"
-msgstr "AI"
-
-#: templates/comments/partials/comment_item.html:26
-#: templates/forum/partials/comment_item.html:26
 msgid "− collapse"
 msgstr "Contraer"
 
-#: templates/comments/partials/comment_item.html:27
-#: templates/forum/partials/comment_item.html:27
 #, python-format
 msgid "+ %(counter)s reply"
 msgid_plural "+ %(counter)s replies"
 msgstr[0] "+ %(counter)s respuesta"
 msgstr[1] "+ %(counter)s respuestas"
 
-#: templates/comments/partials/comment_item.html:37
-#: templates/comments/partials/comment_reply_form.html:59
-#: templates/dashboard/partials/forecast_post_actions.html:5
-#: templates/forum/partials/comment_form.html:19
-#: templates/forum/partials/comment_item.html:37
-#: templates/forum/partials/post_actions.html:6
 msgid "Reply"
 msgstr "Responder"
 
-#: templates/comments/partials/comment_item.html:38
-#: templates/forum/partials/comment_item.html:38
 msgid "Cancel reply"
 msgstr "&nbsp;- Cancelar la respuesta"
 
-#: templates/comments/partials/comment_item.html:41
-#: templates/comments/partials/comment_reply_form.html:4
-#: templates/forum/partials/comment_item.html:41
 msgid "Write a reply…"
 msgstr "Escribe una respuesta..."
 
-#: templates/comments/partials/comment_reply_form.html:2
 msgid "Share your thoughts"
 msgstr "Comparte tus opiniones"
 
-#: templates/comments/partials/comment_reply_form.html:3
 msgid "Share your take on this forecast…"
 msgstr "Comparte tu opinión sobre este pronóstico..."
 
-#: templates/comments/partials/comment_reply_form.html:34
 msgid ""
 "Comments earn <span class=\"badge-pop\">Popularity</span> — not Reputation."
 msgstr ""
 "Los comentarios ganan <span class=\"badge-pop\">popularidad</span>, no "
 "reputación."
 
-#: templates/comments/partials/comment_reply_form.html:42
 msgid "Post comment"
 msgstr "Comentario de la publicación"
 
-#: templates/comments/partials/comment_thread.html:17
 #, python-format
 msgid "Score: %(score)s"
 msgstr "Puntuación: %(score)s"
 
-#: templates/comments/partials/comment_thread.html:28
 msgid "No comments yet. Start the discussion."
 msgstr "Aún no hay comentarios. Inicie la discusión."
 
-#: templates/comments/partials/prediction_discussion.html:6
 msgid "Discussion"
 msgstr "Debate 15."
 
-#: templates/comments/partials/prediction_discussion.html:9
 msgid ""
 "Debate this forecast — likes on comments earn <span class=\"badge-"
 "pop\">Popularity</span> for the author"
@@ -1501,7 +1570,6 @@ msgstr ""
 "Debatir este pronóstico: los \"me gusta\" en los comentarios ganan <span "
 "class=\"badge-pop\">popularidad</span> para el autor"
 
-#: templates/comments/partials/prediction_discussion_inner.html:8
 msgid ""
 "You can't start a thread on your own forecast. Like, dislike, or reply to "
 "comments from others below — or share your post."
@@ -1510,157 +1578,187 @@ msgstr ""
 "respondo a los comentarios de otras personas a continuación, o comparto tu "
 "publicación."
 
-#: templates/comments/partials/prediction_discussion_inner.html:21
-#: templates/comments/partials/prediction_discussion_inner.html:34
 msgid "You liked this forecast — add your perspective"
 msgstr "Te ha gustado esta previsión: añade tu perspectiva"
 
-#: templates/comments/partials/prediction_discussion_inner.html:23
-#: templates/comments/partials/prediction_discussion_inner.html:36
 msgid "You disliked this forecast — explain your view"
 msgstr "No le ha gustado este pronóstico — explique su opinión"
 
-#: templates/comments/partials/prediction_discussion_inner.html:25
-#: templates/comments/partials/prediction_discussion_inner.html:38
-#: templates/forum/partials/post_discussion_inner.html:16
 msgid "Join the conversation"
 msgstr "Unirse a la conversación"
 
-#: templates/comments/partials/prediction_discussion_inner.html:44
 msgid "Close comment form"
 msgstr "Comentario de cierre"
 
-#: templates/comments/partials/prediction_discussion_inner.html:48
 msgid ""
 "What do you think about this forecast? Agree, disagree, or add context…"
 msgstr ""
 "¿Qué opinas de esta previsión? De acuerdo, en desacuerdo o añadiendo "
 "contexto..."
 
-#: templates/comments/partials/prediction_discussion_inner.html:56
 msgid "to comment on this forecast."
 msgstr "para comentar este pronóstico."
 
-#: templates/comments/partials/prediction_discussion_inner.html:67
-#: templates/forum/partials/post_discussion_inner.html:39
 msgid "No comments yet — when others respond, you can reply here."
 msgstr "Aún no hay comentarios. Cuando otros respondan, puedes hacerlo aquí."
 
-#: templates/comments/partials/prediction_discussion_inner.html:70
 msgid "No comments yet — tap above to start the thread."
 msgstr "Aún no hay comentarios. Toca arriba para iniciar el hilo."
 
-#: templates/comments/partials/prediction_discussion_inner.html:72
-#| msgid "No rankings yet."
 msgid "No comments yet."
 msgstr "Aún no hay clasificaciones."
 
-#: templates/comments/partials/vote_buttons.html:17
-#: templates/comments/partials/vote_buttons.html:75
-#: templates/dashboard/partials/forecast_vote_actions.html:15
-#: templates/forum/partials/vote_actions.html:15
 msgid "Like"
 msgstr "Me gusta"
 
-#: templates/comments/partials/vote_buttons.html:34
-#: templates/comments/partials/vote_buttons.html:92
-#: templates/dashboard/partials/forecast_vote_actions.html:31
-#: templates/forum/partials/vote_actions.html:31
 msgid "Dislike"
 msgstr "No me gusta"
 
-#: templates/comments/partials/vote_buttons.html:39
-#: templates/comments/partials/vote_buttons.html:43
-#: templates/comments/partials/vote_buttons.html:97
-#: templates/comments/partials/vote_buttons.html:101
-#: templates/dashboard/partials/forecast_vote_actions.html:37
 msgid "You can't vote on your own forecast"
 msgstr "No puedes votar por tu propio pronóstico"
 
-#: templates/comments/partials/vote_buttons.html:39
-#: templates/comments/partials/vote_buttons.html:43
-#: templates/comments/partials/vote_buttons.html:97
-#: templates/comments/partials/vote_buttons.html:101
 msgid "You can't vote on your own content"
 msgstr "No puedes votar sobre tu propio contenido"
 
-#: templates/comments/partials/vote_buttons.html:39
-#: templates/comments/partials/vote_buttons.html:97
 msgid "Like (disabled)"
 msgstr "Me gusta (desactivado)"
 
-#: templates/comments/partials/vote_buttons.html:43
-#: templates/comments/partials/vote_buttons.html:101
 msgid "Dislike (disabled)"
 msgstr "No me gusta (desactivado)"
 
-#: templates/comments/partials/vote_buttons.html:49
-#: templates/comments/partials/vote_buttons.html:105
-#: templates/dashboard/partials/forecast_vote_actions.html:48
-#: templates/forum/partials/vote_actions.html:46
-#| msgid "Log in"
 msgid "Log in to like"
 msgstr "Inicia sesión para dar like"
 
-#: templates/comments/partials/vote_buttons.html:55
-#: templates/comments/partials/vote_buttons.html:109
-#: templates/dashboard/partials/forecast_vote_actions.html:54
-#: templates/forum/partials/vote_actions.html:52
 msgid "Log in to dislike"
 msgstr "Inicia sesión para dar dislike"
 
-#: templates/dashboard/about.html:54
+#, python-format
+msgid "%(counter)s like — view who liked"
+msgid_plural "%(counter)s likes — view who liked"
+msgstr[0] ""
+msgstr[1] ""
+
+#, fuzzy, python-format
+#| msgid "Resolved outcome: <strong>%(outcome)s</strong>"
+msgid "Liked by <strong>%(name)s</strong>"
+msgstr "Resultado resuelto: <strong>%(outcome)s</strong>"
+
+#, python-format
+msgid "Liked by <strong>%(name1)s</strong> and <strong>%(name2)s</strong>"
+msgstr ""
+
+#, python-format
+msgid ""
+"Liked by <strong>%(name1)s</strong>, <strong>%(name2)s</strong> and "
+"<strong>%(others)s others</strong>"
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "%(counter)s vote"
+#| msgid_plural "%(counter)s votes"
+msgid "%(counter)s like"
+msgid_plural "%(counter)s likes"
+msgstr[0] "%(counter)s voto"
+msgstr[1] "%(counter)s votos"
+
+#, python-format
+msgid "%(counter)s dislike — view who disliked"
+msgid_plural "%(counter)s dislikes — view who disliked"
+msgstr[0] ""
+msgstr[1] ""
+
+#, fuzzy, python-format
+#| msgid "Resolved outcome: <strong>%(outcome)s</strong>"
+msgid "Disliked by <strong>%(name)s</strong>"
+msgstr "Resultado resuelto: <strong>%(outcome)s</strong>"
+
+#, python-format
+msgid "Disliked by <strong>%(name1)s</strong> and <strong>%(name2)s</strong>"
+msgstr ""
+
+#, python-format
+msgid ""
+"Disliked by <strong>%(name1)s</strong>, <strong>%(name2)s</strong> and "
+"<strong>%(others)s others</strong>"
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "%(counter)s vote"
+#| msgid_plural "%(counter)s votes"
+msgid "%(counter)s dislike"
+msgid_plural "%(counter)s dislikes"
+msgstr[0] "%(counter)s voto"
+msgstr[1] "%(counter)s votos"
+
+#, fuzzy
+#| msgid "Closed"
+msgid "Close"
+msgstr "Cerrado"
+
+#, fuzzy
+#| msgid "Elections"
+msgid "Reactions"
+msgstr "Elecciones"
+
+msgid "Likes"
+msgstr "Me gusta"
+
+msgid "Dislikes"
+msgstr "No me gusta"
+
+#, fuzzy
+#| msgid "No challenges yet."
+msgid "No likes yet."
+msgstr "Aún no hay clasificaciones."
+
+#, fuzzy
+#| msgid "No predictions yet."
+msgid "No dislikes yet."
+msgstr "Aún no hay clasificaciones."
+
+#, fuzzy
+#| msgid "Predictions"
+msgid "PredictStamp"
+msgstr "PredictStamp"
+
 msgid "The social layer for"
 msgstr "La capa social para"
 
-#: templates/dashboard/about.html:55
-#| msgid "Top predictors"
 msgid "prediction markets"
 msgstr "mercados de predicción"
 
-#: templates/dashboard/about.html:59
 msgid "Markets turn uncertainty into probabilities. Today they mostly measure"
 msgstr ""
 "Los mercados convierten la incertidumbre en probabilidades. Hoy en día, en "
 "su mayoría miden"
 
-#: templates/dashboard/about.html:60
 msgid "money won"
 msgstr "dinero ganado"
 
-#: templates/dashboard/about.html:61
 msgid "We ask a different question:"
 msgstr "Hacemos una pregunta distinta:"
 
-#: templates/dashboard/about.html:65
 msgid "What if the most valuable asset was not capital, but"
 msgstr "¿Y si el activo más valioso no fuera el capital, sino"
 
-#: templates/dashboard/about.html:66
 msgid "credibility"
 msgstr "la credibilidad"
 
-#: templates/dashboard/about.html:71 templates/dashboard/about.html:565
 msgid "Start building reputation"
 msgstr "Empieza a construir tu reputación"
 
-#: templates/dashboard/about.html:76
 msgid "Explore the thesis"
 msgstr "Conoce la tesis"
 
-#: templates/dashboard/about.html:84
 msgid "Scroll down"
 msgstr "Desplázate hacia abajo"
 
-#: templates/dashboard/about.html:98
 msgid "The shift"
 msgstr "El cambio"
 
-#: templates/dashboard/about.html:100
 msgid "From capital to credibility"
 msgstr "Del capital a la credibilidad"
 
-#: templates/dashboard/about.html:103
 msgid ""
 "Prediction markets are one of the most powerful tools for measuring "
 "collective intelligence — turning opinions into signals and future events "
@@ -1670,45 +1768,40 @@ msgstr ""
 "medir la inteligencia colectiva, convirtiendo las opiniones en señales y los"
 " eventos futuros en registros públicos."
 
-#: templates/dashboard/about.html:111
 msgid "What gets measured"
 msgstr "Qué se mide"
 
-#: templates/dashboard/about.html:117
 msgid "Capital"
 msgstr "Capital"
 
-#: templates/dashboard/about.html:123
 msgid "Credibility"
 msgstr "Credibilidad"
 
-#: templates/dashboard/about.html:134
 msgid "Profit leaderboard — rewards bankrolls, not necessarily insight."
 msgstr "Ranking de ganancias: premia bankrolls, no necesariamente criterio."
 
-#: templates/dashboard/about.html:150
 msgid "Judgment leaderboard — earned through resolved forecasts."
 msgstr "Ranking de criterio: se gana con pronósticos resueltos."
 
-#: templates/dashboard/about.html:168
 msgid "The idea"
 msgstr "La idea"
 
-#: templates/dashboard/about.html:173
+#, fuzzy
+#| msgid ""
+#| "Credibility earned through a public history of judgment — not luck, not "
+#| "capital, not hype. ProofRep secures social intelligence with track record."
 msgid ""
 "Credibility earned through a public history of judgment — not luck, not "
-"capital, not hype. ProofRep secures social intelligence with track record."
+"capital, not hype. PredictStamp secures social intelligence with track "
+"record."
 msgstr ""
 "La credibilidad obtenida a través de una historia pública de juicio, ni "
-"suerte, ni capital, ni exageración. ProofRep asegura la inteligencia social "
+"suerte, ni capital, ni exageración. PredictStamp asegura la inteligencia social "
 "con un historial."
 
-#: templates/dashboard/about.html:184
-#| msgid "track record"
 msgid "Secures with track record"
 msgstr "Respaldado por historial"
 
-#: templates/dashboard/about.html:186
 msgid ""
 "You prove you built something real — thoughtful predictions, reasoning, "
 "accuracy, and consistency over time. Every forecast, thesis, and challenge "
@@ -1718,16 +1811,12 @@ msgstr ""
 " precisión y consistencia a lo largo del tiempo. Cada pronóstico, tesis y "
 "desafío se suma a un registro público que te sigue."
 
-#: templates/dashboard/about.html:189
 msgid "Judgment is the entry fee"
 msgstr "El criterio es la entrada"
 
-#: templates/dashboard/about.html:209 templates/dashboard/about.html:234
-#: templates/dashboard/about.html:259
 msgid "Tap to explore"
 msgstr "Toca para explorar"
 
-#: templates/dashboard/about.html:216
 msgid ""
 "Formal forecasts tied to real markets — with confidence, reasoning, and "
 "probability snapshots captured at the moment you call it."
@@ -1736,12 +1825,9 @@ msgstr ""
 "confianza, razonamiento y probabilidad capturadas en el momento en que lo "
 "llamas."
 
-#: templates/dashboard/about.html:233
-#| msgid "Reputation"
 msgid "Resolution"
 msgstr "Resolución"
 
-#: templates/dashboard/about.html:241
 msgid ""
 "Markets resolve objectively. Reputation follows accuracy — rewarding early "
 "conviction against the odds and penalizing overconfidence."
@@ -1750,11 +1836,9 @@ msgstr ""
 " recompensando la convicción temprana contra viento y marea y penalizando el"
 " exceso de confianza."
 
-#: templates/dashboard/about.html:258
 msgid "Verifiable history"
 msgstr "Historial verificable"
 
-#: templates/dashboard/about.html:266
 msgid ""
 "Every prediction, comment, thesis, and challenge becomes durable history — "
 "transparent, inspectable, and hard to rewrite after the fact."
@@ -1763,7 +1847,6 @@ msgstr ""
 "duradera: transparente, inspeccionable y difícil de reescribir después de "
 "los hechos."
 
-#: templates/dashboard/about.html:274
 msgid ""
 "With <a href=\"https://attest.org/\" target=\"_blank\" rel=\"noopener "
 "noreferrer\" class=\"font-medium text-violet-600 underline decoration-"
@@ -1778,34 +1861,33 @@ msgstr ""
 "difícil de falsificar, pruebas que llevas a otras aplicaciones y ecosistemas"
 " de agentes."
 
-#: templates/dashboard/about.html:282
 msgid "The platform"
 msgstr "La plataforma"
 
-#: templates/dashboard/about.html:284
 msgid "A social network for markets"
 msgstr "Una red social para mercados"
 
-#: templates/dashboard/about.html:287
+#, fuzzy
+#| msgid ""
+#| "<strong class=\"text-slate-800 dark:text-white\">ProofRep</strong> is built "
+#| "around events and outcomes — follow markets, publish theses, debate "
+#| "probabilities, challenge friends, and build a public history of judgment."
 msgid ""
-"<strong class=\"text-slate-800 dark:text-white\">ProofRep</strong> is built "
-"around events and outcomes — follow markets, publish theses, debate "
+"<strong class=\"text-slate-800 dark:text-white\">PredictStamp</strong> is "
+"built around events and outcomes — follow markets, publish theses, debate "
 "probabilities, challenge friends, and build a public history of judgment."
 msgstr ""
-"<strong class=\"text-slate-800 dark:text-white\">ProofRep</strong> se basa "
+"<strong class=\"text-slate-800 dark:text-white\">PredictStamp</strong> se basa "
 "en eventos y resultados: siga los mercados, publique tesis, debata las "
 "probabilidades, desafíe a los amigos y construya una historia pública de "
 "juicio."
 
-#: templates/dashboard/about.html:289
 msgid "Tap a domain to explore specialization:"
 msgstr "Toca un dominio para explorar la especialización:"
 
-#: templates/dashboard/about.html:375
 msgid "Reputation vs Popularity"
 msgstr "Reputación vs. Popularidad"
 
-#: templates/dashboard/about.html:378
 msgid ""
 "The platform records both popularity and reputation for every user. They "
 "stay independent: popularity measures attention; reputation measures "
@@ -1815,29 +1897,9 @@ msgstr ""
 "siendo independientes: la popularidad mide la atención; la reputación, el "
 "criterio demostrado."
 
-#: templates/dashboard/about.html:404
-msgid "Demonstrated judgment"
-msgstr "Criterio demostrado"
-
-#: templates/dashboard/about.html:406
-msgid ""
-"Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes"
-" never touch this score."
-msgstr ""
-"Se gana cuando los pronósticos se resuelven. Las predicciones a "
-"contracorriente más difíciles suman más. Los votos a favor no afectan esta "
-"puntuación."
-
-#: templates/dashboard/about.html:410
-#| msgid "Full leaderboard"
-msgid "Reputation leaderboard"
-msgstr "Ranking de reputación"
-
-#: templates/dashboard/about.html:421
 msgid "Attention"
 msgstr "Atención"
 
-#: templates/dashboard/about.html:423
 msgid ""
 "Driven by votes on comments and forecasts. A post can be popular and wrong —"
 " memes welcome, but status comes from being right over time."
@@ -1846,47 +1908,50 @@ msgstr ""
 "popular e incorrecta: los memes son bienvenidos, pero el estatus proviene de"
 " tener razón con el tiempo."
 
-#: templates/dashboard/about.html:427
-#| msgid "Full leaderboard"
 msgid "Popularity leaderboard"
 msgstr "Ranking de popularidad"
 
-#: templates/dashboard/about.html:439
+msgid "Demonstrated judgment"
+msgstr "Criterio demostrado"
+
+msgid ""
+"Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes"
+" never touch this score."
+msgstr ""
+"Se gana cuando los pronósticos se resuelven. Las predicciones a "
+"contracorriente más difíciles suman más. Los votos a favor no afectan esta "
+"puntuación."
+
+msgid "Reputation leaderboard"
+msgstr "Ranking de reputación"
+
 msgid "Meritocracy"
 msgstr "Meritocracia"
 
-#: templates/dashboard/about.html:441
-#| msgid "Leaderboards"
 msgid "Leaderboards without betting"
 msgstr "Rankings sin apuestas"
 
-#: templates/dashboard/about.html:444
 msgid "Who has the best judgment? Not who made the most money."
 msgstr "¿Quién tiene el mejor juicio? No quién hizo más dinero."
 
-#: templates/dashboard/about.html:450
 msgid "Money"
 msgstr "Dinero"
 
-#: templates/dashboard/about.html:461
 msgid "Judgment"
 msgstr "Criterio"
 
-#: templates/dashboard/about.html:492
 msgid "Challenges between friends"
 msgstr "Desafíos entre amigos"
 
-#: templates/dashboard/about.html:494
 msgid ""
 "Who gets more World Cup predictions right? Who wins on crypto this month? "
 "Private leaderboards, topic-specific contests, time-limited or ongoing — "
 "status without gambling."
 msgstr ""
 "¿Quién acierta más en las predicciones de la Copa del Mundo? ¿Quién gana en "
-"criptomonedas este mes? Rankings privados, concursos de temas"
-" específicos, de tiempo limitado o en curso: estado sin juegos de azar."
+"criptomonedas este mes? Rankings privados, concursos de temas específicos, "
+"de tiempo limitado o en curso: estado sin juegos de azar."
 
-#: templates/dashboard/about.html:497
 msgid ""
 "Fantasy sports × Reddit × prediction markets — based on reputation, not "
 "betting."
@@ -1894,44 +1959,33 @@ msgstr ""
 "Fantasy deportes × Reddit × mercados de predicción — por reputación, no por "
 "apuestas."
 
-#: templates/dashboard/about.html:500
-#| msgid "Challenges"
 msgid "Browse challenges"
 msgstr "Ver desafíos"
 
-#: templates/dashboard/about.html:507
 msgid "Not a betting platform"
 msgstr "No es una plataforma de apuestas"
 
-#: templates/dashboard/about.html:508
 msgid "No wallets. No deposits. No financial settlements."
 msgstr "Sin monederos. Sin depósitos. Sin liquidaciones financieras."
 
-#: templates/dashboard/about.html:510
 msgid "No betting"
 msgstr "Sin apuestas"
 
-#: templates/dashboard/about.html:511
 msgid "No wallets"
 msgstr "Sin monederos"
 
-#: templates/dashboard/about.html:512
 msgid "No custody"
 msgstr "Sin custodia"
 
-#: templates/dashboard/about.html:513
 msgid "Free to use"
 msgstr "Es gratuito"
 
-#: templates/dashboard/about.html:524 templates/dashboard/about.html:585
 msgid "Future"
 msgstr "Futuro"
 
-#: templates/dashboard/about.html:525
 msgid "Monetizing reputation"
 msgstr "Monetización de la reputación"
 
-#: templates/dashboard/about.html:527
 msgid ""
 "Paid feeds, premium analysis, subscriber theses, expert communities, and AI "
 "agents trained on domain expertise — if your judgment creates value, your "
@@ -1941,15 +1995,12 @@ msgstr ""
 "expertos y agentes de IA capacitados en experiencia de dominio: si tu juicio"
 " crea valor, tu reputación se convierte en un activo."
 
-#: templates/dashboard/about.html:534
 msgid "AI-native"
 msgstr "Nativo de IA"
 
-#: templates/dashboard/about.html:535
 msgid "Humans + AI agents"
 msgstr "Humanos + agentes de IA"
 
-#: templates/dashboard/about.html:537
 msgid ""
 "Same public standard for everyone. Which agent is best at sports? Which "
 "explains reasoning clearly? Human + AI + markets + reputation."
@@ -1958,36 +2009,34 @@ msgstr ""
 "¿Qué explica el razonamiento con claridad? Humano + IA + mercados + "
 "reputación."
 
-#: templates/dashboard/about.html:540
 msgid "Public prediction history"
 msgstr "Historial público de predicciones"
 
-#: templates/dashboard/about.html:541
 msgid "Verifiable outcomes via EAS"
 msgstr "Resultados verificables a través de EAS"
 
-#: templates/dashboard/about.html:542
 msgid "AI agents clearly identified"
 msgstr "Agentes de IA claramente identificados"
 
-#: templates/dashboard/about.html:555
 msgid "Where credibility"
 msgstr "Donde la credibilidad"
 
-#: templates/dashboard/about.html:556
 msgid "compounds"
 msgstr "se acumula"
 
-#: templates/dashboard/about.html:559
+#, fuzzy
+#| msgid ""
+#| "The internet has no shortage of opinions. What it lacks is memory. Proof of "
+#| "Reputation turns predictions into a reputation graph and insight into an "
+#| "asset."
 msgid ""
-"The internet has no shortage of opinions. What it lacks is memory. Proof of "
-"Reputation turns predictions into a reputation graph and insight into an "
+"The internet has no shortage of opinions. What it lacks is memory. "
+"PredictStamp turns predictions into a reputation graph and insight into an "
 "asset."
 msgstr ""
-"Internet no le falta opinión. Le falta memoria. Proof of Reputation "
+"Internet no le falta opinión. Le falta memoria. PredictStamp "
 "convierte pronósticos en un grafo de reputación y el criterio en un activo."
 
-#: templates/dashboard/about.html:562
 msgid ""
 "The most valuable signal is not who speaks the loudest — it is who has been "
 "right before."
@@ -1995,151 +2044,113 @@ msgstr ""
 "La señal más valiosa no es quién habla más fuerte, sino quién ha estado en "
 "lo cierto antes."
 
-#: templates/dashboard/about.html:566 templates/dashboard/home.html:48
-#: templates/dashboard/partials/forecasts_feed.html:8
-#| msgid "All markets"
 msgid "Browse markets"
 msgstr "Explorar mercados"
 
-#: templates/dashboard/about.html:568
 msgid "Read the FAQ"
 msgstr "Ver preguntas frecuentes"
 
-#: templates/dashboard/about.html:578
 msgid "Intro"
 msgstr "Introducción"
 
-#: templates/dashboard/about.html:579
 msgid "Thesis"
 msgstr "Tesis"
 
-#: templates/dashboard/about.html:581
 msgid "Platform"
 msgstr "Plataforma"
 
-#: templates/dashboard/about.html:582
 msgid "Scores"
 msgstr "Puntajes"
 
-#: templates/dashboard/about.html:583
 msgid "Rankings"
 msgstr "Rankings"
 
-#: templates/dashboard/about.html:586
 msgid "Start"
 msgstr "Comienzo"
 
-#: templates/dashboard/about.html:587
 msgid "Geopolitics"
 msgstr "Geopolítica"
 
-#: templates/dashboard/about.html:590
 msgid "Elections"
 msgstr "Elecciones"
 
-#: templates/dashboard/about.html:591
 msgid "Macro"
 msgstr "Macro"
 
-#: templates/dashboard/about.html:592
 msgid "Energy"
 msgstr "Energía"
 
-#: templates/dashboard/about.html:593
 msgid "Tech"
 msgstr "Tecnología"
 
-#: templates/dashboard/about.html:594
 msgid "Culture"
 msgstr "Cultura"
 
-#: templates/dashboard/about.html:595
 msgid "Why do you believe this?"
 msgstr "¿Por qué crees esto?"
 
-#: templates/dashboard/about.html:596
 msgid "How confident are you?"
 msgstr "¿Qué tan seguro estás?"
 
-#: templates/dashboard/about.html:597
 msgid "Did you change your mind?"
 msgstr "¿Cambiaste de opinión?"
 
-#: templates/dashboard/about.html:598
 msgid "Were you early or late?"
 msgstr "¿Llegaste temprano o tarde?"
 
-#: templates/dashboard/about.html:599
 msgid "Did your reasoning age well?"
 msgstr "¿Tu razonamiento envejeció bien?"
 
-#: templates/dashboard/about.html:600
 msgid "Are you right in this domain?"
 msgstr "¿Acertás en este dominio?"
 
-#: templates/dashboard/about.html:601
 msgid "Rewards capital, not necessarily insight"
 msgstr "Premia capital, no necesariamente criterio"
 
-#: templates/dashboard/about.html:602
 msgid "Excludes anyone without funds to wager"
 msgstr "Excluye a quien no tiene fondos para apostar"
 
-#: templates/dashboard/about.html:603
 msgid "One lucky bet can distort the ranking"
 msgstr "Una apuesta afortunada puede distorsionar el ranking"
 
-#: templates/dashboard/about.html:604
 msgid "Accuracy, calibration, early conviction"
 msgstr "Precisión, calibración, convicción temprana"
 
-#: templates/dashboard/about.html:605
 msgid "Performance by topic and over time"
 msgstr "Rendimiento por tema y en el tiempo"
 
-#: templates/dashboard/about.html:606
 msgid "Open to anyone — judgment is the entry fee"
 msgstr "Abierto a todos — el criterio es la entrada"
 
-#: templates/dashboard/about.html:608
 msgid "Calibration"
 msgstr "Calibración"
 
-#: templates/dashboard/about.html:609
 msgid "Early conviction"
 msgstr "Convicción temprana"
 
-#: templates/dashboard/about.html:610
 msgid "Topic expertise"
 msgstr "Experiencia por tema"
 
-#: templates/dashboard/about.html:611
 msgid "P&L"
 msgstr "Estado de pérdidas y ganancias"
 
-#: templates/dashboard/about.html:612
 msgid "Volume traded"
 msgstr "Volumen negociado"
 
-#: templates/dashboard/about.html:613
 msgid "Max drawdown"
 msgstr "Disminución máx."
 
-#: templates/dashboard/about.html:614
 msgid "Bankroll size"
 msgstr "Tamaño del bankroll"
 
-#: templates/dashboard/about.html:615
 msgid "Rank by "
 msgstr "Ranking por "
 
-#: templates/dashboard/about.html:616
 #, python-format
 msgid "Become known for %%(domain)s — a living map of who has good judgment."
 msgstr ""
 "Hazte conocido por %%(domain)s: un mapa vivo de quién tiene buen juicio."
 
-#: templates/dashboard/about.html:617
 msgid ""
 "Every forecast captures context — not just yes or no, but why, when, and how"
 " confident."
@@ -2147,70 +2158,53 @@ msgstr ""
 "Cada pronóstico captura contexto: no solo sí o no, sino por qué, cuándo y "
 "con qué confianza."
 
-#: templates/dashboard/category_browse.html:9
-#: templates/dashboard/world_cup_games.html:9
-#: templates/includes/mobile_bottom_nav.html:13
-#: templates/includes/navbar.html:21 templates/includes/navbar.html:188
-#: templates/markets/market_hub.html:4 templates/markets/market_hub.html:8
-#: templates/markets/market_list.html:4 templates/markets/market_list.html:9
-#: templates/markets/market_list.html:14
 msgid "Markets"
 msgstr "Mercados"
 
-#: templates/dashboard/category_browse.html:39
 #, python-format
 msgid "Forecasts in %(area)s · %(category_name)s"
 msgstr "Pronósticos en %(area)s · %(category_name)s"
 
-#: templates/dashboard/category_browse.html:46
-#| msgid "Forecasts"
 msgid "open forecast"
 msgid_plural "open forecasts"
 msgstr[0] "pronóstico abierto"
 msgstr[1] "pronósticos abiertos"
 
-#: templates/dashboard/category_browse.html:48
 #, python-format
 msgid "of %(total)s in %(name)s"
 msgstr "de %(total)s en %(name)s"
 
-#: templates/dashboard/category_browse.html:55
-#: templates/dashboard/partials/leaderboard_category_filter.html:5
-#: templates/dashboard/world_cup_games.html:37
-#: templates/markets/market_list.html:39 templates/markets/market_list.html:90
-#| msgid "All markets"
 msgid "All categories"
 msgstr "Todos los mercados"
 
-#: templates/dashboard/category_browse.html:59
-#| msgid "Reputation"
 msgid "Reputation leaders"
 msgstr "Reputación"
 
-#: templates/dashboard/category_browse.html:62
-#| msgid "Popularity"
 msgid "Popularity leaders"
 msgstr "Popularidad"
 
-#: templates/dashboard/category_browse.html:71
 msgid "Filter by topic"
 msgstr "Filtrar por tema"
 
-#: templates/dashboard/category_browse.html:103
 #, python-format
 msgid "Trending in %(name)s"
 msgstr "Tendencias en %(name)s"
 
-#: templates/dashboard/category_browse.html:106
 msgid "Advanced filters"
 msgstr "Filtros avanzados"
 
-#: templates/dashboard/category_browse.html:118
+#, python-format
+msgid ""
+"No open events match “%(search_query)s” in this category. Try another "
+"keyword."
+msgstr ""
+"Ningún evento abierto coincide con «%(search_query)s» en esta categoría. "
+"Prueba otra palabra."
+
 #, python-format
 msgid "No open forecasts in %(name)s yet."
 msgstr "Aún no hay pronósticos abiertos en %(name)s."
 
-#: templates/dashboard/category_browse.html:120
 msgid ""
 "No open forecasts in this category yet. Check back after the next market "
 "sync."
@@ -2218,19 +2212,15 @@ msgstr ""
 "Todavía no hay pronósticos abiertos en esta categoría. Vuelve a comprobarlo "
 "después de la próxima sincronización del mercado."
 
-#: templates/dashboard/faq.html:11
 msgid "Help center"
 msgstr "Centro de ayuda"
 
-#: templates/dashboard/faq.html:12
 msgid "Frequently asked"
 msgstr "Preguntas más frecuentes"
 
-#: templates/dashboard/faq.html:13
 msgid "questions"
 msgstr "preguntas"
 
-#: templates/dashboard/faq.html:14
 msgid ""
 "How scoring works, what we are not, and how reputation and popularity stay "
 "separate."
@@ -2238,7 +2228,6 @@ msgstr ""
 "Cómo funciona la puntuación, qué no somos y cómo la reputación y la "
 "popularidad se mantienen separadas."
 
-#: templates/dashboard/faq.html:17
 #, python-format
 msgid ""
 "For the big picture, see <a href=\"%(about_url)s\" class=\"font-medium text-"
@@ -2247,14 +2236,12 @@ msgstr ""
 "Para ver el panorama general, consulte <a href=\"%(about_url)s\" "
 "class=\"font-medium text-brand-600 hover:underline\">Acerca de</a>."
 
-#: templates/dashboard/faq.html:23
 msgid ""
 "Resolved forecasts only. Based on Polymarket odds at the time you predicted."
 msgstr ""
 "Solo pronósticos resueltos. Basado en las probabilidades de Polymarket en el"
 " momento en que predijiste."
 
-#: templates/dashboard/faq.html:27
 msgid ""
 "Upvotes (+1) and downvotes (−1) on comments and forecasts. Never affects "
 "reputation."
@@ -2262,12 +2249,9 @@ msgstr ""
 "Upvotes (+1) y downvotes (-1) en comentarios y pronósticos. Nunca afecta a "
 "la reputación."
 
-#: templates/dashboard/faq.html:32
-#| msgid "Reputation"
 msgid "Reputation scoring"
 msgstr "Reputación"
 
-#: templates/dashboard/faq.html:34
 msgid ""
 "When a market resolves, your formal forecast is scored using the market "
 "probability"
@@ -2275,54 +2259,43 @@ msgstr ""
 "Cuando un mercado se resuelve, su pronóstico formal se califica utilizando "
 "la probabilidad del mercado"
 
-#: templates/dashboard/faq.html:35
 msgid "at the moment you submitted it"
 msgstr "en el momento en que lo enviaste"
 
-#: templates/dashboard/faq.html:41
 msgid "Correct →"
 msgstr "Correcto"
 
-#: templates/dashboard/faq.html:41
 #, python-format
 msgid "+ (100 − market %%)"
 msgstr "+ (100 − %% de mercado)"
 
-#: templates/dashboard/faq.html:43
 msgid "Incorrect →"
 msgstr "Incorrecto"
 
-#: templates/dashboard/faq.html:43
 #, python-format
 msgid "− market %%"
 msgstr "Mercado"
 
-#: templates/dashboard/faq.html:49
 #, python-format
 msgid "Consensus pick — market at 90%% Yes"
 msgstr "Selección por consenso — mercado al 90% % Sí"
 
-#: templates/dashboard/faq.html:50
 msgid ""
 "You forecast <strong>Yes</strong>. Polymarket already priced it as very "
 "likely."
 msgstr ""
 "Prevés que <strong>sí</strong>. Polymarket ya lo valoró como muy probable."
 
-#: templates/dashboard/faq.html:53
 msgid "Correct: +10"
 msgstr "Correcto: +10"
 
-#: templates/dashboard/faq.html:54
 msgid "Wrong: −90"
 msgstr "Incorrecto: -90"
 
-#: templates/dashboard/faq.html:59
 #, python-format
 msgid "Contrarian call — market at 10%% Yes"
 msgstr "Convocatoria contraria — mercado al 10%% Sí"
 
-#: templates/dashboard/faq.html:60
 msgid ""
 "You forecast <strong>Yes</strong> against the crowd. Higher reward, lower "
 "penalty if wrong."
@@ -2330,34 +2303,27 @@ msgstr ""
 "Prevés un <strong>SÍ</strong> contra la multitud. Mayor recompensa, menor "
 "penalización si se equivoca."
 
-#: templates/dashboard/faq.html:63
 msgid "Correct: +90"
 msgstr "Correcto: +90"
 
-#: templates/dashboard/faq.html:64
 msgid "Wrong: −10"
 msgstr "Incorrecto: −10"
 
-#: templates/dashboard/faq.html:69
 #, python-format
 msgid "Coin flip — market at 50%%"
 msgstr "Lanzamiento de moneda — mercado al 50%%"
 
-#: templates/dashboard/faq.html:70
 msgid "Balanced odds mean symmetric stakes either way."
 msgstr ""
 "Las probabilidades equilibradas significan apuestas simétricas de cualquier "
 "manera."
 
-#: templates/dashboard/faq.html:73
 msgid "Correct: +50"
 msgstr "Correcto: +50"
 
-#: templates/dashboard/faq.html:74
 msgid "Wrong: −50"
 msgstr "Incorrecto: −50"
 
-#: templates/dashboard/faq.html:80
 msgid ""
 "Every change creates an auditable event record with a human-readable reason."
 " Resolved forecasts cannot be deleted."
@@ -2365,15 +2331,12 @@ msgstr ""
 "Cada cambio crea un registro auditable con una razón legible. Los "
 "pronósticos resueltos no se pueden eliminar."
 
-#: templates/dashboard/faq.html:85
 msgid "Common questions"
 msgstr "Preguntas frecuentes"
 
-#: templates/dashboard/faq.html:90
 msgid "What is the difference between reputation and popularity?"
 msgstr "¿Cuál es la diferencia entre reputación y popularidad?"
 
-#: templates/dashboard/faq.html:96
 msgid ""
 "<span class=\"badge-rep\">Reputation</span> measures whether your <strong "
 "class=\"text-slate-800 dark:text-slate-200\">formal forecasts</strong> were "
@@ -2387,19 +2350,16 @@ msgstr ""
 "pop\">Popularidad</span> mide el engagement social — votos positivos y "
 "negativos en comentarios y pronósticos."
 
-#: templates/dashboard/faq.html:97
 msgid ""
 "A meme comment can top the popularity leaderboard while a quiet analyst tops"
 " reputation. The systems never cross-contaminate."
 msgstr ""
-"Un comentario meme puede liderar el ranking de popularidad mientras un"
-" analista discreto lidera la reputación. Los sistemas nunca se mezclan."
+"Un comentario meme puede liderar el ranking de popularidad mientras un "
+"analista discreto lidera la reputación. Los sistemas nunca se mezclan."
 
-#: templates/dashboard/faq.html:103
 msgid "Do comments affect my reputation?"
 msgstr "¿Los comentarios afectan mi reputación?"
 
-#: templates/dashboard/faq.html:109
 msgid ""
 "No. Comments only affect <span class=\"badge-pop\">Popularity</span> through"
 " votes. Reputation changes only when a <strong class=\"text-slate-800 "
@@ -2411,25 +2371,26 @@ msgstr ""
 " <strong class=\"text-slate-800 dark:text-slate-200\">pronóstico "
 "formal</strong> que publicaste se resuelve contra el resultado del mercado."
 
-#: templates/dashboard/faq.html:115
 msgid "Can I bet money here?"
 msgstr "¿Puedo apostar dinero aquí?"
 
-#: templates/dashboard/faq.html:121
+#, fuzzy
+#| msgid ""
+#| "<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> ProofRep "
+#| "is not a betting, trading, or gambling platform. There are no wallets, "
+#| "deposits, or financial settlements."
 msgid ""
-"<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> ProofRep "
-"is not a betting, trading, or gambling platform. There are no wallets, "
-"deposits, or financial settlements."
+"<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> "
+"PredictStamp is not a betting, trading, or gambling platform. There are no "
+"wallets, deposits, or financial settlements."
 msgstr ""
-"<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> ProofRep "
+"<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> PredictStamp "
 "no es una plataforma de apuestas, trading ni juego. No hay billeteras, "
 "depósitos ni liquidaciones financieras."
 
-#: templates/dashboard/faq.html:127
 msgid "Is it free? Can I monetize my content?"
 msgstr "¿Es gratis? ¿Puedo monetizar mi contenido?"
 
-#: templates/dashboard/faq.html:133
 msgid ""
 "Using the platform is <strong class=\"text-slate-800 dark:text-"
 "slate-200\">completely free</strong> — sign up, browse, comment, and "
@@ -2439,7 +2400,6 @@ msgstr ""
 "slate-200\">completamente gratis</strong>: regístrate, explora, comenta y "
 "pronostica sin costo."
 
-#: templates/dashboard/faq.html:134
 msgid ""
 "Your public track record can still be valuable off-platform: paid "
 "newsletters, consulting, sponsorships, or premium analysis built on the "
@@ -2449,15 +2409,12 @@ msgstr ""
 "pago, consultoría, patrocinios o análisis premium basados en la credibilidad"
 " que ganas aquí."
 
-#: templates/dashboard/faq.html:140
 msgid "How do leaderboards work?"
 msgstr "¿Cómo funcionan los rankings?"
 
-#: templates/dashboard/faq.html:146
 msgid "We maintain two separate rankings:"
 msgstr "Mantenemos dos rankings separados:"
 
-#: templates/dashboard/faq.html:148
 #, python-format
 msgid ""
 "<a href=\"%(reputation_url)s\" class=\"font-medium text-emerald-700 "
@@ -2465,10 +2422,9 @@ msgid ""
 "reputation points from resolved forecasts."
 msgstr ""
 "<a href=\"%(reputation_url)s\" class=\"font-medium text-emerald-700 "
-"hover:underline dark:text-emerald-400\">Ranking de reputación</a> — "
-"puntos totales de reputación por pronósticos resueltos."
+"hover:underline dark:text-emerald-400\">Ranking de reputación</a> — puntos "
+"totales de reputación por pronósticos resueltos."
 
-#: templates/dashboard/faq.html:149
 #, python-format
 msgid ""
 "<a href=\"%(popularity_url)s\" class=\"font-medium text-amber-700 "
@@ -2476,14 +2432,12 @@ msgid ""
 "popularity points from community votes."
 msgstr ""
 "<a href=\"%(popularity_url)s\" class=\"font-medium text-amber-700 "
-"hover:underline dark:text-amber-400\">Ranking de popularidad</a> — "
-"puntos totales de popularidad por votos de la comunidad."
+"hover:underline dark:text-amber-400\">Ranking de popularidad</a> — puntos "
+"totales de popularidad por votos de la comunidad."
 
-#: templates/dashboard/faq.html:156
 msgid "What is EAS and why does it matter?"
 msgstr "¿Qué es EAS y por qué importa?"
 
-#: templates/dashboard/faq.html:162
 msgid ""
 "<a href=\"https://attest.org/\" target=\"_blank\" rel=\"noopener "
 "noreferrer\" class=\"font-medium text-violet-700 hover:underline dark:text-"
@@ -2496,7 +2450,6 @@ msgstr ""
 "abierta para afirmaciones verificables sobre identidad, reputación y "
 "credenciales."
 
-#: templates/dashboard/faq.html:163
 msgid ""
 "Our roadmap includes optional attestations so your reputation history could "
 "become <strong class=\"text-slate-800 dark:text-slate-200\">portable "
@@ -2507,11 +2460,9 @@ msgstr ""
 "slate-200\">pruebas portables</strong> que llevas a otras apps y ecosistemas"
 " de agentes."
 
-#: templates/dashboard/faq.html:169
 msgid "Can AI agents participate?"
 msgstr "¿Pueden participar agentes de IA?"
 
-#: templates/dashboard/faq.html:175
 msgid ""
 "Yes. Verified agents are labeled with an <span class=\"badge-"
 "agent\">AI</span> badge so readers always know who (or what) they are "
@@ -2520,11 +2471,9 @@ msgstr ""
 "Sí. Los agentes verificados llevan la insignia <span class=\"badge-"
 "agent\">IA</span> para que los lectores sepan con quién (o qué) interactúan."
 
-#: templates/dashboard/faq.html:183
 msgid "Still curious?"
 msgstr "¿Sigues con curiosidad?"
 
-#: templates/dashboard/faq.html:185
 msgid ""
 "Read our full thesis on the About page, then jump into a market and publish "
 "your first forecast."
@@ -2532,106 +2481,70 @@ msgstr ""
 "Lee nuestra tesis completa en Acerca de, luego entra a un mercado y publica "
 "tu primer pronóstico."
 
-#: templates/dashboard/faq.html:188
 msgid "About the project"
 msgstr "Sobre el proyecto"
 
-#: templates/dashboard/faq.html:189 templates/dashboard/home.html:55
-#| msgid "Explore by category"
 msgid "Explore categories"
 msgstr "Explorar por categoría"
 
-#: templates/dashboard/forecasts.html:28 templates/forum/forum.html:33
-msgid "Community"
-msgstr "Comunidad"
-
-#: templates/dashboard/forecasts.html:30
 msgid ""
 "Live forecasts from the community — formal predictions tied to real markets."
 msgstr ""
 "Pronósticos en vivo de la comunidad — predicciones formales ligadas a "
 "mercados reales."
 
-#: templates/dashboard/forecasts.html:33
 msgid "Filter by market"
 msgstr "Filtrar por mercado"
 
-#: templates/dashboard/forecasts.html:38 templates/dashboard/landing.html:29
-#: templates/markets/market_hub.html:24 templates/markets/market_list.html:11
 msgid "All markets"
 msgstr "Todos los mercados"
 
-#: templates/dashboard/home.html:4
 msgid "Dashboard"
 msgstr "Panel"
 
-#: templates/dashboard/home.html:8
 msgid "Your dashboard"
 msgstr "Tu panel"
 
-#: templates/dashboard/home.html:9
 msgid "Welcome back,"
 msgstr "Bienvenido de nuevo,"
 
-#: templates/dashboard/home.html:10
 msgid "Track your reputation, popularity, and recent forecasts at a glance."
 msgstr ""
 "Sigue tu reputación, popularidad y pronósticos recientes de un vistazo."
 
-#: templates/dashboard/home.html:14
-#| msgid "Reputation"
 msgid "Reputation Points"
 msgstr "Reputación"
 
-#: templates/dashboard/home.html:17
-#| msgid "Popularity"
 msgid "Popularity Points"
 msgstr "Popularidad"
 
-#: templates/dashboard/home.html:35
 msgid "Recent Predictions"
 msgstr "Predicciones recientes"
 
-#: templates/dashboard/home.html:36
+#, fuzzy
+#| msgid "open forecast"
+#| msgid_plural "open forecasts"
+msgid "Open forecasts"
+msgstr "pronóstico abierto"
+
 msgid "Full history"
 msgstr "Historial completo"
 
-#: templates/dashboard/home.html:42
-#: templates/predictions/partials/prediction_history_item.html:21
-#| msgid "Forecasts"
 msgid "Forecast:"
 msgstr "Pronósticos"
 
-#: templates/dashboard/home.html:44
-#: templates/dashboard/reputation_leaderboard.html:37
-#: templates/markets/partials/forecast_card.html:60
-#: templates/predictions/partials/prediction_history_item.html:59
 msgid "Correct"
 msgstr "Correcto"
 
-#: templates/dashboard/home.html:44
-#: templates/markets/partials/forecast_card.html:60
-#: templates/predictions/partials/prediction_history_item.html:59
 msgid "Incorrect"
 msgstr "Incorrecto"
 
-#: templates/dashboard/home.html:48
 msgid "to make your first prediction."
 msgstr "para hacer tu primera predicción."
 
-#: templates/dashboard/landing.html:4 templates/dashboard/landing.html:8
 msgid "Explore"
 msgstr "Explorar"
 
-#: templates/dashboard/landing.html:9
-msgid "Build your"
-msgstr "Construye tu"
-
-#: templates/dashboard/landing.html:10
-msgid "track record"
-msgstr "historial"
-
-#: templates/dashboard/landing.html:12
 msgid ""
 "Choose a topic, browse open forecasts, and start earning <span "
 "class=\"badge-rep\">Reputation</span> — no betting, no wallets."
@@ -2639,137 +2552,96 @@ msgstr ""
 "Elige un tema, explora pronósticos abiertos y empieza a ganar <span "
 "class=\"badge-rep\">Reputación</span> — sin apuestas ni billeteras."
 
-#: templates/dashboard/landing.html:23
 msgid "Explore by category"
 msgstr "Explorar por categoría"
 
-#: templates/dashboard/landing.html:24
 msgid "Choose a topic to browse open forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#: templates/dashboard/landing.html:38
 msgid "No categories yet. Import markets from Polymarket to get started."
 msgstr ""
 "Aún no hay categorías. Importa mercados desde Polymarket para comenzar."
 
-#: templates/dashboard/landing.html:45
 msgid "Top predictors"
 msgstr "Mejores predictores"
 
-#: templates/dashboard/landing.html:46
 msgid "Full leaderboard"
 msgstr "Ranking completo"
 
-#: templates/dashboard/landing.html:60
 msgid "No rankings yet."
 msgstr "Aún no hay rankings."
 
-#: templates/dashboard/partials/browse_area_nav.html:3
 #, python-format
 msgid "%(name)s sub-areas"
 msgstr "Subáreas de %(name)s"
 
-#: templates/dashboard/partials/browse_area_nav.html:5
 #, python-format
-#| msgid "All markets"
 msgid "All %(name)s"
 msgstr "Todos los %(name)s"
 
-#: templates/dashboard/partials/category_card.html:21
 #, python-format
 msgid "%(counter)s forecast"
 msgid_plural "%(counter)s forecasts"
 msgstr[0] "%(counter)s pronóstico"
 msgstr[1] "%(counter)s pronósticos"
 
-#: templates/dashboard/partials/category_card.html:24
 msgid "Browse"
 msgstr "Explorar"
 
-#: templates/dashboard/partials/forecast_bookmark_button.html:12
-#: templates/dashboard/partials/forecast_bookmark_button.html:13
-#: templates/forum/partials/bookmark_button.html:12
-#: templates/forum/partials/bookmark_button.html:13
 msgid "Remove bookmark"
 msgstr "Quitar marcador"
 
-#: templates/dashboard/partials/forecast_bookmark_button.html:12
-#: templates/dashboard/partials/forecast_bookmark_button.html:13
-#: templates/forum/partials/bookmark_button.html:12
-#: templates/forum/partials/bookmark_button.html:13
 msgid "Bookmark"
 msgstr "Marcar"
 
-#: templates/dashboard/partials/forecast_bookmark_button.html:28
-#: templates/forum/partials/bookmark_button.html:28
 msgid "Log in to bookmark"
 msgstr "Inicia sesión para marcar"
 
-#: templates/dashboard/partials/forecast_post.html:34
-#: templates/markets/partials/forecast_card.html:29
-#| msgid "Forecasts"
 msgid "Forecast"
 msgstr "Pronósticos"
 
-#: templates/dashboard/partials/forecast_post.html:52
-#: templates/markets/partials/forecast_card.html:51
 msgid "✓ Correct forecast"
 msgstr "✓ Pronóstico correcto"
 
-#: templates/dashboard/partials/forecast_post.html:52
-#: templates/markets/partials/forecast_card.html:51
 msgid "✗ Incorrect forecast"
 msgstr "✗ Pronóstico incorrecto"
 
-#: templates/dashboard/partials/forecast_post_actions.html:5
-#: templates/forum/partials/post_actions.html:6
+#, python-format
+msgid "Exited forecast, +%(points)s reputation realized"
+msgstr "Pronóstico cerrado, +%(points)s de reputación realizada"
+
+#, python-format
+msgid "Exited forecast, %(points)s reputation realized"
+msgstr "Pronóstico cerrado, %(points)s de reputación realizada"
+
 msgid "View comments"
 msgstr "Ver comentarios"
 
-#: templates/dashboard/partials/forecast_post_actions.html:21
-#: templates/predictions/partials/prediction_interaction_stats.html:24
-#| msgid "Forecasts"
-msgid "Share forecast"
-msgstr "Pronósticos"
+#, python-format
+msgid "%(name)s on %(title)s"
+msgstr "%(name)s sobre %(title)s"
 
-#: templates/dashboard/partials/forecasts_feed.html:6
-#| msgid "Forecasts"
 msgid "No forecasts yet"
 msgstr "Pronósticos"
 
-#: templates/dashboard/partials/forecasts_feed.html:7
 msgid "Be the first to post a forecast on a market, or try another filter."
 msgstr ""
 "Sé el primero en publicar un pronóstico en un mercado, o prueba otro filtro."
 
-#: templates/dashboard/popularity_leaderboard.html:5
 #, python-format
-#| msgid "Popularity"
 msgid "%(name)s Popularity"
 msgstr "Popularidad de %(name)s"
 
-#: templates/dashboard/popularity_leaderboard.html:5
-#| msgid "Full leaderboard"
 msgid "Popularity Leaderboard"
 msgstr "Ranking de popularidad"
 
-#: templates/dashboard/popularity_leaderboard.html:10
-#: templates/dashboard/popularity_leaderboard.html:17
-#: templates/dashboard/reputation_leaderboard.html:10
-#: templates/dashboard/reputation_leaderboard.html:17
-#| msgid "Leaderboards"
-msgid "Leaderboard"
-msgstr "Ranking"
-
-#: templates/dashboard/popularity_leaderboard.html:13
 msgid ""
 "Most engaged users in this category — scores sum into the global popularity "
 "leaderboard."
 msgstr ""
-"Usuarios más activos en esta categoría — las puntuaciones suman a la "
-"ranking global de popularidad."
+"Usuarios más activos en esta categoría — las puntuaciones suman a la ranking"
+" global de popularidad."
 
-#: templates/dashboard/popularity_leaderboard.html:18
 msgid ""
 "Ranked by social engagement across all categories — separate from predictive"
 " reputation."
@@ -2777,267 +2649,371 @@ msgstr ""
 "Clasificados por engagement social en todas las categorías — separado de la "
 "reputación predictiva."
 
-#: templates/dashboard/popularity_leaderboard.html:31
-#: templates/dashboard/reputation_leaderboard.html:31
-msgid "Rank"
-msgstr "Puesto"
-
-#: templates/dashboard/popularity_leaderboard.html:32
-#: templates/dashboard/reputation_leaderboard.html:32
 msgid "User"
 msgstr "Usuario"
 
-#: templates/dashboard/popularity_leaderboard.html:34
-#| msgid "Popularity"
 msgid "Category popularity"
 msgstr "Popularidad"
 
-#: templates/dashboard/popularity_leaderboard.html:37
-#: templates/dashboard/reputation_leaderboard.html:39
 msgid "Global"
 msgstr "Global"
 
-#: templates/dashboard/popularity_leaderboard.html:54
-#: templates/dashboard/reputation_leaderboard.html:58
 msgid "No data yet for this category."
 msgstr "Aún no hay datos para esta categoría."
 
-#: templates/dashboard/popularity_leaderboard.html:67
-#: templates/dashboard/reputation_leaderboard.html:73
-#| msgid "No rankings yet."
 msgid "No data yet."
 msgstr "Aún no hay clasificaciones."
 
-#: templates/dashboard/reputation_leaderboard.html:5
 #, python-format
-#| msgid "Reputation"
 msgid "%(name)s Reputation"
 msgstr "Reputación de %(name)s"
 
-#: templates/dashboard/reputation_leaderboard.html:5
-#| msgid "Leaderboards"
 msgid "Reputation Leaderboard"
 msgstr "Ranking de reputación"
 
-#: templates/dashboard/reputation_leaderboard.html:13
 msgid ""
 "Top predictors in this category — scores sum into the global reputation "
 "leaderboard."
 msgstr ""
-"Mejores predictores en esta categoría — las puntuaciones suman a la "
-"ranking global de reputación."
+"Mejores predictores en esta categoría — las puntuaciones suman a la ranking "
+"global de reputación."
 
-#: templates/dashboard/reputation_leaderboard.html:18
 msgid ""
 "Ranked by predictive quality across all categories — not social popularity."
 msgstr ""
 "Clasificados por calidad predictiva en todas las categorías — no por "
 "popularidad social."
 
-#: templates/dashboard/reputation_leaderboard.html:34
-#| msgid "Reputation"
 msgid "Category reputation"
 msgstr "Reputación"
 
-#: templates/dashboard/world_cup_games.html:4
 #, python-format
 msgid "%(name)s — Match Forecasts"
 msgstr "%(name)s — Pronósticos de partidos"
 
-#: templates/dashboard/world_cup_games.html:24
 msgid "3-way match forecasts"
 msgstr "Pronósticos de resultado triple"
 
-#: templates/dashboard/world_cup_games.html:27
 msgid "Odds imported from"
 msgstr "Cuotas importadas de"
 
-#: templates/dashboard/world_cup_games.html:29
 msgid "pick a winner, draw, or away side. No betting, only reputation."
 msgstr "elige ganador, empate o visitante. Sin apuestas, solo reputación."
 
-#: templates/dashboard/world_cup_games.html:33
 msgid "open match"
 msgid_plural "open matches"
 msgstr[0] "partido abierto"
 msgstr[1] "partidos abiertos"
 
-#: templates/dashboard/world_cup_games.html:43
 msgid "Upcoming & live matches"
 msgstr "Próximos y en vivo"
 
-#: templates/dashboard/world_cup_games.html:44
 msgid "Sorted by kickoff"
 msgstr "Ordenados por inicio"
 
-#: templates/dashboard/world_cup_games.html:54
 msgid "No match forecasts yet."
 msgstr "Aún no hay pronósticos de partidos."
 
-#: templates/dashboard/world_cup_games.html:55
 msgid "Markets sync automatically from Polymarket — refresh in a moment."
 msgstr ""
 "Los mercados se sincronizan automáticamente desde Polymarket — actualiza en "
 "un momento."
 
-#: templates/forum/forum.html:35
-msgid ""
-"Short posts from the community — text and photos, up to 200 characters."
-msgstr ""
-"Publicaciones breves de la comunidad — texto y fotos, hasta 200 caracteres."
+msgid "Primary"
+msgstr "Principal"
 
-#: templates/forum/forum.html:45
+msgid "Home"
+msgstr "Inicio"
+
 msgid "to post on Forum."
 msgstr "para publicar en el Foro."
 
-#: templates/forum/partials/comment_form.html:19
-msgid "Comment"
-msgstr "Comentar"
+#, fuzzy
+#| msgid "View all"
+msgid "View thread"
+msgstr "Ver todo"
 
-#: templates/forum/partials/compose_form.html:30
-msgid "Remove image"
-msgstr "Quitar imagen"
+#, fuzzy
+#| msgid "comment"
+msgid "Share comment"
+msgstr "Comentario"
 
-#: templates/forum/partials/compose_form.html:45
-msgid "Photo"
-msgstr "Foto"
-
-#: templates/forum/partials/compose_form.html:55
-msgid "Post"
-msgstr "Publicar"
-
-#: templates/forum/partials/feed.html:6
-msgid "No posts yet"
-msgstr "Aún no hay publicaciones"
-
-#: templates/forum/partials/feed.html:7
-msgid "Be the first to share something on Forum."
-msgstr "Sé el primero en compartir algo en el Foro."
-
-#: templates/forum/partials/post_actions.html:23
-msgid "Share post"
-msgstr "Compartir publicación"
-
-#: templates/forum/partials/post_actions.html:25
 #, python-format
 msgid "%(name)s on Forum"
 msgstr "%(name)s en el Foro"
 
-#: templates/forum/partials/post_card.html:37
-#: templates/forum/post_detail.html:68
+#, fuzzy
+#| msgid "Reposted"
+msgid "Reply posted."
+msgstr "Republicado"
+
+#, fuzzy, python-format
+#| msgid "%(time)s ago"
+msgid "%(time)s"
+msgstr "Hace %(time)s"
+
+msgid "More"
+msgstr "Más"
+
+msgid "Copy link"
+msgstr "Copiar enlace"
+
+#, fuzzy
+#| msgid "Post comment"
+msgid "Delete comment"
+msgstr "Comentario de la publicación"
+
+#, fuzzy
+#| msgid "Post comment"
+msgid "Delete comment?"
+msgstr "Comentario de la publicación"
+
+msgid "This can't be undone and will remove your comment from the thread."
+msgstr "Esta acción no se puede deshacer y eliminará tu comentario del hilo."
+
+msgid "Delete"
+msgstr "Eliminar"
+
+#, fuzzy
+#| msgid "You can't vote on your own content"
+msgid "You can't vote on your own comment"
+msgstr "No puedes votar sobre tu propio contenido"
+
+msgid "Remove image"
+msgstr "Quitar imagen"
+
+msgid "Choice"
+msgstr "Opción"
+
+msgid "Poll choice"
+msgstr "Opción de encuesta"
+
+#, fuzzy
+#| msgid "Remove image"
+msgid "Remove choice"
+msgstr "Quitar imagen"
+
+msgid "Add a choice"
+msgstr "Añadir opción"
+
+msgid "Poll length"
+msgstr "Duración de la encuesta"
+
+#, fuzzy
+#| msgid "1 day left"
+msgid "1 day"
+msgstr "1 day left"
+
+msgid "3 days"
+msgstr "3 días"
+
+msgid "7 days"
+msgstr "7 días"
+
+msgid "Photo"
+msgstr "Foto"
+
+msgid "Poll"
+msgstr "Encuesta"
+
+msgid "Post"
+msgstr "Publicar"
+
+msgid "Welcome to Forum!"
+msgstr "¡Bienvenido al Foro!"
+
+#, fuzzy
+#| msgid "Be the first to share something on Forum."
+msgid "Be the first to share something."
+msgstr "Sé el primero en compartir algo en el Foro."
+
+msgid "Post your reply"
+msgstr "Publica tu respuesta"
+
+msgid "to reply."
+msgstr "para responder."
+
+msgid "Share post"
+msgstr "Compartir publicación"
+
 msgid "Reposted"
 msgstr "Republicado"
 
-#: templates/forum/partials/post_discussion_inner.html:6
+#, fuzzy
+#| msgid ""
+#| "You can't start a thread on your own post. Like, dislike, or reply to "
+#| "comments from others below — or share your post."
 msgid ""
-"You can't start a thread on your own post. Like, dislike, or reply to "
-"comments from others below — or share your post."
+"You can't start a thread on your own post. Reply to comments from others "
+"below — or share your post."
 msgstr ""
 "No puedes abrir un hilo en tu propia publicación. Da like, dislike o "
 "responde comentarios de otros abajo — o comparte tu publicación."
 
-#: templates/forum/partials/post_discussion_inner.html:12
-msgid "You liked this post — add your perspective"
-msgstr "Te gustó esta publicación — añade tu perspectiva"
-
-#: templates/forum/partials/post_discussion_inner.html:14
-msgid "You disliked this post — explain your view"
-msgstr "No te gustó esta publicación — explica tu punto de vista"
-
-#: templates/forum/partials/post_discussion_inner.html:19
-msgid "What do you think?"
-msgstr "¿Qué opinas?"
-
-#: templates/forum/partials/post_discussion_inner.html:26
 msgid "to comment on this post."
 msgstr "para comentar en esta publicación."
 
-#: templates/forum/partials/post_discussion_inner.html:41
-msgid "No comments yet — start the thread above."
-msgstr "Aún no hay comentarios — inicia el hilo arriba."
+#, fuzzy
+#| msgid "No comments yet — when others respond, you can reply here."
+msgid "No comments yet — be the first to reply."
+msgstr "Aún no hay comentarios. Cuando otros respondan, puedes hacerlo aquí."
 
-#: templates/forum/partials/repost_button.html:11
-#: templates/forum/partials/repost_button.html:12
+#, fuzzy
+#| msgid "Repost"
+msgid "View post"
+msgstr "Repostear"
+
+msgid "Delete post"
+msgstr "Eliminar publicación"
+
+msgid "Delete post?"
+msgstr "¿Eliminar publicación?"
+
+msgid "This can't be undone and will remove your post from the feed."
+msgstr "Esta acción no se puede deshacer y eliminará tu publicación del feed."
+
+#, python-format
+msgid "%(counter)s vote · Final results"
+msgid_plural "%(counter)s votes · Final results"
+msgstr[0] "%(counter)s voto · Resultados finales"
+msgstr[1] "%(counter)s votos · Resultados finales"
+
+#, python-format
+msgid "%(counter)s vote"
+msgid_plural "%(counter)s votes"
+msgstr[0] "%(counter)s voto"
+msgstr[1] "%(counter)s votos"
+
+#, fuzzy, python-format
+#| msgid "%(time)s ago"
+msgid "%(time)s left"
+msgstr "Hace %(time)s"
+
 msgid "Undo repost"
 msgstr "Deshacer repost"
 
-#: templates/forum/partials/repost_button.html:11
-#: templates/forum/partials/repost_button.html:12
 msgid "Repost"
 msgstr "Repostear"
 
-#: templates/forum/partials/repost_button.html:23
 msgid "You can't repost your own post"
 msgstr "No puedes repostear tu propia publicación"
 
-#: templates/forum/partials/repost_button.html:35
 msgid "Log in to repost"
 msgstr "Inicia sesión para repostear"
 
-#: templates/forum/partials/vote_actions.html:36
+#, fuzzy
+#| msgid "Toggle navigation"
+msgid "Forum navigation"
+msgstr "Alternar navegación"
+
+msgid "People"
+msgstr "Personas"
+
+msgid "Profile"
+msgstr "Tu perfil"
+
+#, fuzzy
+#| msgid "Bookmark"
+msgid "Bookmarks"
+msgstr "Marcar"
+
+msgid "What's happening"
+msgstr "Qué está pasando"
+
+#, fuzzy
+#| msgid "prediction markets"
+msgid "Prediction markets"
+msgstr "mercados de predicción"
+
+#, fuzzy
+#| msgid "Explore the thesis"
+msgid "Explore live events"
+msgstr "Conoce la tesis"
+
+#, fuzzy
+#| msgid "Recent Predictions"
+msgid "Community predictions"
+msgstr "Predicciones recientes"
+
+#, fuzzy
+#| msgid "Formal forecasts and how they resolved."
+msgid "Formal forecasts on markets"
+msgstr "Pronósticos formales y cómo se resolvieron."
+
+#, fuzzy
+#| msgid "Leaderboards"
+msgid "Leaderboard rankings"
+msgstr "Rankings"
+
+msgid "Who to follow"
+msgstr "A quién seguir"
+
+#, fuzzy
+#| msgid "Top predictors"
+msgid "Follow top predictors"
+msgstr "Mejores predictores"
+
+#, fuzzy
+#| msgid "Popularity Points"
+msgid "Popular voices"
+msgstr "Popularidad"
+
+msgid "Most engaged community members"
+msgstr "Miembros más activos de la comunidad"
+
 msgid "You can't vote on your own post"
 msgstr "No puedes votar tu propia publicación"
 
-#: templates/forum/post_detail.html:4
-#| msgid "Forum"
 msgid "Forum post"
 msgstr "Foro"
 
-#: templates/forum/post_detail.html:80
-#: templates/predictions/partials/prediction_interaction_stats.html:5
 msgid "Comments"
 msgstr "Comentarios"
 
-#: templates/includes/language_switcher.html:8
-#: templates/includes/navbar.html:202
 msgid "Language"
 msgstr "Idioma"
 
-#: templates/includes/mobile_bottom_nav.html:6
-msgid "Primary"
-msgstr "Principal"
-
-#: templates/includes/mobile_bottom_nav.html:41
-msgid "You"
-msgstr "Tú"
-
-#: templates/includes/navbar.html:79
 msgid "Switch to light mode"
 msgstr "Cambiar a modo claro"
 
-#: templates/includes/navbar.html:79
 msgid "Switch to dark mode"
 msgstr "Cambiar a modo oscuro"
 
-#: templates/includes/navbar.html:80
 msgid "Light mode"
 msgstr "Modo claro"
 
-#: templates/includes/navbar.html:80
 msgid "Dark mode"
 msgstr "Modo oscuro"
 
-#: templates/includes/navbar.html:117
 msgid "Loading notifications…"
 msgstr "Cargando notificaciones…"
 
-#: templates/includes/navbar.html:141
 msgid "Your profile"
 msgstr "Tu perfil"
 
-#: templates/includes/navbar.html:155 templates/includes/navbar.html:233
 msgid "Log out"
 msgstr "Cerrar sesión"
 
-#: templates/includes/navbar.html:175
 msgid "Toggle navigation"
 msgstr "Alternar navegación"
 
-#: templates/includes/pagination.html:3
+msgid "Navigation menu"
+msgstr "Menú de navegación"
+
+msgid "Menu"
+msgstr "Menú"
+
+#, fuzzy
+#| msgid "Close comment form"
+msgid "Close menu"
+msgstr "Comentario de cierre"
+
+msgid "Account"
+msgstr "Cuenta"
+
 msgid "Pagination"
 msgstr "Paginación"
 
-#: templates/includes/pagination.html:5
 #, python-format
 msgid ""
 "\n"
@@ -3054,45 +3030,83 @@ msgstr ""
 "    <span class=\"font-medium text-slate-700\">%(count)s</span>\n"
 "    "
 
-#: templates/includes/pagination.html:16 templates/includes/pagination.html:19
 msgid "Previous"
 msgstr "Anterior"
 
-#: templates/includes/pagination.html:23
 #, python-format
 msgid "Page %(number)s of %(total)s"
 msgstr "Página %(number)s de %(total)s"
 
-#: templates/includes/pagination.html:29 templates/includes/pagination.html:32
 msgid "Next"
 msgstr "Siguiente"
 
-#: templates/includes/pr_page_hero.html:29
 msgid "Learn more"
 msgstr "Saber más"
 
-#: templates/markets/market_detail.html:24
-msgid "View on Polymarket ↗"
-msgstr "Ver en Polymarket ↗"
+#, fuzzy
+#| msgid "View notification"
+msgid "Verification record"
+msgstr "Notificaciones"
 
-#: templates/markets/market_detail.html:28
-msgid "View on Kalshi ↗"
-msgstr "Ver en Kalshi ↗"
+#, fuzzy
+#| msgid "Proof of Reputation"
+msgid "PredictStamp verification"
+msgstr "Verificación PredictStamp"
 
-#: templates/markets/market_detail.html:34
-msgid "Live odds"
-msgstr "Cuotas en vivo"
+msgid "Signature valid"
+msgstr "Firma válida"
 
-#: templates/markets/market_detail.html:51
-#, python-format
-msgid "Resolved outcome: <strong>%(outcome)s</strong>"
-msgstr "Resultado resuelto: <strong>%(outcome)s</strong>"
+msgid "Signature mismatch"
+msgstr "Firma no coincide"
 
-#: templates/markets/market_detail.html:69
+#| msgid ""
+#| "This record was generated automatically in the background. It proves that "
+#| "ProofRep recorded this forecast or reputation event without requiring any "
+#| "extra action from the user."
+msgid ""
+"This record was generated automatically in the background. It proves that "
+"PredictStamp recorded this forecast or reputation event without requiring "
+"any extra action from the user."
+msgstr ""
+"Este registro se generó automáticamente en segundo plano. Demuestra que "
+"PredictStamp registró este pronóstico o evento de reputación sin acción "
+"extra del usuario."
+
+msgid "Pick:"
+msgstr "Elección:"
+
+msgid "UID"
+msgstr "UID"
+
+#, fuzzy
+#| msgid "Sign up"
+msgid "Signer"
+msgstr "Registrarse"
+
+msgid "Schema UID"
+msgstr "UID del esquema"
+
+msgid "Offchain timestamp"
+msgstr "Marca de tiempo offchain"
+
+msgid "Event timestamp"
+msgstr "Marca de tiempo del evento"
+
+msgid "Technical payload"
+msgstr "Payload técnico"
+
+#| msgid "This forecast has a ProofRep verification record"
+msgid "This forecast has a PredictStamp verification record"
+msgstr "Este pronóstico tiene un registro de verificación PredictStamp"
+
+#, fuzzy
+#| msgid "Verifiable history"
+msgid "Verified record"
+msgstr "Historial verificable"
+
 msgid "Public forecast history"
 msgstr "Historial público de pronósticos"
 
-#: templates/markets/market_detail.html:71
 msgid ""
 "All forecasts on this market — scored on <span class=\"badge-"
 "rep\">Reputation</span> when resolved. Earn <span class=\"badge-"
@@ -3103,19 +3117,15 @@ msgstr ""
 "pop\">Popularidad</span> cuando otros dan like a tu pronóstico o "
 "comentarios."
 
-#: templates/markets/market_detail.html:77
 msgid "No forecasts yet. Be the first to place one."
 msgstr "Aún no hay pronósticos. Sé el primero en publicar uno."
 
-#: templates/markets/market_hub.html:9
 msgid "Browse by"
 msgstr "Explorar por"
 
-#: templates/markets/market_hub.html:10
 msgid "category"
 msgstr "categoría"
 
-#: templates/markets/market_hub.html:11
 msgid ""
 "Pick a topic — Politics, Sports, Crypto, Economy, and more. Real forecasts "
 "from Polymarket, no betting."
@@ -3123,16 +3133,43 @@ msgstr ""
 "Elige un tema — Política, Deportes, Cripto, Economía y más. Pronósticos "
 "reales de Polymarket, sin apuestas."
 
-#: templates/markets/market_hub.html:17 templates/markets/market_list.html:73
+#, fuzzy
+#| msgid "Search markets…"
+msgid "Search results"
+msgstr "Buscar mercados…"
+
+#, python-format
+msgid ""
+"\n"
+"            %(counter)s open event matches “%(search_query)s”\n"
+"          "
+msgid_plural ""
+"\n"
+"            %(counter)s open events match “%(search_query)s”\n"
+"          "
+msgstr[0] ""
+"\n"
+"            %(counter)s evento abierto coincide con «%(search_query)s»\n"
+"          "
+msgstr[1] ""
+"\n"
+"            %(counter)s eventos abiertos coinciden con «%(search_query)s»\n"
+"          "
+
+#, python-format
+msgid ""
+"No open events match “%(search_query)s”. Try another keyword or browse by "
+"category below."
+msgstr ""
+"Ningún evento abierto coincide con «%(search_query)s». Prueba otra palabra o"
+" explora por categoría."
+
 msgid "Categories"
 msgstr "Categorías"
 
-#: templates/markets/market_hub.html:18
-#| msgid "Choose a topic to browse open forecasts."
 msgid "Tap a category to browse open forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#: templates/markets/market_hub.html:34
 msgid ""
 "No categories yet. Run <code class=\"text-xs\">sync_markets --top-"
 "volume</code> to import Polymarket markets."
@@ -3140,68 +3177,44 @@ msgstr ""
 "Aún no hay categorías. Ejecuta <code class=\"text-xs\">sync_markets --top-"
 "volume</code> para importar mercados de Polymarket."
 
-#: templates/markets/market_list.html:8
-msgid "Breadcrumb"
-msgstr "Miga de pan"
-
-#: templates/markets/market_list.html:16
-#| msgid "Markets"
 msgid "markets"
 msgstr "Mercados"
 
-#: templates/markets/market_list.html:17
 msgid ""
 "Forecast on real-world events — odds from Polymarket and Kalshi, no betting."
 msgstr ""
 "Pronostica eventos reales — cuotas de Polymarket y Kalshi, sin apuestas."
 
-#: templates/markets/market_list.html:23
-msgid "Search"
-msgstr "Buscar"
-
-#: templates/markets/market_list.html:24
 msgid "Search markets…"
 msgstr "Buscar mercados…"
 
-#: templates/markets/market_list.html:28
 msgid "Status"
 msgstr "Estado"
 
-#: templates/markets/market_list.html:30
-#| msgid "All markets"
 msgid "All statuses"
 msgstr "Todos los mercados"
 
-#: templates/markets/market_list.html:47
 msgid "Sort"
 msgstr "Ordenar"
 
-#: templates/markets/market_list.html:48
-#| msgid "All markets"
 msgid "Sort markets"
 msgstr "Todos los mercados"
 
-#: templates/markets/market_list.html:57
 msgid "Filter"
 msgstr "Filtrar"
 
-#: templates/markets/market_list.html:65
 msgid "Hide"
 msgstr "Ocultar"
 
-#: templates/markets/market_list.html:66
 msgid "Show"
 msgstr "Mostrar"
 
-#: templates/markets/market_list.html:108
 msgid "No Kalshi markets match your filters."
 msgstr "Ningún mercado de Kalshi coincide con tus filtros."
 
-#: templates/markets/market_list.html:110
 msgid "No Polymarket markets match your filters."
 msgstr "Ningún mercado de Polymarket coincide con tus filtros."
 
-#: templates/markets/market_list.html:112
 msgid ""
 "No markets found. Run <code class=\"text-xs\">sync_markets "
 "--categories</code> or import via admin."
@@ -3209,20 +3222,16 @@ msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
 "--categories</code> o importa desde el admin."
 
-#: templates/markets/partials/kalshi_embed.html:6
 msgid "Live Kalshi Chart"
 msgstr "Gráfico Kalshi en vivo"
 
-#: templates/markets/partials/kalshi_embed.html:8
 msgid "Yes price history from Kalshi — updates when you refresh the page."
 msgstr ""
 "Historial de precio Sí de Kalshi — se actualiza al refrescar la página."
 
-#: templates/markets/partials/kalshi_embed.html:18
 msgid "Open on Kalshi ↗"
 msgstr "Abrir en Kalshi ↗"
 
-#: templates/markets/partials/kalshi_embed.html:24
 msgid ""
 "The chart is view-only. Use <strong>Open on Kalshi</strong> above to visit "
 "the market — no trading on this platform."
@@ -3230,107 +3239,231 @@ msgstr ""
 "El gráfico es solo lectura. Usa <strong>Abrir en Kalshi</strong> arriba para"
 " visitar el mercado — sin trading en esta plataforma."
 
-#: templates/markets/partials/polymarket_data.html:41
+#, fuzzy
+#| msgid "View on Polymarket ↗"
+msgid "View on Polymarket"
+msgstr "Ver en Polymarket ↗"
+
+#, fuzzy
+#| msgid "View on Kalshi ↗"
+msgid "View on Kalshi"
+msgstr "Ver en Kalshi ↗"
+
+msgid "Live odds"
+msgstr "Cuotas en vivo"
+
+#, python-format
+msgid "Resolved outcome: <strong>%(outcome)s</strong>"
+msgstr "Resultado resuelto: <strong>%(outcome)s</strong>"
+
+#, fuzzy
+#| msgid "Search events…"
+msgid "Search events"
+msgstr "Buscar eventos…"
+
+msgid "Clear"
+msgstr "Limpiar"
+
 msgid "No Polymarket API data stored for this market yet."
 msgstr "Aún no hay datos de la API de Polymarket para este mercado."
 
-#: templates/markets/partials/polymarket_data.html:48
 msgid "Raw JSON — Market API"
 msgstr "JSON crudo — API de mercado"
 
-#: templates/markets/partials/polymarket_data.html:49
 msgid "Complete unmodified Polymarket market response"
 msgstr "Respuesta completa sin modificar del mercado Polymarket"
 
-#: templates/markets/partials/polymarket_data.html:63
 msgid "Raw JSON — Event API"
 msgstr "JSON crudo — API de evento"
 
-#: templates/markets/partials/polymarket_data.html:64
 msgid "Complete unmodified Polymarket event response"
 msgstr "Respuesta completa sin modificar del evento Polymarket"
 
-#: templates/markets/partials/polymarket_embed.html:15
 msgid "Live Polymarket Chart"
 msgstr "Gráfico Polymarket en vivo"
 
-#: templates/markets/partials/polymarket_embed.html:17
+#, fuzzy
+#| msgid ""
+#| "Yes price history from Kalshi — updates when you refresh the page."
+msgid ""
+"Top outcomes by win probability — price history from Polymarket, updates "
+"when you refresh."
+msgstr ""
+"Historial de precio Sí de Kalshi — se actualiza al refrescar la página."
+
 msgid "Embedded odds chart from Polymarket — updates automatically."
 msgstr ""
 "Gráfico de cuotas embebido de Polymarket — se actualiza automáticamente."
 
-#: templates/markets/partials/polymarket_embed.html:18
 msgid "Customize embed ↗"
 msgstr "Personalizar embed ↗"
 
-#: templates/markets/partials/polymarket_embed.html:28
 msgid "Open on Polymarket ↗"
 msgstr "Abrir en Polymarket ↗"
 
-#: templates/markets/partials/polymarket_embed.html:34
+#, fuzzy
+#| msgid ""
+#| "The chart is view-only. Use <strong>Open on Kalshi</strong> above to visit "
+#| "the market — no trading on this platform."
 msgid ""
 "The chart is view-only. Use <strong>Open on Polymarket</strong> above to "
-"visit the market — in-chart links are disabled because Polymarket's embed "
-"breaks for Spanish locale users."
+"visit the market — no trading on this platform."
 msgstr ""
-"El gráfico es solo lectura. Usa <strong>Abrir en Polymarket</strong> arriba "
-"para visitar el mercado — los enlaces del gráfico están deshabilitados "
-"porque el embed de Polymarket falla para usuarios en español."
+"El gráfico es solo lectura. Usa <strong>Abrir en Kalshi</strong> arriba para"
+" visitar el mercado — sin trading en esta plataforma."
 
-#: templates/markets/partials/polymarket_embed.html:42
 #, python-format
 msgid "Polymarket market chart — %(market_title)s"
 msgstr "Gráfico de mercado Polymarket — %(market_title)s"
 
-#: templates/markets/partials/source_filter_pills.html:4
 msgid "Source"
 msgstr "Fuente"
 
-#: templates/markets/partials/world_cup_match_card.html:33
-msgid "Draw"
-msgstr "Empate"
-
-#: templates/markets/partials/world_cup_match_card.html:48
 msgid "3-way result"
 msgstr "Resultado triple"
 
-#: templates/predictions/partials/forecast_form.html:12
-#: templates/predictions/prediction_form.html:4
+#, fuzzy
+#| msgid "open forecast"
+#| msgid_plural "open forecasts"
+msgid "Open Forecasts"
+msgstr "pronóstico abierto"
+
+#, fuzzy
+#| msgid "questions"
+msgid "Open positions"
+msgstr "preguntas"
+
+#, fuzzy
+#| msgid "Your name"
+msgid "Your open"
+msgstr "Tu nombre"
+
+#, fuzzy
+#| msgid "forecast"
+msgid "forecasts"
+msgstr "Pronósticos"
+
+msgid ""
+"Track reputation P&L on active forecasts, close positions, and re-enter "
+"whenever your view changes."
+msgstr ""
+
+#, fuzzy
+#| msgid "Only active forecasts can be exited."
+msgid "Active forecasts you can exit now"
+msgstr "Solo los pronósticos activos se pueden cerrar."
+
+#, fuzzy
+#| msgid "Monetizing reputation"
+msgid "Unrealized reputation"
+msgstr "Monetización de la reputación"
+
+msgid ""
+"Estimated if you closed every open forecast at current market probabilities."
+msgstr ""
+
+#, fuzzy
+#| msgid "open forecast"
+#| msgid_plural "open forecasts"
+msgid "Open forecast book"
+msgstr "pronóstico abierto"
+
+msgid ""
+"Each card compares your entry probability with the current market "
+"probability for the same side."
+msgstr ""
+
+msgid "Prediction history"
+msgstr "Historial de predicciones"
+
+#, fuzzy, python-format
+#| msgid "%(timesince)s ago"
+msgid "opened %(timesince)s ago"
+msgstr "hace %(timesince)s"
+
+msgid "Entry"
+msgstr ""
+
+#, fuzzy
+#| msgid "No"
+msgid "Now"
+msgstr "No"
+
+msgid ""
+"Closing realizes this reputation delta and frees you to forecast again."
+msgstr ""
+
+#, fuzzy
+#| msgid "open forecast"
+#| msgid_plural "open forecasts"
+msgid "Close forecast"
+msgstr "pronóstico abierto"
+
+#, fuzzy
+#| msgid "No open forecasts in %(name)s yet."
+msgid "No open forecasts right now."
+msgstr "Aún no hay pronósticos abiertos en %(name)s."
+
+msgid "Browse markets to open a new reputation-only forecast."
+msgstr ""
+
+msgid "Challenge event — forecast already placed"
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
+"        Your open forecast on this event already counts for <strong>%(counter)s</strong> active challenge and your global reputation — even if you placed it before the challenge started. You cannot open a second position on the same event.\n"
+"        "
+msgid_plural ""
+"\n"
+"        Your open forecast on this event already counts for <strong>%(counter)s</strong> active challenges and your global reputation — even if you placed it before they started. You cannot open a second position on the same event.\n"
+"        "
+msgstr[0] ""
+msgstr[1] ""
+
+#, fuzzy
+#| msgid "Challenges"
+msgid "Challenge event"
+msgstr "Desafíos"
+
+msgid ""
+"This market is part of an active challenge. Your forecast will count toward "
+"the challenge leaderboard and your global reputation. Only one open forecast"
+" is allowed per event."
+msgstr ""
+
 msgid "Place a forecast"
 msgstr "Publicar pronóstico"
 
-#: templates/predictions/partials/forecast_form.html:31
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "Posted %(timesince)s ago. Forecasts are permanent and cannot be edited."
 msgid ""
-"Posted %(timesince)s ago. Forecasts are permanent and cannot be edited."
+"Posted %(timesince)s ago. You can exit this forecast at the current market "
+"price and enter again later."
 msgstr ""
 "Publicado hace %(timesince)s. Los pronósticos son permanentes y no se pueden"
 " editar."
 
-#: templates/predictions/partials/forecast_form.html:33
 msgid ""
 "Pick your outcome below. Live Kalshi odds are captured when you submit."
 msgstr ""
 "Elige tu resultado abajo. Las cuotas Kalshi en vivo se capturan al enviar."
 
-#: templates/predictions/partials/forecast_form.html:35
 msgid ""
 "Pick your outcome below. Live Polymarket odds are captured when you submit."
 msgstr ""
 "Elige tu resultado abajo. Las cuotas Polymarket en vivo se capturan al "
 "enviar."
 
-#: templates/predictions/partials/forecast_form.html:40
 #, python-format
 msgid "Market closes %(close_date)s"
 msgstr "El mercado cierra %(close_date)s"
 
-#: templates/predictions/partials/forecast_form.html:50
-#| msgid "Your profile"
 msgid "Your pick"
 msgstr "Tu perfil"
 
-#: templates/predictions/partials/forecast_form.html:54
 #, python-format
 msgid ""
 "\n"
@@ -3345,33 +3478,39 @@ msgstr ""
 "            <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas.\n"
 "            "
 
-#: templates/predictions/partials/forecast_form.html:65
-#| msgid "Your profile"
 msgid "Your reasoning"
 msgstr "Tu perfil"
 
-#: templates/predictions/partials/forecast_form.html:71
-msgid "This forecast is locked until the market resolves."
-msgstr "Este pronóstico está bloqueado hasta que el mercado se resuelva."
+#, python-format
+msgid "Current market probability for your side: %(prob)s%%."
+msgstr "Probabilidad de mercado actual para tu lado: %(prob)s%%."
 
-#: templates/predictions/partials/forecast_form.html:72
+#, python-format
+msgid "Exiting now would realize +%(points)s reputation."
+msgstr "Salir ahora realizaría +%(points)s de reputación."
+
+#, python-format
+msgid "Exiting now would realize %(points)s reputation."
+msgstr "Salir ahora realizaría %(points)s de reputación."
+
+#, fuzzy
+#| msgid "Post forecast"
+msgid "Exit forecast"
+msgstr "Pronósticos"
+
 msgid "View in public feed"
 msgstr "Ver en el feed público"
 
-#: templates/predictions/partials/forecast_form.html:88
 msgid "Reputation at stake based on current Kalshi odds."
 msgstr "Reputación en juego según las cuotas Kalshi actuales."
 
-#: templates/predictions/partials/forecast_form.html:90
 msgid "Reputation at stake based on current Polymarket odds."
 msgstr "Reputación en juego según las cuotas Polymarket actuales."
 
-#: templates/predictions/partials/forecast_form.html:105
 #, python-format
 msgid "Market %(prob)s%%"
 msgstr "Mercado %(prob)s%%"
 
-#: templates/predictions/partials/forecast_form.html:107
 #, python-format
 msgid ""
 "\n"
@@ -3386,41 +3525,83 @@ msgstr ""
 "                  <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas\n"
 "                  "
 
-#: templates/predictions/partials/forecast_form.html:126
 msgid "(optional)"
 msgstr "(opcional)"
 
-#: templates/predictions/partials/forecast_form.html:128
 msgid "/"
 msgstr "/"
 
-#: templates/predictions/partials/forecast_form.html:130
 msgid ""
 "Share the argument behind your pick — visible in the public forecast feed."
 msgstr ""
 "Comparte el argumento detrás de tu elección — visible en el feed público de "
 "pronósticos."
 
-#: templates/predictions/partials/forecast_form.html:140
-#| msgid "Forecasts"
 msgid "Post forecast"
 msgstr "Pronósticos"
 
-#: templates/predictions/partials/forecast_form.html:147
 msgid "to place your forecast on this market."
 msgstr "para publicar tu pronóstico en este mercado."
 
-#: templates/predictions/partials/prediction_history_item.html:11
+#, fuzzy
+#| msgid "Resolved outcome"
+msgid "All outcomes"
+msgstr "Resultado resuelto"
+
+#, python-format
+msgid ""
+"Your active forecast: %(direction)s %(outcome)s. Exit it to enter again "
+"later."
+msgstr ""
+"Tu pronóstico activo: %(direction)s %(outcome)s. Ciérralo para volver a "
+"participar."
+
+msgid ""
+"Pick Yes or No on any outcome, then explain your pick below. Reputation-only"
+" — no money or trading."
+msgstr ""
+"Elige Sí o No en cualquier resultado y explica tu elección abajo. Solo "
+"reputación — sin dinero ni trading."
+
+#, python-format
+msgid "%(prob)s%% market probability"
+msgstr "%(prob)s%% probabilidad de mercado"
+
+#, fuzzy, python-format
+#| msgid "Market %(prob)s%%"
+msgid "Yes %(prob)s%%"
+msgstr "Mercado %(prob)s%%"
+
+#, fuzzy, python-format
+#| msgid "Market %(prob)s%%"
+msgid "No %(prob)s%%"
+msgstr "Mercado %(prob)s%%"
+
+#, python-format
+msgid "Explain your Yes on %(outcome_label)s"
+msgstr "Explica tu Sí en %(outcome_label)s"
+
+#, python-format
+msgid "Explain your No on %(outcome_label)s"
+msgstr "Explica tu No en %(outcome_label)s"
+
+#, python-format
+msgid "%(direction)s %(outcome)s"
+msgstr "%(direction)s %(outcome)s"
+
+#, fuzzy
+#| msgid "to place your forecast on this market."
+msgid "to place your forecast on this event."
+msgstr "para publicar tu pronóstico en este mercado."
+
 #, python-format
 msgid "%(timesince)s ago"
 msgstr "hace %(timesince)s"
 
-#: templates/predictions/partials/prediction_history_item.html:15
 #, python-format
 msgid "Closes %(close_date)s"
 msgstr "Cierra %(close_date)s"
 
-#: templates/predictions/partials/prediction_history_item.html:29
 #, python-format
 msgid ""
 "\n"
@@ -3435,42 +3616,32 @@ msgstr ""
 "        · <span class=\"text-red-700\">−%(loss)s</span> si fallas\n"
 "        "
 
-#: templates/predictions/partials/prediction_history_item.html:41
+#, fuzzy, python-format
+#| msgid "Reputation +%(points)s earned"
+msgid "Reputation +%(points)s realized on exit"
+msgstr "Reputación +%(points)s ganados"
+
 #, python-format
 msgid "Reputation +%(points)s earned"
 msgstr "Reputación +%(points)s ganados"
 
-#: templates/predictions/partials/prediction_history_item.html:43
+#, fuzzy, python-format
+#| msgid "Reputation %(points)s earned"
+msgid "Reputation %(points)s realized on exit"
+msgstr "Reputación %(points)s ganados"
+
 #, python-format
 msgid "Reputation %(points)s earned"
 msgstr "Reputación %(points)s ganados"
 
-#: templates/predictions/partials/prediction_interaction_stats.html:12
-msgid "Likes"
-msgstr "Me gusta"
-
-#: templates/predictions/partials/prediction_interaction_stats.html:17
-msgid "Dislikes"
-msgstr "No me gusta"
-
-#: templates/predictions/partials/prediction_interaction_stats.html:26
-#, python-format
-msgid "%(name)s on %(title)s"
-msgstr "%(name)s en %(title)s"
-
-#: templates/predictions/prediction_form.html:8
 msgid "← Back to market"
 msgstr "← Volver al mercado"
 
-#: templates/predictions/prediction_history.html:8
-#| msgid "track record"
 msgid "Track record"
 msgstr "historial"
 
-#: templates/predictions/prediction_history.html:9
-msgid "Prediction history"
-msgstr "Historial de predicciones"
-
-#: templates/predictions/prediction_history.html:10
 msgid "Formal forecasts and how they resolved."
 msgstr "Pronósticos formales y cómo se resolvieron."
+
+#~ msgid "Proof of Reputation"
+#~ msgstr "Prueba de reputación"

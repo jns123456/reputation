@@ -1,10 +1,12 @@
 (function () {
+  var i18n = window.PROOFREP_I18N || {};
+
   window.copyForumPostLink = function (button) {
     var url = button.getAttribute("data-copy-url");
     if (!url) return;
 
     var label = button.textContent.trim();
-    var copiedLabel = button.getAttribute("data-copied-label") || "Link copied!";
+    var copiedLabel = button.getAttribute("data-copied-label") || i18n.linkCopied || "Link copied!";
 
     function showCopied() {
       button.textContent = copiedLabel;
@@ -13,19 +15,20 @@
       }, 2000);
     }
 
+    var copyPrompt = i18n.copyLinkPrompt || "Copy this link:";
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(showCopied).catch(function () {
-        window.prompt("Copy this link:", url);
+        window.prompt(copyPrompt, url);
       });
       return;
     }
 
-    window.prompt("Copy this link:", url);
+    window.prompt(copyPrompt, url);
   };
 
   window.shareForumPost = function (button) {
     var url = button.getAttribute("data-share-url");
-    var title = button.getAttribute("data-share-title") || "Forecast on ProofRep";
+    var title = button.getAttribute("data-share-title") || i18n.shareForecastTitle || "Forecast on PredictStamp";
     if (!url) return;
 
     if (navigator.share) {
@@ -36,14 +39,14 @@
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(function () {
         var original = button.getAttribute("title");
-        button.setAttribute("title", "Link copied!");
+        button.setAttribute("title", i18n.linkCopied || "Link copied!");
         setTimeout(function () {
-          button.setAttribute("title", original || "Share forecast");
+          button.setAttribute("title", original || i18n.shareForecast || "Share forecast");
         }, 2000);
       });
       return;
     }
 
-    window.prompt("Copy this link:", url);
+    window.prompt(i18n.copyLinkPrompt || "Copy this link:", url);
   };
 })();

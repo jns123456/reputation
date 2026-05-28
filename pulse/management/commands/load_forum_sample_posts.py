@@ -49,7 +49,7 @@ SAMPLE_POSTS = [
     ("marketwatch", "Bitcoin above $100k before Q3? Polymarket odds just crossed 61%.", 180),
     ("rep_analyst", "Early correct calls on low-probability outcomes earn the most reputation. That's the whole game.", 320),
     ("sarah_f", "Just posted my first formal forecast. Nervous but excited to track it against resolution.", 90),
-    ("demo", "ProofRep separates popularity from reputation — finally a feed that rewards being right, not loud.", 15),
+    ("demo", "PredictStamp separates popularity from reputation — finally a feed that rewards being right, not loud.", 15),
     ("predictor_mike", "Watching the Ukraine ceasefire market closely. Probability moved 8 points overnight.", 720),
     ("marketwatch", "Election markets are noisy this week. Good time to read arguments, not just odds.", 1440),
     ("sarah_f", "Who else tracks their Brier score manually? Would love a dashboard widget for that.", 2880),

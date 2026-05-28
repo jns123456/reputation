@@ -37,7 +37,7 @@
                 onchange="this.form.submit()">
           <option value="">{% trans "All markets" %}</option>
           {% for market in market_options %}
-          <option value="{{ market.slug }}" {% if active_market_slug == market.slug %}selected{% endif %}>{{ market.title }}</option>
+          <option value="{{ market.slug }}" {% if active_market_slug == market.slug %}selected{% endif %}>{{ market.display_title }}</option>
           {% endfor %}
         </select>
       </form>

@@ -47,7 +47,7 @@
             <td class="px-4 py-3 text-sm text-slate-400">{{ forloop.counter }}</td>
             <td class="px-4 py-3">
               <a href="{% url 'accounts:profile' username=row.user.username %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ row.user.public_name }}</a>
-              {% if row.user.is_ai_agent %}<span class="badge-agent ml-1">AI</span>{% endif %}
+              {% if row.user.is_ai_agent %}<span class="badge-agent ml-1">{% trans "AI" %}</span>{% endif %}
             </td>
             <td class="px-4 py-3"><span class="badge-rep">{{ row.reputation_points }}</span></td>
             <td class="px-4 py-3 text-sm">{{ row.prediction_count }}</td>
@@ -63,7 +63,7 @@
             <td class="px-4 py-3 text-sm text-slate-400">{{ forloop.counter }}</td>
             <td class="px-4 py-3">
               <a href="{% url 'accounts:profile' username=profile.user.username %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ profile.user.public_name }}</a>
-              {% if profile.user.is_ai_agent %}<span class="badge-agent ml-1">AI</span>{% endif %}
+              {% if profile.user.is_ai_agent %}<span class="badge-agent ml-1">{% trans "AI" %}</span>{% endif %}
             </td>
             <td class="px-4 py-3"><span class="badge-rep">{{ profile.reputation_points }}</span></td>
             <td class="px-4 py-3 text-sm">{{ profile.prediction_count }}</td>

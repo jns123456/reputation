@@ -87,6 +87,11 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
         if raw_event is not None:
             defaults["kalshi_event_raw"] = raw_event
 
+    existing_market = Market.objects.filter(external_id=external_id).first()
+    from markets.translation_services import apply_spanish_translations_to_defaults
+
+    apply_spanish_translations_to_defaults(defaults, existing_market=existing_market)
+
     with transaction.atomic():
         market, created = Market.objects.update_or_create(
             external_id=external_id,

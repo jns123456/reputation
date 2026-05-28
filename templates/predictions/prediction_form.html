@@ -6,7 +6,7 @@
 {% block content %}
 <div class="mx-auto max-w-xl">
   <p class="text-sm text-slate-500"><a href="{% url 'markets:detail' slug=market.slug %}" class="text-brand-600 hover:underline">{% trans "← Back to market" %}</a></p>
-  <h1 class="mt-2 text-2xl font-bold">{{ market.title }}</h1>
+  <h1 class="mt-2 text-2xl font-bold">{{ market.display_title }}</h1>
   {% include "predictions/partials/forecast_form.html" with form=form existing=existing %}
 </div>
 {% endblock %}

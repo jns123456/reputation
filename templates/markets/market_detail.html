@@ -1,57 +1,11 @@
 {% extends "base.html" %}
 {% load i18n reputation_filters %}
 
-{% block title %}{{ market.title }}{% endblock %}
+{% block title %}{{ market.display_title }}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
-  <article class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
-    <div class="pr-mesh pointer-events-none absolute inset-0 opacity-50" aria-hidden="true"></div>
-    <div class="relative flex flex-wrap items-start justify-between gap-4">
-      <div class="flex-1 min-w-0">
-        <div class="flex flex-wrap gap-2">
-          <span class="badge-status-{{ market.status }}">{{ market.get_status_display }}</span>
-          {% if market.category %}<span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.category }}</span>{% endif %}
-          {% if market.source == "polymarket" %}<span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Polymarket</span>{% endif %}
-          {% if market.source == "kalshi" %}<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Kalshi</span>{% endif %}
-        </div>
-        <h1 class="pr-hero-title mt-3">{{ market.title }}</h1>
-        {% if market.description %}
-        <p class="mt-3 text-slate-600 dark:text-slate-300">{{ market.description }}</p>
-        {% endif %}
-        {% if market.polymarket_url %}
-        <div class="mt-3">
-          <a href="{{ market.polymarket_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">{% trans "View on Polymarket ↗" %}</a>
-        </div>
-        {% elif market.kalshi_url %}
-        <div class="mt-3">
-          <a href="{{ market.kalshi_url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-600 hover:underline">{% trans "View on Kalshi ↗" %}</a>
-        </div>
-        {% endif %}
-      </div>
-      {% if market.current_probability and not market|is_multi_outcome_market %}
-      <div class="pr-panel w-full p-4 sm:min-w-[200px] sm:w-auto">
-        <p class="text-xs font-medium uppercase text-slate-500">{% trans "Live odds" %}</p>
-        {% for label, prob in market.current_probability.items %}
-        <div class="mt-2 flex justify-between text-sm">
-          <span>{{ label }}</span>
-          <strong>{{ prob|as_percent }}%</strong>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-
-    {% if market.polymarket_raw.image %}
-    <img src="{{ market.polymarket_raw.image }}" alt="" class="relative mt-4 max-h-32 rounded-lg border border-slate-200 object-cover dark:border-slate-700">
-    {% endif %}
-
-    {% if market.status == "resolved" and market.resolved_outcome %}
-    <div class="relative mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200">
-      {% blocktrans with outcome=market.resolved_outcome %}Resolved outcome: <strong>{{ outcome }}</strong>{% endblocktrans %}
-    </div>
-    {% endif %}
-  </article>
+  {% include "markets/partials/market_hero.html" %}
 
   {% if polymarket_embed %}
     {% include "markets/partials/polymarket_embed.html" %}
@@ -60,79 +14,7 @@
   {% endif %}
 
   {% if market|is_multi_outcome_market %}
-  <section class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800" data-pr-reveal data-delay="1">
-    <div class="border-b border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-50">{% trans "All outcomes" %}</h2>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {% if existing_forecast %}
-              {% blocktrans with direction=existing_forecast.get_predicted_direction_display outcome=existing_forecast.predicted_outcome %}Your locked forecast: {{ direction }} {{ outcome }}.{% endblocktrans %}
-            {% else %}
-              {% trans "Pick Yes or No on any outcome. Forecasting here is reputation-only, with no money or trading." %}
-            {% endif %}
-          </p>
-        </div>
-        {% if market.volume_label %}
-        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.volume_label }}</span>
-        {% endif %}
-      </div>
-    </div>
-    <div class="divide-y divide-slate-100 dark:divide-slate-700">
-      {% for outcome in market|probability_items_sorted %}
-      {% outcome_stakes market outcome.label "yes" as yes_stakes %}
-      {% outcome_stakes market outcome.label "no" as no_stakes %}
-      <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-4 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-6">
-        <div class="min-w-0">
-          <p class="truncate font-semibold text-slate-900 dark:text-slate-50">{{ outcome.label }}</p>
-          <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            {% blocktrans with prob=outcome.prob_percent %}{{ prob }}% market probability{% endblocktrans %}
-          </p>
-        </div>
-        <div class="text-right text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">
-          {{ outcome.prob_percent }}%
-        </div>
-        <div class="col-span-2 flex gap-2 sm:col-span-1">
-          {% if user.is_authenticated and market.is_open and not existing_forecast %}
-          <form method="post" action="{% url 'predictions:create' slug=market.slug %}" class="flex-1">
-            {% csrf_token %}
-            <input type="hidden" name="predicted_outcome" value="{{ outcome.label }}">
-            <input type="hidden" name="predicted_direction" value="yes">
-            <button type="submit" class="w-full rounded-lg bg-emerald-100 px-3 py-2 text-center text-sm font-semibold text-emerald-700 transition hover:bg-emerald-200 dark:bg-emerald-950/45 dark:text-emerald-300 dark:hover:bg-emerald-900/70">
-              <span class="block">{% blocktrans with prob=outcome.prob_percent %}Yes {{ prob }}%{% endblocktrans %}</span>
-              <span class="mt-0.5 block text-[11px] font-medium text-emerald-700/80 dark:text-emerald-300/80">+{{ yes_stakes.win_points }} / −{{ yes_stakes.loss_points }}</span>
-            </button>
-          </form>
-          <form method="post" action="{% url 'predictions:create' slug=market.slug %}" class="flex-1">
-            {% csrf_token %}
-            <input type="hidden" name="predicted_outcome" value="{{ outcome.label }}">
-            <input type="hidden" name="predicted_direction" value="no">
-            <button type="submit" class="w-full rounded-lg bg-rose-100 px-3 py-2 text-center text-sm font-semibold text-rose-700 transition hover:bg-rose-200 dark:bg-rose-950/45 dark:text-rose-300 dark:hover:bg-rose-900/70">
-              <span class="block">{% blocktrans with prob=outcome.no_percent %}No {{ prob }}%{% endblocktrans %}</span>
-              <span class="mt-0.5 block text-[11px] font-medium text-rose-700/80 dark:text-rose-300/80">+{{ no_stakes.win_points }} / −{{ no_stakes.loss_points }}</span>
-            </button>
-          </form>
-          {% else %}
-          <span class="flex-1 rounded-lg bg-emerald-100 px-3 py-2 text-center text-sm font-semibold text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300">
-            <span class="block">{% blocktrans with prob=outcome.prob_percent %}Yes {{ prob }}%{% endblocktrans %}</span>
-            <span class="mt-0.5 block text-[11px] font-medium">+{{ yes_stakes.win_points }} / −{{ yes_stakes.loss_points }}</span>
-          </span>
-          <span class="flex-1 rounded-lg bg-rose-100 px-3 py-2 text-center text-sm font-semibold text-rose-700 dark:bg-rose-950/45 dark:text-rose-300">
-            <span class="block">{% blocktrans with prob=outcome.no_percent %}No {{ prob }}%{% endblocktrans %}</span>
-            <span class="mt-0.5 block text-[11px] font-medium">+{{ no_stakes.win_points }} / −{{ no_stakes.loss_points }}</span>
-          </span>
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% if not user.is_authenticated %}
-    <div class="border-t border-slate-200 px-4 py-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300 sm:px-6">
-      <a href="{% url 'accounts:login' %}?next={% url 'markets:detail' slug=market.slug %}" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "Log in" %}</a>
-      {% trans "to place your forecast on this event." %}
-    </div>
-    {% endif %}
-  </section>
+    {% include "predictions/partials/multi_outcome_forecast_panel.html" %}
   {% endif %}
 
   {% if market.is_open and not market|is_multi_outcome_market %}
@@ -148,7 +30,7 @@
     </p>
     <div id="forecast-list" class="pr-panel mt-4 divide-y divide-slate-200 dark:divide-slate-700" data-popularity-sort>
       {% for item in prediction_sections %}
-        {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes %}
+        {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes like_preview=item.like_preview dislike_preview=item.dislike_preview %}
       {% empty %}
       <p class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">{% trans "No forecasts yet. Be the first to place one." %}</p>
       {% endfor %}

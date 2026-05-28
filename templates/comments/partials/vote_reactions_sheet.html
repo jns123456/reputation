@@ -1,0 +1,89 @@
+{% load i18n %}
+<div class="pr-vote-sheet"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="vote-sheet-title-{{ target_type }}-{{ target_id }}"
+     x-data="{ tab: '{{ active_tab }}' }"
+     x-init="$nextTick(() => { $refs.closeBtn && $refs.closeBtn.focus(); if (window.refreshLucideIcons) window.refreshLucideIcons(); })"
+     @keydown.escape.window="$root.remove()">
+  <button type="button"
+          class="pr-vote-sheet-backdrop"
+          aria-label="{% trans 'Close' %}"
+          @click="$root.remove()"></button>
+
+  <div class="pr-vote-sheet-panel">
+    <div class="pr-vote-sheet-handle" aria-hidden="true"></div>
+
+    <div class="pr-vote-sheet-header">
+      <h2 id="vote-sheet-title-{{ target_type }}-{{ target_id }}" class="pr-vote-sheet-title">{% trans "Reactions" %}</h2>
+      <button type="button"
+              class="pr-vote-sheet-close"
+              x-ref="closeBtn"
+              aria-label="{% trans 'Close' %}"
+              @click="$root.remove()">
+        <i data-lucide="x" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="pr-vote-sheet-tabs" role="tablist">
+      <button type="button"
+              role="tab"
+              class="pr-vote-sheet-tab"
+              :class="{ 'is-active': tab === 'likes' }"
+              :aria-selected="tab === 'likes'"
+              @click="tab = 'likes'">
+        {% include "comments/partials/vote_thumb_icon.html" with direction="up" class="h-4 w-4" %}
+        <span>{% trans "Likes" %}</span>
+        <span class="pr-vote-sheet-tab-count">{{ like_count }}</span>
+      </button>
+      <button type="button"
+              role="tab"
+              class="pr-vote-sheet-tab pr-vote-sheet-tab--dislikes"
+              :class="{ 'is-active': tab === 'dislikes' }"
+              :aria-selected="tab === 'dislikes'"
+              @click="tab = 'dislikes'">
+        {% include "comments/partials/vote_thumb_icon.html" with direction="down" class="h-4 w-4" %}
+        <span>{% trans "Dislikes" %}</span>
+        <span class="pr-vote-sheet-tab-count">{{ dislike_count }}</span>
+      </button>
+    </div>
+
+    <div class="pr-vote-sheet-body">
+      <ul class="pr-vote-sheet-list" x-show="tab === 'likes'" x-cloak role="tabpanel">
+        {% for voter in like_voters %}
+        <li>
+          <a href="{% url 'accounts:profile' username=voter.username %}" class="pr-vote-sheet-user">
+            <span class="pr-user-avatar-ring pr-user-avatar-ring--sm">
+              {% include "accounts/partials/user_avatar.html" with user=voter %}
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-semibold text-slate-900 dark:text-slate-100">{{ voter.public_name }}</span>
+              <span class="block truncate text-sm text-slate-500 dark:text-slate-400">@{{ voter.username }}</span>
+            </span>
+          </a>
+        </li>
+        {% empty %}
+        <li class="pr-vote-sheet-empty">{% trans "No likes yet." %}</li>
+        {% endfor %}
+      </ul>
+
+      <ul class="pr-vote-sheet-list" x-show="tab === 'dislikes'" x-cloak role="tabpanel">
+        {% for voter in dislike_voters %}
+        <li>
+          <a href="{% url 'accounts:profile' username=voter.username %}" class="pr-vote-sheet-user">
+            <span class="pr-user-avatar-ring pr-user-avatar-ring--sm">
+              {% include "accounts/partials/user_avatar.html" with user=voter %}
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-semibold text-slate-900 dark:text-slate-100">{{ voter.public_name }}</span>
+              <span class="block truncate text-sm text-slate-500 dark:text-slate-400">@{{ voter.username }}</span>
+            </span>
+          </a>
+        </li>
+        {% empty %}
+        <li class="pr-vote-sheet-empty">{% trans "No dislikes yet." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>

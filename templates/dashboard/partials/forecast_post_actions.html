@@ -8,7 +8,7 @@
     {% if comment_count %}<span class="text-xs font-medium tabular-nums">{{ comment_count }}</span>{% endif %}
   </a>
 
-  {% include "dashboard/partials/forecast_vote_actions.html" %}
+  {% include "dashboard/partials/forecast_vote_section.html" with like_preview=like_preview dislike_preview=dislike_preview %}
 
   <div id="bookmark-prediction-{{ prediction.id }}">
     {% include "dashboard/partials/forecast_bookmark_button.html" %}
@@ -18,7 +18,7 @@
           class="forecast-action group flex items-center rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/40 dark:hover:text-brand-400"
           title="{% trans 'Share forecast' %}"
           data-share-url="{{ request.scheme }}://{{ request.get_host }}{% url 'markets:detail' slug=market.slug %}#forecast-{{ prediction.id }}"
-          data-share-title="{{ prediction.user.public_name }} on {{ market.title|truncatechars:40 }}"
+          data-share-title="{% blocktrans with name=prediction.user.public_name title=market.display_title|truncatechars:40 %}{{ name }} on {{ title }}{% endblocktrans %}"
           onclick="window.shareForumPost && window.shareForumPost(this)">
     <i data-lucide="share" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
   </button>

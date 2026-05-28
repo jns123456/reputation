@@ -14,7 +14,7 @@ class MarketAdmin(admin.ModelAdmin):
         "polymarket_raw", "polymarket_event_raw", "kalshi_raw", "kalshi_event_raw",
     )
     fieldsets = (
-        (None, {"fields": ("title", "slug", "description", "category", "source", "status")}),
+        (None, {"fields": ("title", "title_es", "slug", "description", "description_es", "category", "source", "status")}),
         ("Outcomes", {"fields": ("outcomes", "current_probability", "resolved_outcome")}),
         ("Polymarket", {"fields": ("external_id", "polymarket_slug", "polymarket_synced_at", "polymarket_raw", "polymarket_event_raw")}),
         ("Kalshi", {"fields": ("kalshi_ticker", "kalshi_synced_at", "kalshi_raw", "kalshi_event_raw")}),

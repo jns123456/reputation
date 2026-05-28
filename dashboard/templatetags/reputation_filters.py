@@ -45,7 +45,24 @@ def prediction_stakes(prediction):
 
 @register.filter
 def prediction_reputation_delta(prediction):
-    """Actual reputation change when resolved; None if still pending."""
+    """Actual reputation change once resolved or exited; None if still pending."""
+    if prediction.status == prediction.Status.EXITED:
+        event = prediction.reputation_events.filter(
+            event_type="exited_prediction"
+        ).first()
+        if event:
+            return event.points_delta
+        if prediction.probability_at_exit_time:
+            from reputation.services import calculate_exit_reputation_delta
+
+            return calculate_exit_reputation_delta(
+                predicted_outcome=prediction.predicted_outcome,
+                entry_probability_snapshot=prediction.probability_at_prediction_time,
+                exit_probability_snapshot=prediction.probability_at_exit_time,
+                predicted_direction=prediction.predicted_direction,
+            )
+        return None
+
     if prediction.status != prediction.Status.RESOLVED or prediction.is_correct is None:
         return None
     from reputation.services import calculate_reputation_delta
@@ -56,6 +73,25 @@ def prediction_reputation_delta(prediction):
         probability_snapshot=prediction.probability_at_prediction_time,
         predicted_direction=prediction.predicted_direction,
     )
+
+
+@register.simple_tag
+def exit_reputation_preview(prediction, market):
+    from reputation.services import calculate_exit_reputation_delta
+
+    return calculate_exit_reputation_delta(
+        predicted_outcome=prediction.predicted_outcome,
+        entry_probability_snapshot=prediction.probability_at_prediction_time,
+        exit_probability_snapshot=getattr(market, "current_probability", {}) or {},
+        predicted_direction=prediction.predicted_direction,
+    )
+
+
+@register.filter
+def localized_outcome(value):
+    from markets.localization import localize_outcome_label
+
+    return localize_outcome_label(str(value or ""))
 
 
 @register.filter

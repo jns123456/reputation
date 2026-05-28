@@ -6,6 +6,7 @@ class ReputationEvent(models.Model):
     class EventType(models.TextChoices):
         CORRECT_PREDICTION = "correct_prediction", "Correct prediction"
         INCORRECT_PREDICTION = "incorrect_prediction", "Incorrect prediction"
+        EXITED_PREDICTION = "exited_prediction", "Exited prediction"
         VOID_PREDICTION = "void_prediction", "Void prediction"
 
     user = models.ForeignKey(

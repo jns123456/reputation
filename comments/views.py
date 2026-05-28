@@ -10,11 +10,30 @@ from comments.selectors import (
     attach_comment_votes,
     collect_comment_ids,
     get_prediction_comment_threads,
+    get_target_vote_counts,
+    get_target_voters,
     get_user_comment_votes,
+    get_vote_previews_for_targets,
 )
 from comments.services import cast_vote, create_comment, get_user_vote
 from markets.models import Market
 from predictions.models import Prediction
+
+
+def _vote_preview_context(*, target_type, target_id, like_count=0, dislike_count=0):
+    previews = get_vote_previews_for_targets(
+        target_type=target_type,
+        target_ids=[target_id],
+    )
+    preview = previews.get(target_id, {"likes": [], "dislikes": []})
+    return {
+        "like_preview": preview["likes"],
+        "dislike_preview": preview["dislikes"],
+        "like_count": like_count,
+        "dislike_count": dislike_count,
+        "target_type": target_type,
+        "target_id": target_id,
+    }
 
 
 def _discussion_context(request, *, market, prediction):
@@ -108,15 +127,26 @@ def vote_view(request):
 
             comment = get_object_or_404(Comment, pk=int(target_id))
             user_vote = get_user_vote(request.user, target_type, int(target_id))
+            like_count, dislike_count = get_target_vote_counts(
+                target_type=target_type,
+                target_id=comment.id,
+            )
             return render(
                 request,
-                "comments/partials/vote_buttons.html",
+                "comments/partials/vote_block.html",
                 {
                     "target_type": Vote.TargetType.COMMENT,
                     "target_id": comment.id,
                     "score": comment.popularity_score,
                     "user_vote": user_vote.value if user_vote else 0,
                     "layout": request.POST.get("layout", "horizontal"),
+                    "after_vote_focus": request.POST.get("after_vote_focus"),
+                    **_vote_preview_context(
+                        target_type=target_type,
+                        target_id=comment.id,
+                        like_count=like_count,
+                        dislike_count=dislike_count,
+                    ),
                 },
             )
         if target_type == Vote.TargetType.PULSE_COMMENT:
@@ -132,22 +162,35 @@ def vote_view(request):
             if layout == "forum":
                 return render(
                     request,
-                    "forum/partials/comment_vote_actions.html",
+                    "forum/partials/comment_vote_preview_oob.html",
                     {
                         "comment": comment,
                         "post": comment.post,
                         "comment_vote": user_vote.value if user_vote else 0,
+                        "vote_oob": True,
+                        **_vote_preview_context(
+                            target_type=target_type,
+                            target_id=comment.id,
+                            like_count=comment.like_count,
+                            dislike_count=comment.dislike_count,
+                        ),
                     },
                 )
             return render(
                 request,
-                "comments/partials/vote_buttons.html",
+                "comments/partials/vote_block.html",
                 {
                     "target_type": Vote.TargetType.PULSE_COMMENT,
                     "target_id": comment.id,
                     "score": comment.popularity_score,
                     "user_vote": user_vote.value if user_vote else 0,
                     "layout": layout,
+                    **_vote_preview_context(
+                        target_type=target_type,
+                        target_id=comment.id,
+                        like_count=comment.like_count,
+                        dislike_count=comment.dislike_count,
+                    ),
                 },
             )
         if target_type == Vote.TargetType.PULSE_POST:
@@ -163,21 +206,34 @@ def vote_view(request):
             if layout == "forum":
                 return render(
                     request,
-                    "forum/partials/vote_actions.html",
+                    "forum/partials/vote_preview_oob.html",
                     {
                         "post": post,
                         "post_vote": user_vote.value if user_vote else 0,
+                        "vote_oob": True,
+                        **_vote_preview_context(
+                            target_type=target_type,
+                            target_id=post.id,
+                            like_count=post.like_count,
+                            dislike_count=post.dislike_count,
+                        ),
                     },
                 )
             return render(
                 request,
-                "comments/partials/vote_buttons.html",
+                "comments/partials/vote_block.html",
                 {
                     "target_type": Vote.TargetType.PULSE_POST,
                     "target_id": post.id,
                     "score": post.popularity_score,
                     "user_vote": user_vote.value if user_vote else 0,
                     "layout": layout,
+                    **_vote_preview_context(
+                        target_type=target_type,
+                        target_id=post.id,
+                        like_count=post.like_count,
+                        dislike_count=post.dislike_count,
+                    ),
                 },
             )
         from predictions.selectors import get_prediction_with_interactions
@@ -192,15 +248,21 @@ def vote_view(request):
         if layout == "forecasts":
             return render(
                 request,
-                "dashboard/partials/forecast_vote_actions.html",
+                "dashboard/partials/forecast_vote_section.html",
                 {
                     "prediction": prediction,
                     "prediction_vote": user_vote.value if user_vote else 0,
+                    **_vote_preview_context(
+                        target_type=target_type,
+                        target_id=prediction.id,
+                        like_count=prediction.like_count,
+                        dislike_count=prediction.dislike_count,
+                    ),
                 },
             )
         return render(
             request,
-            "comments/partials/vote_buttons.html",
+            "comments/partials/vote_block.html",
             {
                 "target_type": Vote.TargetType.PREDICTION,
                 "target_id": prediction.id,
@@ -208,10 +270,68 @@ def vote_view(request):
                 "user_vote": user_vote.value if user_vote else 0,
                 "layout": layout,
                 "after_vote_focus": f"prediction-discussion-{prediction.id}",
+                **_vote_preview_context(
+                    target_type=target_type,
+                    target_id=prediction.id,
+                    like_count=prediction.like_count,
+                    dislike_count=prediction.dislike_count,
+                ),
             },
         )
 
     return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+def vote_reactions_sheet(request):
+    """Instagram-style bottom sheet listing who liked or disliked content."""
+    target_type = request.GET.get("target_type")
+    target_id = request.GET.get("target_id")
+    tab = request.GET.get("tab", "likes")
+
+    if target_type not in (
+        Vote.TargetType.COMMENT,
+        Vote.TargetType.PREDICTION,
+        Vote.TargetType.PULSE_POST,
+        Vote.TargetType.PULSE_COMMENT,
+    ):
+        return HttpResponseBadRequest(_("Invalid target type"))
+
+    try:
+        target_id = int(target_id)
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest(_("Invalid target id"))
+
+    if tab not in ("likes", "dislikes"):
+        tab = "likes"
+
+    like_count, dislike_count = get_target_vote_counts(
+        target_type=target_type,
+        target_id=target_id,
+    )
+    like_voters = get_target_voters(
+        target_type=target_type,
+        target_id=target_id,
+        value=1,
+    )
+    dislike_voters = get_target_voters(
+        target_type=target_type,
+        target_id=target_id,
+        value=-1,
+    )
+
+    return render(
+        request,
+        "comments/partials/vote_reactions_sheet.html",
+        {
+            "target_type": target_type,
+            "target_id": target_id,
+            "active_tab": tab,
+            "like_count": like_count,
+            "dislike_count": dislike_count,
+            "like_voters": like_voters,
+            "dislike_voters": dislike_voters,
+        },
+    )
 
 
 def comment_vote_partial(request, comment_id):

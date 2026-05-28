@@ -85,10 +85,15 @@ def rebuild_all_category_stats():
         event_type__in=[
             ReputationEvent.EventType.CORRECT_PREDICTION,
             ReputationEvent.EventType.INCORRECT_PREDICTION,
+            ReputationEvent.EventType.EXITED_PREDICTION,
         ],
     ).select_related("prediction__market", "user"):
         category_slug = resolve_category_from_market(event.prediction.market)
-        is_correct = event.event_type == ReputationEvent.EventType.CORRECT_PREDICTION
+        is_correct = None
+        if event.event_type == ReputationEvent.EventType.CORRECT_PREDICTION:
+            is_correct = True
+        elif event.event_type == ReputationEvent.EventType.INCORRECT_PREDICTION:
+            is_correct = False
         apply_category_reputation_delta(
             event.user,
             category_slug,

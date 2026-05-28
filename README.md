@@ -1,4 +1,4 @@
-# ProofRep — Proof of Reputation
+# PredictStamp — Social prediction markets
 
 AI-native social platform for public predictions on real-world events (imported from Polymarket and Kalshi) — **without betting money**. Tracks separate **Reputation** (predictive quality) and **Popularity** (social engagement) scores.
 
@@ -156,6 +156,32 @@ Docker variant:
 
 ```bash
 docker compose exec web python manage.py test
+```
+
+## Internationalization (English / Español)
+
+The UI uses Django i18n (`{% trans %}`, `gettext`, `locale/es/`). Switch language via the flag control in the navbar.
+
+**After adding or changing translatable strings:**
+
+```bash
+chmod +x scripts/i18n_update.sh   # once
+./scripts/i18n_update.sh
+```
+
+This runs `makemessages`, applies hand-reviewed Spanish in `scripts/complete_spanish_i18n.py`, and `compilemessages`.
+
+**Imported market copy (Polymarket/Kalshi titles & descriptions)** is translated at sync time when enabled in `.env`:
+
+```env
+MARKET_TRANSLATION_ENABLED=True
+DEEPL_AUTH_KEY=your-key   # optional; DeepL improves quality vs MyMemory fallback
+```
+
+Backfill existing markets:
+
+```bash
+python manage.py translate_markets --source polymarket --missing-only
 ```
 
 ## Project Structure

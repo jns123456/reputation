@@ -5,7 +5,9 @@
 
 {% block content %}
 {% trans "selected" as markets_selected_label %}
-<div class="pr-page challenge-create pb-8">
+<div class="pr-page challenge-create pb-8"
+     x-data="challengeCreateWizard({{ initial_step }}, {{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }}, '{{ markets_selected_label|escapejs }}')"
+     x-init="init()">
   <nav class="pr-breadcrumbs" aria-label="{% trans 'Breadcrumb' %}">
     <a href="{% url 'challenges:list' %}">{% trans "Challenges" %}</a>
     <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" stroke-width="2" aria-hidden="true"></i>
@@ -17,7 +19,8 @@
     <h1 class="challenge-create-title">
       {% trans "Create a" %} <span class="pr-gradient-text">{% trans "challenge" %}</span>
     </h1>
-    <p class="challenge-create-desc">{% blocktrans %}Pick up to 10 open events and challenge users you follow mutually.{% endblocktrans %}</p>
+    <p class="challenge-create-desc" x-show="step === 1" x-cloak>{% trans "Choose who you want to challenge. You can only invite mutual followers." %}</p>
+    <p class="challenge-create-desc" x-show="step === 2" x-cloak>{% blocktrans with max=max_challenge_markets %}Pick up to {{ max }} open events for your challenge.{% endblocktrans %}</p>
   </header>
 
   {% if not mutual_followers %}
@@ -27,7 +30,9 @@
   </div>
   {% endif %}
 
-  <form method="post" class="challenge-create-form">
+  <form method="post"
+        class="challenge-create-form"
+        @change="onFormChange($event)">
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -36,131 +41,202 @@
     </div>
     {% endif %}
 
-    <div class="challenge-create-layout">
-      <aside class="challenge-create-sidebar pr-panel" data-pr-reveal data-delay="1">
-        <div class="challenge-create-sidebar-head">
-          <h2 class="challenge-create-panel-title">{% trans "Challenge details" %}</h2>
-          <p class="challenge-create-panel-desc">{% trans "Name your challenge and pick opponents." %}</p>
-        </div>
+    <ol class="challenge-create-steps mb-6" aria-label="{% trans 'Challenge creation steps' %}" data-pr-reveal data-delay="1">
+      <li class="challenge-create-step-item"
+          :class="{ 'is-active': step === 1, 'is-complete': step > 1 }">
+        <span class="challenge-create-step-badge" aria-hidden="true">
+          <span x-show="step === 1">1</span>
+          <i x-show="step > 1" x-cloak data-lucide="check" class="h-4 w-4" stroke-width="2.5"></i>
+        </span>
+        <span class="challenge-create-step-label">{% trans "Users" %}</span>
+      </li>
+      <li class="challenge-create-step-connector" aria-hidden="true" :class="{ 'is-complete': step > 1 }"></li>
+      <li class="challenge-create-step-item"
+          :class="{ 'is-active': step === 2, 'is-complete': step > 2 }">
+        <span class="challenge-create-step-badge" aria-hidden="true">2</span>
+        <span class="challenge-create-step-label">{% trans "Events" %}</span>
+      </li>
+    </ol>
 
-        <div class="challenge-create-field">
-          <label for="{{ form.title.id_for_label }}" class="challenge-create-label">{% trans "Name (optional)" %}</label>
-          {{ form.title }}
-        </div>
+    <div x-show="step === 1" x-cloak class="challenge-create-step-panel pr-panel" data-pr-reveal data-delay="2">
+      <div class="challenge-create-sidebar-head">
+        <h2 class="challenge-create-panel-title">{% trans "Users to challenge" %}</h2>
+        <p class="challenge-create-panel-desc">{% trans "Select at least one mutual follower." %}</p>
+      </div>
 
-        <div class="challenge-create-field">
-          <label class="challenge-create-label">{% trans "Users to challenge" %}</label>
-          {% if form.opponents.errors %}
-          <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.opponents.errors.0 }}</p>
-          {% endif %}
-          {% if mutual_followers %}
-          <div class="challenge-create-opponents">
-            {% for checkbox in form.opponents %}
-            <label class="challenge-create-opponent">
-              {{ checkbox.tag }}
-              <span class="challenge-create-opponent-avatar" aria-hidden="true">{{ checkbox.choice_label|slice:":1"|upper }}</span>
-              <span class="challenge-create-opponent-name">{{ checkbox.choice_label }}</span>
-            </label>
-            {% endfor %}
-          </div>
-          {% else %}
-          <div class="challenge-create-opponents-empty">
-            <i data-lucide="users" class="h-8 w-8 text-slate-300 dark:text-slate-600" stroke-width="1.5" aria-hidden="true"></i>
-            <p>{% trans "No mutual followers yet." %}</p>
-          </div>
-          {% endif %}
-        </div>
+      <div class="challenge-create-field mt-4">
+        <label for="{{ form.title.id_for_label }}" class="challenge-create-label">{% trans "Name (optional)" %}</label>
+        {{ form.title }}
+      </div>
 
-        <div class="challenge-create-sidebar-foot">
-          <button type="submit" class="btn-primary w-full justify-center" {% if not mutual_followers %}disabled{% endif %}>
-            {% trans "Send challenge" %}
-          </button>
-        </div>
-      </aside>
-
-      <section x-data="challengeMarketPicker({{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }}, '{{ markets_selected_label|escapejs }}')"
-               x-init="init()"
-               class="challenge-create-events pr-panel min-w-0"
-               data-pr-reveal
-               data-delay="2">
-        <div class="challenge-create-events-head">
-          <div>
-            <h2 class="challenge-create-panel-title">{% trans "Select events" %}</h2>
-            <p class="challenge-create-panel-desc">{% blocktrans with max=max_challenge_markets %}Choose up to {{ max }} open markets{% endblocktrans %}</p>
-          </div>
-          <div class="challenge-create-counter" aria-live="polite">
-            <span class="challenge-create-counter-value" x-text="Object.keys(selected).length"></span>
-            <span class="challenge-create-counter-sep">/</span>
-            <span x-text="maxMarkets"></span>
-            <span class="challenge-create-counter-label" x-text="selectedLabel"></span>
-          </div>
-        </div>
-
-        <div class="challenge-create-progress" aria-hidden="true">
-          <div class="challenge-create-progress-bar"
-               :style="'width: ' + (maxMarkets ? (Object.keys(selected).length / maxMarkets * 100) : 0) + '%'"></div>
-        </div>
-
-        {% if form.markets.errors %}
-        <p class="challenge-create-error">{{ form.markets.errors.0 }}</p>
+      <div class="challenge-create-field">
+        <label class="challenge-create-label">{% trans "Opponents" %}</label>
+        {% if form.opponents.errors %}
+        <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.opponents.errors.0 }}</p>
         {% endif %}
-
-        <div id="market-picker-selected" class="challenge-create-selected empty:hidden">
-          <template x-for="[id, title] in Object.entries(selected)" :key="id">
-            <span class="challenge-create-chip">
-              <span x-text="title" class="challenge-create-chip-text"></span>
-              <button type="button"
-                      @click="remove(id)"
-                      class="challenge-create-chip-remove"
-                      aria-label="{% trans 'Remove event' %}">
-                <i data-lucide="x" class="h-3.5 w-3.5" stroke-width="2" aria-hidden="true"></i>
-              </button>
-              <input type="hidden" name="markets" :value="id">
-            </span>
-          </template>
+        {% if mutual_followers %}
+        <div class="challenge-create-opponents">
+          {% for checkbox in form.opponents %}
+          <label class="challenge-create-opponent">
+            {{ checkbox.tag }}
+            <span class="challenge-create-opponent-avatar" aria-hidden="true">{{ checkbox.choice_label|slice:":1"|upper }}</span>
+            <span class="challenge-create-opponent-name">{{ checkbox.choice_label }}</span>
+          </label>
+          {% endfor %}
         </div>
-
-        <div class="challenge-create-search">
-          <i data-lucide="search" class="challenge-create-search-icon" stroke-width="2" aria-hidden="true"></i>
-          <input type="search"
-                 id="challenge-market-search"
-                 name="q"
-                 placeholder="{% trans 'Search events…' %}"
-                 autocomplete="off"
-                 class="form-input challenge-create-search-input"
-                 hx-get="{% url 'challenges:market_search' %}"
-                 hx-trigger="input changed delay:300ms, search"
-                 hx-target="#market-picker-list"
-                 hx-swap="innerHTML"
-                 hx-include="#market-picker-selected-inputs"
-                 @input="onSearchInput()">
+        <p class="challenge-create-step-hint mt-3" x-show="selectedOpponents === 0" x-cloak>
+          {% trans "Select at least one user to continue." %}
+        </p>
+        <p class="challenge-create-step-hint is-success mt-3" x-show="selectedOpponents > 0" x-cloak>
+          <span x-text="selectedOpponents"></span>
+          {% trans "user(s) selected" %}
+        </p>
+        {% else %}
+        <div class="challenge-create-opponents-empty">
+          <i data-lucide="users" class="h-8 w-8 text-slate-300 dark:text-slate-600" stroke-width="1.5" aria-hidden="true"></i>
+          <p>{% trans "No mutual followers yet." %}</p>
         </div>
+        {% endif %}
+      </div>
 
-        <div id="market-picker-selected-inputs" class="hidden">
-          <template x-for="id in Object.keys(selected)" :key="'sel-' + id">
-            <input type="hidden" name="selected" :value="id">
-          </template>
-        </div>
-
-        <div id="market-picker-list"
-             class="challenge-create-market-list"
-             @change="onListChange($event)">
-          {% include "challenges/partials/market_picker_list.html" with markets=initial_markets selected_market_ids=selected_market_ids search_query="" %}
-        </div>
-      </section>
+      <div class="challenge-create-step-actions">
+        <a href="{% url 'challenges:list' %}" class="btn-secondary justify-center">{% trans "Cancel" %}</a>
+        <button type="button"
+                class="btn-primary justify-center"
+                @click="goToEvents()"
+                :disabled="selectedOpponents === 0 || !hasMutualFollowers">
+          {% trans "Continue" %}
+          <i data-lucide="arrow-right" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+        </button>
+      </div>
     </div>
+
+    <section x-show="step === 2"
+             x-cloak
+             class="challenge-create-events pr-panel min-w-0"
+             data-pr-reveal
+             data-delay="2">
+      <div class="challenge-create-events-head">
+        <div>
+          <h2 class="challenge-create-panel-title">{% trans "Select events" %}</h2>
+          <p class="challenge-create-panel-desc">{% blocktrans with max=max_challenge_markets %}Choose up to {{ max }} open markets{% endblocktrans %}</p>
+        </div>
+        <div class="challenge-create-counter" aria-live="polite">
+          <span class="challenge-create-counter-value" x-text="Object.keys(selected).length"></span>
+          <span class="challenge-create-counter-sep">/</span>
+          <span x-text="maxMarkets"></span>
+          <span class="challenge-create-counter-label" x-text="selectedLabel"></span>
+        </div>
+      </div>
+
+      <div class="challenge-create-progress" aria-hidden="true">
+        <div class="challenge-create-progress-bar"
+             :style="'width: ' + (maxMarkets ? (Object.keys(selected).length / maxMarkets * 100) : 0) + '%'"></div>
+      </div>
+
+      {% if form.markets.errors %}
+      <p class="challenge-create-error">{{ form.markets.errors.0 }}</p>
+      {% endif %}
+
+      <div id="market-picker-selected" class="challenge-create-selected empty:hidden">
+        <template x-for="[id, title] in Object.entries(selected)" :key="id">
+          <span class="challenge-create-chip">
+            <span x-text="title" class="challenge-create-chip-text"></span>
+            <button type="button"
+                    @click="remove(id)"
+                    class="challenge-create-chip-remove"
+                    aria-label="{% trans 'Remove event' %}">
+              <i data-lucide="x" class="h-3.5 w-3.5" stroke-width="2" aria-hidden="true"></i>
+            </button>
+            <input type="hidden" name="markets" :value="id">
+          </span>
+        </template>
+      </div>
+
+      <div class="challenge-create-search">
+        <i data-lucide="search" class="challenge-create-search-icon" stroke-width="2" aria-hidden="true"></i>
+        <input type="search"
+               id="challenge-market-search"
+               name="q"
+               placeholder="{% trans 'Search events…' %}"
+               autocomplete="off"
+               class="form-input challenge-create-search-input"
+               hx-get="{% url 'challenges:market_search' %}"
+               hx-trigger="input changed delay:300ms, search"
+               hx-target="#market-picker-list"
+               hx-swap="innerHTML"
+               hx-include="#market-picker-selected-inputs"
+               @input="onSearchInput()">
+      </div>
+
+      <div id="market-picker-selected-inputs" class="hidden">
+        <template x-for="id in Object.keys(selected)" :key="'sel-' + id">
+          <input type="hidden" name="selected" :value="id">
+        </template>
+      </div>
+
+      <div id="market-picker-list"
+           class="challenge-create-market-list"
+           @change="onListChange($event)">
+        {% include "challenges/partials/market_picker_list.html" with markets=initial_markets selected_market_ids=selected_market_ids search_query="" %}
+      </div>
+
+      <div class="challenge-create-step-actions mt-6">
+        <button type="button" class="btn-secondary justify-center" @click="goToUsers()">
+          <i data-lucide="arrow-left" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+          {% trans "Back" %}
+        </button>
+        <button type="submit"
+                class="btn-primary justify-center"
+                :disabled="Object.keys(selected).length === 0">
+          {% trans "Send challenge" %}
+        </button>
+      </div>
+    </section>
   </form>
 </div>
 
 <script>
-  function challengeMarketPicker(maxMarkets, initialSelectedIds, initialTitles, selectedLabel) {
+  function challengeCreateWizard(initialStep, maxMarkets, initialSelectedIds, initialTitles, selectedLabel) {
     initialTitles = initialTitles || {};
-    selectedLabel = selectedLabel || "selected";
     return {
+      step: initialStep || 1,
       maxMarkets,
       selectedLabel,
       selected: {},
+      selectedOpponents: 0,
+      hasMutualFollowers: {{ mutual_followers|yesno:"true,false" }},
       init() {
+        this.syncOpponentCount();
+        this.initMarkets(initialSelectedIds, initialTitles);
+        this.$nextTick(() => {
+          if (typeof lucide !== "undefined") lucide.createIcons();
+        });
+      },
+      syncOpponentCount() {
+        this.selectedOpponents = this.$el.querySelectorAll(".challenge-opponent-checkbox:checked").length;
+      },
+      onFormChange(event) {
+        if (event.target && event.target.classList.contains("challenge-opponent-checkbox")) {
+          this.syncOpponentCount();
+        }
+      },
+      goToEvents() {
+        if (this.selectedOpponents > 0) {
+          this.step = 2;
+          this.$nextTick(() => {
+            if (typeof lucide !== "undefined") lucide.createIcons();
+            document.getElementById("challenge-market-search")?.focus({ preventScroll: true });
+          });
+        }
+      },
+      goToUsers() {
+        this.step = 1;
+        this.$nextTick(() => {
+          if (typeof lucide !== "undefined") lucide.createIcons();
+        });
+      },
+      initMarkets(initialSelectedIds, initialTitles) {
         const list = document.getElementById("market-picker-list");
         if (list) {
           list.querySelectorAll('input[type="checkbox"]').forEach((el) => {
@@ -212,11 +288,11 @@
 
   document.body.addEventListener("htmx:afterSwap", (event) => {
     if (event.detail.target.id !== "market-picker-list") return;
-    const root = document.querySelector("[x-data*='challengeMarketPicker']");
+    const root = document.querySelector(".challenge-create");
     if (!root || !root._x_dataStack) return;
-    const picker = root._x_dataStack[0];
+    const wizard = root._x_dataStack[0];
     event.detail.target.querySelectorAll('input[type="checkbox"]').forEach((el) => {
-      el.checked = Object.prototype.hasOwnProperty.call(picker.selected, el.value);
+      el.checked = Object.prototype.hasOwnProperty.call(wizard.selected, el.value);
     });
   });
 </script>

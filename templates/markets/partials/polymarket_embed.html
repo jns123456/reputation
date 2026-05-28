@@ -65,7 +65,7 @@
       style="margin:0"
     >
       <iframe
-        title="{% blocktrans with market_title=market.title %}Polymarket market chart — {{ market_title }}{% endblocktrans %}"
+        title="{% blocktrans with market_title=market.display_title %}Polymarket market chart — {{ market_title }}{% endblocktrans %}"
         x-bind:src="iframeSrc"
         width="{{ polymarket_embed.embed_width }}"
         height="{{ polymarket_embed.embed_height }}"

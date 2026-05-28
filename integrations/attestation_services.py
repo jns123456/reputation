@@ -232,7 +232,7 @@ def create_offchain_attestation(
     raw_attestation = {
         "sig": {
             "domain": {
-                "name": "ProofRep EAS Offchain",
+                "name": "PredictStamp EAS Offchain",
                 "version": "1",
                 "chainId": schema.chain_id,
                 "verifyingContract": schema.verifying_contract,

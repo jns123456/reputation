@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Terms & Conditions" %}{% endblock %}
+
+{% block content %}
+{% url 'dashboard:legal' as legal_url %}
+<div class="pr-page pb-10">
+  {% trans "Terms" as hero_eyebrow %}
+  {% trans "Terms &" as hero_title %}
+  {% trans "Conditions" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Rules for using PredictStamp, a social reputation platform operated by TAO FACTORY LLC.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
+
+  <div class="mb-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-200" data-pr-reveal>
+    <strong>{% trans "Effective date:" %}</strong> {% trans "May 28, 2026" %}.
+    {% trans "These Terms are provided for product clarity and should be reviewed by counsel before launch in production." %}
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-[0.75fr_1fr]" data-pr-reveal data-delay="1">
+    <aside class="space-y-4">
+      <div class="pr-panel p-5">
+        <p class="text-xs font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">{% trans "Company" %}</p>
+        <h2 class="mt-2 text-lg font-bold text-slate-900 dark:text-white">TAO FACTORY LLC</h2>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "A Delaware limited liability company operating PredictStamp." %}
+        </p>
+        <a href="mailto:ops@predictstamp.com" class="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">ops@predictstamp.com</a>
+      </div>
+      <div class="pr-panel border-emerald-200 bg-emerald-50/80 p-5 dark:border-emerald-800/60 dark:bg-emerald-950/30">
+        <h3 class="text-sm font-bold text-emerald-900 dark:text-emerald-200">{% trans "No betting or trading" %}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-emerald-900/80 dark:text-emerald-200/80">
+          {% trans "PredictStamp does not enable wagers, deposits, wallets, trades, custody, financial transactions, or payouts." %}
+        </p>
+      </div>
+      <a href="{{ legal_url }}" class="btn-secondary w-full justify-center">{% trans "View Legal information" %}</a>
+    </aside>
+
+    <section class="space-y-4">
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "1. Acceptance of Terms" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "By accessing or using PredictStamp, you agree to these Terms and Conditions. If you do not agree, do not use the platform." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "2. The Service" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "PredictStamp lets users browse prediction-market-related topics, publish comments, create formal forecasts, participate in social challenges, and build public reputation and popularity records." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "3. No Financial Activity" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "PredictStamp is not a betting, gambling, trading, brokerage, exchange, custody, wallet, investment advisory, or financial services platform. You cannot deposit funds, place wagers, trade contracts, withdraw funds, or receive payouts through PredictStamp." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "4. User Content and Conduct" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "You are responsible for the content you post, including comments, forecasts, reasoning, votes, and profile information. Do not post illegal, misleading, abusive, infringing, spam, or malicious content. We may remove content or restrict accounts that violate these Terms or harm the platform." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "5. Reputation and Popularity" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "Reputation and popularity scores are platform-specific social metrics. They are not money, securities, tokens, credits, rewards, or transferable property, and they have no cash value." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "6. Third-Party Data" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "PredictStamp may display or reference third-party market data, links, outcomes, and metadata. Third-party data may be delayed, incomplete, inaccurate, or unavailable. PredictStamp is not responsible for third-party services or content." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "7. No Advice" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "Content on PredictStamp is for informational and social discussion purposes only. It is not financial, investment, legal, tax, or professional advice." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "8. Accounts and Availability" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% trans "You are responsible for maintaining account security. We may update, suspend, limit, or discontinue any part of the platform at any time, including features, rankings, scoring formulas, and content availability." %}
+        </p>
+      </article>
+
+      <article class="pr-panel p-6">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "9. Contact" %}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% blocktrans %}For questions about these Terms, contact TAO FACTORY LLC at <a href="mailto:ops@predictstamp.com" class="font-medium text-brand-600 hover:underline dark:text-brand-400">ops@predictstamp.com</a>.{% endblocktrans %}
+        </p>
+      </article>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@
   {% if user.is_authenticated and can_vote != False %}
   <form method="post" action="{% url 'comments:vote' %}" class="inline"
         hx-post="{% url 'comments:vote' %}"
-        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-target="#votes-block-{{ target_type }}-{{ target_id }}"
         hx-swap="outerHTML"
         {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
     {% csrf_token %}
@@ -21,7 +21,7 @@
   <span class="min-w-[1.25rem] text-center text-xs font-semibold tabular-nums text-slate-700" data-vote-score="{{ score }}">{{ score }}</span>
   <form method="post" action="{% url 'comments:vote' %}"
         hx-post="{% url 'comments:vote' %}"
-        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-target="#votes-block-{{ target_type }}-{{ target_id }}"
         hx-swap="outerHTML"
         {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
     {% csrf_token %}
@@ -62,7 +62,7 @@
   {% if user.is_authenticated and can_vote != False %}
   <form method="post" action="{% url 'comments:vote' %}" class="inline"
         hx-post="{% url 'comments:vote' %}"
-        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-target="#votes-block-{{ target_type }}-{{ target_id }}"
         hx-swap="outerHTML"
         {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
     {% csrf_token %}
@@ -79,7 +79,7 @@
   <span class="text-sm font-medium text-slate-700" data-vote-score="{{ score }}">{{ score }}</span>
   <form method="post" action="{% url 'comments:vote' %}"
         hx-post="{% url 'comments:vote' %}"
-        hx-target="#votes-{{ target_type }}-{{ target_id }}"
+        hx-target="#votes-block-{{ target_type }}-{{ target_id }}"
         hx-swap="outerHTML"
         {% if after_vote_focus %}hx-on::after-request="window.focusDiscussionComposer && window.focusDiscussionComposer('{{ after_vote_focus }}')"{% endif %}>
     {% csrf_token %}

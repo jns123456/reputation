@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 MAX_CHALLENGE_MARKETS = 10
 
@@ -54,7 +55,11 @@ class Challenge(models.Model):
         if self.title:
             return self.title
         market_count = self.challenge_markets.count()
-        return f"Challenge with {market_count} event{'s' if market_count != 1 else ''}"
+        return ngettext(
+            "Challenge with %(count)s event",
+            "Challenge with %(count)s events",
+            market_count,
+        ) % {"count": market_count}
 
 
 class ChallengeMarket(models.Model):
@@ -80,9 +85,9 @@ class ChallengeMarket(models.Model):
 
 class ChallengeParticipant(models.Model):
     class Status(models.TextChoices):
-        INVITED = "invited", "Invited"
-        ACCEPTED = "accepted", "Accepted"
-        DECLINED = "declined", "Declined"
+        INVITED = "invited", _("Invited")
+        ACCEPTED = "accepted", _("Accepted")
+        DECLINED = "declined", _("Declined")
 
     challenge = models.ForeignKey(
         Challenge,
@@ -114,4 +119,4 @@ class ChallengeParticipant(models.Model):
     def clean(self):
         if self.challenge_id and self.user_id and self.challenge.creator_id == self.user_id:
             if self.status == self.Status.INVITED:
-                raise ValidationError("The challenge creator cannot be invited.")
+                raise ValidationError(_("The challenge creator cannot be invited."))

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n reputation_filters %}
 
 {% block title %}{% trans "Verification record" %}{% endblock %}
 
@@ -9,7 +9,7 @@
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          {% trans "ProofRep verification" %}
+          {% trans "PredictStamp verification" %}
         </p>
         <h1 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">
           {{ attestation.schema.name }}
@@ -21,7 +21,7 @@
     </div>
 
     <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-      {% trans "This record was generated automatically in the background. It proves that ProofRep recorded this forecast or reputation event without requiring any extra action from the user." %}
+      {% trans "This record was generated automatically in the background. It proves that PredictStamp recorded this forecast or reputation event without requiring any extra action from the user." %}
     </p>
 
     {% if attestation.prediction %}
@@ -29,10 +29,10 @@
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Forecast" %}</p>
       <a href="{% url 'markets:detail' slug=attestation.prediction.market.slug %}#forecast-{{ attestation.prediction.id }}"
          class="mt-1 block font-semibold text-brand-700 hover:underline dark:text-brand-300">
-        {{ attestation.prediction.market.title }}
+        {{ attestation.prediction.market.display_title }}
       </a>
       <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-        {% trans "Pick:" %} {{ attestation.prediction.get_predicted_direction_display }} {{ attestation.prediction.predicted_outcome }}
+        {% trans "Pick:" %} {{ attestation.prediction.get_predicted_direction_display|localized_outcome }} {{ attestation.prediction.predicted_outcome|localized_outcome }}
       </p>
     </div>
     {% endif %}

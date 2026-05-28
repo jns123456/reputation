@@ -61,10 +61,110 @@ def calculate_reputation_delta(*, is_correct, predicted_outcome, probability_sna
     return -stakes["loss_points"]
 
 
+def calculate_exit_reputation_delta(
+    *,
+    predicted_outcome,
+    entry_probability_snapshot,
+    exit_probability_snapshot,
+    predicted_direction="yes",
+):
+    """Reputation P&L from closing a forecast before market resolution."""
+    entry_probability = get_predicted_outcome_probability(
+        predicted_outcome,
+        entry_probability_snapshot,
+        predicted_direction=predicted_direction,
+    )
+    exit_probability = get_predicted_outcome_probability(
+        predicted_outcome,
+        exit_probability_snapshot,
+        predicted_direction=predicted_direction,
+    )
+    return int(round((exit_probability - entry_probability) * 100))
+
+
+def apply_reputation_for_prediction_exit(prediction):
+    """Apply reputation scoring when a user exits an active prediction."""
+    if prediction.status != prediction.Status.EXITED:
+        return None
+
+    if ReputationEvent.objects.filter(
+        prediction=prediction,
+        event_type=ReputationEvent.EventType.EXITED_PREDICTION,
+    ).exists():
+        return None
+
+    delta = calculate_exit_reputation_delta(
+        predicted_outcome=prediction.predicted_outcome,
+        entry_probability_snapshot=prediction.probability_at_prediction_time,
+        exit_probability_snapshot=prediction.probability_at_exit_time,
+        predicted_direction=prediction.predicted_direction,
+    )
+    entry_percent = int(
+        round(
+            get_predicted_outcome_probability(
+                prediction.predicted_outcome,
+                prediction.probability_at_prediction_time,
+                predicted_direction=prediction.predicted_direction,
+            )
+            * 100
+        )
+    )
+    exit_percent = int(
+        round(
+            get_predicted_outcome_probability(
+                prediction.predicted_outcome,
+                prediction.probability_at_exit_time,
+                predicted_direction=prediction.predicted_direction,
+            )
+            * 100
+        )
+    )
+    reason = (
+        f"Forecast on '{prediction.market.title}' was exited "
+        f"(forecast: {prediction.get_predicted_direction_display()} {prediction.predicted_outcome}, "
+        f"entry probability {entry_percent}%, exit probability {exit_percent}%, "
+        f"{'+' if delta >= 0 else ''}{delta} reputation)."
+    )
+
+    event = ReputationEvent.objects.create(
+        user=prediction.user,
+        prediction=prediction,
+        event_type=ReputationEvent.EventType.EXITED_PREDICTION,
+        points_delta=delta,
+        reason=reason,
+    )
+
+    from integrations.attestation_services import record_reputation_event_attestation_safely
+
+    record_reputation_event_attestation_safely(event)
+
+    profile = prediction.user.profile
+    profile.reputation_points += delta
+    profile.reputation_score = float(profile.reputation_points)
+    profile.save(
+        update_fields=[
+            "reputation_points",
+            "reputation_score",
+            "updated_at",
+        ]
+    )
+
+    from accounts.category_stats_services import (
+        apply_category_reputation_delta,
+        resolve_category_from_market,
+    )
+
+    apply_category_reputation_delta(
+        prediction.user,
+        resolve_category_from_market(prediction.market),
+        delta,
+    )
+
+    return event
+
+
 def apply_reputation_for_prediction(prediction):
     """Apply reputation scoring when a prediction is resolved."""
-    from accounts.models import UserProfile
-
     if prediction.status != prediction.Status.RESOLVED:
         return None
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n reputation_filters %}
 
 {% block title %}{{ challenge.display_title }}{% endblock %}
 
@@ -80,95 +80,96 @@
 </div>
 {% endif %}
 
-<div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
-  <div class="min-w-0 space-y-8">
-    <section>
-      <div class="mb-4 flex items-center justify-between gap-2">
-        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% blocktrans with count=markets|length %}Events ({{ count }}){% endblocktrans %}</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400">{% trans "Forecasts are private — only total scores are shown." %}</p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-        {% for market in markets %}
-          {% include "challenges/partials/challenge_market_card.html" %}
-        {% endfor %}
-      </div>
-    </section>
+{% include "challenges/partials/challenge_leaderboard.html" %}
 
-    {% if resolution_snapshots %}
-    <section class="space-y-4">
-      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Resolution updates" %}</h2>
-      {% for snapshot in resolution_snapshots %}
-      <article class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p class="font-semibold text-slate-900 dark:text-slate-100">{{ snapshot.market.title }}</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {% trans "Outcome:" %} <span class="font-semibold text-slate-700 dark:text-slate-200">{{ snapshot.outcome }}</span>
-            </p>
-          </div>
-          <a href="{% url 'markets:detail' slug=snapshot.market.slug %}"
-             class="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400">
-            {% trans "View event" %}
-          </a>
+<div class="space-y-8">
+  <section x-data="{ eventFilter: 'all' }">
+    <div class="mb-4 flex flex-col gap-3">
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 shrink-0">
+          {% blocktrans with count=markets|length %}Events ({{ count }}){% endblocktrans %}
+        </h2>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="{% trans 'Filter events' %}">
+          <button type="button"
+                  class="pr-filter-pill challenge-event-filter"
+                  :class="{ 'is-active': eventFilter === 'all' }"
+                  @click="eventFilter = 'all'"
+                  x-bind:aria-pressed="eventFilter === 'all'">
+            {% trans "All" %}
+            <span class="challenge-event-filter-count">{{ event_filter_counts.all }}</span>
+          </button>
+          <button type="button"
+                  class="pr-filter-pill challenge-event-filter"
+                  :class="{ 'is-active': eventFilter === 'pending' }"
+                  @click="eventFilter = 'pending'"
+                  x-bind:aria-pressed="eventFilter === 'pending'">
+            {% trans "Pending vote" %}
+            <span class="challenge-event-filter-count">{{ event_filter_counts.pending }}</span>
+          </button>
+          <button type="button"
+                  class="pr-filter-pill challenge-event-filter"
+                  :class="{ 'is-active': eventFilter === 'voted' }"
+                  @click="eventFilter = 'voted'"
+                  x-bind:aria-pressed="eventFilter === 'voted'">
+            {% trans "Already voted" %}
+            <span class="challenge-event-filter-count">{{ event_filter_counts.voted }}</span>
+          </button>
         </div>
-        <div class="mt-4">
-          <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Standings after this event" %}</h3>
-          {% include "challenges/partials/standings_table.html" with standings=snapshot.standings compact=False %}
-        </div>
-      </article>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        {% trans "Sorted by soonest closing date. Existing open forecasts count immediately — including forecasts placed before the challenge started." %}
+      </p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {% for market in markets %}
+      <div class="challenge-event-card-wrap min-w-0"
+           data-has-forecast="{% if market.user_forecast %}true{% else %}false{% endif %}"
+           data-is-open="{% if market.status == 'open' %}true{% else %}false{% endif %}"
+           x-show="eventFilter === 'all'
+             || (eventFilter === 'voted' && $el.dataset.hasForecast === 'true')
+             || (eventFilter === 'pending' && $el.dataset.hasForecast === 'false' && $el.dataset.isOpen === 'true')"
+           x-cloak>
+        {% include "challenges/partials/challenge_market_card.html" %}
+      </div>
       {% endfor %}
-    </section>
-    {% endif %}
-  </div>
+    </div>
+    <p x-show="eventFilter === 'pending' && {{ event_filter_counts.pending }} === 0"
+       x-cloak
+       class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+      {% trans "No open events left to vote on." %}
+    </p>
+    <p x-show="eventFilter === 'voted' && {{ event_filter_counts.voted }} === 0"
+       x-cloak
+       class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+      {% trans "You have not voted on any challenge events yet." %}
+    </p>
+  </section>
 
-  <aside class="space-y-6 xl:sticky xl:top-20 xl:self-start">
-    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-      <h2 class="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Standings" %}</h2>
-      {% if challenge.status == 'pending' %}
-      <p class="text-sm text-slate-500 dark:text-slate-400">{% trans "Scores appear once the challenge is active." %}</p>
-      {% elif standings %}
-      <ol class="space-y-3">
-        {% for row in standings %}
-        <li class="flex items-center justify-between rounded-lg border border-slate-100 p-3 dark:border-slate-700">
-          <div class="flex items-center gap-3">
-            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
-              {% if row.rank %}{{ row.rank }}{% else %}—{% endif %}
-            </span>
-            <div>
-              <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
-                 class="font-medium text-slate-900 dark:text-slate-100">
-                {{ row.participant.user.public_name }}
-              </a>
-              {% if row.participant.status == 'invited' %}
-              <span class="ml-1 text-xs text-amber-600">{% trans "pending" %}</span>
-              {% endif %}
-            </div>
-          </div>
-          <span class="badge-rep font-semibold">
-            {% if row.reputation_points >= 0 %}+{% endif %}{{ row.reputation_points }} {% trans "rep" %}
-          </span>
-        </li>
-        {% endfor %}
-      </ol>
-      {% else %}
-      <p class="text-sm text-slate-500 dark:text-slate-400">{% trans "No participants yet." %}</p>
-      {% endif %}
-    </section>
-
-    <section class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-      <h2 class="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Participants" %}</h2>
-      <ul class="space-y-2">
-        {% for participant in challenge.participants.all %}
-        <li class="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 dark:border-slate-700">
-          <a href="{% url 'accounts:profile' username=participant.user.username %}" class="text-sm font-medium text-slate-700 dark:text-slate-200">
-            {{ participant.user.public_name }}
-          </a>
-          <span class="text-xs text-slate-400">{{ participant.get_status_display }}</span>
-        </li>
-        {% endfor %}
-      </ul>
-    </section>
-  </aside>
+  {% if resolution_snapshots %}
+  <section class="space-y-4">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Resolution updates" %}</h2>
+    {% for snapshot in resolution_snapshots %}
+    <article class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p class="font-semibold text-slate-900 dark:text-slate-100">{{ snapshot.market.display_title }}</p>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {% trans "Outcome:" %} <span class="font-semibold text-slate-700 dark:text-slate-200">{{ snapshot.outcome|localized_outcome }}</span>
+          </p>
+        </div>
+        <a href="{% url 'markets:detail' slug=snapshot.market.slug %}"
+           class="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400">
+          {% trans "View event" %}
+        </a>
+      </div>
+      <div class="mt-4">
+        <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Standings after this event" %}</h3>
+        {% include "challenges/partials/standings_table.html" with standings=snapshot.standings compact=False %}
+      </div>
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
 </div>
 </div>
 {% endblock %}
