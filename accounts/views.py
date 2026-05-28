@@ -11,6 +11,13 @@ from django.views.decorators.http import require_http_methods, require_POST
 from accounts.bookmark_selectors import is_bookmarked
 from accounts.bookmark_services import toggle_bookmark
 from accounts.bookmarks_services import build_bookmarks_page_items
+from accounts.email_verification_services import (
+    mark_email_unverified,
+    resend_verification_email,
+    send_verification_email,
+    user_requires_email_verification,
+    verify_email_with_token,
+)
 from accounts.follow_selectors import (
     get_follower_count,
     get_following_count,
@@ -35,6 +42,8 @@ class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
 
     def get_success_url(self):
+        if user_requires_email_verification(self.request.user):
+            return reverse("accounts:verify_email_pending")
         if not self.request.user.onboarding_completed:
             return reverse("accounts:profile_setup")
         return reverse("accounts:profile", kwargs={"username": self.request.user.username})
@@ -51,6 +60,8 @@ class CustomLogoutView(LogoutView):
 
 def signup(request):
     if request.user.is_authenticated:
+        if user_requires_email_verification(request.user):
+            return redirect("accounts:verify_email_pending")
         if not request.user.onboarding_completed:
             return redirect("accounts:profile_setup")
         return redirect("accounts:profile", username=request.user.username)
@@ -59,11 +70,88 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            queue_login_notification_toast(request=request)
-            return redirect("accounts:profile_setup")
+            try:
+                send_verification_email(user)
+            except Exception:
+                messages.error(
+                    request,
+                    _(
+                        "Your account was created, but we could not send the verification email. "
+                        "Try resending from the next screen."
+                    ),
+                )
+            messages.info(
+                request,
+                _("Check your inbox and confirm your email to continue."),
+            )
+            return redirect("accounts:verify_email_pending")
     else:
         form = SignUpForm()
     return render(request, "accounts/signup.html", {"form": form})
+
+
+@login_required
+def verify_email_pending(request):
+    if not user_requires_email_verification(request.user):
+        if not request.user.onboarding_completed:
+            return redirect("accounts:profile_setup")
+        return redirect("accounts:profile", username=request.user.username)
+    return render(
+        request,
+        "accounts/verify_email_pending.html",
+        {"profile_user": request.user},
+    )
+
+
+@login_required
+@require_POST
+def verify_email_resend(request):
+    sent, message = resend_verification_email(request.user)
+    if sent:
+        messages.success(request, message)
+    else:
+        messages.warning(request, message)
+    return redirect("accounts:verify_email_pending")
+
+
+def verify_email_confirm(request, token):
+    result = verify_email_with_token(token)
+    if result.success and result.user is not None:
+        if request.user.is_authenticated:
+            if request.user.pk != result.user.pk:
+                messages.warning(
+                    request,
+                    _(
+                        "Email confirmed for another account. "
+                        "Log in with that account to continue."
+                    ),
+                )
+            else:
+                messages.success(request, result.message)
+                if not result.user.onboarding_completed:
+                    return redirect("accounts:profile_setup")
+                return redirect("accounts:profile", username=result.user.username)
+        else:
+            login(request, result.user)
+            messages.success(request, result.message)
+            if not result.user.onboarding_completed:
+                return redirect("accounts:profile_setup")
+            return redirect("accounts:profile", username=result.user.username)
+
+    status = "error"
+    if result.error_code == "expired":
+        status = "expired"
+    elif result.error_code == "used":
+        status = "used"
+
+    return render(
+        request,
+        "accounts/verify_email_result.html",
+        {
+            "result": result,
+            "status": status,
+        },
+    )
 
 
 @login_required
@@ -124,7 +212,25 @@ def profile_edit(request):
     if request.method == "POST":
         form = ProfileEditForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
-            form.save()
+            email_changed = "email" in form.changed_data
+            user = form.save()
+            if email_changed:
+                mark_email_unverified(user)
+                try:
+                    send_verification_email(user)
+                    messages.info(
+                        request,
+                        _("We sent a verification link to your new email address."),
+                    )
+                except Exception:
+                    messages.error(
+                        request,
+                        _(
+                            "Your email was updated, but we could not send a verification message. "
+                            "Use the resend option on the verification page."
+                        ),
+                    )
+                return redirect("accounts:verify_email_pending")
             messages.success(request, _("Profile updated."))
             return redirect("accounts:profile", username=request.user.username)
     else:

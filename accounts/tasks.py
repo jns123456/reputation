@@ -12,6 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(ignore_result=True)
+def send_verification_email_task(user_id):
+    from accounts.email_verification_services import send_verification_email
+    from accounts.models import User
+
+    user = User.objects.filter(pk=user_id).first()
+    if user is None:
+        return False
+    return send_verification_email(user)
+
+
+@shared_task(ignore_result=True)
 def send_notification_email_task(notification_id):
     from accounts.email_services import send_notification_email
 

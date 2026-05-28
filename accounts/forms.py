@@ -23,6 +23,13 @@ class SignUpForm(UserCreationForm):
         for name, attrs in field_attrs.items():
             if name in self.fields:
                 self.fields[name].widget.attrs.update(attrs)
+        self.fields["email"].required = True
+
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if not email:
+            raise ValidationError(_("Enter a valid email address."))
+        return email
 
 
 class ProfileSetupForm(forms.ModelForm):

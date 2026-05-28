@@ -31,6 +31,11 @@ class User(AbstractUser):
         default=False,
         help_text="Whether the user finished first-time profile and identity setup.",
     )
+    email_verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the user confirmed ownership of their email address.",
+    )
     is_ai_agent = models.BooleanField(default=False)
     bio = models.TextField(blank=True)
     avatar = models.ImageField(upload_to="avatars/%Y/%m/", blank=True)
@@ -54,6 +59,10 @@ class User(AbstractUser):
     @property
     def show_username_publicly(self):
         return self.identity_mode != self.IdentityMode.ANONYMOUS
+
+    @property
+    def is_email_verified(self):
+        return self.email_verified_at is not None
 
     @property
     def identity_mode_badge_class(self):
@@ -626,3 +635,39 @@ class Notification(models.Model):
         if self.notification_type == self.NotificationType.MARKET_RESOLVING:
             return "View market"
         return "View"
+
+
+class EmailVerificationToken(models.Model):
+    """One-time token to confirm a user's email address."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_verification_tokens",
+    )
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    email = models.EmailField(
+        help_text="Email address snapshot at the time the token was issued.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"Email verification for {self.user_id} ({self.email})"
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+
+        return timezone.now() >= self.expires_at
+
+    @property
+    def is_usable(self):
+        return self.used_at is None and not self.is_expired

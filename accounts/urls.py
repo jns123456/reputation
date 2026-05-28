@@ -6,6 +6,9 @@ app_name = "accounts"
 
 urlpatterns = [
     path("signup/", views.signup, name="signup"),
+    path("verify-email/pending/", views.verify_email_pending, name="verify_email_pending"),
+    path("verify-email/resend/", views.verify_email_resend, name="verify_email_resend"),
+    path("verify-email/<str:token>/", views.verify_email_confirm, name="verify_email_confirm"),
     path("setup/", views.profile_setup, name="profile_setup"),
     path("welcome/", views.onboarding, name="onboarding"),
     path("login/", views.CustomLoginView.as_view(), name="login"),

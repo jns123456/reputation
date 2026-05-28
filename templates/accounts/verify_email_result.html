@@ -1,0 +1,71 @@
+{% extends "accounts/auth_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Email verification" %}{% endblock %}
+
+{% block auth_hero_eyebrow %}{% trans "Email verification" %}{% endblock %}
+{% block auth_hero_title %}
+  {% if result.success %}{% trans "Email" %}{% else %}{% trans "Link" %}{% endif %}
+{% endblock %}
+{% block auth_hero_gradient %}
+  {% if result.success %}
+  <span class="pr-gradient-text">{% trans "confirmed" %}</span>
+  {% else %}
+  <span class="pr-gradient-text">{% trans "not valid" %}</span>
+  {% endif %}
+{% endblock %}
+
+{% block auth_title %}
+  {% if result.success %}
+    {% trans "You are all set" %}
+  {% elif status == "expired" %}
+    {% trans "Link expired" %}
+  {% elif status == "used" %}
+    {% trans "Link already used" %}
+  {% else %}
+    {% trans "Invalid link" %}
+  {% endif %}
+{% endblock %}
+
+{% block auth_subtitle %}
+<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ result.message }}</p>
+{% endblock %}
+
+{% block auth_form %}
+<div class="space-y-4">
+  {% if result.success %}
+  <div class="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-100">
+    <i data-lucide="circle-check" class="mt-0.5 h-5 w-5 shrink-0" stroke-width="2" aria-hidden="true"></i>
+    <p>{% trans "You can continue setting up your profile." %}</p>
+  </div>
+  {% else %}
+  <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+    <i data-lucide="triangle-alert" class="mt-0.5 h-5 w-5 shrink-0" stroke-width="2" aria-hidden="true"></i>
+    <p>{% trans "Request a fresh verification email from your account." %}</p>
+  </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-3 sm:flex-row">
+    {% if user.is_authenticated %}
+      {% if not user.is_email_verified %}
+      <a href="{% url 'accounts:verify_email_pending' %}" class="btn-primary flex-1 justify-center py-2.5 text-sm font-semibold">
+        {% trans "Back to verification" %}
+      </a>
+      {% else %}
+      <a href="{% url 'accounts:profile' username=user.username %}" class="btn-primary flex-1 justify-center py-2.5 text-sm font-semibold">
+        {% trans "Go to profile" %}
+      </a>
+      {% endif %}
+    {% else %}
+    <a href="{% url 'accounts:login' %}" class="btn-primary flex-1 justify-center py-2.5 text-sm font-semibold">
+      {% trans "Log in" %}
+    </a>
+    {% endif %}
+    <a href="{% url 'dashboard:landing' %}" class="btn-secondary flex-1 justify-center py-2.5 text-sm font-semibold">
+      {% trans "Home" %}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block auth_footer %}{% endblock %}

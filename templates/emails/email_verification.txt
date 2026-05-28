@@ -1,0 +1,10 @@
+{% load i18n %}{% blocktrans with name=recipient.public_name %}Hi {{ name }},
+
+Confirm your email address to finish creating your PredictStamp account.
+
+{{ verify_url }}
+
+This link expires in {{ expires_hours }} hours and can only be used once.
+
+If you did not create an account, you can ignore this message.
+{% endblocktrans %}

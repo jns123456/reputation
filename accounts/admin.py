@@ -5,6 +5,7 @@ from accounts.models import (
     ActivityStreak,
     AIAgentProfile,
     Bookmark,
+    EmailVerificationToken,
     Notification,
     NotificationPreference,
     PushSubscription,
@@ -31,6 +32,7 @@ class UserAdmin(BaseUserAdmin):
         "identity_mode",
         "is_verified",
         "onboarding_completed",
+        "is_email_verified_display",
         "is_ai_agent",
         "is_staff",
     )
@@ -40,6 +42,7 @@ class UserAdmin(BaseUserAdmin):
         "is_verified",
         "verification_requested",
         "onboarding_completed",
+        "email_verified_at",
         "is_staff",
     )
     fieldsets = BaseUserAdmin.fieldsets + (
@@ -52,6 +55,7 @@ class UserAdmin(BaseUserAdmin):
                     "is_verified",
                     "verification_requested",
                     "onboarding_completed",
+                    "email_verified_at",
                     "is_ai_agent",
                     "bio",
                     "avatar",
@@ -69,6 +73,7 @@ class UserAdmin(BaseUserAdmin):
                     "is_verified",
                     "verification_requested",
                     "onboarding_completed",
+                    "email_verified_at",
                     "is_ai_agent",
                     "bio",
                     "avatar",
@@ -76,6 +81,18 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+    @admin.display(boolean=True, description="Email verified")
+    def is_email_verified_display(self, obj):
+        return obj.is_email_verified
+
+
+@admin.register(EmailVerificationToken)
+class EmailVerificationTokenAdmin(admin.ModelAdmin):
+    list_display = ("user", "email", "created_at", "expires_at", "used_at")
+    list_filter = ("used_at",)
+    search_fields = ("user__username", "email", "token")
+    readonly_fields = ("token", "created_at", "expires_at", "used_at")
 
 
 @admin.register(UserProfile)

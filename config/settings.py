@@ -151,20 +151,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Email / engagement notifications --------------------------------------------
 # Absolute base URL used to build links inside emails (no request available in tasks).
 SITE_BASE_URL = env("SITE_BASE_URL", default="http://localhost:8000")
-
-# Resend (https://resend.com) — preferred transactional provider when API key is set.
-RESEND_API_KEY = env("RESEND_API_KEY", default="")
-
-_email_backend = env("EMAIL_BACKEND", default="")
-if not _email_backend:
-    if RESEND_API_KEY:
-        _email_backend = "accounts.backends.resend_email.ResendEmailBackend"
-    elif DEBUG:
-        _email_backend = "django.core.mail.backends.console.EmailBackend"
-    else:
-        _email_backend = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_BACKEND = _email_backend
-
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default=(
+        "django.core.mail.backends.console.EmailBackend"
+        if DEBUG
+        else "django.core.mail.backends.smtp.EmailBackend"
+    ),
+)
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
