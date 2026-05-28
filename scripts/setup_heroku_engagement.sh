@@ -14,10 +14,10 @@ trap 'rm -rf "$TMPDIR"' EXIT
 "$ROOT/.venv/bin/vapid" --gen --output-dir "$TMPDIR" 2>/dev/null || "$ROOT/.venv/bin/vapid" --gen
 if [[ -f "$TMPDIR/private_key.pem" ]]; then
   PRIVATE_KEY="$(cat "$TMPDIR/private_key.pem")"
-  PUBLIC_KEY="$("$ROOT/.venv/bin/vapid" --applicationServerKey --private-key "$TMPDIR/private_key.pem")"
+  PUBLIC_KEY="$("$ROOT/.venv/bin/vapid" --applicationServerKey --private-key "$TMPDIR/private_key.pem" | sed 's/^Application Server Key = //')"
 elif [[ -f private_key.pem ]]; then
   PRIVATE_KEY="$(cat private_key.pem)"
-  PUBLIC_KEY="$("$ROOT/.venv/bin/vapid" --applicationServerKey)"
+  PUBLIC_KEY="$("$ROOT/.venv/bin/vapid" --applicationServerKey | sed 's/^Application Server Key = //')"
   rm -f private_key.pem public_key.pem
 else
   echo "Failed to generate VAPID keys. Run: .venv/bin/pip install pywebpush && .venv/bin/vapid --gen"

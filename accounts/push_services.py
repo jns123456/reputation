@@ -19,7 +19,11 @@ def is_enabled():
 
 
 def get_vapid_public_key():
-    return getattr(settings, "VAPID_PUBLIC_KEY", "") or ""
+    raw = (getattr(settings, "VAPID_PUBLIC_KEY", "") or "").strip()
+    prefix = "Application Server Key = "
+    if raw.startswith(prefix):
+        raw = raw[len(prefix) :].strip()
+    return raw
 
 
 def save_subscription(*, user, subscription, user_agent=""):
