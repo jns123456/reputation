@@ -23,7 +23,6 @@ self.addEventListener('push', function (event) {
     body: data.body || '',
     tag: data.tag || 'predictstamp',
     data: { url: data.url || '/' },
-    badge: '/static/icons/badge.png',
     renotify: false
   };
   event.waitUntil(self.registration.showNotification(title, options));

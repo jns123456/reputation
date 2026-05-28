@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 import environ
+import ssl
+
 from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +56,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.middleware.EmailVerificationRequiredMiddleware",
     "accounts.middleware.ProfileSetupRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -148,14 +151,20 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Email / engagement notifications --------------------------------------------
 # Absolute base URL used to build links inside emails (no request available in tasks).
 SITE_BASE_URL = env("SITE_BASE_URL", default="http://localhost:8000")
-EMAIL_BACKEND = env(
-    "EMAIL_BACKEND",
-    default=(
-        "django.core.mail.backends.console.EmailBackend"
-        if DEBUG
-        else "django.core.mail.backends.smtp.EmailBackend"
-    ),
-)
+
+# Resend (https://resend.com) — preferred transactional provider when API key is set.
+RESEND_API_KEY = env("RESEND_API_KEY", default="")
+
+_email_backend = env("EMAIL_BACKEND", default="")
+if not _email_backend:
+    if RESEND_API_KEY:
+        _email_backend = "accounts.backends.resend_email.ResendEmailBackend"
+    elif DEBUG:
+        _email_backend = "django.core.mail.backends.console.EmailBackend"
+    else:
+        _email_backend = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = _email_backend
+
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
@@ -163,8 +172,36 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PredictStamp <no-reply@predictstamp.app>")
 SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+
+# Email verification (signup + email changes) --------------------------------
+EMAIL_VERIFICATION_REQUIRED = env.bool("EMAIL_VERIFICATION_REQUIRED", default=True)
+EMAIL_VERIFICATION_TOKEN_HOURS = env.int("EMAIL_VERIFICATION_TOKEN_HOURS", default=48)
+EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS = env.int(
+    "EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS",
+    default=60,
+)
+
+# Heroku Mailgun add-on exposes MAILGUN_SMTP_* — wire it when EMAIL_HOST is unset.
+_mailgun_smtp = env("MAILGUN_SMTP_SERVER", default="")
+if _mailgun_smtp and not EMAIL_HOST:
+    EMAIL_HOST = _mailgun_smtp
+    EMAIL_PORT = env.int("MAILGUN_SMTP_PORT", default=587)
+    EMAIL_HOST_USER = env("MAILGUN_SMTP_LOGIN", default="")
+    EMAIL_HOST_PASSWORD = env("MAILGUN_SMTP_PASSWORD", default="")
+    EMAIL_USE_TLS = True
+    _mailgun_domain = env("MAILGUN_DOMAIN", default="")
+    if _mailgun_domain and DEFAULT_FROM_EMAIL == "PredictStamp <no-reply@predictstamp.app>":
+        DEFAULT_FROM_EMAIL = f"PredictStamp <noreply@{_mailgun_domain}>"
+        SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # Master switch for outbound engagement emails (transactional + digest + streak).
 ENGAGEMENT_EMAILS_ENABLED = env.bool("ENGAGEMENT_EMAILS_ENABLED", default=True)
+# Resend.com API — simplest production email (no SMTP). Free tier: 100 emails/day.
+# Sign up at https://resend.com/api-keys — use onboarding@resend.dev until domain is verified.
+RESEND_API_KEY = env("RESEND_API_KEY", default="")
+RESEND_FROM_EMAIL = env(
+    "RESEND_FROM_EMAIL",
+    default="PredictStamp <onboarding@resend.dev>",
+)
 
 # Web Push (PWA) ---------------------------------------------------------------
 # VAPID keys: generate once with `vapid --gen` (py-vapid) or
@@ -180,16 +217,23 @@ LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "dashboard:landing"
 
-CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
+_redis_url = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_BROKER_URL = _redis_url
+CELERY_RESULT_BACKEND = _redis_url
 CELERY_BROKER_CONNECTION_TIMEOUT = env.float("CELERY_BROKER_CONNECTION_TIMEOUT", default=0.5)
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = False
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
-if env("REDIS_URL", default=""):
-    redis_url = env("REDIS_URL")
+# Heroku Redis uses rediss:// — Celery/kombu need explicit SSL (same as Django cache).
+if _redis_url.startswith("rediss://"):
+    _redis_ssl = {"ssl_cert_reqs": ssl.CERT_NONE}
+    CELERY_BROKER_USE_SSL = _redis_ssl
+    CELERY_REDIS_BACKEND_USE_SSL = _redis_ssl
+
+if _redis_url:
+    redis_url = _redis_url
     redis_cache_options = {}
     if redis_url.startswith("rediss://"):
         redis_cache_options["ssl_cert_reqs"] = None

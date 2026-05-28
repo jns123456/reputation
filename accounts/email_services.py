@@ -35,7 +35,23 @@ _NOTIFICATION_TYPE_TO_PREF = {
 
 
 def _emails_enabled():
-    return getattr(settings, "ENGAGEMENT_EMAILS_ENABLED", True)
+    if not getattr(settings, "ENGAGEMENT_EMAILS_ENABLED", True):
+        return False
+    return _email_delivery_configured()
+
+
+def _email_delivery_configured():
+    """True when we can actually deliver (SMTP, Mailgun add-on, or Resend API)."""
+    if getattr(settings, "RESEND_API_KEY", ""):
+        return True
+    if getattr(settings, "EMAIL_HOST", ""):
+        return True
+    if getattr(settings, "MAILGUN_SMTP_SERVER", ""):
+        return True
+    # Dev: console backend works without SMTP.
+    if settings.DEBUG:
+        return True
+    return False
 
 
 def absolute_url(path):
@@ -49,21 +65,69 @@ def absolute_url(path):
 
 def _send(*, subject, recipient_email, template_base, context):
     """Render a text (+ optional html) template pair and send one message."""
+    text_body = render_to_string(f"emails/{template_base}.txt", context)
+    html_body = ""
+    try:
+        html_body = render_to_string(f"emails/{template_base}.html", context)
+    except Exception:  # html variant is optional
+        pass
+
+    resend_key = getattr(settings, "RESEND_API_KEY", "")
+    if resend_key:
+        return _send_via_resend(
+            api_key=resend_key,
+            subject=subject,
+            recipient_email=recipient_email,
+            text_body=text_body,
+            html_body=html_body,
+        )
+
     from django.core.mail import EmailMultiAlternatives
 
-    text_body = render_to_string(f"emails/{template_base}.txt", context)
     message = EmailMultiAlternatives(
         subject=subject,
         body=text_body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[recipient_email],
     )
-    try:
-        html_body = render_to_string(f"emails/{template_base}.html", context)
+    if html_body:
         message.attach_alternative(html_body, "text/html")
-    except Exception:  # html variant is optional
-        pass
     return message.send(fail_silently=False)
+
+
+def _send_via_resend(*, api_key, subject, recipient_email, text_body, html_body):
+    """Send via Resend HTTP API (https://resend.com — free tier, one env var)."""
+    import requests
+
+    from_email = getattr(
+        settings,
+        "RESEND_FROM_EMAIL",
+        getattr(settings, "DEFAULT_FROM_EMAIL", "PredictStamp <onboarding@resend.dev>"),
+    )
+    payload = {
+        "from": from_email,
+        "to": [recipient_email],
+        "subject": subject,
+        "text": text_body,
+    }
+    if html_body:
+        payload["html"] = html_body
+
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=15,
+    )
+    if response.status_code >= 400:
+        logger.warning(
+            "Resend API error %s: %s", response.status_code, response.text[:500]
+        )
+        return 0
+    return 1
 
 
 def _user_wants_email_for(notification):

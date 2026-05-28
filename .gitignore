@@ -17,3 +17,6 @@ htmlcov/
 .mypy_cache/
 .DS_Store
 *.log
+*.pem
+private_key.pem
+public_key.pem
