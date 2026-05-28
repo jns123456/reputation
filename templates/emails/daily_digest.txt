@@ -1,0 +1,13 @@
+{% load i18n %}{% blocktrans with name=recipient.public_name %}{{ name }}, here's your daily recap{% endblocktrans %}
+
+{% if streak_days %}{% blocktrans count days=streak_days %}{{ days }}-day streak{% plural %}{{ days }}-day streak{% endblocktrans %}{% if streak_at_risk %} — {% trans "act today to keep it alive!" %}{% endif %}
+{% endif %}{% blocktrans count n=unread_count %}{{ n }} unread notification{% plural %}{{ n }} unread notifications{% endblocktrans %}
+{% blocktrans count n=open_forecasts %}{{ n }} open forecast{% plural %}{{ n }} open forecasts{% endblocktrans %}
+
+{% if recent_notifications %}{% trans "Recent activity" %}:
+{% for n in recent_notifications %}- {{ n.actor.public_name }} · {{ n.get_notification_type_display }}
+{% endfor %}{% endif %}
+{% trans "Open PredictStamp" %}: {{ forecasts_url }}
+
+---
+{% trans "Manage your alert settings" %}: {{ settings_url }}

@@ -1,0 +1,19 @@
+{% load i18n reputation_filters %}
+{% comment %}Live mark-to-market reputation P&L for an OPEN forecast (recompute on render).{% endcomment %}
+{% if prediction.status == "pending" %}
+{% with pnl=prediction|live_reputation_pnl %}
+{% if pnl != None %}
+<p class="mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold {% if pnl > 0 %}bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300{% elif pnl < 0 %}bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300{% else %}bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400{% endif %}"
+   title="{% trans 'Unrealized reputation if you exited at current market odds. Updates as the market moves.' %}">
+  <i data-lucide="{% if pnl >= 0 %}trending-up{% else %}trending-down{% endif %}" class="h-3.5 w-3.5" stroke-width="2.25" aria-hidden="true"></i>
+  {% if pnl > 0 %}
+  {% blocktrans with points=pnl %}+{{ points }} rep if exited now{% endblocktrans %}
+  {% elif pnl < 0 %}
+  {% blocktrans with points=pnl %}{{ points }} rep if exited now{% endblocktrans %}
+  {% else %}
+  {% trans "Break-even if exited now" %}
+  {% endif %}
+</p>
+{% endif %}
+{% endwith %}
+{% endif %}

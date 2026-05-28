@@ -1,0 +1,232 @@
+"""Outbound engagement email — transactional alerts, daily digest, streak reminders.
+
+These are the platform's only *external* re-engagement triggers (no push yet).
+All sending is gated by ``settings.ENGAGEMENT_EMAILS_ENABLED`` and per-user
+``NotificationPreference`` so users keep full control (AGENTS.md §10).
+
+Logic here is synchronous and unit-testable; Celery tasks in ``accounts.tasks``
+are thin wrappers around these functions.
+"""
+
+import logging
+
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
+logger = logging.getLogger(__name__)
+
+# Maps a notification type to the NotificationPreference flag that controls it.
+_NOTIFICATION_TYPE_TO_PREF = {
+    "followed_user_prediction": "notify_followed_predictions",
+    "new_follower": "notify_new_follower",
+    "upvote_received": "notify_votes_received",
+    "downvote_received": "notify_votes_received",
+    "prediction_resolved": "notify_prediction_resolved",
+    "challenge_invitation": "notify_challenge_updates",
+    "challenge_market_resolved": "notify_challenge_updates",
+    "challenge_completed": "notify_challenge_updates",
+    "challenge_accepted": "notify_challenge_updates",
+    "comment_reply": "notify_replies",
+    "mention": "notify_mentions",
+    "market_resolving": "notify_market_resolving",
+}
+
+
+def _emails_enabled():
+    return getattr(settings, "ENGAGEMENT_EMAILS_ENABLED", True)
+
+
+def absolute_url(path):
+    base = getattr(settings, "SITE_BASE_URL", "http://localhost:8000").rstrip("/")
+    if not path:
+        return base
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    return f"{base}/{path.lstrip('/')}"
+
+
+def _send(*, subject, recipient_email, template_base, context):
+    """Render a text (+ optional html) template pair and send one message."""
+    from django.core.mail import EmailMultiAlternatives
+
+    text_body = render_to_string(f"emails/{template_base}.txt", context)
+    message = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[recipient_email],
+    )
+    try:
+        html_body = render_to_string(f"emails/{template_base}.html", context)
+        message.attach_alternative(html_body, "text/html")
+    except Exception:  # html variant is optional
+        pass
+    return message.send(fail_silently=False)
+
+
+def _user_wants_email_for(notification):
+    user = notification.recipient
+    if not user.email:
+        return False
+    prefs = getattr(user, "notification_preferences", None)
+    if prefs is None:
+        return False
+    if not prefs.notify_email:
+        return False
+    pref_attr = _NOTIFICATION_TYPE_TO_PREF.get(notification.notification_type)
+    if pref_attr is None:
+        return True
+    return getattr(prefs, pref_attr, True)
+
+
+def send_notification_email(notification_id):
+    """Send a single transactional email for an in-app notification."""
+    if not _emails_enabled():
+        return False
+
+    from accounts.models import Notification
+
+    notification = (
+        Notification.objects.filter(pk=notification_id)
+        .select_related("recipient", "recipient__notification_preferences", "actor")
+        .first()
+    )
+    if notification is None:
+        return False
+    if not _user_wants_email_for(notification):
+        return False
+
+    actor_name = notification.actor.public_name if notification.actor_id else "PredictStamp"
+    subject = _notification_subject(notification, actor_name)
+    context = {
+        "notification": notification,
+        "recipient": notification.recipient,
+        "actor_name": actor_name,
+        "subject": subject,
+        "action_url": absolute_url(notification.action_url),
+        "settings_url": absolute_url("/accounts/settings/alerts/"),
+    }
+    sent = _send(
+        subject=subject,
+        recipient_email=notification.recipient.email,
+        template_base="notification",
+        context=context,
+    )
+    return bool(sent)
+
+
+def _notification_subject(notification, actor_name):
+    Type = notification.NotificationType
+    mapping = {
+        Type.FOLLOWED_USER_PREDICTION: _("%(actor)s published a new forecast"),
+        Type.NEW_FOLLOWER: _("%(actor)s started following you"),
+        Type.UPVOTE_RECEIVED: _("%(actor)s upvoted your content"),
+        Type.DOWNVOTE_RECEIVED: _("Your content received a vote"),
+        Type.PREDICTION_RESOLVED: _("Your forecast resolved — see your reputation"),
+        Type.CHALLENGE_INVITATION: _("%(actor)s invited you to a challenge"),
+        Type.CHALLENGE_MARKET_RESOLVED: _("A challenge event just resolved"),
+        Type.CHALLENGE_COMPLETED: _("A challenge you joined is complete"),
+        Type.CHALLENGE_ACCEPTED: _("%(actor)s accepted your challenge"),
+        Type.COMMENT_REPLY: _("%(actor)s replied to your comment"),
+        Type.MENTION: _("%(actor)s mentioned you"),
+        Type.MARKET_RESOLVING: _("A market you forecast is closing soon"),
+    }
+    template = mapping.get(notification.notification_type, _("You have a new notification"))
+    return template % {"actor": actor_name}
+
+
+def send_daily_digest(user_id):
+    """Send a once-a-day summary of activity to re-engage a user (Substack-style)."""
+    if not _emails_enabled():
+        return False
+
+    from datetime import timedelta
+
+    from accounts.models import Notification, User
+    from accounts.streak_services import get_streak
+
+    user = (
+        User.objects.filter(pk=user_id)
+        .select_related("notification_preferences", "profile")
+        .first()
+    )
+    if user is None or not user.email:
+        return False
+    prefs = getattr(user, "notification_preferences", None)
+    if prefs is None or not prefs.notify_email:
+        return False
+
+    since = timezone.now() - timedelta(hours=24)
+    recent = list(
+        Notification.objects.filter(recipient=user, created_at__gte=since)
+        .select_related("actor")
+        .order_by("-created_at")[:10]
+    )
+    unread_count = Notification.objects.filter(recipient=user, read_at__isnull=True).count()
+
+    open_forecasts = 0
+    try:
+        from predictions.models import Prediction
+
+        open_forecasts = Prediction.objects.filter(
+            user=user, status=Prediction.Status.PENDING
+        ).count()
+    except Exception:  # pragma: no cover - predictions app should always be present
+        pass
+
+    streak = get_streak(user)
+
+    # Nothing worth interrupting someone's inbox over.
+    if not recent and unread_count == 0 and not streak.is_at_risk():
+        return False
+
+    context = {
+        "recipient": user,
+        "recent_notifications": recent,
+        "unread_count": unread_count,
+        "open_forecasts": open_forecasts,
+        "streak": streak,
+        "streak_days": streak.display_streak(),
+        "streak_at_risk": streak.is_at_risk(),
+        "forecasts_url": absolute_url("/forecasts/"),
+        "notifications_url": absolute_url("/accounts/notifications/"),
+        "settings_url": absolute_url("/accounts/settings/alerts/"),
+    }
+    subject = _("Your PredictStamp digest")
+    sent = _send(
+        subject=subject,
+        recipient_email=user.email,
+        template_base="daily_digest",
+        context=context,
+    )
+    return bool(sent)
+
+
+def send_streak_risk_reminder(streak):
+    """Warn a user that their active streak ends tonight unless they act."""
+    if not _emails_enabled():
+        return False
+
+    user = streak.user
+    if not user.email:
+        return False
+    prefs = getattr(user, "notification_preferences", None)
+    if prefs is None or not prefs.notify_email:
+        return False
+
+    context = {
+        "recipient": user,
+        "streak_days": streak.current_streak,
+        "markets_url": absolute_url("/markets/"),
+        "settings_url": absolute_url("/accounts/settings/alerts/"),
+    }
+    subject = _("Your %(days)s-day streak ends tonight") % {"days": streak.current_streak}
+    sent = _send(
+        subject=subject,
+        recipient_email=user.email,
+        template_base="streak_risk",
+        context=context,
+    )
+    return bool(sent)

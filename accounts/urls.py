@@ -1,12 +1,13 @@
 from django.urls import path
 
-from accounts import views
+from accounts import push_views, views
 
 app_name = "accounts"
 
 urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("setup/", views.profile_setup, name="profile_setup"),
+    path("welcome/", views.onboarding, name="onboarding"),
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", views.CustomLogoutView.as_view(), name="logout"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),
@@ -28,6 +29,9 @@ urlpatterns = [
         views.notifications_mark_all_read,
         name="notifications_mark_all_read",
     ),
+    path("push/vapid-key/", push_views.vapid_public_key, name="push_vapid_key"),
+    path("push/subscribe/", push_views.push_subscribe, name="push_subscribe"),
+    path("push/unsubscribe/", push_views.push_unsubscribe, name="push_unsubscribe"),
     path("bookmarks/toggle/", views.bookmark_toggle, name="bookmark_toggle"),
     path("bookmarks/", views.bookmarks_list, name="bookmarks"),
     path("follow/toggle/", views.follow_toggle, name="follow_toggle"),

@@ -34,5 +34,40 @@
       <a href="{% url 'accounts:profile' username=user.username %}" class="btn-secondary">{% trans "Back to profile" %}</a>
     </div>
   </form>
+
+  <div id="push-enable-block" class="mt-4 hidden rounded-xl border border-slate-200 bg-white p-6">
+    <h2 class="text-sm font-bold text-slate-900 dark:text-white">{% trans "Push on this device" %}</h2>
+    <p class="mt-1 text-sm text-slate-500">{% trans "Allow browser notifications so alerts reach you even when PredictStamp is closed." %}</p>
+    <button type="button" id="push-enable-btn" class="btn-secondary mt-3">{% trans "Enable push on this device" %}</button>
+    <p id="push-enable-status" class="mt-2 text-sm text-slate-500" role="status"></p>
+  </div>
 </div>
+
+<script>
+  (function () {
+    var block = document.getElementById("push-enable-block");
+    var btn = document.getElementById("push-enable-btn");
+    var status = document.getElementById("push-enable-status");
+    if (!block || !btn || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      return;
+    }
+    fetch("/accounts/push/vapid-key/", { credentials: "same-origin" })
+      .then(function (r) { return r.json(); })
+      .then(function (config) {
+        if (!config.enabled) { return; }
+        block.classList.remove("hidden");
+        if (window.PredictStampPush && window.PredictStampPush.isGranted()) {
+          status.textContent = "{% filter escapejs %}{% trans 'Push is enabled on this device.' %}{% endfilter %}";
+        }
+        btn.addEventListener("click", function () {
+          status.textContent = "{% filter escapejs %}{% trans 'Requesting permission…' %}{% endfilter %}";
+          window.PredictStampPush.enable().then(function (ok) {
+            status.textContent = ok
+              ? "{% filter escapejs %}{% trans 'Push enabled — you are all set.' %}{% endfilter %}"
+              : "{% filter escapejs %}{% trans 'Permission was not granted.' %}{% endfilter %}";
+          });
+        });
+      });
+  })();
+</script>
 {% endblock %}

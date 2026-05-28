@@ -1,6 +1,6 @@
-{% load i18n %}
+{% load i18n mention_tags %}
 {% if post.body %}
-<p class="x-tweet-text">{{ post.body }}</p>
+<p class="x-tweet-text">{{ post.body|linkify_mentions }}</p>
 {% endif %}
 
 {% if post.image %}

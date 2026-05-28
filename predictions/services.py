@@ -82,8 +82,10 @@ def create_prediction(*, user, market, predicted_outcome, predicted_direction=Pr
         raise
 
     from accounts.notification_services import notify_followers_of_prediction
+    from accounts.streak_services import record_activity
 
     notify_followers_of_prediction(prediction=prediction)
+    record_activity(user)
 
     return prediction
 

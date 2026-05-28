@@ -11,7 +11,12 @@ from django.views.decorators.http import require_http_methods, require_POST
 from accounts.bookmark_selectors import is_bookmarked
 from accounts.bookmark_services import toggle_bookmark
 from accounts.bookmarks_services import build_bookmarks_page_items
-from accounts.follow_selectors import get_follower_count, get_following_count, is_following
+from accounts.follow_selectors import (
+    get_follower_count,
+    get_following_count,
+    get_following_ids,
+    is_following,
+)
 from accounts.follow_services import toggle_follow
 from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm, AvatarUploadForm
 from accounts.models import Bookmark, User
@@ -73,10 +78,44 @@ def profile_setup(request):
             user.onboarding_completed = True
             user.save()
             messages.success(request, _("Your profile is ready. Welcome to PredictStamp!"))
-            return redirect("accounts:profile", username=user.username)
+            return redirect("accounts:onboarding")
     else:
         form = ProfileSetupForm(instance=request.user)
     return render(request, "accounts/profile_setup.html", {"form": form})
+
+
+@login_required
+def onboarding(request):
+    """Activation step: nudge a brand-new user toward their first forecast.
+
+    The wizard 'completes' when the user makes a forecast — so we surface popular
+    open markets and a few sharp predictors to follow. Users who already have an
+    open/resolved prediction are sent straight to their profile.
+    """
+    from accounts.selectors import get_top_predictors
+    from markets.selectors import get_popular_open_markets
+
+    profile = getattr(request.user, "profile", None)
+    if profile and profile.prediction_count > 0:
+        return redirect("accounts:profile", username=request.user.username)
+
+    suggested_markets = get_popular_open_markets(limit=6)
+    suggested_users = [
+        leader.user
+        for leader in get_top_predictors(8)
+        if leader.user_id != request.user.id
+    ][:5]
+    following_ids = set(get_following_ids(request.user))
+
+    return render(
+        request,
+        "accounts/onboarding.html",
+        {
+            "suggested_markets": suggested_markets,
+            "suggested_users": suggested_users,
+            "following_ids": following_ids,
+        },
+    )
 
 
 @login_required
@@ -141,9 +180,19 @@ def user_search_partial(request):
 
 
 def profile_detail(request, username):
-    user = get_object_or_404(User.objects.select_related("profile"), username=username)
+    user = get_object_or_404(
+        User.objects.select_related("profile", "activity_streak"),
+        username=username,
+    )
     predictions = get_user_prediction_history(user)
     category_breakdown = get_user_category_breakdown(user)
+    streak = getattr(user, "activity_streak", None)
+    from accounts.achievement_services import get_level_progress, get_user_achievements
+
+    profile = getattr(user, "profile", None)
+    level = get_level_progress(getattr(profile, "reputation_points", 0))
+    achievements = get_user_achievements(user)
+    unlocked_count = sum(1 for _a, _at, unlocked in achievements if unlocked)
     return render(
         request,
         "accounts/profile_detail.html",
@@ -154,6 +203,13 @@ def profile_detail(request, username):
             "is_following": is_following(follower=request.user, following_user=user),
             "follower_count": get_follower_count(user),
             "following_count": get_following_count(user),
+            "streak_current": streak.display_streak() if streak else 0,
+            "streak_longest": streak.longest_streak if streak else 0,
+            "streak_at_risk": streak.is_at_risk() if streak else False,
+            "level": level,
+            "achievements": achievements,
+            "achievements_unlocked": unlocked_count,
+            "achievements_total": len(achievements),
         },
     )
 

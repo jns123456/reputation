@@ -1,9 +1,14 @@
 {% load i18n %}
-{% for item in feed_items %}
-  {% include "forum/partials/post_card_from_item.html" %}
-{% empty %}
+{% if feed_items %}
+  {% include "forum/partials/feed_items.html" %}
+{% else %}
 <div class="x-forum-empty">
+  {% if active_sort == 'following' %}
+  <p class="x-forum-empty-title">{% trans "Your following feed is empty" %}</p>
+  <p class="x-forum-empty-sub">{% trans "Follow people to see their posts here." %}</p>
+  {% else %}
   <p class="x-forum-empty-title">{% trans "Welcome to Forum!" %}</p>
   <p class="x-forum-empty-sub">{% trans "Be the first to share something." %}</p>
+  {% endif %}
 </div>
-{% endfor %}
+{% endif %}

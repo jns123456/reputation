@@ -3,6 +3,12 @@
 
 {% block title %}{{ market.display_title }}{% endblock %}
 
+{% block og_title %}{{ market.display_title }} · PredictStamp{% endblock %}
+{% block tw_title %}{{ market.display_title }}{% endblock %}
+{% block og_description %}{% blocktrans with cat=market.display_category %}Forecast this {{ cat }} market and build your reputation on PredictStamp.{% endblocktrans %}{% endblock %}
+{% block tw_description %}{% trans "Make your call and build your reputation." %}{% endblock %}
+{% block og_image_tags %}{% if market.image_url %}<meta name="twitter:card" content="summary_large_image"><meta property="og:image" content="{{ market.image_url }}"><meta name="twitter:image" content="{{ market.image_url }}">{% else %}<meta name="twitter:card" content="summary">{% endif %}{% endblock %}
+
 {% block content %}
 <div class="pr-page pb-8">
   {% include "markets/partials/market_hero.html" %}

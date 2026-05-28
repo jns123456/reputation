@@ -57,3 +57,9 @@ def get_mutual_followers(user):
 
 def get_follower_ids(user):
     return UserFollow.objects.filter(following=user).values_list("follower_id", flat=True)
+
+
+def get_following_ids(user):
+    if not user or not user.is_authenticated:
+        return UserFollow.objects.none().values_list("following_id", flat=True)
+    return UserFollow.objects.filter(follower=user).values_list("following_id", flat=True)

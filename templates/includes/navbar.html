@@ -90,6 +90,14 @@
         </div>
 
         {% if user.is_authenticated %}
+        {% if nav_streak_days %}
+        <a href="{% url 'accounts:profile' username=user.username %}"
+           class="hidden items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-sm font-bold text-orange-600 transition hover:bg-orange-100 md:inline-flex dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-950/60"
+           title="{% blocktrans count days=nav_streak_days %}{{ days }}-day activity streak{% plural %}{{ days }}-day activity streak{% endblocktrans %}"
+           aria-label="{% blocktrans count days=nav_streak_days %}{{ days }}-day activity streak{% plural %}{{ days }}-day activity streak{% endblocktrans %}">
+          <span aria-hidden="true">🔥</span>{{ nav_streak_days }}
+        </a>
+        {% endif %}
         <div class="hidden items-center gap-1 md:flex">
           <div class="relative" x-data="{ open: false }" @click.outside="open = false">
             <button type="button"
@@ -163,6 +171,14 @@
           </a>
           <a href="{% url 'accounts:signup' %}" class="btn-primary">{% trans "Sign up" %}</a>
         </div>
+        {% endif %}
+
+        {% if user.is_authenticated and nav_streak_days %}
+        <a href="{% url 'accounts:profile' username=user.username %}"
+           class="inline-flex items-center gap-0.5 rounded-full bg-orange-50 px-2 py-1 text-sm font-bold text-orange-600 md:hidden dark:bg-orange-950/40 dark:text-orange-300"
+           aria-label="{% blocktrans count days=nav_streak_days %}{{ days }}-day activity streak{% plural %}{{ days }}-day activity streak{% endblocktrans %}">
+          <span aria-hidden="true">🔥</span>{{ nav_streak_days }}
+        </a>
         {% endif %}
 
         {% if user.is_authenticated %}

@@ -10,9 +10,12 @@ class ProfileSetupRequiredMiddleware:
         "/accounts/logout/",
         "/accounts/login/",
         "/accounts/signup/",
+        "/accounts/push/",
         "/admin/",
         "/static/",
         "/i18n/",
+        "/sw.js",
+        "/manifest.webmanifest",
     )
 
     def __init__(self, get_response):

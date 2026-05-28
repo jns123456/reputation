@@ -2,11 +2,14 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 
 from accounts.models import (
+    ActivityStreak,
     AIAgentProfile,
     Bookmark,
     Notification,
     NotificationPreference,
+    PushSubscription,
     User,
+    UserAchievement,
     UserCategoryStats,
     UserFollow,
     UserProfile,
@@ -115,6 +118,21 @@ class UserFollowAdmin(admin.ModelAdmin):
     search_fields = ("follower__username", "following__username")
 
 
+@admin.register(UserAchievement)
+class UserAchievementAdmin(admin.ModelAdmin):
+    list_display = ("user", "code", "awarded_at")
+    list_filter = ("code",)
+    search_fields = ("user__username", "code")
+    readonly_fields = ("awarded_at",)
+
+
+@admin.register(PushSubscription)
+class PushSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("user", "endpoint", "created_at", "last_used_at")
+    search_fields = ("user__username", "endpoint")
+    readonly_fields = ("created_at", "last_used_at")
+
+
 @admin.register(NotificationPreference)
 class NotificationPreferenceAdmin(admin.ModelAdmin):
     list_display = (
@@ -141,6 +159,19 @@ class NotificationAdmin(admin.ModelAdmin):
     )
     list_filter = ("notification_type", "read_at")
     search_fields = ("recipient__username", "actor__username")
+
+
+@admin.register(ActivityStreak)
+class ActivityStreakAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "current_streak",
+        "longest_streak",
+        "last_active_date",
+        "risk_notified_date",
+    )
+    search_fields = ("user__username",)
+    ordering = ("-current_streak",)
 
 
 @admin.register(AIAgentProfile)

@@ -212,7 +212,11 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_votes_received",
             "notify_prediction_resolved",
             "notify_challenge_updates",
+            "notify_replies",
+            "notify_mentions",
+            "notify_market_resolving",
             "notify_in_app",
+            "notify_push",
             "notify_email",
         )
         widgets = {
@@ -231,7 +235,19 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_challenge_updates": forms.CheckboxInput(
                 attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
             ),
+            "notify_replies": forms.CheckboxInput(
+                attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+            ),
+            "notify_mentions": forms.CheckboxInput(
+                attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+            ),
+            "notify_market_resolving": forms.CheckboxInput(
+                attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+            ),
             "notify_in_app": forms.CheckboxInput(
+                attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+            ),
+            "notify_push": forms.CheckboxInput(
                 attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
             ),
             "notify_email": forms.CheckboxInput(
@@ -244,7 +260,11 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_votes_received": _("Upvotes and downvotes on your content"),
             "notify_prediction_resolved": _("When your forecasts are resolved"),
             "notify_challenge_updates": _("Challenge invitations and updates"),
+            "notify_replies": _("Replies to your comments"),
+            "notify_mentions": _("When someone @mentions you"),
+            "notify_market_resolving": _("When a market you forecast is closing soon"),
             "notify_in_app": _("In-app notifications"),
+            "notify_push": _("Browser push notifications"),
             "notify_email": _("Email notifications"),
         }
         help_texts = {
@@ -261,6 +281,12 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_challenge_updates": _(
                 "Get notified about challenge invites, resolved events, and final results."
             ),
+            "notify_replies": _("Get notified when someone replies to one of your comments."),
+            "notify_mentions": _("Get notified when someone mentions your @username."),
+            "notify_market_resolving": _(
+                "Get a reminder before a market you have an open forecast on closes."
+            ),
             "notify_in_app": _("Show alerts in your notification bell."),
+            "notify_push": _("Get alerts on this device even when PredictStamp isn't open (requires granting permission)."),
             "notify_email": _("Send alerts to your email address (when email is configured)."),
         }

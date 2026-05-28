@@ -194,6 +194,133 @@ class UserFollow(models.Model):
             raise ValidationError(_("Users cannot follow themselves."))
 
 
+class ActivityStreak(models.Model):
+    """Consecutive-day engagement streak for a user.
+
+    A streak counts calendar days on which the user takes at least one
+    engagement action (forecast, comment, vote, forum post). Streaks feed the
+    POPULARITY dimension only — predictive reputation still comes solely from
+    resolved predictions (AGENTS.md §6). Loss-aversion around an active streak
+    is the core daily-habit retention loop.
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="activity_streak",
+    )
+    current_streak = models.PositiveIntegerField(default=0)
+    longest_streak = models.PositiveIntegerField(default=0)
+    last_active_date = models.DateField(null=True, blank=True)
+    risk_notified_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Last date a 'streak at risk' reminder was sent (dedupe guard).",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["last_active_date"]),
+        ]
+
+    def __str__(self):
+        return f"Streak for {self.user.username}: {self.current_streak}d"
+
+    def _reference_today(self, today=None):
+        from django.utils import timezone
+
+        return today or timezone.localdate()
+
+    def is_active_today(self, today=None):
+        today = self._reference_today(today)
+        return self.last_active_date == today
+
+    def is_alive(self, today=None):
+        """True while the streak can still be continued (acted today or yesterday)."""
+        from datetime import timedelta
+
+        today = self._reference_today(today)
+        if self.last_active_date is None:
+            return False
+        return self.last_active_date >= today - timedelta(days=1)
+
+    def is_at_risk(self, today=None):
+        """Alive but not yet extended today — one day from breaking."""
+        return self.is_alive(today) and not self.is_active_today(today)
+
+    def display_streak(self, today=None):
+        """Streak value to show in the UI (0 once it has lapsed)."""
+        if not self.is_alive(today):
+            return 0
+        return self.current_streak
+
+
+class UserAchievement(models.Model):
+    """Immutable record that a user unlocked a catalog achievement.
+
+    The catalog itself lives in code (``accounts.achievement_services``); this
+    table only stores *which* achievement a user earned and *when*. Achievements
+    are badges (popularity-flavored social proof) — they never alter predictive
+    reputation (AGENTS.md §6). Records are append-only and never deleted.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="achievements",
+    )
+    code = models.CharField(max_length=50)
+    awarded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "code")]
+        indexes = [
+            models.Index(fields=["user", "code"]),
+        ]
+        ordering = ["awarded_at"]
+
+    def __str__(self):
+        return f"{self.user.username} unlocked {self.code}"
+
+
+class PushSubscription(models.Model):
+    """A browser Web Push subscription (PWA service worker endpoint).
+
+    One user can have several (multiple devices/browsers). Dead endpoints are
+    pruned when the push service returns 404/410. Stores only the opaque
+    endpoint + public keys needed to encrypt a push — no message content.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="push_subscriptions",
+    )
+    endpoint = models.URLField(max_length=600, unique=True)
+    p256dh = models.CharField(max_length=255)
+    auth = models.CharField(max_length=255)
+    user_agent = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Push for {self.user.username} ({self.endpoint[:40]}…)"
+
+    def as_subscription_info(self):
+        return {
+            "endpoint": self.endpoint,
+            "keys": {"p256dh": self.p256dh, "auth": self.auth},
+        }
+
+
 class NotificationPreference(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -220,9 +347,25 @@ class NotificationPreference(models.Model):
         default=True,
         help_text="Receive alerts about challenge invitations, event resolutions, and results.",
     )
+    notify_replies = models.BooleanField(
+        default=True,
+        help_text="Receive alerts when someone replies to your comment.",
+    )
+    notify_mentions = models.BooleanField(
+        default=True,
+        help_text="Receive alerts when someone @mentions you.",
+    )
+    notify_market_resolving = models.BooleanField(
+        default=True,
+        help_text="Receive a reminder when a market you forecast is about to close.",
+    )
     notify_in_app = models.BooleanField(
         default=True,
         help_text="Show alerts in the notification center.",
+    )
+    notify_push = models.BooleanField(
+        default=True,
+        help_text="Send browser push notifications (requires granting permission).",
     )
     notify_email = models.BooleanField(
         default=False,
@@ -255,6 +398,9 @@ class Notification(models.Model):
         )
         CHALLENGE_COMPLETED = ("challenge_completed", "Challenge completed")
         CHALLENGE_ACCEPTED = ("challenge_accepted", "Challenge accepted")
+        COMMENT_REPLY = ("comment_reply", "Reply to your comment")
+        MENTION = ("mention", "You were mentioned")
+        MARKET_RESOLVING = ("market_resolving", "Market resolving soon")
 
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -279,6 +425,20 @@ class Notification(models.Model):
     )
     comment = models.ForeignKey(
         "comments.Comment",
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        null=True,
+        blank=True,
+    )
+    pulse_post = models.ForeignKey(
+        "pulse.Post",
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        null=True,
+        blank=True,
+    )
+    pulse_comment = models.ForeignKey(
+        "pulse.Comment",
         on_delete=models.CASCADE,
         related_name="notifications",
         null=True,
@@ -367,6 +527,14 @@ class Notification(models.Model):
                 ),
                 name="unique_challenge_accepted_notification",
             ),
+            models.UniqueConstraint(
+                fields=["recipient", "notification_type", "market"],
+                condition=models.Q(
+                    market__isnull=False,
+                    notification_type="market_resolving",
+                ),
+                name="unique_market_resolving_notification",
+            ),
         ]
 
     def __str__(self):
@@ -415,6 +583,19 @@ class Notification(models.Model):
             self.NotificationType.CHALLENGE_ACCEPTED,
         ):
             return reverse("challenges:detail", kwargs={"pk": self.challenge_id})
+        if self.notification_type in (
+            self.NotificationType.COMMENT_REPLY,
+            self.NotificationType.MENTION,
+        ):
+            if self.comment_id:
+                return reverse("markets:detail", kwargs={"slug": self.comment.market.slug})
+            if self.pulse_comment_id:
+                return reverse("forum:detail", kwargs={"post_id": self.pulse_comment.post_id})
+            if self.pulse_post_id:
+                return reverse("forum:detail", kwargs={"post_id": self.pulse_post_id})
+        if self.notification_type == self.NotificationType.MARKET_RESOLVING:
+            if self.market_id:
+                return reverse("markets:detail", kwargs={"slug": self.market.slug})
         return reverse("accounts:notifications")
 
     @property
@@ -437,4 +618,11 @@ class Notification(models.Model):
             self.NotificationType.CHALLENGE_ACCEPTED,
         ):
             return "View challenge"
+        if self.notification_type in (
+            self.NotificationType.COMMENT_REPLY,
+            self.NotificationType.MENTION,
+        ):
+            return "View conversation"
+        if self.notification_type == self.NotificationType.MARKET_RESOLVING:
+            return "View market"
         return "View"

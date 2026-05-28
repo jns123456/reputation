@@ -27,14 +27,24 @@ from pulse.services import (
 
 @require_GET
 def pulse(request):
-    context = get_forum_page_context(request=request)
+    context = get_forum_page_context(
+        request=request,
+        sort=request.GET.get("sort", "recent"),
+        page=request.GET.get("page", 1),
+    )
     context["post_form"] = PostForm() if request.user.is_authenticated else None
     return render(request, "forum/forum.html", context)
 
 
 @require_GET
 def pulse_feed(request):
-    context = get_forum_page_context(request=request)
+    context = get_forum_page_context(
+        request=request,
+        sort=request.GET.get("sort", "recent"),
+        page=request.GET.get("page", 1),
+    )
+    if context["feed_page"] > 1:
+        return render(request, "forum/partials/feed_page.html", context)
     return render(request, "forum/partials/feed.html", context)
 
 

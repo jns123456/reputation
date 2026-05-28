@@ -16,8 +16,16 @@ def pending_challenge_invites_cache_key(user_id: int) -> str:
     return f"nav:challenge_invites:{user_id}"
 
 
+def streak_cache_key(user_id: int) -> str:
+    return f"nav:streak:{user_id}"
+
+
 def invalidate_notification_nav_cache(user_id: int) -> None:
     cache.delete(unread_notification_count_cache_key(user_id))
+
+
+def invalidate_streak_nav_cache(user_id: int) -> None:
+    cache.delete(streak_cache_key(user_id))
 
 
 def invalidate_challenge_nav_cache(user_id: int) -> None:
@@ -38,6 +46,23 @@ def get_cached_unread_notification_count(*, user) -> int:
     count = get_unread_notification_count(user=user)
     cache.set(cache_key, count, nav_badge_cache_seconds())
     return count
+
+
+def get_cached_display_streak(*, user) -> int:
+    """Current streak length to show in nav (0 once it has lapsed)."""
+    if not user or not user.is_authenticated:
+        return 0
+
+    cache_key = streak_cache_key(user.id)
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    from accounts.streak_services import get_streak
+
+    value = get_streak(user).display_streak()
+    cache.set(cache_key, value, nav_badge_cache_seconds())
+    return value
 
 
 def get_cached_pending_challenge_invites_count(*, user) -> int:

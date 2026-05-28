@@ -1,0 +1,8 @@
+{% load i18n %}{{ subject }}
+
+{% blocktrans with name=recipient.public_name %}Hi {{ name }}, there's new activity on your PredictStamp account.{% endblocktrans %}
+
+{{ notification.action_label }}: {{ action_url }}
+
+---
+{% trans "Manage your alert settings" %}: {{ settings_url }}

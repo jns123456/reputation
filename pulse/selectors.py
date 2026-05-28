@@ -121,12 +121,38 @@ def build_poll_context(*, post, user, user_poll_votes=None):
     }
 
 
-def get_pulse_posts(*, limit=50):
-    return (
-        _post_queryset_base()
-        .annotate(comment_count=Count("comments", distinct=True))
-        .order_by(*FORUM_FEED_ORDER)[:limit]
-    )
+HOT_CANDIDATE_POOL = 150
+
+
+def get_pulse_posts(*, limit=50, offset=0, sort="recent", following_ids=None):
+    """Forum posts supporting recent / hot / following sorts.
+
+    ``recent`` / ``following`` paginate by offset/limit; ``hot`` is a bounded,
+    time-decayed snapshot. Always returns a list.
+    """
+    from dashboard.ranking import hot_score
+
+    qs = _post_queryset_base().annotate(comment_count=Count("comments", distinct=True))
+
+    if sort == "following":
+        ids = list(following_ids or [])
+        if not ids:
+            return []
+        qs = qs.filter(user_id__in=ids)
+
+    if sort == "hot":
+        candidates = list(qs.order_by(*FORUM_FEED_ORDER)[:HOT_CANDIDATE_POOL])
+        candidates.sort(
+            key=lambda p: hot_score(
+                points=getattr(p, "popularity_score", 0),
+                created_at=p.created_at,
+                engagement=p.comment_count,
+            ),
+            reverse=True,
+        )
+        return candidates[:limit]
+
+    return list(qs.order_by(*FORUM_FEED_ORDER)[offset : offset + limit])
 
 
 def get_post_with_interactions(pk):
@@ -202,8 +228,46 @@ def build_feed_item(*, post, user, post_votes, bookmarked_ids, repost_counts, us
     return item
 
 
-def build_pulse_feed(*, user, limit=50):
-    posts = list(get_pulse_posts(limit=limit))
+FORUM_FEED_PAGE_SIZE = 20
+VALID_FORUM_SORTS = ("recent", "hot", "following")
+
+
+def build_pulse_feed(*, user, sort="recent", page=1, page_size=FORUM_FEED_PAGE_SIZE):
+    """Return ``(items, has_more)`` for the requested forum feed page."""
+    from accounts.follow_selectors import get_following_ids
+
+    if sort not in VALID_FORUM_SORTS:
+        sort = "recent"
+    if sort == "following" and not (user and user.is_authenticated):
+        return [], False
+
+    page = max(1, page)
+    following_ids = None
+    if sort == "following":
+        following_ids = list(get_following_ids(user))
+        if not following_ids:
+            return [], False
+
+    if sort == "hot":
+        posts = list(get_pulse_posts(limit=page_size, sort="hot"))
+        has_more = False
+    else:
+        offset = (page - 1) * page_size
+        fetched = list(
+            get_pulse_posts(
+                limit=page_size + 1,
+                offset=offset,
+                sort=sort,
+                following_ids=following_ids,
+            )
+        )
+        has_more = len(fetched) > page_size
+        posts = fetched[:page_size]
+
+    return _build_pulse_items(user=user, posts=posts), has_more
+
+
+def _build_pulse_items(*, user, posts):
     post_ids = [post.id for post in posts]
     original_post_ids = list({post.original_post.id for post in posts})
     post_votes = get_user_pulse_post_votes(user, post_ids)

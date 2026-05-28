@@ -350,6 +350,37 @@ def get_world_cup_match_markets_queryset(*, source=""):
     return qs.order_by("close_date", "title")
 
 
+def get_markets_resolving_soon(*, within_hours=72, limit=8):
+    """Open markets whose close_date is imminent — drives urgency/FOMO UI.
+
+    Ordered soonest-first. Excludes already-closed/resolved markets and those
+    with no close_date. Read-only; does not mutate market status.
+    """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    now = timezone.now()
+    cutoff = now + timedelta(hours=within_hours)
+    qs = _market_card_queryset(
+        Market.objects.filter(
+            status=Market.Status.OPEN,
+            close_date__isnull=False,
+            close_date__gte=now,
+            close_date__lte=cutoff,
+        )
+    ).order_by("close_date")
+    return list(qs[:limit])
+
+
+def get_popular_open_markets(*, limit=6):
+    """Highest-volume open markets — good first-forecast suggestions for onboarding."""
+    qs = _market_card_queryset(
+        Market.objects.filter(status=Market.Status.OPEN)
+    ).order_by("-volume_total", "-created_at")
+    return list(qs[:limit])
+
+
 def get_market_categories():
     return (
         Market.objects.exclude(category="")

@@ -12,6 +12,12 @@ from reputation.models import PopularityEvent
 from reputation.popularity_services import record_popularity_event
 
 
+def _record_streak_activity(user):
+    from accounts.streak_services import record_activity
+
+    record_activity(user)
+
+
 def create_post(*, user, body="", image=None, poll_payload=None):
     if poll_payload and image:
         raise ValueError(_("Polls can't include images."))
@@ -34,6 +40,12 @@ def create_post(*, user, body="", image=None, poll_payload=None):
             reason="Published a Forum post",
             pulse_post=post,
         )
+
+    if body:
+        from accounts.notification_services import notify_mentions
+
+        notify_mentions(actor=user, body=body, pulse_post=post)
+    _record_streak_activity(user)
     return post
 
 
@@ -67,6 +79,7 @@ def vote_on_poll(*, user, poll, option):
             poll=poll,
             defaults={"option": option},
         )
+    _record_streak_activity(user)
     return vote, created
 
 
@@ -80,7 +93,9 @@ def toggle_repost(*, user, post):
     if existing:
         return _remove_repost(repost=existing, original=original)
 
-    return _create_repost(user=user, original=original)
+    result = _create_repost(user=user, original=original)
+    _record_streak_activity(user)
+    return result
 
 
 def resolve_original_post(post):
@@ -189,6 +204,21 @@ def create_pulse_comment(*, user, post, body, parent_comment=None):
             )
             parent_comment.popularity_score += 1
             parent_comment.save(update_fields=["popularity_score", "updated_at"])
+
+    from accounts.notification_services import notify_comment_reply, notify_mentions
+
+    reply_recipient_ids = set()
+    if parent_comment:
+        reply_notification = notify_comment_reply(pulse_comment=comment)
+        if reply_notification is not None:
+            reply_recipient_ids.add(parent_comment.user_id)
+    notify_mentions(
+        actor=user,
+        body=body,
+        pulse_comment=comment,
+        exclude_user_ids=reply_recipient_ids,
+    )
+    _record_streak_activity(user)
     return comment
 
 

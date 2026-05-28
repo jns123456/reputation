@@ -1,0 +1,8 @@
+{% load i18n %}{% blocktrans count days=streak_days %}Don't lose your {{ days }}-day streak{% plural %}Don't lose your {{ days }}-day streak{% endblocktrans %}
+
+{% blocktrans with name=recipient.public_name %}Hi {{ name }} — you haven't been active today. Make a forecast, comment, or vote before midnight (UTC) to keep your streak going.{% endblocktrans %}
+
+{% trans "Keep my streak alive" %}: {{ markets_url }}
+
+---
+{% trans "Manage your alert settings" %}: {{ settings_url }}

@@ -145,6 +145,37 @@ AVATAR_MAX_IMAGE_BYTES = env.int("AVATAR_MAX_IMAGE_BYTES", default=5 * 1024 * 10
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Email / engagement notifications --------------------------------------------
+# Absolute base URL used to build links inside emails (no request available in tasks).
+SITE_BASE_URL = env("SITE_BASE_URL", default="http://localhost:8000")
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default=(
+        "django.core.mail.backends.console.EmailBackend"
+        if DEBUG
+        else "django.core.mail.backends.smtp.EmailBackend"
+    ),
+)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="PredictStamp <no-reply@predictstamp.app>")
+SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+# Master switch for outbound engagement emails (transactional + digest + streak).
+ENGAGEMENT_EMAILS_ENABLED = env.bool("ENGAGEMENT_EMAILS_ENABLED", default=True)
+
+# Web Push (PWA) ---------------------------------------------------------------
+# VAPID keys: generate once with `vapid --gen` (py-vapid) or
+# `.venv/bin/python -c "from py_vapid import Vapid01; v=Vapid01(); v.generate_keys(); ..."`.
+# Public key is the URL-safe base64 (applicationServerKey) handed to the browser.
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+VAPID_CLAIMS_EMAIL = env("VAPID_CLAIMS_EMAIL", default="mailto:admin@predictstamp.app")
+# Push is inert unless both keys are configured — keeps dev/CI clean.
+WEBPUSH_ENABLED = bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY)
+
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "dashboard:landing"
@@ -240,6 +271,21 @@ CELERY_BEAT_SCHEDULE = {
     "refresh-stale-open-markets": {
         "task": "integrations.tasks.refresh_stale_open_markets_task",
         "schedule": crontab(minute=30, hour="*/6"),
+    },
+    # Daily re-engagement digest (Substack-style summary).
+    "send-daily-digest": {
+        "task": "accounts.tasks.send_daily_digest_task",
+        "schedule": crontab(minute=0, hour=env.int("DIGEST_SEND_HOUR_UTC", default=13)),
+    },
+    # "Your streak ends tonight" reminder for users who haven't acted today.
+    "send-streak-risk-reminders": {
+        "task": "accounts.tasks.send_streak_risk_reminders_task",
+        "schedule": crontab(minute=0, hour=env.int("STREAK_REMINDER_HOUR_UTC", default=22)),
+    },
+    # "A market you forecast closes soon" reminder — runs a few times daily.
+    "send-market-resolving-reminders": {
+        "task": "accounts.tasks.send_market_resolving_reminders_task",
+        "schedule": crontab(minute=15, hour="*/6"),
     },
 }
 if KALSHI_ENABLED:

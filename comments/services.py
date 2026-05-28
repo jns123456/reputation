@@ -51,6 +51,22 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
             )
             parent_comment.popularity_score += 1
             parent_comment.save(update_fields=["popularity_score", "updated_at"])
+
+    from accounts.notification_services import notify_comment_reply, notify_mentions
+    from accounts.streak_services import record_activity
+
+    reply_recipient_ids = set()
+    if parent_comment:
+        reply_notification = notify_comment_reply(comment=comment)
+        if reply_notification is not None:
+            reply_recipient_ids.add(parent_comment.user_id)
+    notify_mentions(
+        actor=user,
+        body=body,
+        comment=comment,
+        exclude_user_ids=reply_recipient_ids,
+    )
+    record_activity(user)
     return comment
 
 
@@ -118,6 +134,9 @@ def cast_vote(*, user, target_type, target_id, value):
             value=value,
         )
 
+    from accounts.streak_services import record_activity
+
+    record_activity(user)
     return vote
 
 

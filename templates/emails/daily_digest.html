@@ -1,0 +1,40 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+{% block content %}
+  <h1 style="margin:0 0 4px;font-size:20px;font-weight:700;color:#0f172a;">
+    {% blocktrans with name=recipient.public_name %}{{ name }}, here's your daily recap{% endblocktrans %}
+  </h1>
+  <p style="margin:0 0 20px;font-size:14px;color:#64748b;">{% trans "What happened on PredictStamp in the last 24 hours." %}</p>
+
+  {% if streak_days %}
+  <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+    <p style="margin:0;font-size:15px;color:#9a3412;font-weight:600;">
+      🔥 {% blocktrans count days=streak_days %}{{ days }}-day streak{% plural %}{{ days }}-day streak{% endblocktrans %}
+      {% if streak_at_risk %}— <span style="color:#b91c1c;">{% trans "act today to keep it alive!" %}</span>{% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+    <tr>
+      <td style="padding:6px 0;font-size:14px;color:#475569;">📬 {% blocktrans count n=unread_count %}{{ n }} unread notification{% plural %}{{ n }} unread notifications{% endblocktrans %}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;font-size:14px;color:#475569;">📈 {% blocktrans count n=open_forecasts %}{{ n }} open forecast{% plural %}{{ n }} open forecasts{% endblocktrans %}</td>
+    </tr>
+  </table>
+
+  {% if recent_notifications %}
+  <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;">{% trans "Recent activity" %}</p>
+  <ul style="margin:0 0 20px;padding-left:18px;font-size:14px;line-height:1.7;color:#334155;">
+    {% for n in recent_notifications %}
+    <li>{{ n.actor.public_name }} · {{ n.get_notification_type_display }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <a href="{{ forecasts_url }}"
+     style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:10px;">
+    {% trans "Open PredictStamp" %} →
+  </a>
+{% endblock %}

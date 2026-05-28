@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Welcome" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl px-1 py-2">
+  <header class="text-center">
+    <p class="pr-eyebrow">{% trans "You're in" %}</p>
+    <h1 class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Make your first forecast" %}</h1>
+    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+      {% trans "Reputation is earned by calling real-world markets — no betting, just credibility. Pick a market below to get started." %}
+    </p>
+  </header>
+
+  <section class="mt-6">
+    <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">🔥 {% trans "Popular markets to call" %}</h2>
+    {% if suggested_markets %}
+    <div class="grid gap-3 sm:grid-cols-2">
+      {% for market in suggested_markets %}
+      <a href="{% url 'markets:detail' slug=market.slug %}"
+         class="group flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-brand-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <span class="text-xs font-semibold uppercase tracking-wide text-brand-600">{{ market.display_category|default:_("Market") }}</span>
+        <span class="line-clamp-3 text-sm font-semibold text-slate-800 group-hover:text-brand-700 dark:text-slate-100">{{ market.display_title }}</span>
+        <span class="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-brand-600">
+          {% trans "Forecast this" %}
+          <i data-lucide="arrow-right" class="h-3.5 w-3.5" aria-hidden="true"></i>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
+      {% trans "No open markets right now — check back soon." %}
+      <a href="{% url 'markets:list' %}" class="font-semibold text-brand-600 hover:underline">{% trans "Browse all markets" %} →</a>
+    </p>
+    {% endif %}
+  </section>
+
+  {% if suggested_users %}
+  <section class="mt-8">
+    <h2 class="mb-3 text-sm font-bold text-slate-900 dark:text-white">{% trans "Follow sharp forecasters" %}</h2>
+    <div class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+      {% for suggested in suggested_users %}
+      <div class="flex items-center justify-between gap-3 p-3">
+        <a href="{% url 'accounts:profile' username=suggested.username %}" class="flex min-w-0 items-center gap-3">
+          <span class="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 dark:bg-brand-500/20">
+            {{ suggested.public_name|slice:":1"|upper }}
+          </span>
+          <span class="min-w-0">
+            <span class="block truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{{ suggested.public_name }}</span>
+            <span class="block text-xs text-slate-500">{{ suggested.profile.reputation_points }} {% trans "rep" %}</span>
+          </span>
+        </a>
+        <div id="follow-user-{{ suggested.username }}" class="pr-profile-follow flex-none">
+          <form method="post" action="{% url 'accounts:follow_toggle' %}" class="inline"
+                hx-post="{% url 'accounts:follow_toggle' %}"
+                hx-target="#follow-user-{{ suggested.username }}"
+                hx-swap="outerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="username" value="{{ suggested.username }}">
+            <button type="submit" class="{% if suggested.id in following_ids %}btn-secondary{% else %}btn-primary{% endif %}">
+              {% if suggested.id in following_ids %}{% trans "Following" %}{% else %}{% trans "Follow" %}{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="mt-8 flex items-center justify-center gap-4">
+    <a href="{% url 'markets:list' %}" class="btn-primary">{% trans "Explore markets" %}</a>
+    <a href="{% url 'accounts:profile' username=user.username %}" class="text-sm font-semibold text-slate-500 hover:text-brand-600">{% trans "Skip for now" %}</a>
+  </div>
+</div>
+{% endblock %}

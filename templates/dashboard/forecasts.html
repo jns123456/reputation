@@ -29,7 +29,23 @@
       <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">{% trans "Forecasts" %}</h1>
       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Live forecasts from the community — formal predictions tied to real markets." %}</p>
 
-      <form method="get" action="{% url 'dashboard:forecasts' %}" class="mt-4">
+      <nav class="mt-4 flex items-center gap-1 overflow-x-auto" aria-label="{% trans 'Feed sort' %}">
+        {% url 'dashboard:forecasts' as forecasts_url %}
+        <a href="{{ forecasts_url }}?sort=recent{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
+           class="pr-feed-tab {% if active_sort == 'recent' %}is-active{% endif %}"
+           {% if active_sort == 'recent' %}aria-current="page"{% endif %}>{% trans "Recent" %}</a>
+        <a href="{{ forecasts_url }}?sort=hot{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
+           class="pr-feed-tab {% if active_sort == 'hot' %}is-active{% endif %}"
+           {% if active_sort == 'hot' %}aria-current="page"{% endif %}>🔥 {% trans "Hot" %}</a>
+        {% if user.is_authenticated %}
+        <a href="{{ forecasts_url }}?sort=following{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
+           class="pr-feed-tab {% if active_sort == 'following' %}is-active{% endif %}"
+           {% if active_sort == 'following' %}aria-current="page"{% endif %}>{% trans "Following" %}</a>
+        {% endif %}
+      </nav>
+
+      <form method="get" action="{% url 'dashboard:forecasts' %}" class="mt-3">
+        <input type="hidden" name="sort" value="{{ active_sort }}">
         <label for="forecasts-market-filter" class="sr-only">{% trans "Filter by market" %}</label>
         <select id="forecasts-market-filter"
                 name="market"
@@ -43,11 +59,29 @@
       </form>
     </header>
 
-    <div id="forecasts-feed"
-         class="pr-feed-body rounded-b-2xl"
-         hx-get="{% url 'dashboard:forecasts_feed' %}{% if active_market_slug %}?market={{ active_market_slug }}{% endif %}"
-         hx-trigger="every 20s"
-         hx-swap="innerHTML">
+    {% if resolving_soon %}
+    <section class="pr-resolving-soon" aria-label="{% trans 'Resolving soon' %}">
+      <div class="pr-resolving-soon-head">
+        <span class="pr-resolving-soon-title">⏳ {% trans "Resolving soon" %}</span>
+        <span class="pr-resolving-soon-sub">{% trans "Lock in your call before the window closes" %}</span>
+      </div>
+      <div class="pr-resolving-soon-rail">
+        {% for market in resolving_soon %}
+        {% with countdown=market.expiration_countdown %}
+        <a href="{% url 'markets:detail' slug=market.slug %}" class="pr-resolving-soon-card">
+          <span class="pr-resolving-soon-deadline {% if countdown.tone == 'urgent' or countdown.tone == 'soon' %}is-urgent{% endif %}">
+            <i data-lucide="clock" class="h-3.5 w-3.5" aria-hidden="true"></i>
+            {{ countdown.text }}
+          </span>
+          <span class="pr-resolving-soon-q">{{ market.display_title }}</span>
+        </a>
+        {% endwith %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <div id="forecasts-feed" class="pr-feed-body rounded-b-2xl">
       {% include "dashboard/partials/forecasts_feed.html" %}
     </div>
   </div>

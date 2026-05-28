@@ -16,6 +16,14 @@
   <div class="x-forum-main">
     <header class="x-forum-header">
       <h1>{% trans "Home" %}</h1>
+      <nav class="x-forum-tabs" aria-label="{% trans 'Feed sort' %}">
+        {% url 'forum:feed' as forum_url %}
+        <a href="{{ forum_url }}?sort=recent" class="x-forum-tab {% if active_sort == 'recent' %}is-active{% endif %}" {% if active_sort == 'recent' %}aria-current="page"{% endif %}>{% trans "Recent" %}</a>
+        <a href="{{ forum_url }}?sort=hot" class="x-forum-tab {% if active_sort == 'hot' %}is-active{% endif %}" {% if active_sort == 'hot' %}aria-current="page"{% endif %}>🔥 {% trans "Hot" %}</a>
+        {% if user.is_authenticated %}
+        <a href="{{ forum_url }}?sort=following" class="x-forum-tab {% if active_sort == 'following' %}is-active{% endif %}" {% if active_sort == 'following' %}aria-current="page"{% endif %}>{% trans "Following" %}</a>
+        {% endif %}
+      </nav>
     </header>
 
     {% if user.is_authenticated %}
@@ -29,11 +37,7 @@
     </div>
     {% endif %}
 
-    <div id="forum-feed"
-         class="x-forum-feed"
-         hx-get="{% url 'forum:feed_partial' %}"
-         hx-trigger="every 30s"
-         hx-swap="innerHTML">
+    <div id="forum-feed" class="x-forum-feed">
       {% include "forum/partials/feed.html" %}
     </div>
   </div>

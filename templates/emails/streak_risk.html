@@ -1,0 +1,14 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+{% block content %}
+  <h1 style="margin:0 0 12px;font-size:20px;font-weight:700;color:#0f172a;">
+    🔥 {% blocktrans count days=streak_days %}Don't lose your {{ days }}-day streak{% plural %}Don't lose your {{ days }}-day streak{% endblocktrans %}
+  </h1>
+  <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#475569;">
+    {% blocktrans with name=recipient.public_name %}Hi {{ name }} — you haven't been active today. Make a forecast, comment, or vote before midnight (UTC) to keep your streak going.{% endblocktrans %}
+  </p>
+  <a href="{{ markets_url }}"
+     style="display:inline-block;background:#ea580c;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:10px;">
+    {% trans "Keep my streak alive" %} →
+  </a>
+{% endblock %}

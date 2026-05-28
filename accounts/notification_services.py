@@ -170,6 +170,127 @@ def notify_prediction_resolved(*, prediction, reputation_event):
     return notification
 
 
+def notify_comment_reply(*, comment=None, pulse_comment=None):
+    """Notify the parent author when their comment receives a reply.
+
+    Pass a market ``comment`` or a forum ``pulse_comment`` (exactly one). The
+    reply object itself is linked so the notification deep-links to it.
+    """
+    reply = comment if comment is not None else pulse_comment
+    parent = getattr(reply, "parent_comment", None)
+    if parent is None:
+        return None
+
+    recipient = parent.user
+    actor = reply.user
+    if recipient.id == actor.id:
+        return None
+
+    preferences = get_or_create_notification_preferences(recipient)
+    if not preferences.notify_replies:
+        return None
+
+    fields = {
+        "actor": actor,
+        "notification_type": Notification.NotificationType.COMMENT_REPLY,
+    }
+    if comment is not None:
+        fields["comment"] = comment
+    else:
+        fields["pulse_comment"] = pulse_comment
+    return _create_notification(recipient=recipient, **fields)
+
+
+def notify_mentions(
+    *,
+    actor,
+    body,
+    comment=None,
+    pulse_comment=None,
+    pulse_post=None,
+    exclude_user_ids=(),
+):
+    """Create MENTION notifications for every @username found in ``body``."""
+    from accounts.mention_services import extract_mention_usernames
+    from accounts.models import User
+
+    usernames = extract_mention_usernames(body)
+    if not usernames:
+        return []
+
+    exclude_ids = set(exclude_user_ids) | {actor.id}
+    recipients = User.objects.filter(username__in=usernames).exclude(id__in=exclude_ids)
+
+    created = []
+    for recipient in recipients:
+        preferences = get_or_create_notification_preferences(recipient)
+        if not preferences.notify_mentions:
+            continue
+        notification = _create_notification(
+            recipient=recipient,
+            actor=actor,
+            notification_type=Notification.NotificationType.MENTION,
+            comment=comment,
+            pulse_comment=pulse_comment,
+            pulse_post=pulse_post,
+        )
+        if notification:
+            created.append(notification)
+    return created
+
+
+def notify_market_resolving(*, market):
+    """Remind users with an open forecast that ``market`` is about to close.
+
+    Idempotent per (recipient, market): a unique constraint prevents duplicate
+    reminders if the beat task runs more than once before the market closes.
+    Respects each user's ``notify_market_resolving`` preference. The reminder is
+    a popularity-neutral nudge — it never touches reputation (AGENTS.md §6).
+    """
+    from predictions.models import Prediction
+
+    recipient_ids = list(
+        Prediction.objects.filter(
+            market=market,
+            status=Prediction.Status.PENDING,
+        )
+        .values_list("user_id", flat=True)
+        .distinct()
+    )
+    if not recipient_ids:
+        return []
+
+    preferences_by_user = {
+        pref.user_id: pref
+        for pref in NotificationPreference.objects.filter(user_id__in=recipient_ids)
+    }
+
+    created = []
+    for recipient_id in recipient_ids:
+        preferences = preferences_by_user.get(recipient_id)
+        if preferences is None:
+            preferences = NotificationPreference.objects.create(user_id=recipient_id)
+            preferences_by_user[recipient_id] = preferences
+        if not preferences.notify_market_resolving:
+            continue
+        if not _should_notify_in_app(user_id=recipient_id):
+            continue
+
+        notification, was_created = Notification.objects.get_or_create(
+            recipient_id=recipient_id,
+            notification_type=Notification.NotificationType.MARKET_RESOLVING,
+            market=market,
+            defaults={"actor_id": recipient_id},
+        )
+        if was_created:
+            created.append(notification)
+            from accounts.nav_cache import invalidate_notification_nav_cache
+
+            invalidate_notification_nav_cache(recipient_id)
+
+    return created
+
+
 def mark_notification_read(*, notification, user):
     if notification.recipient_id != user.id:
         raise PermissionError("Cannot mark another user's notification as read.")

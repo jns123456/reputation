@@ -39,6 +39,7 @@ class PopularityEvent(models.Model):
         REPLY_RECEIVED = "reply_received", "Reply received"
         POST_PUBLISHED = "post_published", "Post published"
         REPOST_RECEIVED = "repost_received", "Repost received"
+        STREAK_MILESTONE = "streak_milestone", "Activity streak milestone"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

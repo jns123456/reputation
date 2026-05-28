@@ -5,6 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{% block title %}PredictStamp{% endblock %} — {% trans "The social layer for prediction markets" %}</title>
+
+  {# Open Graph / Twitter share cards — pages override the blocks below. #}
+  <meta property="og:site_name" content="PredictStamp">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}PredictStamp — {% trans 'The social layer for prediction markets' %}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{% trans 'Public predictions and earned reputation for real-world markets. No betting — just credibility.' %}{% endblock %}">
+  <meta name="twitter:title" content="{% block tw_title %}PredictStamp{% endblock %}">
+  <meta name="twitter:description" content="{% block tw_description %}{% trans 'Public predictions and earned reputation for real-world markets.' %}{% endblock %}">
+  {% if request %}<meta property="og:url" content="{{ request.build_absolute_uri }}">{% endif %}
+  {% block og_image_tags %}<meta name="twitter:card" content="summary">{% endblock %}
+
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#4f46e5">
   <script>
     (function () {
       var stored = null;
@@ -362,6 +375,7 @@
     };
   </script>
   <script src="{% static 'js/forum-actions.js' %}"></script>
+  {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}" defer></script>{% endif %}
   <script>
     window.focusDiscussionComposer = function (discussionId) {
       var root = document.getElementById(discussionId);

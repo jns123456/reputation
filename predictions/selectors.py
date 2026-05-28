@@ -57,7 +57,7 @@ def get_market_predictions(market, limit=50):
             ],
         )
         .exclude(status=Prediction.Status.VOID)
-        .select_related("user", "user__profile")
+        .select_related("user", "user__profile", "market")
         .order_by(*DISPLAY_RANK_ORM_FIELDS)
     )
     return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
@@ -66,7 +66,7 @@ def get_market_predictions(market, limit=50):
 def get_prediction_with_interactions(pk):
     return annotate_prediction_interactions(
         prefetch_verified_prediction_attestations(
-            Prediction.objects.filter(pk=pk).select_related("user", "user__profile")
+            Prediction.objects.filter(pk=pk).select_related("user", "user__profile", "market")
         )
     ).first()
 
@@ -96,7 +96,24 @@ def get_user_open_predictions(user, limit=100):
     return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
 
 
-def get_forecasts_feed(*, market_slug=None, limit=50):
+HOT_CANDIDATE_POOL = 150
+
+
+def get_forecasts_feed(
+    *,
+    market_slug=None,
+    limit=50,
+    offset=0,
+    sort="recent",
+    following_ids=None,
+):
+    """Forecasts feed supporting recent / hot / following sorts.
+
+    ``recent`` and ``following`` paginate by offset/limit; ``hot`` returns a
+    bounded, time-decayed snapshot (not paginated). Always returns a list.
+    """
+    from dashboard.ranking import hot_score
+
     qs = (
         Prediction.objects.filter(
             status__in=[
@@ -107,11 +124,30 @@ def get_forecasts_feed(*, market_slug=None, limit=50):
         )
         .exclude(status=Prediction.Status.VOID)
         .select_related("user", "user__profile", "market")
-        .order_by("-created_at")
     )
     if market_slug:
         qs = qs.filter(market__slug=market_slug)
-    return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
+    if sort == "following":
+        ids = list(following_ids or [])
+        if not ids:
+            return []
+        qs = qs.filter(user_id__in=ids)
+
+    qs = annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))
+
+    if sort == "hot":
+        candidates = list(qs.order_by("-created_at")[:HOT_CANDIDATE_POOL])
+        candidates.sort(
+            key=lambda p: hot_score(
+                points=p.popularity_score,
+                created_at=p.created_at,
+                engagement=p.comment_count,
+            ),
+            reverse=True,
+        )
+        return candidates[:limit]
+
+    return list(qs.order_by("-created_at")[offset : offset + limit])
 
 
 def get_forecasts_market_options():

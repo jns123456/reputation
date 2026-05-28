@@ -75,6 +75,14 @@ def prediction_reputation_delta(prediction):
     )
 
 
+@register.filter
+def live_reputation_pnl(prediction):
+    """Live mark-to-market reputation P&L for an open forecast; None otherwise."""
+    from reputation.services import calculate_unrealized_reputation
+
+    return calculate_unrealized_reputation(prediction)
+
+
 @register.simple_tag
 def exit_reputation_preview(prediction, market):
     from reputation.services import calculate_exit_reputation_delta

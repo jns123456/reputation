@@ -300,11 +300,28 @@ def faq(request):
     return render(request, "dashboard/faq.html")
 
 
+RESOLVING_SOON_CACHE_KEY = "forecasts_resolving_soon"
+RESOLVING_SOON_CACHE_SECONDS = 300
+
+
+def _load_resolving_soon():
+    markets = cache.get(RESOLVING_SOON_CACHE_KEY)
+    if markets is None:
+        from markets.selectors import get_markets_resolving_soon
+
+        markets = get_markets_resolving_soon(within_hours=72, limit=8)
+        cache.set(RESOLVING_SOON_CACHE_KEY, markets, RESOLVING_SOON_CACHE_SECONDS)
+    return markets
+
+
 def forecasts(request):
     context = get_forecasts_page_context(
         request=request,
         market_slug=request.GET.get("market", ""),
+        sort=request.GET.get("sort", "recent"),
+        page=request.GET.get("page", 1),
     )
+    context["resolving_soon"] = _load_resolving_soon()
     return render(request, "dashboard/forecasts.html", context)
 
 
@@ -312,5 +329,10 @@ def forecasts_feed(request):
     context = get_forecasts_page_context(
         request=request,
         market_slug=request.GET.get("market", ""),
+        sort=request.GET.get("sort", "recent"),
+        page=request.GET.get("page", 1),
     )
+    # Page 2+ requests only need the appended items + next sentinel.
+    if context["feed_page"] > 1:
+        return render(request, "dashboard/partials/forecasts_feed_page.html", context)
     return render(request, "dashboard/partials/forecasts_feed.html", context)

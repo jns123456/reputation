@@ -1,0 +1,15 @@
+{% load i18n %}
+{% for item in feed_items %}
+  {% include "forum/partials/post_card_from_item.html" %}
+{% endfor %}
+{% if feed_has_more %}
+<div hx-get="{% url 'forum:feed_partial' %}?sort={{ active_sort }}&page={{ feed_next_page }}"
+     hx-trigger="revealed"
+     hx-swap="outerHTML"
+     class="x-forum-load-more">
+  <span class="inline-flex items-center gap-2">
+    <i data-lucide="loader-2" class="h-4 w-4 animate-spin" aria-hidden="true"></i>
+    {% trans "Loading more…" %}
+  </span>
+</div>
+{% endif %}

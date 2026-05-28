@@ -82,6 +82,31 @@ def calculate_exit_reputation_delta(
     return int(round((exit_probability - entry_probability) * 100))
 
 
+def calculate_unrealized_reputation(prediction, *, current_probability=None):
+    """Mark-to-market reputation P&L for an OPEN forecast at live odds.
+
+    Same math as an exit, but using current market odds instead of an exit
+    snapshot. Computed on the fly and never persisted, so it cannot touch the
+    immutable record of resolved/exited predictions (AGENTS.md §6).
+
+    Returns the signed reputation delta the user would realize by exiting now,
+    or ``None`` if the forecast is not open.
+    """
+    if prediction.status != prediction.Status.PENDING:
+        return None
+    snapshot = current_probability
+    if snapshot is None:
+        snapshot = getattr(prediction.market, "current_probability", None) or {}
+    if not snapshot:
+        return None
+    return calculate_exit_reputation_delta(
+        predicted_outcome=prediction.predicted_outcome,
+        entry_probability_snapshot=prediction.probability_at_prediction_time,
+        exit_probability_snapshot=snapshot,
+        predicted_direction=prediction.predicted_direction,
+    )
+
+
 def apply_reputation_for_prediction_exit(prediction):
     """Apply reputation scoring when a user exits an active prediction."""
     if prediction.status != prediction.Status.EXITED:
@@ -251,5 +276,10 @@ def apply_reputation_for_prediction(prediction):
     from accounts.notification_services import notify_prediction_resolved
 
     notify_prediction_resolved(prediction=prediction, reputation_event=event)
+
+    # Re-check accuracy-based achievements (e.g. first correct, sharp eye).
+    from accounts.achievement_services import evaluate_achievements
+
+    evaluate_achievements(prediction.user)
 
     return event
