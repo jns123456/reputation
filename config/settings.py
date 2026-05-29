@@ -56,6 +56,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "accounts.middleware.CountryLanguageMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -82,6 +83,7 @@ TEMPLATES = [
                 "accounts.context_processors.notification_context",
                 "accounts.context_processors.auth0_context",
                 "challenges.context_processors.challenge_context",
+                "config.context_processors.static_version",
             ],
         },
     },
@@ -143,6 +145,9 @@ LANGUAGES = [
 ]
 
 LOCALE_PATHS = [BASE_DIR / "locale"]
+
+# Optional path to MaxMind GeoLite2-Country.mmdb for IP → country (see .env.example).
+GEOIP_COUNTRY_PATH = env("GEOIP_COUNTRY_PATH", default="")
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"

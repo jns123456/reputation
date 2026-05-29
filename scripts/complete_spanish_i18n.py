@@ -7,10 +7,31 @@ from pathlib import Path
 
 import polib
 
+from phase1_i18n_fixes import (
+    PHASE1_FIXES,
+    PHASE1_PLURAL_FIXES,
+    PHASE1_UNFUZZY_KEEP_MSGSTR,
+    SPANISH_MSGID_FIXES,
+)
+from phase2_i18n_fixes import (
+    PHASE2_BLOCK_PLURAL,
+    PHASE2_FIXES,
+    PHASE2_PLURAL_FIXES,
+)
+from phase3_i18n_fixes import PHASE3_FIXES, PHASE3_PLURAL_FIXES
+
 PO_PATH = Path(__file__).resolve().parent.parent / "locale" / "es" / "LC_MESSAGES" / "django.po"
 
+# Phase overrides take precedence over legacy FIXES below.
+FIXES: dict[str, str] = {**PHASE1_FIXES, **PHASE2_FIXES, **PHASE3_FIXES}
+PLURAL_FIXES: dict[str, tuple[str, str]] = {
+    **PHASE1_PLURAL_FIXES,
+    **PHASE2_PLURAL_FIXES,
+    **PHASE3_PLURAL_FIXES,
+}
+
 # msgid -> natural Spanish (preserve %(placeholders)s)
-FIXES: dict[str, str] = {
+FIXES.update({
     "How do you want to appear?": "¿Cómo quieres aparecer?",
     "Display name": "Nombre para mostrar",
     "How others will see you": "Cómo te verán los demás",
@@ -298,9 +319,9 @@ FIXES: dict[str, str] = {
     "Compete with mutual followers on up to 10 events. Highest reputation score wins.": (
         "Compite con seguidores mutuos en hasta 10 eventos. Gana quien tenga más reputación."
     ),
-}
+})
 
-PLURAL_FIXES: dict[str, tuple[str, str]] = {
+PLURAL_FIXES.update({
     "%(days)s day left": ("Queda %(days)s día", "Quedan %(days)s días"),
     "%(days)s days left": ("Queda %(days)s día", "Quedan %(days)s días"),
     "Ended %(past)s day ago": ("Terminó hace %(past)s día", "Terminó hace %(past)s días"),
@@ -347,13 +368,38 @@ PLURAL_FIXES: dict[str, tuple[str, str]] = {
         "\n            %(counter)s evento abierto coincide con «%(search_query)s»\n          ",
         "\n            %(counter)s eventos abiertos coinciden con «%(search_query)s»\n          ",
     ),
-}
+})
 
 
-def apply_fixes() -> tuple[int, int]:
+def apply_fixes() -> tuple[int, int, int]:
     po = polib.pofile(str(PO_PATH))
     updated = 0
+    unfuzzied = 0
     remaining_empty = 0
+
+    for entry in po:
+        if entry.msgid in SPANISH_MSGID_FIXES:
+            entry.msgstr = SPANISH_MSGID_FIXES[entry.msgid]
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+            updated += 1
+            continue
+
+        if entry.msgid in PHASE1_UNFUZZY_KEEP_MSGSTR and entry.msgstr.strip():
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+                unfuzzied += 1
+            continue
+
+        if (
+            "fuzzy" in entry.flags
+            and entry.msgid not in FIXES
+            and not (entry.msgid_plural and entry.msgid in PLURAL_FIXES)
+            and entry.msgstr.strip()
+        ):
+            # Leftover fuzzy with a non-empty msgstr: activate it rather than fall back to English.
+            entry.flags.remove("fuzzy")
+            unfuzzied += 1
 
     for entry in po:
         if entry.msgid == "Challenge with %(count)s event" and entry.msgid_plural:
@@ -381,16 +427,27 @@ def apply_fixes() -> tuple[int, int]:
             updated += 1
             continue
 
+        if entry.msgid_plural and entry.msgid in PHASE2_BLOCK_PLURAL:
+            singular, plural = PHASE2_BLOCK_PLURAL[entry.msgid]
+            entry.msgstr_plural = {0: singular, 1: plural}
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+            updated += 1
+            continue
+
         if entry.msgid and not entry.msgstr.strip() and not entry.msgid_plural:
             remaining_empty += 1
 
     po.save(str(PO_PATH))
-    return updated, remaining_empty
+    return updated, unfuzzied, remaining_empty
 
 
 def main() -> None:
-    updated, remaining = apply_fixes()
-    print(f"Updated {updated} translation(s). Remaining empty singular entries: {remaining}.")
+    updated, unfuzzied, remaining = apply_fixes()
+    print(
+        f"Updated {updated} translation(s), unfuzzied {unfuzzied}. "
+        f"Remaining empty singular entries: {remaining}."
+    )
 
 
 if __name__ == "__main__":

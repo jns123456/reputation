@@ -108,10 +108,9 @@ def _send_verification_message(*, user: User, token: EmailVerificationToken) -> 
         "recipient": user,
         "verify_url": verify_url,
         "expires_hours": int(_token_ttl().total_seconds() // 3600),
-        "subject": _("Confirma tu email en PredictStamp"),
     }
     sent = _send(
-        subject=context["subject"],
+        subject=lambda: _("Confirm your email on PredictStamp"),
         recipient_email=token.email,
         template_base="email_verification",
         context=context,

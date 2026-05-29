@@ -20,6 +20,7 @@
       canvas.dataset.initialized = "true";
 
       var yesLabel = data.yes_label || "Yes";
+      var priceSuffix = data.price_suffix || "price";
       var labels = data.labels || [];
       var values = data.values || [];
 
@@ -29,7 +30,7 @@
           labels: labels,
           datasets: [
             {
-              label: yesLabel + " price",
+              label: yesLabel + " " + priceSuffix,
               data: values,
               borderColor: "rgb(5 150 105)",
               backgroundColor: "rgba(16, 185, 129, 0.12)",

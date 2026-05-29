@@ -46,8 +46,8 @@
   <script defer src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/proofrep-ui.css' %}">
-  <script src="{% static 'js/popularity-sort.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/proofrep-ui.css' %}{% if static_version %}?v={{ static_version }}{% endif %}">
+  <script src="{% static 'js/popularity-sort.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <style>
     [x-cloak] { display: none !important; }
     .form-input, .form-select, .form-textarea {
@@ -323,6 +323,9 @@
     html.dark .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.35) !important; }
     html.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.35) !important; }
     html.dark .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4) !important; }
+
+    /* Forecasts / Saved feed — full width of main (wins over cached proofrep-ui.css) */
+    .pr-feed-shell { max-width: 100%; }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -362,9 +365,9 @@
   {% include "includes/mobile_bottom_nav.html" %}
   <div id="vote-reactions-portal"></div>
   {% block extra_js %}{% endblock %}
-  <script src="{% static 'js/proofrep-ui.js' %}"></script>
-  <script src="{% static 'js/lucide-icons.js' %}"></script>
-  <script src="{% static 'js/theme.js' %}"></script>
+  <script src="{% static 'js/proofrep-ui.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
+  <script src="{% static 'js/lucide-icons.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
+  <script src="{% static 'js/theme.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script>window.proofrepTheme && window.proofrepTheme.init();</script>
   <script>
     window.PROOFREP_I18N = {
@@ -374,8 +377,8 @@
       shareForecast: "{% filter escapejs %}{% trans 'Share forecast' %}{% endfilter %}"
     };
   </script>
-  <script src="{% static 'js/forum-actions.js' %}"></script>
-  {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}" defer></script>{% endif %}
+  <script src="{% static 'js/forum-actions.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
+  {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}{% if static_version %}?v={{ static_version }}{% endif %}" defer></script>{% endif %}
   <script>
     window.focusDiscussionComposer = function (discussionId) {
       var root = document.getElementById(discussionId);

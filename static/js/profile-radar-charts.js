@@ -119,6 +119,8 @@
     var labels = config.labels || [];
     var reputationValues = config.reputationValues || [];
     var popularityValues = config.popularityValues || [];
+    var reputationLabel = config.reputationLabel || "Reputation";
+    var popularityLabel = config.popularityLabel || "Popularity";
 
     var repBounds = computeRadarBounds(reputationValues, true);
     var popBounds = computeRadarBounds(popularityValues, false);
@@ -130,7 +132,7 @@
         {
           labels: labels,
           config: buildDataset(
-            "Reputation",
+            reputationLabel,
             reputationValues,
             reputationValues,
             {
@@ -153,7 +155,7 @@
         {
           labels: labels,
           config: buildDataset(
-            "Popularity",
+            popularityLabel,
             popularityValues,
             popularityValues,
             {

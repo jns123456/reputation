@@ -1,21 +1,21 @@
-Hola {{ recipient.public_name }},
+{% load i18n %}{% blocktrans with name=recipient.public_name %}Hi {{ name }},{% endblocktrans %}
 
-¡Bienvenido a PredictStamp!
+{% trans "Welcome to PredictStamp!" %}
 
-PredictStamp es la capa social de los mercados de predicción: un lugar para debatir eventos del mundo real, publicar pronósticos formales y construir reputación cuando los mercados se resuelven.
+{% blocktrans %}PredictStamp is the social layer for prediction markets: a place to debate real-world events, publish formal forecasts, and build reputation when markets resolve.{% endblocktrans %}
 
-Qué puedes hacer:
-- Explorar mercados importados de fuentes como Polymarket (sin apostar dinero).
-- Publicar pronósticos formales con tu razonamiento.
-- Comentar, debatir y seguir a otros predictores.
-- Ganar Reputación cuando aciertas (calidad predictiva) y Popularidad cuando tu contenido genera engagement social.
+{% trans "What you can do:" %}
+- {% trans "Browse markets imported from sources like Polymarket (no real-money betting)." %}
+- {% trans "Publish formal forecasts with your reasoning." %}
+- {% trans "Comment, debate, and follow other predictors." %}
+- {% trans "Earn Reputation when you are right (predictive quality) and Popularity when your content gets engagement." %}
 
-Dos puntuaciones, independientes:
-- Reputación: mide la calidad histórica de tus pronósticos resueltos.
-- Popularidad: mide votos, respuestas y visibilidad social.
+{% trans "Two scores, independent:" %}
+- {% trans "Reputation: measures the historical quality of your resolved forecasts." %}
+- {% trans "Popularity: measures votes, replies, and social visibility." %}
 
-PredictStamp no es una casa de apuestas: no hay wallets, depósitos ni trading con dinero real.
+{% blocktrans %}PredictStamp is not a betting house: there are no wallets, deposits, or real-money trading.{% endblocktrans %}
 
-Empieza aquí: {{ home_url }}
+{% trans "Get started:" %} {{ home_url }}
 
-Si no creaste una cuenta, puedes ignorar este mensaje.
+{% trans "If you did not create an account, you can ignore this message." %}

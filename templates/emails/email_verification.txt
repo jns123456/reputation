@@ -1,9 +1,9 @@
-Hola {{ recipient.public_name }},
+{% load i18n %}{% blocktrans with name=recipient.public_name %}Hi {{ name }},{% endblocktrans %}
 
-Confirma tu dirección de email para terminar de crear tu cuenta en PredictStamp.
+{% blocktrans %}Confirm your email address to finish creating your PredictStamp account.{% endblocktrans %}
 
 {{ verify_url }}
 
-Este enlace expira en {{ expires_hours }} horas y solo puede usarse una vez.
+{% blocktrans with hours=expires_hours %}This link expires in {{ hours }} hours and can only be used once.{% endblocktrans %}
 
-Si no creaste una cuenta, puedes ignorar este mensaje.
+{% trans "If you did not create an account, you can ignore this message." %}

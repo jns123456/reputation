@@ -167,11 +167,15 @@
     </div>
   </section>
 
+  {% trans "Reputation" as radar_reputation_label %}
+  {% trans "Popularity" as radar_popularity_label %}
   <script id="profile-radar-config" type="application/json">
   {
     "labels": [{% for row in category_breakdown %}"{{ row.category.name|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
     "reputationValues": [{% for row in category_breakdown %}{{ row.reputation_points }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-    "popularityValues": [{% for row in category_breakdown %}{{ row.popularity_points }}{% if not forloop.last %}, {% endif %}{% endfor %}]
+    "popularityValues": [{% for row in category_breakdown %}{{ row.popularity_points }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+    "reputationLabel": "{{ radar_reputation_label|escapejs }}",
+    "popularityLabel": "{{ radar_popularity_label|escapejs }}"
   }
   </script>
 </div>

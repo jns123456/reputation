@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timedelta, timezone as dt_timezone
 
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from integrations.kalshi.client import KalshiClient
 from integrations.kalshi.urls import get_kalshi_series_ticker, resolve_kalshi_market_url
@@ -38,6 +39,7 @@ def build_kalshi_chart_payload(market, *, trade_limit=200):
         "labels": labels,
         "values": values,
         "yes_label": yes_label,
+        "price_suffix": _("price"),
         "current_percent": values[-1] if values else current_prob,
         "volume_label": market.volume_label,
         "ticker": ticker,

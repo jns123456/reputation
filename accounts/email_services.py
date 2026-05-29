@@ -13,6 +13,7 @@ import logging
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils import translation
 from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
@@ -72,20 +73,33 @@ def absolute_url(path):
     return f"{base}/{path.lstrip('/')}"
 
 
-def _send(*, subject, recipient_email, template_base, context):
+def _email_language(context, language=None):
+    return (
+        language
+        or context.get("language")
+        or translation.get_language()
+        or settings.LANGUAGE_CODE
+    )
+
+
+def _send(*, subject, recipient_email, template_base, context, language=None):
     """Render a text (+ optional html) template pair and send one message."""
-    text_body = render_to_string(f"emails/{template_base}.txt", context)
-    html_body = ""
-    try:
-        html_body = render_to_string(f"emails/{template_base}.html", context)
-    except Exception:  # html variant is optional
-        pass
+    lang = _email_language(context, language)
+    with translation.override(lang):
+        resolved_subject = subject() if callable(subject) else str(subject)
+        render_context = {**context, "subject": resolved_subject, "LANGUAGE_CODE": lang}
+        text_body = render_to_string(f"emails/{template_base}.txt", render_context)
+        html_body = ""
+        try:
+            html_body = render_to_string(f"emails/{template_base}.html", render_context)
+        except Exception:  # html variant is optional
+            pass
 
     resend_key = getattr(settings, "RESEND_API_KEY", "")
     if resend_key:
         return _send_via_resend(
             api_key=resend_key,
-            subject=subject,
+            subject=resolved_subject,
             recipient_email=recipient_email,
             text_body=text_body,
             html_body=html_body,
@@ -94,7 +108,7 @@ def _send(*, subject, recipient_email, template_base, context):
     from django.core.mail import EmailMultiAlternatives
 
     message = EmailMultiAlternatives(
-        subject=subject,
+        subject=resolved_subject,
         body=text_body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[recipient_email],
@@ -178,17 +192,15 @@ def send_notification_email(notification_id):
         return False
 
     actor_name = notification.actor.public_name if notification.actor_id else "PredictStamp"
-    subject = _notification_subject(notification, actor_name)
     context = {
         "notification": notification,
         "recipient": notification.recipient,
         "actor_name": actor_name,
-        "subject": subject,
         "action_url": absolute_url(notification.action_url),
         "settings_url": absolute_url("/accounts/settings/alerts/"),
     }
     sent = _send(
-        subject=subject,
+        subject=lambda: _notification_subject(notification, actor_name),
         recipient_email=notification.recipient.email,
         template_base="notification",
         context=context,
@@ -275,9 +287,8 @@ def send_daily_digest(user_id):
         "notifications_url": absolute_url("/accounts/notifications/"),
         "settings_url": absolute_url("/accounts/settings/alerts/"),
     }
-    subject = _("Your PredictStamp digest")
     sent = _send(
-        subject=subject,
+        subject=lambda: _("Your PredictStamp digest"),
         recipient_email=user.email,
         template_base="daily_digest",
         context=context,
@@ -305,9 +316,9 @@ def send_streak_risk_reminder(streak):
         "markets_url": absolute_url("/markets/"),
         "settings_url": absolute_url("/accounts/settings/alerts/"),
     }
-    subject = _("Your %(days)s-day streak ends tonight") % {"days": streak.current_streak}
     sent = _send(
-        subject=subject,
+        subject=lambda: _("Your %(days)s-day streak ends tonight")
+        % {"days": streak.current_streak},
         recipient_email=user.email,
         template_base="streak_risk",
         context=context,
@@ -323,10 +334,9 @@ def send_welcome_email(*, user) -> bool:
     context = {
         "recipient": user,
         "home_url": absolute_url("/markets/"),
-        "subject": "Bienvenido a PredictStamp",
     }
     sent = _send(
-        subject=context["subject"],
+        subject=lambda: _("Welcome to PredictStamp"),
         recipient_email=user.email,
         template_base="welcome",
         context=context,

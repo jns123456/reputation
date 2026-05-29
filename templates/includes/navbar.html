@@ -140,6 +140,13 @@
                 <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{{ user.public_name }}</p>
                 <p class="truncate text-xs text-slate-500 dark:text-slate-400">@{{ user.username }}</p>
               </div>
+              {% if user.is_superuser %}
+              <a href="{% url 'dashboard:admin_panel' %}"
+                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-900/30">
+                <i data-lucide="shield-check" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
+                {% trans "Admin panel" %}
+              </a>
+              {% endif %}
               <a href="{% url 'accounts:profile' username=user.username %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Your profile" %}</a>
               <a href="{% url 'predictions:open' %}"
@@ -318,6 +325,15 @@
           <div class="pr-mobile-nav-section">
             <p class="pr-mobile-nav-section-label">{% trans "Account" %}</p>
             <nav class="flex flex-col gap-0.5">
+              {% if user.is_superuser %}
+              <a href="{% url 'dashboard:admin_panel' %}" @click="closeMobile()"
+                 class="pr-mobile-nav-link {% if request.resolver_match.url_name == 'admin_panel' %}is-active{% endif %}">
+                <span class="pr-mobile-nav-link-icon">
+                  <i data-lucide="shield-check" stroke-width="1.75" aria-hidden="true"></i>
+                </span>
+                {% trans "Admin panel" %}
+              </a>
+              {% endif %}
               <a href="{% url 'accounts:notifications' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">
                   <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
