@@ -669,8 +669,9 @@ When editing §15, **delete or merge** stale lines — do not only append. Prefe
 [2026-05] security — `accounts.templatetags.mention_tags.linkify_mentions` is XSS-safe by escaping the whole body FIRST, then wrapping only @usernames of existing users in anchors. Never build links before escaping user text.
 [2026-05] integration — Web push is feature-flagged by `WEBPUSH_ENABLED` (true only when both VAPID keys set) so dev/CI stay inert. Service worker is served at site root via `config.pwa_views.service_worker` with `Service-Worker-Allowed: /` (a `/static/` SW scope is too narrow); push rides the `Notification` post_save signal next to email. `/accounts/push/*`, `/sw.js`, `/manifest.webmanifest` are exempt from `ProfileSetupRequiredMiddleware`.
 [2026-05] domain — Levels (`get_level_progress` from reputation_points) and achievements (`UserAchievement` + code catalog in `achievement_services`) are popularity-flavored social proof: never grant reputation. `evaluate_achievements(user)` is idempotent; called from `record_activity` (every engagement) and after prediction resolution. "Resolving soon" = `markets.selectors.get_markets_resolving_soon`; reminder via `send_market_resolving_reminders_task` + `notify_market_resolving` (idempotent per recipient+market).
+[2026-05] workflow — PostgreSQL rejects `select_for_update()` across nullable outer joins (e.g. reverse `user__profile` OneToOne) with "FOR UPDATE cannot be applied to the nullable side of an outer join"; use `select_for_update(of=("self",))` and lock related rows in separate queries.
 ```
 
 ---
 
-*Last updated: 2026-05-27. Update §1–14 when architecture, scope, or conventions change; update §15 when durable lessons are learned or retired.*
+*Last updated: 2026-05-28. Update §1–14 when architecture, scope, or conventions change; update §15 when durable lessons are learned or retired.*

@@ -140,9 +140,11 @@ def exit_prediction(*, prediction, user):
     _refresh_market_odds(prediction.market)
 
     with transaction.atomic():
+        from accounts.models import UserProfile
+
         prediction = (
-            Prediction.objects.select_for_update()
-            .select_related("user", "user__profile", "market")
+            Prediction.objects.select_for_update(of=("self",))
+            .select_related("user", "market")
             .get(pk=prediction.pk)
         )
         if prediction.user_id != user.id:
@@ -164,7 +166,7 @@ def exit_prediction(*, prediction, user):
             ]
         )
 
-        profile = prediction.user.profile
+        profile = UserProfile.objects.select_for_update().get(user=prediction.user)
         profile.neutral_prediction_count = max(0, profile.neutral_prediction_count - 1)
         profile.save(update_fields=["neutral_prediction_count", "updated_at"])
 
