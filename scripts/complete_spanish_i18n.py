@@ -65,7 +65,7 @@ FIXES.update({
     "Each poll choice must be %(max)s characters or fewer.": "Cada opción debe tener %(max)s caracteres o menos.",
     "This poll has ended.": "Esta encuesta ha terminado.",
     "Predictive accuracy on resolved forecasts.": "Precisión predictiva en pronósticos resueltos.",
-    "left off": "retomar",
+    "left off": "lo dejaste",
     "Public": "Público",
     "Your name and @username are visible — best for building reputation under your real identity.": (
         "Tu nombre y @usuario son visibles — ideal para construir reputación con tu identidad real."

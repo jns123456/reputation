@@ -1422,7 +1422,7 @@ msgstr "Retoma donde"
 
 #: templates/accounts/login.html:8
 msgid "left off"
-msgstr "retomar"
+msgstr "lo dejaste"
 
 #: templates/accounts/login.html:10
 msgid ""
