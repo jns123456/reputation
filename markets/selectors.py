@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 
 from markets.categories import (
     CANONICAL_CATEGORIES,
@@ -294,7 +294,13 @@ def get_markets_for_display(
     limit=100,
 ):
     """Return markets for list UI, blending sources when browsing open markets."""
-    from markets.sort_options import SORT_ENDING_SOON, SORT_NEWEST, SORT_TRENDING, SORT_VOLUME
+    from markets.sort_options import (
+        SORT_ENDING_SOON,
+        SORT_LIQUIDITY,
+        SORT_NEWEST,
+        SORT_TRENDING,
+        SORT_VOLUME,
+    )
 
     qs = get_markets_list(status=status, category=category, search=search, source=source)
     normalized_sort = normalize_sort_filter(sort)
@@ -321,20 +327,27 @@ def get_markets_for_display(
     if normalized_sort == SORT_NEWEST:
         return list(qs.order_by("-created_at", "-updated_at")[:sorted_limit])
 
-    if normalized_sort == SORT_ENDING_SOON:
-        markets = list(qs)
-        return sort_markets(markets, sort=normalized_sort)[:sorted_limit]
-
     if normalized_sort == SORT_TRENDING:
-        markets = list(qs)
-        return sort_markets(markets, sort=normalized_sort)[:sorted_limit]
+        # ``volume_24h`` is the denormalized trending metric (see display_metadata).
+        return list(qs.order_by("-volume_24h", "-updated_at")[:sorted_limit])
 
-    markets = list(qs)
-    if normalized_sort:
-        markets = sort_markets(markets, sort=normalized_sort)
-    else:
-        markets.sort(key=lambda market: market.updated_at, reverse=True)
-    return markets[:sorted_limit]
+    if normalized_sort == SORT_ENDING_SOON:
+        return list(
+            qs.order_by(
+                F("close_date").asc(nulls_last=True),
+                "-volume_total",
+            )[:sorted_limit]
+        )
+
+    if normalized_sort == SORT_LIQUIDITY:
+        # No denormalized liquidity column exists, so liquidity is ranked from the
+        # import payload in memory. Bound the candidate pool by volume first to
+        # avoid materializing the entire table.
+        candidates = list(qs.order_by("-volume_total", "-updated_at")[:sorted_limit])
+        return sort_markets(candidates, sort=normalized_sort)
+
+    # No explicit sort (e.g. closed/resolved listings): newest-updated first.
+    return list(qs.order_by("-updated_at")[:sorted_limit])
 
 
 def get_world_cup_match_markets_queryset(*, source=""):

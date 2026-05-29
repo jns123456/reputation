@@ -8,18 +8,22 @@ from integrations.attestation_services import (
     record_prediction_claim_attestation_safely,
     record_prediction_resolution_attestation_safely,
 )
-from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import get_user_active_prediction
 from reputation.services import apply_reputation_for_prediction, apply_reputation_for_prediction_exit
 
 
 def _refresh_market_odds(market):
-    """Fetch latest Polymarket odds before recording a forecast snapshot."""
-    if market.source == Market.Source.POLYMARKET and market.external_id:
-        from integrations.services import refresh_market_from_polymarket
+    """Queue a non-blocking odds refresh; never call Polymarket inside the request.
 
-        return refresh_market_from_polymarket(market)
+    The forecast snapshot uses the latest odds already persisted in the DB. A
+    background task keeps those odds fresh (see ``integrations.celery_utils``),
+    so we avoid blocking the HTTP worker on Polymarket latency — and the platform
+    stays usable when Polymarket is slow or unavailable.
+    """
+    from integrations.celery_utils import enqueue_market_refresh_if_stale
+
+    enqueue_market_refresh_if_stale(market)
     return market
 
 

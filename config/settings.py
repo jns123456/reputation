@@ -140,13 +140,59 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-if DEBUG:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-else:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# Django 5.1+ ignores the legacy STATICFILES_STORAGE setting — storage backends
+# must be configured via STORAGES. In production, WhiteNoise's manifest storage
+# fingerprints filenames so assets can be served with far-future, immutable cache
+# headers (large win on repeat visits); hashed files get 1y/immutable and the rest
+# get WHITENOISE_MAX_AGE.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
+if not DEBUG:
+    WHITENOISE_MAX_AGE = env.int("WHITENOISE_MAX_AGE", default=86400)
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# User uploads (avatars, pulse images) — local disk in dev; S3 in production (Heroku).
+USE_S3_MEDIA = env.bool("USE_S3_MEDIA", default=bool(env("AWS_STORAGE_BUCKET_NAME", default="")))
+if USE_S3_MEDIA:
+    INSTALLED_APPS.append("storages")
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
+    AWS_S3_CUSTOM_DOMAIN = env(
+        "AWS_S3_CUSTOM_DOMAIN",
+        default=f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com",
+    )
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
+    AWS_DEFAULT_ACL = "public-read"
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": (
+                "django.contrib.staticfiles.storage.StaticFilesStorage"
+                if DEBUG
+                else "whitenoise.storage.CompressedStaticFilesStorage"
+            ),
+        },
+    }
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
 PULSE_MAX_IMAGE_BYTES = env.int("PULSE_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
 AVATAR_MAX_IMAGE_BYTES = env.int("AVATAR_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
 

@@ -60,6 +60,8 @@ class Prediction(models.Model):
         indexes = [
             models.Index(fields=["market", "status"]),
             models.Index(fields=["user", "status"]),
+            # Backs the Forecasts feed: status filter + newest-first ordering.
+            models.Index(fields=["status", "-created_at"]),
         ]
         constraints = [
             models.UniqueConstraint(

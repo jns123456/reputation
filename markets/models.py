@@ -159,11 +159,32 @@ class Market(models.Model):
             parsed = timezone.make_aware(parsed, timezone.utc)
         return parsed
 
+    # Large JSON payloads deferred by ``market_card_queryset`` for list/grid views.
+    _CARD_DEFERRED_PAYLOAD_FIELDS = frozenset(
+        {
+            "polymarket_raw",
+            "polymarket_event_raw",
+            "kalshi_raw",
+            "kalshi_event_raw",
+        }
+    )
+
+    def _card_payloads_deferred(self) -> bool:
+        """True when raw payloads were deferred (list/grid querysets).
+
+        Accessing a deferred field triggers a per-row DB fetch (N+1). On card
+        querysets the denormalized columns are authoritative, so callers should
+        avoid the payload fallback entirely.
+        """
+        return bool(self._CARD_DEFERRED_PAYLOAD_FIELDS & self.get_deferred_fields())
+
     @property
     def image_url(self):
         """Market/event image from denormalized field or import payload."""
         if self.card_image_url:
             return self.card_image_url
+        if self._card_payloads_deferred():
+            return ""
         from markets.display_metadata import extract_card_image_url_from_market
 
         return extract_card_image_url_from_market(self)

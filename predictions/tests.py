@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -189,6 +191,40 @@ class PredictionPermissionTests(TestCase):
         self.assertEqual(prediction.comment_count, 1)
         self.assertEqual(prediction.like_count, 1)
         self.assertEqual(prediction.dislike_count, 1)
+
+
+class PredictionOddsRefreshTests(TestCase):
+    """Forecasts must never block the request on a synchronous Polymarket fetch."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="poly-user", password="pass")
+        self.market = Market.objects.create(
+            external_id="poly-refresh-1",
+            title="Polymarket sourced market",
+            slug="polymarket-sourced-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.42, "No": 0.58},
+        )
+
+    def test_create_prediction_does_not_call_polymarket_synchronously(self):
+        with patch(
+            "integrations.services.refresh_market_from_polymarket",
+            side_effect=AssertionError("synchronous Polymarket fetch is forbidden"),
+        ), patch(
+            "integrations.celery_utils.enqueue_market_refresh_if_stale",
+            return_value=True,
+        ) as enqueue:
+            prediction = create_prediction(
+                user=self.user,
+                market=self.market,
+                predicted_outcome="Yes",
+            )
+
+        enqueue.assert_called_once()
+        # Snapshot comes straight from the persisted odds, no network round-trip.
+        self.assertEqual(prediction.probability_at_prediction_time, {"Yes": 0.42, "No": 0.58})
 
 
 class PredictionExitTests(TestCase):

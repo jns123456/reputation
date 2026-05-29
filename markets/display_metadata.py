@@ -61,4 +61,10 @@ def market_volume_for_sort(market) -> float:
     stored = getattr(market, "volume_total", None)
     if stored is not None and stored > 0:
         return float(stored)
+    # On card/list querysets the raw payloads are deferred; reading them here
+    # would trigger a per-row DB fetch (N+1). The denormalized column is
+    # authoritative there, so fall back to it instead of the payload.
+    deferred = getattr(market, "_card_payloads_deferred", None)
+    if callable(deferred) and deferred():
+        return float(stored or 0.0)
     return extract_volume_total_from_market(market)
