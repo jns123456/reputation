@@ -6237,7 +6237,7 @@ msgstr ""
 #: templates/predictions/partials/forecast_form.html:163
 #: templates/predictions/partials/multi_outcome_forecast_panel.html:128
 msgid "Post forecast"
-msgstr "Pronósticos"
+msgstr "Pronosticar"
 
 #: templates/predictions/partials/forecast_form.html:170
 msgid "to place your forecast on this market."
