@@ -17,6 +17,15 @@ from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
+
+class EmailDeliveryError(Exception):
+    """Outbound email could not be delivered (Resend/SMTP)."""
+
+    def __init__(self, message, *, provider=""):
+        super().__init__(message)
+        self.provider = provider
+
+
 # Maps a notification type to the NotificationPreference flag that controls it.
 _NOTIFICATION_TYPE_TO_PREF = {
     "followed_user_prediction": "notify_followed_predictions",
@@ -123,10 +132,16 @@ def _send_via_resend(*, api_key, subject, recipient_email, text_body, html_body)
         timeout=15,
     )
     if response.status_code >= 400:
-        logger.warning(
-            "Resend API error %s: %s", response.status_code, response.text[:500]
+        detail = response.text[:500]
+        logger.warning("Resend API error %s: %s", response.status_code, detail)
+        raise EmailDeliveryError(
+            _(
+                "Email provider rejected the message. "
+                "With onboarding@resend.dev you can only send to your Resend account email "
+                "until you verify a domain."
+            ),
+            provider="resend",
         )
-        return 0
     return 1
 
 
@@ -291,6 +306,25 @@ def send_streak_risk_reminder(streak):
         subject=subject,
         recipient_email=user.email,
         template_base="streak_risk",
+        context=context,
+    )
+    return bool(sent)
+
+
+def send_welcome_email(*, user) -> bool:
+    """Send the one-time welcome email after a user joins PredictStamp."""
+    if not user.email:
+        return False
+
+    context = {
+        "recipient": user,
+        "home_url": absolute_url("/markets/"),
+        "subject": "Bienvenido a PredictStamp",
+    }
+    sent = _send(
+        subject=context["subject"],
+        recipient_email=user.email,
+        template_base="welcome",
         context=context,
     )
     return bool(sent)

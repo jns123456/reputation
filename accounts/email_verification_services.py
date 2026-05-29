@@ -17,7 +17,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from accounts.email_services import absolute_url
+from accounts.email_services import absolute_url, EmailDeliveryError
 from accounts.models import EmailVerificationToken, User
 
 logger = logging.getLogger(__name__)
@@ -65,6 +65,26 @@ def _invalidate_active_tokens(user: User) -> None:
     )
 
 
+def _dev_show_verification_link() -> bool:
+    return getattr(settings, "EMAIL_VERIFICATION_DEV_SHOW_LINK", settings.DEBUG)
+
+
+def get_active_verification_url(user: User) -> str | None:
+    """Return the latest usable verification URL, if any."""
+    token = (
+        EmailVerificationToken.objects.filter(
+            user=user,
+            used_at__isnull=True,
+            expires_at__gt=timezone.now(),
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if token is None:
+        return None
+    return absolute_url(f"/accounts/verify-email/{token.token}/")
+
+
 def create_verification_token(user: User) -> EmailVerificationToken:
     """Issue a fresh token; previous unused tokens for the user are invalidated."""
     email = (user.email or "").strip().lower()
@@ -88,7 +108,7 @@ def _send_verification_message(*, user: User, token: EmailVerificationToken) -> 
         "recipient": user,
         "verify_url": verify_url,
         "expires_hours": int(_token_ttl().total_seconds() // 3600),
-        "subject": _("Confirm your PredictStamp email"),
+        "subject": _("Confirma tu email en PredictStamp"),
     }
     sent = _send(
         subject=context["subject"],
@@ -107,9 +127,20 @@ def send_verification_email(user: User) -> bool:
 
     token = create_verification_token(user)
     try:
-        return _send_verification_message(user=user, token=token)
-    except Exception:
-        logger.exception("Failed to send verification email for user_id=%s", user.pk)
+        sent = _send_verification_message(user=user, token=token)
+        if not sent:
+            raise EmailDeliveryError(
+                _("Could not send the verification email."),
+                provider="unknown",
+            )
+        return True
+    except EmailDeliveryError:
+        if _dev_show_verification_link():
+            logger.warning(
+                "Verification email not delivered for user_id=%s; dev link is available",
+                user.pk,
+            )
+            return True
         raise
 
 
@@ -125,7 +156,17 @@ def resend_verification_email(user: User) -> tuple[bool, str]:
     if cache.get(cache_key):
         return False, _("Please wait a minute before requesting another email.")
 
-    send_verification_email(user)
+    try:
+        send_verification_email(user)
+    except EmailDeliveryError as exc:
+        logger.warning("Verification resend failed for user_id=%s: %s", user.pk, exc)
+        if _dev_show_verification_link() and get_active_verification_url(user):
+            cache.set(cache_key, True, timeout=_resend_cooldown_seconds())
+            return True, _(
+                "Resend test mode blocked the email. Use the development link on this page."
+            )
+        return False, str(exc)
+
     cache.set(cache_key, True, timeout=_resend_cooldown_seconds())
     return True, _("Verification email sent. Check your inbox.")
 

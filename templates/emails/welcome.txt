@@ -1,0 +1,21 @@
+Hola {{ recipient.public_name }},
+
+¡Bienvenido a PredictStamp!
+
+PredictStamp es la capa social de los mercados de predicción: un lugar para debatir eventos del mundo real, publicar pronósticos formales y construir reputación cuando los mercados se resuelven.
+
+Qué puedes hacer:
+- Explorar mercados importados de fuentes como Polymarket (sin apostar dinero).
+- Publicar pronósticos formales con tu razonamiento.
+- Comentar, debatir y seguir a otros predictores.
+- Ganar Reputación cuando aciertas (calidad predictiva) y Popularidad cuando tu contenido genera engagement social.
+
+Dos puntuaciones, independientes:
+- Reputación: mide la calidad histórica de tus pronósticos resueltos.
+- Popularidad: mide votos, respuestas y visibilidad social.
+
+PredictStamp no es una casa de apuestas: no hay wallets, depósitos ni trading con dinero real.
+
+Empieza aquí: {{ home_url }}
+
+Si no creaste una cuenta, puedes ignorar este mensaje.

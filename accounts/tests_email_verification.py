@@ -19,6 +19,7 @@ from conftest import create_user
     EMAIL_VERIFICATION_REQUIRED=True,
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     SITE_BASE_URL="http://testserver",
+    RESEND_API_KEY="",
     CACHES={
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -83,6 +84,7 @@ class EmailVerificationServiceTests(TestCase):
 @override_settings(
     EMAIL_VERIFICATION_REQUIRED=True,
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    RESEND_API_KEY="",
     CACHES={
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -119,7 +121,7 @@ class EmailVerificationViewTests(TestCase):
         self.assertEqual(response["Location"], reverse("accounts:verify_email_pending"))
 
     def test_verify_link_logs_in_and_continues_setup(self):
-        user = create_user("verifyme", email_verified_at=None)
+        user = create_user("verifyme", email_verified_at=None, onboarding_completed=False)
         token = create_verification_token(user)
         client = Client()
 

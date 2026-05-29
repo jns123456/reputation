@@ -2,6 +2,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import messages
+from django.conf import settings
 from django.utils.translation import gettext as _
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -12,12 +13,14 @@ from accounts.bookmark_selectors import is_bookmarked
 from accounts.bookmark_services import toggle_bookmark
 from accounts.bookmarks_services import build_bookmarks_page_items
 from accounts.email_verification_services import (
+    get_active_verification_url,
     mark_email_unverified,
     resend_verification_email,
     send_verification_email,
     user_requires_email_verification,
     verify_email_with_token,
 )
+from accounts.email_services import EmailDeliveryError
 from accounts.follow_selectors import (
     get_follower_count,
     get_following_count,
@@ -72,6 +75,17 @@ def signup(request):
             login(request, user)
             try:
                 send_verification_email(user)
+            except EmailDeliveryError as exc:
+                if getattr(settings, "EMAIL_VERIFICATION_DEV_SHOW_LINK", settings.DEBUG):
+                    messages.warning(
+                        request,
+                        _(
+                            "We could not email the verification link (Resend test mode). "
+                            "Use the development link on the next page."
+                        ),
+                    )
+                else:
+                    messages.error(request, str(exc))
             except Exception:
                 messages.error(
                     request,
@@ -96,10 +110,16 @@ def verify_email_pending(request):
         if not request.user.onboarding_completed:
             return redirect("accounts:profile_setup")
         return redirect("accounts:profile", username=request.user.username)
+    dev_verification_url = None
+    if getattr(settings, "EMAIL_VERIFICATION_DEV_SHOW_LINK", settings.DEBUG):
+        dev_verification_url = get_active_verification_url(request.user)
     return render(
         request,
         "accounts/verify_email_pending.html",
-        {"profile_user": request.user},
+        {
+            "profile_user": request.user,
+            "dev_verification_url": dev_verification_url,
+        },
     )
 
 

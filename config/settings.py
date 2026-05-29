@@ -224,6 +224,11 @@ EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS = env.int(
     "EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS",
     default=60,
 )
+# In DEBUG, show a clickable verify link on the pending page when Resend rejects (e.g. onboarding@resend.dev).
+EMAIL_VERIFICATION_DEV_SHOW_LINK = env.bool(
+    "EMAIL_VERIFICATION_DEV_SHOW_LINK",
+    default=DEBUG,
+)
 
 # Heroku Mailgun add-on exposes MAILGUN_SMTP_* — wire it when EMAIL_HOST is unset.
 _mailgun_smtp = env("MAILGUN_SMTP_SERVER", default="")
@@ -262,6 +267,7 @@ LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "dashboard:landing"
 
 _redis_url = env("REDIS_URL", default="redis://localhost:6379/0")
+USE_REDIS_CACHE = env.bool("USE_REDIS_CACHE", default=not DEBUG)
 CELERY_BROKER_URL = _redis_url
 CELERY_RESULT_BACKEND = _redis_url
 CELERY_BROKER_CONNECTION_TIMEOUT = env.float("CELERY_BROKER_CONNECTION_TIMEOUT", default=0.5)
@@ -276,7 +282,7 @@ if _redis_url.startswith("rediss://"):
     CELERY_BROKER_USE_SSL = _redis_ssl
     CELERY_REDIS_BACKEND_USE_SSL = _redis_ssl
 
-if _redis_url:
+if _redis_url and USE_REDIS_CACHE:
     redis_url = _redis_url
     redis_cache_options = {}
     if redis_url.startswith("rediss://"):
