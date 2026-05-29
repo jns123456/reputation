@@ -80,6 +80,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "accounts.context_processors.notification_context",
+                "accounts.context_processors.auth0_context",
                 "challenges.context_processors.challenge_context",
             ],
         },
@@ -114,6 +115,12 @@ DATABASES = {
 if not DEBUG:
     DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=600)
     DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+    # Behind a TLS-terminating proxy (Heroku/AWS) Django sees the request as HTTP.
+    # Trust the proxy's protocol header so request.build_absolute_uri() yields
+    # https:// — required for the Auth0 callback URL to match and be accepted.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -275,6 +282,18 @@ WEBPUSH_ENABLED = bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY)
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
 LOGOUT_REDIRECT_URL = "dashboard:landing"
+
+# Auth0 (Universal Login) -----------------------------------------------------
+# Optional, additive social/OIDC login alongside the local username/password
+# flow. The "Continue with Auth0" button only appears when all three values are
+# configured (see ``AUTH0_ENABLED``). Auth0 already verifies email ownership, so
+# users who arrive through it skip the local email-verification step.
+AUTH0_DOMAIN = env("AUTH0_DOMAIN", default="")
+AUTH0_CLIENT_ID = env("AUTH0_CLIENT_ID", default="")
+AUTH0_CLIENT_SECRET = env("AUTH0_CLIENT_SECRET", default="")
+# Optional API audience if you later need Auth0-issued access tokens.
+AUTH0_AUDIENCE = env("AUTH0_AUDIENCE", default="")
+AUTH0_ENABLED = bool(AUTH0_DOMAIN and AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET)
 
 _redis_url = env("REDIS_URL", default="redis://localhost:6379/0")
 USE_REDIS_CACHE = env.bool("USE_REDIS_CACHE", default=not DEBUG)

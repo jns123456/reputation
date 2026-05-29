@@ -64,6 +64,19 @@
     {% trans "Continue" %}
   </button>
 </form>
+
+{% if auth0_enabled %}
+<div class="my-5 flex items-center gap-3" aria-hidden="true">
+  <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+  <span class="text-xs font-medium uppercase tracking-wide text-slate-400">{% trans "or" %}</span>
+  <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+</div>
+<a href="{% url 'accounts:auth0_login' %}"
+   class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
+  <i data-lucide="shield-check" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Sign up with Auth0" %}
+</a>
+{% endif %}
 {% endblock %}
 
 {% block auth_footer %}

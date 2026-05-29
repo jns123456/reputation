@@ -1,5 +1,7 @@
 """Template context for notification badge and streak in navigation."""
 
+from django.conf import settings
+
 from accounts.nav_cache import (
     get_cached_display_streak,
     get_cached_unread_notification_count,
@@ -19,3 +21,8 @@ def notification_context(request):
         "login_notification_toast": None,
         "nav_streak_days": 0,
     }
+
+
+def auth0_context(request):
+    """Expose whether the Auth0 login option is configured."""
+    return {"auth0_enabled": settings.AUTH0_ENABLED}

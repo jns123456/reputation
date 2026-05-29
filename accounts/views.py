@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
@@ -59,6 +61,73 @@ class CustomLoginView(LoginView):
 
 class CustomLogoutView(LogoutView):
     next_page = "dashboard:landing"
+
+    def dispatch(self, request, *args, **kwargs):
+        # Capture the Auth0 session marker before logout clears the session, so
+        # we can also end the Auth0 (Universal Login) session — otherwise the user
+        # stays silently signed in at Auth0 and "logout" would log them right back in.
+        auth0_session = bool(request.session.get("auth0_id_token")) and settings.AUTH0_ENABLED
+        response = super().dispatch(request, *args, **kwargs)
+        if auth0_session:
+            return_to = request.build_absolute_uri(reverse("dashboard:landing"))
+            params = urlencode(
+                {"returnTo": return_to, "client_id": settings.AUTH0_CLIENT_ID}
+            )
+            return redirect(f"https://{settings.AUTH0_DOMAIN}/v2/logout?{params}")
+        return response
+
+
+def _post_auth_redirect(user):
+    """Where to send a freshly authenticated user (shared by login flows)."""
+    if not user.onboarding_completed:
+        return redirect("accounts:profile_setup")
+    return redirect("accounts:profile", username=user.username)
+
+
+def auth0_login(request):
+    """Kick off the Auth0 Universal Login redirect."""
+    from accounts.auth0 import get_auth0_client
+
+    client = get_auth0_client()
+    if client is None:
+        messages.error(request, _("Auth0 sign-in is not available right now."))
+        return redirect("accounts:login")
+    redirect_uri = request.build_absolute_uri(reverse("accounts:auth0_callback"))
+    return client.authorize_redirect(request, redirect_uri)
+
+
+def auth0_callback(request):
+    """Handle the Auth0 redirect: exchange the code, map the user, log in."""
+    from accounts.auth0 import get_auth0_client, get_or_create_user_from_auth0
+
+    client = get_auth0_client()
+    if client is None:
+        return redirect("accounts:login")
+
+    try:
+        token = client.authorize_access_token(request)
+    except Exception:
+        messages.error(
+            request,
+            _("We couldn't complete the Auth0 sign-in. Please try again."),
+        )
+        return redirect("accounts:login")
+
+    userinfo = token.get("userinfo")
+    if not userinfo:
+        try:
+            userinfo = client.userinfo(token=token)
+        except Exception:
+            userinfo = {}
+    if not userinfo or not userinfo.get("sub"):
+        messages.error(request, _("Auth0 did not return a valid profile."))
+        return redirect("accounts:login")
+
+    user = get_or_create_user_from_auth0(userinfo)
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+    request.session["auth0_id_token"] = token.get("id_token", "")
+    queue_login_notification_toast(request=request)
+    return _post_auth_redirect(user)
 
 
 def signup(request):

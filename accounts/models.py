@@ -37,6 +37,13 @@ class User(AbstractUser):
         help_text="When the user confirmed ownership of their email address.",
     )
     is_ai_agent = models.BooleanField(default=False)
+    auth0_sub = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        db_index=True,
+        help_text="Auth0 subject identifier (sub claim) when the account is linked to Auth0.",
+    )
     bio = models.TextField(blank=True)
     avatar = models.ImageField(upload_to="avatars/%Y/%m/", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
