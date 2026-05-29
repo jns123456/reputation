@@ -37,14 +37,8 @@ SPANISH_OFFICIAL_COUNTRIES = frozenset(
     }
 )
 
-SUPPORTED_LANGUAGE_CODES = None  # filled on first use
-
-
 def _supported_languages():
-    global SUPPORTED_LANGUAGE_CODES
-    if SUPPORTED_LANGUAGE_CODES is None:
-        SUPPORTED_LANGUAGE_CODES = frozenset(code for code, _ in settings.LANGUAGES)
-    return SUPPORTED_LANGUAGE_CODES
+    return frozenset(code for code, _ in settings.LANGUAGES)
 
 
 def get_client_ip(request) -> str | None:
