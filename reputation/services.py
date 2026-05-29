@@ -107,6 +107,18 @@ def calculate_unrealized_reputation(prediction, *, current_probability=None):
     )
 
 
+def calculate_user_unrealized_reputation(user, *, limit=100):
+    """Sum mark-to-market reputation P&L across the user's open forecasts."""
+    from predictions.selectors import get_user_open_predictions
+
+    total = 0
+    for prediction in get_user_open_predictions(user, limit=limit):
+        delta = calculate_unrealized_reputation(prediction)
+        if delta is not None:
+            total += delta
+    return total
+
+
 def apply_reputation_for_prediction_exit(prediction):
     """Apply reputation scoring when a user exits an active prediction."""
     if prediction.status != prediction.Status.EXITED:

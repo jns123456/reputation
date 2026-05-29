@@ -214,6 +214,25 @@ def search_user_matches(*, query="", limit=20) -> UserSearchResults:
     return UserSearchResults(exact=tuple(exact), similar=tuple(similar))
 
 
+BROWSABLE_USERS_PAGE_SIZE = 50
+
+
+def get_browsable_users(*, limit=BROWSABLE_USERS_PAGE_SIZE, offset=0):
+    """Active, non-anonymous users for the platform directory."""
+    return list(
+        _visible_users()
+        .order_by(
+            "-profile__reputation_score",
+            "-profile__popularity_score",
+            "username",
+        )[offset : offset + limit]
+    )
+
+
+def count_browsable_users():
+    return _visible_users().count()
+
+
 def search_users(*, query="", limit=20):
     """Backward-compatible queryset-like helper returning ranked users."""
     return search_user_matches(query=query, limit=limit).users

@@ -44,7 +44,12 @@ from accounts.notification_services import (
     queue_login_notification_toast,
 )
 from accounts.selectors import get_user_prediction_history, search_user_matches
-from accounts.user_search_selectors import is_valid_user_search_query
+from accounts.user_search_selectors import (
+    BROWSABLE_USERS_PAGE_SIZE,
+    count_browsable_users,
+    get_browsable_users,
+    is_valid_user_search_query,
+)
 
 
 class CustomLoginView(LoginView):
@@ -335,6 +340,9 @@ def user_search(request):
     query = request.GET.get("q", "").strip()
     search_ready = is_valid_user_search_query(query)
     results = search_user_matches(query=query) if search_ready else None
+    following_ids = (
+        set(get_following_ids(request.user)) if request.user.is_authenticated else set()
+    )
     return render(
         request,
         "accounts/user_search.html",
@@ -344,6 +352,7 @@ def user_search(request):
             "users": results.users if results else [],
             "exact_users": results.exact_users if results else [],
             "similar_users": results.similar_users if results else [],
+            "following_ids": following_ids,
         },
     )
 
@@ -361,6 +370,36 @@ def user_search_partial(request):
             "users": results.users if results else [],
             "exact_users": results.exact_users if results else [],
             "similar_users": results.similar_users if results else [],
+        },
+    )
+
+
+def user_list(request):
+    try:
+        offset = max(0, int(request.GET.get("offset", 0)))
+    except (TypeError, ValueError):
+        offset = 0
+
+    users = get_browsable_users(offset=offset)
+    total_count = count_browsable_users()
+    next_offset = offset + BROWSABLE_USERS_PAGE_SIZE
+    prev_offset = max(0, offset - BROWSABLE_USERS_PAGE_SIZE)
+    following_ids = (
+        set(get_following_ids(request.user)) if request.user.is_authenticated else set()
+    )
+
+    return render(
+        request,
+        "accounts/user_list.html",
+        {
+            "users": users,
+            "total_count": total_count,
+            "offset": offset,
+            "has_next": next_offset < total_count,
+            "has_prev": offset > 0,
+            "next_offset": next_offset,
+            "prev_offset": prev_offset,
+            "following_ids": following_ids,
         },
     )
 
@@ -389,12 +428,15 @@ def profile_detail(request, username):
         if unlocked
     ]
     unlocked_count = len(earned_badges)
+    from reputation.services import calculate_user_unrealized_reputation
+
     return render(
         request,
         "accounts/profile_detail.html",
         {
             "profile_user": user,
             "predictions": predictions,
+            "unrealized_reputation": calculate_user_unrealized_reputation(user),
             "category_breakdown": category_breakdown,
             "is_following": is_following(follower=request.user, following_user=user),
             "follower_count": get_follower_count(user),
@@ -488,21 +530,30 @@ def bookmarks_list(request):
     )
 
 
-def _render_follow_button(request, profile_user):
-    return render(
-        request,
-        "accounts/partials/follow_button.html",
-        {
-            "profile_user": profile_user,
-            "is_following": is_following(
-                follower=request.user,
-                following_user=profile_user,
-            ),
-        },
+def _render_follow_button(request, profile_user, *, context="profile"):
+    template = (
+        "accounts/partials/follow_button_list.html"
+        if context == "list"
+        else "accounts/partials/follow_button.html"
     )
+    context_data = {
+        "profile_user": profile_user,
+        "is_following": is_following(
+            follower=request.user,
+            following_user=profile_user,
+        ),
+    }
+    if context == "list":
+        context_data["following_ids"] = (
+            set(get_following_ids(request.user)) if request.user.is_authenticated else set()
+        )
+    return render(request, template, context_data)
 
 
 def _render_profile_connections(request, *, profile_user, users, active_tab):
+    following_ids = (
+        set(get_following_ids(request.user)) if request.user.is_authenticated else set()
+    )
     return render(
         request,
         "accounts/profile_connections.html",
@@ -512,6 +563,7 @@ def _render_profile_connections(request, *, profile_user, users, active_tab):
             "active_tab": active_tab,
             "follower_count": get_follower_count(profile_user),
             "following_count": get_following_count(profile_user),
+            "following_ids": following_ids,
         },
     )
 
@@ -556,6 +608,7 @@ def follow_toggle(request):
     if not username:
         return HttpResponseBadRequest(_("Missing username"))
 
+    context = request.POST.get("context", "profile")
     target_user = get_object_or_404(User, username=username)
     try:
         is_following_now = toggle_follow(follower=request.user, following_user=target_user)
@@ -563,6 +616,8 @@ def follow_toggle(request):
         if request.headers.get("HX-Request"):
             return HttpResponseBadRequest(str(exc))
         messages.error(request, str(exc))
+        if context == "list":
+            return redirect("accounts:user_list")
         return redirect("accounts:profile", username=target_user.username)
 
     if is_following_now:
@@ -577,7 +632,9 @@ def follow_toggle(request):
         )
 
     if request.headers.get("HX-Request"):
-        return _render_follow_button(request, target_user)
+        return _render_follow_button(request, target_user, context=context)
+    if context == "list":
+        return redirect("accounts:user_list")
     return redirect("accounts:profile", username=target_user.username)
 
 

@@ -4,7 +4,10 @@ from django.test import TestCase
 
 from conftest import create_market, create_user
 from predictions.models import Prediction
-from reputation.services import calculate_unrealized_reputation
+from reputation.services import (
+    calculate_unrealized_reputation,
+    calculate_user_unrealized_reputation,
+)
 
 
 class UnrealizedReputationTests(TestCase):
@@ -54,3 +57,15 @@ class UnrealizedReputationTests(TestCase):
         self.market.current_probability = {}
         self.market.save(update_fields=["current_probability"])
         self.assertIsNone(calculate_unrealized_reputation(prediction))
+
+    def test_user_total_sums_open_forecasts(self):
+        self._prediction(entry={"Yes": 0.30, "No": 0.70})
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        self.assertEqual(calculate_user_unrealized_reputation(self.user), 25)
+
+    def test_user_total_is_zero_without_open_forecasts(self):
+        prediction = self._prediction(status=Prediction.Status.RESOLVED)
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        self.assertEqual(calculate_user_unrealized_reputation(self.user), 0)

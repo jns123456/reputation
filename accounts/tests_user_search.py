@@ -1,8 +1,15 @@
 from django.test import Client, TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import User
-from accounts.user_search_selectors import normalize_user_search_query, search_user_matches, search_users
+from accounts.user_search_selectors import (
+    count_browsable_users,
+    get_browsable_users,
+    normalize_user_search_query,
+    search_user_matches,
+    search_users,
+)
 
 
 class UserSearchSelectorTests(TestCase):
@@ -76,6 +83,11 @@ class UserSearchSelectorTests(TestCase):
     def test_normalize_strips_leading_at(self):
         self.assertEqual(normalize_user_search_query("@alice"), "alice")
 
+    def test_browsable_users_exclude_anonymous(self):
+        self.assertEqual(count_browsable_users(), 2)
+        usernames = {user.username for user in get_browsable_users()}
+        self.assertEqual(usernames, {"alice", "bob"})
+
 
 class UserSearchViewTests(TestCase):
     def setUp(self):
@@ -99,6 +111,28 @@ class UserSearchViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Searchable User")
 
+    def test_user_search_page_shows_follow_button(self):
+        from conftest import create_user
+
+        self.client.force_login(User.objects.get(username="searchable"))
+        other = create_user("otheruser", display_name="Other User")
+        response = self.client.get("/accounts/users/search/?q=Other")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Follow")
+        self.assertContains(response, f"follow-user-{other.username}")
+
+    def test_user_search_page_shows_unfollow_for_followed_user(self):
+        from accounts.follow_services import toggle_follow
+        from conftest import create_user
+
+        viewer = create_user("viewer")
+        target = User.objects.get(username="searchable")
+        toggle_follow(follower=viewer, following_user=target)
+        self.client.force_login(viewer)
+        response = self.client.get("/accounts/users/search/?q=Searchable")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Unfollow")
+
     def test_user_search_page_finds_user_by_email(self):
         response = self.client.get("/accounts/users/search/?q=searchable@example.com")
         self.assertEqual(response.status_code, 200)
@@ -119,6 +153,27 @@ class UserSearchViewTests(TestCase):
         response = self.client.get("/accounts/users/searchable/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Find users")
+
+    def test_user_list_page_renders_browsable_users(self):
+        response = self.client.get("/accounts/users/list/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "All users")
+        self.assertContains(response, "Searchable User")
+
+    def test_user_search_page_has_view_list_link(self):
+        response = self.client.get("/accounts/users/search/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("accounts:user_list"))
+
+    def test_anonymous_users_excluded_from_browsable_list(self):
+        User.objects.create_user(
+            username="ghostlist",
+            password="pass",
+            identity_mode=User.IdentityMode.ANONYMOUS,
+            display_name="Ghost List",
+        )
+        response = self.client.get("/accounts/users/list/")
+        self.assertNotContains(response, "Ghost List")
 
     def test_forum_sidebar_includes_user_search(self):
         response = self.client.get("/forum/")

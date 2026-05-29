@@ -89,6 +89,25 @@ class FollowToggleViewTests(TestCase):
             UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
         )
 
+    def test_follow_toggle_via_htmx_list_context_shows_unfollow(self):
+        response = self.client.post(
+            self.url,
+            {"username": self.target.username, "context": "list"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Unfollow")
+
+    def test_follow_toggle_via_htmx_list_context_can_unfollow(self):
+        toggle_follow(follower=self.follower, following_user=self.target)
+        response = self.client.post(
+            self.url,
+            {"username": self.target.username, "context": "list"},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Follow")
+
     def test_follow_toggle_without_htmx_redirects_to_profile(self):
         response = self.client.post(self.url, {"username": self.target.username})
         self.assertRedirects(

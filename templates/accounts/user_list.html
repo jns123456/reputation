@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "All users" %}{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% trans "Community" as hero_eyebrow %}
+  {% trans "All users" as hero_title %}
+  {% blocktrans asvar hero_description %}Browse everyone on PredictStamp and follow forecasters you want to track.{% endblocktrans %}
+  {% url 'accounts:user_search' as search_url %}
+  {% trans "Search users" as search_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description secondary_url=search_url secondary_label=search_label %}
+
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-2" data-pr-reveal data-delay="1">
+    <p class="text-sm text-slate-500 dark:text-slate-400">
+      {% blocktrans with count=total_count %}{{ count }} people{% endblocktrans %}
+    </p>
+    <a href="{% url 'accounts:user_search' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
+      {% trans "Search users" %} →
+    </a>
+  </div>
+
+  <div class="space-y-3" data-pr-reveal data-delay="2">
+    {% for profile_user in users %}
+      {% include "accounts/partials/user_list_row.html" %}
+    {% empty %}
+    <div class="pr-empty py-10">{% trans "No users to show yet." %}</div>
+    {% endfor %}
+  </div>
+
+  {% if has_prev or has_next %}
+  <nav class="mt-6 flex items-center justify-between gap-3" aria-label="{% trans 'Pagination' %}">
+    {% if has_prev %}
+    <a href="{% url 'accounts:user_list' %}?offset={{ prev_offset }}" class="btn-secondary">{% trans "Previous" %}</a>
+    {% else %}
+    <span></span>
+    {% endif %}
+    {% if has_next %}
+    <a href="{% url 'accounts:user_list' %}?offset={{ next_offset }}" class="btn-secondary">{% trans "Next" %}</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

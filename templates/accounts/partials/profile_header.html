@@ -78,6 +78,10 @@
                aria-label="{% trans 'Find users' %}"
                minlength="2">
       </form>
+      <a href="{% url 'accounts:user_list' %}" class="btn-secondary pr-profile-action-btn">
+        <i data-lucide="users" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "View list" %}</span>
+      </a>
       {% endif %}
 
       {% if user == profile_user %}

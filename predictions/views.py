@@ -112,9 +112,11 @@ def exit_prediction_view(request, slug, prediction_id):
 
 @login_required
 def open_predictions(request):
+    from reputation.services import calculate_user_unrealized_reputation
+
     predictions = get_user_open_predictions(request.user, limit=100)
     positions = []
-    total_delta = 0
+    total_delta = calculate_user_unrealized_reputation(request.user)
 
     for prediction in predictions:
         market = prediction.market
@@ -134,7 +136,6 @@ def open_predictions(request):
             exit_probability_snapshot=market.current_probability or {},
             predicted_direction=prediction.predicted_direction,
         )
-        total_delta += current_delta
         positions.append(
             {
                 "prediction": prediction,

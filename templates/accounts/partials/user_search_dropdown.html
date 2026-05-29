@@ -45,5 +45,8 @@
     {% blocktrans with query=search_query %}No users match "{{ query }}".{% endblocktrans %}
   </p>
   {% endif %}
+  <a href="{% url 'accounts:user_list' %}" class="x-user-search-more">
+    {% trans "View list" %}
+  </a>
 </div>
 {% endif %}
