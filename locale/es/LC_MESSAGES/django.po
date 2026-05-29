@@ -1463,8 +1463,8 @@ msgid "or"
 msgstr "o"
 
 #: templates/accounts/login.html:73
-msgid "Continue with Auth0"
-msgstr "Continuar con Auth0"
+msgid "Continue with Google"
+msgstr "Continuar con Google"
 
 #: templates/accounts/login.html:79
 msgid "No account?"

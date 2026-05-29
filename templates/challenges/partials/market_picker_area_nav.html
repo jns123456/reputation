@@ -1,0 +1,46 @@
+{% load i18n %}
+{% if area_summaries %}
+<nav class="browse-area-nav" aria-label="{% blocktrans with name=category.name %}{{ name }} sub-areas{% endblocktrans %}">
+  <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+    {% blocktrans with name=category.name %}All {{ name }}{% endblocktrans %}
+  </p>
+
+  <ul class="space-y-0.5">
+    <li>
+      <button type="button"
+              class="group flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm transition {% if not active_area_slug %}bg-slate-100 font-semibold text-slate-900 dark:bg-slate-700 dark:text-slate-100{% else %}text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700/60 dark:hover:text-slate-100{% endif %}"
+              hx-get="{% url 'challenges:market_browse' %}?category={{ category.slug }}"
+              hx-target="#challenge-market-browse"
+              hx-swap="innerHTML"
+              hx-include="#market-picker-selected-inputs">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80 dark:bg-slate-800 dark:ring-slate-600">
+          {% include "dashboard/partials/category_icon.html" with slug=category.slug class=category.icon_fg %}
+        </span>
+        <span class="min-w-0 flex-1 truncate text-left">{% trans "All" %}</span>
+        <span class="shrink-0 tabular-nums text-xs {% if not active_area_slug %}font-semibold text-slate-700 dark:text-slate-200{% else %}text-slate-400{% endif %}">
+          {{ total_market_count }}
+        </span>
+      </button>
+    </li>
+
+    {% for item in area_summaries %}
+    <li>
+      <button type="button"
+              class="group flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm transition {% if active_area_slug == item.area.slug %}bg-slate-100 font-semibold text-slate-900 dark:bg-slate-700 dark:text-slate-100{% else %}text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700/60 dark:hover:text-slate-100{% endif %}"
+              hx-get="{% url 'challenges:market_browse' %}?category={{ category.slug }}&area={{ item.area.slug }}"
+              hx-target="#challenge-market-browse"
+              hx-swap="innerHTML"
+              hx-include="#market-picker-selected-inputs">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80 dark:bg-slate-800 dark:ring-slate-600">
+          {% include "dashboard/partials/browse_area_icon.html" with slug=item.area.slug %}
+        </span>
+        <span class="min-w-0 flex-1 truncate text-left">{{ item.area.name }}</span>
+        <span class="shrink-0 tabular-nums text-xs {% if active_area_slug == item.area.slug %}font-semibold text-slate-700 dark:text-slate-200{% else %}text-slate-400{% endif %}">
+          {{ item.count }}
+        </span>
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}

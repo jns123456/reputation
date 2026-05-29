@@ -10,7 +10,7 @@ PHASE1_FIXES: dict[str, str] = {
     "Open forecasts": "Pronósticos abiertos",
     "Open Forecasts": "Pronósticos abiertos",
     "Close menu": "Cerrar menú",
-    "Continue with Auth0": "Continuar con Auth0",
+    "Continue with Google": "Continuar con Google",
     "Sign up with Auth0": "Registrarse con Auth0",
     "Auth0 sign-in is not available right now.": "El inicio de sesión con Auth0 no está disponible ahora.",
     "We couldn't complete the Auth0 sign-in. Please try again.": (

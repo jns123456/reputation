@@ -1,0 +1,28 @@
+{% load i18n %}
+<div class="challenge-picker-search">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <button type="button"
+            class="btn-secondary px-3 py-2 text-sm"
+            hx-get="{% url 'challenges:market_browse' %}"
+            hx-target="#challenge-market-browse"
+            hx-swap="innerHTML"
+            hx-include="#market-picker-selected-inputs"
+            hx-on:click="document.getElementById('challenge-market-search').value = ''">
+      <i data-lucide="arrow-left" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+      {% trans "All categories" %}
+    </button>
+  </div>
+
+  <div class="mb-4">
+    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">{% trans "Search results" %}</h3>
+    <p class="text-sm text-slate-500 dark:text-slate-400">
+      {% blocktrans count counter=markets|length %}
+        {{ counter }} open event matches “{{ search_query }}”
+      {% plural %}
+        {{ counter }} open events match “{{ search_query }}”
+      {% endblocktrans %}
+    </p>
+  </div>
+
+  {% include "challenges/partials/market_picker_list.html" %}
+</div>

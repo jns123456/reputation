@@ -1,0 +1,33 @@
+{% load i18n %}
+<button type="button"
+        class="pr-card group relative flex h-full w-full flex-col overflow-hidden text-left {% if large %}min-h-[11rem] rounded-3xl p-6{% else %}rounded-2xl p-5{% endif %} border border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-brand-600"
+        hx-get="{% url 'challenges:market_browse' %}?category={{ category.slug }}"
+        hx-target="#challenge-market-browse"
+        hx-swap="innerHTML"
+        hx-include="#market-picker-selected-inputs">
+  <div class="pointer-events-none absolute inset-0 bg-gradient-to-br {{ category.card_hover }}" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full {{ category.card_glow }} blur-2xl transition duration-300 group-hover:scale-110" aria-hidden="true"></div>
+
+  <div class="relative flex items-start justify-between gap-3">
+    <div class="flex {% if large %}h-14 w-14{% else %}h-12 w-12{% endif %} shrink-0 items-center justify-center rounded-xl ring-1 {{ category.icon_bg }} {{ category.ring }} transition duration-300 group-hover:scale-105">
+      {% include "dashboard/partials/category_icon.html" with slug=category.slug class=category.icon_fg %}
+    </div>
+    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold tabular-nums text-slate-700 ring-1 ring-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:ring-slate-600">
+      {{ count }}
+    </span>
+  </div>
+
+  <div class="relative mt-4 flex flex-1 flex-col">
+    <h3 class="{% if large %}text-lg{% else %}text-base{% endif %} font-bold text-slate-900 transition group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-400">{{ category.name }}</h3>
+    <p class="mt-1 line-clamp-2 flex-1 text-sm leading-snug text-slate-500 dark:text-slate-400">{{ category.description }}</p>
+    <div class="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-4 dark:border-slate-700">
+      <span class="text-sm font-medium text-slate-600 dark:text-slate-300">
+        {% blocktrans count counter=count %}{{ counter }} forecast{% plural %}{{ counter }} forecasts{% endblocktrans %}
+      </span>
+      <span class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
+        {% trans "Browse" %}
+        <i data-lucide="chevron-right" class="h-4 w-4 transition group-hover:translate-x-0.5" stroke-width="2" aria-hidden="true"></i>
+      </span>
+    </div>
+  </div>
+</button>

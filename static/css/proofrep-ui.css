@@ -2910,7 +2910,7 @@ html.dark .challenge-create-chip-remove:hover {
 
 .challenge-create-search {
   position: relative;
-  margin-top: 1rem;
+  margin-top: 0.25rem;
 }
 
 .challenge-create-search-icon {

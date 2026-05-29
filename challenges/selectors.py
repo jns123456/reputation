@@ -364,6 +364,66 @@ def search_open_markets_for_challenge(*, query="", limit=50, selected_ids=None):
     return qs[:limit]
 
 
+CHALLENGE_CATEGORY_MARKET_LIMIT = 100
+
+
+def get_challenge_category_browse_context(*, category_slug, area_slug="", search="", selected_ids=None):
+    """Markets and navigation context for challenge event picker category view."""
+    from markets.categories import get_category_for_slug
+    from markets.selectors import (
+        filter_markets_by_browse_area,
+        get_browse_area,
+        get_browse_area_summaries,
+        get_category_display_markets,
+        get_open_markets_by_canonical_category,
+    )
+
+    category = get_category_for_slug(category_slug)
+    if category is None:
+        return None
+
+    total_markets = get_open_markets_by_canonical_category(category_slug=category_slug)
+    area_summaries = get_browse_area_summaries(category_slug=category_slug, markets=total_markets)
+    active_area = get_browse_area(category_slug, area_slug) if area_slug else None
+
+    display_markets = total_markets
+    if active_area:
+        display_markets = filter_markets_by_browse_area(
+            markets=total_markets,
+            category_slug=category_slug,
+            area_slug=area_slug,
+        )
+
+    markets = get_category_display_markets(
+        category_slug=category_slug,
+        area_slug=area_slug or None,
+        search=search or None,
+        limit=CHALLENGE_CATEGORY_MARKET_LIMIT,
+        markets=total_markets,
+    )
+
+    selected_ids_set = {int(pk) for pk in (selected_ids or []) if str(pk).isdigit()}
+    if selected_ids_set:
+        existing_ids = {market.id for market in markets}
+        extra_ids = selected_ids_set - existing_ids
+        if extra_ids:
+            extras = list(
+                Market.objects.filter(id__in=extra_ids, status=Market.Status.OPEN)
+            )
+            markets = extras + list(markets)
+
+    return {
+        "category": category,
+        "area_summaries": area_summaries,
+        "active_area": active_area,
+        "active_area_slug": area_slug,
+        "total_market_count": len(total_markets),
+        "market_count": len(display_markets),
+        "markets": markets,
+        "search_query": search,
+    }
+
+
 def get_challenge_markets(challenge):
     return [
         entry.market

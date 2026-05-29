@@ -172,20 +172,25 @@
         </template>
       </div>
 
-      <div class="challenge-create-search">
-        <i data-lucide="search" class="challenge-create-search-icon" stroke-width="2" aria-hidden="true"></i>
-        <input type="search"
-               id="challenge-market-search"
-               name="q"
-               placeholder="{% trans 'Search events…' %}"
-               autocomplete="off"
-               class="form-input challenge-create-search-input"
-               hx-get="{% url 'challenges:market_search' %}"
-               hx-trigger="input changed delay:300ms, search"
-               hx-target="#market-picker-list"
-               hx-swap="innerHTML"
-               hx-include="#market-picker-selected-inputs"
-               @input="onSearchInput()">
+      <div class="pr-panel mb-4 p-3 sm:p-4">
+        <label for="challenge-market-search" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">
+          {% trans "Search events" %}
+        </label>
+        <div class="challenge-create-search">
+          <i data-lucide="search" class="challenge-create-search-icon" stroke-width="2" aria-hidden="true"></i>
+          <input type="search"
+                 id="challenge-market-search"
+                 name="q"
+                 placeholder="{% trans 'Search events…' %}"
+                 autocomplete="off"
+                 class="form-input challenge-create-search-input w-full"
+                 hx-get="{% url 'challenges:market_browse' %}"
+                 hx-trigger="input changed delay:300ms, search"
+                 hx-target="#challenge-market-browse"
+                 hx-swap="innerHTML"
+                 hx-include="#market-picker-selected-inputs"
+                 @input="onSearchInput()">
+        </div>
       </div>
 
       <div id="market-picker-selected-inputs" class="hidden">
@@ -194,10 +199,10 @@
         </template>
       </div>
 
-      <div id="market-picker-list"
+      <div id="challenge-market-browse"
            class="challenge-create-market-list"
            @change="onListChange($event)">
-        {% include "challenges/partials/market_picker_list.html" with markets=initial_markets selected_market_ids=selected_market_ids search_query="" %}
+        {% include "challenges/partials/market_picker_categories.html" with category_summaries=category_summaries %}
       </div>
 
       <div class="challenge-create-step-actions mt-6">
@@ -263,7 +268,7 @@
         });
       },
       initMarkets(initialSelectedIds, initialTitles) {
-        const list = document.getElementById("market-picker-list");
+        const list = document.getElementById("challenge-market-browse");
         if (list) {
           list.querySelectorAll('input[type="checkbox"]').forEach((el) => {
             if (el.checked && el.value) {
@@ -293,7 +298,7 @@
       },
       remove(id) {
         delete this.selected[id];
-        const el = document.querySelector(`#market-picker-list input[type="checkbox"][value="${id}"]`);
+        const el = document.querySelector(`#challenge-market-browse input[type="checkbox"][value="${id}"]`);
         if (el) el.checked = false;
       },
       onListChange(event) {
@@ -304,7 +309,7 @@
       },
       onSearchInput() {
         this.$nextTick(() => {
-          document.querySelectorAll("#market-picker-list input[type='checkbox']").forEach((el) => {
+          document.querySelectorAll("#challenge-market-browse input[type='checkbox']").forEach((el) => {
             el.checked = Object.prototype.hasOwnProperty.call(this.selected, el.value);
           });
         });
@@ -313,13 +318,14 @@
   }
 
   document.body.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id !== "market-picker-list") return;
+    if (event.detail.target.id !== "challenge-market-browse") return;
     const root = document.querySelector(".challenge-create");
     if (!root || !root._x_dataStack) return;
     const wizard = root._x_dataStack[0];
     event.detail.target.querySelectorAll('input[type="checkbox"]').forEach((el) => {
       el.checked = Object.prototype.hasOwnProperty.call(wizard.selected, el.value);
     });
+    if (typeof lucide !== "undefined") lucide.createIcons();
   });
 </script>
 {% endblock %}

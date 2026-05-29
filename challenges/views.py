@@ -27,6 +27,7 @@ from challenges.selectors import (
     get_user_challenge_groups,
     get_challenge_group_for_user,
     search_open_markets_for_challenge,
+    get_challenge_category_browse_context,
 )
 from challenges.services import (
     accept_challenge,
@@ -105,15 +106,12 @@ def challenge_create(request):
     if request.method == "POST":
         selected_market_ids = request.POST.getlist("markets")
     selected_ids_int = [int(pk) for pk in selected_market_ids if str(pk).isdigit()]
-    initial_markets = search_open_markets_for_challenge(
-        query="",
-        selected_ids=selected_ids_int,
-    )
-    selected_market_titles = {
-        str(market.id): market.display_title
-        for market in initial_markets
-        if market.id in selected_ids_int
-    }
+    selected_market_titles = {}
+    if selected_ids_int:
+        for market in Market.objects.filter(id__in=selected_ids_int):
+            selected_market_titles[str(market.id)] = market.display_title
+
+    from markets.selectors import get_market_hub_category_summaries
 
     initial_step = 1
     if request.method == "POST" and form.errors and not form.errors.get("opponents"):
@@ -126,7 +124,7 @@ def challenge_create(request):
             "form": form,
             "mutual_followers": mutual_followers,
             "challenge_groups": get_user_challenge_groups(request.user),
-            "initial_markets": initial_markets,
+            "category_summaries": get_market_hub_category_summaries(),
             "selected_market_ids_json": json.dumps(selected_ids_int),
             "selected_market_titles_json": json.dumps(selected_market_titles),
             "selected_market_ids": set(selected_ids_int),
@@ -246,23 +244,69 @@ def challenge_group_delete(request, pk):
 
 
 @login_required
-def challenge_market_search(request):
+def challenge_market_browse(request):
+    """HTMX partial: categories, category markets, or search results for challenge picker."""
     query = request.GET.get("q", "").strip()
+    category_slug = request.GET.get("category", "").strip()
+    area_slug = request.GET.get("area", "").strip()
     selected_ids = request.GET.getlist("selected")
-    markets = search_open_markets_for_challenge(
-        query=query,
-        selected_ids=selected_ids,
-    )
     selected_set = {int(pk) for pk in selected_ids if str(pk).isdigit()}
+
+    if query:
+        markets = search_open_markets_for_challenge(
+            query=query,
+            selected_ids=selected_ids,
+            limit=100,
+        )
+        return render(
+            request,
+            "challenges/partials/market_picker_search.html",
+            {
+                "markets": markets,
+                "selected_market_ids": selected_set,
+                "search_query": query,
+            },
+        )
+
+    if category_slug:
+        context = get_challenge_category_browse_context(
+            category_slug=category_slug,
+            area_slug=area_slug,
+            search="",
+            selected_ids=selected_ids,
+        )
+        if context is None:
+            from markets.selectors import get_market_hub_category_summaries
+
+            return render(
+                request,
+                "challenges/partials/market_picker_categories.html",
+                {
+                    "category_summaries": get_market_hub_category_summaries(),
+                },
+            )
+        context["selected_market_ids"] = selected_set
+        return render(
+            request,
+            "challenges/partials/market_picker_category.html",
+            context,
+        )
+
+    from markets.selectors import get_market_hub_category_summaries
+
     return render(
         request,
-        "challenges/partials/market_picker_list.html",
+        "challenges/partials/market_picker_categories.html",
         {
-            "markets": markets,
-            "selected_market_ids": selected_set,
-            "search_query": query,
+            "category_summaries": get_market_hub_category_summaries(),
         },
     )
+
+
+@login_required
+def challenge_market_search(request):
+    """Legacy alias for challenge_market_browse."""
+    return challenge_market_browse(request)
 
 
 @login_required

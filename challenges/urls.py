@@ -11,6 +11,7 @@ urlpatterns = [
     path("groups/new/", views.challenge_group_create, name="group_create"),
     path("groups/<int:pk>/edit/", views.challenge_group_edit, name="group_edit"),
     path("groups/<int:pk>/delete/", views.challenge_group_delete, name="group_delete"),
+    path("markets/browse/", views.challenge_market_browse, name="market_browse"),
     path("markets/search/", views.challenge_market_search, name="market_search"),
     path("<int:pk>/", views.challenge_detail, name="detail"),
     path("<int:pk>/accept/", views.challenge_accept, name="accept"),

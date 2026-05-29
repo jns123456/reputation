@@ -611,6 +611,7 @@ class ChallengeGroupTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Quick crew")
         self.assertContains(response, "Quick select")
+        self.assertContains(response, "Categories")
 
 
 class MarketSearchTests(TestCase):
@@ -671,3 +672,27 @@ class MarketSearchTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "US election winner")
         self.assertNotContains(response, "Bitcoin price 2026")
+
+    def test_market_browse_categories_view(self):
+        from markets.models import Market
+
+        self.market_a.canonical_category_slug = "crypto"
+        self.market_a.save(update_fields=["canonical_category_slug"])
+
+        self.client.force_login(self.user)
+        response = self.client.get("/challenges/markets/browse/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Categories")
+
+    def test_market_browse_category_view(self):
+        self.market_a.canonical_category_slug = "crypto"
+        self.market_a.save(update_fields=["canonical_category_slug"])
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            "/challenges/markets/browse/",
+            {"category": "crypto"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bitcoin price 2026")
+        self.assertContains(response, "All categories")

@@ -1,0 +1,91 @@
+{% load i18n %}
+<div class="challenge-picker-category">
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <button type="button"
+            class="btn-secondary px-3 py-2 text-sm"
+            hx-get="{% url 'challenges:market_browse' %}"
+            hx-target="#challenge-market-browse"
+            hx-swap="innerHTML"
+            hx-include="#market-picker-selected-inputs">
+      <i data-lucide="arrow-left" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+      {% trans "All categories" %}
+    </button>
+  </div>
+
+  <div class="challenge-picker-category-hero mb-5 flex items-start gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-800/80">
+    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 {{ category.icon_bg }} {{ category.ring }}">
+      {% if active_area %}
+        {% include "dashboard/partials/browse_area_icon.html" with slug=active_area.slug %}
+      {% else %}
+        {% include "dashboard/partials/category_icon.html" with slug=category.slug class=category.icon_fg %}
+      {% endif %}
+    </div>
+    <div class="min-w-0">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+        {% if active_area %}{{ active_area.name }}{% else %}{{ category.name }}{% endif %}
+      </h3>
+      <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+        {% if active_area %}
+          {% blocktrans with area=active_area.name category_name=category.name %}{{ area }} · {{ category_name }}{% endblocktrans %}
+        {% else %}
+          {{ category.description }}
+        {% endif %}
+      </p>
+      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+        <span class="font-semibold tabular-nums text-slate-900 dark:text-slate-100">{{ market_count }}</span>
+        {% blocktrans count counter=market_count %}open event{% plural %}open events{% endblocktrans %}
+      </p>
+    </div>
+  </div>
+
+  {% if area_summaries %}
+  <div class="mb-5 lg:hidden">
+    <p class="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">{% trans "Filter by topic" %}</p>
+    <div class="pr-scroll-x flex gap-2">
+      <button type="button"
+              class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2.5 text-sm font-medium transition {% if not active_area_slug %}border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-700 dark:bg-brand-950/40 dark:text-brand-300{% else %}border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300{% endif %}"
+              hx-get="{% url 'challenges:market_browse' %}?category={{ category.slug }}"
+              hx-target="#challenge-market-browse"
+              hx-swap="innerHTML"
+              hx-include="#market-picker-selected-inputs">
+        {% trans "All" %} <span class="tabular-nums text-xs opacity-70">{{ total_market_count }}</span>
+      </button>
+      {% for item in area_summaries %}
+      <button type="button"
+              class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2.5 text-sm font-medium transition {% if active_area_slug == item.area.slug %}border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-700 dark:bg-brand-950/40 dark:text-brand-300{% else %}border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300{% endif %}"
+              hx-get="{% url 'challenges:market_browse' %}?category={{ category.slug }}&area={{ item.area.slug }}"
+              hx-target="#challenge-market-browse"
+              hx-swap="innerHTML"
+              hx-include="#market-picker-selected-inputs">
+        <span class="flex h-5 w-5 items-center justify-center">
+          {% include "dashboard/partials/browse_area_icon.html" with slug=item.area.slug %}
+        </span>
+        {{ item.area.name }}
+        <span class="tabular-nums text-xs opacity-70">{{ item.count }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+    {% if area_summaries %}
+    <aside class="hidden w-full shrink-0 lg:block lg:w-52 xl:w-56">
+      <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        {% include "challenges/partials/market_picker_area_nav.html" %}
+      </div>
+    </aside>
+    {% endif %}
+
+    <section class="min-w-0 flex-1">
+      <h4 class="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+        {% if active_area %}
+          {% blocktrans with name=active_area.name %}Events in {{ name }}{% endblocktrans %}
+        {% else %}
+          {% blocktrans with name=category.name %}Events in {{ name }}{% endblocktrans %}
+        {% endif %}
+      </h4>
+      {% include "challenges/partials/market_picker_list.html" with markets=markets selected_market_ids=selected_market_ids search_query="" %}
+    </section>
+  </div>
+</div>
