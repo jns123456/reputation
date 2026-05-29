@@ -244,6 +244,28 @@ html.dark .pr-eyebrow { color: #818cf8; }
   75%, 100% { transform: scale(2); opacity: 0; }
 }
 
+/* Pulsing icon badge (e.g. “Ending soon” CTA) */
+.pr-pulse-icon {
+  position: relative;
+  isolation: isolate;
+}
+
+.pr-pulse-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #f43f5e;
+  animation: pr-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  opacity: 0.35;
+}
+
+html.dark .pr-pulse-icon::before {
+  background: #fb7185;
+  opacity: 0.4;
+}
+
 /* Hero */
 .pr-hero {
   position: relative;
@@ -1762,6 +1784,7 @@ html.dark .pr-cta-band {
 @media (prefers-reduced-motion: reduce) {
   .pr-orb, .about-orb, .about-bounce,
   [data-pr-reveal], [data-about-reveal],
+  .pr-pulse-icon::before,
   .pr-exit-success-card,
   .pr-exit-success-card__glow,
   .pr-exit-success-card__points,
