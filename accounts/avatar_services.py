@@ -1,35 +1,20 @@
+"""Deterministic profile avatars — no uploads or object storage required."""
+
+from urllib.parse import urlencode
+
 from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-
-ALLOWED_AVATAR_CONTENT_TYPES = {
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-}
 
 
-def validate_avatar_file(*, avatar):
-    if not avatar:
-        return
-
-    max_bytes = getattr(settings, "AVATAR_MAX_IMAGE_BYTES", 5 * 1024 * 1024)
-    if avatar.size > max_bytes:
-        raise ValidationError(_("Profile photo must be 5 MB or smaller."))
-
-    content_type = getattr(avatar, "content_type", "")
-    if content_type and content_type not in ALLOWED_AVATAR_CONTENT_TYPES:
-        raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image."))
+def avatar_seed(user) -> str:
+    """Stable seed for generated avatars (survives username/display name changes)."""
+    return str(user.pk)
 
 
-def update_user_avatar(*, user, avatar):
-    """Replace the user's profile photo, deleting the previous file if present."""
-    validate_avatar_file(avatar=avatar)
-
-    if user.avatar:
-        user.avatar.delete(save=False)
-
-    user.avatar = avatar
-    user.save(update_fields=["avatar", "updated_at"])
-    return user
+def generated_avatar_url(user, *, size: int | None = None) -> str:
+    """Public DiceBear PNG URL unique per user account."""
+    style = getattr(settings, "AVATAR_DICEBEAR_STYLE", "identicon")
+    base = getattr(settings, "AVATAR_DICEBEAR_BASE_URL", "https://api.dicebear.com/9.x").rstrip("/")
+    params = {"seed": avatar_seed(user)}
+    if size is not None:
+        params["size"] = str(size)
+    return f"{base}/{style}/png?{urlencode(params)}"

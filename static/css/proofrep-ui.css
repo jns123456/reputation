@@ -537,6 +537,18 @@ html.dark .pr-profile-avatar-inner {
   color: #0f172a;
 }
 
+.pr-profile-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pr-profile-name-row .pr-profile-name {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 html.dark .pr-profile-name {
   color: #f8fafc;
 }
@@ -587,6 +599,324 @@ html.dark .pr-profile-badge-pending {
   gap: 0.75rem 1.25rem;
   margin: 0.875rem 0 0;
   padding: 0;
+}
+
+/* Profile header — military-style earned badges */
+.pr-profile-medals-wrap {
+  margin-top: 0.875rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.pr-profile-medals-wrap--inline {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+html.dark .pr-profile-medals-wrap {
+  border-top-color: rgba(71, 85, 105, 0.55);
+}
+
+html.dark .pr-profile-medals-wrap--inline {
+  border-top: none;
+}
+
+.pr-profile-medals-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+html.dark .pr-profile-medals-label {
+  color: #94a3b8;
+}
+
+.pr-profile-medals {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  padding: 0.15rem 0;
+}
+
+.pr-profile-medals-wrap--inline .pr-profile-medals {
+  padding: 0;
+}
+
+.pr-medal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: var(--pr-touch-min);
+  min-height: var(--pr-touch-min);
+  padding: 0.25rem 0.35rem 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease;
+}
+
+.pr-medal:hover,
+.pr-medal:focus-visible {
+  transform: translateY(-2px) scale(1.04);
+  outline: none;
+}
+
+.pr-profile-medals .pr-medal + .pr-medal {
+  margin-left: -0.35rem;
+}
+
+.pr-medal-ribbon {
+  display: block;
+  width: 1.35rem;
+  height: 0.7rem;
+  margin-bottom: -0.3rem;
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
+  z-index: 1;
+}
+
+.pr-medal-ribbon--forecast {
+  background: linear-gradient(
+    90deg,
+    #1e3a8a 0%,
+    #1e3a8a 33%,
+    #f8fafc 33%,
+    #f8fafc 66%,
+    #b45309 66%,
+    #b45309 100%
+  );
+}
+
+.pr-medal-ribbon--merit {
+  background: linear-gradient(
+    90deg,
+    #14532d 0%,
+    #14532d 40%,
+    #f8fafc 40%,
+    #f8fafc 60%,
+    #14532d 60%,
+    #14532d 100%
+  );
+}
+
+.pr-medal-ribbon--pop {
+  background: linear-gradient(
+    90deg,
+    #9f1239 0%,
+    #9f1239 35%,
+    #fef3c7 35%,
+    #fef3c7 65%,
+    #9f1239 65%,
+    #9f1239 100%
+  );
+}
+
+.pr-medal-ribbon--streak {
+  background: linear-gradient(
+    90deg,
+    #c2410c 0%,
+    #c2410c 50%,
+    #fdba74 50%,
+    #fdba74 100%
+  );
+}
+
+.pr-medal-disc {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  border: 2px solid #b45309;
+  background:
+    radial-gradient(circle at 32% 28%, #fef9c3 0%, transparent 42%),
+    linear-gradient(155deg, #fde68a 0%, #f59e0b 38%, #b45309 72%, #78350f 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 4px rgba(120, 53, 15, 0.35),
+    0 3px 8px rgba(120, 53, 15, 0.35);
+}
+
+.pr-medal-disc::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+.pr-medal-disc svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: #78350f;
+  stroke-width: 2.25;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
+}
+
+html.dark .pr-medal-disc {
+  border-color: #d97706;
+  background:
+    radial-gradient(circle at 32% 28%, #fef08a 0%, transparent 42%),
+    linear-gradient(155deg, #fcd34d 0%, #d97706 45%, #92400e 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+    0 3px 10px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .pr-medal-disc svg {
+  color: #451a03;
+}
+
+.pr-medal-popover {
+  position: absolute;
+  bottom: calc(100% + 0.35rem);
+  left: 50%;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 9.5rem;
+  max-width: 12.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+html.dark .pr-medal-popover {
+  border-color: rgba(71, 85, 105, 0.8);
+  background: #1e293b;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.pr-medal-popover::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: #fff;
+}
+
+html.dark .pr-medal-popover::after {
+  border-top-color: #1e293b;
+}
+
+.pr-medal-popover-name {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+html.dark .pr-medal-popover-name {
+  color: #f8fafc;
+}
+
+.pr-medal-popover-desc {
+  font-size: 0.625rem;
+  line-height: 1.35;
+  color: #64748b;
+}
+
+html.dark .pr-medal-popover-desc {
+  color: #94a3b8;
+}
+
+.pr-medal-popover-date {
+  font-size: 0.5625rem;
+  color: #94a3b8;
+}
+
+.pr-profile-medals-all {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #6366f1;
+  text-decoration: none;
+}
+
+.pr-profile-medals-all:hover {
+  text-decoration: underline;
+}
+
+html.dark .pr-profile-medals-all {
+  color: #a5b4fc;
+}
+
+@media (min-width: 640px) {
+  .pr-profile-medals {
+    gap: 0.25rem;
+  }
+
+  .pr-profile-medals .pr-medal + .pr-medal {
+    margin-left: -0.2rem;
+  }
+
+  .pr-medal-disc {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .pr-medal-disc svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+}
+
+.pr-profile-medals-wrap--inline .pr-medal {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.15rem 0.2rem 0;
+}
+
+.pr-profile-medals-wrap--inline .pr-medal-disc {
+  width: 2rem;
+  height: 2rem;
+}
+
+.pr-profile-medals-wrap--inline .pr-medal-disc svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.pr-profile-medals-wrap--inline .pr-medal-ribbon {
+  width: 1.15rem;
+  height: 0.6rem;
+}
+
+.pr-profile-medals-wrap--inline .pr-medal-popover {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
+.pr-profile-medals-wrap--inline .pr-medal-popover::after {
+  left: auto;
+  right: 0.85rem;
+  margin-left: 0;
 }
 
 .pr-profile-stat {

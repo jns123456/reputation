@@ -45,7 +45,6 @@ class User(AbstractUser):
         help_text="Auth0 subject identifier (sub claim) when the account is linked to Auth0.",
     )
     bio = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to="avatars/%Y/%m/", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

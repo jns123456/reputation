@@ -175,7 +175,7 @@ if not DEBUG:
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# User uploads (avatars, pulse images) — local disk in dev; S3 in production (Heroku).
+# Pulse image uploads — local disk in dev; S3 in production (Heroku). Profile avatars are generated (DiceBear).
 USE_S3_MEDIA = env.bool("USE_S3_MEDIA", default=bool(env("AWS_STORAGE_BUCKET_NAME", default="")))
 if USE_S3_MEDIA:
     INSTALLED_APPS.append("storages")
@@ -206,7 +206,10 @@ if USE_S3_MEDIA:
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
 PULSE_MAX_IMAGE_BYTES = env.int("PULSE_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
-AVATAR_MAX_IMAGE_BYTES = env.int("AVATAR_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
+
+# Deterministic profile avatars (no storage) — https://www.dicebear.com/
+AVATAR_DICEBEAR_BASE_URL = env("AVATAR_DICEBEAR_BASE_URL", default="https://api.dicebear.com/9.x")
+AVATAR_DICEBEAR_STYLE = env("AVATAR_DICEBEAR_STYLE", default="identicon")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

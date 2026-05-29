@@ -30,7 +30,7 @@ from accounts.follow_selectors import (
     is_following,
 )
 from accounts.follow_services import toggle_follow
-from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm, AvatarUploadForm
+from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm
 from accounts.models import Bookmark, User
 from accounts.category_selectors import get_user_category_breakdown
 from accounts.notification_selectors import get_recent_notifications, get_user_notifications
@@ -327,27 +327,6 @@ def profile_edit(request):
     return render(request, "accounts/profile_edit.html", {"form": form})
 
 
-@login_required
-@require_POST
-def avatar_upload(request):
-    form = AvatarUploadForm(request.POST, request.FILES)
-    if form.is_valid():
-        from accounts.avatar_services import update_user_avatar
-
-        update_user_avatar(user=request.user, avatar=form.cleaned_data["avatar"])
-        messages.success(request, _("Profile photo updated."))
-    else:
-        messages.error(request, form.errors.get("avatar", [_("Invalid profile photo.")])[0])
-
-    if request.headers.get("HX-Request"):
-        return render(
-            request,
-            "accounts/partials/profile_avatar_upload.html",
-            {"profile_user": request.user},
-        )
-    return redirect("accounts:profile", username=request.user.username)
-
-
 def user_search(request):
     query = request.GET.get("q", "").strip()
     users = search_users(query=query) if query else []
@@ -382,12 +361,22 @@ def profile_detail(request, username):
     predictions = get_user_prediction_history(user)
     category_breakdown = get_user_category_breakdown(user)
     streak = getattr(user, "activity_streak", None)
-    from accounts.achievement_services import get_level_progress, get_user_achievements
+    from accounts.achievement_services import (
+        get_level_progress,
+        get_pop_level_progress,
+        get_user_achievements,
+    )
 
     profile = getattr(user, "profile", None)
     level = get_level_progress(getattr(profile, "reputation_points", 0))
+    pop_level = get_pop_level_progress(getattr(profile, "popularity_points", 0))
     achievements = get_user_achievements(user)
-    unlocked_count = sum(1 for _a, _at, unlocked in achievements if unlocked)
+    earned_badges = [
+        (achievement, awarded_at)
+        for achievement, awarded_at, unlocked in achievements
+        if unlocked
+    ]
+    unlocked_count = len(earned_badges)
     return render(
         request,
         "accounts/profile_detail.html",
@@ -402,7 +391,9 @@ def profile_detail(request, username):
             "streak_longest": streak.longest_streak if streak else 0,
             "streak_at_risk": streak.is_at_risk() if streak else False,
             "level": level,
+            "pop_level": pop_level,
             "achievements": achievements,
+            "earned_badges": earned_badges,
             "achievements_unlocked": unlocked_count,
             "achievements_total": len(achievements),
         },

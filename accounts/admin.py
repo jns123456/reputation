@@ -58,7 +58,6 @@ class UserAdmin(BaseUserAdmin):
                     "email_verified_at",
                     "is_ai_agent",
                     "bio",
-                    "avatar",
                 )
             },
         ),
@@ -76,7 +75,6 @@ class UserAdmin(BaseUserAdmin):
                     "email_verified_at",
                     "is_ai_agent",
                     "bio",
-                    "avatar",
                 )
             },
         ),

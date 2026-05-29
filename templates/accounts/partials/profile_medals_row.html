@@ -1,0 +1,38 @@
+{% load i18n %}
+{# Earned badges as military medals — inline beside the profile name by default. #}
+<div class="pr-profile-medals-wrap{% if inline %} pr-profile-medals-wrap--inline{% endif %}"
+     x-data="{ openMedal: null }"
+     @click.outside="openMedal = null">
+  {% if not inline %}
+  <p class="pr-profile-medals-label">
+    <i data-lucide="award" class="h-3.5 w-3.5" aria-hidden="true"></i>
+    {% trans "Decorations" %}
+  </p>
+  {% else %}
+  <span class="sr-only">{% trans "Earned badges" %}</span>
+  {% endif %}
+  <div class="pr-profile-medals" role="list" aria-label="{% trans 'Earned badges' %}">
+    {% for achievement, awarded_at in earned_badges %}
+      {% if "popular" in achievement.code %}
+        {% with ribbon_variant="pop" %}
+          {% include "accounts/partials/profile_medal.html" %}
+        {% endwith %}
+      {% elif "streak" in achievement.code %}
+        {% with ribbon_variant="streak" %}
+          {% include "accounts/partials/profile_medal.html" %}
+        {% endwith %}
+      {% elif "correct" in achievement.code or "sharp" in achievement.code %}
+        {% with ribbon_variant="merit" %}
+          {% include "accounts/partials/profile_medal.html" %}
+        {% endwith %}
+      {% else %}
+        {% with ribbon_variant="forecast" %}
+          {% include "accounts/partials/profile_medal.html" %}
+        {% endwith %}
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% if not inline %}
+  <a href="#profile-badges" class="pr-profile-medals-all">{% trans "All badges" %} →</a>
+  {% endif %}
+</div>

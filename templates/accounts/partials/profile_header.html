@@ -4,12 +4,17 @@
 
   <div class="pr-profile-header-body">
     <div class="pr-profile-header-main">
-      {% include "accounts/partials/profile_avatar_upload.html" %}
+      {% include "accounts/partials/profile_avatar.html" %}
 
       <div class="pr-profile-identity">
-        <h1 class="pr-profile-name">
-          {% include "accounts/partials/user_display_name.html" with user=profile_user %}
-        </h1>
+        <div class="pr-profile-name-row">
+          <h1 class="pr-profile-name">
+            {% include "accounts/partials/user_display_name.html" with user=profile_user %}
+          </h1>
+          {% if earned_badges %}
+          {% include "accounts/partials/profile_medals_row.html" with inline=True %}
+          {% endif %}
+        </div>
 
         <div class="pr-profile-meta">
           {% if profile_user.show_username_publicly %}

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import polib
 
+from achievements_i18n_fixes import ACHIEVEMENTS_I18N_FIXES
 from phase1_i18n_fixes import (
     PHASE1_FIXES,
     PHASE1_PLURAL_FIXES,
@@ -23,7 +24,12 @@ from phase3_i18n_fixes import PHASE3_FIXES, PHASE3_PLURAL_FIXES
 PO_PATH = Path(__file__).resolve().parent.parent / "locale" / "es" / "LC_MESSAGES" / "django.po"
 
 # Phase overrides take precedence over legacy FIXES below.
-FIXES: dict[str, str] = {**PHASE1_FIXES, **PHASE2_FIXES, **PHASE3_FIXES}
+FIXES: dict[str, str] = {
+    **PHASE1_FIXES,
+    **PHASE2_FIXES,
+    **PHASE3_FIXES,
+    **ACHIEVEMENTS_I18N_FIXES,
+}
 PLURAL_FIXES: dict[str, tuple[str, str]] = {
     **PHASE1_PLURAL_FIXES,
     **PHASE2_PLURAL_FIXES,

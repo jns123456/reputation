@@ -16,7 +16,6 @@ urlpatterns = [
     path("auth0/login/", views.auth0_login, name="auth0_login"),
     path("auth0/callback/", views.auth0_callback, name="auth0_callback"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),
-    path("profile/avatar/", views.avatar_upload, name="avatar_upload"),
     path("settings/alerts/", views.alert_settings, name="alert_settings"),
     path("notifications/", views.notifications_list, name="notifications"),
     path(

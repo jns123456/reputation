@@ -1,100 +1,51 @@
-import tempfile
-from io import BytesIO
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from django.utils import timezone
 
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase, override_settings
-from PIL import Image
+from accounts.avatar_services import avatar_seed, generated_avatar_url
 
-from accounts.forms import ProfileEditForm
-from accounts.models import User
+User = get_user_model()
 
 
-def _test_avatar(name="avatar.png", content_type="image/png"):
-    buffer = BytesIO()
-    Image.new("RGB", (8, 8), color="blue").save(buffer, format="PNG")
-    buffer.seek(0)
-    return SimpleUploadedFile(name, buffer.read(), content_type=content_type)
-
-
-@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
-class AvatarUploadTests(TestCase):
+@override_settings(EMAIL_VERIFICATION_REQUIRED=False)
+class GeneratedAvatarTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             username="avataruser",
+            email="avatar@example.com",
             password="pass",
+            display_name="Avatar User",
+            email_verified_at=timezone.now(),
             onboarding_completed=True,
         )
-        self.client = Client()
+
+    def test_seed_uses_primary_key(self):
+        self.assertEqual(avatar_seed(self.user), str(self.user.pk))
+
+    def test_generated_url_is_stable(self):
+        self.assertEqual(
+            generated_avatar_url(self.user),
+            generated_avatar_url(self.user),
+        )
+
+    @override_settings(
+        AVATAR_DICEBEAR_BASE_URL="https://api.dicebear.com/9.x",
+        AVATAR_DICEBEAR_STYLE="identicon",
+    )
+    def test_generated_url_contains_seed_and_style(self):
+        url = generated_avatar_url(self.user, size=128)
+        self.assertIn("identicon/png", url)
+        self.assertIn(f"seed={self.user.pk}", url)
+        self.assertIn("size=128", url)
+
+    def test_profile_page_renders_generated_avatar(self):
         self.client.login(username="avataruser", password="pass")
-
-    def test_avatar_upload_updates_profile_photo(self):
-        response = self.client.post(
-            "/accounts/profile/avatar/",
-            {"avatar": _test_avatar()},
-        )
-        self.assertEqual(response.status_code, 302)
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.avatar)
-        self.assertIn("avatars/", self.user.avatar.name)
-
-    def test_avatar_upload_rejects_large_file(self):
-        large = SimpleUploadedFile(
-            "large.png",
-            b"x" * (5 * 1024 * 1024 + 1),
-            content_type="image/png",
-        )
-        response = self.client.post(
-            "/accounts/profile/avatar/",
-            {"avatar": large},
-        )
-        self.assertEqual(response.status_code, 302)
-        self.user.refresh_from_db()
-        self.assertFalse(self.user.avatar)
-
-    def test_profile_edit_form_saves_avatar(self):
-        form = ProfileEditForm(
-            data={
-                "email": self.user.email,
-                "display_name": "",
-                "identity_mode": User.IdentityMode.PUBLIC,
-                "bio": "",
-            },
-            files={"avatar": _test_avatar()},
-            instance=self.user,
-        )
-        self.assertTrue(form.is_valid(), form.errors)
-        self.assertIsNotNone(form.cleaned_data.get("avatar"))
-        form.save()
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.avatar)
-
-    def test_profile_edit_can_upload_avatar(self):
-        response = self.client.post(
-            "/accounts/profile/edit/",
-            {
-                "email": self.user.email,
-                "display_name": "",
-                "identity_mode": User.IdentityMode.PUBLIC,
-                "bio": "",
-                "avatar": _test_avatar(),
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.avatar)
-
-    def test_profile_page_shows_change_photo_control_for_owner(self):
         response = self.client.get("/accounts/users/avataruser/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Change profile photo")
+        html = response.content.decode()
+        self.assertIn(f"seed={self.user.pk}", html)
+        self.assertIn("api.dicebear.com", html)
 
-    def test_profile_page_hides_change_photo_control_for_other_users(self):
-        other = User.objects.create_user(
-            username="viewer",
-            password="pass",
-            onboarding_completed=True,
-        )
-        self.client.login(username="viewer", password="pass")
-        response = self.client.get("/accounts/users/avataruser/")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Change profile photo")
+    def test_avatar_upload_endpoint_removed(self):
+        response = self.client.post("/accounts/profile/avatar/")
+        self.assertEqual(response.status_code, 404)

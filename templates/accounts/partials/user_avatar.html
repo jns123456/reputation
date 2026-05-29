@@ -1,5 +1,10 @@
-{% if user.avatar %}
-<img src="{{ user.avatar.url }}" alt="" class="pr-user-avatar-img{% if extra_class %} {{ extra_class }}{% endif %}">
-{% else %}
-<span class="pr-user-avatar-fallback{% if extra_class %} {{ extra_class }}{% endif %}">{{ user.public_name|slice:":1"|upper }}</span>
+{% load avatar_tags %}
+{% if user %}
+<img src="{% user_avatar_url user %}"
+     alt=""
+     class="pr-user-avatar-img{% if extra_class %} {{ extra_class }}{% endif %}"
+     width="96"
+     height="96"
+     loading="lazy"
+     decoding="async">
 {% endif %}

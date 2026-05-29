@@ -11,7 +11,11 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.achievement_services import evaluate_achievements, get_level_progress
+from accounts.achievement_services import (
+    evaluate_achievements,
+    get_level_progress,
+    get_pop_level_progress,
+)
 from accounts.models import (
     Notification,
     NotificationPreference,
@@ -201,6 +205,28 @@ class LevelTests(TestCase):
     def test_progress_between_levels(self):
         # Apprentice floor 50, Analyst 150 -> 100 points = 50% of the way.
         level = get_level_progress(100)
+        self.assertEqual(level["progress_pct"], 50)
+
+
+class PopLevelTests(TestCase):
+    def test_newcomer_floor(self):
+        level = get_pop_level_progress(0)
+        self.assertEqual(level["level"], 1)
+        self.assertFalse(level["is_max"])
+
+    def test_negative_points_clamp_to_newcomer(self):
+        level = get_pop_level_progress(-50)
+        self.assertEqual(level["level"], 1)
+        self.assertEqual(level["progress_pct"], 0)
+
+    def test_max_level(self):
+        level = get_pop_level_progress(99999)
+        self.assertTrue(level["is_max"])
+        self.assertIsNone(level["next_threshold"])
+
+    def test_progress_between_levels(self):
+        # Chatter floor 25, Regular 75 -> 50 points = 50% of the way.
+        level = get_pop_level_progress(50)
         self.assertEqual(level["progress_pct"], 50)
 
 

@@ -3,7 +3,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from accounts.avatar_services import validate_avatar_file
 from accounts.models import NotificationPreference, User
 
 
@@ -108,17 +107,6 @@ class ProfileEditForm(forms.ModelForm):
         label=_("How do you want to appear?"),
         widget=forms.RadioSelect,
     )
-    avatar = forms.ImageField(
-        required=False,
-        label=_("Profile photo"),
-        help_text=_("JPEG, PNG, WebP, or GIF. Max 5 MB."),
-        widget=forms.FileInput(
-            attrs={
-                "class": "form-input file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-700",
-                "accept": "image/jpeg,image/png,image/webp,image/gif",
-            }
-        ),
-    )
     verification_requested = forms.BooleanField(
         required=False,
         label=_("Request verified identity"),
@@ -173,42 +161,6 @@ class ProfileEditForm(forms.ModelForm):
             )
         cleaned_data["display_name"] = display_name
         return cleaned_data
-
-    def clean_avatar(self):
-        avatar = self.cleaned_data.get("avatar")
-        validate_avatar_file(avatar=avatar)
-        return avatar
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        avatar = self.cleaned_data.get("avatar")
-        if avatar:
-            from accounts.avatar_services import update_user_avatar
-
-            if commit:
-                user.save()
-            update_user_avatar(user=user, avatar=avatar)
-        elif commit:
-            user.save()
-        return user
-
-
-class AvatarUploadForm(forms.Form):
-    avatar = forms.ImageField(
-        label=_("Profile photo"),
-        widget=forms.FileInput(
-            attrs={
-                "accept": "image/jpeg,image/png,image/webp,image/gif",
-                "class": "sr-only",
-            }
-        ),
-    )
-
-    def clean_avatar(self):
-        avatar = self.cleaned_data["avatar"]
-        validate_avatar_file(avatar=avatar)
-        return avatar
-
 
 class NotificationPreferenceForm(forms.ModelForm):
     class Meta:

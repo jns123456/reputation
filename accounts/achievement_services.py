@@ -2,14 +2,14 @@
 
 Both systems are **popularity-flavored social proof**: they reflect activity and
 milestones, and must never alter predictive reputation points (AGENTS.md §6).
-Levels are derived purely from a user's reputation_points for display ordering
-(a credibility ladder), while achievements are durable, append-only badges.
+Reputation levels use ``reputation_points``; popularity levels use
+``popularity_points``. Achievements are durable, append-only badges.
 """
 
 from dataclasses import dataclass
 from typing import Callable
 
-from django.utils.translation import gettext_lazy as _lazy
+from django.utils.translation import gettext_lazy as _
 
 
 # --------------------------------------------------------------------------- #
@@ -17,36 +17,47 @@ from django.utils.translation import gettext_lazy as _lazy
 # --------------------------------------------------------------------------- #
 
 # (min_points, title). Must stay sorted ascending by min_points.
-LEVEL_THRESHOLDS = (
-    (0, _lazy("Rookie")),
-    (50, _lazy("Apprentice")),
-    (150, _lazy("Analyst")),
-    (350, _lazy("Forecaster")),
-    (700, _lazy("Sharp")),
-    (1500, _lazy("Oracle")),
-    (3000, _lazy("Legend")),
+REP_LEVEL_THRESHOLDS = (
+    (0, _("Rookie")),
+    (50, _("Apprentice")),
+    (150, _("Analyst")),
+    (350, _("Forecaster")),
+    (700, _("Sharp")),
+    (1500, _("Oracle")),
+    (3000, _("Legend")),
 )
 
+# Social engagement ladder — derived from popularity_points only.
+POP_LEVEL_THRESHOLDS = (
+    (0, _("Newcomer")),
+    (25, _("Chatter")),
+    (75, _("Regular")),
+    (200, _("Connector")),
+    (500, _("Influencer")),
+    (1000, _("Crowd Favorite")),
+    (2500, _("Community Icon")),
+)
 
-def get_level_progress(reputation_points):
-    """Return level metadata for a reputation score.
+# Backwards-compatible alias for imports/tests.
+LEVEL_THRESHOLDS = REP_LEVEL_THRESHOLDS
 
-    ``reputation_points`` may be negative (bad forecasters); we clamp display
-    progress to the Rookie floor. Returns a dict with: ``level`` (1-indexed),
-    ``title``, ``current_floor``, ``next_threshold`` (None at max),
-    ``progress_pct`` (toward next level), ``points``.
-    """
-    points = int(reputation_points or 0)
+
+def _get_level_progress(points, thresholds, *, clamp_points_at_zero=False):
+    """Return level metadata for a point total and threshold table."""
+    points = int(points or 0)
+    if clamp_points_at_zero:
+        points = max(0, points)
+
     level_index = 0
-    for idx, (floor, _title) in enumerate(LEVEL_THRESHOLDS):
+    for idx, (floor, _title) in enumerate(thresholds):
         if points >= floor:
             level_index = idx
         else:
             break
 
-    floor, title = LEVEL_THRESHOLDS[level_index]
-    is_max = level_index >= len(LEVEL_THRESHOLDS) - 1
-    next_threshold = None if is_max else LEVEL_THRESHOLDS[level_index + 1][0]
+    floor, title = thresholds[level_index]
+    is_max = level_index >= len(thresholds) - 1
+    next_threshold = None if is_max else thresholds[level_index + 1][0]
 
     if is_max:
         progress_pct = 100
@@ -64,6 +75,28 @@ def get_level_progress(reputation_points):
         "points": points,
         "is_max": is_max,
     }
+
+
+def get_level_progress(reputation_points):
+    """Return reputation level metadata (credibility ladder).
+
+    ``reputation_points`` may be negative; progress toward the next tier is
+    clamped at the current floor.
+    """
+    return _get_level_progress(
+        reputation_points,
+        REP_LEVEL_THRESHOLDS,
+        clamp_points_at_zero=False,
+    )
+
+
+def get_pop_level_progress(popularity_points):
+    """Return popularity level metadata (social engagement ladder)."""
+    return _get_level_progress(
+        popularity_points,
+        POP_LEVEL_THRESHOLDS,
+        clamp_points_at_zero=True,
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -86,64 +119,64 @@ class Achievement:
 ACHIEVEMENTS = (
     Achievement(
         "first_forecast",
-        _lazy("First Forecast"),
-        _lazy("Published your first prediction."),
+        _("First Forecast"),
+        _("Published your first prediction."),
         "flag",
         lambda s: s["prediction_count"] >= 1,
     ),
     Achievement(
         "forecaster_10",
-        _lazy("Getting Serious"),
-        _lazy("Published 10 predictions."),
+        _("Getting Serious"),
+        _("Published 10 predictions."),
         "target",
         lambda s: s["prediction_count"] >= 10,
     ),
     Achievement(
         "forecaster_50",
-        _lazy("Prolific Forecaster"),
-        _lazy("Published 50 predictions."),
+        _("Prolific Forecaster"),
+        _("Published 50 predictions."),
         "crosshair",
         lambda s: s["prediction_count"] >= 50,
     ),
     Achievement(
         "first_correct",
-        _lazy("On the Board"),
-        _lazy("Got your first prediction right."),
+        _("On the Board"),
+        _("Got your first prediction right."),
         "check-circle",
         lambda s: s["correct_prediction_count"] >= 1,
     ),
     Achievement(
         "sharp_10",
-        _lazy("Sharp Eye"),
-        _lazy("Resolved 10 predictions correctly."),
+        _("Sharp Eye"),
+        _("Resolved 10 predictions correctly."),
         "eye",
         lambda s: s["correct_prediction_count"] >= 10,
     ),
     Achievement(
         "popular_100",
-        _lazy("Crowd Favorite"),
-        _lazy("Earned 100 popularity points."),
+        _("Crowd Favorite"),
+        _("Earned 100 popularity points."),
         "heart",
         lambda s: s["popularity_points"] >= 100,
     ),
     Achievement(
         "popular_500",
-        _lazy("Community Voice"),
-        _lazy("Earned 500 popularity points."),
+        _("Community Voice"),
+        _("Earned 500 popularity points."),
         "megaphone",
         lambda s: s["popularity_points"] >= 500,
     ),
     Achievement(
         "streak_7",
-        _lazy("Week Warrior"),
-        _lazy("Reached a 7-day activity streak."),
+        _("Week Warrior"),
+        _("Reached a 7-day activity streak."),
         "flame",
         lambda s: s["longest_streak"] >= 7,
     ),
     Achievement(
         "streak_30",
-        _lazy("Unstoppable"),
-        _lazy("Reached a 30-day activity streak."),
+        _("Unstoppable"),
+        _("Reached a 30-day activity streak."),
         "zap",
         lambda s: s["longest_streak"] >= 30,
     ),

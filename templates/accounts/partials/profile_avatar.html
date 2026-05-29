@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="pr-profile-avatar-wrap">
+  <div class="pr-profile-avatar" aria-hidden="true">
+    <span class="pr-profile-avatar-inner">
+      {% include "accounts/partials/user_avatar.html" with user=profile_user extra_class="pr-profile-avatar-media" %}
+    </span>
+  </div>
+  <p class="sr-only">{% trans "Your avatar is unique to your account." %}</p>
+</div>

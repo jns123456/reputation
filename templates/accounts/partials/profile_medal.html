@@ -1,0 +1,23 @@
+{% load i18n %}
+{# Single earned badge as a military-style medal (ribbon + disc). #}
+<button type="button"
+        class="pr-medal"
+        @click.stop="openMedal = openMedal === '{{ achievement.code }}' ? null : '{{ achievement.code }}'"
+        :aria-expanded="openMedal === '{{ achievement.code }}'"
+        aria-label="{% blocktrans with name=achievement.name %}{{ name }} badge{% endblocktrans %}">
+  <span class="pr-medal-ribbon pr-medal-ribbon--{{ ribbon_variant }}" aria-hidden="true"></span>
+  <span class="pr-medal-disc" aria-hidden="true">
+    <i data-lucide="{{ achievement.icon }}"></i>
+  </span>
+  <span x-show="openMedal === '{{ achievement.code }}'"
+        x-cloak
+        x-transition.opacity.duration.150ms
+        class="pr-medal-popover"
+        role="tooltip">
+    <span class="pr-medal-popover-name">{{ achievement.name }}</span>
+    <span class="pr-medal-popover-desc">{{ achievement.description }}</span>
+    {% if awarded_at %}
+    <span class="pr-medal-popover-date">{% blocktrans with date=awarded_at|date:"M j, Y" %}Earned {{ date }}{% endblocktrans %}</span>
+    {% endif %}
+  </span>
+</button>
