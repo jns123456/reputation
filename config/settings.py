@@ -352,7 +352,7 @@ if _redis_url and USE_REDIS_CACHE:
         redis_cache_options["ssl_cert_reqs"] = None
     CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "BACKEND": "config.cache_backends.ResilientRedisCache",
             "LOCATION": redis_url,
             "OPTIONS": redis_cache_options,
         }
