@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import Client, TestCase
 
 from accounts.models import Bookmark, User
@@ -24,13 +25,27 @@ class StaticPageTests(TestCase):
         self.assertContains(response, "ops@predictstamp.com")
         self.assertContains(response, "No betting or trading")
 
-    def test_landing_about_shows_company_links(self):
+
+class LandingPageI18nTests(TestCase):
+    def test_landing_renders_english_copy_by_default(self):
         response = self.client.get("/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "TAO FACTORY LLC")
-        self.assertContains(response, "/legal/")
-        self.assertContains(response, "/terms/")
+        self.assertContains(response, "Domains and topics:")
+        self.assertContains(response, "What we track")
+        self.assertContains(response, "Compete without betting")
+        self.assertContains(response, "Reputation vs Popularity")
+
+    def test_landing_renders_spanish_copy_with_language_cookie(self):
+        self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Dominios y temas:")
+        self.assertContains(response, "Qué registramos")
+        self.assertContains(response, "Compite sin apostar")
+        self.assertContains(response, "Reputación vs. Popularidad")
+        self.assertNotContains(response, "Domains and topics:")
 
 
 class ForecastsPageTests(TestCase):

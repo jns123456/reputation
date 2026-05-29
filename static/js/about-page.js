@@ -13,7 +13,6 @@ document.addEventListener("alpine:init", function () {
       { id: "leaderboards", label: "Rankings" },
       { id: "social", label: "Social" },
       { id: "future", label: "Future" },
-      { id: "company", label: "Company" },
       { id: "cta", label: "Start" },
     ],
     scrollTo: function (id) {
@@ -29,26 +28,6 @@ document.addEventListener("alpine:init", function () {
       leaderboardMode: "reputation",
       expandedPor: null,
       scoreFocus: "reputation",
-      activeDomain: null,
-      expandedQuestion: null,
-      domains: i18n.domains || [
-        "Geopolitics",
-        "Sports",
-        "Crypto",
-        "Elections",
-        "Macro",
-        "Energy",
-        "Tech",
-        "Culture",
-      ],
-      questions: i18n.questions || [
-        { id: "why", q: "Why do you believe this?" },
-        { id: "conf", q: "How confident are you?" },
-        { id: "mind", q: "Did you change your mind?" },
-        { id: "early", q: "Were you early or late?" },
-        { id: "age", q: "Did your reasoning age well?" },
-        { id: "domain", q: "Are you right in this domain?" },
-      ],
       moneyPoints: i18n.moneyPoints || [
         "Rewards capital, not necessarily insight",
         "Excludes anyone without funds to wager",
@@ -72,8 +51,6 @@ document.addEventListener("alpine:init", function () {
         "Bankroll size",
       ],
       rankByPrefix: i18n.rankByPrefix || "Rank by ",
-      becomeKnownForTemplate: i18n.becomeKnownForTemplate || "Become known for %(domain)s — a living map of who has good judgment.",
-      forecastContextHint: i18n.forecastContextHint || "Every forecast captures context — not just yes or no, but why, when, and how confident.",
       init: function () {
         var self = this;
         this._onScroll = function () {
@@ -81,10 +58,6 @@ document.addEventListener("alpine:init", function () {
         };
         window.addEventListener("scroll", this._onScroll, { passive: true });
         this.updateScrollState();
-      },
-      becomeKnownFor: function (domain) {
-        if (!domain) return "";
-        return (this.becomeKnownForTemplate || "").replace("%(domain)s", domain.toLowerCase());
       },
       updateScrollState: function () {
         var nav = Alpine.store("aboutNav");
