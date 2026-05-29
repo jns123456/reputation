@@ -79,16 +79,63 @@ def notification_icon(notification):
     return mark_safe(icons.get(notification.notification_type, ""))
 
 
+def _challenge_market_resolved_message(notification):
+    from django.urls import reverse
+
+    challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
+    challenge_title = notification.challenge.display_title
+    market_title = notification.market.display_title if notification.market_id else _("An event")
+    outcome = notification.market.resolved_outcome if notification.market_id else ""
+    outcome_html = (
+        format_html(' {}: <span class="font-semibold">{}</span>.', _("Result"), outcome)
+        if outcome
+        else ""
+    )
+    return format_html(
+        '{in_text} <a href="{url}" class="text-brand-600 hover:underline">{title}</a>, '
+        '<span class="font-semibold">{market}</span> {resolved}{outcome}',
+        in_text=_("In"),
+        url=challenge_url,
+        title=challenge_title,
+        market=market_title,
+        resolved=_("was resolved."),
+        outcome=mark_safe(outcome_html),
+    )
+
+
+def _challenge_completed_message(notification):
+    from django.urls import reverse
+
+    challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
+    challenge_title = notification.challenge.display_title
+    winner = notification.challenge.winner
+    if winner and winner.id == notification.recipient_id:
+        return format_html(
+            '{} <a href="{}" class="text-brand-600 hover:underline">{}</a>!',
+            _("You won"),
+            challenge_url,
+            challenge_title,
+        )
+    if winner:
+        return format_html(
+            '<a href="{}" class="text-brand-600 hover:underline">{}</a> {} '
+            '<span class="font-semibold">{}</span>.',
+            challenge_url,
+            challenge_title,
+            _("is complete. Winner:"),
+            winner.public_name,
+        )
+    return format_html(
+        '<a href="{}" class="text-brand-600 hover:underline">{}</a> {}.',
+        challenge_url,
+        challenge_title,
+        _("ended in a tie"),
+    )
+
+
 @register.simple_tag
 def notification_message(notification, compact=False):
     from django.urls import reverse
-    from django.template.loader import render_to_string
-
-    from challenges.notification_formatting import _build_standings_summary
-    from challenges.selectors import (
-        get_challenge_standings,
-        get_challenge_standings_snapshot_for_market,
-    )
 
     actor = _actor_link(notification)
     t = notification.notification_type
@@ -163,106 +210,10 @@ def notification_message(notification, compact=False):
         )
 
     if t == Notification.NotificationType.CHALLENGE_MARKET_RESOLVED and notification.challenge_id:
-        challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
-        challenge_title = notification.challenge.display_title
-        market_title = notification.market.display_title if notification.market_id else _("An event")
-        outcome = notification.market.resolved_outcome if notification.market_id else ""
-        outcome_html = (
-            format_html(' {}: <span class="font-semibold">{}</span>.', _("Result"), outcome)
-            if outcome
-            else ""
-        )
-        standings = []
-        if notification.market_id:
-            standings = get_challenge_standings_snapshot_for_market(
-                challenge=notification.challenge,
-                market=notification.market,
-            )
-        if compact:
-            summary = _build_standings_summary(standings) if standings else ""
-            summary_html = (
-                format_html(" {}: {}.", _("Standings"), summary) if summary else ""
-            )
-            return mark_safe(
-                format_html(
-                    "{in_challenge} <span class=\"font-semibold\">{challenge}</span>, "
-                    "<span class=\"font-semibold\">{market}</span> {resolved}{outcome}{summary}",
-                    in_challenge=_("In"),
-                    challenge=challenge_title,
-                    market=market_title,
-                    resolved=_("was resolved."),
-                    outcome=mark_safe(outcome_html),
-                    summary=mark_safe(summary_html),
-                )
-            )
-        table_html = render_to_string(
-            "challenges/partials/standings_table.html",
-            {"standings": standings, "compact": False},
-        )
-        return mark_safe(
-            format_html(
-                '<p>{in_text} <a href="{url}" class="text-brand-600 hover:underline">{title}</a>, '
-                '<span class="font-semibold">{market}</span> {resolved}{outcome}</p>'
-                '<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{standings_label}</p>'
-                "{table}",
-                in_text=_("In"),
-                url=challenge_url,
-                title=challenge_title,
-                market=market_title,
-                resolved=_("was resolved."),
-                outcome=mark_safe(outcome_html),
-                standings_label=_("Standings"),
-                table=mark_safe(table_html),
-            )
-        )
+        return _challenge_market_resolved_message(notification)
 
     if t == Notification.NotificationType.CHALLENGE_COMPLETED and notification.challenge_id:
-        challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
-        challenge_title = notification.challenge.display_title
-        winner = notification.challenge.winner
-        standings = get_challenge_standings(notification.challenge)
-        if winner and winner.id == notification.recipient_id:
-            headline = format_html(
-                '{} <a href="{}" class="text-brand-600 hover:underline">{}</a>!',
-                _("You won"),
-                challenge_url,
-                challenge_title,
-            )
-        elif winner:
-            headline = format_html(
-                '<a href="{}" class="text-brand-600 hover:underline">{}</a> {} '
-                '<span class="font-semibold">{}</span>.',
-                challenge_url,
-                challenge_title,
-                _("is complete. Winner:"),
-                winner.public_name,
-            )
-        else:
-            headline = format_html(
-                '<a href="{}" class="text-brand-600 hover:underline">{}</a> {}.',
-                challenge_url,
-                challenge_title,
-                _("ended in a tie"),
-            )
-        if compact:
-            summary = _build_standings_summary(standings) if standings else ""
-            summary_html = (
-                format_html(" {}: {}.", _("Final standings"), summary) if summary else ""
-            )
-            return mark_safe(format_html("{}{}", headline, mark_safe(summary_html)))
-        table_html = render_to_string(
-            "challenges/partials/standings_table.html",
-            {"standings": standings, "compact": False},
-        )
-        return mark_safe(
-            format_html(
-                "<p>{}</p>"
-                '<p class="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{}</p>{}',
-                headline,
-                _("Final standings"),
-                mark_safe(table_html),
-            )
-        )
+        return _challenge_completed_message(notification)
 
     return format_html("{} {}", actor, _("sent you a notification"))
 

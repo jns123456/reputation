@@ -72,7 +72,7 @@ class ForecastForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        if self.market and not self.market.is_open:
+        if self.market and not self.market.is_forecastable:
             raise forms.ValidationError(_("This market is no longer open for forecasts."))
         return cleaned
 

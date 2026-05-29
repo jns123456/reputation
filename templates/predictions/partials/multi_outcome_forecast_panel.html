@@ -44,7 +44,7 @@
           {{ outcome.prob_percent }}%
         </div>
         <div class="col-span-2 flex gap-2 sm:col-span-1">
-          {% if user.is_authenticated and market.is_open and not existing_forecast %}
+          {% if user.is_authenticated and market.is_forecastable and not existing_forecast %}
           <button
             type="button"
             class="flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold transition"
@@ -80,7 +80,7 @@
         </div>
       </div>
 
-      {% if user.is_authenticated and market.is_open and not existing_forecast %}
+      {% if user.is_authenticated and market.is_forecastable and not existing_forecast %}
       <div
         x-show="activeKey === {{ forloop.counter0 }}"
         x-cloak

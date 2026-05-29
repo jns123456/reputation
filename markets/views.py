@@ -20,6 +20,7 @@ from challenges.selectors import get_active_challenge_contexts_for_market
 from integrations.kalshi.embed import build_kalshi_embed_context
 from integrations.polymarket.embed import build_polymarket_embed_context
 from integrations.celery_utils import enqueue_market_refresh_if_stale
+from markets.ending_filters import ENDING_WINDOW_CHOICES, ending_window_hours, normalize_ending_filter
 from markets.models import Market
 from markets.selectors import get_market_categories, get_market_hub_category_summaries, get_markets_for_display
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
@@ -82,18 +83,24 @@ def market_list(request):
     search = request.GET.get("q", "")
     source = normalize_source_filter(request.GET.get("source", ""))
     sort = normalize_sort_filter(request.GET.get("sort", ""))
+    ending = normalize_ending_filter(request.GET.get("ending", ""))
+    ending_hours = ending_window_hours(ending)
+
+    # The ending-soon window operates on open markets only.
+    effective_status = Market.Status.OPEN if ending else status
 
     markets = get_markets_for_display(
-        status=status or None,
+        status=effective_status or None,
         category=category or None,
         search=search or None,
         source=source or None,
         sort=sort or None,
+        ending_within_hours=ending_hours,
     )
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("markets:all"),
         active_source=source,
-        extra={"q": search, "status": status, "category": category, "sort": sort},
+        extra={"q": search, "status": status, "category": category, "sort": sort, "ending": ending},
     )
     return render(
         request,
@@ -105,6 +112,8 @@ def market_list(request):
             "current_category": category,
             "current_source": source,
             "current_sort": sort,
+            "current_ending": ending,
+            "ending_choices": ENDING_WINDOW_CHOICES,
             "sort_choices": MARKET_SORT_CHOICES,
             "search_query": search,
             "source_filter_urls": source_filter_urls,
@@ -143,7 +152,7 @@ def market_detail(request, slug):
     existing_forecast = None
     forecast_form = None
     active_challenges = []
-    if request.user.is_authenticated and market.is_open:
+    if request.user.is_authenticated and market.is_forecastable:
         existing_forecast = get_user_active_prediction(request.user, market)
         forecast_form = (
             ForecastForm(market=market) if not existing_forecast else None

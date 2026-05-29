@@ -682,6 +682,8 @@ def normalize_polymarket_event_record(
         "close_date": close_date,
         "resolution_date": close_date if status == "resolved" else None,
         "resolved_outcome": resolved_outcome,
+        "accepting_orders": _any_accepts_orders(open_markets),
+        "game_start_time": _parse_date(event.get("gameStartTime")),
         "polymarket_slug": slug[:550],
     }
 
@@ -781,6 +783,7 @@ def normalize_polymarket_record(raw, *, default_category=""):
 
     end_date = raw.get("endDate") or raw.get("end_date_iso") or raw.get("closeTime")
     close_date = _parse_date(end_date)
+    game_start_time = _parse_date(raw.get("gameStartTime"))
 
     category = raw.get("category") or raw.get("groupItemTitle") or default_category
     if isinstance(category, list):
@@ -798,8 +801,31 @@ def normalize_polymarket_record(raw, *, default_category=""):
         "close_date": close_date,
         "resolution_date": close_date if resolved else None,
         "resolved_outcome": str(resolved_outcome)[:255],
+        "accepting_orders": _accepts_orders(raw),
+        "game_start_time": game_start_time,
         "polymarket_slug": raw.get("slug", "")[:550],
     }
+
+
+def _accepts_orders(raw):
+    """Whether a single source market is still accepting orders.
+
+    Polymarket flips ``acceptingOrders`` to false when a market stops trading
+    (event started, suspended, or resolving) — typically before ``closed`` or
+    ``resolved`` are set. A missing flag defaults to True so markets that do not
+    carry it are not over-blocked.
+    """
+    value = raw.get("acceptingOrders")
+    if value is None:
+        return True
+    return bool(value)
+
+
+def _any_accepts_orders(raw_markets):
+    """True if any sub-market of a grouped event still accepts orders."""
+    if not raw_markets:
+        return False
+    return any(_accepts_orders(market) for market in raw_markets)
 
 
 def _parse_date(value):

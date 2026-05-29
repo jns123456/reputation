@@ -1,0 +1,4 @@
+<p id="open-count-stat" class="pr-stat-value" hx-swap-oob="true">{{ open_count }}</p>
+<p id="unrealized-rep-stat" class="pr-stat-value {% if total_delta >= 0 %}text-rep-600{% else %}text-red-600{% endif %}" hx-swap-oob="true">
+  {% if total_delta >= 0 %}+{% endif %}{{ total_delta }}
+</p>

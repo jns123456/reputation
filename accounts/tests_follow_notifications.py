@@ -410,3 +410,97 @@ class PredictionResolvedNotificationTests(SkipMarketRefreshTestsMixin, TestCase)
     def test_default_preference_is_enabled(self):
         preferences = get_or_create_notification_preferences(self.user)
         self.assertTrue(preferences.notify_prediction_resolved)
+
+
+class NotificationViewsPerformanceTests(SkipMarketRefreshTestsMixin, TestCase):
+    """Dropdown and list views must not recompute challenge standings per row."""
+
+    def setUp(self):
+        super().setUp()
+        from django.utils import timezone
+
+        from accounts.models import UserFollow
+        from challenges.notification_services import notify_challenge_market_resolved
+        from challenges.services import accept_challenge, create_challenge
+
+        self.recipient = create_user("notifperf")
+        self.creator = create_user("chcreator")
+        UserFollow.objects.create(follower=self.recipient, following=self.creator)
+        UserFollow.objects.create(follower=self.creator, following=self.recipient)
+
+        self.market = create_market(slug="ch-perf-m1", external_id="ch-perf-m1")
+        self.challenge = create_challenge(
+            creator=self.creator,
+            title="Perf challenge",
+            market_ids=[self.market.id],
+            opponent_ids=[self.recipient.id],
+        )
+        accept_challenge(challenge=self.challenge, user=self.recipient)
+        self.challenge.refresh_from_db()
+        if not self.challenge.started_at:
+            self.challenge.started_at = timezone.now()
+            self.challenge.status = self.challenge.Status.ACTIVE
+            self.challenge.save(update_fields=["started_at", "status"])
+
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.resolution_date = timezone.now()
+        self.market.save()
+        notify_challenge_market_resolved(challenge=self.challenge, market=self.market)
+
+        for index in range(7):
+            Notification.objects.create(
+                recipient=self.recipient,
+                actor=self.creator,
+                notification_type=Notification.NotificationType.NEW_FOLLOWER,
+            )
+
+        self.client.force_login(self.recipient)
+
+    def test_notifications_dropdown_query_count_bounded(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        url = reverse("accounts:notifications_dropdown")
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Perf challenge")
+        self.assertLessEqual(len(ctx.captured_queries), 10)
+
+    def test_notifications_list_query_count_bounded(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        url = reverse("accounts:notifications")
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Perf challenge")
+        self.assertLessEqual(len(ctx.captured_queries), 10)
+
+    def test_dropdown_query_count_stable_with_more_challenge_rows(self):
+        from django.core.cache import cache
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from challenges.notification_services import notify_challenge_market_resolved
+
+        url = reverse("accounts:notifications_dropdown")
+        cache.clear()
+        with CaptureQueriesContext(connection) as baseline:
+            self.client.get(url)
+        baseline_count = len(baseline.captured_queries)
+
+        market_two = create_market(slug="ch-perf-m2", external_id="ch-perf-m2")
+        self.challenge.challenge_markets.create(market=market_two, position=2)
+        market_two.status = Market.Status.RESOLVED
+        market_two.resolved_outcome = "No"
+        market_two.save()
+        notify_challenge_market_resolved(challenge=self.challenge, market=market_two)
+
+        cache.clear()
+        with CaptureQueriesContext(connection) as after:
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(after.captured_queries), baseline_count)

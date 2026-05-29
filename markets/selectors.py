@@ -291,7 +291,7 @@ def get_market_hub_category_summaries():
     return summaries
 
 
-def get_markets_list(*, status=None, category=None, search=None, source=None):
+def get_markets_list(*, status=None, category=None, search=None, source=None, ending_within_hours=None):
     qs = _market_card_queryset(_exclude_disabled_sources(Market.objects.all()))
     if status:
         qs = qs.filter(status=status)
@@ -305,6 +305,17 @@ def get_markets_list(*, status=None, category=None, search=None, source=None):
             | Q(description__icontains=search)
             | Q(category__icontains=search)
         )
+    if ending_within_hours:
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        now = timezone.now()
+        qs = qs.filter(
+            close_date__isnull=False,
+            close_date__gte=now,
+            close_date__lte=now + timedelta(hours=ending_within_hours),
+        )
     return qs
 
 
@@ -315,6 +326,7 @@ def get_markets_for_display(
     search=None,
     source=None,
     sort="",
+    ending_within_hours=None,
     limit=100,
 ):
     """Return markets for list UI, blending sources when browsing open markets."""
@@ -326,17 +338,35 @@ def get_markets_for_display(
         SORT_VOLUME,
     )
 
-    qs = get_markets_list(status=status, category=category, search=search, source=source)
+    # An "ending soon" window only makes sense for live (open) markets.
+    if ending_within_hours:
+        status = Market.Status.OPEN
+
+    qs = get_markets_list(
+        status=status,
+        category=category,
+        search=search,
+        source=source,
+        ending_within_hours=ending_within_hours,
+    )
     normalized_sort = normalize_sort_filter(sort)
     effective_status = status or Market.Status.OPEN
     sorted_limit = limit
     if normalized_sort:
         sorted_limit = max(limit, getattr(settings, "MARKET_LIST_SORTED_LIMIT", 200))
 
+    # When filtering by an ending window, soonest-first ordering is the natural
+    # default unless the user explicitly picked another sort.
+    if ending_within_hours and not normalized_sort:
+        return list(
+            qs.order_by(F("close_date").asc(nulls_last=True), "-volume_total")[:limit]
+        )
+
     use_source_blend = (
         not normalized_sort
         and not search
         and not source
+        and not ending_within_hours
         and effective_status == Market.Status.OPEN
     )
     if use_source_blend:

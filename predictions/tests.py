@@ -1,7 +1,9 @@
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import User
 from accounts.selectors import get_user_prediction_history
@@ -353,8 +355,10 @@ class OpenPredictionsPageTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             username="open-user",
+            email="open-user@example.com",
             password="pass",
             onboarding_completed=True,
+            email_verified_at=timezone.now(),
         )
         self.market = Market.objects.create(
             external_id="open-m1",
@@ -415,6 +419,42 @@ class OpenPredictionsPageTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response["Location"])
 
+    def test_exit_from_open_predictions_stays_on_page_with_htmx(self):
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "predictions:exit",
+                kwargs={"slug": self.market.slug, "prediction_id": self.prediction.id},
+            ),
+            {"source": "open_predictions"},
+            HTTP_HX_REQUEST="true",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "pr-exit-success-card")
+        self.assertContains(response, "+15")
+        self.assertContains(response, 'id="open-count-stat"')
+        self.assertContains(response, ">0<")
+        self.assertContains(response, 'id="open-positions-empty"')
+        self.prediction.refresh_from_db()
+        self.assertEqual(self.prediction.status, Prediction.Status.EXITED)
+
+    def test_exit_from_open_predictions_non_htmx_redirects_to_open_page(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "predictions:exit",
+                kwargs={"slug": self.market.slug, "prediction_id": self.prediction.id},
+            ),
+            {"source": "open_predictions"},
+        )
+
+        self.assertRedirects(response, reverse("predictions:open"))
+
 
 class ForecastFormTests(TestCase):
     def test_three_way_soccer_form_accepts_all_outcomes(self):
@@ -458,3 +498,147 @@ class ForecastFormTests(TestCase):
 
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["predicted_direction"], "no")
+
+
+class ExpiredMarketGuardTests(TestCase):
+    """Guards against the Polymarket sync delay exploit.
+
+    A market can stay ``OPEN`` locally for hours after it actually closed
+    upstream. Forecasts must be blocked once ``close_date`` has passed, even if
+    the imported ``status`` is still stale.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="late-bettor", password="pass")
+
+    def _market(self, *, close_date, slug):
+        return Market.objects.create(
+            external_id=f"expiry-{slug}",
+            title="Expiry test",
+            slug=slug,
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            close_date=close_date,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+
+    def test_is_forecastable_false_when_close_date_passed(self):
+        market = self._market(
+            close_date=timezone.now() - timedelta(hours=1),
+            slug="expiry-past",
+        )
+        self.assertTrue(market.is_open)
+        self.assertTrue(market.is_expired)
+        self.assertFalse(market.is_forecastable)
+
+    def test_is_forecastable_true_when_close_date_future(self):
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=1),
+            slug="expiry-future",
+        )
+        self.assertTrue(market.is_forecastable)
+
+    def test_is_forecastable_true_when_no_close_date(self):
+        market = self._market(close_date=None, slug="expiry-none")
+        self.assertTrue(market.is_forecastable)
+
+    def test_create_prediction_blocked_on_expired_open_market(self):
+        market = self._market(
+            close_date=timezone.now() - timedelta(minutes=5),
+            slug="expiry-create-blocked",
+        )
+        with self.assertRaises(ValueError) as ctx:
+            create_prediction(
+                user=self.user,
+                market=market,
+                predicted_outcome="Yes",
+            )
+        self.assertIn("already closed", str(ctx.exception))
+        self.assertFalse(Prediction.objects.filter(market=market).exists())
+
+    def test_forecast_form_invalid_on_expired_open_market(self):
+        market = self._market(
+            close_date=timezone.now() - timedelta(minutes=5),
+            slug="expiry-form-blocked",
+        )
+        form = ForecastForm(data={"predicted_outcome": "Yes"}, market=market)
+        self.assertFalse(form.is_valid())
+
+    def test_exit_blocked_after_close_date_passes(self):
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=1),
+            slug="expiry-exit-blocked",
+        )
+        prediction = create_prediction(
+            user=self.user,
+            market=market,
+            predicted_outcome="Yes",
+        )
+        market.close_date = timezone.now() - timedelta(minutes=1)
+        market.save(update_fields=["close_date"])
+
+        with self.assertRaises(ValueError):
+            exit_prediction(prediction=prediction, user=self.user)
+
+    def test_not_forecastable_when_source_stopped_accepting_orders(self):
+        """Replicates Polymarket: no forecasts once the source halts orders."""
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=3),
+            slug="not-accepting-orders",
+        )
+        market.accepting_orders = False
+        market.save(update_fields=["accepting_orders"])
+
+        self.assertTrue(market.is_open)
+        self.assertFalse(market.is_expired)
+        self.assertFalse(market.is_forecastable)
+
+        with self.assertRaises(ValueError):
+            create_prediction(
+                user=self.user,
+                market=market,
+                predicted_outcome="Yes",
+            )
+
+    def test_forecastable_while_source_accepts_orders(self):
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=3),
+            slug="accepting-orders",
+        )
+        self.assertTrue(market.accepting_orders)
+        self.assertTrue(market.is_forecastable)
+
+    def test_not_forecastable_once_event_started(self):
+        """Local backstop: a started match closes forecasts even if the source
+        flag is stale (handles uncertain live-event end times, e.g. tennis)."""
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=4),
+            slug="event-in-play",
+        )
+        market.game_start_time = timezone.now() - timedelta(minutes=10)
+        market.save(update_fields=["game_start_time"])
+
+        self.assertTrue(market.is_open)
+        self.assertTrue(market.accepting_orders)
+        self.assertTrue(market.is_in_play)
+        self.assertFalse(market.is_forecastable)
+
+        with self.assertRaises(ValueError) as ctx:
+            create_prediction(
+                user=self.user,
+                market=market,
+                predicted_outcome="Yes",
+            )
+        self.assertIn("already started", str(ctx.exception))
+
+    def test_forecastable_before_event_starts(self):
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=4),
+            slug="event-not-started",
+        )
+        market.game_start_time = timezone.now() + timedelta(hours=2)
+        market.save(update_fields=["game_start_time"])
+
+        self.assertFalse(market.is_in_play)
+        self.assertTrue(market.is_forecastable)

@@ -48,6 +48,14 @@ class Market(models.Model):
     close_date = models.DateTimeField(null=True, blank=True)
     resolution_date = models.DateTimeField(null=True, blank=True)
     resolved_outcome = models.CharField(max_length=255, blank=True)
+    # Mirrors Polymarket's real-time order gate: when the source stops accepting
+    # orders (event started, suspended, or resolving) we stop accepting forecasts,
+    # even if the imported ``status`` is still a stale ``open``.
+    accepting_orders = models.BooleanField(default=True, db_index=True)
+    # Scheduled start of the underlying event (e.g. a tennis/soccer match). Kept
+    # for context and future live-event handling; sourced from Polymarket
+    # ``gameStartTime`` / event ``startDate`` when available.
+    game_start_time = models.DateTimeField(null=True, blank=True)
     polymarket_slug = models.SlugField(max_length=550, blank=True, db_index=True)
     polymarket_raw = models.JSONField(default=dict, blank=True)
     polymarket_event_raw = models.JSONField(default=dict, blank=True)
@@ -115,6 +123,48 @@ class Market(models.Model):
     @property
     def is_open(self):
         return self.status == self.Status.OPEN
+
+    @property
+    def is_expired(self):
+        """True when the close date has already passed.
+
+        Polymarket data is refreshed asynchronously, so a market can still be
+        ``OPEN`` locally for hours after it actually closed upstream. Comparing
+        ``close_date`` to now lets us treat those stale rows as no longer
+        forecastable without waiting for the next sync.
+        """
+        if not self.close_date:
+            return False
+        return self.close_date <= timezone.now()
+
+    @property
+    def is_in_play(self):
+        """True once the underlying event has started.
+
+        For live events (tennis/soccer) the outcome is revealed in real time, so
+        forecasting closes at kickoff. This is a local, network-free backstop
+        that holds even when the source's ``accepting_orders`` flag has not yet
+        synced — directly closing the sync-delay window for sports.
+        """
+        if not self.game_start_time:
+            return False
+        return self.game_start_time <= timezone.now()
+
+    @property
+    def is_forecastable(self):
+        """Whether a new forecast may be created/exited on this market.
+
+        Mirrors Polymarket's real-time order gate (``accepting_orders``) and adds
+        local, network-free backstops that hold when our imported data lags the
+        source: ``OPEN`` status, a future ``close_date``, and — for live events —
+        a kickoff that has not passed (``is_in_play``).
+        """
+        return (
+            self.is_open
+            and not self.is_expired
+            and self.accepting_orders
+            and not self.is_in_play
+        )
 
     @property
     def polymarket_url(self):

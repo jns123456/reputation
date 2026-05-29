@@ -70,6 +70,8 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
         "close_date": data.get("close_date"),
         "resolution_date": data.get("resolution_date"),
         "resolved_outcome": data.get("resolved_outcome", ""),
+        "accepting_orders": data.get("accepting_orders", True),
+        "game_start_time": data.get("game_start_time"),
     }
 
     if source == Market.Source.POLYMARKET:

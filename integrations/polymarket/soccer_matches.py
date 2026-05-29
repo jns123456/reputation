@@ -3,7 +3,7 @@
 import logging
 import re
 
-from integrations.polymarket.client import _parse_date, _parse_json_field
+from integrations.polymarket.client import _any_accepts_orders, _parse_date, _parse_json_field
 
 logger = logging.getLogger(__name__)
 
@@ -147,6 +147,8 @@ def normalize_world_cup_match_event(event: dict, *, default_category: str = "Spo
 
     kickoff = _parse_date(event.get("startDate") or event.get("endDate"))
     close_date = _parse_date(event.get("endDate") or event.get("startDate"))
+    open_moneyline = [m for m in moneyline if not m.get("closed")]
+    accepting_orders = _any_accepts_orders(open_moneyline)
 
     return {
         "external_id": f"{WORLD_CUP_MATCH_EXTERNAL_PREFIX}{slug}",
@@ -163,6 +165,8 @@ def normalize_world_cup_match_event(event: dict, *, default_category: str = "Spo
         "close_date": close_date or kickoff,
         "resolution_date": close_date if status == "resolved" else None,
         "resolved_outcome": resolved_outcome,
+        "accepting_orders": accepting_orders,
+        "game_start_time": kickoff,
         "polymarket_slug": slug,
     }
 

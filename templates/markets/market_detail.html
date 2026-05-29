@@ -23,7 +23,7 @@
     {% include "predictions/partials/multi_outcome_forecast_panel.html" %}
   {% endif %}
 
-  {% if market.is_open and not market|is_multi_outcome_market %}
+  {% if market.is_forecastable and not market|is_multi_outcome_market %}
     <div data-pr-reveal data-delay="1">
       {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
     </div>

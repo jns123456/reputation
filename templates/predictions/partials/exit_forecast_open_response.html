@@ -1,0 +1,46 @@
+{% load i18n %}
+<article id="open-position-{{ prediction_id }}"
+         class="pr-exit-success-card {% if points_delta > 0 %}is-positive{% elif points_delta < 0 %}is-negative{% else %}is-neutral{% endif %}"
+         role="status"
+         aria-live="polite"
+         x-data
+         x-init="setTimeout(function () { $el.remove(); }, 2800)">
+  <div class="pr-exit-success-card__glow" aria-hidden="true"></div>
+  <div class="pr-exit-success-card__content">
+    <div class="pr-exit-success-card__icon" aria-hidden="true">
+      {% if points_delta >= 0 %}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+      {% else %}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+      {% endif %}
+    </div>
+    <p class="pr-exit-success-card__label">{% trans "Forecast closed" %}</p>
+    <p class="pr-exit-success-card__points">
+      {% if points_delta >= 0 %}+{% endif %}{{ points_delta }}
+    </p>
+    <p class="pr-exit-success-card__subtitle">
+      {% if points_delta > 0 %}
+      {% trans "Reputation realized" %}
+      {% elif points_delta < 0 %}
+      {% trans "Reputation realized" %}
+      {% else %}
+      {% trans "Position closed — you can forecast again." %}
+      {% endif %}
+    </p>
+    {% if market_title %}
+    <p class="pr-exit-success-card__market">{{ market_title }}</p>
+    {% endif %}
+  </div>
+</article>
+
+{% include "predictions/partials/open_positions_stats_oob.html" %}
+
+{% if open_count == 0 %}
+<div id="open-positions-empty" hx-swap-oob="true">
+  {% include "predictions/partials/open_positions_empty.html" %}
+</div>
+{% endif %}

@@ -82,6 +82,23 @@ class SoccerMatchNormalizationTests(TestCase):
         self.assertAlmostEqual(normalized["current_probability"][DRAW_OUTCOME_LABEL], 0.215)
         self.assertAlmostEqual(normalized["current_probability"]["South Africa"], 0.125)
 
+    def test_normalize_captures_kickoff_and_accepting_orders(self):
+        normalized = normalize_world_cup_match_event(MEXICO_VS_RSA_EVENT)
+        self.assertTrue(normalized["accepting_orders"])
+        self.assertIsNotNone(normalized["game_start_time"])
+        self.assertEqual(normalized["game_start_time"].isoformat(), "2026-06-11T19:00:00+00:00")
+
+    def test_normalize_marks_not_accepting_orders_when_source_halts(self):
+        event = {
+            **MEXICO_VS_RSA_EVENT,
+            "markets": [
+                {**market, "acceptingOrders": False}
+                for market in MEXICO_VS_RSA_EVENT["markets"]
+            ],
+        }
+        normalized = normalize_world_cup_match_event(event)
+        self.assertFalse(normalized["accepting_orders"])
+
     def test_import_world_cup_match_market(self):
         normalized = normalize_world_cup_match_event(MEXICO_VS_RSA_EVENT)
         raw_market = build_world_cup_match_raw(MEXICO_VS_RSA_EVENT, normalized=normalized)

@@ -52,6 +52,10 @@ def create_prediction(*, user, market, predicted_outcome, predicted_direction=Pr
     market = _refresh_market_odds(market)
     if not market.is_open:
         raise ValueError(_("Cannot predict on a closed or resolved market."))
+    if market.is_in_play:
+        raise ValueError(_("This event has already started and is no longer accepting forecasts."))
+    if market.is_expired or not market.accepting_orders:
+        raise ValueError(_("This market has already closed and is no longer accepting forecasts."))
     if get_user_active_prediction(user, market):
         raise ValueError(build_duplicate_forecast_error(user=user, market=market))
 
@@ -155,7 +159,7 @@ def exit_prediction(*, prediction, user):
             raise PermissionError(_("Cannot exit another user's prediction."))
         if prediction.status != Prediction.Status.PENDING:
             raise ValueError(_("Only active forecasts can be exited."))
-        if not prediction.market.is_open:
+        if not prediction.market.is_forecastable:
             raise ValueError(_("Cannot exit a forecast after the market has closed."))
 
         prediction.status = Prediction.Status.EXITED

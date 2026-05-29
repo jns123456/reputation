@@ -1,0 +1,6 @@
+{% load i18n %}
+<div class="pr-empty py-10">
+  <p class="font-semibold text-slate-700 dark:text-slate-200">{% trans "No open forecasts right now." %}</p>
+  <p class="mt-1 text-sm">{% trans "Browse markets to open a new reputation-only forecast." %}</p>
+  <a href="{% url 'markets:list' %}" class="btn-primary mt-4">{% trans "Browse markets" %}</a>
+</div>

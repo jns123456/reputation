@@ -16,12 +16,12 @@
   <div class="grid gap-4 sm:grid-cols-3" data-pr-reveal data-delay="1">
     <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Open forecasts" %}</p>
-      <p class="pr-stat-value">{{ open_count }}</p>
+      <p id="open-count-stat" class="pr-stat-value">{{ open_count }}</p>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Active forecasts you can exit now" %}</p>
     </div>
     <div class="pr-stat-card pr-card sm:col-span-2">
       <p class="pr-stat-label">{% trans "Unrealized reputation" %}</p>
-      <p class="pr-stat-value {% if total_delta >= 0 %}text-rep-600{% else %}text-red-600{% endif %}">
+      <p id="unrealized-rep-stat" class="pr-stat-value {% if total_delta >= 0 %}text-rep-600{% else %}text-red-600{% endif %}">
         {% if total_delta >= 0 %}+{% endif %}{{ total_delta }}
       </p>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Estimated if you closed every open forecast at current market probabilities." %}</p>
@@ -39,85 +39,15 @@
       </a>
     </div>
 
-    <div class="grid gap-4">
+    <div id="open-positions-list" class="grid gap-4">
       {% for position in positions %}
-      {% with prediction=position.prediction market=position.market delta=position.current_delta %}
-      <article class="pr-card relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-5">
-        <div class="pr-mesh pointer-events-none absolute inset-0 opacity-40" aria-hidden="true"></div>
-        <div class="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2 text-xs">
-              <span class="badge-status-open">{% trans "Open" %}</span>
-              {% if market.category %}
-              <span class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.category }}</span>
-              {% endif %}
-              {% if position.countdown %}
-              <span class="rounded-full px-2 py-0.5 font-semibold tabular-nums
-                {% if position.countdown.tone == 'urgent' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200
-                {% elif position.countdown.tone == 'soon' %}bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200
-                {% elif position.countdown.tone == 'past' %}bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400
-                {% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200{% endif %}">
-                {{ position.countdown.text }}
-              </span>
-              {% endif %}
-            </div>
-
-            <a href="{% url 'markets:detail' slug=market.slug %}" class="mt-3 block text-lg font-bold leading-snug text-slate-900 hover:text-brand-700 dark:text-slate-50 dark:hover:text-brand-400">
-              {{ market.display_title }}
-            </a>
-
-            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              {% trans "Forecast:" %}
-              <strong class="{% if prediction.predicted_direction == 'no' %}text-red-700 dark:text-red-400{% else %}text-emerald-700 dark:text-emerald-400{% endif %}">
-                {% if prediction.predicted_direction == "no" %}{% trans "No" %} {% endif %}{{ prediction.predicted_outcome }}
-              </strong>
-              <span class="text-slate-400">·</span>
-              {% blocktrans with timesince=prediction.created_at|timesince %}opened {{ timesince }} ago{% endblocktrans %}
-            </p>
-
-            {% if prediction.reasoning %}
-            <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{{ prediction.reasoning }}</p>
-            {% endif %}
-          </div>
-
-          <div class="grid gap-3 sm:grid-cols-3 lg:w-[28rem]">
-            <div class="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
-              <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Entry" %}</p>
-              <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ position.entry_percent }}%</p>
-            </div>
-            <div class="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
-              <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Now" %}</p>
-              <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ position.current_percent }}%</p>
-            </div>
-            <div class="rounded-xl border {% if delta >= 0 %}border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30{% else %}border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30{% endif %} p-3">
-              <p class="text-xs font-medium uppercase tracking-wide {% if delta >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">{% trans "P&L" %}</p>
-              <p class="mt-1 text-2xl font-bold tabular-nums {% if delta >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">
-                {% if delta >= 0 %}+{% endif %}{{ delta }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="relative mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            {% trans "Closing realizes this reputation delta and frees you to forecast again." %}
-          </p>
-          <form method="post" action="{% url 'predictions:exit' slug=market.slug prediction_id=prediction.id %}" class="sm:shrink-0">
-            {% csrf_token %}
-            <button type="submit" class="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-amber-300 bg-white px-5 py-2.5 text-sm font-semibold text-amber-800 shadow-sm transition hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100 dark:hover:bg-amber-900/60 sm:w-auto">
-              {% trans "Close forecast" %}
-            </button>
-          </form>
-        </div>
-      </article>
-      {% endwith %}
-      {% empty %}
-      <div class="pr-empty py-10">
-        <p class="font-semibold text-slate-700 dark:text-slate-200">{% trans "No open forecasts right now." %}</p>
-        <p class="mt-1 text-sm">{% trans "Browse markets to open a new reputation-only forecast." %}</p>
-        <a href="{% url 'markets:list' %}" class="btn-primary mt-4">{% trans "Browse markets" %}</a>
-      </div>
+      {% include "predictions/partials/open_position_card.html" %}
       {% endfor %}
+    </div>
+    <div id="open-positions-empty" {% if open_count %}hidden{% endif %}>
+      {% if not open_count %}
+      {% include "predictions/partials/open_positions_empty.html" %}
+      {% endif %}
     </div>
   </section>
 </div>
