@@ -63,6 +63,11 @@ def send_user_daily_digest_task(user_id):
 @shared_task(ignore_result=True)
 def send_market_resolving_reminders_task(within_hours=24):
     """Nudge users with open forecasts on markets that close within the window."""
+    from django.conf import settings
+
+    if not getattr(settings, "MARKET_RESOLVING_REMINDERS_ENABLED", False):
+        return 0
+
     from accounts.notification_services import notify_market_resolving
     from markets.selectors import get_markets_resolving_soon
 

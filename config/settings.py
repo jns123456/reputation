@@ -252,6 +252,16 @@ RESEND_FROM_EMAIL = env(
     default="PredictStamp <onboarding@resend.dev>",
 )
 
+# Tests must never hit a real provider: use the in-memory backend and capture
+# everything in ``mail.outbox`` regardless of any RESEND/SMTP creds in .env.
+# A sentinel EMAIL_HOST keeps delivery "configured" so opt-in send paths run
+# (the test runner forces DEBUG=False, disabling the console fallback).
+if _RUNNING_TESTS:
+    EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+    RESEND_API_KEY = ""
+    EMAIL_HOST = "localhost"
+    _mailgun_smtp = ""
+
 # Web Push (PWA) ---------------------------------------------------------------
 # VAPID keys: generate once with `vapid --gen` (py-vapid) or
 # `.venv/bin/python -c "from py_vapid import Vapid01; v=Vapid01(); v.generate_keys(); ..."`.
@@ -365,6 +375,14 @@ KALSHI_API_URL = env(
     default="https://external-api.kalshi.com/trade-api/v2",
 )
 
+# Scheduled re-engagement emails are OFF by default to keep mailbox volume low
+# (and stay within provider quotas). Flip the matching flag to re-enable each one.
+DIGEST_EMAILS_ENABLED = env.bool("DIGEST_EMAILS_ENABLED", default=False)
+STREAK_REMINDER_EMAILS_ENABLED = env.bool("STREAK_REMINDER_EMAILS_ENABLED", default=False)
+MARKET_RESOLVING_REMINDERS_ENABLED = env.bool(
+    "MARKET_RESOLVING_REMINDERS_ENABLED", default=False
+)
+
 CELERY_BEAT_SCHEDULE = {
     "sync-all-category-markets": {
         "task": "integrations.tasks.sync_all_category_markets_task",
@@ -374,22 +392,25 @@ CELERY_BEAT_SCHEDULE = {
         "task": "integrations.tasks.refresh_stale_open_markets_task",
         "schedule": crontab(minute=30, hour="*/6"),
     },
-    # Daily re-engagement digest (Substack-style summary).
-    "send-daily-digest": {
+}
+# Daily re-engagement digest (Substack-style summary).
+if DIGEST_EMAILS_ENABLED:
+    CELERY_BEAT_SCHEDULE["send-daily-digest"] = {
         "task": "accounts.tasks.send_daily_digest_task",
         "schedule": crontab(minute=0, hour=env.int("DIGEST_SEND_HOUR_UTC", default=13)),
-    },
-    # "Your streak ends tonight" reminder for users who haven't acted today.
-    "send-streak-risk-reminders": {
+    }
+# "Your streak ends tonight" reminder for users who haven't acted today.
+if STREAK_REMINDER_EMAILS_ENABLED:
+    CELERY_BEAT_SCHEDULE["send-streak-risk-reminders"] = {
         "task": "accounts.tasks.send_streak_risk_reminders_task",
         "schedule": crontab(minute=0, hour=env.int("STREAK_REMINDER_HOUR_UTC", default=22)),
-    },
-    # "A market you forecast closes soon" reminder — runs a few times daily.
-    "send-market-resolving-reminders": {
+    }
+# "A market you forecast closes soon" reminder — runs a few times daily.
+if MARKET_RESOLVING_REMINDERS_ENABLED:
+    CELERY_BEAT_SCHEDULE["send-market-resolving-reminders"] = {
         "task": "accounts.tasks.send_market_resolving_reminders_task",
         "schedule": crontab(minute=15, hour="*/6"),
-    },
-}
+    }
 if KALSHI_ENABLED:
     CELERY_BEAT_SCHEDULE["import-kalshi-open-markets"] = {
         "task": "integrations.tasks.import_kalshi_open_markets_task",

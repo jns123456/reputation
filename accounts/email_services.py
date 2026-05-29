@@ -218,6 +218,8 @@ def _notification_subject(notification, actor_name):
 
 def send_daily_digest(user_id):
     """Send a once-a-day summary of activity to re-engage a user (Substack-style)."""
+    if not getattr(settings, "DIGEST_EMAILS_ENABLED", False):
+        return False
     if not _emails_enabled():
         return False
 
@@ -285,6 +287,8 @@ def send_daily_digest(user_id):
 
 def send_streak_risk_reminder(streak):
     """Warn a user that their active streak ends tonight unless they act."""
+    if not getattr(settings, "STREAK_REMINDER_EMAILS_ENABLED", False):
+        return False
     if not _emails_enabled():
         return False
 

@@ -11,6 +11,7 @@ from accounts.email_services import (
     send_streak_risk_reminder,
 )
 from accounts.models import ActivityStreak, Notification, NotificationPreference
+from accounts.tasks import send_market_resolving_reminders_task
 from conftest import create_user
 
 
@@ -78,7 +79,7 @@ class NotificationEmailTests(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
 
-@override_settings(ENGAGEMENT_EMAILS_ENABLED=True)
+@override_settings(ENGAGEMENT_EMAILS_ENABLED=True, STREAK_REMINDER_EMAILS_ENABLED=True)
 class StreakRiskEmailTests(TestCase):
     def setUp(self):
         self.user = create_user("riskuser")
@@ -102,8 +103,19 @@ class StreakRiskEmailTests(TestCase):
         self.assertFalse(send_streak_risk_reminder(streak))
         self.assertEqual(len(mail.outbox), 0)
 
+    @override_settings(STREAK_REMINDER_EMAILS_ENABLED=False)
+    def test_reminder_blocked_when_feature_disabled(self):
+        _set_prefs(self.user, notify_email=True)
+        streak = ActivityStreak.objects.get(user=self.user)
+        streak.current_streak = 6
+        streak.save(update_fields=["current_streak"])
+        mail.outbox = []
 
-@override_settings(ENGAGEMENT_EMAILS_ENABLED=True)
+        self.assertFalse(send_streak_risk_reminder(streak))
+        self.assertEqual(len(mail.outbox), 0)
+
+
+@override_settings(ENGAGEMENT_EMAILS_ENABLED=True, DIGEST_EMAILS_ENABLED=True)
 class DailyDigestTests(TestCase):
     def setUp(self):
         self.actor = create_user("digest_actor")
@@ -127,3 +139,22 @@ class DailyDigestTests(TestCase):
 
         self.assertFalse(send_daily_digest(self.user.id))
         self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(DIGEST_EMAILS_ENABLED=False)
+    def test_digest_blocked_when_feature_disabled(self):
+        _set_prefs(self.user, notify_email=True)
+        Notification.objects.create(
+            recipient=self.user,
+            actor=self.actor,
+            notification_type=Notification.NotificationType.NEW_FOLLOWER,
+        )
+        mail.outbox = []
+
+        self.assertFalse(send_daily_digest(self.user.id))
+        self.assertEqual(len(mail.outbox), 0)
+
+
+class MarketResolvingReminderTaskTests(TestCase):
+    @override_settings(MARKET_RESOLVING_REMINDERS_ENABLED=False)
+    def test_task_is_noop_when_disabled(self):
+        self.assertEqual(send_market_resolving_reminders_task(), 0)
