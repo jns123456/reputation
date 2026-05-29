@@ -2,7 +2,7 @@
 
 from django.db.models import Q, Sum
 
-from challenges.models import Challenge, ChallengeParticipant
+from challenges.models import Challenge, ChallengeGroup, ChallengeParticipant
 from markets.models import Market
 from reputation.models import ReputationEvent
 
@@ -388,3 +388,23 @@ def get_challenge_event_progress(challenge):
 def get_challenge_resolution_activity(challenge):
     """Deprecated alias — use get_challenge_resolution_snapshots."""
     return get_challenge_resolution_snapshots(challenge)
+
+
+def get_user_challenge_groups(user):
+    if not user or not user.is_authenticated:
+        return ChallengeGroup.objects.none()
+    return (
+        ChallengeGroup.objects.filter(owner=user)
+        .prefetch_related("members")
+        .order_by("name", "id")
+    )
+
+
+def get_challenge_group_for_user(*, group_id, user):
+    if not user or not user.is_authenticated:
+        return None
+    return (
+        ChallengeGroup.objects.filter(pk=group_id, owner=user)
+        .prefetch_related("members")
+        .first()
+    )

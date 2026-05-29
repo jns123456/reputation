@@ -1,5 +1,3 @@
-from django.db.models import Q
-
 from predictions.models import Prediction
 from predictions.selectors import (
     annotate_prediction_interactions,
@@ -33,21 +31,4 @@ def get_top_popular_users(limit=20):
     )[:limit]
 
 
-def search_users(*, query="", limit=20):
-    """Find active users by username, display name, or bio."""
-    from accounts.models import User
-
-    cleaned = (query or "").strip()
-    if len(cleaned) < 2:
-        return User.objects.none()
-
-    return (
-        User.objects.filter(is_active=True)
-        .select_related("profile")
-        .filter(
-            Q(username__icontains=cleaned)
-            | Q(display_name__icontains=cleaned)
-            | Q(bio__icontains=cleaned)
-        )
-        .order_by("-profile__reputation_score", "-profile__popularity_score")[:limit]
-    )
+from accounts.user_search_selectors import UserSearchResults, search_user_matches, search_users

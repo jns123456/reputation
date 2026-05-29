@@ -120,3 +120,33 @@ class ChallengeParticipant(models.Model):
         if self.challenge_id and self.user_id and self.challenge.creator_id == self.user_id:
             if self.status == self.Status.INVITED:
                 raise ValidationError(_("The challenge creator cannot be invited."))
+
+
+class ChallengeGroup(models.Model):
+    """Saved set of mutual followers for quick challenge invitations."""
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="challenge_groups",
+    )
+    name = models.CharField(max_length=100)
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="challenge_group_memberships",
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "name"],
+                name="unique_challenge_group_name_per_owner",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.owner.username})"

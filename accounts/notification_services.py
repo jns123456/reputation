@@ -81,12 +81,16 @@ def notify_new_follower(*, follow):
     if not _should_notify_in_app(user_id=recipient.id):
         return None
 
-    notification = Notification.objects.create(
-        recipient=recipient,
-        actor=actor,
-        notification_type=Notification.NotificationType.NEW_FOLLOWER,
+    notification, created = Notification.objects.get_or_create(
         user_follow=follow,
+        defaults={
+            "recipient": recipient,
+            "actor": actor,
+            "notification_type": Notification.NotificationType.NEW_FOLLOWER,
+        },
     )
+    if not created:
+        return notification
     from accounts.nav_cache import invalidate_notification_nav_cache
 
     invalidate_notification_nav_cache(recipient.id)

@@ -1,30 +1,21 @@
 {% load i18n %}
 {% if users %}
 <div class="space-y-3">
-  {% for profile_user in users %}
-  <a href="{% url 'accounts:profile' username=profile_user.username %}"
-     class="pr-card flex items-center gap-4 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm transition hover:border-brand-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-brand-800">
-    <span class="pr-user-avatar-ring pr-user-avatar-ring--md shrink-0">
-      {% include "accounts/partials/user_avatar.html" with user=profile_user %}
-    </span>
-    <span class="min-w-0 flex-1">
-      <span class="flex flex-wrap items-center gap-2">
-        <span class="font-medium text-slate-900 dark:text-slate-100">{% include "accounts/partials/user_display_name.html" with user=profile_user %}</span>
-        {% if profile_user.is_ai_agent %}<span class="badge-agent">{% trans "AI Agent" %}</span>{% endif %}
-      </span>
-      {% if profile_user.show_username_publicly %}
-      <span class="mt-0.5 block text-sm text-slate-500">@{{ profile_user.username }}</span>
-      {% endif %}
-      {% if profile_user.bio %}
-      <span class="mt-1 block truncate text-sm text-slate-600 dark:text-slate-400">{{ profile_user.bio }}</span>
-      {% endif %}
-    </span>
-    <span class="hidden shrink-0 flex-col items-end gap-1 text-right sm:flex">
-      <span class="badge-rep">{{ profile_user.profile.reputation_points }} {% trans "rep" %}</span>
-      <span class="badge-pop">{{ profile_user.profile.popularity_points }} {% trans "pop" %}</span>
-    </span>
-  </a>
+  {% if exact_users %}
+  {% if similar_users %}
+  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Top matches" %}</p>
+  {% endif %}
+  {% for profile_user in exact_users %}
+  {% include "accounts/partials/user_search_result_item.html" %}
   {% endfor %}
+  {% endif %}
+
+  {% if similar_users %}
+  <p class="{% if exact_users %}mt-4 {% endif %}text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Similar accounts" %}</p>
+  {% for profile_user in similar_users %}
+  {% include "accounts/partials/user_search_result_item.html" %}
+  {% endfor %}
+  {% endif %}
 </div>
 {% else %}
 <div class="pr-empty py-10">

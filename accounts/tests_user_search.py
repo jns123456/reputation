@@ -1,7 +1,8 @@
 from django.test import Client, TestCase
+from django.utils import timezone
 
 from accounts.models import User
-from accounts.selectors import search_users
+from accounts.user_search_selectors import normalize_user_search_query, search_user_matches, search_users
 
 
 class UserSearchSelectorTests(TestCase):
@@ -9,28 +10,71 @@ class UserSearchSelectorTests(TestCase):
         self.alice = User.objects.create_user(
             username="alice",
             password="pass",
+            email="alice@predictstamp.app",
             display_name="Alice Predictor",
             bio="Crypto and politics forecasts.",
         )
-        User.objects.create_user(username="bob", password="pass", bio="Sports only.")
+        User.objects.create_user(
+            username="bob",
+            password="pass",
+            email="bob.sports@example.com",
+            bio="Sports only.",
+        )
+        User.objects.create_user(
+            username="ghost",
+            password="pass",
+            identity_mode=User.IdentityMode.ANONYMOUS,
+            display_name="Hidden Ghost",
+        )
 
     def test_search_requires_minimum_length(self):
-        self.assertEqual(search_users(query="a").count(), 0)
+        self.assertEqual(search_users(query="a"), [])
 
     def test_search_matches_username(self):
-        results = list(search_users(query="bob"))
+        results = search_users(query="bob")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].username, "bob")
 
-    def test_search_matches_display_name(self):
-        results = list(search_users(query="Alice"))
+    def test_search_matches_username_with_at_prefix(self):
+        results = search_users(query="@alice")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].username, "alice")
 
-    def test_search_matches_bio(self):
-        results = list(search_users(query="Sports"))
+    def test_search_matches_display_name(self):
+        results = search_users(query="Alice")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].username, "alice")
+
+    def test_search_matches_email(self):
+        results = search_users(query="alice@predictstamp.app")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].username, "alice")
+
+    def test_search_matches_partial_email(self):
+        results = search_users(query="bob.sports")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].username, "bob")
+
+    def test_search_matches_bio(self):
+        results = search_users(query="Sports")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].username, "bob")
+
+    def test_anonymous_users_are_excluded(self):
+        self.assertEqual(search_users(query="ghost"), [])
+        self.assertEqual(search_users(query="Hidden"), [])
+
+    def test_fuzzy_match_finds_close_username(self):
+        results = search_user_matches(query="alic")
+        usernames = {user.username for user in results.users}
+        self.assertIn("alice", usernames)
+
+    def test_similar_results_are_grouped(self):
+        results = search_user_matches(query="alic")
+        self.assertTrue(results.exact_users or results.similar_users)
+
+    def test_normalize_strips_leading_at(self):
+        self.assertEqual(normalize_user_search_query("@alice"), "alice")
 
 
 class UserSearchViewTests(TestCase):
@@ -38,8 +82,10 @@ class UserSearchViewTests(TestCase):
         User.objects.create_user(
             username="searchable",
             password="pass",
+            email="searchable@example.com",
             display_name="Searchable User",
             onboarding_completed=True,
+            email_verified_at=timezone.now(),
         )
         self.client = Client()
 
@@ -50,6 +96,11 @@ class UserSearchViewTests(TestCase):
 
     def test_user_search_page_finds_user(self):
         response = self.client.get("/accounts/users/search/?q=Searchable")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Searchable User")
+
+    def test_user_search_page_finds_user_by_email(self):
+        response = self.client.get("/accounts/users/search/?q=searchable@example.com")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Searchable User")
 

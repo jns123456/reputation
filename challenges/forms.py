@@ -5,6 +5,38 @@ from challenges.models import MAX_CHALLENGE_MARKETS
 from markets.models import Market
 
 
+class ChallengeGroupForm(forms.Form):
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "placeholder": _("Group name"),
+            },
+        ),
+    )
+    members = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(
+            attrs={"class": "challenge-opponent-checkbox"},
+        ),
+        error_messages={
+            "required": _("Select at least one member."),
+        },
+    )
+
+    def __init__(self, *args, user=None, initial_members=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        from accounts.follow_selectors import get_mutual_followers
+
+        mutual = get_mutual_followers(user) if user else []
+        self.fields["members"].choices = [
+            (str(u.id), u.public_name or u.username) for u in mutual
+        ]
+        if initial_members is not None:
+            self.fields["members"].initial = [str(uid) for uid in initial_members]
+
+
 class ChallengeCreateForm(forms.Form):
     title = forms.CharField(
         max_length=200,

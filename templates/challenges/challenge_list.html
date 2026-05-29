@@ -6,11 +6,13 @@
 {% block content %}
 <div class="pr-page pb-8">
   {% url 'challenges:create' as create_url %}
+  {% url 'challenges:group_list' as groups_url %}
   {% trans "Social" as hero_eyebrow %}
   {% trans "Challenges" as hero_title %}
   {% blocktrans asvar hero_description %}Compete with mutual followers on up to 10 events. Highest reputation score wins.{% endblocktrans %}
   {% trans "New challenge" as hero_action_label %}
-  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label %}
+  {% trans "Groups" as groups_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label secondary_url=groups_url secondary_label=groups_label %}
 
   {% if pending_invitations %}
   <section class="mb-8" data-pr-reveal data-delay="1">

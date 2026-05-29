@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 import json
 
-from challenges.forms import ChallengeCreateForm
+from challenges.forms import ChallengeCreateForm, ChallengeGroupForm
 from challenges.models import MAX_CHALLENGE_MARKETS, Challenge, ChallengeParticipant
 from markets.models import Market
 from predictions.models import Prediction
@@ -24,13 +24,18 @@ from challenges.selectors import (
     get_pending_challenge_invitations,
     get_user_challenges,
     get_user_participation,
+    get_user_challenge_groups,
+    get_challenge_group_for_user,
     search_open_markets_for_challenge,
 )
 from challenges.services import (
     accept_challenge,
     cancel_challenge,
     create_challenge,
+    create_challenge_group,
     decline_challenge,
+    delete_challenge_group,
+    update_challenge_group,
 )
 
 
@@ -120,6 +125,7 @@ def challenge_create(request):
         {
             "form": form,
             "mutual_followers": mutual_followers,
+            "challenge_groups": get_user_challenge_groups(request.user),
             "initial_markets": initial_markets,
             "selected_market_ids_json": json.dumps(selected_ids_int),
             "selected_market_titles_json": json.dumps(selected_market_titles),
@@ -128,6 +134,115 @@ def challenge_create(request):
             "initial_step": initial_step,
         },
     )
+
+
+@login_required
+def challenge_group_list(request):
+    groups = get_user_challenge_groups(request.user)
+    return render(
+        request,
+        "challenges/challenge_group_list.html",
+        {"groups": groups},
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def challenge_group_create(request):
+    from accounts.follow_selectors import get_mutual_followers
+
+    mutual_followers = get_mutual_followers(request.user)
+
+    if request.method == "POST":
+        form = ChallengeGroupForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                create_challenge_group(
+                    owner=request.user,
+                    name=form.cleaned_data["name"],
+                    member_ids=[int(uid) for uid in form.cleaned_data["members"]],
+                )
+                messages.success(request, _("Group created."))
+                return redirect("challenges:group_list")
+            except ValidationError as exc:
+                if hasattr(exc, "message_dict"):
+                    for field, errors in exc.message_dict.items():
+                        for error in errors:
+                            form.add_error(field if field in form.fields else None, error)
+                else:
+                    form.add_error(None, exc.messages[0] if exc.messages else str(exc))
+    else:
+        form = ChallengeGroupForm(user=request.user)
+
+    return render(
+        request,
+        "challenges/challenge_group_form.html",
+        {
+            "form": form,
+            "mutual_followers": mutual_followers,
+            "is_edit": False,
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def challenge_group_edit(request, pk):
+    from accounts.follow_selectors import get_mutual_followers
+
+    group = get_challenge_group_for_user(group_id=pk, user=request.user)
+    if not group:
+        raise Http404("Group not found.")
+
+    mutual_followers = get_mutual_followers(request.user)
+    initial_members = list(group.members.values_list("id", flat=True))
+
+    if request.method == "POST":
+        form = ChallengeGroupForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                update_challenge_group(
+                    group=group,
+                    name=form.cleaned_data["name"],
+                    member_ids=[int(uid) for uid in form.cleaned_data["members"]],
+                )
+                messages.success(request, _("Group updated."))
+                return redirect("challenges:group_list")
+            except ValidationError as exc:
+                if hasattr(exc, "message_dict"):
+                    for field, errors in exc.message_dict.items():
+                        for error in errors:
+                            form.add_error(field if field in form.fields else None, error)
+                else:
+                    form.add_error(None, exc.messages[0] if exc.messages else str(exc))
+    else:
+        form = ChallengeGroupForm(
+            user=request.user,
+            initial={"name": group.name},
+            initial_members=initial_members,
+        )
+
+    return render(
+        request,
+        "challenges/challenge_group_form.html",
+        {
+            "form": form,
+            "group": group,
+            "mutual_followers": mutual_followers,
+            "is_edit": True,
+        },
+    )
+
+
+@login_required
+@require_POST
+def challenge_group_delete(request, pk):
+    group = get_challenge_group_for_user(group_id=pk, user=request.user)
+    if not group:
+        raise Http404("Group not found.")
+    delete_challenge_group(group=group)
+    messages.info(request, _("Group deleted."))
+    return redirect("challenges:group_list")
 
 
 @login_required

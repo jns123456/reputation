@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from accounts.follow_services import toggle_follow
@@ -53,6 +53,79 @@ class FollowServiceTests(TestCase):
     def test_cannot_follow_self(self):
         with self.assertRaises(ValidationError):
             toggle_follow(follower=self.follower, following_user=self.follower)
+
+
+@override_settings(EMAIL_VERIFICATION_REQUIRED=False)
+class FollowToggleViewTests(TestCase):
+    def setUp(self):
+        self.follower = create_user("followview1")
+        self.target = create_user("followview2")
+        self.client = Client()
+        self.client.force_login(self.follower)
+        self.url = reverse("accounts:follow_toggle")
+
+    def test_follow_toggle_via_htmx_updates_button(self):
+        response = self.client.post(
+            self.url,
+            {"username": self.target.username},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Following")
+        self.assertTrue(
+            UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
+        )
+
+    def test_follow_toggle_via_htmx_can_unfollow(self):
+        toggle_follow(follower=self.follower, following_user=self.target)
+        response = self.client.post(
+            self.url,
+            {"username": self.target.username},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Follow")
+        self.assertFalse(
+            UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
+        )
+
+    def test_follow_toggle_survives_notification_failure(self):
+        with patch(
+            "accounts.notification_services.notify_new_follower",
+            side_effect=RuntimeError("notify failed"),
+        ):
+            response = self.client.post(
+                self.url,
+                {"username": self.target.username},
+                HTTP_HX_REQUEST="true",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Following")
+        self.assertTrue(
+            UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
+        )
+
+
+@override_settings(EMAIL_VERIFICATION_REQUIRED=True)
+class FollowToggleEmailGateTests(TestCase):
+    def setUp(self):
+        self.follower = create_user("followgate1", email_verified_at=None)
+        self.target = create_user("followgate2")
+        self.client = Client()
+        self.client.force_login(self.follower)
+        self.url = reverse("accounts:follow_toggle")
+
+    def test_unverified_user_htmx_follow_gets_hx_redirect(self):
+        response = self.client.post(
+            self.url,
+            {"username": self.target.username},
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("HX-Redirect", response.headers)
+        self.assertFalse(
+            UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
+        )
 
 
 class PredictionNotificationTests(SkipMarketRefreshTestsMixin, TestCase):

@@ -221,3 +221,82 @@ def _complete_challenge(challenge):
 
     notify_challenge_completed(challenge=challenge)
     return challenge
+
+
+def create_challenge_group(*, owner, name, member_ids):
+    """Create a saved opponent group from mutual followers."""
+    name = name.strip()
+    if not name:
+        raise ValidationError(_("Enter a group name."))
+    if not member_ids:
+        raise ValidationError(_("Select at least one member."))
+
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    members = list(User.objects.filter(id__in=member_ids))
+    if len(members) != len(set(member_ids)):
+        raise ValidationError(_("One or more selected users were not found."))
+
+    for member in members:
+        if member.id == owner.id:
+            raise ValidationError(_("You cannot add yourself to a group."))
+        if not are_mutual_followers(owner, member):
+            raise ValidationError(
+                _("You and @%(username)s must follow each other to add them to a group.")
+                % {"username": member.username}
+            )
+
+    from challenges.models import ChallengeGroup
+
+    if ChallengeGroup.objects.filter(owner=owner, name__iexact=name).exists():
+        raise ValidationError(_("You already have a group with this name."))
+
+    with transaction.atomic():
+        group = ChallengeGroup.objects.create(owner=owner, name=name)
+        group.members.set(members)
+    return group
+
+
+def update_challenge_group(*, group, name, member_ids):
+    """Update a saved opponent group."""
+    name = name.strip()
+    if not name:
+        raise ValidationError(_("Enter a group name."))
+    if not member_ids:
+        raise ValidationError(_("Select at least one member."))
+
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    members = list(User.objects.filter(id__in=member_ids))
+    if len(members) != len(set(member_ids)):
+        raise ValidationError(_("One or more selected users were not found."))
+
+    for member in members:
+        if member.id == group.owner_id:
+            raise ValidationError(_("You cannot add yourself to a group."))
+        if not are_mutual_followers(group.owner, member):
+            raise ValidationError(
+                _("You and @%(username)s must follow each other to add them to a group.")
+                % {"username": member.username}
+            )
+
+    from challenges.models import ChallengeGroup
+
+    duplicate = ChallengeGroup.objects.filter(
+        owner=group.owner,
+        name__iexact=name,
+    ).exclude(pk=group.pk)
+    if duplicate.exists():
+        raise ValidationError(_("You already have a group with this name."))
+
+    with transaction.atomic():
+        group.name = name
+        group.save(update_fields=["name", "updated_at"])
+        group.members.set(members)
+    return group
+
+
+def delete_challenge_group(*, group):
+    group.delete()

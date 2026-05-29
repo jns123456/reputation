@@ -15,11 +15,14 @@ from markets.models import Market
 from predictions.services import create_prediction
 
 
+from conftest import create_user
+
+
 class MutualFollowTests(TestCase):
     def setUp(self):
-        self.alice = User.objects.create_user(username="alice", password="pass")
-        self.bob = User.objects.create_user(username="bob", password="pass")
-        self.carol = User.objects.create_user(username="carol", password="pass")
+        self.alice = create_user("alice")
+        self.bob = create_user("bob")
+        self.carol = create_user("carol")
 
     def test_mutual_followers(self):
         UserFollow.objects.create(follower=self.alice, following=self.bob)
@@ -35,8 +38,8 @@ class MutualFollowTests(TestCase):
 
 class ChallengeCreateTests(TestCase):
     def setUp(self):
-        self.alice = User.objects.create_user(username="alice", password="pass")
-        self.bob = User.objects.create_user(username="bob", password="pass")
+        self.alice = create_user("alice")
+        self.bob = create_user("bob")
         UserFollow.objects.create(follower=self.alice, following=self.bob)
         UserFollow.objects.create(follower=self.bob, following=self.alice)
         self.market1 = Market.objects.create(
@@ -70,7 +73,7 @@ class ChallengeCreateTests(TestCase):
         self.assertEqual(creator_part.status, ChallengeParticipant.Status.ACCEPTED)
 
     def test_rejects_non_mutual_follow(self):
-        carol = User.objects.create_user(username="carol", password="pass")
+        carol = create_user("carol")
         with self.assertRaises(ValidationError):
             create_challenge(
                 creator=self.alice,
@@ -102,8 +105,8 @@ class ChallengeCreateTests(TestCase):
 
 class ChallengeFlowTests(TestCase):
     def setUp(self):
-        self.alice = User.objects.create_user(username="alice", password="pass")
-        self.bob = User.objects.create_user(username="bob", password="pass")
+        self.alice = create_user("alice")
+        self.bob = create_user("bob")
         UserFollow.objects.create(follower=self.alice, following=self.bob)
         UserFollow.objects.create(follower=self.bob, following=self.alice)
         self.market = Market.objects.create(
@@ -501,8 +504,8 @@ class ChallengeNotificationTests(TestCase):
 
 class ChallengeInvitationListTests(TestCase):
     def setUp(self):
-        self.alice = User.objects.create_user(username="alice", password="pass")
-        self.bob = User.objects.create_user(username="bob", password="pass")
+        self.alice = create_user("alice")
+        self.bob = create_user("bob")
         UserFollow.objects.create(follower=self.alice, following=self.bob)
         UserFollow.objects.create(follower=self.bob, following=self.alice)
         self.market = Market.objects.create(
@@ -541,9 +544,78 @@ class ChallengeInvitationListTests(TestCase):
             ).exists()
         )
 
+class ChallengeGroupTests(TestCase):
+    def setUp(self):
+        from conftest import create_user
+
+        self.alice = create_user("alice")
+        self.bob = create_user("bob")
+        self.carol = create_user("carol")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        UserFollow.objects.create(follower=self.alice, following=self.carol)
+        UserFollow.objects.create(follower=self.carol, following=self.alice)
+
+    def test_create_group_success(self):
+        from challenges.services import create_challenge_group
+
+        group = create_challenge_group(
+            owner=self.alice,
+            name="Weekend crew",
+            member_ids=[self.bob.id, self.carol.id],
+        )
+        self.assertEqual(group.name, "Weekend crew")
+        self.assertEqual(group.members.count(), 2)
+
+    def test_rejects_non_mutual_follow(self):
+        from challenges.services import create_challenge_group
+
+        dave = User.objects.create_user(username="dave", password="pass")
+        with self.assertRaises(ValidationError):
+            create_challenge_group(
+                owner=self.alice,
+                name="Invalid",
+                member_ids=[dave.id],
+            )
+
+    def test_group_list_and_create_views(self):
+        from challenges.services import create_challenge_group
+
+        create_challenge_group(
+            owner=self.alice,
+            name="Friends",
+            member_ids=[self.bob.id],
+        )
+        self.client.force_login(self.alice)
+        response = self.client.get("/challenges/groups/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Friends")
+
+        response = self.client.post(
+            "/challenges/groups/new/",
+            {"name": "More friends", "members": [str(self.carol.id)]},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertContains(self.client.get("/challenges/groups/"), "More friends")
+
+    def test_create_challenge_shows_group_quick_select(self):
+        from challenges.services import create_challenge_group
+
+        create_challenge_group(
+            owner=self.alice,
+            name="Quick crew",
+            member_ids=[self.bob.id],
+        )
+        self.client.force_login(self.alice)
+        response = self.client.get("/challenges/new/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Quick crew")
+        self.assertContains(response, "Quick select")
+
+
 class MarketSearchTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="alice", password="pass")
+        self.user = create_user("alice")
         self.market_a = Market.objects.create(
             external_id="ma",
             title="Bitcoin price 2026",

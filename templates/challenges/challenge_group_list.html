@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Challenge groups" %}{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% url 'challenges:group_create' as create_url %}
+  {% url 'challenges:list' as list_url %}
+  {% trans "Challenges" as hero_eyebrow %}
+  {% trans "Groups" as hero_title %}
+  {% blocktrans asvar hero_description %}Save sets of mutual followers to invite them quickly when creating a challenge.{% endblocktrans %}
+  {% trans "New group" as hero_action_label %}
+  {% trans "Back to challenges" as secondary_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label secondary_url=list_url secondary_label=secondary_label %}
+
+  {% if groups %}
+  <div class="space-y-3" data-pr-reveal data-delay="1">
+    {% for group in groups %}
+    <article class="pr-card rounded-xl border border-slate-200/80 bg-white/90 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <h2 class="font-semibold text-slate-900 dark:text-slate-100">{{ group.name }}</h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {% blocktrans count counter=group.members.count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktrans %}
+          </p>
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            {% for member in group.members.all %}
+            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+              {{ member.public_name|default:member.username }}
+            </span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="flex shrink-0 flex-wrap gap-2">
+          <a href="{% url 'challenges:group_edit' pk=group.pk %}" class="btn-secondary px-3 py-2 text-sm">{% trans "Edit" %}</a>
+          <form method="post" action="{% url 'challenges:group_delete' pk=group.pk %}" onsubmit="return confirm('{% trans "Delete this group?" %}');">
+            {% csrf_token %}
+            <button type="submit" class="btn-secondary px-3 py-2 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">{% trans "Delete" %}</button>
+          </form>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="pr-empty" data-pr-reveal data-delay="1">
+    <p class="text-slate-600 dark:text-slate-300">{% trans "No groups yet." %}</p>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Create a group to reuse the same opponents when starting new challenges." %}</p>
+    <a href="{% url 'challenges:group_create' %}" class="btn-primary mt-4 inline-flex">{% trans "Create your first group" %}</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

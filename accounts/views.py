@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import messages
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -40,7 +41,8 @@ from accounts.notification_services import (
     mark_notification_read,
     queue_login_notification_toast,
 )
-from accounts.selectors import get_user_prediction_history, search_users
+from accounts.selectors import get_user_prediction_history, search_user_matches
+from accounts.user_search_selectors import is_valid_user_search_query
 
 
 class CustomLoginView(LoginView):
@@ -329,26 +331,34 @@ def profile_edit(request):
 
 def user_search(request):
     query = request.GET.get("q", "").strip()
-    users = search_users(query=query) if query else []
+    search_ready = is_valid_user_search_query(query)
+    results = search_user_matches(query=query) if search_ready else None
     return render(
         request,
         "accounts/user_search.html",
         {
             "search_query": query,
-            "users": users,
+            "search_ready": search_ready,
+            "users": results.users if results else [],
+            "exact_users": results.exact_users if results else [],
+            "similar_users": results.similar_users if results else [],
         },
     )
 
 
 def user_search_partial(request):
     query = request.GET.get("q", "").strip()
-    users = search_users(query=query, limit=8)
+    search_ready = is_valid_user_search_query(query)
+    results = search_user_matches(query=query, limit=8) if search_ready else None
     return render(
         request,
         "accounts/partials/user_search_dropdown.html",
         {
             "search_query": query,
-            "users": users,
+            "search_ready": search_ready,
+            "users": results.users if results else [],
+            "exact_users": results.exact_users if results else [],
+            "similar_users": results.similar_users if results else [],
         },
     )
 
@@ -476,6 +486,20 @@ def bookmarks_list(request):
     )
 
 
+def _render_follow_button(request, profile_user):
+    return render(
+        request,
+        "accounts/partials/follow_button.html",
+        {
+            "profile_user": profile_user,
+            "is_following": is_following(
+                follower=request.user,
+                following_user=profile_user,
+            ),
+        },
+    )
+
+
 @login_required
 @require_POST
 def follow_toggle(request):
@@ -484,20 +508,16 @@ def follow_toggle(request):
         return HttpResponseBadRequest(_("Missing username"))
 
     target_user = get_object_or_404(User, username=username)
-    toggle_follow(follower=request.user, following_user=target_user)
+    try:
+        toggle_follow(follower=request.user, following_user=target_user)
+    except ValidationError as exc:
+        if request.headers.get("HX-Request"):
+            return HttpResponseBadRequest(str(exc))
+        messages.error(request, str(exc))
+        return redirect(request.META.get("HTTP_REFERER", "/"))
 
     if request.headers.get("HX-Request"):
-        return render(
-            request,
-            "accounts/partials/follow_button.html",
-            {
-                "profile_user": target_user,
-                "is_following": is_following(
-                    follower=request.user,
-                    following_user=target_user,
-                ),
-            },
-        )
+        return _render_follow_button(request, target_user)
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 

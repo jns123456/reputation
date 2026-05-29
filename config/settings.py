@@ -23,6 +23,12 @@ SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-key-change-in-produc
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+if not CSRF_TRUSTED_ORIGINS and not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{host}"
+        for host in ALLOWED_HOSTS
+        if host and host not in ("*", "localhost", "127.0.0.1") and not host.startswith(".")
+    ]
 KALSHI_ENABLED = env.bool("KALSHI_ENABLED", default=False)
 DEV_FAST_MODE = env.bool("DEV_FAST_MODE", default=False)
 NAV_BADGE_CACHE_SECONDS = env.int("NAV_BADGE_CACHE_SECONDS", default=60)

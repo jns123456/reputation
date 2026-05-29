@@ -1,9 +1,10 @@
 from django.conf import settings
-from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils import translation
 
 from accounts.country_language import language_for_request_country
 from accounts.email_verification_services import user_requires_email_verification
+from accounts.htmx_utils import redirect_response
 
 
 class CountryLanguageMiddleware:
@@ -65,7 +66,10 @@ class EmailVerificationRequiredMiddleware:
         if request.user.is_authenticated and user_requires_email_verification(request.user):
             path = request.path
             if not any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
-                return redirect("accounts:verify_email_pending")
+                return redirect_response(
+                    request,
+                    reverse("accounts:verify_email_pending"),
+                )
         return self.get_response(request)
 
 
@@ -95,5 +99,8 @@ class ProfileSetupRequiredMiddleware:
         if request.user.is_authenticated and not request.user.onboarding_completed:
             path = request.path
             if not any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
-                return redirect("accounts:profile_setup")
+                return redirect_response(
+                    request,
+                    reverse("accounts:profile_setup"),
+                )
         return self.get_response(request)

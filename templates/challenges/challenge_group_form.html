@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if is_edit %}{% trans "Edit group" %}{% else %}{% trans "New group" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="pr-page challenge-create pb-8">
+  <nav class="pr-breadcrumbs" aria-label="{% trans 'Breadcrumb' %}">
+    <a href="{% url 'challenges:list' %}">{% trans "Challenges" %}</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" stroke-width="2" aria-hidden="true"></i>
+    <a href="{% url 'challenges:group_list' %}">{% trans "Groups" %}</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" stroke-width="2" aria-hidden="true"></i>
+    <span class="font-medium text-slate-800 dark:text-slate-200">
+      {% if is_edit %}{% trans "Edit group" %}{% else %}{% trans "New group" %}{% endif %}
+    </span>
+  </nav>
+
+  <header class="challenge-create-header mb-6" data-pr-reveal>
+    <p class="pr-eyebrow">{% trans "Challenges" %}</p>
+    <h1 class="challenge-create-title">
+      {% if is_edit %}
+      {% trans "Edit" %} <span class="pr-gradient-text">{% trans "group" %}</span>
+      {% else %}
+      {% trans "Create a" %} <span class="pr-gradient-text">{% trans "group" %}</span>
+      {% endif %}
+    </h1>
+    <p class="challenge-create-desc">{% trans "Choose a name and select mutual followers to save for future challenges." %}</p>
+  </header>
+
+  {% if not mutual_followers %}
+  <div class="challenge-create-alert mb-6" role="status" data-pr-reveal data-delay="1">
+    <i data-lucide="triangle-alert" class="challenge-create-alert-icon" stroke-width="2" aria-hidden="true"></i>
+    <p>{% trans "You need mutual followers to create a group. Follow someone who follows you back." %}</p>
+  </div>
+  {% endif %}
+
+  <form method="post" class="challenge-create-form pr-panel" data-pr-reveal data-delay="1">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="challenge-create-field">
+      <label for="{{ form.name.id_for_label }}" class="challenge-create-label">{% trans "Group name" %}</label>
+      {% if form.name.errors %}
+      <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.name.errors.0 }}</p>
+      {% endif %}
+      {{ form.name }}
+    </div>
+
+    <div class="challenge-create-field mt-4">
+      <label class="challenge-create-label">{% trans "Members" %}</label>
+      {% if form.members.errors %}
+      <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.members.errors.0 }}</p>
+      {% endif %}
+      {% if mutual_followers %}
+      <div class="challenge-create-opponents">
+        {% for checkbox in form.members %}
+        <label class="challenge-create-opponent">
+          {{ checkbox.tag }}
+          <span class="challenge-create-opponent-avatar" aria-hidden="true">{{ checkbox.choice_label|slice:":1"|upper }}</span>
+          <span class="challenge-create-opponent-name">{{ checkbox.choice_label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="challenge-create-opponents-empty">
+        <i data-lucide="users" class="h-8 w-8 text-slate-300 dark:text-slate-600" stroke-width="1.5" aria-hidden="true"></i>
+        <p>{% trans "No mutual followers yet." %}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="challenge-create-step-actions">
+      <a href="{% url 'challenges:group_list' %}" class="btn-secondary justify-center">{% trans "Cancel" %}</a>
+      <button type="submit" class="btn-primary justify-center" {% if not mutual_followers %}disabled{% endif %}>
+        {% if is_edit %}{% trans "Save changes" %}{% else %}{% trans "Create group" %}{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
