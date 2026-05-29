@@ -7,7 +7,7 @@
 {% block auth_hero_title %}{% trans "Verify your" %}{% endblock %}
 {% block auth_hero_gradient %} <span class="pr-gradient-text">{% trans "email address" %}</span>{% endblock %}
 {% block auth_hero_description %}
-{% blocktrans %}We sent a secure link to <strong>{{ profile_user.email }}</strong>. Open it on this device to unlock your account.{% endblocktrans %}
+{% blocktrans with email=profile_user.email %}We sent a secure link to <strong>{{ email }}</strong>. Open it on this device to unlock your account.{% endblocktrans %}
 {% endblock %}
 
 {% block auth_title %}{% trans "Check your inbox" %}{% endblock %}

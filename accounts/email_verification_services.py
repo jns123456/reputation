@@ -125,6 +125,21 @@ def send_verification_email(user: User) -> bool:
         logger.warning("Skipping verification email for user_id=%s (no email)", user.pk)
         return False
 
+    from accounts.email_services import _email_delivery_configured
+
+    if not _email_delivery_configured():
+        logger.error(
+            "No email provider configured (set RESEND_API_KEY or SMTP). "
+            "Verification email for user_id=%s was not sent.",
+            user.pk,
+        )
+        raise EmailDeliveryError(
+            _(
+                "Email sending is not configured yet. Please contact support or try again later."
+            ),
+            provider="unconfigured",
+        )
+
     token = create_verification_token(user)
     try:
         sent = _send_verification_message(user=user, token=token)
