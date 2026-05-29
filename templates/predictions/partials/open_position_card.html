@@ -53,6 +53,14 @@
           {% if delta >= 0 %}+{% endif %}{{ delta }}
         </p>
       </div>
+      <p class="col-span-full text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-right">
+        {% trans "At resolution" %}:
+        <span class="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">+{{ position.resolution_if_correct }}</span>
+        {% trans "if correct" %}
+        <span class="text-slate-300 dark:text-slate-600" aria-hidden="true">·</span>
+        <span class="font-medium tabular-nums text-red-600 dark:text-red-400">{{ position.resolution_if_wrong }}</span>
+        {% trans "if wrong" %}
+      </p>
     </div>
   </div>
 

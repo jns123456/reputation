@@ -5,6 +5,7 @@ scope covers every page; that's why these are plain views with explicit
 content types instead of static files.
 """
 
+from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.cache import cache_control
 
@@ -54,6 +55,8 @@ def service_worker(request):
 
 @cache_control(max_age=3600)
 def webmanifest(request):
+    static_prefix = settings.STATIC_URL.lstrip("/")
+    icon_base = f"/{static_prefix}images"
     manifest = {
         "name": "PredictStamp",
         "short_name": "PredictStamp",
@@ -61,7 +64,18 @@ def webmanifest(request):
         "start_url": "/",
         "display": "standalone",
         "background_color": "#0f172a",
-        "theme_color": "#4f46e5",
-        "icons": [],
+        "theme_color": "#4338ca",
+        "icons": [
+            {
+                "src": f"{icon_base}/icon-192.png",
+                "sizes": "192x192",
+                "type": "image/png",
+            },
+            {
+                "src": f"{icon_base}/icon-512.png",
+                "sizes": "512x512",
+                "type": "image/png",
+            },
+        ],
     }
     return JsonResponse(manifest, content_type="application/manifest+json")

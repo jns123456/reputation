@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}" class="h-full">
 <head>
@@ -17,7 +17,10 @@
   {% block og_image_tags %}<meta name="twitter:card" content="summary">{% endblock %}
 
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#4f46e5">
+  <link rel="icon" href="{% static 'images/favicon.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'images/favicon-32.png' %}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+  <meta name="theme-color" content="#4338ca">
   <script>
     (function () {
       var stored = null;
@@ -53,7 +56,6 @@
   <script defer src="https://unpkg.com/lucide@latest"></script>
   <script defer src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
-  {% load static %}
   <link rel="stylesheet" href="{% static 'css/proofrep-ui.css' %}{% if static_version %}?v={{ static_version }}{% endif %}">
   <script src="{% static 'js/popularity-sort.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <style>

@@ -16,6 +16,7 @@ from predictions.services import (
 )
 from reputation.services import (
     calculate_exit_reputation_delta,
+    calculate_reputation_stakes,
     calculate_user_unrealized_reputation,
     get_predicted_outcome_probability,
 )
@@ -39,12 +40,19 @@ def _build_open_position_context(prediction):
         exit_probability_snapshot=market.current_probability or {},
         predicted_direction=prediction.predicted_direction,
     )
+    resolution_stakes = calculate_reputation_stakes(
+        predicted_outcome=prediction.predicted_outcome,
+        probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
+    )
     return {
         "prediction": prediction,
         "market": market,
         "entry_percent": int(round(entry_probability * 100)),
         "current_percent": int(round(current_probability * 100)),
         "current_delta": current_delta,
+        "resolution_if_correct": resolution_stakes["win_points"],
+        "resolution_if_wrong": -resolution_stakes["loss_points"],
         "countdown": market.expiration_countdown,
     }
 

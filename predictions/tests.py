@@ -408,6 +408,8 @@ class OpenPredictionsPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Open forecast market")
         self.assertContains(response, "+15")
+        self.assertContains(response, "+60")
+        self.assertContains(response, "-40")
         self.assertContains(response, reverse(
             "predictions:exit",
             kwargs={"slug": self.market.slug, "prediction_id": self.prediction.id},
