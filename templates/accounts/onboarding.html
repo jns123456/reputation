@@ -53,10 +53,7 @@
           </span>
         </a>
         <div id="follow-user-{{ suggested.username }}" class="pr-profile-follow flex-none">
-          <form method="post" action="{% url 'accounts:follow_toggle' %}" class="inline"
-                hx-post="{% url 'accounts:follow_toggle' %}"
-                hx-target="#follow-user-{{ suggested.username }}"
-                hx-swap="outerHTML">
+          <form method="post" action="{% url 'accounts:follow_toggle' %}" class="inline">
             {% csrf_token %}
             <input type="hidden" name="username" value="{{ suggested.username }}">
             <button type="submit" class="{% if suggested.id in following_ids %}btn-secondary{% else %}btn-primary{% endif %}">

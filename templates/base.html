@@ -42,6 +42,14 @@
     }
   </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    document.addEventListener("htmx:configRequest", function (event) {
+      var match = document.cookie.match("(^|;)\\s*csrftoken\\s*=\\s*([^;]+)");
+      if (match) {
+        event.detail.headers["X-CSRFToken"] = decodeURIComponent(match.pop());
+      }
+    });
+  </script>
   <script defer src="https://unpkg.com/lucide@latest"></script>
   <script defer src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>

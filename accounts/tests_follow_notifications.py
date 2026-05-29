@@ -89,6 +89,16 @@ class FollowToggleViewTests(TestCase):
             UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
         )
 
+    def test_follow_toggle_without_htmx_redirects_to_profile(self):
+        response = self.client.post(self.url, {"username": self.target.username})
+        self.assertRedirects(
+            response,
+            reverse("accounts:profile", kwargs={"username": self.target.username}),
+        )
+        self.assertTrue(
+            UserFollow.objects.filter(follower=self.follower, following=self.target).exists()
+        )
+
     def test_follow_toggle_survives_notification_failure(self):
         with patch(
             "accounts.notification_services.notify_new_follower",

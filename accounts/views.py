@@ -500,25 +500,43 @@ def _render_follow_button(request, profile_user):
     )
 
 
-@login_required
 @require_POST
 def follow_toggle(request):
+    if not request.user.is_authenticated:
+        from urllib.parse import urlencode
+
+        login_url = f"{reverse('accounts:login')}?{urlencode({'next': request.path})}"
+        from accounts.htmx_utils import redirect_response
+
+        return redirect_response(request, login_url)
+
     username = request.POST.get("username")
     if not username:
         return HttpResponseBadRequest(_("Missing username"))
 
     target_user = get_object_or_404(User, username=username)
     try:
-        toggle_follow(follower=request.user, following_user=target_user)
+        is_following_now = toggle_follow(follower=request.user, following_user=target_user)
     except ValidationError as exc:
         if request.headers.get("HX-Request"):
             return HttpResponseBadRequest(str(exc))
         messages.error(request, str(exc))
-        return redirect(request.META.get("HTTP_REFERER", "/"))
+        return redirect("accounts:profile", username=target_user.username)
+
+    if is_following_now:
+        messages.success(
+            request,
+            _("You are now following %(name)s.") % {"name": target_user.public_name},
+        )
+    else:
+        messages.success(
+            request,
+            _("You unfollowed %(name)s.") % {"name": target_user.public_name},
+        )
 
     if request.headers.get("HX-Request"):
         return _render_follow_button(request, target_user)
-    return redirect(request.META.get("HTTP_REFERER", "/"))
+    return redirect("accounts:profile", username=target_user.username)
 
 
 @login_required
