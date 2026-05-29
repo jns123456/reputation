@@ -1,0 +1,71 @@
+{% load i18n %}
+<div id="admin-verification-section">
+  {% if pending_verification_users %}
+  <section class="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/50 dark:bg-amber-950/30 sm:p-5">
+    <div class="flex items-start gap-3 text-sm text-amber-900 dark:text-amber-100">
+      <i data-lucide="badge-check" class="mt-0.5 h-5 w-5 shrink-0" stroke-width="1.75" aria-hidden="true"></i>
+      <div>
+        <p class="font-semibold">
+          {% blocktrans count count=pending_verifications %}Hay {{ count }} solicitud de verificación pendiente de revisar.{% plural %}Hay {{ count }} solicitudes de verificación pendientes de revisar.{% endblocktrans %}
+        </p>
+        <p class="mt-1 text-xs text-amber-800/90 dark:text-amber-200/80">
+          {% trans "Aprueba para otorgar el badge verificado o rechaza para cerrar la solicitud." %}
+        </p>
+      </div>
+    </div>
+
+    <ul class="divide-y divide-amber-200/80 dark:divide-amber-900/40">
+      {% for u in pending_verification_users %}
+      <li class="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex min-w-0 items-center gap-3">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-sm font-semibold text-brand-700 shadow-sm dark:bg-slate-900 dark:text-brand-300">
+            {% include "accounts/partials/user_avatar.html" with user=u %}
+          </span>
+          <div class="min-w-0">
+            <a href="{% url 'accounts:profile' username=u.username %}"
+               class="block truncate text-sm font-semibold text-slate-900 hover:text-brand-600 dark:text-white">
+              {{ u.public_name }}
+            </a>
+            <p class="truncate text-xs text-slate-600 dark:text-slate-400">
+              @{{ u.username }}
+              {% if u.email %} · {{ u.email }}{% endif %}
+            </p>
+            <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+              <span class="{{ u.identity_mode_badge_class }}">{{ u.get_identity_mode_display }}</span>
+              · {% trans "Joined" %} {{ u.date_joined|date:"d/m/Y" }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex shrink-0 gap-2 sm:justify-end">
+          <form method="post"
+                action="{% url 'dashboard:resolve_identity_verification' user_id=u.pk %}"
+                hx-post="{% url 'dashboard:resolve_identity_verification' user_id=u.pk %}"
+                hx-target="#admin-verification-section"
+                hx-swap="outerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="btn-secondary gap-1.5 px-3 py-2 text-xs font-semibold sm:text-sm">
+              <i data-lucide="x" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
+              {% trans "Reject" %}
+            </button>
+          </form>
+          <form method="post"
+                action="{% url 'dashboard:resolve_identity_verification' user_id=u.pk %}"
+                hx-post="{% url 'dashboard:resolve_identity_verification' user_id=u.pk %}"
+                hx-target="#admin-verification-section"
+                hx-swap="outerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="approve">
+            <button type="submit" class="btn-primary gap-1.5 px-3 py-2 text-xs font-semibold sm:text-sm">
+              <i data-lucide="badge-check" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
+              {% trans "Approve" %}
+            </button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>

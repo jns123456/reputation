@@ -25,14 +25,7 @@
     </a>
   </header>
 
-  {% if pending_verifications %}
-  <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
-    <i data-lucide="badge-check" class="mt-0.5 h-5 w-5 shrink-0" stroke-width="1.75" aria-hidden="true"></i>
-    <span>
-      {% blocktrans count count=pending_verifications %}Hay {{ count }} solicitud de verificación pendiente de revisar.{% plural %}Hay {{ count }} solicitudes de verificación pendientes de revisar.{% endblocktrans %}
-    </span>
-  </div>
-  {% endif %}
+  {% include "dashboard/partials/verification_review_section.html" %}
 
   {# Stat cards #}
   <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -49,7 +42,7 @@
           <i data-lucide="{{ card.icon }}" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
         </span>
       </div>
-      <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ card.value }}</p>
+      <p {% if card.stat_id %}id="{{ card.stat_id }}"{% endif %} class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ card.value }}</p>
       <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ card.hint }}</p>
     </div>
     {% endfor %}

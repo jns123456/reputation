@@ -1,24 +1,40 @@
 """Platform super-admin control panel.
 
-A lightweight operational overview restricted to super admins (``is_superuser``).
-Read-only aggregates across the main domain apps — it never mutates data, keeping
-it safe to expose in the navbar for the platform owner. Deep management actions
-still live in Django Admin (``/admin/``).
+Operational overview restricted to super admins (``is_superuser``). Identity
+verification requests can be approved or rejected here; deeper management still
+lives in Django Admin (``/admin/``).
 """
 
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
+from accounts.identity_verification_services import (
+    IdentityVerificationError,
+    approve_identity_verification,
+    get_pending_verification_users,
+    reject_identity_verification,
+)
 from comments.models import Comment
 from markets.models import Market
 from predictions.models import Prediction
 from pulse.models import Post as ForumPost
 
 superadmin_required = user_passes_test(lambda u: u.is_active and u.is_superuser)
+
+
+def _verification_context():
+    pending_users = get_pending_verification_users()
+    pending_count = pending_users.count()
+    return {
+        "pending_verification_users": pending_users,
+        "pending_verifications": pending_count,
+    }
 
 
 @superadmin_required
@@ -84,6 +100,7 @@ def admin_panel(request):
             "hint": "Pendientes de revisar",
             "icon": "badge-check",
             "tone": "amber",
+            "stat_id": "admin-verification-stat",
         },
         {
             "label": "Mercados",
@@ -119,6 +136,33 @@ def admin_panel(request):
         "stat_cards": stat_cards,
         "recent_users": recent_users,
         "recent_predictions": recent_predictions,
-        "pending_verifications": pending_verifications,
+        **_verification_context(),
     }
     return render(request, "dashboard/admin_panel.html", context)
+
+
+@superadmin_required
+@require_POST
+def resolve_identity_verification(request, user_id):
+    User = get_user_model()
+    user = get_object_or_404(User, pk=user_id)
+    action = request.POST.get("action")
+
+    try:
+        if action == "approve":
+            approve_identity_verification(user)
+        elif action == "reject":
+            reject_identity_verification(user)
+        else:
+            return HttpResponseBadRequest("Invalid action.")
+    except IdentityVerificationError:
+        pass
+
+    context = _verification_context()
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "dashboard/partials/verification_review_response.html",
+            context,
+        )
+    return redirect("dashboard:admin_panel")

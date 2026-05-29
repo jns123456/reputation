@@ -8,6 +8,11 @@ app_name = "dashboard"
 urlpatterns = [
     path("", views.about, name="landing"),
     path("panel/", admin_panel_views.admin_panel, name="admin_panel"),
+    path(
+        "panel/verifications/<int:user_id>/",
+        admin_panel_views.resolve_identity_verification,
+        name="resolve_identity_verification",
+    ),
     path("explore/", views.explore, name="explore"),
     path(
         "about/",
