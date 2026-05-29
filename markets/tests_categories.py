@@ -324,6 +324,71 @@ class CategoryBrowseViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class BrowseAreaDenormalizationTests(TestCase):
+    def test_browse_area_slugs_computed_on_save(self):
+        market = Market.objects.create(
+            external_id="denorm-nba",
+            title="NBA market",
+            slug="denorm-nba",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+        )
+        market.refresh_from_db()
+        self.assertIn("nba", market.browse_area_slugs)
+
+    def test_browse_area_slugs_recomputed_on_update(self):
+        market = Market.objects.create(
+            external_id="denorm-switch",
+            title="Switch market",
+            slug="denorm-switch",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+        )
+        market.polymarket_event_raw = {"tags": [{"slug": "soccer"}]}
+        market.save()
+        market.refresh_from_db()
+        self.assertIn("soccer", market.browse_area_slugs)
+        self.assertNotIn("nba", market.browse_area_slugs)
+
+    def test_area_summaries_avoid_n_plus_one(self):
+        for index in range(5):
+            Market.objects.create(
+                external_id=f"perf-nba-{index}",
+                title=f"NBA {index}",
+                slug=f"perf-nba-{index}",
+                status=Market.Status.OPEN,
+                polymarket_event_raw={"tags": [{"slug": "nba"}]},
+            )
+        # Counting from the denormalized column must be a single query
+        # regardless of how many markets exist (no per-row payload fetch).
+        with self.assertNumQueries(1):
+            summaries = {
+                item["area"].slug: item["count"]
+                for item in get_browse_area_summaries(category_slug="sports")
+            }
+        self.assertEqual(summaries["nba"], 5)
+
+    def test_area_filter_on_card_queryset_avoids_n_plus_one(self):
+        for index in range(5):
+            Market.objects.create(
+                external_id=f"cardperf-nba-{index}",
+                title=f"NBA {index}",
+                slug=f"cardperf-nba-{index}",
+                status=Market.Status.OPEN,
+                polymarket_event_raw={"tags": [{"slug": "nba"}]},
+            )
+        markets = get_open_markets_by_canonical_category(category_slug="sports")
+        # Card queryset defers raw payloads; filtering must read only the
+        # denormalized column already loaded on each instance (no extra query).
+        with self.assertNumQueries(0):
+            filtered = filter_markets_by_browse_area(
+                markets=markets,
+                category_slug="sports",
+                area_slug="nba",
+            )
+        self.assertEqual(len(filtered), 5)
+
+
 class BlendMarketsBySourceTests(TestCase):
     def test_blend_includes_both_sources(self):
         poly = Market.objects.create(

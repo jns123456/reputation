@@ -3,8 +3,8 @@
 import logging
 
 from celery import shared_task
-from django.core.cache import cache
 
+from integrations.celery_utils import safe_cache_delete
 from integrations.services import import_markets_from_kalshi
 from integrations.sync import refresh_stale_open_markets, sync_all_category_markets, sync_category_markets
 from markets.categories import get_category_for_slug
@@ -21,7 +21,7 @@ def sync_world_cup_match_markets_task(self):
 
     try:
         result = sync_world_cup_match_markets()
-        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
         logger.info(
             "sync_world_cup_match_markets_task finished: imported=%s errors=%s",
             len(result["imported"]),
@@ -40,7 +40,7 @@ def sync_category_markets_task(self, category_slug, kalshi_lightweight=True):
         return
     try:
         sync_category_markets(category, kalshi_lightweight=kalshi_lightweight)
-        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
     except Exception as exc:
         logger.exception("sync_category_markets_task failed for %s", category_slug)
         raise self.retry(exc=exc) from exc
@@ -51,7 +51,7 @@ def sync_all_category_markets_task(self):
     """Periodic import of category markets from Polymarket and Kalshi."""
     try:
         result = sync_all_category_markets()
-        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
         logger.info(
             "sync_all_category_markets_task finished: imported=%s updated=%s errors=%s",
             result["imported"],
@@ -109,7 +109,7 @@ def import_kalshi_open_markets_task(self):
             status="open",
             exclude_mve=True,
         )
-        cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
         created = sum(1 for item in result["imported"] if item["created"])
         logger.info(
             "import_kalshi_open_markets_task finished: total=%s created=%s errors=%s",

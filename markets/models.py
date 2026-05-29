@@ -28,6 +28,9 @@ class Market(models.Model):
     description_es = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True, db_index=True)
     canonical_category_slug = models.CharField(max_length=50, blank=True, db_index=True)
+    # Denormalized browse-area membership (computed from raw payloads at save
+    # time) so request-time filtering/counting avoids N+1 on deferred JSON.
+    browse_area_slugs = models.JSONField(default=list, blank=True)
     slug = models.SlugField(max_length=550, unique=True)
     source = models.CharField(
         max_length=50,
@@ -95,7 +98,10 @@ class Market(models.Model):
         return _("Market")
 
     def save(self, *args, **kwargs):
+        from markets.browse_areas import compute_browse_area_slugs
+
         self.canonical_category_slug = resolve_market_category_slug(self)
+        self.browse_area_slugs = compute_browse_area_slugs(self)
         if not self.slug:
             base = slugify(self.title)[:500] or "market"
             slug = base

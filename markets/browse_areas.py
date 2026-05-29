@@ -97,11 +97,34 @@ def get_browse_area(category_slug: str, area_slug: str) -> BrowseArea | None:
     return AREA_BY_KEY.get((category_slug, area_slug))
 
 
-def market_matches_browse_area(market, area: BrowseArea) -> bool:
-    if _collect_tag_slugs(market).intersection(area.tag_slugs):
-        return True
+def compute_browse_area_slugs(market) -> list[str]:
+    """All browse-area slugs a market belongs to, derived from raw payloads.
+
+    Denormalized onto ``Market.browse_area_slugs`` at save/import time so that
+    request-time filtering and counting never touch the large raw JSON payloads
+    (which are deferred on card querysets and would trigger N+1 fetches).
+    """
+    tag_slugs = _collect_tag_slugs(market)
     series = _kalshi_series_ticker(market)
-    if not series:
-        return False
-    kalshi_series = KALSHI_SERIES_BY_BROWSE_AREA.get((area.category_slug, area.slug), frozenset())
-    return series in kalshi_series
+    matched: list[str] = []
+    for area in BROWSE_AREAS:
+        if tag_slugs.intersection(area.tag_slugs):
+            matched.append(area.slug)
+            continue
+        if series:
+            kalshi_series = KALSHI_SERIES_BY_BROWSE_AREA.get(
+                (area.category_slug, area.slug), frozenset()
+            )
+            if series in kalshi_series:
+                matched.append(area.slug)
+    return matched
+
+
+def market_matches_browse_area(market, area: BrowseArea) -> bool:
+    """True when a market belongs to ``area`` using the denormalized membership.
+
+    Reads ``Market.browse_area_slugs`` (a small, always-loaded column) instead of
+    the deferred raw JSON payloads, so this is safe to call in a loop over card
+    querysets without incurring per-row database fetches.
+    """
+    return area.slug in (getattr(market, "browse_area_slugs", None) or [])

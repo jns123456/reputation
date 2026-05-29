@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from django.conf import settings
 from django.db.models import Count, F, Q
@@ -106,30 +106,31 @@ def blend_markets_by_source(markets, *, limit=CATEGORY_BROWSE_LIMIT):
 
 
 def filter_markets_by_search(*, markets, search):
-    """Filter an in-memory market list by title, description, or category text."""
+    """Filter an in-memory market list by title, description, or category text.
+
+    Description fields are read only when already loaded on the instance. On card
+    querysets ``description`` is deferred, and touching it per row would trigger
+    an N+1 fetch, so it is skipped there (titles/category still match).
+    """
     query = (search or "").strip()
     if not query:
         return markets
     needle = query.casefold()
     filtered = []
     for market in markets:
-        if needle in (market.display_title or "").casefold():
+        loaded = market.__dict__
+        haystacks = [
+            market.display_title or "",
+            loaded.get("title") or "",
+            loaded.get("title_es") or "",
+            loaded.get("category") or "",
+        ]
+        # Only include description fields that are already loaded (avoid N+1).
+        for field in ("description", "description_es"):
+            if field in loaded:
+                haystacks.append(loaded[field] or "")
+        if any(needle in value.casefold() for value in haystacks):
             filtered.append(market)
-            continue
-        if needle in (market.title or "").casefold() or needle in (market.title_es or "").casefold():
-            filtered.append(market)
-            continue
-        if needle in (market.category or "").casefold():
-            filtered.append(market)
-            continue
-        for description in (
-            getattr(market, "display_description", "") or "",
-            getattr(market, "description", "") or "",
-            getattr(market, "description_es", "") or "",
-        ):
-            if needle in description.casefold():
-                filtered.append(market)
-                break
     return filtered
 
 
@@ -183,16 +184,39 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
 
 
 def get_browse_area_summaries(*, category_slug, markets=None):
-    """Count open markets per sub-area; only areas with at least one market."""
+    """Count open markets per sub-area; only areas with at least one market.
+
+    Uses the denormalized ``browse_area_slugs`` column instead of the deferred
+    raw JSON payloads. When ``markets`` is not supplied, counts come from a
+    single lightweight query that selects only that column (no N+1, no big
+    payload transfer).
+    """
+    areas = get_browse_areas_for_category(category_slug)
+    if not areas:
+        return []
+
+    counts = Counter()
     if markets is None:
-        markets = get_open_markets_by_canonical_category(category_slug=category_slug)
+        category = get_category_for_slug(category_slug)
+        if category is None:
+            return []
+        membership_lists = _exclude_disabled_sources(
+            Market.objects.filter(
+                status=Market.Status.OPEN,
+                canonical_category_slug=category.slug,
+            )
+        ).values_list("browse_area_slugs", flat=True)
+        for slugs in membership_lists:
+            counts.update(slugs or ())
+    else:
+        for market in markets:
+            counts.update(market.browse_area_slugs or ())
 
-    summaries = []
-    for area in get_browse_areas_for_category(category_slug):
-        count = sum(1 for market in markets if market_matches_browse_area(market, area))
-        if count:
-            summaries.append({"area": area, "count": count})
-
+    summaries = [
+        {"area": area, "count": counts[area.slug]}
+        for area in areas
+        if counts[area.slug]
+    ]
     summaries.sort(key=lambda item: item["count"], reverse=True)
     return summaries
 

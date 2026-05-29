@@ -8,7 +8,22 @@ from integrations.celery_utils import (
     enqueue_category_sync,
     enqueue_market_refresh_if_stale,
     market_is_stale,
+    safe_cache_delete,
 )
+
+
+class SafeCacheDeleteTests(SimpleTestCase):
+    @patch("integrations.celery_utils.cache")
+    def test_returns_true_on_success(self, mock_cache):
+        self.assertTrue(safe_cache_delete("some-key"))
+        mock_cache.delete.assert_called_once_with("some-key")
+
+    @patch("integrations.celery_utils.cache")
+    def test_swallows_backend_errors(self, mock_cache):
+        mock_cache.delete.side_effect = ConnectionError("redis down")
+        # Must not raise: cache invalidation is best-effort and must never
+        # fail or retry the surrounding task.
+        self.assertFalse(safe_cache_delete("some-key"))
 
 
 class CeleryBrokerAvailabilityTests(SimpleTestCase):

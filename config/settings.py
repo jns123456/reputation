@@ -302,10 +302,33 @@ AUTH0_ENABLED = bool(AUTH0_DOMAIN and AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET)
 
 _redis_url = env("REDIS_URL", default="redis://localhost:6379/0")
 USE_REDIS_CACHE = env.bool("USE_REDIS_CACHE", default=not DEBUG)
+
+# Connection resilience: managed Redis (Heroku) silently drops idle TCP/TLS
+# sockets, surfacing as "Connection reset by peer" / "UNEXPECTED_EOF". Health
+# checks revalidate pooled connections before use and keepalive + timeouts let
+# dropped sockets fail fast and reconnect instead of hanging.
+REDIS_HEALTH_CHECK_INTERVAL = env.int("REDIS_HEALTH_CHECK_INTERVAL", default=30)
+REDIS_SOCKET_TIMEOUT = env.float("REDIS_SOCKET_TIMEOUT", default=5.0)
+REDIS_SOCKET_CONNECT_TIMEOUT = env.float("REDIS_SOCKET_CONNECT_TIMEOUT", default=5.0)
+
 CELERY_BROKER_URL = _redis_url
 CELERY_RESULT_BACKEND = _redis_url
 CELERY_BROKER_CONNECTION_TIMEOUT = env.float("CELERY_BROKER_CONNECTION_TIMEOUT", default=0.5)
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = False
+# Recover from mid-run broker disconnects (the failure seen in production) by
+# retrying the connection instead of failing the task.
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = env.int("CELERY_BROKER_CONNECTION_MAX_RETRIES", default=3)
+# Redis Mini caps connections at 20 (shared web + worker + beat); keep the pool small.
+CELERY_BROKER_POOL_LIMIT = env.int("CELERY_BROKER_POOL_LIMIT", default=5)
+CELERY_REDIS_RETRY_ON_TIMEOUT = True
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "socket_keepalive": True,
+    "socket_timeout": REDIS_SOCKET_TIMEOUT,
+    "socket_connect_timeout": REDIS_SOCKET_CONNECT_TIMEOUT,
+    "health_check_interval": REDIS_HEALTH_CHECK_INTERVAL,
+}
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = dict(CELERY_BROKER_TRANSPORT_OPTIONS)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -318,7 +341,13 @@ if _redis_url.startswith("rediss://"):
 
 if _redis_url and USE_REDIS_CACHE:
     redis_url = _redis_url
-    redis_cache_options = {}
+    redis_cache_options = {
+        "socket_keepalive": True,
+        "socket_timeout": REDIS_SOCKET_TIMEOUT,
+        "socket_connect_timeout": REDIS_SOCKET_CONNECT_TIMEOUT,
+        "health_check_interval": REDIS_HEALTH_CHECK_INTERVAL,
+        "retry_on_timeout": True,
+    }
     if redis_url.startswith("rediss://"):
         redis_cache_options["ssl_cert_reqs"] = None
     CACHES = {

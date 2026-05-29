@@ -10,6 +10,22 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+
+def safe_cache_delete(key: str) -> bool:
+    """Delete a cache key, swallowing backend (Redis) connection errors.
+
+    Cache invalidation is best-effort: a transient Redis outage must never fail
+    or retry the surrounding task, which already did its real work. Returns True
+    on success, False when the delete could not be performed.
+    """
+    try:
+        cache.delete(key)
+        return True
+    except Exception:
+        logger.warning("Cache delete failed for %s; continuing", key, exc_info=True)
+        return False
+
+
 CELERY_BROKER_AVAILABLE_CACHE_KEY = "celery_broker_available"
 CELERY_BROKER_CHECK_SECONDS = 60
 MARKET_REFRESH_ENQUEUE_PREFIX = "market_refresh_queued:"
