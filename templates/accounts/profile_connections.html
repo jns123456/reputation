@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% if active_tab == "followers" %}
+{% blocktrans with name=profile_user.public_name %}Followers · {{ name }}{% endblocktrans %}
+{% else %}
+{% blocktrans with name=profile_user.public_name %}Following · {{ name }}{% endblocktrans %}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  <div class="mb-4">
+    <a href="{% url 'accounts:profile' username=profile_user.username %}"
+       class="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline">
+      <i data-lucide="arrow-left" class="h-4 w-4" aria-hidden="true"></i>
+      {% blocktrans with name=profile_user.public_name %}{{ name }}'s profile{% endblocktrans %}
+    </a>
+  </div>
+
+  <header class="mb-6" data-pr-reveal>
+    <h1 class="text-xl font-bold text-slate-900 dark:text-white">
+      {% include "accounts/partials/user_display_name.html" with user=profile_user %}
+    </h1>
+    {% if profile_user.show_username_publicly %}
+    <p class="mt-1 text-sm text-slate-500">@{{ profile_user.username }}</p>
+    {% endif %}
+  </header>
+
+  <nav class="mb-6 flex gap-2 border-b border-slate-200 dark:border-slate-700" aria-label="{% trans 'Follow lists' %}">
+    <a href="{% url 'accounts:profile_followers' username=profile_user.username %}"
+       class="pr-profile-connections-tab {% if active_tab == 'followers' %}is-active{% endif %}"
+       {% if active_tab == "followers" %}aria-current="page"{% endif %}>
+      <span class="font-semibold">{{ follower_count }}</span>
+      <span>{% blocktrans count counter=follower_count %}follower{% plural %}followers{% endblocktrans %}</span>
+    </a>
+    <a href="{% url 'accounts:profile_following' username=profile_user.username %}"
+       class="pr-profile-connections-tab {% if active_tab == 'following' %}is-active{% endif %}"
+       {% if active_tab == "following" %}aria-current="page"{% endif %}>
+      <span class="font-semibold">{{ following_count }}</span>
+      <span>{% blocktrans count counter=following_count %}following{% plural %}following{% endblocktrans %}</span>
+    </a>
+  </nav>
+
+  <div data-pr-reveal data-delay="1">
+    {% if users %}
+    <div class="space-y-3">
+      {% for listed_user in users %}
+      {% include "accounts/partials/user_search_result_item.html" with profile_user=listed_user %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="pr-empty py-10">
+      {% if active_tab == "followers" %}
+        {% if request.user == profile_user %}
+        {% trans "No one is following you yet." %}
+        {% else %}
+        {% blocktrans with name=profile_user.public_name %}No followers yet for {{ name }}.{% endblocktrans %}
+        {% endif %}
+      {% else %}
+        {% if request.user == profile_user %}
+        {% trans "You are not following anyone yet." %}
+        {% else %}
+        {% blocktrans with name=profile_user.public_name %}{{ name }} is not following anyone yet.{% endblocktrans %}
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

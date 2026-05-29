@@ -31,12 +31,28 @@
 
         <dl class="pr-profile-stats">
           <div class="pr-profile-stat">
-            <dd>{{ follower_count }}</dd>
-            <dt>{% blocktrans count counter=follower_count %}follower{% plural %}followers{% endblocktrans %}</dt>
+            <dd>
+              <a href="{% url 'accounts:profile_followers' username=profile_user.username %}"
+                 class="pr-profile-stat-link">{{ follower_count }}</a>
+            </dd>
+            <dt>
+              <a href="{% url 'accounts:profile_followers' username=profile_user.username %}"
+                 class="pr-profile-stat-link">
+                {% blocktrans count counter=follower_count %}follower{% plural %}followers{% endblocktrans %}
+              </a>
+            </dt>
           </div>
           <div class="pr-profile-stat">
-            <dd>{{ following_count }}</dd>
-            <dt>{% blocktrans count counter=following_count %}following{% plural %}following{% endblocktrans %}</dt>
+            <dd>
+              <a href="{% url 'accounts:profile_following' username=profile_user.username %}"
+                 class="pr-profile-stat-link">{{ following_count }}</a>
+            </dd>
+            <dt>
+              <a href="{% url 'accounts:profile_following' username=profile_user.username %}"
+                 class="pr-profile-stat-link">
+                {% blocktrans count counter=following_count %}following{% plural %}following{% endblocktrans %}
+              </a>
+            </dt>
           </div>
           <div class="pr-profile-stat pr-profile-stat--muted">
             <dt>{% blocktrans with date=profile_user.created_at|date:"M Y" %}Joined {{ date }}{% endblocktrans %}</dt>

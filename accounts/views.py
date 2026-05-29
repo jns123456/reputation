@@ -26,8 +26,10 @@ from accounts.email_verification_services import (
 from accounts.email_services import EmailDeliveryError
 from accounts.follow_selectors import (
     get_follower_count,
+    get_followers,
     get_following_count,
     get_following_ids,
+    get_following_users,
     is_following,
 )
 from accounts.follow_services import toggle_follow
@@ -497,6 +499,46 @@ def _render_follow_button(request, profile_user):
                 following_user=profile_user,
             ),
         },
+    )
+
+
+def _render_profile_connections(request, *, profile_user, users, active_tab):
+    return render(
+        request,
+        "accounts/profile_connections.html",
+        {
+            "profile_user": profile_user,
+            "users": users,
+            "active_tab": active_tab,
+            "follower_count": get_follower_count(profile_user),
+            "following_count": get_following_count(profile_user),
+        },
+    )
+
+
+def profile_followers(request, username):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+    return _render_profile_connections(
+        request,
+        profile_user=profile_user,
+        users=get_followers(profile_user),
+        active_tab="followers",
+    )
+
+
+def profile_following(request, username):
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+    return _render_profile_connections(
+        request,
+        profile_user=profile_user,
+        users=get_following_users(profile_user),
+        active_tab="following",
     )
 
 

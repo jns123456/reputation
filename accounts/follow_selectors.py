@@ -63,3 +63,33 @@ def get_following_ids(user):
     if not user or not user.is_authenticated:
         return UserFollow.objects.none().values_list("following_id", flat=True)
     return UserFollow.objects.filter(follower=user).values_list("following_id", flat=True)
+
+
+def get_followers(user, *, limit=100):
+    """Users who follow the given user."""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    if not user:
+        return User.objects.none()
+    return (
+        User.objects.filter(is_active=True, following_relations__following=user)
+        .select_related("profile")
+        .order_by("-following_relations__created_at")
+        .distinct()[:limit]
+    )
+
+
+def get_following_users(user, *, limit=100):
+    """Users the given user follows."""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    if not user:
+        return User.objects.none()
+    return (
+        User.objects.filter(is_active=True, follower_relations__follower=user)
+        .select_related("profile")
+        .order_by("-follower_relations__created_at")
+        .distinct()[:limit]
+    )
