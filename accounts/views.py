@@ -410,6 +410,9 @@ def profile_detail(request, username):
         username=username,
     )
     predictions = get_user_prediction_history(user)
+    from predictions.selectors import get_user_prediction_summary
+
+    prediction_summary = get_user_prediction_summary(user)
     category_breakdown = get_user_category_breakdown(user)
     streak = getattr(user, "activity_streak", None)
     from accounts.achievement_services import (
@@ -436,6 +439,7 @@ def profile_detail(request, username):
         {
             "profile_user": user,
             "predictions": predictions,
+            "prediction_summary": prediction_summary,
             "unrealized_reputation": calculate_user_unrealized_reputation(user),
             "category_breakdown": category_breakdown,
             "is_following": is_following(follower=request.user, following_user=user),

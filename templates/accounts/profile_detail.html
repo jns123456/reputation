@@ -34,17 +34,18 @@
     {% include "includes/pr_stat_card.html" with label=pop_label value=profile_user.profile.popularity_points value_class="text-pop-600" badge_text=pop_badge badge_class="badge-pop" delay="3" %}
     <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Predictions" %}</p>
-      <p class="pr-stat-value">{{ profile_user.profile.prediction_count }}</p>
+      <p class="pr-stat-value">{{ prediction_summary.total }}</p>
       <p class="mt-1 text-xs text-slate-500">
-        {% blocktrans with correct=profile_user.profile.correct_prediction_count incorrect=profile_user.profile.incorrect_prediction_count %}{{ correct }} correct · {{ incorrect }} incorrect{% endblocktrans %}
+        {% if prediction_summary.open %}{% blocktrans count open=prediction_summary.open %}{{ open }} open{% plural %}{{ open }} open{% endblocktrans %} · {% endif %}{% blocktrans with correct=prediction_summary.correct incorrect=prediction_summary.incorrect %}{{ correct }} correct · {{ incorrect }} incorrect{% endblocktrans %}
       </p>
     </div>
-    {% with total=profile_user.profile.correct_prediction_count|add:profile_user.profile.incorrect_prediction_count %}
     <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Accuracy" %}</p>
-      <p class="pr-stat-value">{% if total > 0 %}{% widthratio profile_user.profile.correct_prediction_count total 100 %}%{% else %}—{% endif %}</p>
+      <p class="pr-stat-value">{% if prediction_summary.accuracy_pct is not None %}{{ prediction_summary.accuracy_pct }}%{% else %}—{% endif %}</p>
+      {% if prediction_summary.resolved == 0 and prediction_summary.total > 0 %}
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Based on resolved forecasts only." %}</p>
+      {% endif %}
     </div>
-    {% endwith %}
   </div>
 
   {% if streak_current or streak_longest %}

@@ -1,4 +1,4 @@
-from django.db.models import Count, IntegerField, OuterRef, Prefetch, Subquery, Value
+from django.db.models import Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 
 from comments.models import Vote
@@ -69,6 +69,34 @@ def get_prediction_with_interactions(pk):
             Prediction.objects.filter(pk=pk).select_related("user", "user__profile", "market")
         )
     ).first()
+
+
+def get_user_prediction_summary(user):
+    """Aggregate non-void forecast counts for profile and dashboard display."""
+    aggregated = (
+        Prediction.objects.filter(user=user)
+        .exclude(status=Prediction.Status.VOID)
+        .aggregate(
+            total=Count("id"),
+            correct=Count(
+                "id",
+                filter=Q(status=Prediction.Status.RESOLVED, is_correct=True),
+            ),
+            incorrect=Count(
+                "id",
+                filter=Q(status=Prediction.Status.RESOLVED, is_correct=False),
+            ),
+            open=Count("id", filter=Q(status=Prediction.Status.PENDING)),
+            exited=Count("id", filter=Q(status=Prediction.Status.EXITED)),
+        )
+    )
+    resolved = aggregated["correct"] + aggregated["incorrect"]
+    accuracy_pct = round(aggregated["correct"] * 100 / resolved) if resolved else None
+    return {
+        **aggregated,
+        "resolved": resolved,
+        "accuracy_pct": accuracy_pct,
+    }
 
 
 def get_user_active_prediction(user, market):

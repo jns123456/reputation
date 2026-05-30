@@ -1463,6 +1463,15 @@ msgstr "Predicciones"
 msgid "%(correct)s correct · %(incorrect)s incorrect"
 msgstr "%(correct)s correcto · %(incorrect)s incorrecto"
 
+#, python-format
+msgid "%(open)s open"
+msgid_plural "%(open)s open"
+msgstr[0] "%(open)s abierto"
+msgstr[1] "%(open)s abiertos"
+
+msgid "Based on resolved forecasts only."
+msgstr "Solo cuenta pronósticos ya resueltos."
+
 msgid "Accuracy"
 msgstr "Exactitud"
 

@@ -17,6 +17,7 @@ from predictions.selectors import (
     get_market_predictions,
     get_user_active_prediction,
     get_user_open_predictions,
+    get_user_prediction_summary,
 )
 from predictions.services import (
     create_prediction,
@@ -351,6 +352,48 @@ class PredictionExitTests(TestCase):
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.reputation_points, 15)
         self.assertEqual(ReputationEvent.objects.filter(prediction=prediction).count(), 1)
+
+
+class PredictionSummaryTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="summary-user", password="pass")
+        self.market = Market.objects.create(
+            external_id="summary-m1",
+            title="Summary test",
+            slug="summary-test",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+
+    def test_open_forecasts_do_not_affect_accuracy(self):
+        create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
+        summary = get_user_prediction_summary(self.user)
+        self.assertEqual(summary["total"], 1)
+        self.assertEqual(summary["open"], 1)
+        self.assertEqual(summary["correct"], 0)
+        self.assertEqual(summary["incorrect"], 0)
+        self.assertIsNone(summary["accuracy_pct"])
+
+    def test_resolved_forecasts_compute_accuracy(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save()
+        resolve_market_predictions(self.market)
+        prediction.refresh_from_db()
+
+        summary = get_user_prediction_summary(self.user)
+        self.assertEqual(summary["total"], 1)
+        self.assertEqual(summary["open"], 0)
+        self.assertEqual(summary["correct"], 1)
+        self.assertEqual(summary["incorrect"], 0)
+        self.assertEqual(summary["accuracy_pct"], 100)
 
 
 class OpenPredictionsPageTests(TestCase):

@@ -120,20 +120,7 @@ def update_prediction(*, prediction, user, predicted_outcome, predicted_directio
         prediction.status = Prediction.Status.VOID
         prediction.save(update_fields=["superseded_by", "status", "updated_at"])
 
-        profile = user.profile
-        profile.neutral_prediction_count = max(0, profile.neutral_prediction_count - 1)
-        profile.prediction_count += 1
-        profile.neutral_prediction_count += 1
-        profile.save(
-            update_fields=["prediction_count", "neutral_prediction_count", "updated_at"]
-        )
-
-        from accounts.category_stats_services import (
-            apply_category_prediction_created,
-            resolve_category_from_market,
-        )
-
-        apply_category_prediction_created(user, resolve_category_from_market(market))
+        # Replacing a pending forecast does not change aggregate profile counters.
 
     return new_prediction
 
