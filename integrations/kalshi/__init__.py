@@ -1,1 +1,0 @@
-"""Kalshi integration package."""

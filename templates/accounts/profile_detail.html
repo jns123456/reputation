@@ -24,7 +24,7 @@
   {% trans "Social engagement" as pop_badge %}
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
     {% include "includes/pr_stat_card.html" with label=rep_label value=profile_user.profile.reputation_points value_class="text-rep-600" badge_text=rep_badge delay="1" %}
-    <div class="pr-stat-card pr-card" data-pr-reveal data-delay="2">
+    <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Unrealized reputation" %}</p>
       <p class="pr-stat-value {% if unrealized_reputation >= 0 %}text-rep-600{% else %}text-red-600{% endif %}">
         {% if unrealized_reputation > 0 %}+{% endif %}{{ unrealized_reputation }}
@@ -32,7 +32,7 @@
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Estimated if you closed every open forecast at current market probabilities." %}</p>
     </div>
     {% include "includes/pr_stat_card.html" with label=pop_label value=profile_user.profile.popularity_points value_class="text-pop-600" badge_text=pop_badge badge_class="badge-pop" delay="3" %}
-    <div class="pr-stat-card pr-card" data-pr-reveal data-delay="4">
+    <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Predictions" %}</p>
       <p class="pr-stat-value">{{ profile_user.profile.prediction_count }}</p>
       <p class="mt-1 text-xs text-slate-500">
@@ -40,7 +40,7 @@
       </p>
     </div>
     {% with total=profile_user.profile.correct_prediction_count|add:profile_user.profile.incorrect_prediction_count %}
-    <div class="pr-stat-card pr-card" data-pr-reveal data-delay="5">
+    <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Accuracy" %}</p>
       <p class="pr-stat-value">{% if total > 0 %}{% widthratio profile_user.profile.correct_prediction_count total 100 %}%{% else %}—{% endif %}</p>
     </div>
@@ -109,7 +109,7 @@
   </div>
 
   {% if achievements %}
-  <section class="mt-6" id="profile-badges" data-pr-reveal>
+  <section class="mt-6" id="profile-badges">
     <div class="flex items-center justify-between gap-2">
       <div>
         <h2 class="text-sm font-bold text-slate-900 dark:text-white">{% trans "Badges" %}</h2>
@@ -125,7 +125,7 @@
   </section>
   {% endif %}
 
-  <section class="mt-10" data-pr-reveal>
+  <section class="mt-10">
     <h2 class="pr-section-title">{% trans "Expertise by category" %}</h2>
     <p class="pr-section-desc">{% trans "Reputation and popularity broken down by topic — spot specialists in crypto, politics, sports, and more." %}</p>
 
@@ -184,7 +184,7 @@
     </div>
   </section>
 
-  <section class="mt-10" data-pr-reveal>
+  <section class="mt-10">
     <div class="flex items-center justify-between">
       <h2 class="pr-section-title">{% trans "Prediction History" %}</h2>
       <a href="{% url 'predictions:history' username=profile_user.username %}" class="text-sm text-brand-600 hover:underline">{% trans "View all" %}</a>

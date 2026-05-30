@@ -11,16 +11,8 @@
   {% blocktrans asvar hero_description %}Pick a topic — Politics, Sports, Crypto, Economy, and more. Real forecasts from Polymarket, no betting.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
 
-  <div class="pr-panel mb-6 p-3 sm:p-4" data-pr-reveal data-delay="1">
-    {% include "markets/partials/market_search_form.html" with preserve_source=True current_source=active_source clear_search_url=clear_search_url %}
-    <div class="mt-4">
-      {% include "markets/partials/source_filter_pills.html" %}
-    </div>
-  </div>
-
   <a href="{% url 'markets:all' %}?ending=24h{% if active_source %}&source={{ active_source }}{% endif %}"
-     class="group mb-6 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-brand-700"
-     data-pr-reveal data-delay="2">
+     class="group mb-6 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-brand-700">
     <span class="pr-pulse-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
       <i data-lucide="clock" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
     </span>
@@ -30,6 +22,38 @@
     </span>
     <i data-lucide="arrow-right" class="h-5 w-5 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-brand-600 dark:text-slate-500" stroke-width="2" aria-hidden="true"></i>
   </a>
+
+  <section class="mb-8">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+      <div class="pr-section-head mb-0">
+        <h2 class="pr-section-title">{% trans "Categories" %}</h2>
+        <p class="pr-section-desc">{% trans "Tap a category to browse open forecasts." %}</p>
+      </div>
+      <div class="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
+        <a href="{% url 'markets:all' %}{% if active_source %}?source={{ active_source }}{% endif %}"
+           class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline">
+          {% trans "All markets" %} →
+        </a>
+      </div>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {% for item in category_summaries %}
+        {% include "dashboard/partials/category_card.html" with category=item.category count=item.count active_source=active_source large=True %}
+      {% empty %}
+      <div class="pr-empty col-span-full">
+        {% blocktrans %}No categories yet. Run <code class="text-xs">sync_markets --top-volume</code> to import Polymarket markets.{% endblocktrans %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="pr-panel mb-6 p-3 sm:p-4">
+    {% include "markets/partials/market_search_form.html" with preserve_source=True current_source=active_source clear_search_url=clear_search_url %}
+    <div class="mt-4">
+      {% include "markets/partials/source_filter_pills.html" %}
+    </div>
+  </div>
 
   {% if search_query %}
   <section class="mb-10">
@@ -54,36 +78,11 @@
         {% include "markets/partials/market_grid_card.html" %}
       {% empty %}
       <div class="pr-empty col-span-full">
-        {% blocktrans %}No open events match “{{ search_query }}”. Try another keyword or browse by category below.{% endblocktrans %}
+        {% blocktrans %}No open events match “{{ search_query }}”. Try another keyword or browse by category above.{% endblocktrans %}
       </div>
       {% endfor %}
     </div>
   </section>
   {% endif %}
-
-  <section data-pr-reveal data-delay="{% if search_query %}3{% else %}1{% endif %}">
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-      <div class="pr-section-head mb-0">
-        <h2 class="pr-section-title">{% trans "Categories" %}</h2>
-        <p class="pr-section-desc">{% trans "Tap a category to browse open forecasts." %}</p>
-      </div>
-      <div class="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-        <a href="{% url 'markets:all' %}{% if active_source %}?source={{ active_source }}{% endif %}"
-           class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline">
-          {% trans "All markets" %} →
-        </a>
-      </div>
-    </div>
-
-    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      {% for item in category_summaries %}
-        {% include "dashboard/partials/category_card.html" with category=item.category count=item.count active_source=active_source large=True %}
-      {% empty %}
-      <div class="pr-empty col-span-full">
-        {% blocktrans %}No categories yet. Run <code class="text-xs">sync_markets --top-volume</code> to import Polymarket markets.{% endblocktrans %}
-      </div>
-      {% endfor %}
-    </div>
-  </section>
 </div>
 {% endblock %}

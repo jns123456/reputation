@@ -13,23 +13,33 @@
 <div class="pr-page pb-8">
   {% include "markets/partials/market_hero.html" %}
 
-  {% if polymarket_embed %}
-    {% include "markets/partials/polymarket_embed.html" %}
-  {% elif kalshi_embed %}
-    {% include "markets/partials/kalshi_embed.html" %}
-  {% endif %}
-
-  {% if market|is_multi_outcome_market %}
-    {% include "predictions/partials/multi_outcome_forecast_panel.html" %}
-  {% endif %}
-
-  {% if market.is_forecastable and not market|is_multi_outcome_market %}
-    <div data-pr-reveal data-delay="1">
-      {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
+  {% if polymarket_embed and market.is_forecastable and not market|is_multi_outcome_market %}
+  {# Visual test: chart left, forecast right on large screens #}
+  <div class="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+    <div class="flex min-w-0 flex-col">
+      {% include "markets/partials/polymarket_embed.html" with inline_layout=True %}
     </div>
+    <div class="flex min-w-0 flex-col">
+      {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast inline_layout=True %}
+    </div>
+  </div>
+  {% else %}
+    {% if polymarket_embed %}
+      {% include "markets/partials/polymarket_embed.html" %}
+    {% endif %}
+
+    {% if market|is_multi_outcome_market %}
+      {% include "predictions/partials/multi_outcome_forecast_panel.html" %}
+    {% endif %}
+
+    {% if market.is_forecastable and not market|is_multi_outcome_market %}
+      <div>
+        {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
+      </div>
+    {% endif %}
   {% endif %}
 
-  <section id="forecasts" class="mt-10" data-pr-reveal data-delay="2">
+  <section id="forecasts" class="mt-10">
     <h2 class="pr-section-title">{% trans "Public forecast history" %}</h2>
     <p class="pr-section-desc">
       {% blocktrans %}All forecasts on this market — scored on <span class="badge-rep">Reputation</span> when resolved. Earn <span class="badge-pop">Popularity</span> when others like your forecast or comments.{% endblocktrans %}

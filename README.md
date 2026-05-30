@@ -1,6 +1,6 @@
 # PredictStamp — Social prediction markets
 
-AI-native social platform for public predictions on real-world events (imported from Polymarket and Kalshi) — **without betting money**. Tracks separate **Reputation** (predictive quality) and **Popularity** (social engagement) scores.
+AI-native social platform for public predictions on real-world events (imported from Polymarket) — **without betting money**. Tracks separate **Reputation** (predictive quality) and **Popularity** (social engagement) scores.
 
 See [agents.md](agents.md) for full project context.
 
@@ -54,7 +54,7 @@ deactivate
 
 **Demo accounts:** `demo` / `demo123` · **Admin:** `admin` / `admin123`
 
-> **Note:** `load_sample_data` creates 3 **manual** demo markets only. It does **not** connect to Polymarket or Kalshi. To see real markets with live odds, run the import commands in [Import markets](#import-markets-polymarket--kalshi) below.
+> **Note:** `load_sample_data` creates 3 **manual** demo markets only. It does **not** connect to Polymarket. To see real markets with live odds, run the import commands in [Import markets](#import-markets-polymarket) below.
 
 ### Docker Compose (PostgreSQL + Redis)
 
@@ -74,7 +74,7 @@ docker compose exec web python manage.py load_sample_data
 
 App URL: http://127.0.0.1:8000
 
-`docker compose up` starts **web**, **celery**, and **celery-beat**. Celery Beat syncs markets from Polymarket and Kalshi automatically every 10–15 minutes. For an immediate first import, run the commands in [Import markets](#import-markets-polymarket--kalshi).
+`docker compose up` starts **web**, **celery**, and **celery-beat**. Celery Beat syncs markets from Polymarket automatically every 10–15 minutes. For an immediate first import, run the commands in [Import markets](#import-markets-polymarket).
 
 Stop containers:
 
@@ -82,21 +82,20 @@ Stop containers:
 docker compose down
 ```
 
-### Import markets (Polymarket & Kalshi)
+### Import markets (Polymarket)
 
-Market data is imported **read-only** from public APIs — no trading, wallets, or API keys required. Code lives in `integrations/` (`integrations/polymarket/client.py`, `integrations/kalshi/client.py`).
+Market data is imported **read-only** from public APIs — no trading, wallets, or API keys required. Code lives in `integrations/` (`integrations/polymarket/client.py`).
 
-**Recommended — import both sources by browse category:**
+**Recommended — import by browse category:**
 
 ```bash
 python manage.py sync_markets --categories --limit 50
 ```
 
-**Or import each source separately:**
+**Or import directly from Polymarket:**
 
 ```bash
 python manage.py import_polymarket_markets --limit 50
-python manage.py import_kalshi_markets --limit 50
 ```
 
 Category-specific imports:
@@ -104,7 +103,6 @@ Category-specific imports:
 ```bash
 python manage.py import_polymarket_markets --economy --limit 20
 python manage.py import_polymarket_markets --tag sports --limit 20
-python manage.py import_kalshi_markets --series-ticker KXHIGHNY --limit 20
 ```
 
 Docker variants (prefix with `docker compose exec web`):
@@ -112,7 +110,6 @@ Docker variants (prefix with `docker compose exec web`):
 ```bash
 docker compose exec web python manage.py sync_markets --categories --limit 50
 docker compose exec web python manage.py import_polymarket_markets --limit 50
-docker compose exec web python manage.py import_kalshi_markets --limit 50
 ```
 
 **When does sync run automatically?**
@@ -171,7 +168,7 @@ chmod +x scripts/i18n_update.sh   # once
 
 This runs `makemessages`, applies hand-reviewed Spanish in `scripts/complete_spanish_i18n.py`, and `compilemessages`.
 
-**Imported market copy (Polymarket/Kalshi titles & descriptions)** is translated at sync time when enabled in `.env`:
+**Imported market copy (Polymarket titles & descriptions)** is translated at sync time when enabled in `.env`:
 
 ```env
 MARKET_TRANSLATION_ENABLED=True
@@ -188,11 +185,11 @@ python manage.py translate_markets --source polymarket --missing-only
 
 ```
 accounts/      Users, profiles, AI agent profiles
-markets/       Imported markets (Polymarket, Kalshi, manual)
+markets/       Imported markets (Polymarket, manual)
 predictions/   Formal predictions and resolution
 comments/      Discussion threads and votes
 reputation/    Reputation & popularity event logs, scoring
-integrations/  Polymarket & Kalshi import (read-only)
+integrations/  Polymarket import (read-only)
 dashboard/     Landing, dashboard, leaderboards
 ```
 

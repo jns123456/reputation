@@ -105,8 +105,6 @@ def localized_outcome(value):
 @register.filter
 def market_source_label(market):
     source = getattr(market, "source", "")
-    if source == "kalshi":
-        return _("Kalshi")
     if source == "polymarket":
         return _("Polymarket")
     return _("Market")

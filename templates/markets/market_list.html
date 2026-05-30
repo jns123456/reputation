@@ -14,10 +14,10 @@
   {% trans "Markets" as hero_eyebrow %}
   {% trans "All" as hero_title %}
   {% trans "markets" as hero_gradient %}
-  {% blocktrans asvar hero_description %}Forecast on real-world events — odds from Polymarket and Kalshi, no betting.{% endblocktrans %}
+  {% blocktrans asvar hero_description %}Forecast on real-world events — odds from Polymarket, no betting.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
 
-  <div class="pr-panel mb-6 p-3 sm:p-4" data-pr-reveal data-delay="1">
+  <div class="pr-panel mb-6 p-3 sm:p-4">
     <form method="get" class="pr-filter-grid">
       <div class="sm:min-w-[12rem] sm:flex-1">
         <label class="mb-1 block text-xs font-medium text-slate-500">{% trans "Search" %}</label>
@@ -84,7 +84,7 @@
   </div>
 
   {% if current_ending %}
-  <p class="mb-5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400" data-pr-reveal data-delay="1">
+  <p class="mb-5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
     <i data-lucide="clock" class="h-4 w-4 shrink-0 text-brand-500" stroke-width="2" aria-hidden="true"></i>
     <span>{% blocktrans count counter=markets|length %}{{ counter }} event ends within this window — sorted soonest first.{% plural %}{{ counter }} events end within this window — sorted soonest first.{% endblocktrans %}</span>
   </p>
@@ -93,7 +93,7 @@
   {% if categories %}
   {% trans "Hide" as hide_label %}
   {% trans "Show" as show_label %}
-  <div class="mb-6" data-pr-reveal data-delay="2" x-data="{ categoriesOpen: {% if current_category %}true{% else %}false{% endif %} }">
+  <div class="mb-6" x-data="{ categoriesOpen: {% if current_category %}true{% else %}false{% endif %} }">
     <button type="button"
             class="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800"
             @click="categoriesOpen = !categoriesOpen"
@@ -133,9 +133,7 @@
       {% include "markets/partials/market_grid_card.html" %}
     {% empty %}
     <div class="pr-empty col-span-full">
-      {% if source_filter_urls.active_source == 'kalshi' %}
-        {% trans "No Kalshi markets match your filters." %}
-      {% elif source_filter_urls.active_source == 'polymarket' %}
+      {% if source_filter_urls.active_source == 'polymarket' %}
         {% trans "No Polymarket markets match your filters." %}
       {% else %}
         {% blocktrans %}No markets found. Run <code class="text-xs">sync_markets --categories</code> or import via admin.{% endblocktrans %}

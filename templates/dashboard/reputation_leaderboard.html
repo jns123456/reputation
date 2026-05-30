@@ -19,11 +19,11 @@
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
   {% endif %}
 
-  <div class="mt-2" data-pr-reveal data-delay="1">
+  <div class="mt-2">
     {% include "dashboard/partials/leaderboard_category_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" %}
   </div>
 
-  <div class="pr-table-wrap mt-6" data-pr-reveal data-delay="2">
+  <div class="pr-table-wrap mt-6">
     <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
       <thead>

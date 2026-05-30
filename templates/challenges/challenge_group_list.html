@@ -15,7 +15,7 @@
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label secondary_url=list_url secondary_label=secondary_label %}
 
   {% if groups %}
-  <div class="space-y-3" data-pr-reveal data-delay="1">
+  <div class="space-y-3">
     {% for group in groups %}
     <article class="pr-card rounded-xl border border-slate-200/80 bg-white/90 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -44,7 +44,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="pr-empty" data-pr-reveal data-delay="1">
+  <div class="pr-empty">
     <p class="text-slate-600 dark:text-slate-300">{% trans "No groups yet." %}</p>
     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Create a group to reuse the same opponents when starting new challenges." %}</p>
     <a href="{% url 'challenges:group_create' %}" class="btn-primary mt-4 inline-flex">{% trans "Create your first group" %}</a>

@@ -16,7 +16,7 @@ from dashboard.leaderboard_cache import get_cached_top_popular_users, get_cached
 from integrations.celery_utils import celery_broker_available, enqueue_category_sync
 from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, get_all_chart_categories, get_category_for_slug
 from markets.browse_areas import get_browse_area
-from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, kalshi_enabled, normalize_source_filter
+from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from markets.selectors import (
     filter_markets_by_browse_area,
     filter_markets_by_search,
@@ -26,6 +26,7 @@ from markets.selectors import (
     get_open_markets_by_canonical_category,
     get_world_cup_match_markets_queryset,
 )
+from predictions.selectors import attach_user_forecasts_to_markets
 
 logger = logging.getLogger(__name__)
 
@@ -68,27 +69,14 @@ def explore(request):
 
 def _enqueue_category_sync_if_needed(category):
     """Queue background sync; never block the HTTP response on external APIs."""
-    has_poly = bool(category.polymarket_tag)
-    has_kalshi = kalshi_enabled() and bool(category.kalshi_series_tickers)
-    if not has_poly and not has_kalshi:
+    if not category.polymarket_tag:
         return
 
     poly_cache_key = f"{CATEGORY_SYNC_CACHE_PREFIX}polymarket:{category.slug}"
-    kalshi_cache_key = f"{CATEGORY_SYNC_CACHE_PREFIX}kalshi:{category.slug}"
-    poly_due = has_poly and not cache.get(poly_cache_key)
-    kalshi_due = has_kalshi and not cache.get(kalshi_cache_key)
-
-    if not poly_due and not kalshi_due:
+    if cache.get(poly_cache_key):
         return
 
-    if poly_due:
-        cache.set(poly_cache_key, True, settings.MARKET_SYNC_CACHE_SECONDS)
-    if kalshi_due:
-        cache.set(
-            kalshi_cache_key,
-            True,
-            getattr(settings, "KALSHI_SYNC_CACHE_SECONDS", settings.MARKET_SYNC_CACHE_SECONDS),
-        )
+    cache.set(poly_cache_key, True, settings.MARKET_SYNC_CACHE_SECONDS)
 
     if not enqueue_category_sync(category.slug):
         logger.debug("Category sync for %s not queued; Celery broker unavailable", category.slug)
@@ -124,12 +112,15 @@ def category_browse(request, slug):
     if search:
         display_markets = filter_markets_by_search(markets=display_markets, search=search)
 
-    markets = get_category_display_markets(
-        category_slug=slug,
-        source=source or None,
-        area_slug=area_slug or None,
-        search=search or None,
-        markets=total_markets,
+    markets = attach_user_forecasts_to_markets(
+        request.user,
+        get_category_display_markets(
+            category_slug=slug,
+            source=source or None,
+            area_slug=area_slug or None,
+            search=search or None,
+            markets=total_markets,
+        ),
     )
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("dashboard:category_browse", kwargs={"slug": slug}),

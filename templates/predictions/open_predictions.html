@@ -13,22 +13,7 @@
   {% trans "Browse markets" as markets_label %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True show_dot=True title=hero_title gradient=hero_gradient description=hero_description secondary_url=markets_url secondary_label=markets_label %}
 
-  <div class="grid gap-4 sm:grid-cols-3" data-pr-reveal data-delay="1">
-    <div class="pr-stat-card pr-card">
-      <p class="pr-stat-label">{% trans "Open forecasts" %}</p>
-      <p id="open-count-stat" class="pr-stat-value">{{ open_count }}</p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Active forecasts you can exit now" %}</p>
-    </div>
-    <div class="pr-stat-card pr-card sm:col-span-2">
-      <p class="pr-stat-label">{% trans "Unrealized reputation" %}</p>
-      <p id="unrealized-rep-stat" class="pr-stat-value {% if total_delta >= 0 %}text-rep-600{% else %}text-red-600{% endif %}">
-        {% if total_delta >= 0 %}+{% endif %}{{ total_delta }}
-      </p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Estimated if you closed every open forecast at current market probabilities." %}</p>
-    </div>
-  </div>
-
-  <section class="mt-8" data-pr-reveal data-delay="2">
+  <section>
     <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <div class="pr-section-head mb-0">
         <h2 class="pr-section-title">{% trans "Open forecast book" %}</h2>
@@ -50,5 +35,20 @@
       {% endif %}
     </div>
   </section>
+
+  <div class="mt-8 grid gap-4 sm:grid-cols-3">
+    <div class="pr-stat-card pr-card">
+      <p class="pr-stat-label">{% trans "Open forecasts" %}</p>
+      <p id="open-count-stat" class="pr-stat-value">{{ open_count }}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Active forecasts you can exit now" %}</p>
+    </div>
+    <div class="pr-stat-card pr-card sm:col-span-2">
+      <p class="pr-stat-label">{% trans "Unrealized reputation" %}</p>
+      <p id="unrealized-rep-stat" class="pr-stat-value {% if total_delta >= 0 %}text-rep-600{% else %}text-red-600{% endif %}">
+        {% if total_delta >= 0 %}+{% endif %}{{ total_delta }}
+      </p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Estimated if you closed every open forecast at current market probabilities." %}</p>
+    </div>
+  </div>
 </div>
 {% endblock %}

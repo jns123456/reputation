@@ -19,7 +19,7 @@
     </a>
   </div>
 
-  <header class="mb-6" data-pr-reveal>
+  <header class="mb-6">
     <h1 class="text-xl font-bold text-slate-900 dark:text-white">
       {% include "accounts/partials/user_display_name.html" with user=profile_user %}
     </h1>
@@ -43,7 +43,7 @@
     </a>
   </nav>
 
-  <div data-pr-reveal data-delay="1">
+  <div>
     {% if users %}
     <div class="space-y-3">
       {% for listed_user in users %}

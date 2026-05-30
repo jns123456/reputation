@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.utils.translation import gettext as _
 
-# Common Polymarket/Kalshi category strings → canonical Spanish labels.
+# Common Polymarket category strings → canonical Spanish labels.
 CATEGORY_LABELS: dict[str, str] = {
     "politics": "Politics",
     "sports": "Sports",

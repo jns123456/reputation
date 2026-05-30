@@ -72,7 +72,6 @@ PHASE3_FIXES: dict[str, str] = {
     "Confirm your email address to finish creating your PredictStamp account.": (
         "Confirma tu dirección de email para terminar de crear tu cuenta en PredictStamp."
     ),
-    # Kalshi chart JS
     "price": "precio",
 }
 

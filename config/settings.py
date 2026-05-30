@@ -29,7 +29,6 @@ if not CSRF_TRUSTED_ORIGINS and not DEBUG:
         for host in ALLOWED_HOSTS
         if host and host not in ("*", "localhost", "127.0.0.1") and not host.startswith(".")
     ]
-KALSHI_ENABLED = env.bool("KALSHI_ENABLED", default=False)
 DEV_FAST_MODE = env.bool("DEV_FAST_MODE", default=False)
 NAV_BADGE_CACHE_SECONDS = env.int("NAV_BADGE_CACHE_SECONDS", default=60)
 LEADERBOARD_CACHE_SECONDS = env.int("LEADERBOARD_CACHE_SECONDS", default=120)
@@ -401,12 +400,6 @@ MARKET_TRANSLATION_CACHE_SECONDS = env.int("MARKET_TRANSLATION_CACHE_SECONDS", d
 MARKET_TRANSLATION_REQUEST_DELAY = env.float("MARKET_TRANSLATION_REQUEST_DELAY", default=0.35)
 DEEPL_AUTH_KEY = env("DEEPL_AUTH_KEY", default="")
 DEEPL_API_URL = env("DEEPL_API_URL", default="https://api-free.deepl.com/v2/translate")
-KALSHI_SYNC_OPEN_LIMIT = env.int("KALSHI_SYNC_OPEN_LIMIT", default=200)
-KALSHI_SYNC_CATEGORY_LIMIT = env.int("KALSHI_SYNC_CATEGORY_LIMIT", default=12)
-KALSHI_SYNC_CATEGORY_SERIES_LIMIT = env.int("KALSHI_SYNC_CATEGORY_SERIES_LIMIT", default=2)
-KALSHI_SYNC_CACHE_SECONDS = env.int("KALSHI_SYNC_CACHE_SECONDS", default=900)
-KALSHI_API_MIN_INTERVAL_MS = env.int("KALSHI_API_MIN_INTERVAL_MS", default=300)
-KALSHI_API_MAX_RETRIES = env.int("KALSHI_API_MAX_RETRIES", default=3)
 CATEGORY_SYNC_FAILURE_COOLDOWN_SECONDS = env.int(
     "CATEGORY_SYNC_FAILURE_COOLDOWN_SECONDS",
     default=120,
@@ -430,11 +423,6 @@ POPULARITY_REPOST_POINTS = 1
 POLYMARKET_API_URL = env(
     "POLYMARKET_API_URL",
     default="https://gamma-api.polymarket.com",
-)
-
-KALSHI_API_URL = env(
-    "KALSHI_API_URL",
-    default="https://external-api.kalshi.com/trade-api/v2",
 )
 
 # Scheduled re-engagement emails are OFF by default to keep mailbox volume low
@@ -473,11 +461,6 @@ if MARKET_RESOLVING_REMINDERS_ENABLED:
         "task": "accounts.tasks.send_market_resolving_reminders_task",
         "schedule": crontab(minute=15, hour="*/6"),
     }
-if KALSHI_ENABLED:
-    CELERY_BEAT_SCHEDULE["import-kalshi-open-markets"] = {
-        "task": "integrations.tasks.import_kalshi_open_markets_task",
-        "schedule": crontab(minute="5,35"),
-    }
 
 # Official Polymarket embed widget — https://embed.polymarket.com/
 POLYMARKET_EMBED_BASE_URL = env(
@@ -500,4 +483,3 @@ POLYMARKET_EMBED_BORDER = env.bool("POLYMARKET_EMBED_BORDER", default=True)
 POLYMARKET_EMBED_CONTENT_WIDTH = env.int("POLYMARKET_EMBED_CONTENT_WIDTH", default=1200)
 POLYMARKET_EMBED_WIDTH = env("POLYMARKET_EMBED_WIDTH", default="100%")
 POLYMARKET_EMBED_HEIGHT = env.int("POLYMARKET_EMBED_HEIGHT", default=420)
-KALSHI_EMBED_HEIGHT = env.int("KALSHI_EMBED_HEIGHT", default=POLYMARKET_EMBED_HEIGHT)

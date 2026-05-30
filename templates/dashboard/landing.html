@@ -17,7 +17,7 @@
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow show_dot=True title=hero_title gradient=hero_gradient description=hero_description %}
   {% endif %}
 
-  <section data-pr-reveal data-delay="1">
+  <section>
     <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
       <div class="pr-section-head mb-0">
         <h2 class="pr-section-title">{% trans "Explore by category" %}</h2>
@@ -40,7 +40,7 @@
     </div>
   </section>
 
-  <section class="mt-12" data-pr-reveal data-delay="2">
+  <section class="mt-12">
     <div class="mb-4 flex items-center justify-between">
       <h2 class="pr-section-title">{% trans "Top predictors" %}</h2>
       <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-sm font-medium text-brand-600 hover:underline">{% trans "Full leaderboard" %} →</a>

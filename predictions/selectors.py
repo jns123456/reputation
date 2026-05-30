@@ -83,6 +83,36 @@ def get_user_active_prediction(user, market):
     )
 
 
+def attach_user_forecasts_to_markets(user, markets):
+    """Annotate each market with ``user_forecast`` (pending prediction or None)."""
+    market_list = list(markets)
+    if not market_list:
+        return market_list
+
+    if not user.is_authenticated:
+        for market in market_list:
+            market.user_forecast = None
+        return market_list
+
+    market_ids = [market.id for market in market_list]
+    pending_by_market = {}
+    for prediction in (
+        Prediction.objects.filter(
+            user=user,
+            market_id__in=market_ids,
+            status=Prediction.Status.PENDING,
+        )
+        .order_by("market_id", "-created_at")
+        .select_related("market")
+    ):
+        pending_by_market.setdefault(prediction.market_id, prediction)
+
+    for market in market_list:
+        market.user_forecast = pending_by_market.get(market.id)
+
+    return market_list
+
+
 def get_user_open_predictions(user, limit=100):
     qs = (
         Prediction.objects.filter(

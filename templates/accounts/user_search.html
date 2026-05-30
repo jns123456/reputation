@@ -10,7 +10,7 @@
   {% blocktrans asvar hero_description %}Search by name, @username, email, pseudonym, or bio. We also surface similar accounts when the match is close.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
 
-  <div class="pr-panel mb-6 p-4 sm:p-5" data-pr-reveal data-delay="1">
+  <div class="pr-panel mb-6 p-4 sm:p-5">
     <form method="get" action="{% url 'accounts:user_search' %}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
       <div class="min-w-0 flex-1">
         <label for="user-search-q" class="mb-1 block text-xs font-medium text-slate-500">{% trans "Search" %}</label>
@@ -31,7 +31,7 @@
     <p class="mt-2 text-xs text-slate-500">{% trans "Enter at least 2 characters, or an email address." %}</p>
   </div>
 
-  <div data-pr-reveal data-delay="2">
+  <div>
     {% if search_query %}
       {% if not search_ready %}
       <div class="pr-empty py-10">{% trans "Enter at least 2 characters, or an email address." %}</div>

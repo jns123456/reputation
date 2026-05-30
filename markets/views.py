@@ -17,16 +17,15 @@ from comments.selectors import (
     get_vote_summaries_for_targets,
 )
 from challenges.selectors import get_active_challenge_contexts_for_market
-from integrations.kalshi.embed import build_kalshi_embed_context
 from integrations.polymarket.embed import build_polymarket_embed_context
 from integrations.celery_utils import enqueue_market_refresh_if_stale
 from markets.ending_filters import ENDING_WINDOW_CHOICES, ending_window_hours, normalize_ending_filter
 from markets.models import Market
 from markets.selectors import get_market_categories, get_market_hub_category_summaries, get_markets_for_display
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
-from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, kalshi_enabled, normalize_source_filter
+from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from predictions.forms import ForecastForm
-from predictions.selectors import get_market_predictions, get_user_active_prediction
+from predictions.selectors import get_market_predictions, get_user_active_prediction, attach_user_forecasts_to_markets
 from reputation.services import calculate_reputation_stakes
 
 MARKET_HUB_SUMMARIES_CACHE_KEY = "market_hub_category_summaries"
@@ -55,10 +54,13 @@ def market_hub(request):
     )
     search_results = []
     if search:
-        search_results = get_markets_for_display(
-            status=Market.Status.OPEN,
-            search=search,
-            source=source or None,
+        search_results = attach_user_forecasts_to_markets(
+            request.user,
+            get_markets_for_display(
+                status=Market.Status.OPEN,
+                search=search,
+                source=source or None,
+            ),
         )
     return render(
         request,
@@ -89,13 +91,16 @@ def market_list(request):
     # The ending-soon window operates on open markets only.
     effective_status = Market.Status.OPEN if ending else status
 
-    markets = get_markets_for_display(
-        status=effective_status or None,
-        category=category or None,
-        search=search or None,
-        source=source or None,
-        sort=sort or None,
-        ending_within_hours=ending_hours,
+    markets = attach_user_forecasts_to_markets(
+        request.user,
+        get_markets_for_display(
+            status=effective_status or None,
+            category=category or None,
+            search=search or None,
+            source=source or None,
+            sort=sort or None,
+            ending_within_hours=ending_hours,
+        ),
     )
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("markets:all"),
@@ -188,7 +193,6 @@ def market_detail(request, slug):
             "predictions": predictions,
             "prediction_sections": prediction_sections,
             "polymarket_embed": build_polymarket_embed_context(market),
-            "kalshi_embed": build_kalshi_embed_context(market) if kalshi_enabled() else None,
             "forecast_form": forecast_form,
             "existing_forecast": existing_forecast,
             "active_challenges": active_challenges,

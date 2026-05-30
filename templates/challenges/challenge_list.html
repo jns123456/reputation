@@ -15,7 +15,7 @@
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label secondary_url=groups_url secondary_label=groups_label %}
 
   {% if pending_invitations %}
-  <section class="mb-8" data-pr-reveal data-delay="1">
+  <section class="mb-8">
     <div class="mb-3 flex items-center justify-between gap-2">
       <h2 class="pr-section-title">
         {% trans "Pending invitations" %}
@@ -30,7 +30,7 @@
   </section>
   {% endif %}
 
-  <div class="mb-6 flex flex-wrap gap-2" data-pr-reveal data-delay="2">
+  <div class="mb-6 flex flex-wrap gap-2">
     <a href="{% url 'challenges:list' %}" class="pr-filter-pill {% if not current_status %}is-active{% endif %}">{% trans "All" %}</a>
     {% for value, label in status_choices %}
     <a href="?status={{ value }}" class="pr-filter-pill {% if current_status == value %}is-active{% endif %}">{{ label }}</a>
@@ -38,7 +38,7 @@
   </div>
 
   {% if challenges %}
-  <div class="space-y-3" data-pr-reveal data-delay="3">
+  <div class="space-y-3">
     {% for challenge in challenges %}
     <a href="{% url 'challenges:detail' pk=challenge.pk %}"
        class="pr-card block rounded-xl border border-slate-200/80 bg-white/90 p-4 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
@@ -68,7 +68,7 @@
     {% endfor %}
   </div>
   {% elif not pending_invitations %}
-  <div class="pr-empty" data-pr-reveal>
+  <div class="pr-empty">
     <p class="text-slate-600 dark:text-slate-300">{% trans "No challenges yet." %}</p>
     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Follow users back to unlock head-to-head challenges." %}</p>
     <a href="{% url 'challenges:create' %}" class="btn-primary mt-4 inline-flex">{% trans "Create your first challenge" %}</a>

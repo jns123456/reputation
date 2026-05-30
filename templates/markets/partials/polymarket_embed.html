@@ -1,6 +1,27 @@
 {% load i18n static %}
 {# Polymarket embed — official iframe or top-outcome chart for multi-outcome events #}
-<section class="mt-8">
+<section class="
+  {% if inline_layout %}
+    flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border-2 border-brand-200 bg-white shadow-sm dark:border-brand-800/50 dark:bg-slate-900 dark:shadow-lg dark:shadow-black/25
+  {% else %}
+    mt-8
+  {% endif %}
+">
+  {% if inline_layout %}
+  <div class="flex shrink-0 items-center justify-between gap-3 border-b border-brand-100 px-4 py-4 dark:border-slate-700/80 sm:px-6 sm:py-5">
+    <p class="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">{% trans "Live Polymarket Chart" %}</p>
+    {% if polymarket_embed.polymarket_url %}
+    <a
+      href="{{ polymarket_embed.polymarket_url }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="shrink-0 text-xs font-medium text-brand-600 hover:underline dark:text-brand-400"
+    >
+      {% trans "Open on Polymarket ↗" %}
+    </a>
+    {% endif %}
+  </div>
+  {% else %}
   <div class="flex flex-wrap items-end justify-between gap-3">
     <div>
       <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-50">{% trans "Live Polymarket Chart" %}</h2>
@@ -28,11 +49,12 @@
   <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
     {% blocktrans %}The chart is view-only. Use <strong>Open on Polymarket</strong> above to visit the market — no trading on this platform.{% endblocktrans %}
   </p>
+  {% endif %}
 
   {% if polymarket_embed.embed_kind == "multi_outcome_chart" %}
   {{ polymarket_embed.chart_data|json_script:"polymarket-multi-chart-data" }}
   <figure
-    class="polymarket-multi-embed mt-3 block w-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+    class="polymarket-multi-embed {% if inline_layout %}flex min-h-0 flex-1 flex-col m-0{% else %}mt-3 block{% endif %} w-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
     style="margin:0"
   >
     {% if polymarket_embed.chart_data.volume_label %}
@@ -41,8 +63,8 @@
     </p>
     {% endif %}
     <div
-      class="relative w-full px-2 py-3 sm:px-4"
-      style="height: {{ polymarket_embed.embed_height }}px;"
+      class="relative w-full px-2 py-3 sm:px-4 {% if inline_layout %}min-h-0 flex-1{% endif %}"
+      {% if not inline_layout %}style="height: {{ polymarket_embed.embed_height }}px;"{% endif %}
     >
       <canvas id="polymarket-multi-chart-canvas-{{ market.slug }}" class="h-full w-full"></canvas>
     </div>
@@ -51,32 +73,44 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script src="{% static 'js/polymarket-multi-chart.js' %}"></script>
   {% else %}
-  <section
-    x-data="{
-      theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-      lightUrl: '{{ polymarket_embed.embed_url_light|escapejs }}',
-      darkUrl: '{{ polymarket_embed.embed_url_dark|escapejs }}',
-      get iframeSrc() { return this.theme === 'dark' ? this.darkUrl : this.lightUrl; }
-    }"
-    @proofrep-theme-change.window="theme = $event.detail.theme"
-  >
-    <figure
-      class="polymarket-embed mt-3 block w-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
-      style="margin:0"
+  <div class="{% if inline_layout %}flex min-h-0 flex-1 flex-col px-3 pb-3 pt-0 sm:px-4 sm:pb-4{% endif %}">
+    <section
+      class="{% if inline_layout %}flex min-h-0 flex-1 flex-col{% endif %}"
+      x-data="{
+        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+        lightUrl: '{{ polymarket_embed.embed_url_light|escapejs }}',
+        darkUrl: '{{ polymarket_embed.embed_url_dark|escapejs }}',
+        get iframeSrc() { return this.theme === 'dark' ? this.darkUrl : this.lightUrl; }
+      }"
+      @proofrep-theme-change.window="theme = $event.detail.theme"
     >
-      <iframe
-        title="{% blocktrans with market_title=market.display_title %}Polymarket market chart — {{ market_title }}{% endblocktrans %}"
-        x-bind:src="iframeSrc"
-        width="{{ polymarket_embed.embed_width }}"
-        height="{{ polymarket_embed.embed_height }}"
-        class="block w-full max-w-full border-0"
-        frameborder="0"
-        allowtransparency="true"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        sandbox="allow-scripts allow-same-origin"
-      ></iframe>
-    </figure>
-  </section>
+      <figure
+        class="polymarket-embed {% if inline_layout %}m-0 flex min-h-0 flex-1 flex-col{% else %}mt-3 block{% endif %} w-full overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+        style="margin:0"
+      >
+        <iframe
+          title="{% blocktrans with market_title=market.display_title %}Polymarket market chart — {{ market_title }}{% endblocktrans %}"
+          x-bind:src="iframeSrc"
+          width="{{ polymarket_embed.embed_width }}"
+          {% if not inline_layout %}height="{{ polymarket_embed.embed_height }}"{% endif %}
+          class="block w-full max-w-full border-0 {% if inline_layout %}min-h-[360px] flex-1{% endif %}"
+          frameborder="0"
+          allowtransparency="true"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          sandbox="allow-scripts allow-same-origin"
+        ></iframe>
+      </figure>
+    </section>
+  </div>
   {% endif %}
 </section>
+
+{% if inline_layout %}
+<style>
+  .polymarket-embed iframe {
+    height: 100%;
+    min-height: 360px;
+  }
+</style>
+{% endif %}

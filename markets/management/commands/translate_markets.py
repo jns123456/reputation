@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--source",
-            choices=["polymarket", "kalshi", "all"],
+            choices=["polymarket", "all"],
             default="polymarket",
             help="Which imported markets to translate.",
         )

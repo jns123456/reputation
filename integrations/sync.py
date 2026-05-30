@@ -3,21 +3,16 @@
 import logging
 from dataclasses import dataclass, field
 
-import requests
 from django.conf import settings
 from django.utils import timezone
 
-from integrations.kalshi.client import KalshiRateLimitError
 from integrations.services import (
-    refresh_market_from_kalshi,
     refresh_market_from_polymarket,
     sync_binary_markets_by_tag,
-    sync_kalshi_markets_by_series,
     sync_top_volume_polymarket_markets,
 )
 from markets.categories import CANONICAL_CATEGORIES, CanonicalCategory, FIFA_WORLD_CUP_CATEGORY_SLUG
 from markets.models import Market
-from markets.source_filters import kalshi_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +38,11 @@ def refresh_market(market):
     """Refresh a market from its configured external source."""
     if market.source == Market.Source.POLYMARKET:
         return refresh_market_from_polymarket(market)
-    if market.source == Market.Source.KALSHI and kalshi_enabled():
-        return refresh_market_from_kalshi(market)
     return market
 
 
-def sync_category_markets(category: CanonicalCategory, *, limit=None, kalshi_lightweight=True) -> SyncSummary:
-    """Import fresh markets for a browse category from all configured sources."""
+def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSummary:
+    """Import fresh markets for a browse category from Polymarket."""
     limit = limit or settings.MARKET_SYNC_CATEGORY_LIMIT
     summary = SyncSummary()
 
@@ -74,58 +67,11 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None, kalshi_lig
         except Exception:
             logger.exception("Polymarket category sync failed for %s", category.slug)
 
-    if not kalshi_enabled() or not category.kalshi_series_tickers:
-        return summary
-
-    kalshi_limit = (
-        getattr(settings, "KALSHI_SYNC_CATEGORY_LIMIT", 12)
-        if kalshi_lightweight
-        else limit
-    )
-    series_tickers = list(category.kalshi_series_tickers)
-    if kalshi_lightweight:
-        series_tickers = series_tickers[: getattr(settings, "KALSHI_SYNC_CATEGORY_SERIES_LIMIT", 2)]
-
-    for series_ticker in series_tickers:
-        try:
-            summary.absorb(
-                sync_kalshi_markets_by_series(
-                    series_ticker=series_ticker,
-                    default_category=category.name,
-                    limit=kalshi_limit,
-                    fetch_events=not kalshi_lightweight,
-                    include_metadata=True,
-                )
-            )
-        except KalshiRateLimitError:
-            logger.warning(
-                "Kalshi rate limit hit syncing %s for category %s — stopping Kalshi sync",
-                series_ticker,
-                category.slug,
-            )
-            summary.errors.append({"raw_id": series_ticker, "error": "rate_limited"})
-            break
-        except requests.HTTPError as exc:
-            logger.exception(
-                "Kalshi HTTP error syncing %s for category %s",
-                series_ticker,
-                category.slug,
-            )
-            summary.errors.append({"raw_id": series_ticker, "error": str(exc)})
-            if exc.response is not None and exc.response.status_code == 429:
-                break
-        except Exception:
-            logger.exception(
-                "Kalshi sync failed for series %s in category %s",
-                series_ticker,
-                category.slug,
-            )
-
     return summary
 
 
 def sync_all_category_markets(*, limit=None) -> dict:
-    """Sync every canonical category from Polymarket and Kalshi."""
+    """Sync every canonical category from Polymarket."""
     limit = limit or settings.MARKET_SYNC_CATEGORY_LIMIT
     totals = SyncSummary()
     per_category = {}
@@ -136,11 +82,9 @@ def sync_all_category_markets(*, limit=None) -> dict:
         logger.exception("Polymarket top-volume sync failed")
 
     for category in CANONICAL_CATEGORIES:
-        has_poly = bool(category.polymarket_tag)
-        has_kalshi = kalshi_enabled() and bool(category.kalshi_series_tickers)
-        if not has_poly and not has_kalshi:
+        if not category.polymarket_tag:
             continue
-        summary = sync_category_markets(category, limit=limit, kalshi_lightweight=False)
+        summary = sync_category_markets(category, limit=limit)
         per_category[category.slug] = {
             "imported": summary.imported,
             "updated": summary.updated,
@@ -173,21 +117,17 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
     refreshed = 0
     failures = 0
 
-    active_sources = [Market.Source.POLYMARKET]
-    if kalshi_enabled():
-        active_sources.append(Market.Source.KALSHI)
-
     stale_markets = (
         Market.objects.filter(
             status=Market.Status.OPEN,
-            source__in=active_sources,
+            source=Market.Source.POLYMARKET,
         )
         .order_by("updated_at")[: batch_size * 3]
     )
 
     candidates = []
     for market in stale_markets:
-        synced_at = market.polymarket_synced_at if market.source == Market.Source.POLYMARKET else market.kalshi_synced_at
+        synced_at = market.polymarket_synced_at
         if synced_at is None or synced_at <= cutoff:
             candidates.append(market)
         if len(candidates) >= batch_size:

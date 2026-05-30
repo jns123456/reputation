@@ -667,9 +667,6 @@ msgstr "Tipo de destino no válido"
 msgid "Invalid target id"
 msgstr "ID de destino no válido"
 
-msgid "Kalshi"
-msgstr "Kalshi"
-
 msgid "Polymarket"
 msgstr "Todos los mercados"
 
@@ -1312,8 +1309,8 @@ msgstr "Verificación pendiente"
 
 msgid "follower"
 msgid_plural "followers"
-msgstr[0] "Seguir"
-msgstr[1] "Seguir"
+msgstr[0] "Seguidores"
+msgstr[1] "Seguidores"
 
 msgid "following"
 msgid_plural "following"
@@ -4368,10 +4365,8 @@ msgstr ""
 msgid "markets"
 msgstr "Mercados"
 
-msgid ""
-"Forecast on real-world events — odds from Polymarket and Kalshi, no betting."
-msgstr ""
-"Pronostica eventos reales — cuotas de Polymarket y Kalshi, sin apuestas."
+msgid "Forecast on real-world events — odds from Polymarket, no betting."
+msgstr "Pronostica eventos reales — cuotas de Polymarket, sin apuestas."
 
 msgid "Search markets…"
 msgstr "Buscar mercados…"
@@ -4410,9 +4405,6 @@ msgstr "Ocultar"
 msgid "Show"
 msgstr "Mostrar"
 
-msgid "No Kalshi markets match your filters."
-msgstr "Ningún mercado de Kalshi coincide con tus filtros."
-
 msgid "No Polymarket markets match your filters."
 msgstr "Ningún mercado de Polymarket coincide con tus filtros."
 
@@ -4423,28 +4415,8 @@ msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets --"
 "categories</code> o importa desde el admin."
 
-msgid "Live Kalshi Chart"
-msgstr "Gráfico Kalshi en vivo"
-
-msgid "Yes price history from Kalshi — updates when you refresh the page."
-msgstr ""
-"Historial de precio Sí de Kalshi — se actualiza al refrescar la página."
-
-msgid "Open on Kalshi ↗"
-msgstr "Abrir en Kalshi ↗"
-
-msgid ""
-"The chart is view-only. Use <strong>Open on Kalshi</strong> above to visit "
-"the market — no trading on this platform."
-msgstr ""
-"El gráfico es solo lectura. Usa <strong>Abrir en Kalshi</strong> arriba para "
-"visitar el mercado — sin trading en esta plataforma."
-
 msgid "View on Polymarket"
 msgstr "Ver en Polymarket ↗"
-
-msgid "View on Kalshi"
-msgstr "Ver en Kalshi ↗"
 
 msgid "Live odds"
 msgstr "Cuotas en vivo"
@@ -4605,10 +4577,6 @@ msgstr ""
 "Publicado hace %(timesince)s. Puedes cerrar este pronóstico al precio actual "
 "del mercado y volver a participar después."
 
-msgid "Pick your outcome below. Live Kalshi odds are captured when you submit."
-msgstr ""
-"Elige tu resultado abajo. Las cuotas Kalshi en vivo se capturan al enviar."
-
 msgid ""
 "Pick your outcome below. Live Polymarket odds are captured when you submit."
 msgstr ""
@@ -4660,9 +4628,6 @@ msgstr "Cerrar pronóstico"
 
 msgid "View in public feed"
 msgstr "Ver en el feed público"
-
-msgid "Reputation at stake based on current Kalshi odds."
-msgstr "Reputación en juego según las cuotas Kalshi actuales."
 
 msgid "Reputation at stake based on current Polymarket odds."
 msgstr "Reputación en juego según las cuotas Polymarket actuales."
@@ -4823,6 +4788,12 @@ msgstr "Historial"
 
 msgid "Formal forecasts and how they resolved."
 msgstr "Pronósticos formales y cómo se resolvieron."
+
+msgid "Read more"
+msgstr "Leer más"
+
+msgid "Show less"
+msgstr "Ver menos"
 
 #~ msgid "Standings"
 #~ msgstr "Clasificación"

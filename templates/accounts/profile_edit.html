@@ -16,7 +16,6 @@
 
   <form method="post"
         class="mx-auto max-w-3xl space-y-5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-8"
-        data-pr-reveal
         x-data="{
           mode: '{{ form.identity_mode.value|default:'public'|escapejs }}',
           displayName: '{{ form.display_name.value|default:''|escapejs }}',

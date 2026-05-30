@@ -13,31 +13,6 @@ class BrowseArea:
     category_slug: str
 
 
-KALSHI_SERIES_BY_BROWSE_AREA: dict[tuple[str, str], frozenset[str]] = {
-    ("sports", "soccer"): frozenset(),
-    ("sports", "nba"): frozenset({"KXNBAGAME", "KXWNBAGAME", "KXNBAH2HPTS"}),
-    ("sports", "mlb"): frozenset({"KXMLBGAME", "KXMLBSPREAD"}),
-    ("sports", "nhl"): frozenset({"KXNHLGAME"}),
-    ("sports", "nfl"): frozenset({"KXNFLGAME", "KXNFLNFCCHAMP"}),
-    ("sports", "ufc"): frozenset(),
-    ("sports", "tennis"): frozenset(),
-    ("sports", "cricket"): frozenset(),
-    ("economy", "fed"): frozenset({"KXFED", "KXFEDDECISION", "KXEFFR", "KXCBDECISIONENGLAND"}),
-    ("economy", "finance"): frozenset({"KXUSTYLD", "KXMORTGAGERATE"}),
-    ("economy", "macro"): frozenset({"KXECONSTATCPIYOY", "KXPAYROLLS", "KXJOBLESS", "KXU3"}),
-    ("science-tech", "ai"): frozenset({"KXAILABDIS", "KXFRONTIERAI"}),
-}
-
-
-def _kalshi_series_ticker(market) -> str:
-    raw = market.kalshi_raw or {}
-    event_payload = market.kalshi_event_raw or {}
-    event = event_payload.get("event") if isinstance(event_payload, dict) else {}
-    if not isinstance(event, dict):
-        event = event_payload if isinstance(event_payload, dict) else {}
-    return (raw.get("series_ticker") or event.get("series_ticker") or "").upper()
-
-
 BROWSE_AREAS: tuple[BrowseArea, ...] = (
     # Sports
     BrowseArea("soccer", "Soccer", frozenset({"soccer", "ucl", "champions-league"}), "sports"),
@@ -105,18 +80,10 @@ def compute_browse_area_slugs(market) -> list[str]:
     (which are deferred on card querysets and would trigger N+1 fetches).
     """
     tag_slugs = _collect_tag_slugs(market)
-    series = _kalshi_series_ticker(market)
     matched: list[str] = []
     for area in BROWSE_AREAS:
         if tag_slugs.intersection(area.tag_slugs):
             matched.append(area.slug)
-            continue
-        if series:
-            kalshi_series = KALSHI_SERIES_BY_BROWSE_AREA.get(
-                (area.category_slug, area.slug), frozenset()
-            )
-            if series in kalshi_series:
-                matched.append(area.slug)
     return matched
 
 

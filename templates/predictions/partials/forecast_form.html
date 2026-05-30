@@ -1,6 +1,10 @@
 {% load i18n reputation_filters %}
-<section id="place-forecast" class="forecast-section mt-10 overflow-hidden rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-sm dark:border-brand-800/50 dark:from-slate-800 dark:to-slate-900 dark:shadow-lg dark:shadow-black/25">
-  <div class="border-b border-brand-100 px-4 py-4 dark:border-slate-700/80 sm:px-6 sm:py-5">
+<section id="place-forecast" class="forecast-section{% if inline_layout %} forecast-section--paired flex h-full min-h-0 flex-col{% endif %}{% if not inline_layout %} mt-10{% endif %} overflow-hidden rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-sm dark:border-brand-800/50 dark:from-slate-800 dark:to-slate-900 dark:shadow-lg dark:shadow-black/25"
+  {% if not existing and user.is_authenticated and form %}
+  x-data="{ activeOutcome: {% if form.predicted_outcome.value %}'{{ form.predicted_outcome.value|escapejs }}'{% else %}null{% endif %} }"
+  {% endif %}
+>
+  <div class="shrink-0 border-b border-brand-100 px-4 py-4 dark:border-slate-700/80 sm:px-6 sm:py-5">
     <div class="flex flex-wrap items-start gap-3">
       {% if market.image_url %}
       <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-500 dark:bg-white/90">
@@ -29,8 +33,9 @@
     <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">
       {% if existing %}
         {% blocktrans with timesince=existing.created_at|timesince %}Posted {{ timesince }} ago. You can exit this forecast at the current market price and enter again later.{% endblocktrans %}
-      {% elif market.source == "kalshi" %}
-        {% blocktrans %}Pick your outcome below. Live Kalshi odds are captured when you submit.{% endblocktrans %}
+      {% elif user.is_authenticated and form %}
+        <span x-show="!activeOutcome">{% blocktrans %}Pick your outcome below. Live Polymarket odds are captured when you submit.{% endblocktrans %}</span>
+        <span x-show="activeOutcome" x-cloak>{% trans "Share the argument behind your pick, then post your forecast." %}</span>
       {% else %}
         {% blocktrans %}Pick your outcome below. Live Polymarket odds are captured when you submit.{% endblocktrans %}
       {% endif %}
@@ -42,7 +47,7 @@
     {% endif %}
   </div>
 
-  <div class="px-4 py-4 sm:px-6 sm:py-5">
+  <div class="{% if inline_layout %}flex min-h-0 flex-1 flex-col {% endif %}px-4 py-4 sm:px-6 sm:py-5">
     {% include "predictions/partials/challenge_forecast_alert.html" with active_challenges=active_challenges existing=existing compact=False %}
     {% if user.is_authenticated %}
       {% if existing %}
@@ -94,7 +99,13 @@
         </div>
       </div>
       {% else %}
-      <form method="post" action="{% url 'predictions:create' slug=market.slug %}" class="space-y-5">
+      <form
+        method="post"
+        action="{% url 'predictions:create' slug=market.slug %}"
+        x-ref="forecastForm"
+        class="{% if inline_layout %}flex min-h-0 flex-1 flex-col {% endif %}"
+        @change="if ($event.target.name === 'predicted_outcome') { activeOutcome = $event.target.value; $nextTick(() => $refs.forecastForm.querySelector('.forecast-reasoning-input')?.focus()) }"
+      >
         {% csrf_token %}
         {% if form.non_field_errors %}
         <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-200">
@@ -102,14 +113,16 @@
         </div>
         {% endif %}
 
-        <div>
+        <div
+          x-show="!activeOutcome"
+          x-transition:enter="transition ease-out duration-200"
+          x-transition:enter-start="opacity-0"
+          x-transition:enter-end="opacity-100"
+          class="{% if inline_layout %}flex min-h-0 flex-1 flex-col justify-center{% endif %}"
+        >
           <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">{{ form.predicted_outcome.label }}</span>
           <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            {% if market.source == "kalshi" %}
-            {% blocktrans %}Reputation at stake based on current Kalshi odds.{% endblocktrans %}
-            {% else %}
             {% blocktrans %}Reputation at stake based on current Polymarket odds.{% endblocktrans %}
-            {% endif %}
           </p>
           <div class="mt-3 grid gap-3 {% if form.outcome_count > 6 %}grid-cols-1 sm:grid-cols-2 lg:grid-cols-3{% elif form.outcome_count >= 3 %}grid-cols-1 sm:grid-cols-3{% else %}grid-cols-2{% endif %}">
             {% for radio in form.predicted_outcome %}
@@ -142,8 +155,31 @@
           {% endif %}
         </div>
 
-        <div class="forecast-reasoning-block">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <div
+          x-show="activeOutcome"
+          x-cloak
+          x-transition:enter="transition ease-out duration-200"
+          x-transition:enter-start="opacity-0 translate-y-1"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          class="forecast-reasoning-block {% if inline_layout %}flex min-h-0 flex-1 flex-col{% endif %}"
+        >
+          <div class="rounded-xl border-2 border-brand-200 px-4 py-3 dark:border-brand-700/50 forecast-pick-card">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Your pick" %}</p>
+                <p class="mt-0.5 text-lg font-bold text-slate-900 dark:text-slate-50" x-text="activeOutcome"></p>
+              </div>
+              <button
+                type="button"
+                class="shrink-0 text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400"
+                @click="activeOutcome = null; $refs.forecastForm.querySelectorAll('input[name=predicted_outcome]').forEach(function (radio) { radio.checked = false; })"
+              >
+                {% trans "Change pick" %}
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-baseline justify-between gap-2">
             <label for="{{ form.reasoning.id_for_label }}" class="text-sm font-semibold text-slate-800 dark:text-slate-100">
               {{ form.reasoning.label }}
               <span class="ml-1 font-normal text-slate-400 dark:text-slate-500">{% trans "(optional)" %}</span>
@@ -151,17 +187,17 @@
             <span class="text-xs text-slate-400 dark:text-slate-500" id="reasoning-count-{{ market.slug }}" data-reasoning-separator="{% trans '/' %}" data-reasoning-max="2,000">0 / 2,000</span>
           </div>
           <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Share the argument behind your pick — visible in the public forecast feed." %}</p>
-          <div class="mt-2 overflow-hidden rounded-xl border border-slate-200 shadow-sm transition focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100 dark:border-slate-600 dark:focus-within:border-brand-500 dark:focus-within:ring-brand-900/50 forecast-reasoning-wrap">
+          <div class="mt-2 overflow-hidden rounded-xl border border-slate-200 shadow-sm transition focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-100 dark:border-slate-600 dark:focus-within:border-brand-500 dark:focus-within:ring-brand-900/50 forecast-reasoning-wrap {% if inline_layout %}flex min-h-0 flex-1 flex-col{% endif %}">
             {{ form.reasoning }}
           </div>
           {% if form.reasoning.errors %}
           <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.reasoning.errors.0 }}</p>
           {% endif %}
-        </div>
 
-        <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto">
-          {% trans "Post forecast" %}
-        </button>
+          <button type="submit" class="{% if inline_layout %}mt-auto shrink-0 {% endif %}mt-4 inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto">
+            {% trans "Post forecast" %}
+          </button>
+        </div>
       </form>
       {% endif %}
     {% else %}
@@ -419,6 +455,11 @@
   }
   .forecast-reasoning-input:focus {
     outline: none;
+  }
+
+  .forecast-section--paired .forecast-reasoning-input {
+    flex: 1 1 auto;
+    min-height: 5rem;
   }
 
   html.dark .forecast-reasoning-input {

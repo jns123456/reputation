@@ -16,7 +16,6 @@ from markets.browse_areas import (
 )
 from markets.models import Market
 from markets.sort_options import market_volume, normalize_sort_filter, sort_markets
-from markets.source_filters import kalshi_enabled
 
 MARKET_HUB_CATEGORY_SLUG_ORDER = (
     "politics",
@@ -32,15 +31,12 @@ MARKET_HUB_CATEGORY_SLUG_ORDER = (
 
 SOURCE_DISPLAY_ORDER = (
     Market.Source.POLYMARKET,
-    Market.Source.KALSHI,
 )
 CATEGORY_BROWSE_LIMIT = 48
 MARKET_CARD_DEFER_FIELDS = (
     "description",
     "polymarket_raw",
     "polymarket_event_raw",
-    "kalshi_raw",
-    "kalshi_event_raw",
 )
 
 
@@ -55,8 +51,6 @@ def market_card_queryset(qs):
 
 def _exclude_disabled_sources(markets):
     excluded = {Market.Source.MANUAL}
-    if not kalshi_enabled():
-        excluded.add(Market.Source.KALSHI)
     if isinstance(markets, list):
         return [market for market in markets if market.source not in excluded]
     return markets.exclude(source__in=excluded)
@@ -73,7 +67,7 @@ def _sort_markets_by_volume(markets):
 
 
 def blend_markets_by_source(markets, *, limit=CATEGORY_BROWSE_LIMIT):
-    """Interleave markets by source so Kalshi is visible alongside Polymarket."""
+    """Order markets by trading volume for browse listings."""
     sorted_markets = _sort_markets_by_volume(markets)
     if not sorted_markets:
         return []

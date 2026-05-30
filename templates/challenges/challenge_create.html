@@ -14,7 +14,7 @@
     <span class="font-medium text-slate-800 dark:text-slate-200">{% trans "New challenge" %}</span>
   </nav>
 
-  <header class="challenge-create-header mb-6" data-pr-reveal>
+  <header class="challenge-create-header mb-6">
     <p class="pr-eyebrow">{% trans "Challenges" %}</p>
     <h1 class="challenge-create-title">
       {% trans "Create a" %} <span class="pr-gradient-text">{% trans "challenge" %}</span>
@@ -24,7 +24,7 @@
   </header>
 
   {% if not mutual_followers %}
-  <div class="challenge-create-alert mb-6" role="status" data-pr-reveal data-delay="1">
+  <div class="challenge-create-alert mb-6" role="status">
     <i data-lucide="triangle-alert" class="challenge-create-alert-icon" stroke-width="2" aria-hidden="true"></i>
     <p>{% trans "You need mutual followers to create a challenge. Follow someone who follows you back." %}</p>
   </div>
@@ -41,7 +41,7 @@
     </div>
     {% endif %}
 
-    <ol class="challenge-create-steps mb-6" aria-label="{% trans 'Challenge creation steps' %}" data-pr-reveal data-delay="1">
+    <ol class="challenge-create-steps mb-6" aria-label="{% trans 'Challenge creation steps' %}">
       <li class="challenge-create-step-item"
           :class="{ 'is-active': step === 1, 'is-complete': step > 1 }">
         <span class="challenge-create-step-badge" aria-hidden="true">
@@ -58,7 +58,7 @@
       </li>
     </ol>
 
-    <div x-show="step === 1" x-cloak class="challenge-create-step-panel pr-panel" data-pr-reveal data-delay="2">
+    <div x-show="step === 1" x-cloak class="challenge-create-step-panel pr-panel">
       <div class="challenge-create-sidebar-head">
         <h2 class="challenge-create-panel-title">{% trans "Users to challenge" %}</h2>
         <p class="challenge-create-panel-desc">{% trans "Select at least one mutual follower." %}</p>
@@ -133,8 +133,7 @@
     <section x-show="step === 2"
              x-cloak
              class="challenge-create-events pr-panel min-w-0"
-             data-pr-reveal
-             data-delay="2">
+            >
       <div class="challenge-create-events-head">
         <div>
           <h2 class="challenge-create-panel-title">{% trans "Select events" %}</h2>

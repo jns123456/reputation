@@ -375,7 +375,6 @@
   {% include "includes/mobile_bottom_nav.html" %}
   <div id="vote-reactions-portal"></div>
   {% block extra_js %}{% endblock %}
-  <script src="{% static 'js/proofrep-ui.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/lucide-icons.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/theme.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script>window.proofrepTheme && window.proofrepTheme.init();</script>

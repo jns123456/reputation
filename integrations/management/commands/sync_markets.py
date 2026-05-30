@@ -2,32 +2,24 @@ from django.core.management.base import BaseCommand
 
 from integrations.sync import refresh_stale_open_markets, sync_all_category_markets
 from integrations.services import (
-    import_markets_from_kalshi,
     import_markets_from_polymarket,
-    refresh_kalshi_market_images,
     sync_top_volume_polymarket_markets,
 )
-from markets.source_filters import kalshi_enabled
 
 
 class Command(BaseCommand):
-    help = "Sync markets from Polymarket and Kalshi (read-only, no trading)."
+    help = "Sync markets from Polymarket (read-only, no trading)."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--categories",
             action="store_true",
-            help="Sync all canonical browse categories from configured sources",
+            help="Sync all canonical browse categories from Polymarket",
         )
         parser.add_argument(
             "--stale",
             action="store_true",
             help="Refresh open markets that have not synced recently",
-        )
-        parser.add_argument(
-            "--kalshi-discovery",
-            action="store_true",
-            help="Import newly listed open Kalshi markets",
         )
         parser.add_argument(
             "--polymarket",
@@ -38,11 +30,6 @@ class Command(BaseCommand):
             "--top-volume",
             action="store_true",
             help="Import high-volume Polymarket markets (aligned with Polymarket volume rankings)",
-        )
-        parser.add_argument(
-            "--kalshi-images",
-            action="store_true",
-            help="Refresh Kalshi event metadata (team/event images for cards)",
         )
         parser.add_argument(
             "--if-due",
@@ -86,14 +73,6 @@ class Command(BaseCommand):
             )
             return
 
-        if options["kalshi_discovery"]:
-            if not kalshi_enabled():
-                self.stdout.write(self.style.WARNING("Kalshi is disabled (KALSHI_ENABLED=False)."))
-                return
-            result = import_markets_from_kalshi(limit=options["limit"])
-            self._print_import_result("Kalshi discovery", result)
-            return
-
         if options["top_volume"]:
             result = sync_top_volume_polymarket_markets(max_markets=options["limit"])
             self._print_import_result("Polymarket top-volume sync", result)
@@ -104,23 +83,10 @@ class Command(BaseCommand):
             self._print_import_result("Polymarket import", result)
             return
 
-        if options["kalshi_images"]:
-            if not kalshi_enabled():
-                self.stdout.write(self.style.WARNING("Kalshi is disabled (KALSHI_ENABLED=False)."))
-                return
-            result = refresh_kalshi_market_images(batch_size=options["limit"])
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Kalshi images: {result['refreshed']} markets updated "
-                    f"({result['failures']} failures)"
-                )
-            )
-            return
-
         self.stdout.write(
             self.style.WARNING(
-                "No action selected. Use --categories, --top-volume, --if-due, --stale, "
-                "--kalshi-discovery, --kalshi-images, or --polymarket."
+                "No action selected. Use --categories, --top-volume, --if-due, "
+                "--stale, or --polymarket."
             )
         )
 

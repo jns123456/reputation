@@ -5,7 +5,6 @@ import logging
 from celery import shared_task
 
 from integrations.celery_utils import safe_cache_delete
-from integrations.services import import_markets_from_kalshi
 from integrations.sync import refresh_stale_open_markets, sync_all_category_markets, sync_category_markets
 from markets.categories import get_category_for_slug
 
@@ -33,13 +32,13 @@ def sync_world_cup_match_markets_task(self):
 
 
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
-def sync_category_markets_task(self, category_slug, kalshi_lightweight=True):
+def sync_category_markets_task(self, category_slug):
     """Background sync for a single browse category."""
     category = get_category_for_slug(category_slug)
     if category is None:
         return
     try:
-        sync_category_markets(category, kalshi_lightweight=kalshi_lightweight)
+        sync_category_markets(category)
         safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
     except Exception as exc:
         logger.exception("sync_category_markets_task failed for %s", category_slug)
@@ -48,7 +47,7 @@ def sync_category_markets_task(self, category_slug, kalshi_lightweight=True):
 
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
 def sync_all_category_markets_task(self):
-    """Periodic import of category markets from Polymarket and Kalshi."""
+    """Periodic import of category markets from Polymarket."""
     try:
         result = sync_all_category_markets()
         safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
@@ -91,32 +90,4 @@ def refresh_stale_open_markets_task(self):
         )
     except Exception as exc:
         logger.exception("refresh_stale_open_markets_task failed")
-        raise self.retry(exc=exc) from exc
-
-
-@shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
-def import_kalshi_open_markets_task(self):
-    """Discover newly listed open Kalshi markets."""
-    from django.conf import settings
-
-    from markets.source_filters import kalshi_enabled
-
-    if not kalshi_enabled():
-        return
-    try:
-        result = import_markets_from_kalshi(
-            limit=settings.KALSHI_SYNC_OPEN_LIMIT,
-            status="open",
-            exclude_mve=True,
-        )
-        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
-        created = sum(1 for item in result["imported"] if item["created"])
-        logger.info(
-            "import_kalshi_open_markets_task finished: total=%s created=%s errors=%s",
-            len(result["imported"]),
-            created,
-            len(result["errors"]),
-        )
-    except Exception as exc:
-        logger.exception("import_kalshi_open_markets_task failed")
         raise self.retry(exc=exc) from exc

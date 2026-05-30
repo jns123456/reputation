@@ -17,20 +17,20 @@
     {% trans "Popularity Points" as stat_popularity_label %}
     {% trans "Social engagement" as stat_popularity_badge %}
     {% include "includes/pr_stat_card.html" with label=stat_popularity_label value=profile.popularity_points value_class="text-pop-600" badge_text=stat_popularity_badge badge_class="badge-pop" delay="2" %}
-    <div class="pr-stat-card pr-card" data-pr-reveal data-delay="3">
+    <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Predictions" %}</p>
       <p class="pr-stat-value">{{ profile.prediction_count }}</p>
       <p class="mt-1 text-xs text-slate-500">{% blocktrans with correct=profile.correct_prediction_count incorrect=profile.incorrect_prediction_count %}{{ correct }} correct · {{ incorrect }} incorrect{% endblocktrans %}</p>
     </div>
     {% with total=profile.correct_prediction_count|add:profile.incorrect_prediction_count %}
-    <div class="pr-stat-card pr-card" data-pr-reveal data-delay="4">
+    <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Accuracy" %}</p>
       <p class="pr-stat-value">{% if total > 0 %}{% widthratio profile.correct_prediction_count total 100 %}%{% else %}—{% endif %}</p>
     </div>
     {% endwith %}
   </div>
 
-  <section class="mt-10" data-pr-reveal>
+  <section class="mt-10">
     <div class="flex items-center justify-between">
       <h2 class="pr-section-title">{% trans "Recent Predictions" %}</h2>
       <div class="flex items-center gap-3">
@@ -53,7 +53,7 @@
     </div>
   </section>
 
-  <div class="mt-8 flex gap-3" data-pr-reveal data-delay="1">
+  <div class="mt-8 flex gap-3">
     <a href="{% url 'accounts:profile_edit' %}" class="btn-secondary">{% trans "Edit Profile" %}</a>
     <a href="{% url 'markets:list' %}" class="btn-primary">{% trans "Explore categories" %}</a>
   </div>

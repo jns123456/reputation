@@ -1,5 +1,5 @@
 {% load i18n reputation_filters %}
-<article class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
+<article class="pr-hero pr-hero--compact relative overflow-hidden">
   <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
   <div class="pr-orb pr-orb--slow absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
   <div class="pr-orb absolute -bottom-12 -left-8 h-36 w-36 bg-emerald-400/15" aria-hidden="true"></div>
@@ -25,15 +25,43 @@
             {% endif %}
             {% if market.source == "polymarket" %}
             <span class="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950/45 dark:text-indigo-300">{{ market.display_source }}</span>
-            {% elif market.source == "kalshi" %}
-            <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300">{{ market.display_source }}</span>
             {% endif %}
           </div>
 
           <h1 class="pr-hero-title mt-3">{{ market.display_title }}</h1>
 
           {% if market.display_description %}
-          <p class="pr-hero-desc">{{ market.display_description }}</p>
+          <div
+            class="pr-hero-desc-collapsible"
+            x-data="{
+              expanded: false,
+              canExpand: false,
+              init() {
+                this.$nextTick(() => {
+                  const el = this.$refs.desc;
+                  if (!el) return;
+                  this.canExpand = el.scrollHeight > el.clientHeight + 2;
+                });
+              }
+            }"
+          >
+            <p
+              x-ref="desc"
+              class="pr-hero-desc"
+              :class="{ 'pr-hero-desc--clamped': !expanded }"
+            >{{ market.display_description }}</p>
+            <button
+              type="button"
+              class="pr-hero-desc-toggle"
+              x-show="canExpand"
+              x-cloak
+              @click="expanded = !expanded"
+              :aria-expanded="expanded"
+            >
+              <span x-show="!expanded">{% trans "Read more" %}</span>
+              <span x-show="expanded" x-cloak>{% trans "Show less" %}</span>
+            </button>
+          </div>
           {% endif %}
 
           <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -41,12 +69,6 @@
             <a href="{{ market.polymarket_url }}" target="_blank" rel="noopener noreferrer"
                class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition hover:text-brand-700 hover:underline dark:text-brand-400 dark:hover:text-brand-300">
               {% trans "View on Polymarket" %}
-              <i data-lucide="external-link" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
-            </a>
-            {% elif market.kalshi_url %}
-            <a href="{{ market.kalshi_url }}" target="_blank" rel="noopener noreferrer"
-               class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition hover:text-brand-700 hover:underline dark:text-brand-400 dark:hover:text-brand-300">
-              {% trans "View on Kalshi" %}
               <i data-lucide="external-link" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
             </a>
             {% endif %}

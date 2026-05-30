@@ -335,6 +335,43 @@ html.dark .pr-hero-desc { color: #94a3b8; }
   .pr-hero-desc { font-size: 1rem; }
 }
 
+.pr-hero-desc-collapsible {
+  margin-top: 0.75rem;
+  max-width: 42rem;
+}
+
+.pr-hero-desc-collapsible .pr-hero-desc {
+  margin-top: 0;
+}
+
+.pr-hero-desc--clamped {
+  max-height: 6.5rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 65%, transparent 100%);
+}
+
+.pr-hero-desc-toggle {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4f46e5;
+  transition: color 0.15s ease;
+}
+
+.pr-hero-desc-toggle:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+html.dark .pr-hero-desc-toggle {
+  color: #818cf8;
+}
+
+html.dark .pr-hero-desc-toggle:hover {
+  color: #a5b4fc;
+}
+
 /* Market detail hero */
 .pr-market-hero-image {
   display: flex;
@@ -1727,30 +1764,6 @@ html.dark .pr-cta-band {
   transform: translateY(-1px);
 }
 
-/* Scroll reveal */
-[data-pr-reveal],
-[data-about-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-[data-pr-reveal].is-visible,
-[data-about-reveal].is-visible {
-  opacity: 1;
-  transform: none;
-}
-
-[data-pr-reveal][data-delay="1"],
-[data-about-reveal][data-delay="1"] { transition-delay: 0.08s; }
-[data-pr-reveal][data-delay="2"],
-[data-about-reveal][data-delay="2"] { transition-delay: 0.16s; }
-[data-pr-reveal][data-delay="3"],
-[data-about-reveal][data-delay="3"] { transition-delay: 0.24s; }
-[data-pr-reveal][data-delay="4"],
-[data-about-reveal][data-delay="4"] { transition-delay: 0.32s; }
-
 /* About-page specific aliases */
 .about-progress { transform-origin: left center; transition: transform 0.15s ease-out; }
 .about-nav-pill { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -1783,7 +1796,6 @@ html.dark .pr-cta-band {
 
 @media (prefers-reduced-motion: reduce) {
   .pr-orb, .about-orb, .about-bounce,
-  [data-pr-reveal], [data-about-reveal],
   .pr-pulse-icon::before,
   .pr-exit-success-card,
   .pr-exit-success-card__glow,
@@ -3847,16 +3859,6 @@ html.dark .challenge-market-card-badge {
 html.dark .challenge-market-card-badge--poly {
   background: rgba(49, 46, 129, 0.45);
   color: #c7d2fe;
-}
-
-.challenge-market-card-badge--kalshi {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-html.dark .challenge-market-card-badge--kalshi {
-  background: rgba(6, 78, 59, 0.4);
-  color: #6ee7b7;
 }
 
 /* ── Forum — Twitter / X layout ── */

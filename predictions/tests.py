@@ -1,6 +1,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
+from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -12,6 +13,7 @@ from comments.services import cast_vote
 from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import (
+    attach_user_forecasts_to_markets,
     get_market_predictions,
     get_user_active_prediction,
     get_user_open_predictions,
@@ -456,6 +458,51 @@ class OpenPredictionsPageTests(TestCase):
         )
 
         self.assertRedirects(response, reverse("predictions:open"))
+
+
+class AttachUserForecastsTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="forecaster", password="pass")
+        self.other = User.objects.create_user(username="other", password="pass")
+        self.forecasted_market = Market.objects.create(
+            external_id="attach-m1",
+            title="Forecasted market",
+            slug="forecasted-market",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.open_market = Market.objects.create(
+            external_id="attach-m2",
+            title="Open market",
+            slug="open-market",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.forecast = create_prediction(
+            user=self.user,
+            market=self.forecasted_market,
+            predicted_outcome="Yes",
+        )
+
+    def test_attach_user_forecasts_marks_markets_with_pending_prediction(self):
+        markets = attach_user_forecasts_to_markets(
+            self.user,
+            [self.forecasted_market, self.open_market],
+        )
+
+        self.assertIsNotNone(markets[0].user_forecast)
+        self.assertEqual(markets[0].user_forecast.market_id, self.forecasted_market.id)
+        self.assertIsNone(markets[1].user_forecast)
+
+    def test_attach_user_forecasts_clears_for_anonymous_user(self):
+        markets = attach_user_forecasts_to_markets(
+            AnonymousUser(),
+            [self.forecasted_market],
+        )
+
+        self.assertIsNone(markets[0].user_forecast)
 
 
 class ForecastFormTests(TestCase):

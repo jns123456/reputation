@@ -7,6 +7,9 @@ from accounts.models import Notification
 
 register = template.Library()
 
+LINK_CLASS = "text-brand-600 hover:underline dark:text-brand-400"
+ACTOR_LINK_CLASS = "font-semibold text-brand-600 hover:underline dark:text-brand-400"
+
 
 def _actor_link(notification):
     name = notification.actor.public_name
@@ -14,8 +17,9 @@ def _actor_link(notification):
 
     profile_url = reverse("accounts:profile", kwargs={"username": notification.actor.username})
     return format_html(
-        '<a href="{}" class="font-semibold text-brand-600 hover:underline">{}</a>',
+        '<a href="{}" class="{}">{}</a>',
         profile_url,
+        ACTOR_LINK_CLASS,
         name,
     )
 
@@ -23,17 +27,17 @@ def _actor_link(notification):
 @register.simple_tag
 def notification_icon_bg(notification):
     icons = {
-        Notification.NotificationType.FOLLOWED_USER_PREDICTION: "bg-indigo-100 text-indigo-600",
-        Notification.NotificationType.NEW_FOLLOWER: "bg-violet-100 text-violet-600",
-        Notification.NotificationType.UPVOTE_RECEIVED: "bg-emerald-100 text-emerald-600",
-        Notification.NotificationType.DOWNVOTE_RECEIVED: "bg-rose-100 text-rose-600",
-        Notification.NotificationType.PREDICTION_RESOLVED: "bg-amber-100 text-amber-600",
-        Notification.NotificationType.CHALLENGE_INVITATION: "bg-indigo-100 text-indigo-600",
-        Notification.NotificationType.CHALLENGE_MARKET_RESOLVED: "bg-sky-100 text-sky-600",
-        Notification.NotificationType.CHALLENGE_COMPLETED: "bg-emerald-100 text-emerald-600",
-        Notification.NotificationType.CHALLENGE_ACCEPTED: "bg-violet-100 text-violet-600",
+        Notification.NotificationType.FOLLOWED_USER_PREDICTION: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300",
+        Notification.NotificationType.NEW_FOLLOWER: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
+        Notification.NotificationType.UPVOTE_RECEIVED: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300",
+        Notification.NotificationType.DOWNVOTE_RECEIVED: "bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-300",
+        Notification.NotificationType.PREDICTION_RESOLVED: "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300",
+        Notification.NotificationType.CHALLENGE_INVITATION: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300",
+        Notification.NotificationType.CHALLENGE_MARKET_RESOLVED: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300",
+        Notification.NotificationType.CHALLENGE_COMPLETED: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300",
+        Notification.NotificationType.CHALLENGE_ACCEPTED: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
     }
-    return icons.get(notification.notification_type, "bg-slate-100 text-slate-600")
+    return icons.get(notification.notification_type, "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300")
 
 
 @register.simple_tag
@@ -92,10 +96,11 @@ def _challenge_market_resolved_message(notification):
         else ""
     )
     return format_html(
-        '{in_text} <a href="{url}" class="text-brand-600 hover:underline">{title}</a>, '
+        '{in_text} <a href="{url}" class="{link}">{title}</a>, '
         '<span class="font-semibold">{market}</span> {resolved}{outcome}',
         in_text=_("In"),
         url=challenge_url,
+        link=LINK_CLASS,
         title=challenge_title,
         market=market_title,
         resolved=_("was resolved."),
@@ -111,23 +116,26 @@ def _challenge_completed_message(notification):
     winner = notification.challenge.winner
     if winner and winner.id == notification.recipient_id:
         return format_html(
-            '{} <a href="{}" class="text-brand-600 hover:underline">{}</a>!',
+            '{} <a href="{}" class="{}">{}</a>!',
             _("You won"),
             challenge_url,
+            LINK_CLASS,
             challenge_title,
         )
     if winner:
         return format_html(
-            '<a href="{}" class="text-brand-600 hover:underline">{}</a> {} '
+            '<a href="{}" class="{}">{}</a> {} '
             '<span class="font-semibold">{}</span>.',
             challenge_url,
+            LINK_CLASS,
             challenge_title,
             _("is complete. Winner:"),
             winner.public_name,
         )
     return format_html(
-        '<a href="{}" class="text-brand-600 hover:underline">{}</a> {}.',
+        '<a href="{}" class="{}">{}</a> {}.',
         challenge_url,
+        LINK_CLASS,
         challenge_title,
         _("ended in a tie"),
     )
@@ -150,10 +158,11 @@ def notification_message(notification, compact=False):
         )
         market_title = notification.prediction.market.display_title
         return format_html(
-            "{} {} <a href=\"{}\" class=\"text-brand-600 hover:underline\">{}</a>",
+            "{} {} <a href=\"{}\" class=\"{}\">{}</a>",
             actor,
             _("published a forecast on"),
             market_url,
+            LINK_CLASS,
             market_title,
         )
 
@@ -175,11 +184,12 @@ def notification_message(notification, compact=False):
         outcome_label = _("correct") if notification.prediction.is_correct else _("incorrect")
         delta_label = f"+{delta}" if delta >= 0 else str(delta)
         return format_html(
-            '{market} <a href="{url}" class="text-brand-600 hover:underline">{title}</a> '
+            '{market} <a href="{url}" class="{link}">{title}</a> '
             "{resolved} {outcome} — "
             '<span class="font-semibold">{delta}</span> {points}.',
             market=_("Market"),
             url=market_url,
+            link=LINK_CLASS,
             title=market_title,
             resolved=_("was resolved. Your forecast was"),
             outcome=outcome_label,
@@ -191,10 +201,11 @@ def notification_message(notification, compact=False):
         challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
         challenge_title = notification.challenge.display_title
         return format_html(
-            '{} {} <a href="{}" class="text-brand-600 hover:underline">{}</a>',
+            '{} {} <a href="{}" class="{}">{}</a>',
             actor,
             _("challenged you to"),
             challenge_url,
+            LINK_CLASS,
             challenge_title,
         )
 
@@ -202,10 +213,11 @@ def notification_message(notification, compact=False):
         challenge_url = reverse("challenges:detail", kwargs={"pk": notification.challenge_id})
         challenge_title = notification.challenge.display_title
         return format_html(
-            '{} {} <a href="{}" class="text-brand-600 hover:underline">{}</a>',
+            '{} {} <a href="{}" class="{}">{}</a>',
             actor,
             _("accepted your challenge"),
             challenge_url,
+            LINK_CLASS,
             challenge_title,
         )
 

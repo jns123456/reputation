@@ -10,7 +10,7 @@
   {% blocktrans asvar hero_description %}Formal forecasts and how they resolved.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=profile_user.public_name description=hero_description %}
 
-  <div class="mt-2 space-y-3" data-pr-reveal>
+  <div class="mt-2 space-y-3">
     {% for prediction in predictions %}
       {% include "predictions/partials/prediction_history_item.html" %}
     {% empty %}

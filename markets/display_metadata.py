@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from integrations.kalshi.images import resolve_kalshi_market_image
 from markets.sort_options import SORT_VOLUME, market_sort_metric
 
 
@@ -25,13 +24,8 @@ def extract_volume_24h_from_market(market) -> float:
 
 
 def extract_card_image_url_from_market(market) -> str:
-    if getattr(market, "source", "") == "kalshi":
-        kalshi_image = resolve_kalshi_market_image(market)
-        if kalshi_image:
-            return kalshi_image
-
-    raw = market.polymarket_raw or market.kalshi_raw or {}
-    event = market.polymarket_event_raw or market.kalshi_event_raw or {}
+    raw = market.polymarket_raw or {}
+    event = market.polymarket_event_raw or {}
     event_data = event.get("event") if isinstance(event, dict) else {}
     if not isinstance(event_data, dict):
         event_data = event if isinstance(event, dict) else {}

@@ -15,7 +15,7 @@
     </span>
   </nav>
 
-  <header class="challenge-create-header mb-6" data-pr-reveal>
+  <header class="challenge-create-header mb-6">
     <p class="pr-eyebrow">{% trans "Challenges" %}</p>
     <h1 class="challenge-create-title">
       {% if is_edit %}
@@ -28,13 +28,13 @@
   </header>
 
   {% if not mutual_followers %}
-  <div class="challenge-create-alert mb-6" role="status" data-pr-reveal data-delay="1">
+  <div class="challenge-create-alert mb-6" role="status">
     <i data-lucide="triangle-alert" class="challenge-create-alert-icon" stroke-width="2" aria-hidden="true"></i>
     <p>{% trans "You need mutual followers to create a group. Follow someone who follows you back." %}</p>
   </div>
   {% endif %}
 
-  <form method="post" class="challenge-create-form pr-panel" data-pr-reveal data-delay="1">
+  <form method="post" class="challenge-create-form pr-panel">
     {% csrf_token %}
 
     {% if form.non_field_errors %}

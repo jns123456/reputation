@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 
 from markets.models import Market
@@ -132,23 +132,25 @@ class SortMarketsTests(TestCase):
 
 
 class GetMarketsForDisplaySortTests(TestCase):
-    @override_settings(KALSHI_ENABLED=True)
-    def test_explicit_sort_overrides_source_blend(self):
-        poly = Market.objects.create(
-            external_id="display-poly",
-            title="Poly",
-            slug="display-poly",
+    def test_explicit_sort_orders_by_volume(self):
+        Market.objects.create(
+            external_id="display-poly-low",
+            title="Poly low",
+            slug="display-poly-low",
             source=Market.Source.POLYMARKET,
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 100},
         )
-        kalshi = Market.objects.create(
-            external_id="display-kalshi",
-            title="Kalshi",
-            slug="display-kalshi",
-            source=Market.Source.KALSHI,
+        Market.objects.create(
+            external_id="display-poly-high",
+            title="Poly high",
+            slug="display-poly-high",
+            source=Market.Source.POLYMARKET,
             status=Market.Status.OPEN,
-            kalshi_raw={"volume_fp": "10000"},
+            polymarket_raw={"volumeNum": 10000},
         )
         ordered = get_markets_for_display(sort=SORT_VOLUME, limit=10)
-        self.assertEqual([market.slug for market in ordered[:2]], ["display-kalshi", "display-poly"])
+        self.assertEqual(
+            [market.slug for market in ordered[:2]],
+            ["display-poly-high", "display-poly-low"],
+        )

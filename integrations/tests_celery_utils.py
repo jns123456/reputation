@@ -44,7 +44,6 @@ class MarketRefreshEnqueueTests(SimpleTestCase):
         market.source = "polymarket"
         market.status = "open"
         market.polymarket_synced_at = None
-        market.kalshi_synced_at = None
         self.assertTrue(market_is_stale(market))
 
     def test_market_is_not_stale_when_recently_synced(self):

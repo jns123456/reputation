@@ -75,16 +75,6 @@ class MarketCategoryResolutionTests(TestCase):
         )
         self.assertEqual(resolve_market_category_slug(market), "other")
 
-    def test_kalshi_event_category_maps_to_sports(self):
-        market = Market(
-            external_id="kalshi-sport",
-            title="NBA game",
-            slug="nba-game",
-            source=Market.Source.KALSHI,
-            kalshi_event_raw={"event": {"category": "Sports", "series_ticker": "KXNBAGAME"}},
-        )
-        self.assertEqual(resolve_market_category_slug(market), "sports")
-
 
 class MarketCategorySelectorTests(TestCase):
     def setUp(self):
@@ -302,14 +292,14 @@ class CategoryBrowseViewTests(TestCase):
         self.assertEqual(len(markets), 1)
         self.assertEqual(markets[0].slug, "mexico-vs-south-africa")
 
-    def test_kalshi_series_matches_browse_area(self):
-        kalshi_nba = Market.objects.create(
-            external_id="kalshi-nba-filter",
-            title="NBA Kalshi",
-            slug="nba-kalshi",
+    def test_polymarket_tag_matches_browse_area(self):
+        poly_nba = Market.objects.create(
+            external_id="poly-nba-filter",
+            title="NBA Polymarket",
+            slug="nba-poly",
             status=Market.Status.OPEN,
-            source=Market.Source.KALSHI,
-            kalshi_event_raw={"event": {"category": "Sports", "series_ticker": "KXNBAGAME"}},
+            source=Market.Source.POLYMARKET,
+            polymarket_raw={"tags": [{"slug": "nba"}]},
         )
         sports = get_open_markets_by_canonical_category(category_slug="sports")
         filtered = filter_markets_by_browse_area(
@@ -317,7 +307,7 @@ class CategoryBrowseViewTests(TestCase):
             category_slug="sports",
             area_slug="nba",
         )
-        self.assertEqual([market.pk for market in filtered], [kalshi_nba.pk])
+        self.assertEqual([market.pk for market in filtered], [poly_nba.pk])
 
     def test_unknown_category_returns_404(self):
         response = self.client.get(reverse("dashboard:category_browse", kwargs={"slug": "unknown"}))
@@ -390,23 +380,22 @@ class BrowseAreaDenormalizationTests(TestCase):
 
 
 class BlendMarketsBySourceTests(TestCase):
-    def test_blend_includes_both_sources(self):
-        poly = Market.objects.create(
-            external_id="blend-poly",
+    def test_blend_orders_by_volume(self):
+        high = Market.objects.create(
+            external_id="blend-poly-high",
             title="Poly high volume",
-            slug="blend-poly",
+            slug="blend-poly-high",
             source=Market.Source.POLYMARKET,
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 1_000_000},
         )
-        kalshi = Market.objects.create(
-            external_id="blend-kalshi",
-            title="Kalshi market",
-            slug="blend-kalshi",
-            source=Market.Source.KALSHI,
+        low = Market.objects.create(
+            external_id="blend-poly-low",
+            title="Poly low volume",
+            slug="blend-poly-low",
+            source=Market.Source.POLYMARKET,
             status=Market.Status.OPEN,
-            kalshi_raw={"volume_fp": "100"},
+            polymarket_raw={"volumeNum": 100},
         )
-        blended = blend_markets_by_source([poly, kalshi], limit=2)
-        sources = {market.source for market in blended}
-        self.assertEqual(sources, {Market.Source.POLYMARKET, Market.Source.KALSHI})
+        blended = blend_markets_by_source([low, high], limit=2)
+        self.assertEqual([market.pk for market in blended], [high.pk, low.pk])

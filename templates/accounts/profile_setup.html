@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="pr-page pb-8">
-  <section class="pr-hero pr-hero--compact relative overflow-hidden" data-pr-reveal>
+  <section class="pr-hero pr-hero--compact relative overflow-hidden">
     <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
     <div class="pr-orb pr-orb--slow pointer-events-none absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
     <div class="pr-orb pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 bg-emerald-400/15" aria-hidden="true"></div>
@@ -30,8 +30,7 @@
 
   <form method="post"
         class="mx-auto max-w-3xl space-y-5 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-8"
-        data-pr-reveal
-        data-delay="1"
+       
         x-data="{
           mode: '{{ form.identity_mode.value|default:'public'|escapejs }}',
           displayName: '{{ form.display_name.value|default:''|escapejs }}',

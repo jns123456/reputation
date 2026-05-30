@@ -74,21 +74,15 @@ def enqueue_category_sync(category_slug: str) -> bool:
 def market_is_stale(market) -> bool:
     """True when an imported open market has not synced recently."""
     from markets.models import Market
-    from markets.source_filters import kalshi_enabled
 
-    if market.source == Market.Source.MANUAL:
-        return False
-    if market.source == Market.Source.KALSHI and not kalshi_enabled():
+    if market.source != Market.Source.POLYMARKET:
         return False
     if market.status != Market.Status.OPEN:
         return False
 
     stale_minutes = getattr(settings, "MARKET_SYNC_STALE_MINUTES", 30)
     cutoff = timezone.now() - timezone.timedelta(minutes=stale_minutes)
-    if market.source == Market.Source.POLYMARKET:
-        synced_at = market.polymarket_synced_at
-    else:
-        synced_at = market.kalshi_synced_at
+    synced_at = market.polymarket_synced_at
     return synced_at is None or synced_at <= cutoff
 
 

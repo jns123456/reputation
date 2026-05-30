@@ -208,7 +208,6 @@ PHASE1_UNFUZZY_KEEP_MSGSTR: frozenset[str] = frozenset(
         "Be the first to share something.",
         "No comments yet — be the first to reply.",
         "View on Polymarket",
-        "View on Kalshi",
         "You can't start a thread on your own post. Reply to comments from others below — or share your post.",
     }
 )

@@ -44,23 +44,17 @@ def normalize_sort_filter(value: str) -> str:
 
 
 def _market_payloads(market, *, include_event_payloads=False):
-    payloads = (
-        market.polymarket_raw or {},
-        market.kalshi_raw or {},
-    )
+    payloads = (market.polymarket_raw or {},)
     if include_event_payloads:
-        payloads = (
-            *payloads,
-            market.polymarket_event_raw or {},
-            market.kalshi_event_raw or {},
-        )
+        payloads = (*payloads, market.polymarket_event_raw or {})
     return payloads
 
 
 def market_sort_metric(market, sort: str) -> float:
-    """Numeric metric from imported Polymarket/Kalshi payload for ranking."""
+    """Numeric metric from imported Polymarket payload for ranking."""
     keys = _METRIC_KEYS.get(sort, _METRIC_KEYS[SORT_VOLUME])
-    for payload in _market_payloads(market, include_event_payloads=True):
+    include_event_payloads = sort == SORT_LIQUIDITY
+    for payload in _market_payloads(market, include_event_payloads=include_event_payloads):
         for key in keys:
             value = payload.get(key)
             if value is None or value == "":

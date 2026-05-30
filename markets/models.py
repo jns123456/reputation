@@ -5,7 +5,6 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 
-from integrations.kalshi.urls import resolve_kalshi_public_url
 from integrations.polymarket.urls import resolve_polymarket_public_url
 from markets.categories import resolve_market_category_slug
 
@@ -18,7 +17,6 @@ class Market(models.Model):
 
     class Source(models.TextChoices):
         POLYMARKET = "polymarket", "Polymarket"
-        KALSHI = "kalshi", "Kalshi"
         MANUAL = "manual", "Manual"
 
     external_id = models.CharField(max_length=255, unique=True, db_index=True)
@@ -60,10 +58,6 @@ class Market(models.Model):
     polymarket_raw = models.JSONField(default=dict, blank=True)
     polymarket_event_raw = models.JSONField(default=dict, blank=True)
     polymarket_synced_at = models.DateTimeField(null=True, blank=True)
-    kalshi_ticker = models.CharField(max_length=255, blank=True, db_index=True)
-    kalshi_raw = models.JSONField(default=dict, blank=True)
-    kalshi_event_raw = models.JSONField(default=dict, blank=True)
-    kalshi_synced_at = models.DateTimeField(null=True, blank=True)
     volume_total = models.FloatField(default=0.0, db_index=True)
     volume_24h = models.FloatField(default=0.0, db_index=True)
     card_image_url = models.URLField(max_length=500, blank=True)
@@ -101,8 +95,6 @@ class Market(models.Model):
     def display_source(self) -> str:
         if self.source == self.Source.POLYMARKET:
             return _("Polymarket")
-        if self.source == self.Source.KALSHI:
-            return _("Kalshi")
         return _("Market")
 
     def save(self, *args, **kwargs):
@@ -181,14 +173,6 @@ class Market(models.Model):
         return bool(self.polymarket_raw)
 
     @property
-    def kalshi_url(self):
-        return resolve_kalshi_public_url(self)
-
-    @property
-    def has_kalshi_data(self):
-        return bool(self.kalshi_raw)
-
-    @property
     def outcome_labels(self):
         if isinstance(self.outcomes, list):
             return [o.get("label", o) if isinstance(o, dict) else str(o) for o in self.outcomes]
@@ -220,8 +204,6 @@ class Market(models.Model):
         {
             "polymarket_raw",
             "polymarket_event_raw",
-            "kalshi_raw",
-            "kalshi_event_raw",
         }
     )
 
