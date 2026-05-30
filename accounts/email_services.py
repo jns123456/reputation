@@ -43,6 +43,14 @@ _NOTIFICATION_TYPE_TO_PREF = {
     "market_resolving": "notify_market_resolving",
 }
 
+# Challenge alerts are emailed when notify_challenge_updates is on, even if the
+# global notify_email toggle is off (invitations are time-sensitive).
+_CHALLENGE_EMAIL_NOTIFICATION_TYPES = frozenset(
+    key
+    for key, pref in _NOTIFICATION_TYPE_TO_PREF.items()
+    if pref == "notify_challenge_updates"
+)
+
 
 def _emails_enabled():
     if not getattr(settings, "ENGAGEMENT_EMAILS_ENABLED", True):
@@ -166,9 +174,19 @@ def _user_wants_email_for(notification):
     prefs = getattr(user, "notification_preferences", None)
     if prefs is None:
         return False
+
+    pref_attr = _NOTIFICATION_TYPE_TO_PREF.get(notification.notification_type)
+    is_challenge_email = (
+        notification.notification_type in _CHALLENGE_EMAIL_NOTIFICATION_TYPES
+    )
+
+    if is_challenge_email:
+        if pref_attr and not getattr(prefs, pref_attr, True):
+            return False
+        return True
+
     if not prefs.notify_email:
         return False
-    pref_attr = _NOTIFICATION_TYPE_TO_PREF.get(notification.notification_type)
     if pref_attr is None:
         return True
     return getattr(prefs, pref_attr, True)
@@ -183,7 +201,14 @@ def send_notification_email(notification_id):
 
     notification = (
         Notification.objects.filter(pk=notification_id)
-        .select_related("recipient", "recipient__notification_preferences", "actor")
+        .select_related(
+            "recipient",
+            "recipient__notification_preferences",
+            "actor",
+            "challenge",
+            "challenge__winner",
+            "market",
+        )
         .first()
     )
     if notification is None:
@@ -192,17 +217,39 @@ def send_notification_email(notification_id):
         return False
 
     actor_name = notification.actor.public_name if notification.actor_id else "PredictStamp"
-    context = {
-        "notification": notification,
-        "recipient": notification.recipient,
-        "actor_name": actor_name,
-        "action_url": absolute_url(notification.action_url),
-        "settings_url": absolute_url("/accounts/settings/alerts/"),
-    }
+    action_url = absolute_url(notification.action_url)
+    settings_url = absolute_url("/accounts/settings/alerts/")
+    is_challenge_email = (
+        notification.notification_type in _CHALLENGE_EMAIL_NOTIFICATION_TYPES
+        and notification.challenge_id
+    )
+
+    if is_challenge_email:
+        from challenges.email_services import build_challenge_notification_email_context
+
+        context = {
+            **build_challenge_notification_email_context(
+                notification=notification,
+                action_url=action_url,
+            ),
+            "recipient": notification.recipient,
+            "settings_url": settings_url,
+        }
+        template_base = "challenge_notification"
+    else:
+        context = {
+            "notification": notification,
+            "recipient": notification.recipient,
+            "actor_name": actor_name,
+            "action_url": action_url,
+            "settings_url": settings_url,
+        }
+        template_base = "notification"
+
     sent = _send(
         subject=lambda: _notification_subject(notification, actor_name),
         recipient_email=notification.recipient.email,
-        template_base="notification",
+        template_base=template_base,
         context=context,
     )
     return bool(sent)

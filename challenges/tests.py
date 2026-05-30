@@ -82,6 +82,20 @@ class ChallengeCreateTests(TestCase):
                 opponent_ids=[carol.id],
             )
 
+    def test_create_challenge_view_accepts_single_market(self):
+        self.client.force_login(self.alice)
+        response = self.client.post(
+            "/challenges/new/",
+            {
+                "title": "Quick duel",
+                "opponents": [str(self.bob.id)],
+                "markets": [str(self.market1.id)],
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        challenge = Challenge.objects.get(creator=self.alice, title="Quick duel")
+        self.assertEqual(challenge.challenge_markets.count(), 1)
+
     def test_rejects_more_than_ten_markets(self):
         market_ids = []
         for i in range(MAX_CHALLENGE_MARKETS + 1):

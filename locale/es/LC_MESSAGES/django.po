@@ -138,6 +138,36 @@ msgstr "Tu pronóstico se resolvió — mira tu reputación"
 msgid "%(actor)s invited you to a challenge"
 msgstr "%(actor)s te invitó a un desafío"
 
+#, python-format
+msgid "%(actor)s invited you to a challenge: %(title)s."
+msgstr "%(actor)s te invitó a un desafío: %(title)s."
+
+#, python-format
+msgid "%(actor)s accepted your challenge: %(title)s."
+msgstr "%(actor)s aceptó tu desafío: %(title)s."
+
+#, python-format
+msgid "An event in your challenge “%(challenge)s” was resolved: %(market)s."
+msgstr "Un evento de tu desafío «%(challenge)s» se resolvió: %(market)s."
+
+#, python-format
+msgid "Your challenge “%(title)s” is complete. Winner: %(winner)s."
+msgstr "Tu desafío «%(title)s» terminó. Ganador: %(winner)s."
+
+#, python-format
+msgid "Your challenge “%(title)s” ended in a tie."
+msgstr "Tu desafío «%(title)s» terminó en empate."
+
+msgid "You have a new update on a challenge you joined."
+msgstr "Hay una novedad en un desafío al que te uniste."
+
+msgid "View challenge"
+msgstr "Ver desafío"
+
+#, python-format
+msgid "Result: %(outcome)s"
+msgstr "Resultado: %(outcome)s"
+
 msgid "A challenge event just resolved"
 msgstr "Un evento del desafío se resolvió"
 
@@ -1922,6 +1952,20 @@ msgstr "Seleccionar eventos"
 #, python-format
 msgid "Choose up to %(max)s open markets"
 msgstr "Elige hasta %(max)s mercados abiertos"
+
+#, python-format
+msgid "event(s) selected · max %(max)s"
+msgstr "evento(s) seleccionado(s) · máx. %(max)s"
+
+msgid "Select at least one event to send the challenge."
+msgstr "Selecciona al menos un evento para enviar el desafío."
+
+msgid "You can send the challenge now or add more events."
+msgstr "Puedes enviar el desafío ahora o agregar más eventos."
+
+#, python-format
+msgid "Maximum of %(max)s events reached."
+msgstr "Se alcanzó el máximo de %(max)s eventos."
 
 msgid "Remove event"
 msgstr "Quitar evento"

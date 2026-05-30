@@ -4,9 +4,8 @@
 {% block title %}{% trans "New challenge" %}{% endblock %}
 
 {% block content %}
-{% trans "selected" as markets_selected_label %}
 <div class="pr-page challenge-create pb-8"
-     x-data="challengeCreateWizard({{ initial_step }}, {{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }}, '{{ markets_selected_label|escapejs }}')"
+     x-data="challengeCreateWizard({{ initial_step }}, {{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }})"
      x-init="init()">
   <nav class="pr-breadcrumbs" aria-label="{% trans 'Breadcrumb' %}">
     <a href="{% url 'challenges:list' %}">{% trans "Challenges" %}</a>
@@ -141,20 +140,25 @@
         </div>
         <div class="challenge-create-counter" aria-live="polite">
           <span class="challenge-create-counter-value" x-text="Object.keys(selected).length"></span>
-          <span class="challenge-create-counter-sep">/</span>
-          <span x-text="maxMarkets"></span>
-          <span class="challenge-create-counter-label" x-text="selectedLabel"></span>
+          <span class="challenge-create-counter-label">
+            {% blocktrans with max=max_challenge_markets %}event(s) selected · max {{ max }}{% endblocktrans %}
+          </span>
         </div>
-      </div>
-
-      <div class="challenge-create-progress" aria-hidden="true">
-        <div class="challenge-create-progress-bar"
-             :style="'width: ' + (maxMarkets ? (Object.keys(selected).length / maxMarkets * 100) : 0) + '%'"></div>
       </div>
 
       {% if form.markets.errors %}
       <p class="challenge-create-error">{{ form.markets.errors.0 }}</p>
       {% endif %}
+
+      <p class="challenge-create-step-hint mt-3" x-show="Object.keys(selected).length === 0" x-cloak>
+        {% trans "Select at least one event to send the challenge." %}
+      </p>
+      <p class="challenge-create-step-hint is-success mt-3" x-show="Object.keys(selected).length > 0 && Object.keys(selected).length < maxMarkets" x-cloak>
+        {% trans "You can send the challenge now or add more events." %}
+      </p>
+      <p class="challenge-create-step-hint mt-3" x-show="Object.keys(selected).length >= maxMarkets" x-cloak>
+        {% blocktrans with max=max_challenge_markets %}Maximum of {{ max }} events reached.{% endblocktrans %}
+      </p>
 
       <div id="market-picker-selected" class="challenge-create-selected empty:hidden">
         <template x-for="[id, title] in Object.entries(selected)" :key="id">
@@ -220,12 +224,11 @@
 </div>
 
 <script>
-  function challengeCreateWizard(initialStep, maxMarkets, initialSelectedIds, initialTitles, selectedLabel) {
+  function challengeCreateWizard(initialStep, maxMarkets, initialSelectedIds, initialTitles) {
     initialTitles = initialTitles || {};
     return {
       step: initialStep || 1,
       maxMarkets,
-      selectedLabel,
       selected: {},
       selectedOpponents: 0,
       hasMutualFollowers: {{ mutual_followers|yesno:"true,false" }},

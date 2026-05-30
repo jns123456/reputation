@@ -20,6 +20,87 @@ def _set_prefs(user, **kwargs):
 
 
 @override_settings(ENGAGEMENT_EMAILS_ENABLED=True)
+class ChallengeInvitationEmailTests(TestCase):
+    def setUp(self):
+        from accounts.models import UserFollow
+        from challenges.services import create_challenge
+        from markets.models import Market
+
+        self.alice = create_user("alice")
+        self.bob = create_user("bob")
+        UserFollow.objects.create(follower=self.alice, following=self.bob)
+        UserFollow.objects.create(follower=self.bob, following=self.alice)
+        self.market_one = Market.objects.create(
+            external_id="email-m1",
+            title="Bitcoin hits 100k",
+            slug="bitcoin-100k",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+        self.market_two = Market.objects.create(
+            external_id="email-m2",
+            title="US election winner",
+            slug="us-election-email",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+        self.challenge = create_challenge(
+            creator=self.alice,
+            title="Weekend duel",
+            market_ids=[self.market_one.id, self.market_two.id],
+            opponent_ids=[self.bob.id],
+        )
+        self.notification = Notification.objects.get(
+            recipient=self.bob,
+            notification_type=Notification.NotificationType.CHALLENGE_INVITATION,
+            challenge=self.challenge,
+        )
+
+    def test_challenge_invitation_email_sent_without_global_email_pref(self):
+        _set_prefs(
+            self.bob,
+            notify_email=False,
+            notify_challenge_updates=True,
+        )
+        mail.outbox = []
+
+        result = send_notification_email(self.notification.id)
+
+        self.assertTrue(result)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.bob.email])
+        body = mail.outbox[0].body
+        self.assertIn("Bitcoin hits 100k", body)
+        self.assertIn("US election winner", body)
+        self.assertIn("/challenges/", body)
+
+    def test_challenge_invitation_email_blocked_when_challenge_pref_off(self):
+        _set_prefs(
+            self.bob,
+            notify_email=True,
+            notify_challenge_updates=False,
+        )
+        mail.outbox = []
+
+        self.assertFalse(send_notification_email(self.notification.id))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_challenge_invitation_html_includes_view_button(self):
+        _set_prefs(self.bob, notify_email=False, notify_challenge_updates=True)
+        mail.outbox = []
+
+        send_notification_email(self.notification.id)
+
+        message = mail.outbox[0]
+        html = message.alternatives[0][0] if message.alternatives else ""
+        self.assertIn("View challenge", html)
+        self.assertIn("Bitcoin hits 100k", html)
+        self.assertIn(f"/challenges/{self.challenge.pk}/", html)
+
+
+@override_settings(ENGAGEMENT_EMAILS_ENABLED=True)
 class NotificationEmailTests(TestCase):
     def setUp(self):
         self.actor = create_user("actor")

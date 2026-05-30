@@ -1,0 +1,17 @@
+{% load i18n %}{{ subject }}
+
+{% blocktrans with name=recipient.public_name %}Hi {{ name }},{% endblocktrans %}
+
+{{ intro_text }}
+
+{% if challenge_markets %}
+{% trans "Events" %}:
+{% for market in challenge_markets %}
+- {{ market.display_title }}{% if highlight_market and highlight_market.id == market.id and highlight_market.resolved_outcome %} ({% blocktrans with outcome=highlight_market.resolved_outcome %}Result: {{ outcome }}{% endblocktrans %}){% endif %}
+{% endfor %}
+{% endif %}
+
+{{ view_label }}: {{ action_url }}
+
+---
+{% trans "Manage your alert settings" %}: {{ settings_url }}
