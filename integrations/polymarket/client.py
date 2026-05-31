@@ -2,7 +2,9 @@
 
 import json
 import logging
+import re
 from datetime import datetime
+from datetime import timedelta
 
 import requests
 from django.conf import settings
@@ -19,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 ECONOMY_TAG_SLUG = "economy"
 CRYPTO_TAG_SLUG = "crypto"
+SPORTS_GAME_START_MAX_EARLY_DELTA = timedelta(hours=12)
+DATE_IN_TEXT_RE = re.compile(r"\b(20\d{2}-\d{2}-\d{2})\b")
 
 
 def is_multi_outcome_event_market(market) -> bool:
@@ -786,7 +790,7 @@ def normalize_polymarket_record(raw, *, default_category=""):
 
     end_date = raw.get("endDate") or raw.get("end_date_iso") or raw.get("closeTime")
     close_date = _parse_date(end_date)
-    game_start_time = _parse_date(raw.get("gameStartTime"))
+    game_start_time = _coherent_game_start_time(raw, close_date)
 
     category = raw.get("category") or raw.get("groupItemTitle") or default_category
     if isinstance(category, list):
@@ -829,6 +833,52 @@ def _any_accepts_orders(raw_markets):
     if not raw_markets:
         return False
     return any(_accepts_orders(market) for market in raw_markets)
+
+
+def _date_from_text(*values):
+    for value in values:
+        if not value:
+            continue
+        match = DATE_IN_TEXT_RE.search(str(value))
+        if match:
+            try:
+                return datetime.fromisoformat(match.group(1)).date()
+            except ValueError:
+                continue
+    return None
+
+
+def _looks_like_sports_market(raw):
+    if raw.get("sportsMarketType"):
+        return True
+    tags = json.dumps(raw.get("tags") or []).lower()
+    category = str(raw.get("category") or "").lower()
+    return "sport" in category or "sports" in tags
+
+
+def _coherent_game_start_time(raw, close_date):
+    """Return a kickoff timestamp only when it is consistent with market close.
+
+    Some Polymarket sports records carry a stale ``gameStartTime`` that predates
+    the actual event while ``closed=False`` and ``acceptingOrders=True``. In that
+    case the market close/end date is the safer forecast cutoff.
+    """
+    game_start_time = _parse_date(raw.get("gameStartTime"))
+    if not game_start_time or not close_date:
+        return game_start_time
+
+    market_date = _date_from_text(
+        raw.get("question"),
+        raw.get("title"),
+        raw.get("slug"),
+    )
+    if market_date and game_start_time.date() < market_date <= close_date.date():
+        return close_date
+
+    if _looks_like_sports_market(raw) and game_start_time < close_date - SPORTS_GAME_START_MAX_EARLY_DELTA:
+        return close_date
+
+    return game_start_time
 
 
 def _parse_date(value):

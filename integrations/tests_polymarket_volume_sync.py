@@ -7,6 +7,7 @@ from integrations.polymarket.client import (
     collect_importable_market_pairs_from_events,
     is_binary_market_record,
     normalize_polymarket_event_record,
+    normalize_polymarket_record,
 )
 from integrations.services import sync_top_volume_polymarket_markets
 
@@ -180,3 +181,43 @@ class BinaryMarketRecordTests(SimpleTestCase):
                 {"outcomes": '["A", "B", "C"]', "question": "Multi"},
             )
         )
+
+
+class NormalizePolymarketRecordTests(SimpleTestCase):
+    def test_sports_market_uses_close_date_when_game_start_time_is_stale(self):
+        raw = _binary_market(
+            "real-sociedad",
+            question="Will Real Sociedad de Fútbol B win on 2026-05-31?",
+        ) | {
+            "slug": "es2-rso-leo-2026-05-31-rso",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-05-30 14:15:00+00",
+            "endDate": "2026-05-31T16:30:00Z",
+            "acceptingOrders": True,
+            "closed": False,
+            "outcomePrices": '["0.0005", "0.9995"]',
+        }
+
+        normalized = normalize_polymarket_record(raw, default_category="Sports")
+
+        self.assertEqual(normalized["close_date"].isoformat(), "2026-05-31T16:30:00+00:00")
+        self.assertEqual(normalized["game_start_time"].isoformat(), "2026-05-31T16:30:00+00:00")
+        self.assertTrue(normalized["accepting_orders"])
+
+    def test_sports_market_keeps_coherent_game_start_time(self):
+        raw = _binary_market(
+            "spain",
+            question="Will Spain win on 2026-06-26?",
+        ) | {
+            "slug": "fifwc-ury-esp-2026-06-26-esp",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-27 00:00:00+00",
+            "endDate": "2026-06-27T00:00:00Z",
+            "acceptingOrders": True,
+            "closed": False,
+            "outcomePrices": '["0.62", "0.38"]',
+        }
+
+        normalized = normalize_polymarket_record(raw, default_category="Sports")
+
+        self.assertEqual(normalized["game_start_time"].isoformat(), "2026-06-27T00:00:00+00:00")
