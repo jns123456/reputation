@@ -9,13 +9,16 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
+from integrations.polymarket.constants import (
+    MULTI_OUTCOME_CHART_OUTCOMES,
+    MULTI_OUTCOME_EVENT_KIND,
+    POLYMARKET_EVENT_EXTERNAL_PREFIX,
+)
+
 logger = logging.getLogger(__name__)
 
 ECONOMY_TAG_SLUG = "economy"
 CRYPTO_TAG_SLUG = "crypto"
-POLYMARKET_EVENT_EXTERNAL_PREFIX = "pm-event:"
-MULTI_OUTCOME_EVENT_KIND = "polymarket_multi_outcome_event"
-MULTI_OUTCOME_CHART_OUTCOMES = 4
 
 
 def is_multi_outcome_event_market(market) -> bool:

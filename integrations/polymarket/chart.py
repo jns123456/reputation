@@ -6,9 +6,11 @@ from datetime import datetime, timezone as dt_timezone
 import requests
 from django.utils import timezone
 
-from integrations.polymarket.client import (
+from integrations.polymarket.constants import (
     MULTI_OUTCOME_CHART_OUTCOMES,
     POLYMARKET_EVENT_EXTERNAL_PREFIX,
+)
+from integrations.polymarket.client import (
     PolymarketClient,
     build_polymarket_event_raw,
     is_multi_outcome_event_market,

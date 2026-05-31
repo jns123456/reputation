@@ -6,9 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.text import slugify
 
+from integrations.polymarket.constants import MULTI_OUTCOME_EVENT_KIND, POLYMARKET_EVENT_EXTERNAL_PREFIX
 from integrations.polymarket.client import (
-    MULTI_OUTCOME_EVENT_KIND,
-    POLYMARKET_EVENT_EXTERNAL_PREFIX,
     PolymarketClient,
     build_polymarket_event_raw,
     normalize_polymarket_event_record,
