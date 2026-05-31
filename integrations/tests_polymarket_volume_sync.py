@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 from django.test import SimpleTestCase, override_settings
 
 from integrations.polymarket.client import (
+    _market_is_resolved_yes,
     collect_binary_market_pairs_from_events,
     collect_importable_market_pairs_from_events,
     is_binary_market_record,
@@ -108,6 +109,45 @@ class CollectBinaryMarketPairsTests(SimpleTestCase):
         self.assertEqual([item["label"] for item in normalized["outcomes"]], ["Bob", "Alice", "Carol"])
         self.assertAlmostEqual(normalized["current_probability"]["Bob"], 0.4)
         self.assertEqual(normalized["category"], "Politics")
+
+    def test_grouped_event_detects_winner_without_resolved_outcome_field(self):
+        """Polymarket can auto-resolve with outcomePrices only (no resolvedOutcome)."""
+        event = {
+            "slug": "uefa-champions-league-winner",
+            "title": "UEFA Champions League Winner",
+            "closed": True,
+            "markets": [
+                _binary_market("winner", closed=True)
+                | {
+                    "groupItemTitle": "PSG",
+                    "automaticallyResolved": True,
+                    "umaResolutionStatus": "resolved",
+                    "outcomePrices": '["1", "0"]',
+                },
+                _binary_market("runner-up", closed=True)
+                | {
+                    "groupItemTitle": "Arsenal",
+                    "automaticallyResolved": True,
+                    "umaResolutionStatus": "resolved",
+                    "outcomePrices": '["0", "1"]',
+                },
+                _binary_market("other", closed=True)
+                | {
+                    "groupItemTitle": "Real Madrid",
+                    "automaticallyResolved": True,
+                    "umaResolutionStatus": "resolved",
+                    "outcomePrices": '["0", "1"]',
+                },
+            ],
+        }
+
+        normalized = normalize_polymarket_event_record(event, require_open=False)
+
+        self.assertEqual(normalized["status"], "resolved")
+        self.assertEqual(normalized["resolved_outcome"], "PSG")
+        psg = event["markets"][0]
+        self.assertTrue(_market_is_resolved_yes(psg))
+        self.assertFalse(_market_is_resolved_yes(event["markets"][1]))
 
     def test_grouped_event_close_date_uses_latest_open_submarket(self):
         """Event-level endDate can be stale while later outcome buckets stay open."""

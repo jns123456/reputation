@@ -3,7 +3,12 @@
 import logging
 import re
 
-from integrations.polymarket.client import _any_accepts_orders, _parse_date, _parse_json_field
+from integrations.polymarket.client import (
+    _any_accepts_orders,
+    _market_is_resolved_yes,
+    _parse_date,
+    _parse_json_field,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,21 +76,6 @@ def _yes_price(raw_market: dict) -> float | None:
         return float(prices[0])
     except (TypeError, ValueError):
         return None
-
-
-def _market_is_resolved_yes(raw_market: dict) -> bool:
-    resolved = raw_market.get("resolved") or raw_market.get("automaticallyResolved")
-    if not resolved:
-        return False
-    winning = str(raw_market.get("resolvedOutcome") or raw_market.get("winning_outcome") or "").lower()
-    if winning == "yes":
-        return True
-    for token in raw_market.get("tokens") or []:
-        if isinstance(token, dict) and token.get("winner"):
-            label = str(token.get("outcome") or token.get("name") or "").lower()
-            if label == "yes":
-                return True
-    return False
 
 
 def _match_kickoff_time(event: dict, moneyline_markets: list[dict]):

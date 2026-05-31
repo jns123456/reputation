@@ -124,9 +124,10 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
     failures = 0
 
     due_markets = (
-        Market.objects.filter(
-            status=Market.Status.OPEN,
-            source=Market.Source.POLYMARKET,
+        Market.objects.filter(source=Market.Source.POLYMARKET)
+        .filter(
+            Q(status=Market.Status.OPEN)
+            | Q(status=Market.Status.CLOSED, resolved_outcome="")
         )
         .filter(
             Q(polymarket_synced_at__isnull=True)
@@ -134,6 +135,7 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
             | Q(close_date__lte=now)
             | Q(game_start_time__lte=now)
             | Q(accepting_orders=False)
+            | Q(status=Market.Status.CLOSED, resolved_outcome="")
         )
         .order_by("polymarket_synced_at", "updated_at")[:batch_size]
     )

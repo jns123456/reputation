@@ -62,6 +62,23 @@ class RefreshStaleOpenMarketsTests(TestCase):
         mock_refresh.assert_called_once_with(market)
 
     @patch("integrations.sync.refresh_market")
+    def test_refresh_stale_includes_closed_unresolved_markets(self, mock_refresh):
+        market = Market.objects.create(
+            external_id="closed-unresolved",
+            title="Closed but unresolved",
+            slug="closed-unresolved",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.CLOSED,
+            resolved_outcome="",
+            polymarket_synced_at=timezone.now(),
+        )
+
+        result = refresh_stale_open_markets(batch_size=10, stale_minutes=30)
+
+        self.assertEqual(result["refreshed"], 1)
+        mock_refresh.assert_called_once_with(market)
+
+    @patch("integrations.sync.refresh_market")
     def test_refresh_stale_open_markets_prioritizes_elapsed_markets(self, mock_refresh):
         recent_sync = timezone.now() - timedelta(minutes=1)
         market = Market.objects.create(

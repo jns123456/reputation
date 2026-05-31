@@ -577,9 +577,23 @@ def _yes_price(raw_market: dict) -> float | None:
     return None
 
 
+_RESOLVED_YES_PRICE_THRESHOLD = 0.99
+
+
+def _market_is_resolved(raw_market: dict) -> bool:
+    """True when Polymarket has finished resolving a binary sub-market."""
+    if raw_market.get("resolved") or raw_market.get("automaticallyResolved"):
+        return True
+    return str(raw_market.get("umaResolutionStatus") or "").lower() == "resolved"
+
+
 def _market_is_resolved_yes(raw_market: dict) -> bool:
-    resolved = raw_market.get("resolved") or raw_market.get("automaticallyResolved")
-    if not resolved:
+    """True when a grouped/binary sub-market resolved to Yes.
+
+    Polymarket often omits ``resolvedOutcome`` on ``automaticallyResolved`` buckets
+    and only sets ``outcomePrices`` to ["1", "0"] (e.g. UEFA CL winner → PSG).
+    """
+    if not _market_is_resolved(raw_market):
         return False
     winning = str(raw_market.get("resolvedOutcome") or raw_market.get("winning_outcome") or "").lower()
     if winning == "yes":
@@ -589,7 +603,8 @@ def _market_is_resolved_yes(raw_market: dict) -> bool:
             label = str(token.get("outcome") or token.get("name") or "").lower()
             if label == "yes":
                 return True
-    return False
+    yes_price = _yes_price(raw_market)
+    return yes_price is not None and yes_price >= _RESOLVED_YES_PRICE_THRESHOLD
 
 
 def _grouped_outcome_markets(event: dict, *, open_only: bool) -> list[dict]:
