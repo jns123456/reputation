@@ -13,6 +13,12 @@ urlpatterns = [
         admin_panel_views.resolve_identity_verification,
         name="resolve_identity_verification",
     ),
+    path("panel/moderation/", admin_panel_views.moderation_queue, name="moderation_queue"),
+    path(
+        "panel/moderation/action/",
+        admin_panel_views.moderation_action,
+        name="moderation_action",
+    ),
     path("explore/", views.explore, name="explore"),
     path(
         "about/",

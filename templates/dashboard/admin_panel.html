@@ -19,10 +19,16 @@
         </p>
       </div>
     </div>
-    <a href="/admin/" class="btn-secondary gap-1.5 text-sm">
-      <i data-lucide="settings-2" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
-      {% trans "Django Admin" %}
-    </a>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'dashboard:moderation_queue' %}" class="btn-secondary gap-1.5 text-sm">
+        <i data-lucide="shield-alert" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
+        {% trans "Moderation" %}
+      </a>
+      <a href="/admin/" class="btn-secondary gap-1.5 text-sm">
+        <i data-lucide="settings-2" class="h-4 w-4" stroke-width="1.75" aria-hidden="true"></i>
+        {% trans "Django Admin" %}
+      </a>
+    </div>
   </header>
 
   {% include "dashboard/partials/verification_review_section.html" %}

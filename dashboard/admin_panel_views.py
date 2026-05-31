@@ -20,6 +20,7 @@ from accounts.identity_verification_services import (
     get_pending_verification_users,
     reject_identity_verification,
 )
+from accounts.models import AbuseEvent, AIAgentProfile
 from comments.models import Comment
 from markets.models import Market
 from predictions.models import Prediction
@@ -166,3 +167,58 @@ def resolve_identity_verification(request, user_id):
             context,
         )
     return redirect("dashboard:admin_panel")
+
+
+@superadmin_required
+def moderation_queue(request):
+    """Anti-abuse moderation queue: recent abuse events, agents, suspicious users (§16)."""
+    User = get_user_model()
+
+    event_type = request.GET.get("event_type") or ""
+    severity = request.GET.get("severity") or ""
+    abuse_events = AbuseEvent.objects.select_related("user").all()
+    if event_type:
+        abuse_events = abuse_events.filter(event_type=event_type)
+    if severity:
+        abuse_events = abuse_events.filter(severity=severity)
+    abuse_events = abuse_events[:100]
+
+    week_ago = timezone.now() - timedelta(days=7)
+    context = {
+        "abuse_events": abuse_events,
+        "event_type_filter": event_type,
+        "severity_filter": severity,
+        "event_types": AbuseEvent.EventType.choices,
+        "severities": AbuseEvent.Severity.choices,
+        "high_severity_7d": AbuseEvent.objects.filter(
+            severity=AbuseEvent.Severity.HIGH, created_at__gte=week_ago
+        ).count(),
+        "agents": AIAgentProfile.objects.select_related("user").order_by(
+            "trust_level", "-updated_at"
+        )[:100],
+        "suspicious_users": User.objects.filter(
+            account_type=User.AccountType.SUSPICIOUS
+        ).order_by("-date_joined")[:50],
+        "agent_actions": ["promote", "verify", "restrict", "ban", "reset_standard"],
+        "user_actions": ["clear_suspicious", "mark_suspicious"],
+    }
+    return render(request, "dashboard/moderation_queue.html", context)
+
+
+@superadmin_required
+@require_POST
+def moderation_action(request):
+    from accounts.moderation_services import bulk_moderate
+
+    action = request.POST.get("action", "")
+    user_ids = request.POST.getlist("user_ids")
+    try:
+        user_ids = [int(uid) for uid in user_ids]
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid user ids.")
+
+    affected = bulk_moderate(action=action, user_ids=user_ids)
+    from django.contrib import messages
+
+    messages.success(request, f"Applied '{action}' to {affected} account(s).")
+    return redirect("dashboard:moderation_queue")

@@ -2,6 +2,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib import admin
 
 from accounts.models import (
+    AbuseEvent,
     ActivityStreak,
     AIAgentProfile,
     Bookmark,
@@ -29,14 +30,17 @@ class UserAdmin(BaseUserAdmin):
         "username",
         "email",
         "display_name",
+        "account_type",
+        "verification_status",
         "identity_mode",
         "is_verified",
         "onboarding_completed",
         "is_email_verified_display",
-        "is_ai_agent",
         "is_staff",
     )
     list_filter = (
+        "account_type",
+        "verification_status",
         "is_ai_agent",
         "identity_mode",
         "is_verified",
@@ -51,6 +55,8 @@ class UserAdmin(BaseUserAdmin):
             {
                 "fields": (
                     "display_name",
+                    "account_type",
+                    "verification_status",
                     "identity_mode",
                     "is_verified",
                     "verification_requested",
@@ -68,6 +74,8 @@ class UserAdmin(BaseUserAdmin):
             {
                 "fields": (
                     "display_name",
+                    "account_type",
+                    "verification_status",
                     "identity_mode",
                     "is_verified",
                     "verification_requested",
@@ -191,6 +199,77 @@ class ActivityStreakAdmin(admin.ModelAdmin):
 
 @admin.register(AIAgentProfile)
 class AIAgentProfileAdmin(admin.ModelAdmin):
-    list_display = ("agent_name", "user", "model_provider", "model_name", "is_verified_agent")
-    list_filter = ("is_verified_agent", "model_provider")
-    search_fields = ("agent_name", "user__username")
+    list_display = (
+        "agent_name",
+        "user",
+        "operator_type",
+        "autonomy_level",
+        "trust_level",
+        "rate_limit_tier",
+        "is_verified_agent",
+    )
+    list_filter = (
+        "trust_level",
+        "rate_limit_tier",
+        "autonomy_level",
+        "operator_type",
+        "is_verified_agent",
+    )
+    search_fields = ("agent_name", "user__username", "agent_operator")
+    actions = ["verify_agents", "restrict_agents", "ban_agents", "promote_to_standard"]
+
+    @admin.action(description="Verify selected agents")
+    def verify_agents(self, request, queryset):
+        queryset.update(is_verified_agent=True)
+
+    @admin.action(description="Restrict selected agents (revoke writes)")
+    def restrict_agents(self, request, queryset):
+        queryset.update(trust_level=AIAgentProfile.TrustLevel.RESTRICTED)
+
+    @admin.action(description="Ban selected agents")
+    def ban_agents(self, request, queryset):
+        queryset.update(trust_level=AIAgentProfile.TrustLevel.BANNED)
+
+    @admin.action(description="Promote selected agents to standard trust")
+    def promote_to_standard(self, request, queryset):
+        from accounts.agent_services import scopes_for_trust_level
+
+        for profile in queryset:
+            profile.trust_level = AIAgentProfile.TrustLevel.STANDARD
+            profile.rate_limit_tier = AIAgentProfile.RateLimitTier.STANDARD
+            profile.allowed_scopes = scopes_for_trust_level(profile.trust_level)
+            profile.save(
+                update_fields=["trust_level", "rate_limit_tier", "allowed_scopes", "updated_at"]
+            )
+
+
+@admin.register(AbuseEvent)
+class AbuseEventAdmin(admin.ModelAdmin):
+    list_display = (
+        "event_type",
+        "severity",
+        "user",
+        "scope",
+        "risk_score",
+        "action_taken",
+        "created_at",
+    )
+    list_filter = ("event_type", "severity")
+    search_fields = ("user__username", "scope", "reason")
+    readonly_fields = (
+        "user",
+        "event_type",
+        "severity",
+        "scope",
+        "risk_score",
+        "action_taken",
+        "reason",
+        "signals",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

@@ -148,8 +148,18 @@ def signup(request):
         return redirect("accounts:profile", username=request.user.username)
     if request.method == "POST":
         form = SignUpForm(request.POST)
+        human_check = _run_signup_human_verification(request)
+        if not human_check["allowed"]:
+            messages.error(
+                request,
+                _("We could not verify you are human. Please try again."),
+            )
+            return render(request, "accounts/signup.html", _signup_context(request, form))
         if form.is_valid():
             user = form.save()
+            if human_check["passed"] and human_check["provider"] != "noop":
+                user.verification_status = User.VerificationStatus.HUMAN_CHALLENGE_PASSED
+                user.save(update_fields=["verification_status", "updated_at"])
             login(request, user)
             try:
                 send_verification_email(user)
@@ -179,7 +189,51 @@ def signup(request):
             return redirect("accounts:verify_email_pending")
     else:
         form = SignUpForm()
-    return render(request, "accounts/signup.html", {"form": form})
+    return render(request, "accounts/signup.html", _signup_context(request, form))
+
+
+def _signup_context(request, form):
+    return {
+        "form": form,
+        "turnstile_site_key": getattr(settings, "TURNSTILE_SITE_KEY", ""),
+    }
+
+
+def _run_signup_human_verification(request):
+    """Run the anti-bot provider for a signup POST (AGENTS.md §16).
+
+    Returns {allowed, passed, provider}. When verification is not required, a
+    failed/absent challenge still allows signup (it only raises the risk score);
+    when required, a failed challenge blocks account creation.
+    """
+    from accounts.human_verification import verify_human_signal
+    from accounts.models import AbuseEvent
+    from accounts.risk_services import calculate_request_risk_score
+
+    token = request.POST.get("cf-turnstile-response", "") or request.POST.get(
+        "human_verification_token", ""
+    )
+    result = verify_human_signal(token=token, request=request)
+    required = getattr(settings, "HUMAN_VERIFICATION_REQUIRED", False)
+    allowed = result.passed or not required
+
+    if not result.passed:
+        risk = calculate_request_risk_score(
+            ip=request.META.get("REMOTE_ADDR"),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            is_human_verified=False,
+        )
+        from accounts.abuse_services import record_abuse_event
+
+        record_abuse_event(
+            event_type=AbuseEvent.EventType.REGISTRATION_RISK,
+            severity=AbuseEvent.Severity.MEDIUM if required else AbuseEvent.Severity.LOW,
+            scope="registration",
+            risk_score=risk,
+            action_taken="blocked" if not allowed else "flagged",
+            reason=f"Human verification failed (provider={result.provider}).",
+        )
+    return {"allowed": allowed, "passed": result.passed, "provider": result.provider}
 
 
 @login_required
@@ -252,6 +306,36 @@ def verify_email_confirm(request, token):
     )
 
 
+def _apply_onboarding_classification(user, form):
+    """Set account_type + verification_status from the onboarding answers (§15/§16)."""
+    from accounts.agent_services import classify_account_from_onboarding
+    from accounts.risk_services import calculate_account_risk_score, risk_band
+
+    operation = form.cleaned_data.get("account_operation", "human")
+    user.account_type = classify_account_from_onboarding(operation)
+
+    # Progressive friction: high-risk new accounts are flagged for review.
+    band = risk_band(calculate_account_risk_score(user))
+    if band == "high":
+        user.account_type = User.AccountType.SUSPICIOUS
+        user.verification_status = User.VerificationStatus.RESTRICTED
+    elif user.is_email_verified:
+        user.verification_status = User.VerificationStatus.EMAIL_VERIFIED
+
+
+def _finalize_agent_onboarding(user, form):
+    """Create the agent trust profile for declared/organization agents (§15)."""
+    from accounts.agent_services import get_or_create_agent_profile, requires_agent_disclosure
+
+    if not requires_agent_disclosure(user.account_type):
+        return
+    get_or_create_agent_profile(
+        user,
+        agent_operator=form.cleaned_data.get("agent_operator", ""),
+        public_description=form.cleaned_data.get("agent_public_description", ""),
+    )
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def profile_setup(request):
@@ -262,7 +346,9 @@ def profile_setup(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.onboarding_completed = True
+            _apply_onboarding_classification(user, form)
             user.save()
+            _finalize_agent_onboarding(user, form)
             messages.success(request, _("Your profile is ready. Welcome to PredictStamp!"))
             return redirect("accounts:onboarding")
     else:

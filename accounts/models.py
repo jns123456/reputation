@@ -12,6 +12,38 @@ class User(AbstractUser):
         PSEUDONYM = "pseudonym", _lazy("Pseudonym")
         ANONYMOUS = "anonymous", _lazy("Anonymous")
 
+    class AccountType(models.TextChoices):
+        HUMAN = "human", _lazy("Human")
+        DECLARED_AGENT = "declared_agent", _lazy("Declared AI agent")
+        ORGANIZATION_AGENT = "organization_agent", _lazy("Organization AI agent")
+        HYBRID = "hybrid", _lazy("Human + AI assisted")
+        UNKNOWN = "unknown", _lazy("Unknown")
+        SUSPICIOUS = "suspicious", _lazy("Suspicious")
+
+    class VerificationStatus(models.TextChoices):
+        UNVERIFIED = "unverified", _lazy("Unverified")
+        EMAIL_VERIFIED = "email_verified", _lazy("Email verified")
+        HUMAN_CHALLENGE_PASSED = "human_challenge_passed", _lazy("Human challenge passed")
+        AGENT_VERIFIED = "agent_verified", _lazy("Agent verified")
+        ORGANIZATION_VERIFIED = "organization_verified", _lazy("Organization verified")
+        RESTRICTED = "restricted", _lazy("Restricted")
+
+    # Operating-mode classification (AGENTS.md §15). ``is_ai_agent`` below is a
+    # derived backward-compatibility bridge kept in sync via ``save()``.
+    account_type = models.CharField(
+        max_length=20,
+        choices=AccountType.choices,
+        default=AccountType.HUMAN,
+        db_index=True,
+        help_text="How the account is primarily operated (human vs AI agent).",
+    )
+    verification_status = models.CharField(
+        max_length=30,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.UNVERIFIED,
+        db_index=True,
+        help_text="Progressive verification/anti-abuse status for the account.",
+    )
     display_name = models.CharField(max_length=150, blank=True)
     identity_mode = models.CharField(
         max_length=20,
@@ -48,8 +80,33 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    AGENT_ACCOUNT_TYPES = (
+        AccountType.DECLARED_AGENT,
+        AccountType.ORGANIZATION_AGENT,
+    )
+
     class Meta:
         ordering = ["username"]
+
+    def save(self, *args, **kwargs):
+        # Bidirectional bridge between the rich classification and the legacy
+        # boolean (AGENTS.md §15) so both old code paths (that set ``is_ai_agent``
+        # directly) and new code (that set ``account_type``) stay consistent.
+        if self.account_type in self.AGENT_ACCOUNT_TYPES:
+            self.is_ai_agent = True
+        elif self.is_ai_agent and self.account_type in (
+            self.AccountType.HUMAN,
+            self.AccountType.UNKNOWN,
+        ):
+            self.account_type = self.AccountType.DECLARED_AGENT
+        else:
+            self.is_ai_agent = False
+        super().save(*args, **kwargs)
+
+    @property
+    def is_agent_account(self):
+        """True for declared/organization AI agents (replaces raw is_ai_agent checks)."""
+        return self.account_type in self.AGENT_ACCOUNT_TYPES
 
     def __str__(self):
         return self.public_name
@@ -132,16 +189,86 @@ class UserCategoryStats(models.Model):
 
 
 class AIAgentProfile(models.Model):
+    """Operational trust/permission record for an AI (or hybrid) account.
+
+    Account *classification* lives on ``User.account_type`` (§15); this profile
+    holds the agent-specific trust level, granted scopes, and rate-limit tier
+    that gate participation and MCP access (§17). New agents start read-only and
+    earn write permissions progressively.
+    """
+
+    class OperatorType(models.TextChoices):
+        INDIVIDUAL = "individual", _lazy("Individual")
+        COMPANY = "company", _lazy("Company")
+        RESEARCH = "research", _lazy("Research")
+        UNKNOWN = "unknown", _lazy("Unknown")
+
+    class AutonomyLevel(models.TextChoices):
+        ASSISTANT_ONLY = "assistant_only", _lazy("Assistant only")
+        HUMAN_SUPERVISED = "human_supervised", _lazy("Human supervised")
+        SEMI_AUTONOMOUS = "semi_autonomous", _lazy("Semi-autonomous")
+        AUTONOMOUS = "autonomous", _lazy("Autonomous")
+
+    class TrustLevel(models.TextChoices):
+        NEW = "new", _lazy("New")
+        LIMITED = "limited", _lazy("Limited")
+        STANDARD = "standard", _lazy("Standard")
+        TRUSTED = "trusted", _lazy("Trusted")
+        RESTRICTED = "restricted", _lazy("Restricted")
+        BANNED = "banned", _lazy("Banned")
+
+    class RateLimitTier(models.TextChoices):
+        NEW = "new", _lazy("New")
+        STANDARD = "standard", _lazy("Standard")
+        TRUSTED = "trusted", _lazy("Trusted")
+        THROTTLED = "throttled", _lazy("Throttled")
+
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name="agent_profile",
     )
     agent_name = models.CharField(max_length=150)
+    agent_operator = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Accountable human or organization operating this agent.",
+    )
+    operator_type = models.CharField(
+        max_length=20,
+        choices=OperatorType.choices,
+        default=OperatorType.UNKNOWN,
+    )
     model_provider = models.CharField(max_length=100, blank=True)
     model_name = models.CharField(max_length=100, blank=True)
+    autonomy_level = models.CharField(
+        max_length=20,
+        choices=AutonomyLevel.choices,
+        default=AutonomyLevel.HUMAN_SUPERVISED,
+    )
     system_description = models.TextField(blank=True)
+    public_description = models.TextField(
+        blank=True,
+        help_text="Public disclosure shown on the agent's profile.",
+    )
+    homepage_url = models.URLField(blank=True)
     is_verified_agent = models.BooleanField(default=False)
+    trust_level = models.CharField(
+        max_length=20,
+        choices=TrustLevel.choices,
+        default=TrustLevel.NEW,
+        db_index=True,
+    )
+    allowed_scopes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Granted MCP/API scopes, e.g. ['markets:read', 'predictions:write'].",
+    )
+    rate_limit_tier = models.CharField(
+        max_length=20,
+        choices=RateLimitTier.choices,
+        default=RateLimitTier.NEW,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -150,6 +277,84 @@ class AIAgentProfile(models.Model):
 
     def __str__(self):
         return self.agent_name
+
+    @property
+    def can_write(self):
+        """Whether the agent's trust level permits any write action."""
+        return self.trust_level in (
+            self.TrustLevel.STANDARD,
+            self.TrustLevel.TRUSTED,
+        )
+
+
+class AbuseEvent(models.Model):
+    """Immutable record of an anti-abuse detection or moderation action (§16).
+
+    Append-only audit trail surfaced in Django Admin. Stores only internal
+    signals — never raw private identifiers in a way that leaks to public UI.
+    """
+
+    class EventType(models.TextChoices):
+        RATE_LIMITED = "rate_limited", _lazy("Rate limited")
+        DUPLICATE_CONTENT = "duplicate_content", _lazy("Duplicate content")
+        SPAM_SUSPECTED = "spam_suspected", _lazy("Spam suspected")
+        VELOCITY = "velocity", _lazy("Abnormal velocity")
+        VOTE_MANIPULATION = "vote_manipulation", _lazy("Vote manipulation")
+        REGISTRATION_RISK = "registration_risk", _lazy("Registration risk")
+        MCP_ABUSE = "mcp_abuse", _lazy("MCP abuse")
+        CIRCUIT_BREAKER = "circuit_breaker", _lazy("Circuit breaker tripped")
+        MODERATION_ACTION = "moderation_action", _lazy("Moderation action")
+
+    class Severity(models.TextChoices):
+        INFO = "info", _lazy("Info")
+        LOW = "low", _lazy("Low")
+        MEDIUM = "medium", _lazy("Medium")
+        HIGH = "high", _lazy("High")
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="abuse_events",
+    )
+    event_type = models.CharField(
+        max_length=30,
+        choices=EventType.choices,
+        db_index=True,
+    )
+    severity = models.CharField(
+        max_length=10,
+        choices=Severity.choices,
+        default=Severity.LOW,
+        db_index=True,
+    )
+    scope = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="What was being protected, e.g. 'comments', 'mcp:submit_prediction'.",
+    )
+    risk_score = models.PositiveIntegerField(default=0)
+    action_taken = models.CharField(
+        max_length=80,
+        blank=True,
+        help_text="e.g. 'throttled', 'quarantined', 'blocked', 'flagged'.",
+    )
+    reason = models.TextField(blank=True)
+    signals = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["event_type", "-created_at"]),
+            models.Index(fields=["severity", "-created_at"]),
+        ]
+
+    def __str__(self):
+        who = self.user.username if self.user_id else "anonymous"
+        return f"AbuseEvent({self.event_type}, {self.severity}) for {who}"
 
 
 class Bookmark(models.Model):

@@ -36,11 +36,38 @@
           displayName: '{{ form.display_name.value|default:''|escapejs }}',
           username: '{{ user.username|escapejs }}',
           verified: {{ form.verification_requested.value|yesno:'true,false' }},
+          operation: '{{ form.account_operation.value|default:'human'|escapejs }}',
           labelAnonymous: '{% filter escapejs %}{% trans "Anonymous" %}{% endfilter %}',
           labelYourName: '{% filter escapejs %}{% trans "Your name" %}{% endfilter %}',
           labelUsername: '{% filter escapejs %}{% trans "username" %}{% endfilter %}'
         }">
     {% csrf_token %}
+
+    <fieldset class="space-y-3">
+      <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{% trans "Account type" %}</legend>
+      <p class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.account_operation.label }}</p>
+      {% if form.account_operation.help_text %}
+        <p class="text-xs text-slate-500 dark:text-slate-400">{{ form.account_operation.help_text }}</p>
+      {% endif %}
+      <div class="space-y-2">
+        {% for radio in form.account_operation %}
+          <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            {{ radio.tag }} <span>{{ radio.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <div x-show="operation === 'autonomous_agent' || operation === 'organization_agent'" x-cloak class="space-y-3 rounded-xl border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-700 dark:bg-amber-900/10">
+        <div>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="{{ form.agent_operator.id_for_label }}">{{ form.agent_operator.label }}</label>
+          {{ form.agent_operator }}
+          {% if form.agent_operator.errors %}<p class="text-xs text-rose-600">{{ form.agent_operator.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="{{ form.agent_public_description.id_for_label }}">{{ form.agent_public_description.label }}</label>
+          {{ form.agent_public_description }}
+        </div>
+      </div>
+    </fieldset>
 
     <fieldset class="space-y-4">
       <legend class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{% trans "Profile & identity" %}</legend>

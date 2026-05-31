@@ -1,7 +1,7 @@
 # PredictStamp — Project Context
 
 > **This file is the primary source of truth for all AI agents and developers working on this codebase.**
-> Read it fully before writing or modifying any code — including **§15 Recursive Learning**, which holds durable lessons from past work.
+> Read it fully before writing or modifying any code — including **§18 Recursive Learning**, which holds durable lessons from past work.
 
 ---
 
@@ -133,9 +133,9 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 - Optional future integration for reputation attestations, proofs, or hashes.
 - Do not implement blockchain in the MVP unless explicitly requested.
 
-**MCP (future)**
-- Architecture must be AI-native and compatible with future MCP integrations.
-- Allow AI agents to query markets, users, reputation, comments, and predictions.
+**MCP (implemented — see §17)**
+- Concrete MCP layer lives in the `mcp` app. Read-only by default; writes are feature-flagged and scoped.
+- Allow AI agents to query markets, users, reputation, comments, and predictions, and (when enabled) submit predictions/comments through existing services — never duplicated business logic.
 
 ---
 
@@ -177,13 +177,19 @@ admin.py       → Django Admin registration
 
 ### AI-Native Design
 
-- Add `is_ai_agent` field to users or profiles.
-- Create extensible `AIAgentProfile` structure.
+- Classify accounts via `User.account_type` (§15); `is_ai_agent` is a derived bridge only.
+- `AIAgentProfile` is the operational trust/permission record for agents (§5, §15).
 - Do not assume all users are human.
-- Prepare clean internal APIs for future agent access.
-- Design with future MCP compatibility in mind.
-- Maintain clear traceability between human and AI agent actions.
-- AI agents may publish predictions and reasoning but must be clearly identified.
+- Internal services/selectors are the single source of truth — the `mcp` app and DRF API both call them (§17).
+- Maintain clear traceability between human and AI agent actions; every agent write is audit-logged (§17).
+- AI agents may publish predictions and reasoning but must be clearly identified, rate-limited, and screened (§15, §16).
+
+| App | Purpose |
+|-----|---------|
+| `mcp` | MCP server: tokens, scopes, resources/tools/prompts, audit logs (§17) |
+
+Anti-abuse, risk scoring, and agent-classification services live in `accounts`
+(`agent_services`, `risk_services`, `abuse_services`, `human_verification`).
 
 ---
 
@@ -199,8 +205,10 @@ Human or AI user of the platform.
 | `username` | Unique identifier |
 | `email` | Auth contact |
 | `display_name` | Public display name |
-| `is_anonymous` | Whether profile is anonymous |
-| `is_ai_agent` | Whether user is an AI agent |
+| `identity_mode` | public / pseudonym / anonymous |
+| `account_type` | `human` / `declared_agent` / `organization_agent` / `hybrid` / `unknown` / `suspicious` — primary operating-mode classification (see §15) |
+| `verification_status` | `unverified` / `email_verified` / `human_challenge_passed` / `agent_verified` / `organization_verified` / `restricted` |
+| `is_ai_agent` | **Backward-compatible bridge** — derived from `account_type` (true for declared/organization agents). Do not rely on it as the long-term model |
 | `bio` | Optional biography |
 | `created_at`, `updated_at` | Timestamps |
 
@@ -247,13 +255,17 @@ Formal prediction by a user on a market.
 |-------|--------------|
 | `user` | FK → User |
 | `market` | FK → Market |
-| `predicted_outcome` | Chosen outcome |
-| `confidence` | User-stated confidence (affects scoring) |
-| `probability_at_prediction_time` | Snapshot of market probability |
-| `reasoning` | Optional explanation |
-| `status` | pending / resolved / void |
+| `predicted_outcome` | Outcome label the user chose |
+| `predicted_direction` | `yes` / `no` on that outcome |
+| `probability_at_prediction_time` | **Market-implied probability snapshot** (JSON) captured by the system at forecast time — drives scoring |
+| `confidence` | *Legacy/internal field (default `0.5`).* **Not user-entered** and not part of scoring. Users never type a confidence %; do not surface or collect it. Kept only for backward compatibility — treat as deprecated |
+| `reasoning` | Optional free-text the user may write to explain the pick |
+| `status` | pending / resolved / exited / void |
 | `is_correct` | Boolean after resolution |
-| `created_at`, `updated_at`, `resolved_at` | Timestamps |
+| `probability_at_exit_time` | Market probability snapshot when a forecast is exited early |
+| `created_at`, `updated_at`, `resolved_at`, `exited_at` | Timestamps |
+
+> **Scoring input correction:** A user/agent only **picks an outcome (and Yes/No direction)** and may add optional reasoning. The platform automatically snapshots the market-implied probability at that moment. There is **no user-entered confidence percentage** — reputation is scored against that snapshot and the resolved outcome (see §6).
 
 ### Comment
 
@@ -309,17 +321,30 @@ Immutable record explaining changes in social popularity.
 
 ### AIAgentProfile
 
-Optional profile for non-human AI users.
+Operational trust/permission profile for non-human (or hybrid) AI users.
 
 | Field | Type / Notes |
 |-------|--------------|
 | `user` | FK → User |
 | `agent_name` | Display name for the agent |
+| `agent_operator` | Human/org accountable for the agent |
+| `operator_type` | `individual` / `company` / `research` / `unknown` |
 | `model_provider` | e.g. OpenAI, Anthropic |
 | `model_name` | e.g. gpt-4, claude-3 |
-| `system_description` | What the agent does |
+| `autonomy_level` | `assistant_only` / `human_supervised` / `semi_autonomous` / `autonomous` |
+| `system_description` | Internal description of what the agent does |
+| `public_description` | Public-facing disclosure shown on profile |
+| `homepage_url` | Optional operator/agent homepage |
 | `is_verified_agent` | Platform-verified flag |
+| `trust_level` | `new` / `limited` / `standard` / `trusted` / `restricted` / `banned` — gates permissions (see §15) |
+| `allowed_scopes` | JSON list of granted scopes (e.g. `markets:read`, `predictions:write`) |
+| `rate_limit_tier` | `new` / `standard` / `trusted` / `throttled` — chooses the rate-limit bucket |
 | `created_at`, `updated_at` | Timestamps |
+
+> New agents start at `trust_level=new` with read-only scopes. Write scopes are
+> granted progressively based on age, verification, low abuse reports, and useful
+> contribution history (§15). `account_type` lives on `User`; this profile holds
+> the agent-specific trust/permission state.
 
 ---
 
@@ -331,26 +356,34 @@ Optional profile for non-human AI users.
 
 | Rule | Detail |
 |------|--------|
-| Earning | Reputation Points earned or lost through resolved predictions |
+| Earning | Reputation Points earned or lost through resolved (or exited) predictions |
 | Independence | Popularity Points must **never** directly affect Reputation Points |
 | Timestamps | Every prediction stored with creation timestamp |
-| Probability snapshot | Market probability at prediction time must be stored |
-| Difficulty bonus | Correct prediction against low market probability → higher reward |
-| Obvious penalty | Correct prediction when market already high probability → lower reward |
-| Traceability | Changing a prediction creates a new record or leaves clear audit trail |
+| Probability snapshot | Market-implied probability at prediction time must be stored |
+| Difficulty bonus | Correct pick against a *low* market probability → higher reward |
+| Obvious penalty | Correct pick when the market was *already* high probability → lower reward |
+| No self-rated confidence | Scoring uses the **market price snapshot**, never a user-entered confidence |
+| Traceability | Changing a prediction creates a new record or leaves a clear audit trail |
 | Immutability | Resolved predictions must not be deleted |
 
-**Initial scoring formula (keep simple and auditable):**
+**Scoring formula (implemented — Polymarket-style, base 100):**
+
+The system reads the market-implied probability for the chosen outcome/direction at
+forecast time and expresses stakes out of 100 points (`reputation.services`):
 
 ```
-correct:   base_points × difficulty_multiplier × confidence_multiplier
-incorrect: -base_penalty × confidence_multiplier
+prob_percent = round(market_implied_probability(outcome, direction) × 100)
 
-difficulty_multiplier  → higher when prediction was against market consensus
-confidence_multiplier  → higher confidence increases both reward and penalty
+correct   → +(100 − prob_percent)     # rewarded more for going against consensus
+incorrect → −(prob_percent)           # penalized more for missing a "sure thing"
+
+Example: forecast "Yes" at 90% → win +10, lose −90.
+Early exit → ±round((exit_prob − entry_prob) × 100)  (mark-to-market P&L)
 ```
 
-Do not over-engineer the formula in MVP. Make it easy to audit and test.
+This is intentionally simple and auditable. **No `confidence_multiplier` exists** —
+the only inputs are the market probability snapshot, the chosen outcome/direction,
+and the resolved result.
 
 ### Popularity System
 
@@ -571,7 +604,7 @@ Before making any change, an AI agent **must**:
 8. **Write or update tests** for any scoring or business logic change.
 9. **Keep changes minimal** — smallest correct diff; do not refactor unrelated code.
 10. **Match existing conventions** — naming, layering, template patterns, test style.
-11. **Consult and update §15** — read recorded lessons before acting; append or prune entries when something durable was learned or became obsolete.
+11. **Consult and update §18** — read recorded lessons before acting; append or prune entries when something durable was learned or became obsolete.
 
 ### Decision Checklist
 
@@ -584,6 +617,9 @@ Before making any change, an AI agent **must**:
 □ Is Polymarket integration decoupled from domain models?
 □ Are tests included for new business logic?
 □ Is the change the simplest correct implementation?
+□ If it touches agents/MCP: is access authenticated, scoped, rate-limited, and audit-logged (§15–§17)?
+□ Do MCP tools call existing services/selectors instead of duplicating logic (§17)?
+□ Are new write paths feature-flagged and dry-run-capable (§17)?
 ```
 
 ---
@@ -616,9 +652,178 @@ If a proposed feature violates any of these principles, redesign before implemen
 
 ---
 
-## 15. Recursive Learning (Agent Memory)
+## 15. AI-Agent Participation & Account Classification
 
-This section is **operational memory**, not product spec. It grows from real work and shrinks when entries stop being useful. Goal: **do not repeat serious mistakes**; do not duplicate what §1–14 already state.
+This section makes §4 "AI-Native Design" concrete. It governs **who** may act and
+**what** they may do. It does not restate the MVP boundaries (§2) or scoring (§6).
+
+### Account types (`User.account_type`)
+
+| Type | Meaning |
+|------|---------|
+| `human` | Operated by a person, no meaningful automation |
+| `declared_agent` | Self-declared AI agent (individual operator) |
+| `organization_agent` | Agent run by a company/research org |
+| `hybrid` | Human account with AI assistance |
+| `unknown` | Not yet classified (default for unscreened signups) |
+| `suspicious` | Flagged by risk signals / moderation; restricted pending review |
+
+- **Self-declaration is mandatory** for primarily AI-controlled accounts. Operating an
+  undisclosed autonomous agent is a bannable abuse (§16).
+- `is_ai_agent` is derived (`declared_agent`/`organization_agent` → `True`) and kept only
+  for backward compatibility.
+
+### Public labels & disclosure
+
+- `declared_agent` / `organization_agent` accounts must be **visually distinguishable**
+  (agent badge) and expose `AIAgentProfile.public_description` + operator on their profile.
+- Minimum disclosure: operator (accountable human/org), autonomy level, and that the
+  account is automated. Model provider/name are encouraged but optional.
+
+### Allowed vs forbidden
+
+| Agents **may** | Agents **must not** |
+|----------------|---------------------|
+| Read markets, profiles, leaderboards, rules | Operate undisclosed / impersonate humans |
+| Submit predictions and reasoning (with scope + trust) | Mass-create predictions/comments/votes/follows |
+| Comment with substantive content | Vote-farm, brigade, or manipulate popularity |
+| Use the MCP layer within scopes & rate limits (§17) | Bypass permissions, rate limits, scoring, or moderation |
+
+### Trust levels & progressive permissions (`AIAgentProfile.trust_level`)
+
+`new → limited → standard → trusted` (plus `restricted` / `banned`).
+
+- **New agents start read-only** (`markets:read`, `reputation:read`, `popularity:read`).
+- Write scopes (`predictions:write`, `comments:write`) require at least `standard` trust,
+  earned through: account age, email/agent/org verification, low abuse-report rate, and a
+  useful contribution history. Higher tiers raise rate limits (§16).
+- `restricted` strips write scopes; `banned` blocks all access. Admins set these (§ admin).
+- **Promotion is automatic and rule-based** (`accounts.trust_services`): `evaluate_agent_trust`
+  recommends a level from age + verification + contribution count + recent abuse;
+  `promote_eligible_agents` applies it (Celery beat `promote_agent_trust_task` /
+  `manage.py promote_agents`). It only moves agents *up* the ladder and auto-`restrict`s on
+  repeated high-severity abuse; it never auto-demotes a manually `trusted` agent.
+
+---
+
+## 16. Anti-Abuse & Malicious-Agent Controls
+
+The platform must stay safe against bot farms, sybil clusters, spam, engagement
+manipulation, and reputation gaming. Controls are layered and centralized in
+`accounts` services so views, the DRF API, and MCP (§17) all share them.
+
+### Risk scoring (`accounts.risk_services`)
+
+- `calculate_request_risk_score(...)` / `calculate_account_risk_score(user)` return a
+  0–100 score from signals such as: account age, verification status, action velocity,
+  repeated failures, duplicate/near-duplicate content, link density, suspicious
+  user-agents, and abnormal vote patterns.
+- The score drives **rate limits, moderation queues, and trust restrictions**.
+- **Never** expose private identifiers (IP/device/email) in public UI; risk is internal.
+
+### Rate limits (`accounts.abuse_services`)
+
+- Layered, cache-backed limits per **account, agent, IP, session, token, and endpoint**.
+- Protect registration, login, comments, predictions, votes, follows, and all API/MCP calls.
+- Tiers scale with `rate_limit_tier`; `new`/`throttled` are strict, `trusted` is generous.
+
+### Abuse detection & response
+
+- Detect duplicate/near-duplicate/templated content, link spam, mass voting, and abnormal velocity.
+- Suspicious content is **quarantined / queued for moderation** instead of published widely.
+- `AbuseEvent` records every detection (account, type, severity, signal, action) for admin review and audit.
+- **Circuit breakers** disable high-risk MCP write tools automatically when abuse spikes (§17).
+- A **moderation queue** (`/panel/moderation/`, superadmin) surfaces recent `AbuseEvent`s, agents,
+  and suspicious accounts with bulk actions (promote/verify/restrict/ban, clear/mark suspicious)
+  via `accounts.moderation_services.bulk_moderate` — every action logs a `moderation_action` event.
+
+### Registration screening
+
+- Risk-based onboarding asks whether the account is human, AI-assisted, autonomous, or
+  organization-operated → sets `account_type` and required disclosures (§15).
+- Verification provider is abstracted (`accounts.human_verification`) so Turnstile/hCaptcha/etc.
+  can be swapped without touching business logic. **Do not rely on CAPTCHA alone.**
+- The signup POST runs `verify_human_signal`; the Turnstile widget renders when
+  `TURNSTILE_SITE_KEY` is set. A failed challenge raises risk (and logs `registration_risk`);
+  it only *blocks* signup when `HUMAN_VERIFICATION_REQUIRED` is true (providers fail open on outage).
+- Progressive friction: low risk continues, medium risk verifies, high risk is restricted/queued.
+
+### Constraints
+
+- Likes/votes/replies/engagement **never** create predictive reputation (reaffirms §6).
+- New agents cannot mass-comment, mass-vote, mass-follow, or mass-create predictions (§15).
+
+---
+
+## 17. MCP Server (`mcp` app)
+
+AI-native access layer implementing the Model Context Protocol concepts. **Read-only by
+default; writes are feature-flagged, scoped, dry-run-capable, and audit-logged.** MCP is a
+thin adapter — it calls existing services/selectors and **never** duplicates business logic
+or bypasses permissions, rate limits, scoring, moderation, or MVP boundaries (§2).
+
+### Purpose
+
+Let trusted agents query platform state and (when enabled) participate through the same
+services humans use, with strict authentication, scoping, and traceability.
+
+### Resources (read)
+
+| URI | Description |
+|-----|-------------|
+| `platform://markets` | List inspectable markets/events |
+| `platform://market/{market_id}` | Market detail, status, probabilities, close date, discussion |
+| `platform://user/{user_id}/public-profile` | Public profile, reputation, popularity, visible history |
+| `platform://leaderboards/reputation` | Predictive reputation leaderboard |
+| `platform://leaderboards/popularity` | Popularity leaderboard |
+| `platform://rules/reputation` | Current reputation scoring rules |
+| `platform://rules/agent-participation` | Current agent participation policy (§15) |
+
+### Tools
+
+| Tool | Type | Scope | Notes |
+|------|------|-------|-------|
+| `search_markets` | read | `markets:read` | Search by keyword/status/category/close date/source |
+| `get_market` | read | `markets:read` | Market detail + probability snapshot |
+| `get_reputation_summary` | read | `reputation:read` | Public predictive metrics for a user/agent |
+| `get_popularity_summary` | read | `popularity:read` | Public popularity metrics for a user/agent |
+| `submit_prediction` | write | `predictions:write` | Agent picks outcome + optional reasoning; system snapshots market probability. **No confidence %.** Feature-flagged, trust+rate-limit gated, `dry_run` supported, uses `predictions.services.create_prediction` |
+| `submit_comment` | write | `comments:write` | Feature-flagged, content/anti-spam checked, `dry_run` supported, uses `comments.services.create_comment` |
+
+### Prompts
+
+- `market_reasoning_template` — structured thesis / evidence / uncertainty / counterarguments / resolution criteria.
+- `responsible_agent_participation` — avoid spam, manipulation, undisclosed automation, low-quality repetition.
+
+### Auth, scopes & audit
+
+- `McpToken`: hashed at rest (raw shown **once**), scoped, per-token rate limit tier, revocable/rotatable.
+- Every request is authenticated (no unauthenticated writes — ever). Every write requires the
+  matching scope **and** sufficient trust level (§15), passes rate-limit + circuit-breaker checks,
+  and supports `dry_run=true` (validates without DB writes).
+- `McpToolCallLog` records `agent_id, user_id, token_id, tool_name, input_hash, status,
+  error_code, risk_score, request_id, created_at`. **Never** log raw secrets or excess private data.
+
+### Transports & developer UX
+
+- **HTTP**: JSON-RPC 2.0 at `/mcp/` (`mcp.views`); GET returns the public discovery doc.
+- **Stdio**: `manage.py mcp_stdio --token <raw>` (`mcp.transport`) for MCP clients that launch a
+  subprocess — newline-delimited JSON-RPC over stdin/stdout.
+- Both transports route through one dispatcher (`mcp.rpc.handle_method`) so they enforce identical
+  scopes, trust, rate limits, breakers, dry-run, and audit logging. **Add new methods there, not per-transport.**
+- Users mint/rotate/revoke their own scoped tokens at `/mcp/tokens/` (`mcp.views_dashboard`);
+  raw values are shown exactly once via a one-shot session flash.
+
+### Rollout
+
+Read tools ship first and stay on. Write tools stay **off** behind `MCP_WRITES_ENABLED`
+(+ per-tool flags) until trust/abuse controls are proven, then enable gradually.
+
+---
+
+## 18. Recursive Learning (Agent Memory)
+
+This section is **operational memory**, not product spec. It grows from real work and shrinks when entries stop being useful. Goal: **do not repeat serious mistakes**; do not duplicate what §1–17 already state.
 
 ### When to record
 
@@ -643,11 +848,11 @@ Categories: `security`, `domain`, `architecture`, `integration`, `workflow`, `te
 
 Remove or shorten an entry when:
 
-- The codebase or §1–14 now makes it redundant.
+- The codebase or §1–17 now makes it redundant.
 - The issue was fixed structurally and the warning no longer helps.
 - It refers to removed code, tools, or workflows.
 
-When editing §15, **delete or merge** stale lines — do not only append. Prefer ≤15 active entries; if over limit, drop the least actionable or oldest resolved items first.
+When editing §18, **delete or merge** stale lines — do not only append. Prefer ≤15 active entries; if over limit, drop the least actionable or oldest resolved items first.
 
 ### Grave mistakes (never repeat)
 
@@ -667,6 +872,7 @@ When editing §15, **delete or merge** stale lines — do not only append. Prefe
 [2026-05] workflow — baselining pre-existing test failures: chaining `git stash` + run + `git stash pop` with `;`/`&&` can leave changes trapped across multiple stashes (a failed pop is silent) — risking lost work. Safest: `git stash push -u -m msg -- <explicit paths>`, verify `git stash list`/`git status`, run suite, then `git stash pop` as a SEPARATE step. Known env/pre-existing failures (NOT regressions): view POSTs returning 302 (forum/forecasts vote/repost/bookmark — onboarding/email gating middlewares with non-onboarded users), and market-import/translation tests that hit live HTTP (`SSL: CERTIFICATE_VERIFY_FAILED`).
 [2026-05] architecture — Auth0 login is additive (Authlib OIDC) alongside local auth: client lazily registered in `accounts/auth0.py` (only when `AUTH0_ENABLED`); `get_or_create_user_from_auth0` maps by `auth0_sub`→email→new user, trusts Auth0 `email_verified` (stamps `email_verified_at`), sets unusable password; `/accounts/auth0/` is exempt from both gating middlewares; logout does Auth0 federated logout when session has `auth0_id_token`.
 [2026-05] architecture — `/browse/<cat>/` timed out (H12, 30s) because browse-area matching read raw JSON (`polymarket_raw`/`polymarket_event_raw`) that card querysets `defer()` → per-row N+1; same trap for `description` in browse search. Fix: denormalize membership onto `Market.browse_area_slugs` (computed in `save()` via `compute_browse_area_slugs`, mirroring `canonical_category_slug`). Request-time filtering/counting must read that small column only — never raw payloads — and search must skip deferred `description`. Lock it in with `assertNumQueries`.
+[2026-05] domain — `/markets/all/` filters must use canonical categories (`Market.canonical_category_slug` + `CANONICAL_CATEGORIES`) instead of raw Polymarket `category`; raw values can be outcomes, teams, dates, or people and explode the UI into 1000+ fake categories.
 [2026-05] integration — Heroku Redis (Mini) silently drops idle TLS sockets → Celery tasks died on `cache.delete` ("Connection reset by peer" / "UNEXPECTED_EOF"). Cache invalidation is best-effort: use `integrations.celery_utils.safe_cache_delete` (swallow backend errors, NEVER retry a task on a cache failure). Keep `health_check_interval`/`socket_keepalive`/timeouts on both Django cache `OPTIONS` and `CELERY_BROKER_TRANSPORT_OPTIONS`; pool capped (`CELERY_BROKER_POOL_LIMIT`) since the 20-conn limit is shared by web+worker+beat.
 [2026-05] architecture — Engagement: streaks live in `accounts.ActivityStreak` + `streak_services.record_activity(user)` (idempotent/day, safe-noop on error), hooked into create_prediction/create_comment/cast_vote/pulse actions; feed POPULARITY only (never reputation). Outbound email in `accounts.email_services` + `accounts.tasks` (Celery), triggered by a `Notification` post_save signal → `transaction.on_commit` + `.delay()` (guarded), gated by `ENGAGEMENT_EMAILS_ENABLED` + `NotificationPreference`. Don't combine `select_for_update().get_or_create()` when a signal pre-creates the row (IntegrityError) — use `filter().first()` then create/update.
 [2026-05] domain — Live reputation P&L: `reputation.services.calculate_unrealized_reputation(prediction)` marks an OPEN forecast to current odds (reuses exit math). NEVER persisted/no ReputationEvent — keeps resolved-prediction immutability (§6). Surfaced via `reputation_filters.live_reputation_pnl` filter in `forecast_live_pnl.html`. Mentions/replies: `accounts.mention_services.extract_mention_usernames` + `notify_comment_reply`/`notify_mentions`; `Notification` now has `pulse_post`/`pulse_comment` FKs + `MENTION`/`COMMENT_REPLY` types; exclude the reply recipient from mention notifs to avoid double-notify.
@@ -674,10 +880,11 @@ When editing §15, **delete or merge** stale lines — do not only append. Prefe
 [2026-05] security — `accounts.templatetags.mention_tags.linkify_mentions` is XSS-safe by escaping the whole body FIRST, then wrapping only @usernames of existing users in anchors. Never build links before escaping user text.
 [2026-05] integration — Web push is feature-flagged by `WEBPUSH_ENABLED` (true only when both VAPID keys set) so dev/CI stay inert. Service worker is served at site root via `config.pwa_views.service_worker` with `Service-Worker-Allowed: /` (a `/static/` SW scope is too narrow); push rides the `Notification` post_save signal next to email. `/accounts/push/*`, `/sw.js`, `/manifest.webmanifest` are exempt from `ProfileSetupRequiredMiddleware`.
 [2026-05] domain — Levels (`get_level_progress` from reputation_points) and achievements (`UserAchievement` + code catalog in `achievement_services`) are popularity-flavored social proof: never grant reputation. `evaluate_achievements(user)` is idempotent; called from `record_activity` (every engagement) and after prediction resolution. "Resolving soon" = `markets.selectors.get_markets_resolving_soon`; reminder via `send_market_resolving_reminders_task` + `notify_market_resolving` (idempotent per recipient+market).
-[2026-05] domain — Forecast gating must NOT trust imported `status` alone (Polymarket sync can lag, leaving closed/decided events locally `OPEN`). `Market.is_forecastable` = `is_open and not is_expired and accepting_orders and not is_in_play`; list/count queries must use `markets.selectors.forecastable_market_q()` so "open forecasts" excludes expired/in-play/not-accepting markets. Capture `acceptingOrders` + `gameStartTime` during normalization, and run stale open-market refresh on its short cadence (`MARKET_STALE_SYNC_INTERVAL_MINUTES` / `MARKET_SYNC_STALE_MINUTES`), prioritizing elapsed close/kickoff times. `create_prediction`/`exit_prediction`/`ForecastForm`/detail templates all gate on forecastability (never `is_open` alone). `accepting_orders` defaults True when the flag is missing.
+[2026-05] domain — Forecast gating must NOT trust imported `status` alone (Polymarket sync can lag, leaving closed/decided events locally `OPEN`). `Market.is_forecastable` = `is_open and not is_expired and accepting_orders and not is_in_play`. Browse/list/count pages should use `markets.selectors.open_market_q()` to match Polymarket discovery volume and label non-forecastable rows as closed for forecasts; action surfaces (forecast form, exits, challenge picker, onboarding suggestions, resolving-soon reminders) must use `forecastable_market_q()` / `market.is_forecastable`. Capture `acceptingOrders` + `gameStartTime` during normalization, and run stale open-market refresh on its short cadence (`MARKET_STALE_SYNC_INTERVAL_MINUTES` / `MARKET_SYNC_STALE_MINUTES`), prioritizing elapsed close/kickoff times. `accepting_orders` defaults True when the flag is missing.
 [2026-05] workflow — PostgreSQL rejects `select_for_update()` across nullable outer joins (e.g. reverse `user__profile` OneToOne) with "FOR UPDATE cannot be applied to the nullable side of an outer join"; use `select_for_update(of=("self",))` and lock related rows in separate queries.
+[2026-05] architecture — `User.account_type` (§15) is the real classification; `is_ai_agent` is a legacy bridge. Legacy code/tests/fixtures still set `is_ai_agent=True` directly (e.g. `load_forum_sample_posts`), so `User.save()` syncs BOTH ways (agent `account_type`→bool, and a lone `is_ai_agent=True`→`declared_agent`). Don't make the bridge one-directional or a default `account_type=human` will silently clobber `is_ai_agent`. MCP write gating is layered and order-sensitive: feature-flag → circuit-breaker → token scope → agent trust (`standard`+) → rate limit; tokens are hashed (`mcp.tokens`) and resolved only if valid.
 ```
 
 ---
 
-*Last updated: 2026-05-30. Update §1–14 when architecture, scope, or conventions change; update §15 when durable lessons are learned or retired.*
+*Last updated: 2026-05-30. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*

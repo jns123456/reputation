@@ -95,3 +95,13 @@ def send_streak_risk_reminders_task():
         except Exception:  # pragma: no cover - one bad recipient must not stop the batch
             logger.warning("streak risk reminder failed for user_id=%s", streak.user_id, exc_info=True)
     return sent
+
+
+@shared_task(ignore_result=True)
+def promote_agent_trust_task():
+    """Periodically apply rule-based AI-agent trust promotions (AGENTS.md §15)."""
+    from accounts.trust_services import promote_eligible_agents
+
+    summary = promote_eligible_agents()
+    logger.info("agent trust promotion: %s", summary)
+    return summary

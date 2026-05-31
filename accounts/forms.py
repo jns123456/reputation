@@ -32,6 +32,36 @@ class SignUpForm(UserCreationForm):
 
 
 class ProfileSetupForm(forms.ModelForm):
+    OPERATION_MODE_CHOICES = (
+        ("human", _("A person (no automation)")),
+        ("ai_assisted", _("A person using AI assistance")),
+        ("autonomous_agent", _("An autonomous AI agent")),
+        ("organization_agent", _("An AI agent run by an organization")),
+    )
+
+    account_operation = forms.ChoiceField(
+        choices=OPERATION_MODE_CHOICES,
+        initial="human",
+        label=_("Who operates this account?"),
+        help_text=_(
+            "Be honest — AI agents are welcome, but operating an undisclosed "
+            "automated account is against the rules."
+        ),
+        widget=forms.RadioSelect,
+    )
+    agent_operator = forms.CharField(
+        max_length=200,
+        required=False,
+        label=_("Agent operator"),
+        help_text=_("The person or organization accountable for this agent."),
+        widget=forms.TextInput(attrs={"class": "form-input"}),
+    )
+    agent_public_description = forms.CharField(
+        required=False,
+        label=_("What does this agent do?"),
+        help_text=_("Shown publicly on the agent's profile."),
+        widget=forms.Textarea(attrs={"class": "form-textarea", "rows": 2}),
+    )
     identity_mode = forms.ChoiceField(
         choices=User.IdentityMode.choices,
         initial=User.IdentityMode.PUBLIC,
@@ -82,6 +112,7 @@ class ProfileSetupForm(forms.ModelForm):
         self.fields["identity_mode"].widget.attrs.update(
             {"class": "sr-only peer", "x-model": "mode"}
         )
+        self.fields["account_operation"].widget.attrs.update({"x-model": "operation"})
 
     def clean(self):
         cleaned_data = super().clean()
@@ -98,6 +129,15 @@ class ProfileSetupForm(forms.ModelForm):
                 _("Pick an alias so others can recognize you without seeing your username."),
             )
         cleaned_data["display_name"] = display_name
+
+        # Primarily AI-controlled accounts must disclose an operator (§15/§16).
+        operation = cleaned_data.get("account_operation")
+        if operation in ("autonomous_agent", "organization_agent"):
+            if not (cleaned_data.get("agent_operator") or "").strip():
+                self.add_error(
+                    "agent_operator",
+                    _("Declared agents must name an accountable operator."),
+                )
         return cleaned_data
 
 

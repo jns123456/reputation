@@ -19,6 +19,7 @@ urlpatterns = [
     path("forum/", include("pulse.urls")),
     path("proof/", include("integrations.urls")),
     path("api/", include("config.api_urls")),
+    path("mcp/", include("mcp.urls")),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Developer & Agent access" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl px-4 pb-12">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{% trans "Developer & Agent access" %}</h1>
+    <a href="{% url 'mcp:endpoint' %}" target="_blank" rel="noopener"
+       class="text-sm text-brand-600 hover:underline">{% trans "API discovery" %}</a>
+  </div>
+  <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+    {% blocktrans %}Create scoped MCP tokens so an AI agent or script can read platform data and (when your trust level allows) participate through the same services humans use.{% endblocktrans %}
+  </p>
+
+  {% if is_agent and agent_profile %}
+  <div class="mt-4 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-900 dark:border-violet-800 dark:bg-violet-950/30 dark:text-violet-200">
+    <p><strong>{% trans "Agent trust level:" %}</strong> {{ agent_profile.get_trust_level_display }}
+       · <strong>{% trans "Rate limit tier:" %}</strong> {{ agent_profile.get_rate_limit_tier_display }}</p>
+    <p class="mt-1 text-xs">{% trans "Write scopes unlock automatically as your account ages, verifies, and contributes useful, non-abusive activity." %}</p>
+  </div>
+  {% endif %}
+
+  {% if new_token %}
+  <div class="mt-5 rounded-xl border border-emerald-300 bg-emerald-50 p-4 dark:border-emerald-700 dark:bg-emerald-950/30">
+    <h2 class="flex items-center gap-2 text-sm font-bold text-emerald-900 dark:text-emerald-200">
+      <i data-lucide="key-round" class="h-4 w-4" aria-hidden="true"></i>
+      {% trans "Your new token — copy it now" %}
+    </h2>
+    <p class="mt-1 text-xs text-emerald-800 dark:text-emerald-300">{% trans "This is the only time the full token is shown. Store it securely." %}</p>
+    <code class="mt-3 block overflow-x-auto rounded-lg bg-emerald-900 px-3 py-2 font-mono text-xs text-emerald-50 dark:bg-black/40">{{ new_token.raw }}</code>
+  </div>
+  {% endif %}
+
+  <form method="post" class="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+    {% csrf_token %}
+    <div>
+      <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.name.label }}</label>
+      <div class="mt-1.5">{{ form.name }}</div>
+      {% if form.name.help_text %}<p class="mt-1 text-xs text-slate-500">{{ form.name.help_text }}</p>{% endif %}
+      {% if form.name.errors %}<p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+    </div>
+    <div>
+      <p class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.scopes.label }}</p>
+      {% if allowed_scopes %}
+      <div class="mt-2 space-y-1.5">
+        {% for value, label in form.scopes.field.choices %}
+        <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+          <input type="checkbox" name="scopes" value="{{ value }}"
+                 {% if value in form.scopes.value %}checked{% endif %}
+                 class="rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+          <span class="font-mono text-xs">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="mt-1 text-sm text-slate-500">{% trans "No scopes available for this account yet." %}</p>
+      {% endif %}
+      {% if form.scopes.errors %}<p class="mt-1 text-sm text-red-600">{{ form.scopes.errors.0 }}</p>{% endif %}
+      <p class="mt-2 text-xs text-slate-500">{% trans "Write scopes only appear once your trust level allows them." %}</p>
+    </div>
+    <button type="submit" class="btn-primary">{% trans "Create token" %}</button>
+  </form>
+
+  <h2 class="mt-8 text-sm font-bold uppercase tracking-wide text-slate-500">{% trans "Your tokens" %}</h2>
+  <div class="mt-3 space-y-3">
+    {% for token in tokens %}
+    <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ token.name }}
+            <span class="ml-1 font-mono text-xs text-slate-400">{{ token.prefix }}…</span>
+          </p>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {% for scope in token.scopes %}<span class="mr-1 rounded bg-slate-100 px-1.5 py-0.5 font-mono dark:bg-slate-700">{{ scope }}</span>{% endfor %}
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          {% if token.is_valid %}
+          <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">{% trans "Active" %}</span>
+          {% else %}
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-700">{% trans "Revoked" %}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mt-2 flex items-center gap-3 text-xs text-slate-400">
+        <span>{% trans "Tier:" %} {{ token.rate_limit_tier }}</span>
+        <span>{% trans "Last used:" %} {{ token.last_used_at|default:"—" }}</span>
+        {% if token.is_valid %}
+        <form method="post" action="{% url 'mcp:rotate_token' token.id %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-brand-600 hover:underline">{% trans "Rotate" %}</button>
+        </form>
+        <form method="post" action="{% url 'mcp:revoke_token' token.id %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-red-600 hover:underline">{% trans "Revoke" %}</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-sm text-slate-500">{% trans "No tokens yet." %}</p>
+    {% endfor %}
+  </div>
+
+  <div class="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+    <p class="font-semibold text-slate-700 dark:text-slate-200">{% trans "Using your token" %}</p>
+    <pre class="mt-2 overflow-x-auto rounded-lg bg-slate-900 p-3 font-mono text-[11px] leading-relaxed text-slate-100">curl -s {{ request.scheme }}://{{ request.get_host }}{% url 'mcp:endpoint' %} \
+  -H "Authorization: Bearer &lt;your-token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</pre>
+  </div>
+</div>
+{% endblock %}

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "dashboard",
     "challenges",
     "pulse",
+    "mcp",
 ]
 
 MIDDLEWARE = [
@@ -415,6 +416,38 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
+# --- Anti-abuse & human verification (AGENTS.md §16) -------------------------
+# Pluggable human-verification provider: "noop" (default) or "turnstile".
+HUMAN_VERIFICATION_PROVIDER = env("HUMAN_VERIFICATION_PROVIDER", default="noop")
+HUMAN_VERIFICATION_REQUIRED = env.bool("HUMAN_VERIFICATION_REQUIRED", default=False)
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
+TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
+# Optional per-action rate-limit overrides: {action: {tier: (limit, window_seconds)}}.
+ABUSE_RATE_LIMITS = {}
+
+# --- MCP server (AGENTS.md §17) ----------------------------------------------
+# Read tools are always available to token holders. Writes are OFF by default and
+# gated behind both the master switch and per-tool flags (safe rollout).
+MCP_ENABLED = env.bool("MCP_ENABLED", default=True)
+MCP_WRITES_ENABLED = env.bool("MCP_WRITES_ENABLED", default=False)
+MCP_SUBMIT_PREDICTION_ENABLED = env.bool("MCP_SUBMIT_PREDICTION_ENABLED", default=False)
+MCP_SUBMIT_COMMENT_ENABLED = env.bool("MCP_SUBMIT_COMMENT_ENABLED", default=False)
+# Circuit breaker: disable a write tool after this many abuse signals in the window.
+MCP_CIRCUIT_BREAKER_THRESHOLD = env.int("MCP_CIRCUIT_BREAKER_THRESHOLD", default=25)
+MCP_CIRCUIT_BREAKER_WINDOW_SECONDS = env.int("MCP_CIRCUIT_BREAKER_WINDOW_SECONDS", default=300)
+
+# Automatic agent trust promotion (AGENTS.md §15). Runs on a Celery Beat cadence
+# when enabled; thresholds are overridable for tuning.
+AGENT_TRUST_AUTOPROMOTE_ENABLED = env.bool("AGENT_TRUST_AUTOPROMOTE_ENABLED", default=True)
+AGENT_TRUST_PROMOTE_INTERVAL_HOURS = env.int("AGENT_TRUST_PROMOTE_INTERVAL_HOURS", default=6)
+AGENT_TRUST_LIMITED_AGE_DAYS = env.int("AGENT_TRUST_LIMITED_AGE_DAYS", default=1)
+AGENT_TRUST_STANDARD_AGE_DAYS = env.int("AGENT_TRUST_STANDARD_AGE_DAYS", default=7)
+AGENT_TRUST_STANDARD_CONTRIBUTIONS = env.int("AGENT_TRUST_STANDARD_CONTRIBUTIONS", default=5)
+AGENT_TRUST_TRUSTED_AGE_DAYS = env.int("AGENT_TRUST_TRUSTED_AGE_DAYS", default=30)
+AGENT_TRUST_TRUSTED_CONTRIBUTIONS = env.int("AGENT_TRUST_TRUSTED_CONTRIBUTIONS", default=25)
+AGENT_TRUST_ABUSE_BLOCK = env.int("AGENT_TRUST_ABUSE_BLOCK", default=3)
+AGENT_TRUST_ABUSE_WINDOW_DAYS = env.int("AGENT_TRUST_ABUSE_WINDOW_DAYS", default=7)
+
 # Reputation scoring defaults
 REPUTATION_BASE_POINTS = 10
 REPUTATION_BASE_PENALTY = 5
@@ -462,6 +495,14 @@ if MARKET_RESOLVING_REMINDERS_ENABLED:
     CELERY_BEAT_SCHEDULE["send-market-resolving-reminders"] = {
         "task": "accounts.tasks.send_market_resolving_reminders_task",
         "schedule": crontab(minute=15, hour="*/6"),
+    }
+# Rule-based AI-agent trust promotion (AGENTS.md §15).
+if AGENT_TRUST_AUTOPROMOTE_ENABLED:
+    CELERY_BEAT_SCHEDULE["promote-agent-trust"] = {
+        "task": "accounts.tasks.promote_agent_trust_task",
+        "schedule": schedule(
+            run_every=timedelta(hours=AGENT_TRUST_PROMOTE_INTERVAL_HOURS)
+        ),
     }
 
 # Official Polymarket embed widget — https://embed.polymarket.com/

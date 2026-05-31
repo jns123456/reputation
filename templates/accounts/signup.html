@@ -60,10 +60,18 @@
   </div>
   {% endfor %}
 
+  {% if turnstile_site_key %}
+  <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+  {% endif %}
+
   <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm shadow-brand-500/20">
     {% trans "Continue" %}
   </button>
 </form>
+
+{% if turnstile_site_key %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 
 {% if auth0_enabled %}
 <div class="my-5 flex items-center gap-3" aria-hidden="true">
