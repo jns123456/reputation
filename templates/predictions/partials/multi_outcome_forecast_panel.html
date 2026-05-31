@@ -153,6 +153,7 @@
             {% blocktrans with points=exit_delta %}Exiting now would realize {{ points }} reputation.{% endblocktrans %}
             {% endif %}
           </p>
+          {% if market.is_exitable %}
           <form method="post" action="{% url 'predictions:exit' slug=market.slug prediction_id=existing_forecast.id %}" class="mt-3">
             {% csrf_token %}
             <button
@@ -162,6 +163,11 @@
               {% trans "Exit forecast" %}
             </button>
           </form>
+          {% else %}
+          <p class="mt-3 text-sm text-amber-800 dark:text-amber-200">
+            {% trans "This market has closed. Your forecast will resolve automatically when the outcome is known." %}
+          </p>
+          {% endif %}
         </div>
         {% if existing_forecast.reasoning %}
         <p class="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Your reasoning" %}</p>

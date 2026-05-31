@@ -502,6 +502,29 @@ class OpenPredictionsPageTests(TestCase):
 
         self.assertRedirects(response, reverse("predictions:open"))
 
+    def test_exit_from_open_predictions_shows_error_on_closed_market(self):
+        self.market.status = Market.Status.CLOSED
+        self.market.save(update_fields=["status"])
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "predictions:exit",
+                kwargs={"slug": self.market.slug, "prediction_id": self.prediction.id},
+            ),
+            {"source": "open_predictions"},
+            HTTP_HX_REQUEST="true",
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertContains(
+            response,
+            "Cannot exit a forecast after the market has closed.",
+            status_code=422,
+        )
+        self.prediction.refresh_from_db()
+        self.assertEqual(self.prediction.status, Prediction.Status.PENDING)
+
 
 class AttachUserForecastsTests(TestCase):
     def setUp(self):
@@ -657,10 +680,10 @@ class ExpiredMarketGuardTests(TestCase):
         form = ForecastForm(data={"predicted_outcome": "Yes"}, market=market)
         self.assertFalse(form.is_valid())
 
-    def test_exit_blocked_after_close_date_passes(self):
+    def test_exit_allowed_after_close_date_passes(self):
         market = self._market(
             close_date=timezone.now() + timedelta(hours=1),
-            slug="expiry-exit-blocked",
+            slug="expiry-exit-allowed",
         )
         prediction = create_prediction(
             user=self.user,
@@ -670,8 +693,30 @@ class ExpiredMarketGuardTests(TestCase):
         market.close_date = timezone.now() - timedelta(minutes=1)
         market.save(update_fields=["close_date"])
 
-        with self.assertRaises(ValueError):
-            exit_prediction(prediction=prediction, user=self.user)
+        self.assertFalse(market.is_forecastable)
+        self.assertTrue(market.is_exitable)
+
+        exited = exit_prediction(prediction=prediction, user=self.user)
+        self.assertEqual(exited.status, Prediction.Status.EXITED)
+
+    def test_exit_allowed_when_source_stopped_accepting_orders(self):
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=3),
+            slug="exit-not-accepting-orders",
+        )
+        prediction = create_prediction(
+            user=self.user,
+            market=market,
+            predicted_outcome="Yes",
+        )
+        market.accepting_orders = False
+        market.save(update_fields=["accepting_orders"])
+
+        self.assertFalse(market.is_forecastable)
+        self.assertTrue(market.is_exitable)
+
+        exited = exit_prediction(prediction=prediction, user=self.user)
+        self.assertEqual(exited.status, Prediction.Status.EXITED)
 
     def test_not_forecastable_when_source_stopped_accepting_orders(self):
         """Replicates Polymarket: no forecasts once the source halts orders."""

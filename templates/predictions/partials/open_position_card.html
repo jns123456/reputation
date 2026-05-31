@@ -68,6 +68,7 @@
     <p class="text-xs text-slate-500 dark:text-slate-400">
       {% trans "Closing realizes this reputation delta and frees you to forecast again." %}
     </p>
+    {% if market.is_exitable %}
     <form method="post"
           action="{% url 'predictions:exit' slug=market.slug prediction_id=prediction.id %}"
           class="sm:shrink-0"
@@ -82,10 +83,15 @@
         <span>{% trans "Close forecast" %}</span>
       </button>
     </form>
+    {% else %}
+    <p class="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs sm:text-right">
+      {% trans "This market has closed. Your forecast will resolve automatically when the outcome is known." %}
+    </p>
+    {% endif %}
   </div>
-  {% if exit_error %}
+  {% if position.exit_error %}
   <p class="relative mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200" role="alert">
-    {{ exit_error }}
+    {{ position.exit_error }}
   </p>
   {% endif %}
 </article>

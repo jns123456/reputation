@@ -46,6 +46,10 @@
   </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script>
+    (function () {
+      var catchAll = htmx.config.responseHandling.length - 1;
+      htmx.config.responseHandling.splice(catchAll, 0, { code: "422", swap: true });
+    })();
     document.addEventListener("htmx:configRequest", function (event) {
       var match = document.cookie.match("(^|;)\\s*csrftoken\\s*=\\s*([^;]+)");
       if (match) {

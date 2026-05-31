@@ -144,7 +144,7 @@ class Market(models.Model):
 
     @property
     def is_forecastable(self):
-        """Whether a new forecast may be created/exited on this market.
+        """Whether a new forecast may be created on this market.
 
         Mirrors Polymarket's real-time order gate (``accepting_orders``) and adds
         local, network-free backstops that hold when our imported data lags the
@@ -157,6 +157,16 @@ class Market(models.Model):
             and self.accepting_orders
             and not self.is_in_play
         )
+
+    @property
+    def is_exitable(self):
+        """Whether an existing pending forecast may be closed early.
+
+        Exits only require the market to remain ``OPEN`` locally — users may
+        realize mark-to-market reputation even when new forecasts are blocked
+        (expired close date, source stopped accepting orders, event in play).
+        """
+        return self.is_open
 
     @property
     def polymarket_url(self):
