@@ -623,6 +623,35 @@ def is_multi_outcome_event_record(
     return len(_grouped_outcome_markets(event, open_only=require_open)) >= min_outcomes
 
 
+def _latest_submarket_end_date(raw_markets: list[dict]):
+    """Return the latest ``endDate`` found on grouped sub-markets."""
+    dates = []
+    for raw_market in raw_markets:
+        parsed = _parse_date(raw_market.get("endDate"))
+        if parsed:
+            dates.append(parsed)
+    return max(dates) if dates else None
+
+
+def _grouped_event_close_date(
+    event: dict,
+    *,
+    open_markets: list[dict],
+    all_grouped_markets: list[dict],
+):
+    """Effective forecast cutoff for grouped multi-outcome events.
+
+    Polymarket's event-level ``endDate`` can lag behind individual outcome
+    buckets (e.g. Claude 5 keeps trading through September while the event
+    payload still shows April). Prefer the latest open sub-market end date.
+    """
+    return (
+        _latest_submarket_end_date(open_markets)
+        or _latest_submarket_end_date(all_grouped_markets)
+        or _parse_date(event.get("endDate") or event.get("closedTime") or event.get("startDate"))
+    )
+
+
 def normalize_polymarket_event_record(
     event: dict,
     *,
@@ -670,7 +699,11 @@ def normalize_polymarket_event_record(
     else:
         status = "open"
 
-    close_date = _parse_date(event.get("endDate") or event.get("closedTime") or event.get("startDate"))
+    close_date = _grouped_event_close_date(
+        event,
+        open_markets=open_markets,
+        all_grouped_markets=all_grouped_markets,
+    )
     category = event.get("category") or default_category
     if isinstance(category, list):
         category = category[0] if category else default_category

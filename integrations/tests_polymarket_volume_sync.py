@@ -109,6 +109,53 @@ class CollectBinaryMarketPairsTests(SimpleTestCase):
         self.assertAlmostEqual(normalized["current_probability"]["Bob"], 0.4)
         self.assertEqual(normalized["category"], "Politics")
 
+    def test_grouped_event_close_date_uses_latest_open_submarket(self):
+        """Event-level endDate can be stale while later outcome buckets stay open."""
+        event = {
+            "slug": "claude-5-released-by",
+            "title": "Claude 5 released by...?",
+            "endDate": "2026-04-30T00:00:00Z",
+            "markets": [
+                _binary_market("1", closed=True)
+                | {
+                    "groupItemTitle": "April 30, 2026",
+                    "endDate": "2026-04-30T00:00:00Z",
+                    "acceptingOrders": False,
+                    "outcomePrices": '["0.01", "0.99"]',
+                },
+                _binary_market("2")
+                | {
+                    "groupItemTitle": "May 31, 2026",
+                    "endDate": "2026-05-31T00:00:00Z",
+                    "acceptingOrders": True,
+                    "outcomePrices": '["0.01", "0.99"]',
+                },
+                _binary_market("3")
+                | {
+                    "groupItemTitle": "June 30, 2026",
+                    "endDate": "2026-06-30T00:00:00Z",
+                    "acceptingOrders": True,
+                    "outcomePrices": '["0.29", "0.71"]',
+                },
+                _binary_market("4")
+                | {
+                    "groupItemTitle": "September 30, 2026",
+                    "endDate": "2026-09-30T00:00:00Z",
+                    "acceptingOrders": True,
+                    "outcomePrices": '["0.69", "0.31"]',
+                },
+            ],
+        }
+
+        normalized = normalize_polymarket_event_record(event)
+
+        self.assertEqual(normalized["status"], "open")
+        self.assertTrue(normalized["accepting_orders"])
+        self.assertEqual(
+            normalized["close_date"].isoformat(),
+            "2026-09-30T00:00:00+00:00",
+        )
+
 
 class FetchTopVolumeMarketPairsTests(SimpleTestCase):
     @patch("integrations.polymarket.client.PolymarketClient.fetch_events_paginated")
