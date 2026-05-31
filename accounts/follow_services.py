@@ -33,3 +33,44 @@ def toggle_follow(*, follower, following_user):
             following_user.pk,
         )
     return True
+
+
+def ensure_mutual_follows_among_active_users(*, dry_run=False):
+    """Create missing follow edges so every active user follows every other active user."""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    user_ids = list(User.objects.filter(is_active=True).values_list("id", flat=True))
+    if len(user_ids) < 2:
+        return {
+            "users": len(user_ids),
+            "created": 0,
+            "existing": 0,
+            "expected": 0,
+        }
+
+    user_id_set = set(user_ids)
+    existing = set(
+        UserFollow.objects.filter(
+            follower_id__in=user_id_set,
+            following_id__in=user_id_set,
+        ).values_list("follower_id", "following_id")
+    )
+
+    to_create = [
+        UserFollow(follower_id=follower_id, following_id=following_id)
+        for follower_id in user_ids
+        for following_id in user_ids
+        if follower_id != following_id and (follower_id, following_id) not in existing
+    ]
+    expected = len(user_ids) * (len(user_ids) - 1)
+
+    if not dry_run and to_create:
+        UserFollow.objects.bulk_create(to_create, ignore_conflicts=True)
+
+    return {
+        "users": len(user_ids),
+        "created": len(to_create),
+        "existing": len(existing),
+        "expected": expected,
+    }
