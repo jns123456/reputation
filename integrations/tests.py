@@ -131,6 +131,90 @@ class ResolvedMarketRepairTests(TestCase):
         self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
         self.assertTrue(prediction.is_correct)
 
+    def test_repair_refreshes_open_market_with_pending_forecasts(self):
+        from unittest.mock import patch
+
+        from integrations.polymarket.client import (
+            build_polymarket_event_raw,
+            normalize_polymarket_event_record,
+        )
+        from integrations.polymarket.constants import MULTI_OUTCOME_EVENT_KIND
+        event_raw = {
+            "slug": "league-winner-repair",
+            "title": "League Winner",
+            "markets": [
+                {
+                    "id": "1",
+                    "question": "Will PSG win?",
+                    "outcomes": '["Yes", "No"]',
+                    "groupItemTitle": "PSG",
+                    "closed": True,
+                    "automaticallyResolved": True,
+                    "outcomePrices": '["1", "0"]',
+                },
+                {
+                    "id": "2",
+                    "question": "Will Arsenal win?",
+                    "outcomes": '["Yes", "No"]',
+                    "groupItemTitle": "Arsenal",
+                    "closed": True,
+                    "automaticallyResolved": True,
+                    "outcomePrices": '["0", "1"]',
+                },
+                {
+                    "id": "3",
+                    "question": "Will Real Madrid win?",
+                    "outcomes": '["Yes", "No"]',
+                    "groupItemTitle": "Real Madrid",
+                    "closed": True,
+                    "automaticallyResolved": True,
+                    "outcomePrices": '["0", "1"]',
+                },
+            ],
+        }
+        market = Market.objects.create(
+            external_id="pm-event:league-winner-repair",
+            title="League Winner",
+            slug="league-winner-repair",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "PSG"}, {"label": "Arsenal"}, {"label": "Real Madrid"}],
+            current_probability={"PSG": 0.57},
+            resolved_outcome="",
+            polymarket_slug="league-winner-repair",
+            polymarket_raw={"market_kind": MULTI_OUTCOME_EVENT_KIND},
+            polymarket_event_raw=event_raw,
+        )
+        prediction = create_prediction(
+            user=self.user,
+            market=market,
+            predicted_outcome="PSG",
+        )
+
+        def _fake_refresh(m):
+            normalized = normalize_polymarket_event_record(event_raw, require_open=False)
+            raw = build_polymarket_event_raw(event_raw, normalized=normalized)
+            updated, _ = import_market_from_normalized(
+                normalized, raw_market=raw, raw_event=event_raw
+            )
+            return updated
+
+        with patch(
+            "integrations.services.refresh_market_from_polymarket",
+            side_effect=_fake_refresh,
+        ):
+            result = repair_resolved_markets_with_pending_predictions()
+
+        prediction.refresh_from_db()
+        market.refresh_from_db()
+
+        self.assertEqual(result["candidates"], 1)
+        self.assertEqual(result["refreshed_markets"], 1)
+        self.assertEqual(market.status, Market.Status.RESOLVED)
+        self.assertEqual(market.resolved_outcome, "PSG")
+        self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
+        self.assertTrue(prediction.is_correct)
+
 
 class OffchainAttestationTests(TestCase):
     def setUp(self):

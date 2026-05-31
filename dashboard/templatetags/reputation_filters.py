@@ -80,6 +80,14 @@ def prediction_closed_at(prediction):
 
 
 @register.filter
+def prediction_resolution_percent(prediction):
+    """Implied probability of the chosen side at resolution (100 or 0)."""
+    if prediction.status != prediction.Status.RESOLVED or prediction.is_correct is None:
+        return None
+    return 100 if prediction.is_correct else 0
+
+
+@register.filter
 def prediction_reputation_delta(prediction):
     """Actual reputation change once resolved or exited; None if still pending."""
     if prediction.status == prediction.Status.EXITED:

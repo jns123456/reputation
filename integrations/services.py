@@ -58,10 +58,25 @@ def backfill_market_resolved_outcome(market, *, raw_market=None):
     if market.resolved_outcome or market.status != Market.Status.RESOLVED:
         return market
 
-    from integrations.polymarket.client import infer_binary_resolved_outcome
+    from integrations.polymarket.client import infer_binary_resolved_outcome, normalize_polymarket_event_record
 
     raw = raw_market or market.polymarket_raw or {}
-    inferred = infer_binary_resolved_outcome(raw)
+    inferred = ""
+
+    if (
+        raw.get("market_kind") == MULTI_OUTCOME_EVENT_KIND
+        and market.polymarket_event_raw
+    ):
+        normalized = normalize_polymarket_event_record(
+            market.polymarket_event_raw,
+            default_category=market.category or "",
+            require_open=False,
+        )
+        if normalized:
+            inferred = normalized.get("resolved_outcome") or ""
+
+    if not inferred:
+        inferred = infer_binary_resolved_outcome(raw)
     if not inferred:
         return market
 
@@ -71,32 +86,45 @@ def backfill_market_resolved_outcome(market, *, raw_market=None):
 
 
 def repair_resolved_markets_with_pending_predictions(*, limit=200):
-    """Backfill missing outcomes and score forecasts stuck pending on resolved markets."""
+    """Refresh Polymarket state, backfill outcomes, and score stuck pending forecasts."""
     from predictions.models import Prediction
 
     candidates = (
-        Market.objects.filter(status=Market.Status.RESOLVED)
-        .filter(
-            Q(resolved_outcome="")
-            | Q(predictions__status=Prediction.Status.PENDING)
-        )
+        Market.objects.filter(source=Market.Source.POLYMARKET)
+        .filter(predictions__status=Prediction.Status.PENDING)
         .distinct()
         .order_by("-updated_at")[:limit]
     )
     repaired_markets = 0
     resolved_predictions = 0
+    refreshed_markets = 0
 
     for market in candidates:
         before_outcome = market.resolved_outcome
+        before_status = market.status
+
+        if not market.resolved_outcome or market.status != Market.Status.RESOLVED:
+            try:
+                market = refresh_market_from_polymarket(market)
+                market.refresh_from_db()
+                if market.status != before_status or market.resolved_outcome != before_outcome:
+                    refreshed_markets += 1
+            except Exception:
+                logger.exception(
+                    "Failed to refresh Polymarket market %s during repair",
+                    market.external_id,
+                )
+
         market = backfill_market_resolved_outcome(market)
         if market.resolved_outcome and not before_outcome:
             repaired_markets += 1
-        if market.resolved_outcome:
+        if market.status == Market.Status.RESOLVED and market.resolved_outcome:
             resolved_predictions += len(resolve_market_predictions(market))
 
     return {
         "repaired_markets": repaired_markets,
         "resolved_predictions": resolved_predictions,
+        "refreshed_markets": refreshed_markets,
         "candidates": len(candidates),
     }
 
