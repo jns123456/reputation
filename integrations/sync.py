@@ -128,6 +128,7 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
         .filter(
             Q(status=Market.Status.OPEN)
             | Q(status=Market.Status.CLOSED, resolved_outcome="")
+            | Q(status=Market.Status.RESOLVED, resolved_outcome="")
         )
         .filter(
             Q(polymarket_synced_at__isnull=True)
@@ -136,6 +137,7 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
             | Q(game_start_time__lte=now)
             | Q(accepting_orders=False)
             | Q(status=Market.Status.CLOSED, resolved_outcome="")
+            | Q(status=Market.Status.RESOLVED, resolved_outcome="")
         )
         .order_by("polymarket_synced_at", "updated_at")[:batch_size]
     )
@@ -156,4 +158,20 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
         failures,
         batch_size,
     )
-    return {"refreshed": refreshed, "failures": failures, "candidates": len(candidates)}
+
+    from integrations.services import repair_resolved_markets_with_pending_predictions
+
+    repair = repair_resolved_markets_with_pending_predictions(limit=batch_size)
+    if repair["resolved_predictions"] or repair["repaired_markets"]:
+        logger.info(
+            "Resolved-market repair: %s markets backfilled, %s predictions scored",
+            repair["repaired_markets"],
+            repair["resolved_predictions"],
+        )
+
+    return {
+        "refreshed": refreshed,
+        "failures": failures,
+        "candidates": len(candidates),
+        "repair": repair,
+    }

@@ -3,6 +3,7 @@
 import logging
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -50,6 +51,54 @@ def _fetch_event_for_market(client, raw_market, raw_event=None):
             logger.exception("Failed to fetch Polymarket event %s", event_slug)
 
     return raw_event or {}
+
+
+def backfill_market_resolved_outcome(market, *, raw_market=None):
+    """Fill missing ``resolved_outcome`` from stored or fresh Polymarket raw payloads."""
+    if market.resolved_outcome or market.status != Market.Status.RESOLVED:
+        return market
+
+    from integrations.polymarket.client import infer_binary_resolved_outcome
+
+    raw = raw_market or market.polymarket_raw or {}
+    inferred = infer_binary_resolved_outcome(raw)
+    if not inferred:
+        return market
+
+    market.resolved_outcome = inferred
+    market.save(update_fields=["resolved_outcome", "updated_at"])
+    return market
+
+
+def repair_resolved_markets_with_pending_predictions(*, limit=200):
+    """Backfill missing outcomes and score forecasts stuck pending on resolved markets."""
+    from predictions.models import Prediction
+
+    candidates = (
+        Market.objects.filter(status=Market.Status.RESOLVED)
+        .filter(
+            Q(resolved_outcome="")
+            | Q(predictions__status=Prediction.Status.PENDING)
+        )
+        .distinct()
+        .order_by("-updated_at")[:limit]
+    )
+    repaired_markets = 0
+    resolved_predictions = 0
+
+    for market in candidates:
+        before_outcome = market.resolved_outcome
+        market = backfill_market_resolved_outcome(market)
+        if market.resolved_outcome and not before_outcome:
+            repaired_markets += 1
+        if market.resolved_outcome:
+            resolved_predictions += len(resolve_market_predictions(market))
+
+    return {
+        "repaired_markets": repaired_markets,
+        "resolved_predictions": resolved_predictions,
+        "candidates": len(candidates),
+    }
 
 
 def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
@@ -101,8 +150,10 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
             market.slug = slug
             market.save(update_fields=["slug", "updated_at"])
 
-        if market.status == Market.Status.RESOLVED and market.resolved_outcome:
-            resolve_market_predictions(market)
+        if market.status == Market.Status.RESOLVED:
+            market = backfill_market_resolved_outcome(market, raw_market=raw_market)
+            if market.resolved_outcome:
+                resolve_market_predictions(market)
 
         from markets.display_metadata import sync_market_display_metadata
 

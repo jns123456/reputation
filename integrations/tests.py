@@ -4,8 +4,13 @@ from django.test import TestCase
 from accounts.models import User
 from integrations.attestation_services import verify_offchain_attestation
 from integrations.models import AttestationSchema, OffchainAttestation
-from integrations.services import import_market_from_normalized
+from integrations.services import (
+    backfill_market_resolved_outcome,
+    import_market_from_normalized,
+    repair_resolved_markets_with_pending_predictions,
+)
 from markets.models import Market
+from predictions.models import Prediction
 from predictions.services import create_prediction, resolve_market_predictions
 from reputation.models import ReputationEvent
 
@@ -49,6 +54,82 @@ class MarketImportServiceTests(TestCase):
         market, created = import_market_from_normalized(data)
         self.assertFalse(created)
         self.assertEqual(market.title, "Updated Title")
+
+
+class ResolvedMarketRepairTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="repair-user", password="pass")
+        self.raw_market = {
+            "id": "repair-psg",
+            "question": "Will Paris Saint-Germain FC win on 2026-05-30?",
+            "closed": True,
+            "automaticallyResolved": True,
+            "umaResolutionStatus": "resolved",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["1", "0"]',
+        }
+
+    def test_backfill_scores_pending_forecast_from_stored_raw(self):
+        market = Market.objects.create(
+            external_id="repair-psg",
+            title=self.raw_market["question"],
+            slug="repair-psg",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+            resolved_outcome="",
+            polymarket_raw=self.raw_market,
+        )
+        prediction = create_prediction(
+            user=self.user,
+            market=market,
+            predicted_outcome="Yes",
+        )
+        market.status = Market.Status.RESOLVED
+        market.current_probability = {"Yes": 1.0, "No": 0.0}
+        market.save(update_fields=["status", "current_probability", "updated_at"])
+
+        backfill_market_resolved_outcome(market)
+        resolve_market_predictions(market)
+        prediction.refresh_from_db()
+        self.user.profile.refresh_from_db()
+
+        self.assertEqual(market.resolved_outcome, "Yes")
+        self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
+        self.assertTrue(prediction.is_correct)
+        self.assertEqual(self.user.profile.reputation_points, 60)
+
+    def test_repair_batch_scores_pending_forecasts(self):
+        market = Market.objects.create(
+            external_id="repair-batch-1",
+            title=self.raw_market["question"],
+            slug="repair-batch-1",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+            resolved_outcome="",
+            polymarket_raw=self.raw_market,
+        )
+        prediction = create_prediction(
+            user=self.user,
+            market=market,
+            predicted_outcome="Yes",
+        )
+        market.status = Market.Status.RESOLVED
+        market.current_probability = {"Yes": 1.0, "No": 0.0}
+        market.save(update_fields=["status", "current_probability", "updated_at"])
+
+        result = repair_resolved_markets_with_pending_predictions()
+        prediction.refresh_from_db()
+        market.refresh_from_db()
+
+        self.assertEqual(result["repaired_markets"], 1)
+        self.assertEqual(result["resolved_predictions"], 1)
+        self.assertEqual(market.resolved_outcome, "Yes")
+        self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
+        self.assertTrue(prediction.is_correct)
 
 
 class OffchainAttestationTests(TestCase):

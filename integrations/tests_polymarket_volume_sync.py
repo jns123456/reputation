@@ -308,3 +308,35 @@ class NormalizePolymarketRecordTests(SimpleTestCase):
         normalized = normalize_polymarket_record(raw, default_category="Sports")
 
         self.assertEqual(normalized["game_start_time"].isoformat(), "2026-06-27T00:00:00+00:00")
+
+    def test_auto_resolved_binary_infers_yes_from_outcome_prices(self):
+        raw = _binary_market(
+            "psg-win",
+            question="Will Paris Saint-Germain FC win on 2026-05-30?",
+            closed=True,
+        ) | {
+            "automaticallyResolved": True,
+            "umaResolutionStatus": "resolved",
+            "outcomePrices": '["1", "0"]',
+        }
+
+        normalized = normalize_polymarket_record(raw, default_category="Sports")
+
+        self.assertEqual(normalized["status"], "resolved")
+        self.assertEqual(normalized["resolved_outcome"], "Yes")
+
+    def test_auto_resolved_binary_infers_no_from_outcome_prices(self):
+        raw = _binary_market(
+            "psg-loss",
+            question="Will Paris Saint-Germain FC win on 2026-05-30?",
+            closed=True,
+        ) | {
+            "automaticallyResolved": True,
+            "umaResolutionStatus": "resolved",
+            "outcomePrices": '["0", "1"]',
+        }
+
+        normalized = normalize_polymarket_record(raw, default_category="Sports")
+
+        self.assertEqual(normalized["status"], "resolved")
+        self.assertEqual(normalized["resolved_outcome"], "No")

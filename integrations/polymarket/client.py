@@ -587,12 +587,46 @@ def _market_is_resolved(raw_market: dict) -> bool:
     return str(raw_market.get("umaResolutionStatus") or "").lower() == "resolved"
 
 
-def _market_is_resolved_yes(raw_market: dict) -> bool:
-    """True when a grouped/binary sub-market resolved to Yes.
+def infer_binary_resolved_outcome(raw, labels=None):
+    """Best-effort winning outcome for a resolved Polymarket binary market.
 
-    Polymarket often omits ``resolvedOutcome`` on ``automaticallyResolved`` buckets
-    and only sets ``outcomePrices`` to ["1", "0"] (e.g. UEFA CL winner → PSG).
+    Polymarket often omits ``resolvedOutcome`` on auto-resolved buckets and only
+    sets ``outcomePrices`` to ``["1", "0"]`` — without this, forecasts stay pending
+    while the market card already reads as resolved.
     """
+    winning = str(raw.get("resolvedOutcome") or raw.get("winning_outcome") or "").strip()
+    if winning:
+        return winning[:255]
+
+    for token in raw.get("tokens") or []:
+        if isinstance(token, dict) and token.get("winner"):
+            label = str(token.get("outcome") or token.get("name") or "").strip()
+            if label:
+                return label[:255]
+
+    if not _market_is_resolved(raw):
+        return ""
+
+    labels = labels or _extract_outcome_labels(raw)
+    yes_price = _yes_price(raw)
+    if yes_price is None:
+        return ""
+
+    if yes_price >= _RESOLVED_YES_PRICE_THRESHOLD:
+        for label in labels:
+            if str(label).strip().lower() == "yes":
+                return str(label)[:255]
+        return "Yes"
+    if yes_price <= (1 - _RESOLVED_YES_PRICE_THRESHOLD):
+        for label in labels:
+            if str(label).strip().lower() == "no":
+                return str(label)[:255]
+        return "No"
+    return ""
+
+
+def _market_is_resolved_yes(raw_market: dict) -> bool:
+    """True when a grouped/binary sub-market resolved to Yes."""
     if not _market_is_resolved(raw_market):
         return False
     winning = str(raw_market.get("resolvedOutcome") or raw_market.get("winning_outcome") or "").lower()
@@ -828,13 +862,7 @@ def normalize_polymarket_record(raw, *, default_category=""):
     else:
         status = "open"
 
-    resolved_outcome = ""
-    if resolved:
-        resolved_outcome = raw.get("resolvedOutcome") or raw.get("winning_outcome") or ""
-        if not resolved_outcome and tokens:
-            for token in tokens:
-                if isinstance(token, dict) and token.get("winner"):
-                    resolved_outcome = token.get("outcome") or token.get("name", "")
+    resolved_outcome = infer_binary_resolved_outcome(raw, labels=labels) if resolved else ""
 
     end_date = raw.get("endDate") or raw.get("end_date_iso") or raw.get("closeTime")
     close_date = _parse_date(end_date)

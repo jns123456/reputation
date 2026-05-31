@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from integrations.sync import refresh_stale_open_markets, sync_all_category_markets
 from integrations.services import (
     import_markets_from_polymarket,
+    repair_resolved_markets_with_pending_predictions,
     sync_top_volume_polymarket_markets,
 )
 
@@ -35,6 +36,11 @@ class Command(BaseCommand):
             "--if-due",
             action="store_true",
             help="Run category + stale sync only when MARKET_FULL_SYNC_INTERVAL_HOURS has elapsed",
+        )
+        parser.add_argument(
+            "--repair-resolved",
+            action="store_true",
+            help="Backfill missing resolved outcomes and score stuck pending forecasts",
         )
         parser.add_argument("--limit", type=int, default=50)
 
@@ -75,6 +81,25 @@ class Command(BaseCommand):
                 self.style.SUCCESS(
                     f"Refreshed {result['refreshed']} stale markets "
                     f"({result['failures']} failures)"
+                )
+            )
+            repair = result.get("repair") or {}
+            if repair.get("resolved_predictions") or repair.get("repaired_markets"):
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Repair: {repair.get('repaired_markets', 0)} markets backfilled, "
+                        f"{repair.get('resolved_predictions', 0)} forecasts scored"
+                    )
+                )
+            return
+
+        if options["repair_resolved"]:
+            result = repair_resolved_markets_with_pending_predictions(limit=options["limit"])
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Repair complete: {result['repaired_markets']} markets backfilled, "
+                    f"{result['resolved_predictions']} forecasts scored "
+                    f"({result['candidates']} candidates)"
                 )
             )
             return
