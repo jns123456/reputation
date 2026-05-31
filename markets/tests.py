@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from markets.ending_filters import ending_window_hours, normalize_ending_filter
 from markets.models import Market
-from markets.selectors import get_markets_for_display
+from markets.selectors import get_market_categories, get_markets_for_display
 
 
 class MarketExpirationCountdownTests(TestCase):
@@ -138,3 +138,68 @@ class EndingSoonFilterTests(TestCase):
         slugs = [m.slug for m in response.context["markets"]]
         self.assertIn("view-ends-soon", slugs)
         self.assertNotIn("view-ends-later", slugs)
+
+
+class MarketCategoryFilterTests(TestCase):
+    def test_market_categories_are_canonical(self):
+        Market.objects.create(
+            external_id="raw-outcome-category",
+            title="Raw outcome category",
+            slug="raw-outcome-category",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            category="Draw (Team A vs. Team B)",
+            canonical_category_slug="sports",
+        )
+
+        categories = get_market_categories()
+
+        self.assertLessEqual(len(categories), 10)
+        self.assertIn("sports", [category.slug for category in categories])
+        self.assertNotIn("Draw (Team A vs. Team B)", [category.name for category in categories])
+
+    def test_market_list_filters_by_canonical_category_slug(self):
+        sports_market = Market.objects.create(
+            external_id="sports-market",
+            title="Sports market",
+            slug="sports-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            category="Sports",
+        )
+        Market.objects.filter(pk=sports_market.pk).update(
+            category="Draw (Team A vs. Team B)",
+            canonical_category_slug="sports",
+        )
+        Market.objects.create(
+            external_id="politics-market",
+            title="Politics market",
+            slug="politics-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            category="Politics",
+        )
+
+        response = self.client.get(reverse("markets:all"), {"category": "sports"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["current_category"], "sports")
+        slugs = [market.slug for market in response.context["markets"]]
+        self.assertIn("sports-market", slugs)
+        self.assertNotIn("politics-market", slugs)
+
+    def test_market_list_accepts_legacy_category_name(self):
+        Market.objects.create(
+            external_id="legacy-sports-market",
+            title="Legacy sports market",
+            slug="legacy-sports-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            category="Sports",
+        )
+
+        response = self.client.get(reverse("markets:all"), {"category": "Sports"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["current_category"], "sports")
+        self.assertEqual([market.slug for market in response.context["markets"]], ["legacy-sports-market"])

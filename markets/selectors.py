@@ -73,6 +73,24 @@ def forecastable_market_q(*, now=None):
     )
 
 
+def normalize_category_filter(category):
+    """Resolve category URL/input values to canonical category slugs."""
+    value = (category or "").strip()
+    if not value:
+        return ""
+    if get_category_for_slug(value):
+        return value
+    lowered = value.casefold()
+    for candidate in (*CANONICAL_CATEGORIES, OTHER_CATEGORY):
+        if (
+            candidate.slug.casefold() == lowered
+            or str(candidate.name).casefold() == lowered
+            or lowered in candidate.category_names
+        ):
+            return candidate.slug
+    return ""
+
+
 def _sort_markets_by_volume(markets):
     if isinstance(markets, list):
         return sorted(
@@ -308,8 +326,9 @@ def get_markets_list(*, status=None, category=None, search=None, source=None, en
         qs = qs.filter(open_market_q())
     elif status:
         qs = qs.filter(status=status)
-    if category:
-        qs = qs.filter(category__iexact=category)
+    category_slug = normalize_category_filter(category)
+    if category_slug:
+        qs = qs.filter(canonical_category_slug=category_slug)
     if source:
         qs = qs.filter(source=source)
     if search:
@@ -462,9 +481,4 @@ def get_popular_open_markets(*, limit=6):
 
 
 def get_market_categories():
-    return (
-        Market.objects.exclude(category="")
-        .values_list("category", flat=True)
-        .distinct()
-        .order_by("category")
-    )
+    return CANONICAL_CATEGORIES + (OTHER_CATEGORY,)

@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404, render
@@ -21,7 +23,13 @@ from integrations.polymarket.embed import build_polymarket_embed_context
 from integrations.celery_utils import enqueue_market_refresh_if_stale
 from markets.ending_filters import ENDING_WINDOW_CHOICES, ending_window_hours, normalize_ending_filter
 from markets.models import Market
-from markets.selectors import get_market_categories, get_market_hub_category_summaries, get_markets_for_display
+from markets.categories import get_category_for_slug
+from markets.selectors import (
+    get_market_categories,
+    get_market_hub_category_summaries,
+    get_markets_for_display,
+    normalize_category_filter,
+)
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
 from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from predictions.forms import ForecastForm
@@ -81,7 +89,7 @@ def market_hub(request):
 
 def market_list(request):
     status = request.GET.get("status", "")
-    category = request.GET.get("category", "")
+    category = normalize_category_filter(request.GET.get("category", ""))
     search = request.GET.get("q", "")
     source = normalize_source_filter(request.GET.get("source", ""))
     sort = normalize_sort_filter(request.GET.get("sort", ""))
@@ -107,6 +115,23 @@ def market_list(request):
         active_source=source,
         extra={"q": search, "status": status, "category": category, "sort": sort, "ending": ending},
     )
+    clear_category_params = {
+        key: value
+        for key, value in {
+            "q": search,
+            "status": status,
+            "source": source,
+            "sort": sort,
+            "ending": ending,
+        }.items()
+        if value
+    }
+    clear_category_query = urlencode(clear_category_params)
+    clear_category_url = (
+        f"{reverse('markets:all')}?{clear_category_query}"
+        if clear_category_query
+        else reverse("markets:all")
+    )
     return render(
         request,
         "markets/market_list.html",
@@ -115,9 +140,13 @@ def market_list(request):
             "categories": get_market_categories(),
             "current_status": status,
             "current_category": category,
+            "current_category_label": (
+                get_category_for_slug(category).name if category else ""
+            ),
             "current_source": source,
             "current_sort": sort,
             "current_ending": ending,
+            "clear_category_url": clear_category_url,
             "ending_choices": ENDING_WINDOW_CHOICES,
             "sort_choices": MARKET_SORT_CHOICES,
             "search_query": search,
