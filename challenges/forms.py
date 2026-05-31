@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from challenges.models import MAX_CHALLENGE_MARKETS
 from markets.models import Market
+from markets.selectors import forecastable_market_q
 
 
 class ChallengeGroupForm(forms.Form):
@@ -50,7 +51,7 @@ class ChallengeCreateForm(forms.Form):
     )
     markets = forms.ModelMultipleChoiceField(
         queryset=Market.objects.filter(
-            status=Market.Status.OPEN,
+            forecastable_market_q(),
             source=Market.Source.POLYMARKET,
         ).order_by("title"),
         widget=forms.CheckboxSelectMultiple(

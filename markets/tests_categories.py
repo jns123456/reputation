@@ -112,7 +112,7 @@ class MarketCategorySelectorTests(TestCase):
         self.assertEqual(len(markets), 1)
         self.assertEqual(markets[0].slug, "politics-market")
 
-    def test_open_category_selectors_exclude_non_forecastable_markets(self):
+    def test_open_category_selectors_include_non_forecastable_markets(self):
         Market.objects.create(
             external_id="sel-econ-expired",
             title="Expired economy market",
@@ -141,8 +141,16 @@ class MarketCategorySelectorTests(TestCase):
         markets = get_open_markets_by_canonical_category(category_slug="economy")
         summaries = {item["category"].slug: item["count"] for item in get_category_summaries()}
 
-        self.assertEqual([market.slug for market in markets], ["economy-market"])
-        self.assertEqual(summaries["economy"], 1)
+        self.assertEqual(
+            {market.slug for market in markets},
+            {
+                "economy-market",
+                "expired-economy-market",
+                "started-economy-market",
+                "halted-economy-market",
+            },
+        )
+        self.assertEqual(summaries["economy"], 4)
 
 
 class CategoryBrowseViewTests(TestCase):

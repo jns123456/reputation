@@ -351,7 +351,11 @@ def search_open_markets_for_challenge(*, query="", limit=50, selected_ids=None):
     """Open markets for challenge picker, optionally filtered by search text."""
     from markets.selectors import forecastable_market_q, get_markets_list
 
-    qs = get_markets_list(status=Market.Status.OPEN, search=query or None).order_by("title")
+    qs = (
+        get_markets_list(status=Market.Status.OPEN, search=query or None)
+        .filter(forecastable_market_q())
+        .order_by("title")
+    )
 
     selected_ids = {int(pk) for pk in (selected_ids or []) if str(pk).isdigit()}
     if selected_ids:
@@ -382,7 +386,11 @@ def get_challenge_category_browse_context(*, category_slug, area_slug="", search
     if category is None:
         return None
 
-    total_markets = get_open_markets_by_canonical_category(category_slug=category_slug)
+    total_markets = [
+        market
+        for market in get_open_markets_by_canonical_category(category_slug=category_slug)
+        if market.is_forecastable
+    ]
     area_summaries = get_browse_area_summaries(category_slug=category_slug, markets=total_markets)
     active_area = get_browse_area(category_slug, area_slug) if area_slug else None
 

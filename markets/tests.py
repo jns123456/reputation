@@ -108,7 +108,7 @@ class EndingSoonFilterTests(TestCase):
         results = get_markets_for_display(ending_within_hours=24)
         self.assertEqual(results, [])
 
-    def test_open_display_excludes_stale_open_markets(self):
+    def test_open_display_includes_non_forecastable_open_markets(self):
         now = timezone.now()
         self._market(slug="fresh-open", close_date=now + timedelta(hours=2))
         self._market(slug="expired-open", close_date=now - timedelta(minutes=5))
@@ -121,7 +121,10 @@ class EndingSoonFilterTests(TestCase):
 
         results = get_markets_for_display(status=Market.Status.OPEN)
 
-        self.assertEqual([market.slug for market in results], ["fresh-open"])
+        self.assertEqual(
+            {market.slug for market in results},
+            {"fresh-open", "expired-open", "in-play-open", "halted-open"},
+        )
 
     def test_market_list_view_ending_filter(self):
         now = timezone.now()
