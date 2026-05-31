@@ -17,7 +17,7 @@ from markets.models import Market
 MEXICO_VS_RSA_EVENT = {
     "slug": "fifwc-mex-rsa-2026-06-11",
     "title": "Mexico vs. South Africa",
-    "startDate": "2026-06-11T19:00:00Z",
+    "startDate": "2026-04-06T22:38:23Z",
     "endDate": "2026-06-11T21:00:00Z",
     "volume24hr": 21240,
     "markets": [
@@ -25,6 +25,7 @@ MEXICO_VS_RSA_EVENT = {
             "id": "m1",
             "question": "Will Mexico win on 2026-06-11?",
             "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-11T19:00:00Z",
             "outcomes": '["Yes", "No"]',
             "outcomePrices": '["0.665", "0.335"]',
             "closed": False,
@@ -33,6 +34,7 @@ MEXICO_VS_RSA_EVENT = {
             "id": "m2",
             "question": "Will Mexico vs. South Africa end in a draw?",
             "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-11T19:00:00Z",
             "outcomes": '["Yes", "No"]',
             "outcomePrices": '["0.215", "0.785"]',
             "closed": False,
@@ -41,6 +43,7 @@ MEXICO_VS_RSA_EVENT = {
             "id": "m3",
             "question": "Will South Africa win on 2026-06-11?",
             "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-11T19:00:00Z",
             "outcomes": '["Yes", "No"]',
             "outcomePrices": '["0.125", "0.875"]',
             "closed": False,
@@ -87,6 +90,10 @@ class SoccerMatchNormalizationTests(TestCase):
         self.assertTrue(normalized["accepting_orders"])
         self.assertIsNotNone(normalized["game_start_time"])
         self.assertEqual(normalized["game_start_time"].isoformat(), "2026-06-11T19:00:00+00:00")
+        self.assertNotEqual(
+            normalized["game_start_time"].isoformat(),
+            "2026-04-06T22:38:23+00:00",
+        )
 
     def test_normalize_marks_not_accepting_orders_when_source_halts(self):
         event = {

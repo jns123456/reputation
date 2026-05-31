@@ -88,6 +88,20 @@ def _market_is_resolved_yes(raw_market: dict) -> bool:
     return False
 
 
+def _match_kickoff_time(event: dict, moneyline_markets: list[dict]):
+    """Return the scheduled kickoff, not the market listing/open timestamp.
+
+    Sports events from Polymarket often use ``startDate`` for when the market was
+    listed. The actual match kickoff is carried by ``gameStartTime`` on the
+    event or its sports sub-markets.
+    """
+    for raw_market in moneyline_markets:
+        kickoff = _parse_date(raw_market.get("gameStartTime"))
+        if kickoff:
+            return kickoff
+    return _parse_date(event.get("gameStartTime"))
+
+
 def normalize_world_cup_match_event(event: dict, *, default_category: str = "Sports") -> dict | None:
     """Convert a Polymarket match event into a single 3-outcome market dict."""
     if not is_world_cup_match_event(event):
@@ -145,8 +159,8 @@ def normalize_world_cup_match_event(event: dict, *, default_category: str = "Spo
         if label in outcome_probs
     }
 
-    kickoff = _parse_date(event.get("startDate") or event.get("endDate"))
-    close_date = _parse_date(event.get("endDate") or event.get("startDate"))
+    kickoff = _match_kickoff_time(event, moneyline)
+    close_date = _parse_date(event.get("endDate")) or kickoff
     open_moneyline = [m for m in moneyline if not m.get("closed")]
     accepting_orders = _any_accepts_orders(open_moneyline)
 
@@ -174,9 +188,10 @@ def normalize_world_cup_match_event(event: dict, *, default_category: str = "Spo
 def build_world_cup_match_raw(event: dict, *, normalized: dict) -> dict:
     """Composite polymarket_raw payload stored on imported match markets."""
     team_a, team_b = parse_match_teams(event.get("title", ""))
-    kickoff = _parse_date(event.get("startDate") or event.get("endDate"))
+    moneyline = _moneyline_markets(event, open_only=False)
+    kickoff = _match_kickoff_time(event, moneyline)
     moneyline_markets = {}
-    for raw_market in _moneyline_markets(event, open_only=False):
+    for raw_market in moneyline:
         label = classify_moneyline_outcome(raw_market.get("question") or "", team_a or "", team_b or "")
         if not label:
             continue
