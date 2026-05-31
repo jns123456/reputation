@@ -1,20 +1,79 @@
 {% extends "base.html" %}
 {% load i18n reputation_filters %}
 
-{% block title %}{% trans "Prediction History" %}{% endblock %}
+{% block title %}{% trans "Track record" %} · {{ profile_user.public_name }}{% endblock %}
 
 {% block content %}
 <div class="pr-page pb-8">
   {% trans "Track record" as hero_eyebrow %}
-  {% trans "Prediction history" as hero_title %}
-  {% blocktrans asvar hero_description %}Formal forecasts and how they resolved.{% endblocktrans %}
+  {% trans "Closed forecasts" as hero_title %}
+  {% blocktrans asvar hero_description %}Resolved predictions and positions you entered and exited early.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=profile_user.public_name description=hero_description %}
 
-  <div class="mt-2 space-y-3">
+  <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="pr-stat-card pr-card">
+      <p class="pr-stat-label">{% trans "Resolved" %}</p>
+      <p class="pr-stat-value">{{ prediction_summary.resolved }}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        {% blocktrans with correct=prediction_summary.correct incorrect=prediction_summary.incorrect %}{{ correct }} correct · {{ incorrect }} incorrect{% endblocktrans %}
+      </p>
+    </div>
+    <div class="pr-stat-card pr-card">
+      <p class="pr-stat-label">{% trans "Exited early" %}</p>
+      <p class="pr-stat-value">{{ prediction_summary.exited }}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Closed before resolution" %}</p>
+    </div>
+    <div class="pr-stat-card pr-card">
+      <p class="pr-stat-label">{% trans "Accuracy" %}</p>
+      <p class="pr-stat-value">{% if prediction_summary.accuracy_pct is not None %}{{ prediction_summary.accuracy_pct }}%{% else %}—{% endif %}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Based on resolved forecasts only" %}</p>
+    </div>
+    <div class="pr-stat-card pr-card">
+      <p class="pr-stat-label">{% trans "Open now" %}</p>
+      <p class="pr-stat-value">{{ prediction_summary.open }}</p>
+      {% if request.user == profile_user and prediction_summary.open %}
+      <a href="{% url 'predictions:open' %}" class="mt-1 inline-block text-xs font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "View open forecasts" %} →</a>
+      {% else %}
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{% trans "Active positions" %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="{% trans 'Filter track record' %}">
+    <a href="{% url 'predictions:history' username=profile_user.username %}"
+       class="inline-flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-medium {% if status_filter == 'all' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700{% endif %}"
+       {% if status_filter == 'all' %}aria-current="page"{% endif %}>
+      {% trans "All closed" %}
+    </a>
+    <a href="{% url 'predictions:history' username=profile_user.username %}?status=resolved"
+       class="inline-flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-medium {% if status_filter == 'resolved' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700{% endif %}"
+       {% if status_filter == 'resolved' %}aria-current="page"{% endif %}>
+      {% trans "Resolved" %}
+    </a>
+    <a href="{% url 'predictions:history' username=profile_user.username %}?status=exited"
+       class="inline-flex min-h-[44px] items-center rounded-full px-4 py-2 text-sm font-medium {% if status_filter == 'exited' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700{% endif %}"
+       {% if status_filter == 'exited' %}aria-current="page"{% endif %}>
+      {% trans "Exited early" %}
+    </a>
+  </div>
+
+  <div class="mt-4 space-y-3">
     {% for prediction in predictions %}
-      {% include "predictions/partials/prediction_history_item.html" %}
+      {% include "predictions/partials/prediction_history_item.html" with show_closed_details=True %}
     {% empty %}
-    <div class="pr-empty">{% trans "No predictions yet." %}</div>
+    <div class="pr-empty">
+      {% if status_filter == 'resolved' %}
+      {% trans "No resolved forecasts yet." %}
+      {% elif status_filter == 'exited' %}
+      {% trans "No early exits yet." %}
+      {% else %}
+      {% trans "No closed forecasts yet." %}
+      {% endif %}
+      {% if request.user == profile_user %}
+      <a href="{% url 'markets:list' %}" class="text-brand-600 hover:underline">{% trans "Browse markets" %}</a>
+      {% trans "to make your first forecast." %}
+      {% endif %}
+    </div>
     {% endfor %}
   </div>
 </div>

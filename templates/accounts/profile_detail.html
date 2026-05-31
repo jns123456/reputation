@@ -187,14 +187,14 @@
 
   <section class="mt-10">
     <div class="flex items-center justify-between">
-      <h2 class="pr-section-title">{% trans "Prediction History" %}</h2>
+      <h2 class="pr-section-title">{% trans "Track record" %}</h2>
       <a href="{% url 'predictions:history' username=profile_user.username %}" class="text-sm text-brand-600 hover:underline">{% trans "View all" %}</a>
     </div>
     <div class="mt-4 space-y-3">
-      {% for prediction in predictions|slice:":10" %}
-        {% include "predictions/partials/prediction_history_item.html" %}
+      {% for prediction in predictions %}
+        {% include "predictions/partials/prediction_history_item.html" with show_closed_details=True %}
       {% empty %}
-      <div class="pr-empty py-8">{% trans "No predictions yet." %}</div>
+      <div class="pr-empty py-8">{% trans "No closed forecasts yet." %}</div>
       {% endfor %}
     </div>
   </section>

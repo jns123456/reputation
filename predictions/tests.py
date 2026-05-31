@@ -16,6 +16,7 @@ from predictions.selectors import (
     attach_user_forecasts_to_markets,
     get_market_predictions,
     get_user_active_prediction,
+    get_user_closed_prediction_history,
     get_user_open_predictions,
     get_user_prediction_summary,
 )
@@ -394,6 +395,108 @@ class PredictionSummaryTests(TestCase):
         self.assertEqual(summary["correct"], 1)
         self.assertEqual(summary["incorrect"], 0)
         self.assertEqual(summary["accuracy_pct"], 100)
+
+
+class ClosedPredictionHistoryTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="history-user", password="pass")
+        self.market = Market.objects.create(
+            external_id="history-m1",
+            title="History test",
+            slug="history-test",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+    def test_closed_history_excludes_pending_forecasts(self):
+        pending_market = Market.objects.create(
+            external_id="history-m0",
+            title="Still open",
+            slug="still-open",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+        create_prediction(
+            user=self.user,
+            market=pending_market,
+            predicted_outcome="Yes",
+        )
+
+        to_exit = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exited = exit_prediction(prediction=to_exit, user=self.user)
+
+        resolved_market = Market.objects.create(
+            external_id="history-m2",
+            title="Resolved market",
+            slug="resolved-market",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        resolved_prediction = create_prediction(
+            user=self.user,
+            market=resolved_market,
+            predicted_outcome="Yes",
+        )
+        resolved_market.status = Market.Status.RESOLVED
+        resolved_market.resolved_outcome = "Yes"
+        resolved_market.save()
+        resolve_market_predictions(resolved_market)
+        resolved_prediction.refresh_from_db()
+
+        closed = list(get_user_closed_prediction_history(self.user))
+        self.assertEqual(len(closed), 2)
+        self.assertEqual({item.id for item in closed}, {exited.id, resolved_prediction.id})
+
+    def test_closed_history_status_filter(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        self.assertEqual(len(get_user_closed_prediction_history(self.user)), 1)
+        self.assertEqual(
+            len(get_user_closed_prediction_history(self.user, status=Prediction.Status.EXITED)),
+            1,
+        )
+        self.assertEqual(
+            len(get_user_closed_prediction_history(self.user, status=Prediction.Status.RESOLVED)),
+            0,
+        )
+
+    def test_history_page_is_public_and_shows_closed_only(self):
+        create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(
+            prediction=Prediction.objects.filter(user=self.user).first(),
+            user=self.user,
+        )
+
+        url = reverse("predictions:history", kwargs={"username": self.user.username})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "History test")
+        self.assertNotContains(response, "Pending")
+
+        filtered = self.client.get(f"{url}?status=exited")
+        self.assertEqual(filtered.status_code, 200)
+        self.assertContains(filtered, "History test")
 
 
 class OpenPredictionsPageTests(TestCase):

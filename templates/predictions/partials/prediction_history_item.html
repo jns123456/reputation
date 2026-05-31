@@ -13,9 +13,17 @@
         {{ prediction.market.display_title }}
       </a>
       <p class="mt-2 text-sm text-slate-500">
+        {% with closed_at=prediction|prediction_closed_at %}
+        {% if show_closed_details and closed_at %}
+        {% blocktrans with closed_date=closed_at|date:"M j, Y" %}Closed {{ closed_date }}{% endblocktrans %}
+        <span class="mx-1">·</span>
+        {% blocktrans with entry_date=prediction.created_at|date:"M j, Y" %}Entered {{ entry_date }}{% endblocktrans %}
+        {% else %}
         {{ prediction.created_at|date:"M j, Y" }}
         <span class="mx-1">·</span>
         {% blocktrans with timesince=prediction.created_at|timesince %}{{ timesince }} ago{% endblocktrans %}
+        {% endif %}
+        {% endwith %}
         {% include "integrations/partials/attestation_badge.html" with attestation=prediction.verified_attestation %}
         {% with countdown=prediction.market.expiration_countdown %}
         {% if countdown and prediction.market.close_date %}
@@ -32,6 +40,32 @@
         </strong>
       </p>
 
+      {% if show_closed_details and prediction.status == "exited" %}
+      <div class="mt-3 grid grid-cols-3 gap-2 sm:max-w-md">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/40">
+          <p class="text-[0.65rem] font-medium uppercase tracking-wide text-slate-500">{% trans "Entry" %}</p>
+          <p class="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ prediction|prediction_entry_percent }}%</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/40">
+          <p class="text-[0.65rem] font-medium uppercase tracking-wide text-slate-500">{% trans "Exit" %}</p>
+          <p class="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ prediction|prediction_exit_percent }}%</p>
+        </div>
+        <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-900/60 dark:bg-amber-950/30">
+          <p class="text-[0.65rem] font-medium uppercase tracking-wide text-amber-700 dark:text-amber-300">{% trans "Realized" %}</p>
+          {% with delta=prediction|prediction_reputation_delta %}
+          <p class="mt-0.5 text-lg font-bold tabular-nums {% if delta >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">
+            {% if delta >= 0 %}+{% endif %}{{ delta }}
+          </p>
+          {% endwith %}
+        </div>
+      </div>
+      {% elif show_closed_details and prediction.status == "resolved" and prediction.market.resolved_outcome %}
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        {% trans "Outcome:" %}
+        <strong>{{ prediction.market.resolved_outcome|localized_outcome }}</strong>
+      </p>
+      {% endif %}
+
       {% with reputation_stakes=prediction|prediction_stakes %}
       <p class="mt-1 text-xs text-slate-500">
         {% blocktrans with source=prediction.market|market_source_label outcome=prediction.predicted_outcome prob=reputation_stakes.prob_percent win=reputation_stakes.win_points loss=reputation_stakes.loss_points %}
@@ -44,6 +78,7 @@
 
       {% with delta=prediction|prediction_reputation_delta %}
       {% if delta != None %}
+      {% if not show_closed_details or prediction.status != "exited" %}
       <p class="mt-1 text-xs font-semibold {% if delta >= 0 %}text-emerald-700{% else %}text-red-700{% endif %}">
         {% if delta >= 0 %}
         {% if prediction.status == "exited" %}
@@ -59,6 +94,7 @@
         {% endif %}
         {% endif %}
       </p>
+      {% endif %}
       {% endif %}
       {% endwith %}
 

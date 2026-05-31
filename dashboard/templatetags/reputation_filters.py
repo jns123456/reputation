@@ -43,6 +43,42 @@ def prediction_stakes(prediction):
     )
 
 
+def _prediction_side_probability(prediction, probability_snapshot):
+    from reputation.services import get_predicted_outcome_probability
+
+    if not probability_snapshot:
+        return None
+    return int(
+        round(
+            get_predicted_outcome_probability(
+                prediction.predicted_outcome,
+                probability_snapshot,
+                predicted_direction=prediction.predicted_direction,
+            )
+            * 100
+        )
+    )
+
+
+@register.filter
+def prediction_entry_percent(prediction):
+    return _prediction_side_probability(
+        prediction, prediction.probability_at_prediction_time
+    )
+
+
+@register.filter
+def prediction_exit_percent(prediction):
+    return _prediction_side_probability(
+        prediction, prediction.probability_at_exit_time
+    )
+
+
+@register.filter
+def prediction_closed_at(prediction):
+    return prediction.resolved_at or prediction.exited_at
+
+
 @register.filter
 def prediction_reputation_delta(prediction):
     """Actual reputation change once resolved or exited; None if still pending."""

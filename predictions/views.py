@@ -8,7 +8,12 @@ from django.views.decorators.http import require_http_methods, require_POST
 from markets.models import Market
 from predictions.forms import ForecastForm
 from predictions.models import Prediction
-from predictions.selectors import get_user_active_prediction, get_user_open_predictions
+from predictions.selectors import (
+    get_user_active_prediction,
+    get_user_closed_prediction_history,
+    get_user_open_predictions,
+    get_user_prediction_summary,
+)
 from predictions.services import (
     build_duplicate_forecast_error,
     create_prediction,
@@ -211,18 +216,26 @@ def open_predictions(request):
     )
 
 
-@login_required
 def prediction_history(request, username):
     from accounts.models import User
 
     user = get_object_or_404(User, username=username)
-    if request.user != user and not request.user.is_staff:
-        pass  # Public history is allowed per MVP
-    from accounts.selectors import get_user_prediction_history
+    status_filter = request.GET.get("status", "all")
+    status = None
+    if status_filter == Prediction.Status.RESOLVED:
+        status = Prediction.Status.RESOLVED
+    elif status_filter == Prediction.Status.EXITED:
+        status = Prediction.Status.EXITED
 
-    predictions = get_user_prediction_history(user, limit=100)
+    predictions = get_user_closed_prediction_history(user, limit=100, status=status)
+    summary = get_user_prediction_summary(user)
     return render(
         request,
         "predictions/prediction_history.html",
-        {"profile_user": user, "predictions": predictions},
+        {
+            "profile_user": user,
+            "predictions": predictions,
+            "prediction_summary": summary,
+            "status_filter": status_filter,
+        },
     )

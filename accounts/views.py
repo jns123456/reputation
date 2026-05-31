@@ -43,7 +43,8 @@ from accounts.notification_services import (
     mark_notification_read,
     queue_login_notification_toast,
 )
-from accounts.selectors import get_user_prediction_history, search_user_matches
+from accounts.selectors import search_user_matches
+from predictions.selectors import get_user_closed_prediction_history
 from accounts.user_search_selectors import (
     BROWSABLE_USERS_PAGE_SIZE,
     count_browsable_users,
@@ -495,7 +496,7 @@ def profile_detail(request, username):
         User.objects.select_related("profile", "activity_streak"),
         username=username,
     )
-    predictions = get_user_prediction_history(user)
+    predictions = get_user_closed_prediction_history(user, limit=10)
     from predictions.selectors import get_user_prediction_summary
 
     prediction_summary = get_user_prediction_summary(user)

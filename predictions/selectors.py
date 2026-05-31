@@ -141,6 +141,25 @@ def attach_user_forecasts_to_markets(user, markets):
     return market_list
 
 
+def get_user_closed_prediction_history(user, *, limit=100, status=None):
+    """Resolved and early-exited forecasts — the user's public track record."""
+    qs = (
+        Prediction.objects.filter(
+            user=user,
+            status__in=[Prediction.Status.RESOLVED, Prediction.Status.EXITED],
+        )
+        .select_related("market", "user")
+        .order_by(Coalesce("resolved_at", "exited_at", "created_at").desc())
+    )
+    if status == Prediction.Status.RESOLVED:
+        qs = qs.filter(status=Prediction.Status.RESOLVED)
+    elif status == Prediction.Status.EXITED:
+        qs = qs.filter(status=Prediction.Status.EXITED)
+    return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[
+        :limit
+    ]
+
+
 def get_user_open_predictions(user, limit=100):
     qs = (
         Prediction.objects.filter(
