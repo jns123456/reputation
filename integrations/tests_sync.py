@@ -60,3 +60,21 @@ class RefreshStaleOpenMarketsTests(TestCase):
 
         self.assertEqual(result["refreshed"], 1)
         mock_refresh.assert_called_once_with(market)
+
+    @patch("integrations.sync.refresh_market")
+    def test_refresh_stale_open_markets_prioritizes_elapsed_markets(self, mock_refresh):
+        recent_sync = timezone.now() - timedelta(minutes=1)
+        market = Market.objects.create(
+            external_id="elapsed-poly",
+            title="Elapsed market",
+            slug="elapsed-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            close_date=timezone.now() - timedelta(minutes=2),
+            polymarket_synced_at=recent_sync,
+        )
+
+        result = refresh_stale_open_markets(batch_size=10, stale_minutes=30)
+
+        self.assertEqual(result["refreshed"], 1)
+        mock_refresh.assert_called_once_with(market)

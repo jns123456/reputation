@@ -19,7 +19,11 @@
 
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
+            {% if market.status == "open" and not market.is_forecastable %}
+            <span class="badge-status-closed">{% trans "Forecasts closed" %}</span>
+            {% else %}
             <span class="badge-status-{{ market.status }}">{{ market.get_status_display }}</span>
+            {% endif %}
             {% if market.category %}
             <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.display_category }}</span>
             {% endif %}
@@ -85,7 +89,11 @@
             {% if market.close_date %}
             <span class="inline-flex items-center gap-1.5">
               <i data-lucide="calendar" class="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" stroke-width="2" aria-hidden="true"></i>
+              {% if market.is_expired %}
+              {% blocktrans with date=market.close_date|date:"M j, Y" %}Closed {{ date }}{% endblocktrans %}
+              {% else %}
               {% blocktrans with date=market.close_date|date:"M j, Y" %}Closes {{ date }}{% endblocktrans %}
+              {% endif %}
             </span>
             {% endif %}
           </div>

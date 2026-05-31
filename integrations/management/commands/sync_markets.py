@@ -46,13 +46,19 @@ class Command(BaseCommand):
             if result is None:
                 self.stdout.write("Scheduled sync not due yet.")
                 return
-            self._print_summary("Category sync", result["categories"])
+            if result["categories"]:
+                self._print_summary("Category sync", result["categories"])
+            else:
+                self.stdout.write("Category sync not due.")
             stale = result["stale"]
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Stale refresh: {stale['refreshed']} refreshed ({stale['failures']} failures)"
+            if stale:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Stale refresh: {stale['refreshed']} refreshed ({stale['failures']} failures)"
+                    )
                 )
-            )
+            else:
+                self.stdout.write("Stale refresh not due.")
             return
 
         if options["categories"]:

@@ -8,6 +8,9 @@
         {{ market.kickoff_at|date:"D, M j · H:i" }} UTC
       </p>
       {% endif %}
+      {% if market.status == "open" and not market.is_forecastable %}
+      <span class="mt-2 inline-flex badge-status-closed">{% trans "Forecasts closed" %}</span>
+      {% endif %}
       <h3 class="mt-1 text-base font-bold leading-snug text-slate-900 group-hover:text-brand-700 dark:text-slate-100 dark:group-hover:text-brand-400 sm:text-lg">
         {{ market.display_title }}
       </h3>

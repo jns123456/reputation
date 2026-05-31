@@ -331,7 +331,7 @@ def challenge_detail(request, pk):
     for market in markets:
         forecast = user_market_forecasts.get(market.id)
         market.user_forecast = forecast
-        if forecast and market.status == Market.Status.OPEN:
+        if forecast and market.is_forecastable:
             market.user_forecast_unrealized = calculate_exit_reputation_delta(
                 predicted_outcome=forecast.predicted_outcome,
                 entry_probability_snapshot=forecast.probability_at_prediction_time,
@@ -347,7 +347,7 @@ def challenge_detail(request, pk):
         "pending": sum(
             1
             for market in markets
-            if not market.user_forecast and market.status == Market.Status.OPEN
+            if not market.user_forecast and market.is_forecastable
         ),
     }
 

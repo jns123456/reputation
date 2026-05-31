@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -8,7 +9,7 @@ import ssl
 # ``manage.py test`` / pytest should not require a local Redis for Django cache.
 _RUNNING_TESTS = "test" in sys.argv or "pytest" in sys.argv[0]
 
-from celery.schedules import crontab
+from celery.schedules import crontab, schedule
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -390,10 +391,11 @@ POLYMARKET_TOP_VOLUME_MAX_MARKETS = env.int("POLYMARKET_TOP_VOLUME_MAX_MARKETS",
 POLYMARKET_TOP_VOLUME_MAX_EVENT_PAGES = env.int("POLYMARKET_TOP_VOLUME_MAX_EVENT_PAGES", default=15)
 POLYMARKET_TAG_SYNC_MAX_EVENT_PAGES = env.int("POLYMARKET_TAG_SYNC_MAX_EVENT_PAGES", default=10)
 MARKET_FULL_SYNC_INTERVAL_HOURS = env.int("MARKET_FULL_SYNC_INTERVAL_HOURS", default=6)
+MARKET_STALE_SYNC_INTERVAL_MINUTES = env.int("MARKET_STALE_SYNC_INTERVAL_MINUTES", default=10)
 ENABLE_EMBEDDED_MARKET_SYNC = env.bool("ENABLE_EMBEDDED_MARKET_SYNC", default=False)
 # 0 = import every available World Cup group-stage match from Polymarket.
 WORLD_CUP_MATCH_SYNC_LIMIT = env.int("WORLD_CUP_MATCH_SYNC_LIMIT", default=0)
-MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=30)
+MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=10)
 MARKET_SYNC_STALE_BATCH_SIZE = env.int("MARKET_SYNC_STALE_BATCH_SIZE", default=100)
 MARKET_TRANSLATION_ENABLED = env.bool("MARKET_TRANSLATION_ENABLED", default=False)
 MARKET_TRANSLATION_CACHE_SECONDS = env.int("MARKET_TRANSLATION_CACHE_SECONDS", default=60 * 60 * 24 * 30)
@@ -440,7 +442,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "refresh-stale-open-markets": {
         "task": "integrations.tasks.refresh_stale_open_markets_task",
-        "schedule": crontab(minute=30, hour="*/6"),
+        "schedule": schedule(run_every=timedelta(minutes=MARKET_STALE_SYNC_INTERVAL_MINUTES)),
     },
 }
 # Daily re-engagement digest (Substack-style summary).

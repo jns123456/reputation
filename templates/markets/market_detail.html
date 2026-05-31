@@ -39,6 +39,18 @@
     {% endif %}
   {% endif %}
 
+  {% if not market.is_forecastable %}
+  <div class="mt-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+    {% if market.is_in_play %}
+      {% trans "Forecasts are closed because this event has already started." %}
+    {% elif market.is_expired or not market.accepting_orders %}
+      {% trans "Forecasts are closed because this market is no longer accepting forecasts." %}
+    {% else %}
+      {% trans "Forecasts are closed for this market." %}
+    {% endif %}
+  </div>
+  {% endif %}
+
   <section id="forecasts" class="mt-10">
     <h2 class="pr-section-title">{% trans "Public forecast history" %}</h2>
     <p class="pr-section-desc">
@@ -48,7 +60,11 @@
       {% for item in prediction_sections %}
         {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes like_preview=item.like_preview dislike_preview=item.dislike_preview %}
       {% empty %}
+      {% if market.is_forecastable %}
       <p class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">{% trans "No forecasts yet. Be the first to place one." %}</p>
+      {% else %}
+      <p class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">{% trans "No forecasts were placed before this market closed." %}</p>
+      {% endif %}
       {% endfor %}
     </div>
   </section>

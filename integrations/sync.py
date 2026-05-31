@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass, field
 
 from django.conf import settings
+from django.db.models import Q
 from django.utils import timezone
 
 from integrations.services import (
@@ -109,29 +110,35 @@ def sync_all_category_markets(*, limit=None) -> dict:
 
 
 def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
-    """Refresh open imported markets that have not synced recently."""
+    """Refresh open imported markets whose source state may have changed.
+
+    Besides normal staleness, locally elapsed close/kickoff times are refreshed
+    immediately so resolution status does not wait for the full catalog sync.
+    """
     batch_size = batch_size or settings.MARKET_SYNC_STALE_BATCH_SIZE
     stale_minutes = stale_minutes or settings.MARKET_SYNC_STALE_MINUTES
-    cutoff = timezone.now() - timezone.timedelta(minutes=stale_minutes)
+    now = timezone.now()
+    cutoff = now - timezone.timedelta(minutes=stale_minutes)
 
     refreshed = 0
     failures = 0
 
-    stale_markets = (
+    due_markets = (
         Market.objects.filter(
             status=Market.Status.OPEN,
             source=Market.Source.POLYMARKET,
         )
-        .order_by("updated_at")[: batch_size * 3]
+        .filter(
+            Q(polymarket_synced_at__isnull=True)
+            | Q(polymarket_synced_at__lte=cutoff)
+            | Q(close_date__lte=now)
+            | Q(game_start_time__lte=now)
+            | Q(accepting_orders=False)
+        )
+        .order_by("polymarket_synced_at", "updated_at")[:batch_size]
     )
 
-    candidates = []
-    for market in stale_markets:
-        synced_at = market.polymarket_synced_at
-        if synced_at is None or synced_at <= cutoff:
-            candidates.append(market)
-        if len(candidates) >= batch_size:
-            break
+    candidates = list(due_markets)
 
     for market in candidates:
         try:

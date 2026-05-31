@@ -349,15 +349,15 @@ def user_can_view_challenge(*, challenge, user):
 
 def search_open_markets_for_challenge(*, query="", limit=50, selected_ids=None):
     """Open markets for challenge picker, optionally filtered by search text."""
-    from markets.selectors import get_markets_list
+    from markets.selectors import forecastable_market_q, get_markets_list
 
     qs = get_markets_list(status=Market.Status.OPEN, search=query or None).order_by("title")
 
     selected_ids = {int(pk) for pk in (selected_ids or []) if str(pk).isdigit()}
     if selected_ids:
         selected_qs = Market.objects.filter(
+            forecastable_market_q(),
             id__in=selected_ids,
-            status=Market.Status.OPEN,
         )
         qs = (selected_qs | qs).distinct().order_by("title")
 
@@ -407,8 +407,10 @@ def get_challenge_category_browse_context(*, category_slug, area_slug="", search
         existing_ids = {market.id for market in markets}
         extra_ids = selected_ids_set - existing_ids
         if extra_ids:
+            from markets.selectors import forecastable_market_q
+
             extras = list(
-                Market.objects.filter(id__in=extra_ids, status=Market.Status.OPEN)
+                Market.objects.filter(forecastable_market_q(), id__in=extra_ids)
             )
             markets = extras + list(markets)
 

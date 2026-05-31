@@ -2,6 +2,7 @@ from collections import Counter, defaultdict
 
 from django.conf import settings
 from django.db.models import Count, F, Q
+from django.utils import timezone
 
 from markets.categories import (
     CANONICAL_CATEGORIES,
@@ -54,6 +55,17 @@ def _exclude_disabled_sources(markets):
     if isinstance(markets, list):
         return [market for market in markets if market.source not in excluded]
     return markets.exclude(source__in=excluded)
+
+
+def forecastable_market_q(*, now=None):
+    """Database equivalent of ``Market.is_forecastable`` for list/count queries."""
+    now = now or timezone.now()
+    return (
+        Q(status=Market.Status.OPEN)
+        & Q(accepting_orders=True)
+        & (Q(close_date__isnull=True) | Q(close_date__gt=now))
+        & (Q(game_start_time__isnull=True) | Q(game_start_time__gt=now))
+    )
 
 
 def _sort_markets_by_volume(markets):
@@ -165,7 +177,7 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
     qs = _exclude_disabled_sources(
         _market_card_queryset(
             Market.objects.filter(
-                status=Market.Status.OPEN,
+                forecastable_market_q(),
                 canonical_category_slug=category.slug,
             )
         )
@@ -196,7 +208,7 @@ def get_browse_area_summaries(*, category_slug, markets=None):
             return []
         membership_lists = _exclude_disabled_sources(
             Market.objects.filter(
-                status=Market.Status.OPEN,
+                forecastable_market_q(),
                 canonical_category_slug=category.slug,
             )
         ).values_list("browse_area_slugs", flat=True)
@@ -230,7 +242,7 @@ def get_category_summaries(*, include_empty=False):
     counts[OTHER_CATEGORY.slug] = 0
 
     for row in (
-        _exclude_disabled_sources(Market.objects.filter(status=Market.Status.OPEN))
+        _exclude_disabled_sources(Market.objects.filter(forecastable_market_q()))
         .values("canonical_category_slug")
         .annotate(count=Count("id"))
     ):
@@ -264,7 +276,7 @@ def _pin_featured_world_cup_summary(summaries, counts):
     if count is None:
         count = _exclude_disabled_sources(
             Market.objects.filter(
-                status=Market.Status.OPEN,
+                forecastable_market_q(),
                 canonical_category_slug=world_cup.slug,
             )
         ).count()
@@ -287,7 +299,9 @@ def get_market_hub_category_summaries():
 
 def get_markets_list(*, status=None, category=None, search=None, source=None, ending_within_hours=None):
     qs = _market_card_queryset(_exclude_disabled_sources(Market.objects.all()))
-    if status:
+    if status == Market.Status.OPEN:
+        qs = qs.filter(forecastable_market_q())
+    elif status:
         qs = qs.filter(status=status)
     if category:
         qs = qs.filter(category__iexact=category)
@@ -364,7 +378,7 @@ def get_markets_for_display(
         and effective_status == Market.Status.OPEN
     )
     if use_source_blend:
-        open_markets = list(qs.filter(status=Market.Status.OPEN))
+        open_markets = list(qs.filter(forecastable_market_q()))
         return blend_markets_by_source(open_markets, limit=limit)
 
     if normalized_sort == SORT_VOLUME:
@@ -402,7 +416,7 @@ def get_world_cup_match_markets_queryset(*, source=""):
     """Open World Cup match markets ordered by kickoff."""
     qs = _market_card_queryset(
         Market.objects.filter(
-            status=Market.Status.OPEN,
+            forecastable_market_q(),
             canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
         )
     )
@@ -425,7 +439,7 @@ def get_markets_resolving_soon(*, within_hours=72, limit=8):
     cutoff = now + timedelta(hours=within_hours)
     qs = _market_card_queryset(
         Market.objects.filter(
-            status=Market.Status.OPEN,
+            forecastable_market_q(now=now),
             close_date__isnull=False,
             close_date__gte=now,
             close_date__lte=cutoff,
@@ -437,7 +451,7 @@ def get_markets_resolving_soon(*, within_hours=72, limit=8):
 def get_popular_open_markets(*, limit=6):
     """Highest-volume open markets — good first-forecast suggestions for onboarding."""
     qs = _market_card_queryset(
-        Market.objects.filter(status=Market.Status.OPEN)
+        Market.objects.filter(forecastable_market_q())
     ).order_by("-volume_total", "-created_at")
     return list(qs[:limit])
 

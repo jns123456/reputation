@@ -1,7 +1,9 @@
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from markets.categories import resolve_market_category_slug
 from markets.models import Market
@@ -109,6 +111,38 @@ class MarketCategorySelectorTests(TestCase):
         markets = get_open_markets_by_canonical_category(category_slug="politics")
         self.assertEqual(len(markets), 1)
         self.assertEqual(markets[0].slug, "politics-market")
+
+    def test_open_category_selectors_exclude_non_forecastable_markets(self):
+        Market.objects.create(
+            external_id="sel-econ-expired",
+            title="Expired economy market",
+            slug="expired-economy-market",
+            category="Economy",
+            status=Market.Status.OPEN,
+            close_date=timezone.now() - timedelta(minutes=5),
+        )
+        Market.objects.create(
+            external_id="sel-econ-in-play",
+            title="Started economy market",
+            slug="started-economy-market",
+            category="Economy",
+            status=Market.Status.OPEN,
+            game_start_time=timezone.now() - timedelta(minutes=5),
+        )
+        Market.objects.create(
+            external_id="sel-econ-not-accepting",
+            title="Halted economy market",
+            slug="halted-economy-market",
+            category="Economy",
+            status=Market.Status.OPEN,
+            accepting_orders=False,
+        )
+
+        markets = get_open_markets_by_canonical_category(category_slug="economy")
+        summaries = {item["category"].slug: item["count"] for item in get_category_summaries()}
+
+        self.assertEqual([market.slug for market in markets], ["economy-market"])
+        self.assertEqual(summaries["economy"], 1)
 
 
 class CategoryBrowseViewTests(TestCase):
