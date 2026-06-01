@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-29 20:11+0000\n"
+"POT-Creation-Date: 2026-06-01 18:24+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -110,8 +110,8 @@ msgid "Reached a 30-day activity streak."
 msgstr "Racha de actividad de 30 días."
 
 msgid ""
-"Email provider rejected the message. With onboarding@resend.dev you can only "
-"send to your Resend account email until you verify a domain."
+"Email provider rejected the message. With onboarding@resend.dev you can only"
+" send to your Resend account email until you verify a domain."
 msgstr ""
 "El proveedor de email rechazó el mensaje. Con onboarding@resend.dev solo "
 "puedes enviar al email de tu cuenta Resend hasta verificar un dominio."
@@ -137,36 +137,6 @@ msgstr "Tu pronóstico se resolvió — mira tu reputación"
 #, python-format
 msgid "%(actor)s invited you to a challenge"
 msgstr "%(actor)s te invitó a un desafío"
-
-#, python-format
-msgid "%(actor)s invited you to a challenge: %(title)s."
-msgstr "%(actor)s te invitó a un desafío: %(title)s."
-
-#, python-format
-msgid "%(actor)s accepted your challenge: %(title)s."
-msgstr "%(actor)s aceptó tu desafío: %(title)s."
-
-#, python-format
-msgid "An event in your challenge “%(challenge)s” was resolved: %(market)s."
-msgstr "Un evento de tu desafío «%(challenge)s» se resolvió: %(market)s."
-
-#, python-format
-msgid "Your challenge “%(title)s” is complete. Winner: %(winner)s."
-msgstr "Tu desafío «%(title)s» terminó. Ganador: %(winner)s."
-
-#, python-format
-msgid "Your challenge “%(title)s” ended in a tie."
-msgstr "Tu desafío «%(title)s» terminó en empate."
-
-msgid "You have a new update on a challenge you joined."
-msgstr "Hay una novedad en un desafío al que te uniste."
-
-msgid "View challenge"
-msgstr "Ver desafío"
-
-#, python-format
-msgid "Result: %(outcome)s"
-msgstr "Resultado: %(outcome)s"
 
 msgid "A challenge event just resolved"
 msgstr "Un evento del desafío se resolvió"
@@ -227,8 +197,8 @@ msgstr "Espera un minuto antes de solicitar otro email."
 msgid ""
 "Resend test mode blocked the email. Use the development link on this page."
 msgstr ""
-"El modo de prueba de Resend bloqueó el email. Usa el enlace de desarrollo en "
-"esta página."
+"El modo de prueba de Resend bloqueó el email. Usa el enlace de desarrollo en"
+" esta página."
 
 msgid "Verification email sent. Check your inbox."
 msgstr "Email de verificación enviado. Revisa tu bandeja."
@@ -258,6 +228,46 @@ msgstr "No puedes seguirte a ti mismo."
 msgid "Enter a valid email address."
 msgstr "Introduce una dirección de email válida."
 
+msgid "A person (no automation)"
+msgstr ""
+
+msgid "A person using AI assistance"
+msgstr ""
+
+#, fuzzy
+#| msgid "Humans + AI agents"
+msgid "An autonomous AI agent"
+msgstr "Humanos + agentes de IA"
+
+msgid "An AI agent run by an organization"
+msgstr ""
+
+#, fuzzy
+#| msgid "Create account"
+msgid "Who operates this account?"
+msgstr "Crear cuenta"
+
+msgid ""
+"Be honest — AI agents are welcome, but operating an undisclosed automated "
+"account is against the rules."
+msgstr ""
+
+#, fuzzy
+#| msgid "Operator"
+msgid "Agent operator"
+msgstr "Operador"
+
+msgid "The person or organization accountable for this agent."
+msgstr ""
+
+#, fuzzy
+#| msgid "What you can do:"
+msgid "What does this agent do?"
+msgstr "Qué puedes hacer:"
+
+msgid "Shown publicly on the agent's profile."
+msgstr ""
+
 msgid "How do you want to appear?"
 msgstr "¿Cómo quieres aparecer?"
 
@@ -286,8 +296,12 @@ msgstr "Biografía"
 msgid "Choose a pseudonym — it becomes your public name."
 msgstr "Elige un seudónimo — será tu nombre público."
 
-msgid "Pick an alias so others can recognize you without seeing your username."
+msgid ""
+"Pick an alias so others can recognize you without seeing your username."
 msgstr "Elige un alias para que otros te reconozcan sin ver tu @usuario."
+
+msgid "Declared agents must name an accountable operator."
+msgstr ""
 
 msgid "Your account is already verified."
 msgstr "Tu cuenta ya está verificada."
@@ -333,10 +347,11 @@ msgstr ""
 msgid "Get notified when a user starts following you."
 msgstr "Recibe notificaciones cuando un usuario empiece a seguirte."
 
-msgid "Get notified when someone likes or dislikes your comments or forecasts."
+msgid ""
+"Get notified when someone likes or dislikes your comments or forecasts."
 msgstr ""
-"Recibe notificaciones cuando a alguien le gusten o disgusten tus comentarios "
-"o pronósticos."
+"Recibe notificaciones cuando a alguien le gusten o disgusten tus comentarios"
+" o pronósticos."
 
 msgid ""
 "Get notified when a market closes and see the reputation points you gained "
@@ -457,6 +472,12 @@ msgstr ""
 msgid "Auth0 did not return a valid profile."
 msgstr "Auth0 no devolvió un perfil válido."
 
+#, fuzzy
+#| msgid "We couldn't complete the Auth0 sign-in. Please try again."
+msgid "We could not verify you are human. Please try again."
+msgstr ""
+"No pudimos completar el inicio de sesión con Auth0. Inténtalo de nuevo."
+
 msgid ""
 "We could not email the verification link (Resend test mode). Use the "
 "development link on the next page."
@@ -517,6 +538,38 @@ msgstr "Preferencias de alerta guardadas."
 msgid "All notifications marked as read."
 msgstr "Se han marcado todas las notificaciones como leídas"
 
+msgid "Content rejected by anti-spam checks."
+msgstr ""
+
+msgid "You're doing that too often. Please wait a bit and try again."
+msgstr ""
+
+msgid "View challenge"
+msgstr "Ver desafío"
+
+#, python-format
+msgid "%(actor)s invited you to a challenge: %(title)s."
+msgstr "%(actor)s te invitó a un desafío: %(title)s."
+
+#, python-format
+msgid "%(actor)s accepted your challenge: %(title)s."
+msgstr "%(actor)s aceptó tu desafío: %(title)s."
+
+#, python-format
+msgid "An event in your challenge “%(challenge)s” was resolved: %(market)s."
+msgstr "Un evento de tu desafío «%(challenge)s» se resolvió: %(market)s."
+
+#, python-format
+msgid "Your challenge “%(title)s” is complete. Winner: %(winner)s."
+msgstr "Tu desafío «%(title)s» terminó. Ganador: %(winner)s."
+
+#, python-format
+msgid "Your challenge “%(title)s” ended in a tie."
+msgstr "Tu desafío «%(title)s» terminó en empate."
+
+msgid "You have a new update on a challenge you joined."
+msgstr "Hay una novedad en un desafío al que te uniste."
+
 #, fuzzy
 #| msgid "Your name"
 msgid "Group name"
@@ -543,6 +596,19 @@ msgstr "Puede seleccionar como máximo %(max)s eventos."
 msgid "You cannot challenge yourself."
 msgstr "No puedes desafiarte a ti mismo."
 
+#, fuzzy
+#| msgid "You can only delete your own posts."
+msgid "You can only use your own saved groups."
+msgstr "Solo puedes eliminar tus propias publicaciones."
+
+msgid "The selected group has no members you can currently challenge."
+msgstr ""
+
+#, fuzzy
+#| msgid "Select at least one user to challenge."
+msgid "Select at least one user to challenge, or choose a saved group."
+msgstr "Seleccione al menos un usuario para desafiar."
+
 msgid "Pending"
 msgstr "Pendiente"
 
@@ -554,6 +620,10 @@ msgstr "Completado"
 
 msgid "Cancelled"
 msgstr "Cancelado"
+
+msgid ""
+"When set, the challenge activates after the first invited member accepts."
+msgstr ""
 
 #, python-format
 msgid "Challenge with %(count)s event"
@@ -594,6 +664,12 @@ msgstr "No se han encontrado uno o más usuarios seleccionados."
 msgid "You and @%(username)s must follow each other to challenge them."
 msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
 
+msgid "The selected group has no eligible members."
+msgstr ""
+
+msgid "Opponents must belong to the selected group."
+msgstr ""
+
 msgid "You are not part of this challenge."
 msgstr "No eres parte de este desafío."
 
@@ -618,7 +694,8 @@ msgid "You cannot add yourself to a group."
 msgstr "No puedes desafiarte a ti mismo."
 
 #, fuzzy, python-format
-#| msgid "You and @%(username)s must follow each other to challenge them."
+#| msgid ""
+#| "You and @%(username)s must follow each other to challenge them."
 msgid "You and @%(username)s must follow each other to add them to a group."
 msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
 
@@ -626,6 +703,11 @@ msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
 #| msgid "You already declined this challenge."
 msgid "You already have a group with this name."
 msgstr "Ya has rechazado este desafío."
+
+#, fuzzy
+#| msgid "Challenge created. Waiting for opponents to accept."
+msgid "Group challenge created. It starts when the first member accepts."
+msgstr "Desafío creado. A la espera de que los oponentes acepten."
 
 msgid "Challenge created. Waiting for opponents to accept."
 msgstr "Desafío creado. A la espera de que los oponentes acepten."
@@ -699,9 +781,6 @@ msgstr "ID de destino no válido"
 
 msgid "Polymarket"
 msgstr "Todos los mercados"
-
-msgid "price"
-msgstr "precio"
 
 msgid "Crypto"
 msgstr "Criptomonedas"
@@ -826,6 +905,30 @@ msgstr "La más reciente"
 msgid "Ending soon"
 msgstr "Termina pronto"
 
+#, fuzzy
+#| msgid "Your name"
+msgid "Token name"
+msgstr "Tu nombre"
+
+msgid "A label to recognize this token, e.g. 'forecasting-bot'."
+msgstr ""
+
+msgid "Scopes"
+msgstr ""
+
+#, python-format
+msgid "You are not allowed to grant these scopes: %(scopes)s"
+msgstr ""
+
+msgid "Token created. Copy it now — it won't be shown again."
+msgstr ""
+
+msgid "Token revoked."
+msgstr ""
+
+msgid "Token rotated. Copy the new value now — it won't be shown again."
+msgstr ""
+
 msgid "What data, news, or logic supports your pick?"
 msgstr "¿Qué datos, noticias o lógica respaldan su elección?"
 
@@ -864,9 +967,10 @@ msgid ""
 "first. It already counts toward the challenge leaderboard and your global "
 "reputation."
 msgstr ""
-"Ya tienes un pronóstico abierto en este evento del desafío (%(challenges)s). "
-"Solo se permite un pronóstico abierto por evento — cierra tu posición actual "
-"primero. Ya cuenta para el ranking del desafío y tu reputación global."
+"Ya tienes un pronóstico abierto en este evento del desafío (%(challenges)s)."
+" Solo se permite un pronóstico abierto por evento — cierra tu posición "
+"actual primero. Ya cuenta para el ranking del desafío y tu reputación "
+"global."
 
 msgid ""
 "You already have an open forecast on this market. Only one open forecast is "
@@ -997,6 +1101,12 @@ msgstr "Guardar preferencias"
 msgid "Back to profile"
 msgstr "Tu perfil"
 
+msgid "Developer & Agent access"
+msgstr ""
+
+msgid "Create MCP tokens for AI agents and scripts."
+msgstr ""
+
 msgid "Push on this device"
 msgstr "Push en este dispositivo"
 
@@ -1064,7 +1174,8 @@ msgid "Your library"
 msgstr "Su catálogo"
 
 msgid "Forecasts and forum posts you bookmarked."
-msgstr "Previsiones y publicaciones en el foro que has marcado como favoritas."
+msgstr ""
+"Previsiones y publicaciones en el foro que has marcado como favoritas."
 
 msgid "All"
 msgstr "Todo"
@@ -1114,17 +1225,17 @@ msgstr "Iniciar sesión"
 msgid "Enter your credentials to access your account."
 msgstr "Introduce tus credenciales para acceder a tu cuenta."
 
+msgid "Continue with Google"
+msgstr "Continuar con Google"
+
+msgid "or"
+msgstr "o"
+
 msgid "Username"
 msgstr "Nombre de usuario"
 
 msgid "Password"
 msgstr "Contraseña"
-
-msgid "or"
-msgstr "o"
-
-msgid "Continue with Google"
-msgstr "Continuar con Google"
 
 msgid "No account?"
 msgstr "¿No tienes cuenta?"
@@ -1490,20 +1601,20 @@ msgid "Predictions"
 msgstr "Predicciones"
 
 #, python-format
-msgid "%(correct)s correct · %(incorrect)s incorrect"
-msgstr "%(correct)s correcto · %(incorrect)s incorrecto"
-
-#, python-format
 msgid "%(open)s open"
 msgid_plural "%(open)s open"
 msgstr[0] "%(open)s abierto"
 msgstr[1] "%(open)s abiertos"
 
-msgid "Based on resolved forecasts only."
-msgstr "Solo cuenta pronósticos ya resueltos."
+#, python-format
+msgid "%(correct)s correct · %(incorrect)s incorrect"
+msgstr "%(correct)s correcto · %(incorrect)s incorrecto"
 
 msgid "Accuracy"
 msgstr "Exactitud"
+
+msgid "Based on resolved forecasts only."
+msgstr "Solo cuenta pronósticos ya resueltos."
 
 #, python-format
 msgid "%(days)s-day streak"
@@ -1555,8 +1666,8 @@ msgid "Expertise by category"
 msgstr "Explorar por categoría"
 
 msgid ""
-"Reputation and popularity broken down by topic — spot specialists in crypto, "
-"politics, sports, and more."
+"Reputation and popularity broken down by topic — spot specialists in crypto,"
+" politics, sports, and more."
 msgstr ""
 "Reputación y popularidad desglosadas por tema: encuentra especialistas en "
 "criptomonedas, política, deportes y más."
@@ -1586,14 +1697,16 @@ msgstr "Rankings"
 msgid "%(correct)s/%(total)s correct"
 msgstr "%(correct)s/%(total)s correctos"
 
-msgid "Prediction History"
-msgstr "Historial de predicciones"
+msgid "Track record"
+msgstr "Historial"
 
 msgid "View all"
 msgstr "Ver todo"
 
-msgid "No predictions yet."
-msgstr "Aún no hay clasificaciones."
+#, fuzzy
+#| msgid "No match forecasts yet."
+msgid "No closed forecasts yet."
+msgstr "Aún no hay pronósticos de partidos."
 
 msgid "Edit Profile"
 msgstr "Editar perfil"
@@ -1635,8 +1748,13 @@ msgid ""
 "Step 2 of 2 — pick a public identity, preview how others will see you, and "
 "optionally request verification. You can change this anytime in settings."
 msgstr ""
-"Paso 2 de 2 — elige tu identidad pública, previsualiza cómo te verán otros y "
-"opcionalmente solicita verificación. Puedes cambiarlo en ajustes."
+"Paso 2 de 2 — elige tu identidad pública, previsualiza cómo te verán otros y"
+" opcionalmente solicita verificación. Puedes cambiarlo en ajustes."
+
+#, fuzzy
+#| msgid "Account"
+msgid "Account type"
+msgstr "Cuenta"
 
 msgid "Finish setup"
 msgstr "Finalizar configuración"
@@ -1654,7 +1772,8 @@ msgid "track record"
 msgstr "historial"
 
 msgid ""
-"Create your account in seconds. Next, choose how you want to appear publicly."
+"Create your account in seconds. Next, choose how you want to appear "
+"publicly."
 msgstr ""
 "Crea tu cuenta en segundos. Después, elige cómo quieres aparecer "
 "públicamente."
@@ -1673,9 +1792,6 @@ msgstr "Requisitos de contraseña"
 
 msgid "Continue"
 msgstr "Continuar"
-
-msgid "Sign up with Auth0"
-msgstr "Registrarse con Auth0"
 
 msgid "Already have an account?"
 msgstr "Crear cuenta"
@@ -1713,8 +1829,8 @@ msgid "Next"
 msgstr "Siguiente"
 
 msgid ""
-"Search by name, @username, email, pseudonym, or bio. We also surface similar "
-"accounts when the match is close."
+"Search by name, @username, email, pseudonym, or bio. We also surface similar"
+" accounts when the match is close."
 msgstr ""
 
 msgid "Search"
@@ -1758,11 +1874,11 @@ msgid "Waiting for confirmation"
 msgstr "Esperando confirmación"
 
 msgid ""
-"Until your email is verified you can only use this page, log out, or request "
-"a new link."
+"Until your email is verified you can only use this page, log out, or request"
+" a new link."
 msgstr ""
-"Hasta verificar tu email solo puedes usar esta página, cerrar sesión o pedir "
-"un enlace nuevo."
+"Hasta verificar tu email solo puedes usar esta página, cerrar sesión o pedir"
+" un enlace nuevo."
 
 msgid "Development shortcut"
 msgstr "Atajo de desarrollo"
@@ -1875,9 +1991,6 @@ msgstr "Pronósticos"
 msgid "New challenge"
 msgstr "Nuevo desafío"
 
-msgid "selected"
-msgstr "seleccionados"
-
 msgid "Breadcrumb"
 msgstr "Miga de pan"
 
@@ -1890,7 +2003,8 @@ msgstr "Crea un"
 msgid "challenge"
 msgstr "desafío"
 
-msgid "Choose who you want to challenge. You can only invite mutual followers."
+msgid ""
+"Choose who you want to challenge. You can only invite mutual followers."
 msgstr ""
 "Elige a quién quieres desafiar. Solo puedes invitar a seguidores mutuos."
 
@@ -1924,21 +2038,52 @@ msgid "Name (optional)"
 msgstr "Nombre (opcional)"
 
 #, fuzzy
-#| msgid "selected"
-msgid "Quick select"
-msgstr "seleccionados"
+#| msgid "Create a"
+msgid "Saved groups"
+msgstr "Crea un"
 
-msgid "Apply a saved group to select opponents."
+#, fuzzy
+#| msgid "Challenges"
+msgid "Manage groups"
+msgstr "Desafíos"
+
+msgid ""
+"Select a group to challenge. The challenge starts when the first member "
+"accepts — others can still join later."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "%(counter)s event"
+#| msgid_plural "%(counter)s events"
+msgid "%(counter)s member"
+msgid_plural "%(counter)s members"
+msgstr[0] "%(counter)s evento"
+msgstr[1] "%(counter)s eventos"
+
+msgid "Group selected — all members will be invited."
 msgstr ""
 
 msgid "Opponents"
 msgstr "Oponentes"
+
+#, fuzzy
+#| msgid "No mutual followers yet."
+msgid "Or pick individual mutual followers below."
+msgstr "Todavía no hay seguidores mutuos."
+
+msgid ""
+"Members included from the selected group. Deselect the group above to pick "
+"individuals."
+msgstr ""
 
 msgid "Select at least one user to continue."
 msgstr "Selecciona al menos un usuario para continuar."
 
 msgid "user(s) selected"
 msgstr "usuario(s) seleccionado(s)"
+
+msgid "group member(s) will be invited"
+msgstr ""
 
 msgid "No mutual followers yet."
 msgstr "Todavía no hay seguidores mutuos."
@@ -1982,9 +2127,17 @@ msgstr "Volver"
 msgid "Send challenge"
 msgstr "Enviar desafío"
 
+msgid "How challenges work"
+msgstr "Cómo funcionan los desafíos"
+
 #, python-format
 msgid "Created by @%(username)s"
 msgstr "Creado por @%(username)s"
+
+#, fuzzy, python-format
+#| msgid "Your name"
+msgid "Group: %(group_name)s"
+msgstr "Tu nombre"
 
 #, python-format
 msgid "Started %(date)s"
@@ -2007,6 +2160,12 @@ msgstr "Aceptar desafío"
 msgid "Decline"
 msgstr "Rechazar"
 
+#, python-format
+msgid ""
+"Waiting for a member of %(group_name)s to accept. The challenge starts with "
+"the first acceptance."
+msgstr ""
+
 msgid "Waiting for opponents to respond."
 msgstr "Esperando a que los oponentes respondan."
 
@@ -2015,7 +2174,8 @@ msgid "Winner: %(name)s"
 msgstr "Ganador: %(name)s"
 
 msgid "Highest total reputation score across all challenge events."
-msgstr "Mayor puntuación total de reputación en todos los eventos del desafío."
+msgstr ""
+"Mayor puntuación total de reputación en todos los eventos del desafío."
 
 msgid "Tie — no winner"
 msgstr "Empate — sin ganador"
@@ -2081,8 +2241,8 @@ msgstr ""
 
 #, fuzzy
 #| msgid ""
-#| "You need mutual followers to create a challenge. Follow someone who "
-#| "follows you back."
+#| "You need mutual followers to create a challenge. Follow someone who follows "
+#| "you back."
 msgid ""
 "You need mutual followers to create a group. Follow someone who follows you "
 "back."
@@ -2113,14 +2273,6 @@ msgstr ""
 msgid "Back to challenges"
 msgstr "Ver desafíos"
 
-#, fuzzy, python-format
-#| msgid "%(counter)s event"
-#| msgid_plural "%(counter)s events"
-msgid "%(counter)s member"
-msgid_plural "%(counter)s members"
-msgstr[0] "%(counter)s evento"
-msgstr[1] "%(counter)s eventos"
-
 #, fuzzy
 #| msgid "Delete post?"
 msgid "Delete this group?"
@@ -2143,8 +2295,265 @@ msgstr ""
 msgid "Create your first group"
 msgstr "Crea tu primer desafío"
 
+msgid "How it works"
+msgstr "Cómo funciona"
+
 msgid "Social"
 msgstr "Social"
+
+#| msgid "Hot"
+msgid "How"
+msgstr "Cómo"
+
+#| msgid "How challenges work"
+msgid "challenges work"
+msgstr "funcionan los desafíos"
+
+msgid ""
+"Head-to-head reputation duels with mutual followers on real-world events. No"
+" extra bets — your forecasts are the score."
+msgstr ""
+"Duelos de reputación cara a cara con seguidores mutuos en eventos del mundo "
+"real. Sin apuestas extra — tus pronósticos son la puntuación."
+
+msgid "Mutual followers"
+msgstr "Seguidores mutuos"
+
+msgid "You can only challenge people who follow you back."
+msgstr "Solo puedes desafiar a personas que te siguen de vuelta."
+
+#, python-format
+msgid "Up to %(max)s events"
+msgstr "Hasta %(max)s eventos"
+
+msgid ""
+"Pick open markets everyone will compete on. The duel ends when all of them "
+"resolve."
+msgstr ""
+"Elige mercados abiertos en los que todos competirán. El duelo termina cuando"
+" se resuelvan todos."
+
+msgid "Highest reputation wins"
+msgstr "Gana quien sume más reputación"
+
+msgid ""
+"Only predictive reputation counts — likes and votes never affect the score."
+msgstr ""
+"Solo cuenta la reputación predictiva — los likes y votos nunca afectan la "
+"puntuación."
+
+msgid "From invitation to winner"
+msgstr "De la invitación al ganador"
+
+msgid "Create or get invited"
+msgstr "Crea o recibe una invitación"
+
+msgid ""
+"Someone picks the events and invites opponents. You can accept or decline."
+msgstr ""
+"Alguien elige los eventos e invita oponentes. Puedes aceptar o rechazar."
+
+msgid "Challenge goes live"
+msgstr "El desafío se activa"
+
+msgid ""
+"Once everyone has responded, the challenge activates and the clock starts. "
+"Group challenges can start when the first invited member accepts."
+msgstr ""
+"Cuando todos han respondido, el desafío se activa y empieza el cronómetro. "
+"Los desafíos de grupo pueden empezar cuando el primer invitado acepta."
+
+msgid "Forecast on the events"
+msgstr "Pronostica en los eventos"
+
+msgid ""
+"Publish formal forecasts on the challenge markets — or keep an existing one."
+" See the next section."
+msgstr ""
+"Publica pronósticos formales en los mercados del desafío — o conserva uno "
+"que ya tengas. Mira la siguiente sección."
+
+msgid "Markets resolve"
+msgstr "Los mercados se resuelven"
+
+msgid ""
+"When every event in the challenge resolves, we tally final reputation "
+"points. The highest total wins; a tie means no single winner."
+msgstr ""
+"Cuando se resuelve cada evento del desafío, sumamos los puntos finales de "
+"reputación. Gana quien tenga más total; un empate significa que no hay "
+"ganador único."
+
+msgid "Already forecast on a challenge event?"
+msgstr "¿Ya pronosticaste en un evento del desafío?"
+
+msgid ""
+"You do not need to place a new forecast just because an event was added to a"
+" challenge."
+msgstr ""
+"No necesitas hacer un pronóstico nuevo solo porque un evento se añadió a un "
+"desafío."
+
+msgid ""
+"Your existing open forecast counts automatically once the challenge is live."
+msgstr ""
+"Tu pronóstico abierto existente cuenta automáticamente cuando el desafío "
+"está activo."
+
+msgid ""
+"If you already have a <strong class=\"text-slate-800 dark:text-"
+"slate-200\">pending forecast</strong> on one of the challenge events, it is "
+"included in your challenge score immediately — no duplicate pick required."
+msgstr ""
+"Si ya tienes un <strong class=\"text-slate-800 dark:text-"
+"slate-200\">pronóstico pendiente</strong> en uno de los eventos del desafío,"
+" se incluye en tu puntuación de inmediato — no hace falta volver a elegir."
+
+msgid ""
+"While the market is still open, we show <strong class=\"text-slate-800 "
+"dark:text-slate-200\">unrealized</strong> reputation (mark-to-market P&amp;L"
+" against current odds). When the market resolves or you exit early, those "
+"points become <strong class=\"text-slate-800 dark:text-"
+"slate-200\">realized</strong>."
+msgstr ""
+"Mientras el mercado sigue abierto, mostramos reputación <strong "
+"class=\"text-slate-800 dark:text-slate-200\">no realizada</strong> (P&amp;L "
+"mark-to-market contra las cuotas actuales). Cuando el mercado se resuelve o "
+"sales temprano, esos puntos pasan a ser <strong class=\"text-slate-800 "
+"dark:text-slate-200\">realizados</strong>."
+
+msgid ""
+"<strong class=\"font-medium\">After you accept</strong>, only reputation "
+"earned from that moment onward counts toward realized points. Resolutions or"
+" early exits that happened before you joined the challenge do not count — "
+"but an open forecast you placed earlier still contributes live unrealized "
+"points."
+msgstr ""
+"<strong class=\"font-medium\">Después de aceptar</strong>, solo cuenta la "
+"reputación ganada desde ese momento hacia los puntos realizados. "
+"Resoluciones o salidas tempranas anteriores a unirte al desafío no cuentan —"
+" pero un pronóstico abierto que hayas hecho antes sigue aportando puntos no "
+"realizados en vivo."
+
+msgid "How points are calculated"
+msgstr "Cómo se calculan los puntos"
+
+msgid ""
+"Challenges use the same <span class=\"badge-rep\">Reputation</span> rules as"
+" the rest of PredictStamp — based on market odds when you forecast, not on "
+"votes or popularity."
+msgstr ""
+"Los desafíos usan las mismas reglas de <span class=\"badge-"
+"rep\">Reputación</span> que el resto de PredictStamp — basadas en las cuotas"
+" del mercado cuando pronosticas, no en votos ni popularidad."
+
+msgid "Correct →"
+msgstr "Correcto"
+
+#, python-format
+msgid "+ (100 − market %%)"
+msgstr "+ (100 − %% de mercado)"
+
+msgid "Incorrect →"
+msgstr "Incorrecto"
+
+#, python-format
+msgid "− market %%"
+msgstr "− %% del mercado"
+
+msgid "Realized"
+msgstr "Realizado"
+
+msgid "Points locked in when a market resolves or you exit a forecast early."
+msgstr ""
+"Puntos fijados cuando un mercado se resuelve o sales temprano de un "
+"pronóstico."
+
+msgid "Unrealized"
+msgstr "No realizado"
+
+msgid "Live estimate on open markets — updates as odds move."
+msgstr ""
+"Estimación en vivo en mercados abiertos — se actualiza cuando cambian las "
+"cuotas."
+
+msgid ""
+"Your challenge total is <strong class=\"text-slate-800 dark:text-"
+"slate-200\">realized + unrealized</strong> across all events in the duel. "
+"The leaderboard inside each challenge shows both columns."
+msgstr ""
+"Tu total del desafío es <strong class=\"text-slate-800 dark:text-"
+"slate-200\">realizado + no realizado</strong> en todos los eventos del "
+"duelo. La clasificación dentro de cada desafío muestra ambas columnas."
+
+#, python-format
+msgid ""
+"For more examples and edge cases, see the <a href=\"%(faq_url)s\" "
+"class=\"font-medium text-brand-600 hover:underline dark:text-"
+"brand-400\">FAQ</a>."
+msgstr ""
+"Para más ejemplos y casos límite, consulta las <a href=\"%(faq_url)s\" "
+"class=\"font-medium text-brand-600 hover:underline dark:text-"
+"brand-400\">preguntas frecuentes</a>."
+
+msgid "Common questions"
+msgstr "Preguntas frecuentes"
+
+msgid "Do I need to bet money or place a special challenge forecast?"
+msgstr ""
+"¿Necesito apostar dinero o hacer un pronóstico especial para el desafío?"
+
+msgid ""
+"<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> "
+"PredictStamp has no wallets or real-money betting. A challenge reuses your "
+"normal formal forecasts on the selected events — there is no separate wager."
+msgstr ""
+"<strong class=\"text-slate-800 dark:text-slate-200\">No.</strong> "
+"PredictStamp no tiene billeteras ni apuestas con dinero real. Un desafío "
+"reutiliza tus pronósticos formales normales en los eventos seleccionados — "
+"no hay una apuesta aparte."
+
+msgid "Can I join multiple challenges on the same event?"
+msgstr "¿Puedo unirme a varios desafíos en el mismo evento?"
+
+msgid ""
+"Yes. One forecast on a market can count toward every active challenge that "
+"includes that event."
+msgstr ""
+"Sí. Un pronóstico en un mercado puede contar para cada desafío activo que "
+"incluya ese evento."
+
+msgid "What are challenge groups?"
+msgstr "¿Qué son los grupos de desafío?"
+
+msgid ""
+"Saved lists of mutual followers for quick invitations. Group challenges can "
+"start as soon as the first invited member accepts, instead of waiting for "
+"every response."
+msgstr ""
+"Listas guardadas de seguidores mutuos para invitar rápido. Los desafíos de "
+"grupo pueden empezar en cuanto el primer miembro invitado acepta, sin "
+"esperar a que todos respondan."
+
+msgid "Do upvotes affect my challenge score?"
+msgstr "¿Los votos positivos afectan mi puntuación en el desafío?"
+
+msgid ""
+"No. <span class=\"badge-pop\">Popularity</span> from votes is completely "
+"separate. Only reputation from forecasts determines the winner."
+msgstr ""
+"No. La <span class=\"badge-pop\">Popularidad</span> de los votos es "
+"completamente independiente. Solo la reputación de los pronósticos determina"
+" al ganador."
+
+msgid "Ready to compete?"
+msgstr "¿Listo para competir?"
+
+msgid "Challenge a mutual follower or respond to a pending invitation."
+msgstr "Desafía a un seguidor mutuo o responde a una invitación pendiente."
+
+msgid "My challenges"
+msgstr "Mis desafíos"
 
 msgid ""
 "Compete with mutual followers on up to 10 events. Highest reputation score "
@@ -2152,6 +2561,9 @@ msgid ""
 msgstr ""
 "Compite con seguidores mutuos en hasta 10 eventos. Gana quien tenga más "
 "reputación."
+
+msgid "Manage challenge groups"
+msgstr "Administrar grupos de desafío"
 
 msgid "Pending invitations"
 msgstr "Invitaciones pendientes"
@@ -2209,17 +2621,11 @@ msgid ""
 "challenge events at current odds — including open forecasts you placed "
 "before joining, once the challenge is live."
 msgstr ""
-"Los puntos realizados solo cuentan desde que te unes al desafío (pronósticos "
-"resueltos o cerrados en esos eventos). Los no realizados estiman el P&L en "
+"Los puntos realizados solo cuentan desde que te unes al desafío (pronósticos"
+" resueltos o cerrados en esos eventos). Los no realizados estiman el P&L en "
 "eventos abiertos del desafío según las cuotas actuales — incluidos los "
 "pronósticos abiertos que hiciste antes de unirte, una vez el desafío está "
 "activo."
-
-msgid "Realized"
-msgstr "Realizado"
-
-msgid "Unrealized"
-msgstr "No realizado"
 
 msgid "Combined"
 msgstr "Combinado"
@@ -2437,7 +2843,8 @@ msgstr "Unirse a la conversación"
 msgid "Close comment form"
 msgstr "Comentario de cierre"
 
-msgid "What do you think about this forecast? Agree, disagree, or add context…"
+msgid ""
+"What do you think about this forecast? Agree, disagree, or add context…"
 msgstr ""
 "¿Qué opinas de esta previsión? De acuerdo, en desacuerdo o añadiendo "
 "contexto..."
@@ -2599,8 +3006,8 @@ msgid ""
 "into public records."
 msgstr ""
 "Los mercados de predicción son una de las herramientas más poderosas para "
-"medir la inteligencia colectiva, convirtiendo las opiniones en señales y los "
-"eventos futuros en registros públicos."
+"medir la inteligencia colectiva, convirtiendo las opiniones en señales y los"
+" eventos futuros en registros públicos."
 
 msgid "What gets measured"
 msgstr "Qué se mide"
@@ -2626,7 +3033,8 @@ msgid ""
 "record."
 msgstr ""
 "Credibilidad ganada con un historial público de criterio — no suerte, ni "
-"capital, ni hype. PredictStamp respalda la inteligencia social con historial."
+"capital, ni hype. PredictStamp respalda la inteligencia social con "
+"historial."
 
 msgid "Secures with track record"
 msgstr "Respaldado por historial"
@@ -2636,8 +3044,8 @@ msgid ""
 "accuracy, and consistency over time. Every forecast, thesis, and challenge "
 "adds to a public record that follows you."
 msgstr ""
-"Demuestras que construiste algo real: predicciones reflexivas, razonamiento, "
-"precisión y consistencia a lo largo del tiempo. Cada pronóstico, tesis y "
+"Demuestras que construiste algo real: predicciones reflexivas, razonamiento,"
+" precisión y consistencia a lo largo del tiempo. Cada pronóstico, tesis y "
 "desafío se suma a un registro público que te sigue."
 
 msgid "Judgment is the entry fee"
@@ -2661,9 +3069,9 @@ msgid ""
 "Markets resolve objectively. Reputation follows accuracy — rewarding early "
 "conviction against the odds and penalizing overconfidence."
 msgstr ""
-"Los mercados se resuelven objetivamente. La reputación sigue a la precisión, "
-"recompensando la convicción temprana contra viento y marea y penalizando el "
-"exceso de confianza."
+"Los mercados se resuelven objetivamente. La reputación sigue a la precisión,"
+" recompensando la convicción temprana contra viento y marea y penalizando el"
+" exceso de confianza."
 
 msgid "Verifiable history"
 msgstr "Historial verificable"
@@ -2687,8 +3095,8 @@ msgstr ""
 "noreferrer\" class=\"font-medium text-violet-600 underline decoration-"
 "violet-300 underline-offset-2 hover:text-violet-700 dark:text-"
 "violet-400\">EAS</a>, la reputación puede volverse portátil, transparente y "
-"difícil de falsificar, pruebas que llevas a otras aplicaciones y ecosistemas "
-"de agentes."
+"difícil de falsificar, pruebas que llevas a otras aplicaciones y ecosistemas"
+" de agentes."
 
 msgid "The platform"
 msgstr "La plataforma"
@@ -2776,8 +3184,8 @@ msgid "Demonstrated judgment"
 msgstr "Criterio demostrado"
 
 msgid ""
-"Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes "
-"never touch this score."
+"Earned when forecasts resolve. Harder contrarian calls score higher. Upvotes"
+" never touch this score."
 msgstr ""
 "Se gana cuando los pronósticos se resuelven. Las predicciones a "
 "contracorriente más difíciles suman más. Los votos a favor no afectan esta "
@@ -2787,12 +3195,12 @@ msgid "Attention"
 msgstr "Atención"
 
 msgid ""
-"Driven by votes on comments and forecasts. A post can be popular and wrong — "
-"memes welcome, but status comes from being right over time."
+"Driven by votes on comments and forecasts. A post can be popular and wrong —"
+" memes welcome, but status comes from being right over time."
 msgstr ""
 "Impulsado por votos en comentarios y pronósticos. Una publicación puede ser "
-"popular e incorrecta: los memes son bienvenidos, pero el estatus proviene de "
-"tener razón con el tiempo."
+"popular e incorrecta: los memes son bienvenidos, pero el estatus proviene de"
+" tener razón con el tiempo."
 
 msgid "Meritocracy"
 msgstr "Meritocracia"
@@ -2881,8 +3289,8 @@ msgid ""
 "reputation becomes an asset."
 msgstr ""
 "Feeds pagados, análisis premium, tesis de suscriptores, comunidades de "
-"expertos y agentes de IA capacitados en experiencia de dominio: si tu juicio "
-"crea valor, tu reputación se convierte en un activo."
+"expertos y agentes de IA capacitados en experiencia de dominio: si tu juicio"
+" crea valor, tu reputación se convierte en un activo."
 
 msgid "AI-native"
 msgstr "Nativo de IA"
@@ -3006,14 +3414,13 @@ msgstr ""
 msgid "Super Admin"
 msgstr ""
 
+#, fuzzy
+#| msgid "Reactions"
+msgid "Moderation"
+msgstr "Reacciones"
+
 msgid "Django Admin"
 msgstr ""
-
-#, python-format
-msgid "Hay %(count)s solicitud de verificación pendiente de revisar."
-msgid_plural "Hay %(count)s solicitudes de verificación pendientes de revisar."
-msgstr[0] ""
-msgstr[1] ""
 
 msgid "Usuarios recientes"
 msgstr ""
@@ -3105,8 +3512,8 @@ msgstr ""
 msgid ""
 "Resolved forecasts only. Based on Polymarket odds at the time you predicted."
 msgstr ""
-"Solo pronósticos resueltos. Basado en las probabilidades de Polymarket en el "
-"momento en que predijiste."
+"Solo pronósticos resueltos. Basado en las probabilidades de Polymarket en el"
+" momento en que predijiste."
 
 msgid ""
 "Upvotes (+1) and downvotes (−1) on comments and forecasts. Never affects "
@@ -3127,20 +3534,6 @@ msgstr ""
 
 msgid "at the moment you submitted it"
 msgstr "en el momento en que lo enviaste"
-
-msgid "Correct →"
-msgstr "Correcto"
-
-#, python-format
-msgid "+ (100 − market %%)"
-msgstr "+ (100 − %% de mercado)"
-
-msgid "Incorrect →"
-msgstr "Incorrecto"
-
-#, python-format
-msgid "− market %%"
-msgstr "Mercado"
 
 #, python-format
 msgid "Consensus pick — market at 90%% Yes"
@@ -3191,14 +3584,11 @@ msgid "Wrong: −50"
 msgstr "Incorrecto: −50"
 
 msgid ""
-"Every change creates an auditable event record with a human-readable reason. "
-"Resolved forecasts cannot be deleted."
+"Every change creates an auditable event record with a human-readable reason."
+" Resolved forecasts cannot be deleted."
 msgstr ""
 "Cada cambio crea un registro auditable con una razón legible. Los "
 "pronósticos resueltos no se pueden eliminar."
-
-msgid "Common questions"
-msgstr "Preguntas frecuentes"
 
 msgid "What is the difference between reputation and popularity?"
 msgstr "¿Cuál es la diferencia entre reputación y popularidad?"
@@ -3207,17 +3597,18 @@ msgid ""
 "<span class=\"badge-rep\">Reputation</span> measures whether your <strong "
 "class=\"text-slate-800 dark:text-slate-200\">formal forecasts</strong> were "
 "right after markets resolve. <span class=\"badge-pop\">Popularity</span> "
-"measures social engagement — upvotes and downvotes on comments and forecasts."
+"measures social engagement — upvotes and downvotes on comments and "
+"forecasts."
 msgstr ""
-"<span class=\"badge-rep\">Reputación</span> mide si tus <strong class=\"text-"
-"slate-800 dark:text-slate-200\">pronósticos formales</strong> fueron "
-"correctos tras resolver los mercados. <span class=\"badge-pop\">Popularidad</"
-"span> mide el engagement social — votos positivos y negativos en comentarios "
-"y pronósticos."
+"<span class=\"badge-rep\">Reputación</span> mide si tus <strong "
+"class=\"text-slate-800 dark:text-slate-200\">pronósticos formales</strong> "
+"fueron correctos tras resolver los mercados. <span class=\"badge-"
+"pop\">Popularidad</span> mide el engagement social — votos positivos y "
+"negativos en comentarios y pronósticos."
 
 msgid ""
-"A meme comment can top the popularity leaderboard while a quiet analyst tops "
-"reputation. The systems never cross-contaminate."
+"A meme comment can top the popularity leaderboard while a quiet analyst tops"
+" reputation. The systems never cross-contaminate."
 msgstr ""
 "Un comentario meme puede liderar el ranking de popularidad mientras un "
 "analista discreto lidera la reputación. Los sistemas nunca se mezclan."
@@ -3226,15 +3617,15 @@ msgid "Do comments affect my reputation?"
 msgstr "¿Los comentarios afectan mi reputación?"
 
 msgid ""
-"No. Comments only affect <span class=\"badge-pop\">Popularity</span> through "
-"votes. Reputation changes only when a <strong class=\"text-slate-800 "
+"No. Comments only affect <span class=\"badge-pop\">Popularity</span> through"
+" votes. Reputation changes only when a <strong class=\"text-slate-800 "
 "dark:text-slate-200\">formal prediction</strong> you published is resolved "
 "against the market outcome."
 msgstr ""
-"No. Los comentarios solo afectan la <span class=\"badge-pop\">Popularidad</"
-"span> mediante votos. La reputación cambia solo cuando un <strong "
-"class=\"text-slate-800 dark:text-slate-200\">pronóstico formal</strong> que "
-"publicaste se resuelve contra el resultado del mercado."
+"No. Los comentarios solo afectan la <span class=\"badge-"
+"pop\">Popularidad</span> mediante votos. La reputación cambia solo cuando un"
+" <strong class=\"text-slate-800 dark:text-slate-200\">pronóstico "
+"formal</strong> que publicaste se resuelve contra el resultado del mercado."
 
 msgid "Can I bet money here?"
 msgstr "¿Puedo apostar dinero aquí?"
@@ -3266,8 +3657,8 @@ msgid ""
 "credibility you earn here."
 msgstr ""
 "Tu historial público puede valer fuera de la plataforma: newsletters de "
-"pago, consultoría, patrocinios o análisis premium basados en la credibilidad "
-"que ganas aquí."
+"pago, consultoría, patrocinios o análisis premium basados en la credibilidad"
+" que ganas aquí."
 
 msgid "How do leaderboards work?"
 msgstr "¿Cómo funcionan los rankings?"
@@ -3312,20 +3703,21 @@ msgstr ""
 
 msgid ""
 "Our roadmap includes optional attestations so your reputation history could "
-"become <strong class=\"text-slate-800 dark:text-slate-200\">portable proofs</"
-"strong> you carry into other apps and agent ecosystems."
+"become <strong class=\"text-slate-800 dark:text-slate-200\">portable "
+"proofs</strong> you carry into other apps and agent ecosystems."
 msgstr ""
 "Nuestra hoja de ruta incluye atestaciones opcionales para que tu historial "
 "de reputación pueda convertirse en <strong class=\"text-slate-800 dark:text-"
-"slate-200\">pruebas portables</strong> que llevas a otras apps y ecosistemas "
-"de agentes."
+"slate-200\">pruebas portables</strong> que llevas a otras apps y ecosistemas"
+" de agentes."
 
 msgid "Can AI agents participate?"
 msgstr "¿Pueden participar agentes de IA?"
 
 msgid ""
-"Yes. Verified agents are labeled with an <span class=\"badge-agent\">AI</"
-"span> badge so readers always know who (or what) they are engaging with."
+"Yes. Verified agents are labeled with an <span class=\"badge-"
+"agent\">AI</span> badge so readers always know who (or what) they are "
+"engaging with."
 msgstr ""
 "Sí. Los agentes verificados llevan la insignia <span class=\"badge-"
 "agent\">IA</span> para que los lectores sepan con quién (o qué) interactúan."
@@ -3398,9 +3790,6 @@ msgstr "Predicciones recientes"
 msgid "Open forecasts"
 msgstr "Pronósticos abiertos"
 
-msgid "Full history"
-msgstr "Historial completo"
-
 msgid "Forecast:"
 msgstr "Pronóstico:"
 
@@ -3410,6 +3799,9 @@ msgstr "Correcto"
 msgid "Incorrect"
 msgstr "Incorrecto"
 
+msgid "No predictions yet."
+msgstr "Aún no hay clasificaciones."
+
 msgid "to make your first prediction."
 msgstr "para hacer tu primera predicción."
 
@@ -3417,8 +3809,8 @@ msgid "Explore"
 msgstr "Explorar"
 
 msgid ""
-"Choose a topic, browse open forecasts, and start earning <span class=\"badge-"
-"rep\">Reputation</span> — no betting, no wallets."
+"Choose a topic, browse open forecasts, and start earning <span "
+"class=\"badge-rep\">Reputation</span> — no betting, no wallets."
 msgstr ""
 "Elige un tema, explora pronósticos abiertos y empieza a ganar <span "
 "class=\"badge-rep\">Reputación</span> — sin apuestas ni billeteras."
@@ -3459,8 +3851,8 @@ msgid ""
 "PredictStamp is operated by TAO FACTORY LLC, a Delaware limited liability "
 "company."
 msgstr ""
-"PredictStamp es operado por TAO FACTORY LLC, una sociedad de responsabilidad "
-"limitada de Delaware."
+"PredictStamp es operado por TAO FACTORY LLC, una sociedad de responsabilidad"
+" limitada de Delaware."
 
 msgid "Company"
 msgstr "Empresa"
@@ -3506,11 +3898,11 @@ msgstr ""
 "debates de mercados son contenido social generado por usuarios."
 
 msgid ""
-"Market data may reference third-party sources. PredictStamp does not control "
-"external markets, outcomes, or third-party data availability."
+"Market data may reference third-party sources. PredictStamp does not control"
+" external markets, outcomes, or third-party data availability."
 msgstr ""
-"Los datos de mercado pueden referenciar fuentes de terceros. PredictStamp no "
-"controla mercados externos, resultados ni la disponibilidad de datos de "
+"Los datos de mercado pueden referenciar fuentes de terceros. PredictStamp no"
+" controla mercados externos, resultados ni la disponibilidad de datos de "
 "terceros."
 
 msgid ""
@@ -3591,6 +3983,28 @@ msgid "Loading more…"
 msgstr "Cargando más…"
 
 #, python-format
+msgid "Hay %(count)s solicitud de verificación pendiente de revisar."
+msgid_plural ""
+"Hay %(count)s solicitudes de verificación pendientes de revisar."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid ""
+"Aprueba para otorgar el badge verificado o rechaza para cerrar la solicitud."
+msgstr ""
+
+#, fuzzy
+#| msgid "Combined"
+msgid "Joined"
+msgstr "Combinado"
+
+msgid "Reject"
+msgstr ""
+
+msgid "Approve"
+msgstr ""
+
+#, python-format
 msgid "%(name)s Popularity"
 msgstr "Popularidad de %(name)s"
 
@@ -3601,12 +4015,12 @@ msgid ""
 "Most engaged users in this category — scores sum into the global popularity "
 "leaderboard."
 msgstr ""
-"Usuarios más activos en esta categoría — las puntuaciones suman a la ranking "
-"global de popularidad."
+"Usuarios más activos en esta categoría — las puntuaciones suman a la ranking"
+" global de popularidad."
 
 msgid ""
-"Ranked by social engagement across all categories — separate from predictive "
-"reputation."
+"Ranked by social engagement across all categories — separate from predictive"
+" reputation."
 msgstr ""
 "Clasificados por engagement social en todas las categorías — separado de la "
 "reputación predictiva."
@@ -3699,8 +4113,8 @@ msgid "1. Acceptance of Terms"
 msgstr "1. Aceptación de los Términos"
 
 msgid ""
-"By accessing or using PredictStamp, you agree to these Terms and Conditions. "
-"If you do not agree, do not use the platform."
+"By accessing or using PredictStamp, you agree to these Terms and Conditions."
+" If you do not agree, do not use the platform."
 msgstr ""
 "Al acceder o usar PredictStamp, aceptas estos Términos y Condiciones. Si no "
 "estás de acuerdo, no uses la plataforma."
@@ -3735,16 +4149,16 @@ msgid "4. User Content and Conduct"
 msgstr "4. Contenido y conducta del usuario"
 
 msgid ""
-"You are responsible for the content you post, including comments, forecasts, "
-"reasoning, votes, and profile information. Do not post illegal, misleading, "
-"abusive, infringing, spam, or malicious content. We may remove content or "
+"You are responsible for the content you post, including comments, forecasts,"
+" reasoning, votes, and profile information. Do not post illegal, misleading,"
+" abusive, infringing, spam, or malicious content. We may remove content or "
 "restrict accounts that violate these Terms or harm the platform."
 msgstr ""
 "Eres responsable del contenido que publicas, incluidos comentarios, "
 "pronósticos, razonamiento, votos e información de perfil. No publiques "
 "contenido ilegal, engañoso, abusivo, infractor, spam o malicioso. Podemos "
-"eliminar contenido o restringir cuentas que violen estos Términos o dañen la "
-"plataforma."
+"eliminar contenido o restringir cuentas que violen estos Términos o dañen la"
+" plataforma."
 
 msgid "5. Reputation and Popularity"
 msgstr "5. Reputación y popularidad"
@@ -3779,8 +4193,8 @@ msgid ""
 "Content on PredictStamp is for informational and social discussion purposes "
 "only. It is not financial, investment, legal, tax, or professional advice."
 msgstr ""
-"El contenido en PredictStamp es solo para información y debate social. No es "
-"asesoramiento financiero, de inversión, legal, fiscal ni profesional."
+"El contenido en PredictStamp es solo para información y debate social. No es"
+" asesoramiento financiero, de inversión, legal, fiscal ni profesional."
 
 msgid "8. Accounts and Availability"
 msgstr "8. Cuentas y disponibilidad"
@@ -3841,13 +4255,25 @@ msgstr ""
 
 msgid ""
 "You receive this email because you enabled email alerts on PredictStamp."
-msgstr "Recibís este email porque activaste alertas por email en PredictStamp."
+msgstr ""
+"Recibís este email porque activaste alertas por email en PredictStamp."
 
 msgid "Manage alerts"
 msgstr "Administrar alertas"
 
 msgid "You receive this email because you signed up on PredictStamp."
 msgstr "Recibís este email porque te registraste en PredictStamp."
+
+#, python-format
+msgid "Hi %(name)s,"
+msgstr "Todos los %(name)s"
+
+#, python-format
+msgid "Result: %(outcome)s"
+msgstr "Resultado: %(outcome)s"
+
+msgid "Manage your alert settings"
+msgstr "Administra tus alertas"
 
 #, python-format
 msgid "%(name)s, here's your daily recap"
@@ -3877,13 +4303,10 @@ msgstr "Actividad reciente"
 msgid "Open PredictStamp"
 msgstr "Abrir PredictStamp"
 
-msgid "Manage your alert settings"
-msgstr "Administra tus alertas"
-
 #, python-format
 msgid ""
-"Hi %(name)s, confirm your email address to finish creating your PredictStamp "
-"account."
+"Hi %(name)s, confirm your email address to finish creating your PredictStamp"
+" account."
 msgstr ""
 "Hola %(name)s, confirma tu dirección de email para terminar de crear tu "
 "cuenta en PredictStamp."
@@ -3895,12 +4318,9 @@ msgstr "Confirmar email"
 msgid "This link expires in %(hours)s hours and can only be used once."
 msgstr "Este enlace expira en %(hours)s horas y solo puede usarse una vez."
 
-msgid "If the button does not work, copy and paste this URL into your browser:"
+msgid ""
+"If the button does not work, copy and paste this URL into your browser:"
 msgstr "Si el botón no funciona, copia y pega esta URL en tu navegador:"
-
-#, python-format
-msgid "Hi %(name)s,"
-msgstr "Todos los %(name)s"
 
 msgid ""
 "Confirm your email address to finish creating your PredictStamp account."
@@ -3944,9 +4364,9 @@ msgid ""
 "events, publish formal forecasts, and build credibility when markets "
 "resolve. No betting, no wallets."
 msgstr ""
-"PredictStamp es la capa social de los mercados de predicción: debatí eventos "
-"del mundo real, publicá pronósticos formales y construí credibilidad cuando "
-"los mercados se resuelven. Sin apuestas, sin wallets."
+"PredictStamp es la capa social de los mercados de predicción: debatí eventos"
+" del mundo real, publicá pronósticos formales y construí credibilidad cuando"
+" los mercados se resuelven. Sin apuestas, sin wallets."
 
 msgid ""
 "Earned when your resolved forecasts are correct. Measures your predictive "
@@ -3956,8 +4376,8 @@ msgstr ""
 "predictiva a lo largo del tiempo."
 
 msgid ""
-"Driven by votes and debate. Independent from reputation — you can be popular "
-"without being accurate."
+"Driven by votes and debate. Independent from reputation — you can be popular"
+" without being accurate."
 msgstr ""
 "Impulsada por votos y debate. Es independiente de la reputación: podés ser "
 "popular sin ser preciso."
@@ -3989,7 +4409,8 @@ msgid "What you can do:"
 msgstr "Qué puedes hacer:"
 
 msgid ""
-"Browse markets imported from sources like Polymarket (no real-money betting)."
+"Browse markets imported from sources like Polymarket (no real-money "
+"betting)."
 msgstr ""
 "Explorar mercados importados de fuentes como Polymarket (sin apostar dinero "
 "real)."
@@ -4010,15 +4431,16 @@ msgstr ""
 msgid "Two scores, independent:"
 msgstr "Dos puntuaciones, independientes:"
 
-msgid "Reputation: measures the historical quality of your resolved forecasts."
+msgid ""
+"Reputation: measures the historical quality of your resolved forecasts."
 msgstr "Reputación: mide la calidad histórica de tus pronósticos resueltos."
 
 msgid "Popularity: measures votes, replies, and social visibility."
 msgstr "Popularidad: mide votos, respuestas y visibilidad social."
 
 msgid ""
-"PredictStamp is not a betting house: there are no wallets, deposits, or real-"
-"money trading."
+"PredictStamp is not a betting house: there are no wallets, deposits, or "
+"real-money trading."
 msgstr ""
 "PredictStamp no es una casa de apuestas: no hay wallets, depósitos ni "
 "trading con dinero real."
@@ -4342,12 +4764,28 @@ msgid "Verified record"
 msgstr "Registro verificado"
 
 #, python-format
-msgid "Forecast this %(cat)s market and build your reputation on PredictStamp."
+msgid ""
+"Forecast this %(cat)s market and build your reputation on PredictStamp."
 msgstr ""
-"Pronostica este mercado de %(cat)s y construye tu reputación en PredictStamp."
+"Pronostica este mercado de %(cat)s y construye tu reputación en "
+"PredictStamp."
 
 msgid "Make your call and build your reputation."
 msgstr "Haz tu pronóstico y construye tu reputación."
+
+msgid "Forecasts are closed because this event has already started."
+msgstr ""
+
+#, fuzzy
+#| msgid "This market is no longer open for forecasts."
+msgid ""
+"Forecasts are closed because this market is no longer accepting forecasts."
+msgstr "Elige un tema para explorar pronósticos abiertos."
+
+#, fuzzy
+#| msgid "Choose a valid outcome for this market."
+msgid "Forecasts are closed for this market."
+msgstr "Elija un resultado válido para este mercado."
 
 msgid "Public forecast history"
 msgstr "Historial público de pronósticos"
@@ -4359,10 +4797,16 @@ msgid ""
 msgstr ""
 "Todos los pronósticos en este mercado — puntuados en <span class=\"badge-"
 "rep\">Reputación</span> al resolverse. Gana <span class=\"badge-"
-"pop\">Popularidad</span> cuando otros dan like a tu pronóstico o comentarios."
+"pop\">Popularidad</span> cuando otros dan like a tu pronóstico o "
+"comentarios."
 
 msgid "No forecasts yet. Be the first to place one."
 msgstr "Aún no hay pronósticos. Sé el primero en publicar uno."
+
+#, fuzzy
+#| msgid "No forecast yet — place one to score"
+msgid "No forecasts were placed before this market closed."
+msgstr "Sin pronóstico — publica uno para sumar puntos"
 
 msgid "Browse by"
 msgstr "Explorar por"
@@ -4382,6 +4826,16 @@ msgstr ""
 "Eventos que cierran en las próximas 24 horas — pronostica antes de que se "
 "bloqueen."
 
+msgid "Tap a category to browse open forecasts."
+msgstr "Elige un tema para explorar pronósticos abiertos."
+
+msgid ""
+"No categories yet. Run <code class=\"text-xs\">sync_markets --top-"
+"volume</code> to import Polymarket markets."
+msgstr ""
+"Aún no hay categorías. Ejecuta <code class=\"text-xs\">sync_markets --top-"
+"volume</code> para importar mercados de Polymarket."
+
 #, python-format
 msgid ""
 "\n"
@@ -4400,23 +4854,16 @@ msgstr[1] ""
 "            %(counter)s eventos abiertos coinciden con «%(search_query)s»\n"
 "          "
 
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "No open events match “%(search_query)s”. Try another keyword or browse by "
+#| "category below."
 msgid ""
 "No open events match “%(search_query)s”. Try another keyword or browse by "
-"category below."
+"category above."
 msgstr ""
-"Ningún evento abierto coincide con «%(search_query)s». Prueba otra palabra o "
-"explora por categoría."
-
-msgid "Tap a category to browse open forecasts."
-msgstr "Elige un tema para explorar pronósticos abiertos."
-
-msgid ""
-"No categories yet. Run <code class=\"text-xs\">sync_markets --top-volume</"
-"code> to import Polymarket markets."
-msgstr ""
-"Aún no hay categorías. Ejecuta <code class=\"text-xs\">sync_markets --top-"
-"volume</code> para importar mercados de Polymarket."
+"Ningún evento abierto coincide con «%(search_query)s». Prueba otra palabra o"
+" explora por categoría."
 
 msgid "markets"
 msgstr "Mercados"
@@ -4450,7 +4897,8 @@ msgid "%(counter)s event ends within this window — sorted soonest first."
 msgid_plural ""
 "%(counter)s events end within this window — sorted soonest first."
 msgstr[0] ""
-"%(counter)s evento termina dentro de esta ventana — ordenados por proximidad."
+"%(counter)s evento termina dentro de esta ventana — ordenados por "
+"proximidad."
 msgstr[1] ""
 "%(counter)s eventos terminan dentro de esta ventana — ordenados por "
 "proximidad."
@@ -4465,14 +4913,43 @@ msgid "No Polymarket markets match your filters."
 msgstr "Ningún mercado de Polymarket coincide con tus filtros."
 
 msgid ""
-"No markets found. Run <code class=\"text-xs\">sync_markets --categories</"
-"code> or import via admin."
+"No markets found. Run <code class=\"text-xs\">sync_markets "
+"--categories</code> or import via admin."
 msgstr ""
-"No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets --"
-"categories</code> o importa desde el admin."
+"No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
+"--categories</code> o importa desde el admin."
+
+#, fuzzy
+#| msgid "to place your forecast on this market."
+msgid "You have a forecast on this market"
+msgstr "para publicar tu pronóstico en este mercado."
+
+#, fuzzy
+#| msgid "Forecast closed"
+msgid "Forecasts closed"
+msgstr "Pronóstico cerrado"
+
+msgid "vs"
+msgstr ""
+
+#, fuzzy
+#| msgid "All outcomes"
+msgid "Top outcomes"
+msgstr "Todos los resultados"
+
+msgid "Read more"
+msgstr "Leer más"
+
+msgid "Show less"
+msgstr "Ver menos"
 
 msgid "View on Polymarket"
 msgstr "Ver en Polymarket ↗"
+
+#, fuzzy, python-format
+#| msgid "Closes %(date)s"
+msgid "Closed %(date)s"
+msgstr "Cierra el %(date)s"
 
 msgid "Live odds"
 msgstr "Cuotas en vivo"
@@ -4499,6 +4976,9 @@ msgstr "Respuesta completa sin modificar del evento Polymarket"
 msgid "Live Polymarket Chart"
 msgstr "Gráfico Polymarket en vivo"
 
+msgid "Open on Polymarket ↗"
+msgstr "Abrir en Polymarket ↗"
+
 msgid ""
 "Top outcomes by win probability — price history from Polymarket, updates "
 "when you refresh."
@@ -4512,9 +4992,6 @@ msgstr ""
 
 msgid "Customize embed ↗"
 msgstr "Personalizar embed ↗"
-
-msgid "Open on Polymarket ↗"
-msgstr "Abrir en Polymarket ↗"
 
 msgid ""
 "The chart is view-only. Use <strong>Open on Polymarket</strong> above to "
@@ -4532,6 +5009,73 @@ msgstr "Fuente"
 
 msgid "3-way result"
 msgstr "Resultado triple"
+
+msgid "API discovery"
+msgstr ""
+
+msgid ""
+"Create scoped MCP tokens so an AI agent or script can read platform data and"
+" (when your trust level allows) participate through the same services humans"
+" use."
+msgstr ""
+
+msgid "Agent trust level:"
+msgstr ""
+
+msgid "Rate limit tier:"
+msgstr ""
+
+msgid ""
+"Write scopes unlock automatically as your account ages, verifies, and "
+"contributes useful, non-abusive activity."
+msgstr ""
+
+msgid "Your new token — copy it now"
+msgstr ""
+
+msgid "This is the only time the full token is shown. Store it securely."
+msgstr ""
+
+#, fuzzy
+#| msgid "No open events available."
+msgid "No scopes available for this account yet."
+msgstr "No hay eventos disponibles."
+
+msgid "Write scopes only appear once your trust level allows them."
+msgstr ""
+
+#, fuzzy
+#| msgid "Create a"
+msgid "Create token"
+msgstr "Crea un"
+
+#, fuzzy
+#| msgid "Your open"
+msgid "Your tokens"
+msgstr "Tus"
+
+msgid "Revoked"
+msgstr ""
+
+msgid "Tier:"
+msgstr ""
+
+msgid "Last used:"
+msgstr ""
+
+msgid "Rotate"
+msgstr ""
+
+msgid "Revoke"
+msgstr ""
+
+#, fuzzy
+#| msgid "No likes yet."
+msgid "No tokens yet."
+msgstr "Aún no hay likes."
+
+msgid "Using your token"
+msgstr ""
 
 msgid "Open Forecasts"
 msgstr "Pronósticos abiertos"
@@ -4552,9 +5096,6 @@ msgstr ""
 "Sigue el P&L de reputación en pronósticos activos, cierra posiciones y "
 "vuelve a entrar cuando cambie tu visión."
 
-msgid "Active forecasts you can exit now"
-msgstr "Pronósticos activos que puedes cerrar ahora"
-
 msgid "Open forecast book"
 msgstr "Libro de pronósticos abiertos"
 
@@ -4565,8 +5106,8 @@ msgstr ""
 "Cada tarjeta compara tu probabilidad de entrada con la probabilidad actual "
 "del mercado para el mismo lado."
 
-msgid "Prediction history"
-msgstr "Historial de predicciones"
+msgid "Active forecasts you can exit now"
+msgstr "Pronósticos activos que puedes cerrar ahora"
 
 msgid "Challenge event — forecast already placed"
 msgstr "Evento del desafío — pronóstico ya publicado"
@@ -4574,31 +5115,19 @@ msgstr "Evento del desafío — pronóstico ya publicado"
 #, python-format
 msgid ""
 "\n"
-"        Your open forecast on this event already counts for "
-"<strong>%(counter)s</strong> active challenge and your global reputation — "
-"even if you placed it before the challenge started. You cannot open a second "
-"position on the same event.\n"
+"        Your open forecast on this event already counts for <strong>%(counter)s</strong> active challenge and your global reputation — even if you placed it before the challenge started. You cannot open a second position on the same event.\n"
 "        "
 msgid_plural ""
 "\n"
-"        Your open forecast on this event already counts for "
-"<strong>%(counter)s</strong> active challenges and your global reputation — "
-"even if you placed it before they started. You cannot open a second position "
-"on the same event.\n"
+"        Your open forecast on this event already counts for <strong>%(counter)s</strong> active challenges and your global reputation — even if you placed it before they started. You cannot open a second position on the same event.\n"
 "        "
 msgstr[0] ""
 "\n"
-"        Tu pronóstico abierto en este evento ya cuenta para "
-"<strong>%(counter)s</strong> desafío activo y tu reputación global — incluso "
-"si lo publicaste antes de que empezara el desafío. No puedes abrir una "
-"segunda posición en el mismo evento.\n"
+"        Tu pronóstico abierto en este evento ya cuenta para <strong>%(counter)s</strong> desafío activo y tu reputación global — incluso si lo publicaste antes de que empezara el desafío. No puedes abrir una segunda posición en el mismo evento.\n"
 "        "
 msgstr[1] ""
 "\n"
-"        Tu pronóstico abierto en este evento ya cuenta para "
-"<strong>%(counter)s</strong> desafíos activos y tu reputación global — "
-"incluso si lo publicaste antes de que empezaran. No puedes abrir una segunda "
-"posición en el mismo evento.\n"
+"        Tu pronóstico abierto en este evento ya cuenta para <strong>%(counter)s</strong> desafíos activos y tu reputación global — incluso si lo publicaste antes de que empezaran. No puedes abrir una segunda posición en el mismo evento.\n"
 "        "
 
 msgid "Challenge event"
@@ -4606,11 +5135,11 @@ msgstr "Evento del desafío"
 
 msgid ""
 "This market is part of an active challenge. Your forecast will count toward "
-"the challenge leaderboard and your global reputation. Only one open forecast "
-"is allowed per event."
+"the challenge leaderboard and your global reputation. Only one open forecast"
+" is allowed per event."
 msgstr ""
-"Este mercado forma parte de un desafío activo. Tu pronóstico contará para el "
-"ranking del desafío y tu reputación global. Solo se permite un pronóstico "
+"Este mercado forma parte de un desafío activo. Tu pronóstico contará para el"
+" ranking del desafío y tu reputación global. Solo se permite un pronóstico "
 "abierto por evento."
 
 msgid "Forecast closed"
@@ -4630,14 +5159,22 @@ msgid ""
 "Posted %(timesince)s ago. You can exit this forecast at the current market "
 "price and enter again later."
 msgstr ""
-"Publicado hace %(timesince)s. Puedes cerrar este pronóstico al precio actual "
-"del mercado y volver a participar después."
+"Publicado hace %(timesince)s. Puedes cerrar este pronóstico al precio actual"
+" del mercado y volver a participar después."
 
 msgid ""
 "Pick your outcome below. Live Polymarket odds are captured when you submit."
 msgstr ""
 "Elige tu resultado abajo. Las cuotas Polymarket en vivo se capturan al "
 "enviar."
+
+#, fuzzy
+#| msgid ""
+#| "Share the argument behind your pick — visible in the public forecast feed."
+msgid "Share the argument behind your pick, then post your forecast."
+msgstr ""
+"Comparte el argumento detrás de tu elección — visible en el feed público de "
+"pronósticos."
 
 #, python-format
 msgid "Market closes %(close_date)s"
@@ -4650,18 +5187,14 @@ msgstr "Tu perfil"
 msgid ""
 "\n"
 "            Odds at submission: %(prob)s%% market probability.\n"
-"            <span class=\"font-semibold text-emerald-700 dark:text-"
-"emerald-400\">+%(win)s</span> if correct,\n"
-"            <span class=\"font-semibold text-red-700 dark:text-red-400\">−"
-"%(loss)s</span> if wrong.\n"
+"            <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> if correct,\n"
+"            <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> if wrong.\n"
 "            "
 msgstr ""
 "\n"
 "            Cuotas al enviar: %(prob)s%% probabilidad de mercado.\n"
-"            <span class=\"font-semibold text-emerald-700 dark:text-"
-"emerald-400\">+%(win)s</span> si aciertas,\n"
-"            <span class=\"font-semibold text-red-700 dark:text-red-400\">−"
-"%(loss)s</span> si fallas.\n"
+"            <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> si aciertas,\n"
+"            <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas.\n"
 "            "
 
 msgid "Your reasoning"
@@ -4682,6 +5215,11 @@ msgstr "Salir ahora realizaría %(points)s de reputación."
 msgid "Exit forecast"
 msgstr "Cerrar pronóstico"
 
+msgid ""
+"This market has closed. Your forecast will resolve automatically when the "
+"outcome is known."
+msgstr ""
+
 msgid "View in public feed"
 msgstr "Ver en el feed público"
 
@@ -4695,22 +5233,19 @@ msgstr "Mercado %(prob)s%%"
 #, python-format
 msgid ""
 "\n"
-"                  <span class=\"font-semibold text-emerald-700 dark:text-"
-"emerald-400\">+%(win)s</span> if correct\n"
-"                  <span class=\"text-slate-300 dark:text-slate-600\"> · </"
-"span>\n"
-"                  <span class=\"font-semibold text-red-700 dark:text-"
-"red-400\">−%(loss)s</span> if wrong\n"
+"                  <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> if correct\n"
+"                  <span class=\"text-slate-300 dark:text-slate-600\"> · </span>\n"
+"                  <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> if wrong\n"
 "                  "
 msgstr ""
 "\n"
-"                  <span class=\"font-semibold text-emerald-700 dark:text-"
-"emerald-400\">+%(win)s</span> si aciertas\n"
-"                  <span class=\"text-slate-300 dark:text-slate-600\"> · </"
-"span>\n"
-"                  <span class=\"font-semibold text-red-700 dark:text-"
-"red-400\">−%(loss)s</span> si fallas\n"
+"                  <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> si aciertas\n"
+"                  <span class=\"text-slate-300 dark:text-slate-600\"> · </span>\n"
+"                  <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas\n"
 "                  "
+
+msgid "Change pick"
+msgstr ""
 
 msgid "(optional)"
 msgstr "(opcional)"
@@ -4742,8 +5277,8 @@ msgstr ""
 "participar."
 
 msgid ""
-"Pick Yes or No on any outcome, then explain your pick below. Reputation-only "
-"— no money or trading."
+"Pick Yes or No on any outcome, then explain your pick below. Reputation-only"
+" — no money or trading."
 msgstr ""
 "Elige Sí o No en cualquier resultado y explica tu elección abajo. Solo "
 "reputación — sin dinero ni trading."
@@ -4785,7 +5320,21 @@ msgstr "Entrada"
 msgid "Now"
 msgstr "Ahora"
 
-msgid "Closing realizes this reputation delta and frees you to forecast again."
+#, fuzzy
+#| msgid "Resolution"
+msgid "At resolution"
+msgstr "Resolución"
+
+#, fuzzy
+#| msgid "incorrect"
+msgid "if correct"
+msgstr "incorrecto"
+
+msgid "if wrong"
+msgstr ""
+
+msgid ""
+"Closing realizes this reputation delta and frees you to forecast again."
 msgstr ""
 "Cerrar realiza este delta de reputación y te permite pronosticar de nuevo."
 
@@ -4798,6 +5347,16 @@ msgstr "No tienes pronósticos abiertos ahora."
 msgid "Browse markets to open a new reputation-only forecast."
 msgstr "Explora mercados para abrir un nuevo pronóstico solo de reputación."
 
+#, fuzzy, python-format
+#| msgid "Closes %(close_date)s"
+msgid "Closed %(closed_date)s"
+msgstr "Cierra %(close_date)s"
+
+#, fuzzy, python-format
+#| msgid "Earned %(date)s"
+msgid "Entered %(entry_date)s"
+msgstr "Conseguida el %(date)s"
+
 #, python-format
 msgid "%(timesince)s ago"
 msgstr "hace %(timesince)s"
@@ -4805,6 +5364,11 @@ msgstr "hace %(timesince)s"
 #, python-format
 msgid "Closes %(close_date)s"
 msgstr "Cierra %(close_date)s"
+
+#, fuzzy
+#| msgid "Exited"
+msgid "Exit"
+msgstr "Salido"
 
 #, python-format
 msgid ""
@@ -4836,20 +5400,108 @@ msgstr "Reputación %(points)s al cerrar"
 msgid "Reputation %(points)s earned"
 msgstr "Reputación %(points)s ganados"
 
+#, fuzzy
+#| msgid "Verification pending"
+msgid "Scoring pending"
+msgstr "Verificación pendiente"
+
 msgid "← Back to market"
 msgstr "← Volver al mercado"
 
-msgid "Track record"
-msgstr "Historial"
+#, fuzzy
+#| msgid "Close forecast"
+msgid "Closed forecasts"
+msgstr "Cerrar pronóstico"
 
-msgid "Formal forecasts and how they resolved."
-msgstr "Pronósticos formales y cómo se resolvieron."
+msgid "Resolved predictions and positions you entered and exited early."
+msgstr ""
 
-msgid "Read more"
-msgstr "Leer más"
+#, fuzzy
+#| msgid "Exited"
+msgid "Exited early"
+msgstr "Salido"
 
-msgid "Show less"
-msgstr "Ver menos"
+#, fuzzy
+#| msgid "Close forecast"
+msgid "Closed before resolution"
+msgstr "Cerrar pronóstico"
+
+#, fuzzy
+#| msgid "Based on resolved forecasts only."
+msgid "Based on resolved forecasts only"
+msgstr "Solo cuenta pronósticos ya resueltos."
+
+#, fuzzy
+#| msgid "Open"
+msgid "Open now"
+msgstr "Abierto"
+
+#, fuzzy
+#| msgid "open forecast"
+#| msgid_plural "open forecasts"
+msgid "View open forecasts"
+msgstr "pronóstico abierto"
+
+#, fuzzy
+#| msgid "Open positions"
+msgid "Active positions"
+msgstr "Posiciones abiertas"
+
+#, fuzzy
+#| msgid "track record"
+msgid "Filter track record"
+msgstr "historial"
+
+#, fuzzy
+#| msgid "All outcomes"
+msgid "All closed"
+msgstr "Todos los resultados"
+
+#, fuzzy
+#| msgid "Based on resolved forecasts only."
+msgid "No resolved forecasts yet."
+msgstr "Solo cuenta pronósticos ya resueltos."
+
+#, fuzzy
+#| msgid "No likes yet."
+msgid "No early exits yet."
+msgstr "Aún no hay likes."
+
+#, fuzzy
+#| msgid "Make your first forecast"
+msgid "to make your first forecast."
+msgstr "Haz tu primer pronóstico"
+
+#~ msgid "How challenges"
+#~ msgstr "Cómo funcionan los"
+
+#~ msgid "work"
+#~ msgstr "desafíos"
+
+#~ msgid "price"
+#~ msgstr "precio"
+
+#~ msgid "Prediction History"
+#~ msgstr "Historial de predicciones"
+
+#~ msgid "Sign up with Auth0"
+#~ msgstr "Registrarse con Auth0"
+
+#~ msgid "selected"
+#~ msgstr "seleccionados"
+
+#, fuzzy
+#~ msgid "Quick select"
+#~ msgstr "seleccionados"
+
+#~ msgid "Full history"
+#~ msgstr "Historial completo"
+
+#~ msgid "Prediction history"
+#~ msgstr "Historial de predicciones"
+
+#~ msgid "Formal forecasts and how they resolved."
+#~ msgstr "Pronósticos formales y cómo se resolvieron."
 
 #~ msgid "Standings"
 #~ msgstr "Clasificación"
