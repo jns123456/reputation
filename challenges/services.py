@@ -16,7 +16,7 @@ from challenges.selectors import get_challenge_standings
 from markets.models import Market
 
 
-def create_challenge(*, creator, title="", market_ids, opponent_ids):
+def create_challenge(*, creator, title="", market_ids, opponent_ids, challenge_group=None):
     """Create a challenge with up to 10 markets and mutual-follow opponents."""
     if not market_ids:
         raise ValidationError(_("Select at least one event."))
@@ -50,11 +50,26 @@ def create_challenge(*, creator, title="", market_ids, opponent_ids):
                 % {"username": opponent.username}
             )
 
+    if challenge_group is not None:
+        from challenges.models import ChallengeGroup
+
+        if challenge_group.owner_id != creator.id:
+            raise ValidationError(_("You can only use your own saved groups."))
+        group_member_ids = set(
+            challenge_group.members.values_list("id", flat=True),
+        )
+        opponent_id_set = set(opponent_ids)
+        if not opponent_id_set:
+            raise ValidationError(_("The selected group has no eligible members."))
+        if not opponent_id_set.issubset(group_member_ids):
+            raise ValidationError(_("Opponents must belong to the selected group."))
+
     with transaction.atomic():
         challenge = Challenge.objects.create(
             creator=creator,
             title=title.strip(),
             status=Challenge.Status.PENDING,
+            challenge_group=challenge_group,
         )
 
         for position, market in enumerate(markets):
@@ -156,16 +171,24 @@ def _maybe_activate_challenge(challenge):
     if challenge.status != Challenge.Status.PENDING:
         return challenge
 
+    accepted_opponents = challenge.participants.filter(
+        status=ChallengeParticipant.Status.ACCEPTED,
+    ).exclude(user_id=challenge.creator_id)
+
+    if challenge.challenge_group_id:
+        if accepted_opponents.exists():
+            challenge.status = Challenge.Status.ACTIVE
+            challenge.started_at = timezone.now()
+            challenge.save(update_fields=["status", "started_at", "updated_at"])
+        return challenge
+
     has_pending_invites = challenge.participants.filter(
         status=ChallengeParticipant.Status.INVITED,
     ).exists()
     if has_pending_invites:
         return challenge
 
-    accepted_opponents = challenge.participants.filter(
-        status=ChallengeParticipant.Status.ACCEPTED,
-    ).exclude(user_id=challenge.creator_id).exists()
-    if not accepted_opponents:
+    if not accepted_opponents.exists():
         return challenge
 
     challenge.status = Challenge.Status.ACTIVE

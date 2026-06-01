@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from challenges.models import MAX_CHALLENGE_MARKETS
+from challenges.models import MAX_CHALLENGE_MARKETS, ChallengeGroup
 from markets.models import Market
 from markets.selectors import forecastable_market_q
 
@@ -62,12 +62,18 @@ class ChallengeCreateForm(forms.Form):
         },
     )
     opponents = forms.MultipleChoiceField(
+        required=False,
         widget=forms.CheckboxSelectMultiple(
             attrs={"class": "challenge-opponent-checkbox"},
         ),
         error_messages={
             "required": _("Select at least one user to challenge."),
         },
+    )
+    challenge_group = forms.ModelChoiceField(
+        queryset=ChallengeGroup.objects.none(),
+        required=False,
+        widget=forms.HiddenInput(),
     )
 
     def __init__(self, *args, user=None, **kwargs):
@@ -79,6 +85,10 @@ class ChallengeCreateForm(forms.Form):
         self.fields["opponents"].choices = [
             (str(u.id), u.public_name or u.username) for u in mutual
         ]
+        if user:
+            self.fields["challenge_group"].queryset = ChallengeGroup.objects.filter(
+                owner=user,
+            ).prefetch_related("members")
 
     def clean_markets(self):
         markets = self.cleaned_data.get("markets")
@@ -91,9 +101,35 @@ class ChallengeCreateForm(forms.Form):
         return markets
 
     def clean_opponents(self):
-        opponents = self.cleaned_data.get("opponents")
-        if not opponents:
-            return opponents
+        opponents = self.cleaned_data.get("opponents") or []
         if self.user and str(self.user.id) in opponents:
             raise forms.ValidationError(_("You cannot challenge yourself."))
         return opponents
+
+    def clean(self):
+        cleaned_data = super().clean()
+        opponents = cleaned_data.get("opponents") or []
+        challenge_group = cleaned_data.get("challenge_group")
+
+        if challenge_group:
+            if challenge_group.owner_id != self.user.id:
+                raise forms.ValidationError(_("You can only use your own saved groups."))
+            from accounts.follow_selectors import are_mutual_followers
+
+            eligible_ids = [
+                str(member.id)
+                for member in challenge_group.members.all()
+                if are_mutual_followers(self.user, member)
+            ]
+            if not eligible_ids:
+                raise forms.ValidationError(
+                    _("The selected group has no members you can currently challenge."),
+                )
+            cleaned_data["opponents"] = eligible_ids
+        elif not opponents:
+            self.add_error(
+                "opponents",
+                _("Select at least one user to challenge, or choose a saved group."),
+            )
+
+        return cleaned_data

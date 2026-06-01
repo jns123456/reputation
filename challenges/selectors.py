@@ -303,7 +303,7 @@ def get_challenge_for_user(*, challenge_id, user):
             Q(creator=user) | Q(participants__user=user),
             pk=challenge_id,
         )
-        .select_related("creator", "winner")
+        .select_related("creator", "winner", "challenge_group")
         .prefetch_related("challenge_markets__market", "participants__user__profile")
         .first()
     )

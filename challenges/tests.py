@@ -624,8 +624,112 @@ class ChallengeGroupTests(TestCase):
         response = self.client.get("/challenges/new/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Quick crew")
-        self.assertContains(response, "Quick select")
+        self.assertContains(response, "Saved groups")
         self.assertContains(response, "Categories")
+
+    def test_group_challenge_activates_on_first_accept(self):
+        from challenges.services import create_challenge_group, create_challenge
+
+        dave = create_user("dave")
+        eve = create_user("eve")
+        for user in (dave, eve):
+            UserFollow.objects.create(follower=self.alice, following=user)
+            UserFollow.objects.create(follower=user, following=self.alice)
+
+        group = create_challenge_group(
+            owner=self.alice,
+            name="Squad",
+            member_ids=[self.bob.id, dave.id, eve.id],
+        )
+        market = Market.objects.create(
+            external_id="mg1",
+            title="Group event",
+            slug="group-event",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Group duel",
+            market_ids=[market.id],
+            opponent_ids=[self.bob.id, dave.id, eve.id],
+            challenge_group=group,
+        )
+        self.assertEqual(challenge.status, Challenge.Status.PENDING)
+
+        accept_challenge(challenge=challenge, user=self.bob)
+        challenge.refresh_from_db()
+        self.assertEqual(challenge.status, Challenge.Status.ACTIVE)
+
+        invited = challenge.participants.filter(status=ChallengeParticipant.Status.INVITED)
+        self.assertEqual(invited.count(), 2)
+
+    def test_individual_multi_opponent_waits_for_all_responses(self):
+        from challenges.services import create_challenge
+
+        dave = create_user("dave")
+        eve = create_user("eve")
+        for user in (dave, eve):
+            UserFollow.objects.create(follower=self.alice, following=user)
+            UserFollow.objects.create(follower=user, following=self.alice)
+
+        market = Market.objects.create(
+            external_id="mg2",
+            title="Multi event",
+            slug="multi-event",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Multi duel",
+            market_ids=[market.id],
+            opponent_ids=[self.bob.id, dave.id, eve.id],
+        )
+
+        accept_challenge(challenge=challenge, user=self.bob)
+        challenge.refresh_from_db()
+        self.assertEqual(challenge.status, Challenge.Status.PENDING)
+
+        decline_challenge(challenge=challenge, user=dave)
+        decline_challenge(challenge=challenge, user=eve)
+        challenge.refresh_from_db()
+        self.assertEqual(challenge.status, Challenge.Status.ACTIVE)
+
+    def test_create_challenge_view_with_group(self):
+        from challenges.services import create_challenge_group
+
+        group = create_challenge_group(
+            owner=self.alice,
+            name="View squad",
+            member_ids=[self.bob.id, self.carol.id],
+        )
+        market = Market.objects.create(
+            external_id="vg1",
+            title="View event",
+            slug="view-event",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.client.force_login(self.alice)
+        response = self.client.post(
+            "/challenges/new/",
+            {
+                "title": "Group via form",
+                "challenge_group": str(group.pk),
+                "markets": [str(market.id)],
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        challenge = Challenge.objects.get(creator=self.alice, title="Group via form")
+        self.assertEqual(challenge.challenge_group_id, group.pk)
+        self.assertEqual(
+            challenge.participants.filter(status=ChallengeParticipant.Status.INVITED).count(),
+            2,
+        )
 
 
 class MarketSearchTests(TestCase):

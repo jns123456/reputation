@@ -70,32 +70,65 @@
 
       {% if challenge_groups %}
       <div class="challenge-create-field">
-        <label class="challenge-create-label">{% trans "Quick select" %}</label>
-        <p class="challenge-create-panel-desc mb-2">{% trans "Apply a saved group to select opponents." %}</p>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <label class="challenge-create-label mb-0">{% trans "Saved groups" %}</label>
+          <a href="{% url 'challenges:group_list' %}" class="text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">
+            {% trans "Manage groups" %}
+          </a>
+        </div>
+        <p class="challenge-create-panel-desc mb-3">
+          {% trans "Select a group to challenge. The challenge starts when the first member accepts — others can still join later." %}
+        </p>
+        <div class="challenge-create-groups">
           {% for group in challenge_groups %}
           <button type="button"
-                  class="pr-filter-pill"
-                  @click="applyGroup($el.dataset.groupMembers)"
-                  data-group-members="{% for member in group.members.all %}{{ member.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
-            <i data-lucide="users" class="h-3.5 w-3.5" stroke-width="2" aria-hidden="true"></i>
-            {{ group.name }}
-            <span class="text-slate-400 dark:text-slate-500">({{ group.members.count }})</span>
+                  class="challenge-create-group-card"
+                  :class="{ 'is-selected': activeGroupId === {{ group.pk }} }"
+                  @click="selectGroup({{ group.pk }})"
+                  data-group-id="{{ group.pk }}"
+                  data-group-members="{% for member in group.members.all %}{{ member.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                  aria-pressed="false"
+                  :aria-pressed="(activeGroupId === {{ group.pk }}).toString()">
+            <span class="challenge-create-group-check" aria-hidden="true">
+              <i data-lucide="check" class="h-4 w-4" stroke-width="2.5"></i>
+            </span>
+            <span class="min-w-0 flex-1 text-left">
+              <span class="challenge-create-group-name">{{ group.name }}</span>
+              <span class="challenge-create-group-meta">
+                {% blocktrans count counter=group.members.count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktrans %}
+              </span>
+              <span class="challenge-create-group-members">
+                {% for member in group.members.all %}
+                <span class="challenge-create-group-member">{{ member.public_name|default:member.username }}</span>
+                {% endfor %}
+              </span>
+            </span>
+            <i data-lucide="users" class="challenge-create-group-icon h-5 w-5 shrink-0" stroke-width="2" aria-hidden="true"></i>
           </button>
           {% endfor %}
         </div>
+        <input type="hidden" name="challenge_group" :value="activeGroupId || ''">
+        <p class="challenge-create-step-hint is-success mt-3" x-show="activeGroupId" x-cloak>
+          {% trans "Group selected — all members will be invited." %}
+        </p>
       </div>
       {% endif %}
 
       <div class="challenge-create-field">
         <label class="challenge-create-label">{% trans "Opponents" %}</label>
+        <p class="challenge-create-panel-desc mb-2" x-show="!activeGroupId">
+          {% trans "Or pick individual mutual followers below." %}
+        </p>
+        <p class="challenge-create-panel-desc mb-2" x-show="activeGroupId" x-cloak>
+          {% trans "Members included from the selected group. Deselect the group above to pick individuals." %}
+        </p>
         {% if form.opponents.errors %}
         <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.opponents.errors.0 }}</p>
         {% endif %}
         {% if mutual_followers %}
         <div class="challenge-create-opponents">
           {% for checkbox in form.opponents %}
-          <label class="challenge-create-opponent">
+          <label class="challenge-create-opponent" :class="{ 'is-readonly': activeGroupId }">
             {{ checkbox.tag }}
             <span class="challenge-create-opponent-avatar" aria-hidden="true">{{ checkbox.choice_label|slice:":1"|upper }}</span>
             <span class="challenge-create-opponent-name">{{ checkbox.choice_label }}</span>
@@ -231,6 +264,7 @@
       maxMarkets,
       selected: {},
       selectedOpponents: 0,
+      activeGroupId: null,
       hasMutualFollowers: {{ mutual_followers|yesno:"true,false" }},
       init() {
         this.syncOpponentCount();
@@ -242,15 +276,60 @@
       syncOpponentCount() {
         this.selectedOpponents = this.$el.querySelectorAll(".challenge-opponent-checkbox:checked").length;
       },
-      applyGroup(memberIdsCsv) {
-        const memberIds = memberIdsCsv ? String(memberIdsCsv).split(",").filter(Boolean) : [];
+      getGroupMemberIds(groupId) {
+        const card = this.$el.querySelector(`.challenge-create-group-card[data-group-id="${groupId}"]`);
+        if (!card) return [];
+        const csv = card.dataset.groupMembers || "";
+        return csv.split(",").map((id) => id.trim()).filter(Boolean);
+      },
+      applyMemberSelection(memberIds) {
+        const memberIdSet = new Set(memberIds.map(String));
         this.$el.querySelectorAll(".challenge-opponent-checkbox").forEach((checkbox) => {
-          checkbox.checked = memberIds.includes(checkbox.value);
+          const shouldCheck = memberIdSet.has(String(checkbox.value));
+          checkbox.disabled = Boolean(this.activeGroupId);
+          if (checkbox.checked !== shouldCheck) {
+            checkbox.checked = shouldCheck;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+        this.syncOpponentCount();
+      },
+      selectGroup(groupId) {
+        if (this.activeGroupId === groupId) {
+          this.clearGroup();
+          return;
+        }
+        this.activeGroupId = groupId;
+        this.applyMemberSelection(this.getGroupMemberIds(groupId));
+        this.$nextTick(() => {
+          if (typeof lucide !== "undefined") lucide.createIcons();
+        });
+      },
+      clearGroup() {
+        this.activeGroupId = null;
+        this.$el.querySelectorAll(".challenge-opponent-checkbox").forEach((checkbox) => {
+          checkbox.disabled = false;
+          if (checkbox.checked) {
+            checkbox.checked = false;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+          }
         });
         this.syncOpponentCount();
       },
       onFormChange(event) {
         if (event.target && event.target.classList.contains("challenge-opponent-checkbox")) {
+          if (this.activeGroupId) {
+            const expected = new Set(this.getGroupMemberIds(this.activeGroupId).map(String));
+            const checked = Array.from(
+              this.$el.querySelectorAll(".challenge-opponent-checkbox:checked"),
+            ).map((el) => String(el.value));
+            const matchesGroup =
+              checked.length === expected.size &&
+              checked.every((id) => expected.has(id));
+            if (!matchesGroup) {
+              this.activeGroupId = null;
+            }
+          }
           this.syncOpponentCount();
         }
       },

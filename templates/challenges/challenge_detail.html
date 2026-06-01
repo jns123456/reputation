@@ -18,6 +18,7 @@
       <h1 class="pr-hero-title mt-0">{{ challenge.display_title }}</h1>
       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
         {% blocktrans with username=challenge.creator.username %}Created by @{{ username }}{% endblocktrans %}
+        {% if challenge.challenge_group %}· {% blocktrans with group_name=challenge.challenge_group.name %}Group: {{ group_name }}{% endblocktrans %}{% endif %}
         {% if challenge.started_at %}· {% blocktrans with date=challenge.started_at|date:"M j, Y" %}Started {{ date }}{% endblocktrans %}{% endif %}
         {% if challenge.completed_at %}· {% blocktrans with date=challenge.completed_at|date:"M j, Y" %}Finished {{ date }}{% endblocktrans %}{% endif %}
       </p>
@@ -59,7 +60,13 @@
 
 {% if is_creator and challenge.status == 'pending' %}
 <div class="mb-6 flex items-center gap-3">
-  <p class="text-sm text-slate-600 dark:text-slate-300">{% trans "Waiting for opponents to respond." %}</p>
+  <p class="text-sm text-slate-600 dark:text-slate-300">
+    {% if challenge.challenge_group %}
+      {% blocktrans with group_name=challenge.challenge_group.name %}Waiting for a member of {{ group_name }} to accept. The challenge starts with the first acceptance.{% endblocktrans %}
+    {% else %}
+      {% trans "Waiting for opponents to respond." %}
+    {% endif %}
+  </p>
   <form method="post" action="{% url 'challenges:cancel' pk=challenge.pk %}">
     {% csrf_token %}
     <button type="submit" class="btn-secondary text-red-600 dark:text-red-400">{% trans "Cancel" %}</button>

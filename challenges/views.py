@@ -89,8 +89,15 @@ def challenge_create(request):
                     title=form.cleaned_data.get("title", ""),
                     market_ids=[m.id for m in form.cleaned_data["markets"]],
                     opponent_ids=[int(uid) for uid in form.cleaned_data["opponents"]],
+                    challenge_group=form.cleaned_data.get("challenge_group"),
                 )
-                messages.success(request, _("Challenge created. Waiting for opponents to accept."))
+                if form.cleaned_data.get("challenge_group"):
+                    messages.success(
+                        request,
+                        _("Group challenge created. It starts when the first member accepts."),
+                    )
+                else:
+                    messages.success(request, _("Challenge created. Waiting for opponents to accept."))
                 return redirect("challenges:detail", pk=challenge.pk)
             except ValidationError as exc:
                 if hasattr(exc, "message_dict"):
@@ -113,6 +120,8 @@ def challenge_create(request):
 
     from markets.selectors import get_market_hub_category_summaries
 
+    challenge_groups = get_user_challenge_groups(request.user)
+
     initial_step = 1
     if request.method == "POST" and form.errors and not form.errors.get("opponents"):
         initial_step = 2
@@ -123,7 +132,7 @@ def challenge_create(request):
         {
             "form": form,
             "mutual_followers": mutual_followers,
-            "challenge_groups": get_user_challenge_groups(request.user),
+            "challenge_groups": challenge_groups,
             "category_summaries": get_market_hub_category_summaries(),
             "selected_market_ids_json": json.dumps(selected_ids_int),
             "selected_market_titles_json": json.dumps(selected_market_titles),

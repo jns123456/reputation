@@ -33,6 +33,14 @@ class Challenge(models.Model):
         blank=True,
         related_name="won_challenges",
     )
+    challenge_group = models.ForeignKey(
+        "ChallengeGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="challenges",
+        help_text=_("When set, the challenge activates after the first invited member accepts."),
+    )
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
