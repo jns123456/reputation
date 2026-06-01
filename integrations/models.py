@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class AttestationSchema(models.Model):
@@ -107,10 +108,10 @@ class OffchainAttestation(models.Model):
 
 class AttestationBatch(models.Model):
     class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
-        SIGNED = "signed", "Signed off-chain"
-        ANCHORED = "anchored", "Anchored on-chain"
-        FAILED = "failed", "Failed"
+        PENDING = "pending", _("Pending")
+        SIGNED = "signed", _("Signed off-chain")
+        ANCHORED = "anchored", _("Anchored on-chain")
+        FAILED = "failed", _("Failed")
 
     merkle_root = models.CharField(max_length=66, unique=True)
     batch_date = models.DateField(unique=True, db_index=True)
