@@ -96,6 +96,67 @@ class CompositeRedirectTests(TestCase):
         self.assertEqual(target.pk, composite.pk)
 
 
+class CompositeRedirectListingTests(TestCase):
+    def test_public_listings_exclude_soccer_moneyline_orphans(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        close = timezone.now() + timedelta(days=1)
+        composite = Market.objects.create(
+            external_id=f"{WORLD_CUP_MATCH_EXTERNAL_PREFIX}aut-tun-2026-06-01",
+            title="Austria vs. Tunisia",
+            slug="austria-vs-tunisia",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=close,
+            outcomes=[{"label": "Austria"}, {"label": "Draw"}, {"label": "Tunisia"}],
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            canonical_category_slug="sports",
+        )
+        Market.objects.create(
+            external_id="orphan-aut-win",
+            title="Will Austria win on 2026-06-01?",
+            slug="will-austria-win",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=close,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            polymarket_raw={"sportsMarketType": "moneyline"},
+            canonical_category_slug="sports",
+        )
+        Market.objects.create(
+            external_id="orphan-draw",
+            title="Will Austria vs. Tunisia end in a draw?",
+            slug="will-austria-tunisia-draw",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=close,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            polymarket_raw={"sportsMarketType": "moneyline"},
+            canonical_category_slug="sports",
+        )
+
+        from markets.composite_redirect import orphan_polymarket_leg_q
+        from markets.selectors import get_markets_for_display, get_markets_list
+
+        self.assertTrue(composite.is_forecastable)
+        self.assertFalse(
+            Market.objects.filter(pk=composite.pk).filter(orphan_polymarket_leg_q()).exists()
+        )
+        self.assertEqual(
+            list(get_markets_list(status=Market.Status.OPEN).values_list("slug", flat=True)),
+            ["austria-vs-tunisia"],
+        )
+        slugs = {m.slug for m in get_markets_for_display(status=Market.Status.OPEN, limit=50)}
+        self.assertIn(composite.slug, slugs)
+        self.assertNotIn("will-austria-win", slugs)
+        self.assertNotIn("will-austria-tunisia-draw", slugs)
+
+
 class CompositeRedirectViewTests(TestCase):
     def test_market_detail_redirects_orphan_to_composite(self):
         composite = Market.objects.create(

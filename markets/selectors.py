@@ -57,6 +57,13 @@ def _exclude_disabled_sources(markets):
     return markets.exclude(source__in=excluded)
 
 
+def _public_market_filter(qs):
+    """Public listings: enabled sources only, no orphan Polymarket legs."""
+    from markets.composite_redirect import exclude_orphan_polymarket_legs
+
+    return exclude_orphan_polymarket_legs(_exclude_disabled_sources(qs))
+
+
 def open_market_q():
     """Markets with local status ``OPEN`` (may still be non-forecastable)."""
     return Q(status=Market.Status.OPEN)
@@ -202,7 +209,7 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
     if category is None:
         return []
 
-    qs = _exclude_disabled_sources(
+    qs = _public_market_filter(
         _market_card_queryset(
             Market.objects.filter(
                 discoverable_market_q(),
@@ -234,7 +241,7 @@ def get_browse_area_summaries(*, category_slug, markets=None):
         category = get_category_for_slug(category_slug)
         if category is None:
             return []
-        membership_lists = _exclude_disabled_sources(
+        membership_lists = _public_market_filter(
             Market.objects.filter(
                 discoverable_market_q(),
                 canonical_category_slug=category.slug,
@@ -270,7 +277,7 @@ def get_category_summaries(*, include_empty=False):
     counts[OTHER_CATEGORY.slug] = 0
 
     for row in (
-        _exclude_disabled_sources(Market.objects.filter(discoverable_market_q()))
+        _public_market_filter(Market.objects.filter(discoverable_market_q()))
         .values("canonical_category_slug")
         .annotate(count=Count("id"))
     ):
@@ -302,7 +309,7 @@ def _pin_featured_world_cup_summary(summaries, counts):
     summaries = [item for item in summaries if item["category"].slug != world_cup.slug]
     count = counts.get(world_cup.slug)
     if count is None:
-        count = _exclude_disabled_sources(
+        count = _public_market_filter(
             Market.objects.filter(
                 discoverable_market_q(),
                 canonical_category_slug=world_cup.slug,
@@ -326,7 +333,7 @@ def get_market_hub_category_summaries():
 
 
 def get_markets_list(*, status=None, category=None, search=None, source=None, ending_within_hours=None):
-    qs = _market_card_queryset(_exclude_disabled_sources(Market.objects.all()))
+    qs = _market_card_queryset(_public_market_filter(Market.objects.all()))
     if status == Market.Status.OPEN:
         qs = qs.filter(discoverable_market_q())
     elif status:
@@ -442,10 +449,12 @@ def get_markets_for_display(
 
 def get_world_cup_match_markets_queryset(*, source=""):
     """Open World Cup match markets ordered by kickoff."""
-    qs = _market_card_queryset(
-        Market.objects.filter(
-            discoverable_market_q(),
-            canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
+    qs = _public_market_filter(
+        _market_card_queryset(
+            Market.objects.filter(
+                discoverable_market_q(),
+                canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
+            )
         )
     )
     if source:
@@ -465,12 +474,14 @@ def get_markets_resolving_soon(*, within_hours=72, limit=8):
 
     now = timezone.now()
     cutoff = now + timedelta(hours=within_hours)
-    qs = _market_card_queryset(
-        Market.objects.filter(
-            forecastable_market_q(now=now),
-            close_date__isnull=False,
-            close_date__gte=now,
-            close_date__lte=cutoff,
+    qs = _public_market_filter(
+        _market_card_queryset(
+            Market.objects.filter(
+                forecastable_market_q(now=now),
+                close_date__isnull=False,
+                close_date__gte=now,
+                close_date__lte=cutoff,
+            )
         )
     ).order_by("close_date")
     return list(qs[:limit])
@@ -478,8 +489,8 @@ def get_markets_resolving_soon(*, within_hours=72, limit=8):
 
 def get_popular_open_markets(*, limit=6):
     """Highest-volume open markets — good first-forecast suggestions for onboarding."""
-    qs = _market_card_queryset(
-        Market.objects.filter(forecastable_market_q())
+    qs = _public_market_filter(
+        _market_card_queryset(Market.objects.filter(forecastable_market_q()))
     ).order_by("-volume_total", "-created_at")
     return list(qs[:limit])
 

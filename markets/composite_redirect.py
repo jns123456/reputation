@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from django.db.models import Q
+
 from integrations.polymarket.constants import (
     MULTI_OUTCOME_EVENT_KIND,
     POLYMARKET_EVENT_EXTERNAL_PREFIX,
@@ -82,6 +84,60 @@ def is_orphan_polymarket_leg(market) -> bool:
         return True
 
     return False
+
+
+def orphan_polymarket_leg_q() -> Q:
+    """ORM filter matching ``is_orphan_polymarket_leg`` for positive matches only.
+
+    Prefer ``exclude_orphan_polymarket_legs`` for list querysets: ``exclude(Q)`` on
+    JSON lookups is not NULL-safe on SQLite (drops standalone Polymarket rows).
+    """
+    composite_external = Q(external_id__startswith=WORLD_CUP_MATCH_EXTERNAL_PREFIX) | Q(
+        external_id__startswith=POLYMARKET_EVENT_EXTERNAL_PREFIX
+    )
+
+    grouped_leg = (
+        Q(source=Market.Source.POLYMARKET)
+        & Q(polymarket_raw__has_key="groupItemTitle")
+        & ~Q(polymarket_raw__groupItemTitle="")
+        & ~composite_external
+    )
+    moneyline_leg = (
+        Q(source=Market.Source.POLYMARKET)
+        & Q(polymarket_raw__sportsMarketType=MONEYLINE_TYPE)
+        & ~composite_external
+    )
+    return grouped_leg | moneyline_leg
+
+
+def _orphan_polymarket_leg_sql() -> str:
+    """Vendor-specific SQL predicate for orphan legs (NULL-safe for ``exclude``)."""
+    from django.db import connection
+
+    composite_guard = (
+        "external_id NOT LIKE 'wc-match:%%' AND external_id NOT LIKE 'pm-event:%%'"
+    )
+    if connection.vendor == "postgresql":
+        payload = """
+            COALESCE(polymarket_raw->>'groupItemTitle', '') <> ''
+            OR COALESCE(polymarket_raw->>'sportsMarketType', '') = %s
+        """
+    else:
+        payload = """
+            COALESCE(json_extract(polymarket_raw, '$.groupItemTitle'), '') <> ''
+            OR COALESCE(json_extract(polymarket_raw, '$.sportsMarketType'), '') = %s
+        """
+    return f"""
+        source = 'polymarket'
+        AND {composite_guard}
+        AND ({payload})
+    """
+
+
+def exclude_orphan_polymarket_legs(qs):
+    """Drop Polymarket submarkets that belong to a composite parent event."""
+    sql = _orphan_polymarket_leg_sql()
+    return qs.extra(where=[f"NOT ({sql})"], params=[MONEYLINE_TYPE])
 
 
 def get_composite_redirect_market(market) -> Market | None:
