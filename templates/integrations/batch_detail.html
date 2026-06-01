@@ -19,10 +19,14 @@
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-violet-600 dark:text-violet-400">
-          {% trans "Daily Merkle batch" %}
+          {% if is_historical %}{% trans "Full history Merkle batch" %}{% else %}{% trans "Daily Merkle batch" %}{% endif %}
         </p>
         <h1 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">
-          {{ batch.period_start|date:"M j" }} → {{ batch.period_end|date:"M j, Y H:i" }} UTC
+          {% if is_historical %}
+            {% trans "All realized reputation" %} · {{ batch.period_start|date:"M j, Y" }} → {{ batch.period_end|date:"M j, Y" }}
+          {% else %}
+            {{ batch.period_start|date:"M j" }} → {{ batch.period_end|date:"M j, Y H:i" }} UTC
+          {% endif %}
         </h1>
       </div>
       <span class="rounded-full px-2.5 py-1 text-xs font-semibold {% if signature_valid %}bg-emerald-100 text-emerald-700 dark:bg-emerald-950/45 dark:text-emerald-300{% else %}bg-red-100 text-red-700 dark:bg-red-950/45 dark:text-red-300{% endif %}">

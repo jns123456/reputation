@@ -147,6 +147,12 @@ class AttestationBatch(models.Model):
         return self.merkle_root
 
     @property
+    def is_historical(self):
+        from integrations.batch_services import HISTORICAL_BATCH_DATE
+
+        return self.batch_date == HISTORICAL_BATCH_DATE
+
+    @property
     def short_root(self):
         return f"{self.merkle_root[:10]}...{self.merkle_root[-6:]}"
 

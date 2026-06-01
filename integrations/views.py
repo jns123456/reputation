@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render
 
 from integrations.attestation_services import verify_offchain_attestation
-from integrations.batch_services import get_batch_stats, verify_merkle_proof
+from integrations.batch_services import get_batch_stats, is_historical_batch, verify_merkle_proof
 from integrations.models import AttestationBatch, OffchainAttestation
 
 
@@ -16,7 +16,7 @@ def _payload_timestamp(attestation, key):
 
 def proof_index(request):
     stats = get_batch_stats()
-    recent_batches = AttestationBatch.objects.order_by("-batch_date")[:12]
+    recent_batches = AttestationBatch.objects.order_by("-created_at")[:12]
     return render(
         request,
         "integrations/proof_index.html",
@@ -52,6 +52,7 @@ def batch_detail(request, merkle_root):
             "batch": batch,
             "records": records,
             "signature_valid": batch.is_signature_valid,
+            "is_historical": is_historical_batch(batch),
         },
     )
 

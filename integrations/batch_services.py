@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
@@ -26,6 +26,7 @@ from reputation.services import get_predicted_outcome_probability
 logger = logging.getLogger(__name__)
 
 SCORE_VERSION = 1
+HISTORICAL_BATCH_DATE = date(1970, 1, 1)
 REALIZED_EVENT_TYPES = (
     ReputationEvent.EventType.EXITED_PREDICTION,
     ReputationEvent.EventType.CORRECT_PREDICTION,
@@ -171,6 +172,19 @@ def get_reputation_events_for_period(*, period_start, period_end):
     )
 
 
+def get_all_realized_reputation_events():
+    """Every resolved/exited forecast that changed reputation points."""
+    return (
+        ReputationEvent.objects.filter(event_type__in=REALIZED_EVENT_TYPES)
+        .select_related("prediction", "prediction__market", "user")
+        .order_by("created_at", "id")
+    )
+
+
+def is_historical_batch(batch):
+    return batch.batch_date == HISTORICAL_BATCH_DATE
+
+
 def _batch_exists_for_date(batch_date):
     return AttestationBatch.objects.filter(batch_date=batch_date).exists()
 
@@ -199,27 +213,19 @@ def _sign_batch(*, merkle_root, record_count, period_start, period_end, prev_bat
 ZERO_HASH = "0x" + "0" * 64
 
 
-def build_daily_attestation_batch(*, as_of=None, force=False):
-    """
-    Build a signed Merkle batch for the last 24 hours of realized reputation.
-
-    Idempotent per UTC ``batch_date`` unless ``force=True``.
-    """
-    as_of = as_of or timezone.now()
-    period_end = as_of
-    period_start = as_of - timedelta(hours=24)
-    batch_date = as_of.date()
-
-    if not force and _batch_exists_for_date(batch_date):
-        existing = AttestationBatch.objects.get(batch_date=batch_date)
-        logger.info("Daily attestation batch already exists for %s", batch_date.isoformat())
-        return existing, False
-
-    events = list(get_reputation_events_for_period(period_start=period_start, period_end=period_end))
+def _create_attestation_batch(
+    *,
+    events,
+    batch_date,
+    period_start,
+    period_end,
+    prev_batch_root,
+    force,
+    log_label,
+):
     records = [build_position_close_record(event) for event in events]
     leaf_hashes = [hash_position_close_record(record) for record in records]
     merkle_root = compute_merkle_root(leaf_hashes)
-    prev_batch_root = _previous_batch_root() if not force else ""
     message, signature = _sign_batch(
         merkle_root=merkle_root,
         record_count=len(records),
@@ -267,7 +273,8 @@ def build_daily_attestation_batch(*, as_of=None, force=False):
         return batch, False
 
     logger.info(
-        "Built daily attestation batch root=%s records=%s period=%s→%s",
+        "Built %s attestation batch root=%s records=%s period=%s→%s",
+        log_label,
         batch.short_root,
         batch.record_count,
         period_start.isoformat(),
@@ -280,6 +287,65 @@ def build_daily_attestation_batch(*, as_of=None, force=False):
         batch = anchor_batch_onchain_safely(batch)
 
     return batch, True
+
+
+def build_daily_attestation_batch(*, as_of=None, force=False):
+    """
+    Build a signed Merkle batch for the last 24 hours of realized reputation.
+
+    Idempotent per UTC ``batch_date`` unless ``force=True``.
+    """
+    as_of = as_of or timezone.now()
+    period_end = as_of
+    period_start = as_of - timedelta(hours=24)
+    batch_date = as_of.date()
+
+    if not force and _batch_exists_for_date(batch_date):
+        existing = AttestationBatch.objects.get(batch_date=batch_date)
+        logger.info("Daily attestation batch already exists for %s", batch_date.isoformat())
+        return existing, False
+
+    events = list(get_reputation_events_for_period(period_start=period_start, period_end=period_end))
+    prev_batch_root = _previous_batch_root() if not force else ""
+    return _create_attestation_batch(
+        events=events,
+        batch_date=batch_date,
+        period_start=period_start,
+        period_end=period_end,
+        prev_batch_root=prev_batch_root,
+        force=force,
+        log_label="daily",
+    )
+
+
+def build_historical_attestation_batch(*, force=False):
+    """
+    One-time genesis batch: every realized reputation position ever scored.
+
+    Uses ``HISTORICAL_BATCH_DATE`` (1970-01-01) as a sentinel ``batch_date``.
+    """
+    if not force and _batch_exists_for_date(HISTORICAL_BATCH_DATE):
+        existing = AttestationBatch.objects.get(batch_date=HISTORICAL_BATCH_DATE)
+        logger.info("Historical attestation batch already exists")
+        return existing, False
+
+    events = list(get_all_realized_reputation_events())
+    if events:
+        period_start = events[0].created_at
+        period_end = events[-1].created_at
+    else:
+        now = timezone.now()
+        period_start = period_end = now
+
+    return _create_attestation_batch(
+        events=events,
+        batch_date=HISTORICAL_BATCH_DATE,
+        period_start=period_start,
+        period_end=period_end,
+        prev_batch_root="",
+        force=force,
+        log_label="historical",
+    )
 
 
 def verify_batch_signature(batch):
@@ -301,7 +367,7 @@ def verify_batch_signature(batch):
 def get_batch_stats():
     from integrations.eas_onchain import get_anchor_wallet_address, onchain_ready
 
-    latest = AttestationBatch.objects.order_by("-batch_date").first()
+    latest = AttestationBatch.objects.order_by("-created_at").first()
     total_records = sum(
         AttestationBatch.objects.values_list("record_count", flat=True)[:365]
     )

@@ -423,6 +423,22 @@ class DailyAttestationBatchTests(TestCase):
         call_command("build_daily_attestation_batch")
         self.assertEqual(AttestationBatch.objects.count(), 1)
 
+    def test_historical_batch_includes_all_realized_events(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            prediction = create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
+        self.market.current_probability = {"Yes": 0.5, "No": 0.5}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        from integrations.batch_services import build_historical_attestation_batch, is_historical_batch
+
+        batch, created = build_historical_attestation_batch()
+
+        self.assertTrue(created)
+        self.assertTrue(is_historical_batch(batch))
+        self.assertEqual(batch.record_count, 1)
+        self.assertTrue(verify_batch_signature(batch))
+
 
 class EasOnchainConfigTests(TestCase):
     def test_compute_schema_uid_is_deterministic(self):
