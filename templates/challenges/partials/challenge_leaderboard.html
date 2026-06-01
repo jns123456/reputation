@@ -9,7 +9,7 @@
           <p class="pr-eyebrow">{% trans "Live ranking" %}</p>
           <h2 class="challenge-leaderboard-title">{% trans "Leaderboard" %}</h2>
           <p class="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            {% trans "Realized points come from resolved or closed forecasts. Unrealized points estimate P&L on open challenge events at current market odds — including forecasts you placed before joining the challenge." %}
+            {% trans "Realized points count only after you join the challenge (resolved or closed forecasts on challenge events). Unrealized points estimate P&L on open challenge events at current odds — including open forecasts you placed before joining, once the challenge is live." %}
           </p>
         </div>
         {% if challenge.status == 'active' or challenge.status == 'completed' %}

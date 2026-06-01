@@ -13,20 +13,39 @@ REALIZED_REPUTATION_EVENT_TYPES = [
 ]
 
 
-def get_participant_challenge_reputation(*, challenge, user, market_ids=None):
+def get_participant_challenge_reputation(*, challenge, participant, market_ids=None):
     """Total realized reputation from challenge markets (resolved + exited)."""
     return get_participant_challenge_realized_points(
         challenge=challenge,
-        user=user,
+        participant=participant,
         market_ids=market_ids,
     )
 
 
-def get_participant_challenge_realized_points(*, challenge, user, market_ids=None):
-    """Sum of realized reputation events on the given challenge markets."""
+def _challenge_reputation_cutoff(*, challenge, participant):
+    """Earliest moment challenge reputation counts for this participant."""
+    if not challenge.started_at:
+        return None
+    joined = participant.joined_at
+    if joined is None:
+        return challenge.started_at
+    return max(joined, challenge.started_at)
+
+
+def get_participant_challenge_realized_points(*, challenge, participant, market_ids=None):
+    """Sum of realized reputation events on challenge markets after the participant joins.
+
+    Only events at or after max(joined_at, challenge.started_at) count — exits or
+    resolutions before acceptance do not affect challenge standings.
+    """
     if not challenge.started_at:
         return 0
 
+    cutoff = _challenge_reputation_cutoff(challenge=challenge, participant=participant)
+    if cutoff is None:
+        return 0
+
+    user = participant.user
     if market_ids is None:
         market_ids = challenge.challenge_markets.values_list("market_id", flat=True)
     else:
@@ -40,6 +59,7 @@ def get_participant_challenge_realized_points(*, challenge, user, market_ids=Non
             user=user,
             prediction__market_id__in=market_ids,
             event_type__in=REALIZED_REPUTATION_EVENT_TYPES,
+            created_at__gte=cutoff,
         ).aggregate(total=Sum("points_delta"))["total"]
         or 0
     )
@@ -134,7 +154,7 @@ def get_challenge_standings_for_markets(*, challenge, market_ids):
     for participant in participants:
         realized = get_participant_challenge_realized_points(
             challenge=challenge,
-            user=participant.user,
+            participant=participant,
             market_ids=market_ids,
         )
         standings.append(
@@ -228,7 +248,7 @@ def get_challenge_standings(challenge):
     for participant in participants:
         realized = get_participant_challenge_realized_points(
             challenge=challenge,
-            user=participant.user,
+            participant=participant,
             market_ids=all_market_ids,
         )
         unrealized = get_participant_challenge_unrealized_points(

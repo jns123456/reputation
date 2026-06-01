@@ -230,6 +230,32 @@ class PriorPredictionChallengeTests(TestCase):
         self.assertEqual(bob_row["unrealized_points"], -40)
         self.assertEqual(bob_row["total_points"], -40)
 
+    def test_exit_before_accept_does_not_count_as_realized(self):
+        from predictions.services import create_prediction, exit_prediction
+
+        prediction = create_prediction(
+            user=self.bob,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.bob)
+
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Clean join",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=challenge, user=self.bob)
+
+        standings = get_challenge_standings(challenge)
+        bob_row = next(row for row in standings if row["participant"].user_id == self.bob.id)
+        self.assertEqual(bob_row["realized_points"], 0)
+        self.assertEqual(bob_row["unrealized_points"], 0)
+        self.assertEqual(bob_row["total_points"], 0)
+
 
 class ResolutionSnapshotTests(TestCase):
     def setUp(self):
