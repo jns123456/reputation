@@ -121,21 +121,30 @@ def build_merkle_proofs(leaf_hashes):
         return {}
 
     leaves = sorted(leaf_hashes)
-    proofs = {leaf: [] for leaf in leaves}
-    layer = leaves[:]
+    proofs_by_index = [[] for _ in leaves]
+    layer = [(leaf_hash, {index}) for index, leaf_hash in enumerate(leaves)]
 
     while len(layer) > 1:
         if len(layer) % 2 == 1:
             layer.append(layer[-1])
         next_layer = []
         for index in range(0, len(layer), 2):
-            left = layer[index]
-            right = layer[index + 1]
-            proofs[left].append({"hash": right, "left": True})
-            proofs[right].append({"hash": left, "left": False})
-            next_layer.append(_hash_pair(left, right))
+            left_hash, left_indices = layer[index]
+            right_hash, right_indices = layer[index + 1]
+            if left_hash == right_hash and left_indices == right_indices:
+                for leaf_index in left_indices:
+                    proofs_by_index[leaf_index].append({"hash": right_hash, "left": True})
+            else:
+                for leaf_index in left_indices:
+                    proofs_by_index[leaf_index].append({"hash": right_hash, "left": True})
+                for leaf_index in right_indices:
+                    proofs_by_index[leaf_index].append({"hash": left_hash, "left": False})
+            next_layer.append((_hash_pair(left_hash, right_hash), left_indices | right_indices))
         layer = next_layer
 
+    proofs = {}
+    for index, leaf_hash in enumerate(leaves):
+        proofs.setdefault(leaf_hash, proofs_by_index[index])
     return proofs
 
 

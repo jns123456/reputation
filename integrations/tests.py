@@ -393,6 +393,21 @@ class DailyAttestationBatchTests(TestCase):
             verify_merkle_proof(leaf_hash=leaves[0], proof=proofs[leaves[0]], root=root)
         )
 
+    def test_merkle_proof_with_odd_leaf_count(self):
+        from integrations.batch_services import build_merkle_proofs
+
+        leaves = [
+            hash_position_close_record({"a": 1}),
+            hash_position_close_record({"b": 2}),
+            hash_position_close_record({"c": 3}),
+        ]
+        root = compute_merkle_root(leaves)
+        proofs = build_merkle_proofs(leaves)
+        for leaf in leaves:
+            self.assertTrue(
+                verify_merkle_proof(leaf_hash=leaf, proof=proofs[leaf], root=root)
+            )
+
     def test_proof_pages_render(self):
         batch, _ = build_daily_attestation_batch()
 
