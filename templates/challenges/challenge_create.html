@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="pr-page challenge-create pb-8"
-     x-data="challengeCreateWizard({{ initial_step }}, {{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }})"
+     x-data="challengeCreateWizard({{ initial_step }}, {{ max_challenge_markets }}, {{ selected_market_ids_json }}, {{ selected_market_titles_json }}, {{ group_eligible_member_ids_json }})"
      x-init="init()">
   <nav class="pr-breadcrumbs" aria-label="{% trans 'Breadcrumb' %}">
     <a href="{% url 'challenges:list' %}">{% trans "Challenges" %}</a>
@@ -80,13 +80,14 @@
           {% trans "Select a group to challenge. The challenge starts when the first member accepts — others can still join later." %}
         </p>
         <div class="challenge-create-groups">
-          {% for group in challenge_groups %}
+          {% for card in challenge_group_cards %}
+          {% with group=card.group %}
           <button type="button"
                   class="challenge-create-group-card"
                   :class="{ 'is-selected': activeGroupId === {{ group.pk }} }"
                   @click="selectGroup({{ group.pk }})"
                   data-group-id="{{ group.pk }}"
-                  data-group-members="{% for member in group.members.all %}{{ member.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                  data-eligible-count="{{ card.eligible_count }}"
                   aria-pressed="false"
                   :aria-pressed="(activeGroupId === {{ group.pk }}).toString()">
             <span class="challenge-create-group-check" aria-hidden="true">
@@ -105,6 +106,7 @@
             </span>
             <i data-lucide="users" class="challenge-create-group-icon h-5 w-5 shrink-0" stroke-width="2" aria-hidden="true"></i>
           </button>
+          {% endwith %}
           {% endfor %}
         </div>
         <input type="hidden" name="challenge_group" :value="activeGroupId || ''">
@@ -135,12 +137,16 @@
           </label>
           {% endfor %}
         </div>
-        <p class="challenge-create-step-hint mt-3" x-show="selectedOpponents === 0" x-cloak>
+        <p class="challenge-create-step-hint mt-3" x-show="!canContinueUsers()" x-cloak>
           {% trans "Select at least one user to continue." %}
         </p>
-        <p class="challenge-create-step-hint is-success mt-3" x-show="selectedOpponents > 0" x-cloak>
+        <p class="challenge-create-step-hint is-success mt-3" x-show="canContinueUsers() && !activeGroupId" x-cloak>
           <span x-text="selectedOpponents"></span>
           {% trans "user(s) selected" %}
+        </p>
+        <p class="challenge-create-step-hint is-success mt-3" x-show="canContinueUsers() && activeGroupId" x-cloak>
+          <span x-text="activeGroupEligibleCount"></span>
+          {% trans "group member(s) will be invited" %}
         </p>
         {% else %}
         <div class="challenge-create-opponents-empty">
@@ -155,7 +161,7 @@
         <button type="button"
                 class="btn-primary justify-center"
                 @click="goToEvents()"
-                :disabled="selectedOpponents === 0 || !hasMutualFollowers">
+                :disabled="!canContinueUsers() || !hasMutualFollowers">
           {% trans "Continue" %}
           <i data-lucide="arrow-right" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
         </button>
@@ -257,14 +263,18 @@
 </div>
 
 <script>
-  function challengeCreateWizard(initialStep, maxMarkets, initialSelectedIds, initialTitles) {
+  function challengeCreateWizard(initialStep, maxMarkets, initialSelectedIds, initialTitles, eligibleMembersByGroup) {
     initialTitles = initialTitles || {};
+    eligibleMembersByGroup = eligibleMembersByGroup || {};
     return {
       step: initialStep || 1,
       maxMarkets,
       selected: {},
       selectedOpponents: 0,
       activeGroupId: null,
+      activeGroupEligibleCount: 0,
+      syncingGroupSelection: false,
+      eligibleMembersByGroup,
       hasMutualFollowers: {{ mutual_followers|yesno:"true,false" }},
       init() {
         this.syncOpponentCount();
@@ -277,21 +287,31 @@
         this.selectedOpponents = this.$el.querySelectorAll(".challenge-opponent-checkbox:checked").length;
       },
       getGroupMemberIds(groupId) {
-        const card = this.$el.querySelector(`.challenge-create-group-card[data-group-id="${groupId}"]`);
-        if (!card) return [];
-        const csv = card.dataset.groupMembers || "";
-        return csv.split(",").map((id) => id.trim()).filter(Boolean);
+        const key = String(groupId);
+        return (this.eligibleMembersByGroup[key] || []).slice();
+      },
+      updateActiveGroupEligibleCount() {
+        if (!this.activeGroupId) {
+          this.activeGroupEligibleCount = 0;
+          return;
+        }
+        this.activeGroupEligibleCount = this.getGroupMemberIds(this.activeGroupId).length;
+      },
+      canContinueUsers() {
+        if (this.activeGroupId) {
+          return this.activeGroupEligibleCount > 0;
+        }
+        return this.selectedOpponents > 0;
       },
       applyMemberSelection(memberIds) {
+        this.syncingGroupSelection = true;
         const memberIdSet = new Set(memberIds.map(String));
         this.$el.querySelectorAll(".challenge-opponent-checkbox").forEach((checkbox) => {
           const shouldCheck = memberIdSet.has(String(checkbox.value));
           checkbox.disabled = Boolean(this.activeGroupId);
-          if (checkbox.checked !== shouldCheck) {
-            checkbox.checked = shouldCheck;
-            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-          }
+          checkbox.checked = shouldCheck;
         });
+        this.syncingGroupSelection = false;
         this.syncOpponentCount();
       },
       selectGroup(groupId) {
@@ -300,6 +320,7 @@
           return;
         }
         this.activeGroupId = groupId;
+        this.updateActiveGroupEligibleCount();
         this.applyMemberSelection(this.getGroupMemberIds(groupId));
         this.$nextTick(() => {
           if (typeof lucide !== "undefined") lucide.createIcons();
@@ -307,34 +328,33 @@
       },
       clearGroup() {
         this.activeGroupId = null;
+        this.activeGroupEligibleCount = 0;
+        this.syncingGroupSelection = true;
         this.$el.querySelectorAll(".challenge-opponent-checkbox").forEach((checkbox) => {
           checkbox.disabled = false;
-          if (checkbox.checked) {
-            checkbox.checked = false;
-            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-          }
+          checkbox.checked = false;
         });
+        this.syncingGroupSelection = false;
         this.syncOpponentCount();
       },
       onFormChange(event) {
+        if (this.syncingGroupSelection) {
+          return;
+        }
         if (event.target && event.target.classList.contains("challenge-opponent-checkbox")) {
           if (this.activeGroupId) {
-            const expected = new Set(this.getGroupMemberIds(this.activeGroupId).map(String));
-            const checked = Array.from(
-              this.$el.querySelectorAll(".challenge-opponent-checkbox:checked"),
-            ).map((el) => String(el.value));
-            const matchesGroup =
-              checked.length === expected.size &&
-              checked.every((id) => expected.has(id));
-            if (!matchesGroup) {
-              this.activeGroupId = null;
-            }
+            this.activeGroupId = null;
+            this.activeGroupEligibleCount = 0;
+            event.target.disabled = false;
+            this.$el.querySelectorAll(".challenge-opponent-checkbox").forEach((checkbox) => {
+              checkbox.disabled = false;
+            });
           }
           this.syncOpponentCount();
         }
       },
       goToEvents() {
-        if (this.selectedOpponents > 0) {
+        if (this.canContinueUsers()) {
           this.step = 2;
           this.$nextTick(() => {
             if (typeof lucide !== "undefined") lucide.createIcons();

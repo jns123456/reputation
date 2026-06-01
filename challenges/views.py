@@ -121,6 +121,22 @@ def challenge_create(request):
     from markets.selectors import get_market_hub_category_summaries
 
     challenge_groups = get_user_challenge_groups(request.user)
+    mutual_follower_ids = {user.id for user in mutual_followers}
+    group_eligible_member_ids = {}
+    challenge_group_cards = []
+    for group in challenge_groups:
+        eligible_ids = [
+            str(member.id)
+            for member in group.members.all()
+            if member.id in mutual_follower_ids
+        ]
+        group_eligible_member_ids[str(group.pk)] = eligible_ids
+        challenge_group_cards.append(
+            {
+                "group": group,
+                "eligible_count": len(eligible_ids),
+            }
+        )
 
     initial_step = 1
     if request.method == "POST" and form.errors and not form.errors.get("opponents"):
@@ -133,6 +149,8 @@ def challenge_create(request):
             "form": form,
             "mutual_followers": mutual_followers,
             "challenge_groups": challenge_groups,
+            "challenge_group_cards": challenge_group_cards,
+            "group_eligible_member_ids_json": json.dumps(group_eligible_member_ids),
             "category_summaries": get_market_hub_category_summaries(),
             "selected_market_ids_json": json.dumps(selected_ids_int),
             "selected_market_titles_json": json.dumps(selected_market_titles),
