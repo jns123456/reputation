@@ -424,6 +424,11 @@ TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
 # Optional per-action rate-limit overrides: {action: {tier: (limit, window_seconds)}}.
 ABUSE_RATE_LIMITS = {}
+# Shared anti-abuse gate for web + MCP write services (``accounts.write_guard``).
+ABUSE_WRITE_GUARD_ENABLED = env.bool("ABUSE_WRITE_GUARD_ENABLED", default=True)
+if _RUNNING_TESTS:
+    # Existing suites assume unlimited writes; write-guard tests opt in explicitly.
+    ABUSE_WRITE_GUARD_ENABLED = False
 
 # --- MCP server (AGENTS.md §17) ----------------------------------------------
 # Read tools are always available to token holders. Writes are OFF by default and

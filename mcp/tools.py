@@ -165,13 +165,6 @@ def submit_comment(*, context, arguments):
         raise McpError("invalid_arguments", "body is required.")
     body = body[:5000]
 
-    # Anti-spam / quality gate shared with the human path (§16).
-    from accounts.abuse_services import assess_content
-
-    assessment = assess_content(user=user, text=body, scope="mcp:submit_comment")
-    if assessment["is_spam"]:
-        raise McpError("spam_rejected", "Comment rejected by anti-spam checks.")
-
     parent_comment = None
     parent_id = arguments.get("parent_comment_id")
     if parent_id:

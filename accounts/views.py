@@ -33,6 +33,8 @@ from accounts.follow_selectors import (
     is_following,
 )
 from accounts.follow_services import toggle_follow
+from accounts import abuse_services
+from accounts.write_guard import write_guard_user_message
 from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm
 from accounts.models import Bookmark, User
 from accounts.category_selectors import get_user_category_breakdown
@@ -707,6 +709,14 @@ def follow_toggle(request):
         if request.headers.get("HX-Request"):
             return HttpResponseBadRequest(str(exc))
         messages.error(request, str(exc))
+        if context == "list":
+            return redirect("accounts:user_list")
+        return redirect("accounts:profile", username=target_user.username)
+    except abuse_services.RateLimitExceeded as exc:
+        message = write_guard_user_message(exc)
+        if request.headers.get("HX-Request"):
+            return HttpResponseBadRequest(message, status=429)
+        messages.error(request, message)
         if context == "list":
             return redirect("accounts:user_list")
         return redirect("accounts:profile", username=target_user.username)

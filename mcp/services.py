@@ -18,6 +18,7 @@ from django.conf import settings
 from accounts import abuse_services
 from accounts.agent_services import can_agent_write, is_write_scope
 from accounts.risk_services import calculate_account_risk_score
+from accounts.write_guard import ContentRejected
 from mcp.errors import McpError
 from mcp.models import McpToolCallLog
 from mcp.registry import get_tool
@@ -128,6 +129,12 @@ def execute_tool(*, context: McpContext, tool_name: str, arguments: dict = None)
         # 6. Execute.
         result = tool.handler(context=context, arguments=arguments)
 
+    except ContentRejected as exc:
+        if tool.is_write:
+            abuse_services.register_abuse_signal(breaker_name)
+        _log(context=context, tool_name=tool.name, arguments=arguments,
+             status=McpToolCallLog.Status.DENIED, error_code="spam_rejected", risk_score=risk_score)
+        raise McpError("spam_rejected", str(exc), http_status=403) from exc
     except abuse_services.RateLimitExceeded as exc:
         _log(context=context, tool_name=tool.name, arguments=arguments,
              status=McpToolCallLog.Status.RATE_LIMITED, error_code=str(exc.action), risk_score=risk_score)

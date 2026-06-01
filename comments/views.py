@@ -19,6 +19,9 @@ from comments.services import cast_vote, create_comment, get_user_vote
 from markets.models import Market
 from predictions.models import Prediction
 
+from accounts import abuse_services
+from accounts.write_guard import ContentRejected, write_guard_user_message
+
 
 def _vote_preview_context(*, target_type, target_id, like_count=0, dislike_count=0):
     previews = get_vote_previews_for_targets(
@@ -80,8 +83,10 @@ def create_comment_view(request, slug):
             parent_comment=parent,
             prediction=prediction,
         )
-    except ValueError as exc:
-        return HttpResponseBadRequest(str(exc))
+    except (ValueError, ContentRejected) as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc))
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
 
     if request.headers.get("HX-Request"):
         return render(
@@ -120,6 +125,8 @@ def vote_view(request):
         )
     except ValueError as e:
         return HttpResponseBadRequest(str(e))
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
 
     if request.headers.get("HX-Request"):
         if target_type == Vote.TargetType.COMMENT:

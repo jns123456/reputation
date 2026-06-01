@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -23,6 +24,9 @@ from pulse.services import (
     toggle_repost,
     vote_on_poll,
 )
+
+from accounts import abuse_services
+from accounts.write_guard import ContentRejected, write_guard_user_message
 
 
 @require_GET
@@ -62,12 +66,35 @@ def create_post_view(request):
             )
         return redirect("forum:feed")
 
-    post = create_post(
-        user=request.user,
-        body=form.cleaned_data["body"],
-        image=form.cleaned_data.get("image"),
-        poll_payload=form.cleaned_data.get("poll_payload"),
-    )
+    try:
+        post = create_post(
+            user=request.user,
+            body=form.cleaned_data["body"],
+            image=form.cleaned_data.get("image"),
+            poll_payload=form.cleaned_data.get("poll_payload"),
+        )
+    except (ValueError, ContentRejected) as exc:
+        if request.headers.get("HX-Request"):
+            form.add_error(None, write_guard_user_message(exc))
+            return render(
+                request,
+                "forum/partials/compose_form.html",
+                {"post_form": form},
+                status=400,
+            )
+        messages.error(request, write_guard_user_message(exc))
+        return redirect("forum:feed")
+    except abuse_services.RateLimitExceeded as exc:
+        if request.headers.get("HX-Request"):
+            form.add_error(None, write_guard_user_message(exc))
+            return render(
+                request,
+                "forum/partials/compose_form.html",
+                {"post_form": form},
+                status=429,
+            )
+        messages.error(request, write_guard_user_message(exc))
+        return redirect("forum:feed")
 
     if request.headers.get("HX-Request"):
         post = get_post_with_interactions(post.id)
@@ -127,8 +154,10 @@ def create_comment_view(request, post_id):
             body=form.cleaned_data["body"],
             parent_comment=parent,
         )
-    except ValueError as exc:
-        return HttpResponseBadRequest(str(exc))
+    except (ValueError, ContentRejected) as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc))
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
 
     if request.headers.get("HX-Request"):
         reply_context = request.POST.get("reply_context", "detail")
@@ -187,6 +216,8 @@ def repost_toggle(request, post_id):
         result, created = toggle_repost(user=request.user, post=post)
     except ValueError as exc:
         return HttpResponseBadRequest(str(exc))
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
 
     original_post = post.original_post
     repost_counts = {
@@ -267,6 +298,8 @@ def poll_vote_view(request, post_id):
         vote_on_poll(user=request.user, poll=poll, option=option)
     except ValueError as exc:
         return HttpResponseBadRequest(str(exc))
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
 
     if request.headers.get("HX-Request"):
         refreshed_post = get_post_with_interactions(content_post.id)

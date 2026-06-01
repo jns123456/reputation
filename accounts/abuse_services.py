@@ -22,6 +22,12 @@ DEFAULT_RATE_LIMITS = {
         "trusted": (200, 3600),
         "throttled": (2, 3600),
     },
+    "post": {
+        "new": (5, 3600),
+        "standard": (40, 3600),
+        "trusted": (200, 3600),
+        "throttled": (2, 3600),
+    },
     "prediction": {
         "new": (10, 3600),
         "standard": (60, 3600),

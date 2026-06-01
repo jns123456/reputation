@@ -9,6 +9,15 @@ from reputation.popularity_services import apply_vote_popularity, record_popular
 
 
 def create_comment(*, user, market, body, parent_comment=None, prediction=None):
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(
+        action="comment",
+        user=user,
+        text=body,
+        content_scope="write:comment",
+    )
+
     if parent_comment:
         if parent_comment.market_id != market.id:
             raise ValueError(_("Parent comment belongs to a different market."))
@@ -72,6 +81,11 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
 
 def cast_vote(*, user, target_type, target_id, value):
     """Cast or update a vote. Value: 1 (upvote), -1 (downvote), 0 (remove)."""
+    if value != 0:
+        from accounts.write_guard import guard_write_action
+
+        guard_write_action(action="vote", user=user)
+
     target = _get_vote_target(target_type, target_id)
     if target is None:
         raise ValueError(_("Vote target not found."))

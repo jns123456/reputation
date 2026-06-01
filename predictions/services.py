@@ -49,6 +49,15 @@ def build_duplicate_forecast_error(*, user, market):
 
 
 def create_prediction(*, user, market, predicted_outcome, predicted_direction=Prediction.Direction.YES, reasoning=""):
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(
+        action="prediction",
+        user=user,
+        text=reasoning,
+        content_scope="write:prediction",
+    )
+
     market = _refresh_market_odds(market)
     if not market.is_open:
         raise ValueError(_("Cannot predict on a closed or resolved market."))

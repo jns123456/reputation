@@ -21,6 +21,11 @@ def toggle_follow(*, follower, following_user):
     if follow:
         follow.delete()
         return False
+
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(action="follow", user=follower)
+
     follow = UserFollow.objects.create(follower=follower, following=following_user)
     try:
         from accounts.notification_services import notify_new_follower

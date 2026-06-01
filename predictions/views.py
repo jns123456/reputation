@@ -26,6 +26,9 @@ from reputation.services import (
     get_predicted_outcome_probability,
 )
 
+from accounts import abuse_services
+from accounts.write_guard import ContentRejected, write_guard_user_message
+
 
 def _build_open_position_context(prediction):
     market = prediction.market
@@ -105,8 +108,16 @@ def create_prediction_view(request, slug):
                     predicted_direction=form.cleaned_data["predicted_direction"],
                     reasoning=form.cleaned_data.get("reasoning", ""),
                 )
-            except ValueError as exc:
-                messages.error(request, str(exc))
+            except (ValueError, ContentRejected) as exc:
+                messages.error(request, write_guard_user_message(exc))
+                anchor = (
+                    "#multi-outcome-forecasts"
+                    if len(market.outcome_labels or []) > 2
+                    else "#place-forecast"
+                )
+                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{anchor}")
+            except abuse_services.RateLimitExceeded as exc:
+                messages.error(request, write_guard_user_message(exc))
                 anchor = (
                     "#multi-outcome-forecasts"
                     if len(market.outcome_labels or []) > 2

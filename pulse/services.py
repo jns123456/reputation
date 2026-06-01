@@ -19,6 +19,15 @@ def _record_streak_activity(user):
 
 
 def create_post(*, user, body="", image=None, poll_payload=None):
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(
+        action="post",
+        user=user,
+        text=body,
+        content_scope="write:post",
+    )
+
     if poll_payload and image:
         raise ValueError(_("Polls can't include images."))
 
@@ -64,6 +73,10 @@ def _create_poll_for_post(*, post, options, duration_days):
 
 
 def vote_on_poll(*, user, poll, option):
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(action="vote", user=user)
+
     if poll.is_closed:
         raise ValueError(_("This poll has ended."))
 
@@ -103,6 +116,10 @@ def resolve_original_post(post):
 
 
 def _create_repost(*, user, original):
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(action="follow", user=user)
+
     repost_points = settings.POPULARITY_REPOST_POINTS
     with transaction.atomic():
         repost = Post.objects.create(user=user, reposted_from=original)
@@ -174,6 +191,15 @@ def delete_post(*, user, post):
 
 
 def create_pulse_comment(*, user, post, body, parent_comment=None):
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(
+        action="comment",
+        user=user,
+        text=body,
+        content_scope="write:pulse_comment",
+    )
+
     if parent_comment:
         if parent_comment.post_id != post.id:
             raise ValueError(_("Parent comment belongs to a different post."))
