@@ -20,6 +20,7 @@ MEXICO_VS_RSA_EVENT = {
     "startDate": "2026-04-06T22:38:23Z",
     "endDate": "2026-06-11T21:00:00Z",
     "volume24hr": 21240,
+    "tags": [{"slug": "fifa-world-cup", "label": "FIFA World Cup"}],
     "markets": [
         {
             "id": "m1",
@@ -52,6 +53,45 @@ MEXICO_VS_RSA_EVENT = {
 }
 
 
+COLOMBIA_VS_COSTA_RICA_EVENT = {
+    "slug": "fif-col-cri-2026-06-01",
+    "title": "Colombia vs Costa Rica",
+    "startDate": "2026-05-20T00:11:00Z",
+    "endDate": "2026-06-01T23:00:00Z",
+    "volume24hr": 12000,
+    "tags": [{"slug": "fifa-friendlies", "label": "FIFA Friendlies"}],
+    "markets": [
+        {
+            "id": "col-win",
+            "question": "Will Colombia win on 2026-06-01?",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-01T23:00:00Z",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["0.86", "0.14"]',
+            "closed": False,
+        },
+        {
+            "id": "draw",
+            "question": "Will Colombia vs. Costa Rica end in a draw?",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-01T23:00:00Z",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["0.11", "0.89"]',
+            "closed": False,
+        },
+        {
+            "id": "cri-win",
+            "question": "Will Costa Rica win on 2026-06-01?",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-01T23:00:00Z",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["0.05", "0.95"]',
+            "closed": False,
+        },
+    ],
+}
+
+
 class SoccerMatchNormalizationTests(TestCase):
     def test_parse_match_teams(self):
         self.assertEqual(parse_match_teams("Mexico vs. South Africa"), ("Mexico", "South Africa"))
@@ -74,7 +114,20 @@ class SoccerMatchNormalizationTests(TestCase):
 
     def test_is_world_cup_match_event(self):
         self.assertTrue(is_world_cup_match_event(MEXICO_VS_RSA_EVENT))
+        self.assertTrue(is_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT))
         self.assertFalse(is_world_cup_match_event({"title": "Mexico vs. South Africa - More Markets", "markets": []}))
+
+    def test_normalize_fifa_friendly_match_event(self):
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT)
+        self.assertIsNotNone(normalized)
+        self.assertEqual(normalized["title"], "Colombia vs Costa Rica")
+        self.assertEqual(
+            [item["label"] for item in normalized["outcomes"]],
+            ["Colombia", DRAW_OUTCOME_LABEL, "Costa Rica"],
+        )
+        self.assertAlmostEqual(normalized["current_probability"]["Colombia"], 0.86)
+        self.assertAlmostEqual(normalized["current_probability"][DRAW_OUTCOME_LABEL], 0.11)
+        self.assertAlmostEqual(normalized["current_probability"]["Costa Rica"], 0.05)
 
     def test_normalize_world_cup_match_event(self):
         normalized = normalize_world_cup_match_event(MEXICO_VS_RSA_EVENT)
@@ -106,7 +159,8 @@ class SoccerMatchNormalizationTests(TestCase):
         normalized = normalize_world_cup_match_event(event)
         self.assertFalse(normalized["accepting_orders"])
 
-    def test_import_world_cup_match_market(self):
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    def test_import_world_cup_match_market(self, _mock_translate):
         normalized = normalize_world_cup_match_event(MEXICO_VS_RSA_EVENT)
         raw_market = build_world_cup_match_raw(MEXICO_VS_RSA_EVENT, normalized=normalized)
         market, created = import_market_from_normalized(
@@ -121,8 +175,9 @@ class SoccerMatchNormalizationTests(TestCase):
 
 
 class SyncWorldCupMatchMarketsTests(TestCase):
-    @patch("integrations.services.PolymarketClient.fetch_world_cup_match_events")
-    def test_sync_world_cup_match_markets(self, mock_fetch):
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    @patch("integrations.services.PolymarketClient.fetch_soccer_match_events")
+    def test_sync_world_cup_match_markets(self, mock_fetch, _mock_translate):
         mock_fetch.return_value = [MEXICO_VS_RSA_EVENT]
         result = sync_world_cup_match_markets(limit=5)
         mock_fetch.assert_called_once_with(limit=5)
@@ -131,8 +186,8 @@ class SyncWorldCupMatchMarketsTests(TestCase):
         self.assertEqual(market.external_id, f"{WORLD_CUP_MATCH_EXTERNAL_PREFIX}fifwc-mex-rsa-2026-06-11")
         self.assertTrue(Market.objects.filter(external_id=market.external_id).exists())
 
-    @patch("integrations.polymarket.client.PolymarketClient.fetch_events")
-    def test_fetch_world_cup_match_events_paginates(self, mock_fetch_events):
+    @patch("integrations.polymarket.client.PolymarketClient.fetch_events_paginated")
+    def test_fetch_soccer_match_events_paginates(self, mock_fetch_paginated):
         from integrations.polymarket.client import PolymarketClient
 
         def make_match(slug):
@@ -141,12 +196,20 @@ class SyncWorldCupMatchMarketsTests(TestCase):
             event["title"] = f"Team Home vs. Team Away {slug}"
             return event
 
-        page_one = [{"slug": "prop-1", "title": "Will Spain win?", "markets": []}]
-        page_one.extend(make_match(f"match-{idx}") for idx in range(100))
-        page_two = [make_match("match-final")]
-        mock_fetch_events.side_effect = [page_one, page_two]
+        matches = [make_match(f"match-{idx}") for idx in range(101)]
+        mock_fetch_paginated.return_value = matches
 
         client = PolymarketClient()
-        matches = client.fetch_world_cup_match_events()
-        self.assertEqual(len(matches), 101)
-        self.assertEqual(mock_fetch_events.call_count, 2)
+        result = client.fetch_soccer_match_events(tag_slugs=("fifa-world-cup",))
+        self.assertEqual(len(result), 101)
+        mock_fetch_paginated.assert_called_once()
+
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    @patch("integrations.services.PolymarketClient.fetch_soccer_match_events")
+    def test_sync_includes_fifa_friendlies(self, mock_fetch, _mock_translate):
+        mock_fetch.return_value = [COLOMBIA_VS_COSTA_RICA_EVENT]
+        result = sync_world_cup_match_markets(limit=5)
+        self.assertEqual(len(result["imported"]), 1)
+        market = result["imported"][0]["market"]
+        self.assertEqual(market.title, "Colombia vs Costa Rica")
+        self.assertEqual(market.canonical_category_slug, "sports")

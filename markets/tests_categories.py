@@ -53,8 +53,19 @@ class MarketCategoryResolutionTests(TestCase):
             title="Mexico vs. South Africa",
             slug="mexico-vs-south-africa",
             polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
         )
         self.assertEqual(resolve_market_category_slug(market), "fifa-world-cup-2026")
+
+    def test_friendly_soccer_match_resolves_to_sports_category(self):
+        market = Market(
+            external_id="wc-match:fif-col-cri-2026-06-01",
+            title="Colombia vs Costa Rica",
+            slug="colombia-vs-costa-rica",
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-friendlies"}]},
+        )
+        self.assertEqual(resolve_market_category_slug(market), "sports")
 
     def test_crypto_wins_over_economy_when_both_tags_present(self):
         market = Market(

@@ -203,7 +203,18 @@ def remaining_probability_count(market, shown=2):
 
 @register.filter
 def is_multi_outcome_market(market):
-    return len(getattr(market, "outcome_labels", []) or []) > 2
+    """Grouped Polymarket events: Yes/No per outcome (not pick-one)."""
+    from markets.forecast_modes import ForecastMode, get_forecast_mode
+
+    return get_forecast_mode(market) == ForecastMode.MULTI_BINARY
+
+
+@register.filter
+def is_pick_one_market(market):
+    """Mutually exclusive outcomes — user picks exactly one option."""
+    from markets.forecast_modes import ForecastMode, get_forecast_mode
+
+    return get_forecast_mode(market) == ForecastMode.PICK_ONE
 
 
 @register.simple_tag

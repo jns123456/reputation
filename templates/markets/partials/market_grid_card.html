@@ -31,7 +31,7 @@
   </div>
   {% endif %}
 
-  {% if market|is_multi_outcome_market %}
+  {% if market.is_multi_binary_market %}
   <div class="mt-4 space-y-2">
     {% for outcome in market|top_probability_items:2 %}
     <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 text-sm">

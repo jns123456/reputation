@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.core.cache import cache
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from accounts.bookmark_selectors import get_user_bookmarked_ids
@@ -157,6 +157,17 @@ def market_list(request):
 
 def market_detail(request, slug):
     market = get_object_or_404(Market, slug=slug)
+
+    from markets.composite_redirect import get_composite_redirect_market
+
+    composite_market = get_composite_redirect_market(market)
+    if composite_market:
+        target = reverse("markets:detail", kwargs={"slug": composite_market.slug})
+        query_string = request.META.get("QUERY_STRING", "")
+        if query_string:
+            target = f"{target}?{query_string}"
+        return redirect(target, permanent=True)
+
     enqueue_market_refresh_if_stale(market)
 
     predictions = get_market_predictions(market)

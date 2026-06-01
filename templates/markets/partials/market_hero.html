@@ -34,6 +34,54 @@
 
           <h1 class="pr-hero-title mt-3">{{ market.display_title }}</h1>
 
+          {% if market.is_soccer_match and market.match_team_a and market.match_team_b %}
+          <div class="mt-4 rounded-xl border border-slate-200 bg-white/80 px-4 py-4 dark:border-slate-600 dark:bg-slate-900/50">
+            <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 text-center">
+              <div class="min-w-0">
+                <p class="truncate text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">{{ market.match_team_a }}</p>
+              </div>
+              <div class="shrink-0 px-1">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{% trans "vs" %}</p>
+                {% if market.kickoff_at %}
+                <p class="mt-1 text-xs font-medium tabular-nums text-slate-500 dark:text-slate-400">{{ market.kickoff_at|date:"M j · H:i" }} UTC</p>
+                {% endif %}
+              </div>
+              <div class="min-w-0">
+                <p class="truncate text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">{{ market.match_team_b }}</p>
+              </div>
+            </div>
+            {% if market.current_probability %}
+            <div class="mt-4 grid grid-cols-3 gap-2">
+              {% for label, prob in market.current_probability.items %}
+              <div class="flex flex-col items-center rounded-lg border py-2.5
+                {% if label|lower == 'draw' %}border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-950/35{% elif forloop.first %}border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-950/35{% else %}border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-800/55{% endif %}">
+                <span class="truncate px-1 text-[10px] font-semibold uppercase tracking-wide
+                  {% if label|lower == 'draw' %}text-amber-700 dark:text-amber-300{% elif forloop.first %}text-emerald-700 dark:text-emerald-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
+                  {% if label|lower == 'draw' %}{% trans "Draw" %}{% else %}{{ label }}{% endif %}
+                </span>
+                <span class="mt-0.5 text-lg font-bold tabular-nums
+                  {% if label|lower == 'draw' %}text-amber-800 dark:text-amber-200{% elif forloop.first %}text-emerald-800 dark:text-emerald-200{% else %}text-slate-800 dark:text-slate-100{% endif %}">
+                  {{ prob|as_percent }}%
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if market.is_multi_binary_market and market.current_probability %}
+          <div class="mt-4 space-y-2 rounded-xl border border-slate-200 bg-white/80 px-4 py-4 dark:border-slate-600 dark:bg-slate-900/50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Top outcomes" %}</p>
+            {% for outcome in market|top_probability_items:4 %}
+            <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-sm">
+              <span class="truncate font-medium text-slate-800 dark:text-slate-100">{{ outcome.label|localized_outcome }}</span>
+              <span class="font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ outcome.prob_percent }}%</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           {% if market.display_description %}
           <div
             class="pr-hero-desc-collapsible"
@@ -101,7 +149,7 @@
         </div>
       </div>
 
-      {% if market.current_probability and not market|is_multi_outcome_market %}
+      {% if market.current_probability and not market.is_multi_binary_market and not market.is_soccer_match %}
       <div class="pr-panel w-full shrink-0 p-4 lg:min-w-[220px] lg:max-w-[260px] lg:w-auto">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Live odds" %}</p>
         <div class="mt-3 space-y-2">

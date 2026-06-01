@@ -18,6 +18,17 @@ MONEYLINE_TYPE = "moneyline"
 WORLD_CUP_TAG_SLUGS = ("fifa-world-cup", "2026-fifa-world-cup")
 # Group-stage match events (3-way moneyline) live under this tag on Polymarket.
 WORLD_CUP_MATCH_TAG_SLUG = "fifa-world-cup"
+# Polymarket tags that carry 3-way soccer moneyline events (friendlies, leagues, etc.).
+SOCCER_MATCH_TAG_SLUGS = (
+    "fifa-world-cup",
+    "2026-fifa-world-cup",
+    "fifa-friendlies",
+    "soccer",
+    "mls",
+    "la-liga",
+    "epl",
+    "ucl",
+)
 
 
 def is_world_cup_match_market(market) -> bool:
@@ -28,7 +39,7 @@ def is_world_cup_match_market(market) -> bool:
     return raw.get("market_kind") == "soccer_match_3way"
 
 
-def is_world_cup_match_event(event: dict) -> bool:
+def is_soccer_match_event(event: dict) -> bool:
     title = (event.get("title") or "").strip()
     if not title:
         return False
@@ -38,6 +49,19 @@ def is_world_cup_match_event(event: dict) -> bool:
     if " vs " not in lowered and " vs. " not in lowered:
         return False
     return len(_moneyline_markets(event, open_only=True)) == 3
+
+
+# Backwards-compatible alias — detection is not World-Cup-specific.
+is_world_cup_match_event = is_soccer_match_event
+
+
+def is_soccer_moneyline_submarket(raw_market: dict, event: dict | None = None) -> bool:
+    """True for binary Yes/No legs of a grouped 3-way soccer moneyline event."""
+    if raw_market.get("sportsMarketType") != MONEYLINE_TYPE:
+        return False
+    if event and is_soccer_match_event(event):
+        return True
+    return False
 
 
 def parse_match_teams(title: str) -> tuple[str | None, str | None]:
@@ -92,9 +116,9 @@ def _match_kickoff_time(event: dict, moneyline_markets: list[dict]):
     return _parse_date(event.get("gameStartTime"))
 
 
-def normalize_world_cup_match_event(event: dict, *, default_category: str = "Sports") -> dict | None:
+def normalize_soccer_match_event(event: dict, *, default_category: str = "Sports") -> dict | None:
     """Convert a Polymarket match event into a single 3-outcome market dict."""
-    if not is_world_cup_match_event(event):
+    if not is_soccer_match_event(event):
         return None
 
     slug = event.get("slug")
@@ -175,7 +199,10 @@ def normalize_world_cup_match_event(event: dict, *, default_category: str = "Spo
     }
 
 
-def build_world_cup_match_raw(event: dict, *, normalized: dict) -> dict:
+normalize_world_cup_match_event = normalize_soccer_match_event
+
+
+def build_soccer_match_raw(event: dict, *, normalized: dict) -> dict:
     """Composite polymarket_raw payload stored on imported match markets."""
     team_a, team_b = parse_match_teams(event.get("title", ""))
     moneyline = _moneyline_markets(event, open_only=False)
@@ -202,3 +229,6 @@ def build_world_cup_match_raw(event: dict, *, normalized: dict) -> dict:
         "image": event.get("image") or event.get("icon"),
         "icon": event.get("icon") or event.get("image"),
     }
+
+
+build_world_cup_match_raw = build_soccer_match_raw

@@ -307,37 +307,51 @@ class PolymarketClient:
             fallback_tag_in_payload="crypto",
         )
 
-    def fetch_world_cup_match_events(self, *, limit=None, tag_slug=None):
-        """Fetch FIFA World Cup group-stage match events with 3-way moneyline markets."""
+    def fetch_soccer_match_events(self, *, limit=None, tag_slugs=None):
+        """Fetch Polymarket soccer events with 3-way moneyline markets."""
         from integrations.polymarket.soccer_matches import (
-            WORLD_CUP_MATCH_TAG_SLUG,
-            is_world_cup_match_event,
+            SOCCER_MATCH_TAG_SLUGS,
+            is_soccer_match_event,
         )
 
-        tag_slug = tag_slug or WORLD_CUP_MATCH_TAG_SLUG
+        tag_slugs = tag_slugs or SOCCER_MATCH_TAG_SLUGS
         matches = []
         seen_slugs = set()
 
-        events = self.fetch_events_paginated(
-            tag_slug=tag_slug,
-            page_size=100,
-            max_pages=50,
-            active=True,
-            closed=False,
-        )
-        for event in events:
-            slug = event.get("slug")
-            if not slug or slug in seen_slugs:
-                continue
-            if not is_world_cup_match_event(event):
-                continue
-            matches.append(event)
-            seen_slugs.add(slug)
+        for tag_slug in tag_slugs:
+            events = self.fetch_events_paginated(
+                tag_slug=tag_slug,
+                page_size=100,
+                max_pages=50,
+                active=True,
+                closed=False,
+            )
+            for event in events:
+                slug = event.get("slug")
+                if not slug or slug in seen_slugs:
+                    continue
+                if not is_soccer_match_event(event):
+                    continue
+                matches.append(event)
+                seen_slugs.add(slug)
+                if limit is not None and len(matches) >= limit:
+                    break
             if limit is not None and len(matches) >= limit:
                 break
 
         matches.sort(key=lambda event: event.get("startDate") or event.get("endDate") or "")
         return matches
+
+    def fetch_world_cup_match_events(self, *, limit=None, tag_slug=None):
+        """Fetch FIFA World Cup group-stage match events with 3-way moneyline markets."""
+        from integrations.polymarket.soccer_matches import WORLD_CUP_MATCH_TAG_SLUG
+
+        if tag_slug and tag_slug != WORLD_CUP_MATCH_TAG_SLUG:
+            return self.fetch_soccer_match_events(limit=limit, tag_slugs=(tag_slug,))
+
+        from integrations.polymarket.soccer_matches import WORLD_CUP_TAG_SLUGS
+
+        return self.fetch_soccer_match_events(limit=limit, tag_slugs=WORLD_CUP_TAG_SLUGS)
 
     def fetch_market_by_id(self, external_id):
         url = f"{self.base_url}/markets/{external_id}"
@@ -386,6 +400,17 @@ def _embedded_event_for_market(raw_market):
     return {}
 
 
+def is_grouped_composite_event(event: dict) -> bool:
+    """True when an event should be one internal market, not separate binary legs."""
+    from integrations.polymarket.soccer_matches import is_soccer_match_event
+
+    return is_soccer_match_event(event) or is_multi_outcome_event_record(
+        event,
+        min_outcomes=2,
+        require_open=False,
+    )
+
+
 def collect_binary_market_pairs_from_events(
     events,
     *,
@@ -394,12 +419,23 @@ def collect_binary_market_pairs_from_events(
     default_category="",
 ):
     """Extract active binary markets from Polymarket events with parent event attached."""
+    from integrations.polymarket.soccer_matches import (
+        is_soccer_match_event,
+        is_soccer_moneyline_submarket,
+    )
+
     if seen_ids is None:
         seen_ids = set()
 
     pairs = []
     for event in events:
+        composite_event = is_grouped_composite_event(event)
+        skip_moneyline_legs = is_soccer_match_event(event)
         for market in event.get("markets") or []:
+            if skip_moneyline_legs and is_soccer_moneyline_submarket(market, event):
+                continue
+            if composite_event and market.get("groupItemTitle"):
+                continue
             if not is_binary_market_record(market) or market.get("closed"):
                 continue
             market_id = market.get("id")
@@ -424,6 +460,11 @@ def collect_importable_market_pairs_from_events(
     default_category="",
 ):
     """Extract composite multi-outcome events or individual binary markets."""
+    from integrations.polymarket.soccer_matches import (
+        build_soccer_match_raw,
+        normalize_soccer_match_event,
+    )
+
     if seen_ids is None:
         seen_ids = set()
 
@@ -434,6 +475,16 @@ def collect_importable_market_pairs_from_events(
             external_id = composite["external_id"]
             if external_id not in seen_ids:
                 pairs.append((build_polymarket_event_raw(event, normalized=composite), event))
+                seen_ids.add(external_id)
+                if limit is not None and len(pairs) >= limit:
+                    return pairs
+            continue
+
+        soccer = normalize_soccer_match_event(event, default_category=default_category)
+        if soccer:
+            external_id = soccer["external_id"]
+            if external_id not in seen_ids:
+                pairs.append((build_soccer_match_raw(event, normalized=soccer), event))
                 seen_ids.add(external_id)
                 if limit is not None and len(pairs) >= limit:
                     return pairs
@@ -662,7 +713,7 @@ def _grouped_outcome_markets(event: dict, *, open_only: bool) -> list[dict]:
 def is_multi_outcome_event_record(
     event: dict,
     *,
-    min_outcomes: int = 3,
+    min_outcomes: int = 2,
     require_open: bool = True,
 ) -> bool:
     """True for Polymarket grouped events that can be represented as one forecast."""

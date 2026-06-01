@@ -78,6 +78,39 @@ class CollectBinaryMarketPairsTests(SimpleTestCase):
         self.assertEqual(raw_market["id"], "pm-event:league-winner")
         self.assertEqual(parent["slug"], "league-winner")
 
+    def test_collects_soccer_match_before_moneyline_legs(self):
+        from integrations.tests_soccer_matches import COLOMBIA_VS_COSTA_RICA_EVENT
+
+        pairs = collect_importable_market_pairs_from_events(
+            [COLOMBIA_VS_COSTA_RICA_EVENT],
+            default_category="Sports",
+        )
+
+        self.assertEqual(len(pairs), 1)
+        raw_market, parent = pairs[0]
+        self.assertEqual(raw_market["market_kind"], "soccer_match_3way")
+        self.assertEqual(parent["slug"], "fif-col-cri-2026-06-01")
+
+        binary_pairs = collect_binary_market_pairs_from_events(
+            [COLOMBIA_VS_COSTA_RICA_EVENT],
+            default_category="Sports",
+        )
+        self.assertEqual(binary_pairs, [])
+
+    def test_skips_grouped_submarkets_when_event_is_composite(self):
+        event = {
+            "slug": "two-way-race",
+            "title": "Two-way race",
+            "markets": [
+                _binary_market("a", question="Will Alice win?") | {"groupItemTitle": "Alice", "groupItemThreshold": "0"},
+                _binary_market("b", question="Will Bob win?") | {"groupItemTitle": "Bob", "groupItemThreshold": "1"},
+            ],
+        }
+        pairs = collect_importable_market_pairs_from_events([event], default_category="Politics")
+        self.assertEqual(len(pairs), 1)
+        self.assertEqual(pairs[0][0]["market_kind"], "polymarket_multi_outcome_event")
+        self.assertEqual(collect_binary_market_pairs_from_events([event]), [])
+
     def test_normalizes_grouped_multi_outcome_event(self):
         event = {
             "slug": "democratic-nominee",

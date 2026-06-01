@@ -195,6 +195,28 @@ class Market(models.Model):
         return is_world_cup_match_market(self)
 
     @property
+    def match_team_a(self):
+        raw = self.polymarket_raw or {}
+        return raw.get("team_a") or ""
+
+    @property
+    def match_team_b(self):
+        raw = self.polymarket_raw or {}
+        return raw.get("team_b") or ""
+
+    @property
+    def forecast_mode(self) -> str:
+        from markets.forecast_modes import get_forecast_mode
+
+        return get_forecast_mode(self)
+
+    @property
+    def is_multi_binary_market(self) -> bool:
+        from markets.forecast_modes import uses_multi_binary_panel
+
+        return uses_multi_binary_panel(self)
+
+    @property
     def kickoff_at(self):
         raw = self.polymarket_raw or {}
         kickoff = raw.get("kickoff_at")

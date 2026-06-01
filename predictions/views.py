@@ -26,8 +26,16 @@ from reputation.services import (
     get_predicted_outcome_probability,
 )
 
+from markets.forecast_modes import ForecastMode, get_forecast_mode
+
 from accounts import abuse_services
 from accounts.write_guard import ContentRejected, write_guard_user_message
+
+
+def _forecast_form_anchor(market) -> str:
+    if get_forecast_mode(market) == ForecastMode.MULTI_BINARY:
+        return "#multi-outcome-forecasts"
+    return "#place-forecast"
 
 
 def _build_open_position_context(prediction):
@@ -91,11 +99,7 @@ def create_prediction_view(request, slug):
     if request.method == "POST":
         if existing:
             messages.error(request, build_duplicate_forecast_error(user=request.user, market=market))
-            anchor = (
-                "#multi-outcome-forecasts"
-                if len(market.outcome_labels or []) > 2
-                else "#place-forecast"
-            )
+            anchor = _forecast_form_anchor(market)
             return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{anchor}")
 
         form = ForecastForm(request.POST, market=market)
@@ -110,20 +114,10 @@ def create_prediction_view(request, slug):
                 )
             except (ValueError, ContentRejected) as exc:
                 messages.error(request, write_guard_user_message(exc))
-                anchor = (
-                    "#multi-outcome-forecasts"
-                    if len(market.outcome_labels or []) > 2
-                    else "#place-forecast"
-                )
-                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{anchor}")
+                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{_forecast_form_anchor(market)}")
             except abuse_services.RateLimitExceeded as exc:
                 messages.error(request, write_guard_user_message(exc))
-                anchor = (
-                    "#multi-outcome-forecasts"
-                    if len(market.outcome_labels or []) > 2
-                    else "#place-forecast"
-                )
-                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{anchor}")
+                return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{_forecast_form_anchor(market)}")
             messages.success(request, _("Your forecast was posted."))
             return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
     else:
@@ -148,11 +142,7 @@ def exit_prediction_view(request, slug, prediction_id):
     )
     from_open_page = request.POST.get("source") == "open_predictions"
     is_htmx = request.headers.get("HX-Request")
-    anchor = (
-        "#multi-outcome-forecasts"
-        if len(market.outcome_labels or []) > 2
-        else "#place-forecast"
-    )
+    anchor = _forecast_form_anchor(market)
 
     try:
         exited_prediction = exit_prediction(prediction=prediction, user=request.user)

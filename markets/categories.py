@@ -108,6 +108,7 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
             {
                 "sports",
                 "soccer",
+                "fifa-friendlies",
                 "fifa-world-cup",
                 "2026-fifa-world-cup",
                 "nba",
@@ -252,10 +253,11 @@ def resolve_market_category_slug(market) -> str:
     """Map a market to one canonical category slug."""
     from integrations.polymarket.soccer_matches import is_world_cup_match_market
 
-    if is_world_cup_match_market(market):
-        return FIFA_WORLD_CUP_CATEGORY_SLUG
-
     tag_slugs = _collect_tag_slugs(market)
+    if is_world_cup_match_market(market):
+        wc_tags = frozenset({"fifa-world-cup", "2026-fifa-world-cup"})
+        if tag_slugs.intersection(wc_tags):
+            return FIFA_WORLD_CUP_CATEGORY_SLUG
 
     for category in CANONICAL_CATEGORIES:
         if tag_slugs.intersection(category.tag_slugs):

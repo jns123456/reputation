@@ -13,7 +13,7 @@
 <div class="pr-page pb-8">
   {% include "markets/partials/market_hero.html" %}
 
-  {% if polymarket_embed and market.is_forecastable and not market|is_multi_outcome_market %}
+  {% if polymarket_embed and market.is_forecastable and not market.is_multi_binary_market %}
   {# Visual test: chart left, forecast right on large screens #}
   <div class="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">
     <div class="flex min-w-0 flex-col">
@@ -28,11 +28,11 @@
       {% include "markets/partials/polymarket_embed.html" %}
     {% endif %}
 
-    {% if market|is_multi_outcome_market %}
+    {% if market.is_multi_binary_market %}
       {% include "predictions/partials/multi_outcome_forecast_panel.html" %}
     {% endif %}
 
-    {% if market.is_forecastable and not market|is_multi_outcome_market %}
+    {% if market.is_forecastable and not market.is_multi_binary_market %}
       <div>
         {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
       </div>

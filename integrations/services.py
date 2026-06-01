@@ -268,6 +268,15 @@ def refresh_polymarket_multi_outcome_market(market):
 
 
 def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
+    """Legacy paginated import — prefers composite events when parent data exists."""
+    from integrations.polymarket.client import (
+        normalize_polymarket_event_record,
+    )
+    from integrations.polymarket.soccer_matches import (
+        build_soccer_match_raw,
+        normalize_soccer_match_event,
+    )
+
     client = PolymarketClient()
     raw_markets = client.fetch_markets(
         limit=limit,
@@ -279,14 +288,42 @@ def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
 
     imported = []
     errors = []
+    seen_composite_slugs = set()
 
     for raw in raw_markets:
         try:
-            normalized = normalize_polymarket_record(raw)
             raw_event = _fetch_event_for_market(client, raw)
+            event_slug = (raw_event or {}).get("slug")
+
+            if event_slug and event_slug not in seen_composite_slugs:
+                composite = normalize_polymarket_event_record(
+                    raw_event,
+                    default_category=raw.get("category") or "",
+                )
+                soccer = normalize_soccer_match_event(
+                    raw_event,
+                    default_category=raw.get("category") or "Sports",
+                )
+                if composite:
+                    seen_composite_slugs.add(event_slug)
+                    raw_market = build_polymarket_event_raw(raw_event, normalized=composite)
+                    normalized = composite
+                elif soccer:
+                    seen_composite_slugs.add(event_slug)
+                    raw_market = build_soccer_match_raw(raw_event, normalized=soccer)
+                    normalized = soccer
+                else:
+                    normalized = normalize_polymarket_record(raw)
+                    raw_market = raw
+            else:
+                if event_slug and event_slug in seen_composite_slugs:
+                    continue
+                normalized = normalize_polymarket_record(raw)
+                raw_market = raw
+
             market, created = import_market_from_normalized(
                 normalized,
-                raw_market=raw,
+                raw_market=raw_market,
                 raw_event=raw_event,
             )
             imported.append({"market": market, "created": created})
@@ -331,6 +368,15 @@ def _import_polymarket_market_pairs(client, pairs, *, default_category=""):
 
             if raw_market.get("market_kind") == MULTI_OUTCOME_EVENT_KIND:
                 normalized = normalize_polymarket_event_record(
+                    raw_event or {},
+                    default_category=default_category or raw_market.get("category") or "",
+                )
+                if not normalized:
+                    continue
+            elif raw_market.get("market_kind") == "soccer_match_3way":
+                from integrations.polymarket.soccer_matches import normalize_soccer_match_event
+
+                normalized = normalize_soccer_match_event(
                     raw_event or {},
                     default_category=default_category or raw_market.get("category") or "",
                 )
@@ -431,24 +477,24 @@ def _world_cup_sync_limit(limit):
 
 
 def sync_world_cup_match_markets(*, limit=None):
-    """Fetch FIFA World Cup match events and upsert as 3-outcome markets."""
+    """Fetch Polymarket soccer match events and upsert as 3-outcome markets."""
     from integrations.polymarket.soccer_matches import (
-        build_world_cup_match_raw,
-        normalize_world_cup_match_event,
+        build_soccer_match_raw,
+        normalize_soccer_match_event,
     )
 
     client = PolymarketClient()
-    events = client.fetch_world_cup_match_events(limit=_world_cup_sync_limit(limit))
+    events = client.fetch_soccer_match_events(limit=_world_cup_sync_limit(limit))
 
     imported = []
     errors = []
 
     for event in events:
         try:
-            normalized = normalize_world_cup_match_event(event, default_category="Sports")
+            normalized = normalize_soccer_match_event(event, default_category="Sports")
             if not normalized:
                 continue
-            raw_market = build_world_cup_match_raw(event, normalized=normalized)
+            raw_market = build_soccer_match_raw(event, normalized=normalized)
             market, created = import_market_from_normalized(
                 normalized,
                 raw_market=raw_market,
@@ -463,12 +509,12 @@ def sync_world_cup_match_markets(*, limit=None):
 
 
 def refresh_world_cup_match_market(market):
-    """Refresh a composite World Cup match market from its Polymarket event."""
+    """Refresh a composite soccer match market from its Polymarket event."""
     from integrations.polymarket.soccer_matches import (
         WORLD_CUP_MATCH_EXTERNAL_PREFIX,
-        build_world_cup_match_raw,
+        build_soccer_match_raw,
         is_world_cup_match_market,
-        normalize_world_cup_match_event,
+        normalize_soccer_match_event,
     )
 
     if not is_world_cup_match_market(market):
@@ -490,14 +536,14 @@ def refresh_world_cup_match_market(market):
     if not event:
         return market
 
-    normalized = normalize_world_cup_match_event(
+    normalized = normalize_soccer_match_event(
         event,
         default_category=market.category or "Sports",
     )
     if not normalized:
         return market
 
-    raw_market = build_world_cup_match_raw(event, normalized=normalized)
+    raw_market = build_soccer_match_raw(event, normalized=normalized)
     market, _ = import_market_from_normalized(
         normalized,
         raw_market=raw_market,
