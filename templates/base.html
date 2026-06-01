@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  {% if base_app_id %}<meta name="base:app_id" content="{{ base_app_id }}">{% endif %}
   <title>{% block title %}PredictStamp{% endblock %} — {% trans "The social layer for prediction markets" %}</title>
 
   {# Open Graph / Twitter share cards — pages override the blocks below. #}
@@ -369,6 +370,7 @@
     <p>{% trans "PredictStamp — The social layer for prediction markets. Popularity ≠ Reputation." %}</p>
     <div class="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
       <a href="{% url 'dashboard:about' %}" class="hover:text-brand-600">{% trans "About" %}</a>
+      <a href="{% url 'integrations:proof_index' %}" class="hover:text-brand-600">{% trans "Portable proof" %}</a>
       <a href="{% url 'dashboard:faq' %}" class="hover:text-brand-600">{% trans "FAQ" %}</a>
       <a href="{% url 'dashboard:legal' %}" class="hover:text-brand-600">{% trans "Legal" %}</a>
       <a href="{% url 'dashboard:terms' %}" class="hover:text-brand-600">{% trans "Terms" %}</a>

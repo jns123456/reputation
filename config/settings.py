@@ -34,10 +34,16 @@ DEV_FAST_MODE = env.bool("DEV_FAST_MODE", default=False)
 NAV_BADGE_CACHE_SECONDS = env.int("NAV_BADGE_CACHE_SECONDS", default=60)
 LEADERBOARD_CACHE_SECONDS = env.int("LEADERBOARD_CACHE_SECONDS", default=120)
 WORLD_CUP_MATCHES_PER_PAGE = env.int("WORLD_CUP_MATCHES_PER_PAGE", default=24)
+CATEGORY_BROWSE_PAGE_SIZE = env.int("CATEGORY_BROWSE_PAGE_SIZE", default=24)
 EAS_ATTESTER_ID = env("EAS_ATTESTER_ID", default="proofrep-platform-v1")
 EAS_OFFCHAIN_SIGNING_KEY = env("EAS_OFFCHAIN_SIGNING_KEY", default=SECRET_KEY)
 EAS_CHAIN_ID = env.int("EAS_CHAIN_ID", default=0)
 EAS_VERIFYING_CONTRACT = env("EAS_VERIFYING_CONTRACT", default="")
+EAS_DAILY_BATCH_ENABLED = env.bool("EAS_DAILY_BATCH_ENABLED", default=True)
+EAS_DAILY_BATCH_HOUR_UTC = env.int("EAS_DAILY_BATCH_HOUR_UTC", default=0)
+EAS_ONCHAIN_ANCHOR_ENABLED = env.bool("EAS_ONCHAIN_ANCHOR_ENABLED", default=False)
+# Base developer portal domain verification (meta name="base:app_id" in <head>).
+BASE_APP_ID = env("BASE_APP_ID", default="")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -91,6 +97,7 @@ TEMPLATES = [
                 "accounts.context_processors.auth0_context",
                 "challenges.context_processors.challenge_context",
                 "config.context_processors.static_version",
+                "config.context_processors.platform_context",
             ],
         },
     },
@@ -483,6 +490,11 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": schedule(run_every=timedelta(minutes=MARKET_STALE_SYNC_INTERVAL_MINUTES)),
     },
 }
+if EAS_DAILY_BATCH_ENABLED:
+    CELERY_BEAT_SCHEDULE["build-daily-attestation-batch"] = {
+        "task": "integrations.tasks.build_daily_attestation_batch_task",
+        "schedule": crontab(minute=5, hour=EAS_DAILY_BATCH_HOUR_UTC),
+    }
 # Daily re-engagement digest (Substack-style summary).
 if DIGEST_EMAILS_ENABLED:
     CELERY_BEAT_SCHEDULE["send-daily-digest"] = {

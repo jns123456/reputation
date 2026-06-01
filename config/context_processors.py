@@ -10,3 +10,9 @@ def static_version(request):
         return {"static_version": int(css_path.stat().st_mtime)}
     except OSError:
         return {"static_version": None}
+
+
+def platform_context(request):
+    return {
+        "base_app_id": getattr(settings, "BASE_APP_ID", "") or "",
+    }
