@@ -58,8 +58,13 @@ def _exclude_disabled_sources(markets):
 
 
 def open_market_q():
-    """Markets that Polymarket still reports as open and should be discoverable."""
+    """Markets with local status ``OPEN`` (may still be non-forecastable)."""
     return Q(status=Market.Status.OPEN)
+
+
+def discoverable_market_q(*, now=None):
+    """Markets shown in browse/hub/category listings — same rules as ``is_forecastable``."""
+    return forecastable_market_q(now=now)
 
 
 def forecastable_market_q(*, now=None):
@@ -200,7 +205,7 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
     qs = _exclude_disabled_sources(
         _market_card_queryset(
             Market.objects.filter(
-                open_market_q(),
+                discoverable_market_q(),
                 canonical_category_slug=category.slug,
             )
         )
@@ -231,7 +236,7 @@ def get_browse_area_summaries(*, category_slug, markets=None):
             return []
         membership_lists = _exclude_disabled_sources(
             Market.objects.filter(
-                open_market_q(),
+                discoverable_market_q(),
                 canonical_category_slug=category.slug,
             )
         ).values_list("browse_area_slugs", flat=True)
@@ -265,7 +270,7 @@ def get_category_summaries(*, include_empty=False):
     counts[OTHER_CATEGORY.slug] = 0
 
     for row in (
-        _exclude_disabled_sources(Market.objects.filter(open_market_q()))
+        _exclude_disabled_sources(Market.objects.filter(discoverable_market_q()))
         .values("canonical_category_slug")
         .annotate(count=Count("id"))
     ):
@@ -299,7 +304,7 @@ def _pin_featured_world_cup_summary(summaries, counts):
     if count is None:
         count = _exclude_disabled_sources(
             Market.objects.filter(
-                open_market_q(),
+                discoverable_market_q(),
                 canonical_category_slug=world_cup.slug,
             )
         ).count()
@@ -323,7 +328,7 @@ def get_market_hub_category_summaries():
 def get_markets_list(*, status=None, category=None, search=None, source=None, ending_within_hours=None):
     qs = _market_card_queryset(_exclude_disabled_sources(Market.objects.all()))
     if status == Market.Status.OPEN:
-        qs = qs.filter(open_market_q())
+        qs = qs.filter(discoverable_market_q())
     elif status:
         qs = qs.filter(status=status)
     category_slug = normalize_category_filter(category)
@@ -402,8 +407,7 @@ def get_markets_for_display(
         and effective_status == Market.Status.OPEN
     )
     if use_source_blend:
-        open_markets = list(qs.filter(open_market_q()))
-        return blend_markets_by_source(open_markets, limit=limit)
+        return blend_markets_by_source(list(qs), limit=limit)
 
     if normalized_sort == SORT_VOLUME:
         return list(
@@ -440,7 +444,7 @@ def get_world_cup_match_markets_queryset(*, source=""):
     """Open World Cup match markets ordered by kickoff."""
     qs = _market_card_queryset(
         Market.objects.filter(
-            open_market_q(),
+            discoverable_market_q(),
             canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG,
         )
     )
