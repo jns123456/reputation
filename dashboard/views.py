@@ -15,13 +15,11 @@ from dashboard.forecasts_context import get_forecasts_page_context
 from dashboard.leaderboard_cache import get_cached_top_popular_users, get_cached_top_predictors
 from integrations.celery_utils import celery_broker_available, enqueue_category_sync
 from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, get_all_chart_categories, get_category_for_slug
-from markets.browse_areas import get_browse_area
+from markets.browse_areas import WORLD_CUP_GAMES_AREA_SLUG, get_browse_area
 from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from markets.selectors import (
-    filter_markets_by_browse_area,
-    filter_markets_by_search,
     get_browse_area_summaries,
-    get_category_display_markets,
+    get_category_browse_queryset,
     get_category_summaries,
     get_open_markets_by_canonical_category,
     get_world_cup_match_markets_queryset,
@@ -88,42 +86,45 @@ def category_browse(request, slug):
         raise Http404("Category not found")
 
     if slug == FIFA_WORLD_CUP_CATEGORY_SLUG:
-        return world_cup_games(request, category=category)
+        query = request.GET.copy()
+        query["area"] = WORLD_CUP_GAMES_AREA_SLUG
+        destination = reverse("dashboard:category_browse", kwargs={"slug": "sports"})
+        encoded = query.urlencode()
+        return redirect(destination if not encoded else f"{destination}?{encoded}")
 
     _enqueue_category_sync_if_needed(category)
 
     area_slug = request.GET.get("area", "").strip()
     search = request.GET.get("q", "").strip()
     source = normalize_source_filter(request.GET.get("source", ""))
+    world_cup_match_layout = (
+        slug == "sports" and area_slug == WORLD_CUP_GAMES_AREA_SLUG and not search
+    )
 
     total_markets = get_open_markets_by_canonical_category(category_slug=slug)
     area_summaries = get_browse_area_summaries(category_slug=slug, markets=total_markets)
 
     active_area = get_browse_area(slug, area_slug) if area_slug else None
-    display_markets = total_markets
-    if active_area:
-        display_markets = filter_markets_by_browse_area(
-            markets=total_markets,
-            category_slug=slug,
-            area_slug=area_slug,
-        )
-    if source:
-        display_markets = [market for market in display_markets if market.source == source]
-    if search:
-        display_markets = filter_markets_by_search(markets=display_markets, search=search)
+    browse_base_url = reverse("dashboard:category_browse", kwargs={"slug": slug})
 
-    markets = attach_user_forecasts_to_markets(
-        request.user,
-        get_category_display_markets(
+    if world_cup_match_layout:
+        browse_qs = get_world_cup_match_markets_queryset(source=source)
+        page_size = settings.WORLD_CUP_MATCHES_PER_PAGE
+    else:
+        browse_qs = get_category_browse_queryset(
             category_slug=slug,
-            source=source or None,
             area_slug=area_slug or None,
             search=search or None,
-            markets=total_markets,
-        ),
-    )
+            source=source or None,
+        )
+        page_size = settings.CATEGORY_BROWSE_PAGE_SIZE
+
+    market_count = browse_qs.count()
+    paginator = Paginator(browse_qs, page_size)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    markets = attach_user_forecasts_to_markets(request.user, list(page_obj.object_list))
     source_filter_urls = build_source_filter_urls(
-        base_url=reverse("dashboard:category_browse", kwargs={"slug": slug}),
+        base_url=browse_base_url,
         active_source=source,
         extra={"area": area_slug, "q": search},
     )
@@ -133,16 +134,19 @@ def category_browse(request, slug):
         {
             "category": category,
             "markets": markets,
-            "market_count": len(display_markets),
+            "market_count": market_count,
             "total_market_count": len(total_markets),
+            "page_obj": page_obj,
+            "pagination_query": _pagination_extra_query(request),
             "area_summaries": area_summaries,
             "active_area": active_area,
             "active_area_slug": active_area.slug if active_area else "",
             "active_source": source,
             "search_query": search,
+            "world_cup_match_layout": world_cup_match_layout,
             "source_filter_urls": source_filter_urls,
             "clear_search_url": build_browse_clear_search_url(
-                base_url=reverse("dashboard:category_browse", kwargs={"slug": slug}),
+                base_url=browse_base_url,
                 source=source,
                 area=area_slug,
             ),

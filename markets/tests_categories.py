@@ -1,7 +1,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -117,6 +117,28 @@ class MarketCategorySelectorTests(TestCase):
         summaries = {item["category"].slug: item["count"] for item in get_category_summaries()}
         self.assertEqual(summaries["economy"], 1)
         self.assertEqual(summaries["politics"], 1)
+
+    def test_category_summaries_sports_includes_world_cup_matches(self):
+        Market.objects.create(
+            external_id="wc-match:summary-wc",
+            title="Uruguay vs. Spain",
+            slug="uruguay-vs-spain-summary",
+            status=Market.Status.OPEN,
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+        )
+        Market.objects.create(
+            external_id="summary-nba",
+            title="NBA champion",
+            slug="nba-champion-summary",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+        )
+
+        summaries = {item["category"].slug: item["count"] for item in get_category_summaries()}
+
+        self.assertEqual(summaries["sports"], 2)
+        self.assertEqual(summaries["fifa-world-cup-2026"], 1)
 
     def test_get_open_markets_by_canonical_category(self):
         markets = get_open_markets_by_canonical_category(category_slug="politics")
@@ -281,6 +303,85 @@ class CategoryBrowseViewTests(TestCase):
         self.assertContains(response, "World Cup final")
         self.assertNotContains(response, "NBA champion")
 
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_world_cup_match_gets_world_cup_games_browse_area(self, mock_enqueue):
+        market = Market.objects.create(
+            external_id="wc-match:denorm-wc",
+            title="Uruguay vs. Spain",
+            slug="uruguay-vs-spain-denorm",
+            status=Market.Status.OPEN,
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+        )
+        market.refresh_from_db()
+        self.assertIn("world-cup-games", market.browse_area_slugs)
+
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_sports_search_includes_world_cup_match_markets(self, mock_enqueue):
+        Market.objects.create(
+            external_id="wc-match:uruguay-cabo-verde",
+            title="Uruguay vs. Cabo Verde",
+            slug="uruguay-vs-cabo-verde",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Uruguay"}, {"label": "Draw"}, {"label": "Cabo Verde"}],
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+        )
+        Market.objects.create(
+            external_id="sport-nba-uruguay",
+            title="NBA champion",
+            slug="nba-champion-uruguay",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+        )
+        response = self.client.get(
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"q": "uruguay"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Uruguay vs. Cabo Verde")
+        self.assertNotContains(response, "NBA champion")
+
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_sports_browse_lists_world_cup_sub_area(self, mock_enqueue):
+        Market.objects.create(
+            external_id="wc-match:uruguay-spain",
+            title="Uruguay vs. Spain",
+            slug="uruguay-vs-spain-browse",
+            status=Market.Status.OPEN,
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+        )
+        response = self.client.get(
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"area": "world-cup-games"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Uruguay vs. Spain")
+        self.assertContains(response, "FIFA World Cup 2026")
+
+    @patch("dashboard.views.enqueue_category_sync")
+    @override_settings(CATEGORY_BROWSE_PAGE_SIZE=2)
+    def test_category_browse_pagination(self, mock_enqueue):
+        for index in range(3):
+            Market.objects.create(
+                external_id=f"sport-page-{index}",
+                title=f"Sports market {index}",
+                slug=f"sports-market-{index}",
+                status=Market.Status.OPEN,
+                volume_total=float(100 - index),
+                polymarket_event_raw={"tags": [{"slug": "soccer"}]},
+            )
+        response = self.client.get(reverse("dashboard:category_browse", kwargs={"slug": "sports"}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["page_obj"].has_next)
+        page_two = self.client.get(
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"page": 2},
+        )
+        self.assertEqual(page_two.status_code, 200)
+        self.assertContains(page_two, "Next")
+
     def test_browse_area_summaries(self):
         Market.objects.create(
             external_id="area-nba",
@@ -329,9 +430,9 @@ class CategoryBrowseViewTests(TestCase):
             title="Mexico vs. South Africa",
             slug="mexico-vs-south-africa",
             status=Market.Status.OPEN,
-            canonical_category_slug="fifa-world-cup-2026",
             outcomes=[{"label": "Mexico"}, {"label": "Draw"}, {"label": "South Africa"}],
             polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
         )
         markets = get_open_markets_by_canonical_category(category_slug="fifa-world-cup-2026")
         self.assertEqual(len(markets), 1)

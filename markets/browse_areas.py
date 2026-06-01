@@ -2,7 +2,9 @@
 
 from dataclasses import dataclass
 
-from markets.categories import _collect_tag_slugs
+from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, _collect_tag_slugs
+
+WORLD_CUP_GAMES_AREA_SLUG = "world-cup-games"
 
 
 @dataclass(frozen=True)
@@ -15,6 +17,12 @@ class BrowseArea:
 
 BROWSE_AREAS: tuple[BrowseArea, ...] = (
     # Sports
+    BrowseArea(
+        WORLD_CUP_GAMES_AREA_SLUG,
+        "FIFA World Cup 2026",
+        frozenset({"fifa-world-cup", "2026-fifa-world-cup"}),
+        "sports",
+    ),
     BrowseArea("soccer", "Soccer", frozenset({"soccer", "ucl", "champions-league"}), "sports"),
     BrowseArea("nba", "NBA", frozenset({"nba", "nba-finals", "nba-champion", "2026-nba-playoffs", "basketball"}), "sports"),
     BrowseArea("mlb", "MLB", frozenset({"mlb", "baseball"}), "sports"),
@@ -79,11 +87,15 @@ def compute_browse_area_slugs(market) -> list[str]:
     request-time filtering and counting never touch the large raw JSON payloads
     (which are deferred on card querysets and would trigger N+1 fetches).
     """
+    from integrations.polymarket.soccer_matches import is_world_cup_match_market
+
     tag_slugs = _collect_tag_slugs(market)
     matched: list[str] = []
     for area in BROWSE_AREAS:
         if tag_slugs.intersection(area.tag_slugs):
             matched.append(area.slug)
+    if is_world_cup_match_market(market) and WORLD_CUP_GAMES_AREA_SLUG not in matched:
+        matched.append(WORLD_CUP_GAMES_AREA_SLUG)
     return matched
 
 
@@ -94,4 +106,6 @@ def market_matches_browse_area(market, area: BrowseArea) -> bool:
     the deferred raw JSON payloads, so this is safe to call in a loop over card
     querysets without incurring per-row database fetches.
     """
+    if area.slug == WORLD_CUP_GAMES_AREA_SLUG and area.category_slug == "sports":
+        return (getattr(market, "canonical_category_slug", "") or "") == FIFA_WORLD_CUP_CATEGORY_SLUG
     return area.slug in (getattr(market, "browse_area_slugs", None) or [])

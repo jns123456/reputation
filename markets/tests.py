@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -211,3 +211,63 @@ class MarketCategoryFilterTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["current_category"], "sports")
         self.assertEqual([market.slug for market in response.context["markets"]], ["legacy-sports-market"])
+
+    def test_market_list_sports_category_includes_world_cup_matches(self):
+        Market.objects.create(
+            external_id="wc-match:uruguay-all",
+            title="Uruguay vs. Cabo Verde",
+            slug="uruguay-vs-cabo-verde-all",
+            status=Market.Status.OPEN,
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+        )
+        Market.objects.create(
+            external_id="nba-all",
+            title="NBA champion",
+            slug="nba-champion-all",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+        )
+
+        response = self.client.get(reverse("markets:all"), {"category": "sports"})
+
+        self.assertEqual(response.status_code, 200)
+        slugs = [market.slug for market in response.context["markets"]]
+        self.assertIn("uruguay-vs-cabo-verde-all", slugs)
+        self.assertIn("nba-champion-all", slugs)
+
+    def test_market_list_search_matches_spanish_title(self):
+        Market.objects.create(
+            external_id="es-title-market",
+            title="English placeholder",
+            title_es="Uruguay contra Cabo Verde",
+            slug="uruguay-es-title",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "soccer"}]},
+        )
+
+        response = self.client.get(reverse("markets:all"), {"q": "Uruguay", "status": "open"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([market.slug for market in response.context["markets"]], ["uruguay-es-title"])
+
+    @override_settings(MARKET_LIST_PAGE_SIZE=2)
+    def test_market_list_pagination(self):
+        for index in range(3):
+            Market.objects.create(
+                external_id=f"all-page-{index}",
+                title=f"Market page {index}",
+                slug=f"market-page-{index}",
+                status=Market.Status.OPEN,
+                volume_total=float(100 - index),
+                polymarket_event_raw={"tags": [{"slug": "soccer"}]},
+            )
+
+        response = self.client.get(reverse("markets:all"), {"status": "open"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["page_obj"].has_next)
+        self.assertEqual(response.context["market_count"], 3)
+
+        page_two = self.client.get(reverse("markets:all"), {"status": "open", "page": 2})
+        self.assertEqual(page_two.status_code, 200)
+        self.assertContains(page_two, "Next")

@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -25,12 +26,14 @@ from markets.ending_filters import ENDING_WINDOW_CHOICES, ending_window_hours, n
 from markets.models import Market
 from markets.categories import get_category_for_slug
 from markets.selectors import (
+    apply_markets_list_ordering,
     get_market_categories,
     get_market_hub_category_summaries,
     get_markets_for_display,
+    get_markets_list,
     normalize_category_filter,
 )
-from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
+from markets.sort_options import MARKET_SORT_CHOICES, SORT_LIQUIDITY, normalize_sort_filter, sort_markets
 from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction, attach_user_forecasts_to_markets
@@ -49,6 +52,13 @@ def _load_market_hub_summaries():
             settings.MARKET_SYNC_CACHE_SECONDS,
         )
     return summaries
+
+
+def _pagination_extra_query(request, *, exclude=("page",)):
+    query = request.GET.copy()
+    for key in exclude:
+        query.pop(key, None)
+    return query.urlencode()
 
 
 def market_hub(request):
@@ -99,17 +109,34 @@ def market_list(request):
     # The ending-soon window operates on open markets only.
     effective_status = Market.Status.OPEN if ending else status
 
-    markets = attach_user_forecasts_to_markets(
-        request.user,
-        get_markets_for_display(
-            status=effective_status or None,
-            category=category or None,
-            search=search or None,
-            source=source or None,
-            sort=sort or None,
-            ending_within_hours=ending_hours,
-        ),
+    qs = get_markets_list(
+        status=effective_status or None,
+        category=category or None,
+        search=search or None,
+        source=source or None,
+        ending_within_hours=ending_hours,
     )
+    page_size = settings.MARKET_LIST_PAGE_SIZE
+
+    if sort == SORT_LIQUIDITY:
+        sorted_limit = max(
+            page_size,
+            getattr(settings, "MARKET_LIST_SORTED_LIMIT", 200),
+        )
+        candidates = list(qs.order_by("-volume_total", "-updated_at")[:sorted_limit])
+        ordered = sort_markets(candidates, sort=SORT_LIQUIDITY)
+        paginator = Paginator(ordered, page_size)
+    else:
+        qs = apply_markets_list_ordering(
+            qs,
+            sort=sort,
+            ending_within_hours=ending_hours,
+        )
+        paginator = Paginator(qs, page_size)
+
+    page_obj = paginator.get_page(request.GET.get("page"))
+    markets = attach_user_forecasts_to_markets(request.user, list(page_obj.object_list))
+
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("markets:all"),
         active_source=source,
@@ -137,6 +164,9 @@ def market_list(request):
         "markets/market_list.html",
         {
             "markets": markets,
+            "market_count": paginator.count,
+            "page_obj": page_obj,
+            "pagination_query": _pagination_extra_query(request),
             "categories": get_market_categories(),
             "current_status": status,
             "current_category": category,

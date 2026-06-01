@@ -73,12 +73,12 @@ class WorldCupPaginationTests(TestCase):
     def setUp(self):
         for index in range(5):
             Market.objects.create(
-                external_id=f"wc-page-{index}",
+                external_id=f"wc-match:wc-page-{index}",
                 title=f"Match {index}",
                 slug=f"match-{index}",
                 status=Market.Status.OPEN,
-                canonical_category_slug="fifa-world-cup-2026",
                 polymarket_raw={"market_kind": "soccer_match_3way"},
+                polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
                 volume_total=float(index),
             )
 
@@ -86,20 +86,35 @@ class WorldCupPaginationTests(TestCase):
         from django.urls import reverse
 
         response = self.client.get(
-            reverse("dashboard:category_browse", kwargs={"slug": "fifa-world-cup-2026"})
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"area": "world-cup-games"},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context["markets"]), 2)
         self.assertEqual(response.context["market_count"], 5)
         self.assertTrue(response.context["page_obj"].has_next)
+        self.assertTrue(response.context["world_cup_match_layout"])
 
     def test_world_cup_page_two(self):
         from django.urls import reverse
 
         response = self.client.get(
-            reverse("dashboard:category_browse", kwargs={"slug": "fifa-world-cup-2026"}),
-            {"page": 2},
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"area": "world-cup-games", "page": 2},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context["markets"]), 2)
         self.assertEqual(response.context["page_obj"].number, 2)
+
+    def test_legacy_world_cup_url_redirects_to_sports_sub_area(self):
+        from django.urls import reverse
+
+        response = self.client.get(
+            reverse("dashboard:category_browse", kwargs={"slug": "fifa-world-cup-2026"})
+        )
+        self.assertRedirects(
+            response,
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"})
+            + "?area=world-cup-games",
+            fetch_redirect_response=False,
+        )

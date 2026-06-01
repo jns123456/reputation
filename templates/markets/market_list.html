@@ -86,7 +86,7 @@
   {% if current_ending %}
   <p class="mb-5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
     <i data-lucide="clock" class="h-4 w-4 shrink-0 text-brand-500" stroke-width="2" aria-hidden="true"></i>
-    <span>{% blocktrans count counter=markets|length %}{{ counter }} event ends within this window — sorted soonest first.{% plural %}{{ counter }} events end within this window — sorted soonest first.{% endblocktrans %}</span>
+    <span>{% blocktrans count counter=market_count %}{{ counter }} event ends within this window — sorted soonest first.{% plural %}{{ counter }} events end within this window — sorted soonest first.{% endblocktrans %}</span>
   </p>
   {% endif %}
 
@@ -141,5 +141,7 @@
     </div>
     {% endfor %}
   </div>
+
+  {% include "includes/pagination.html" %}
 </div>
 {% endblock %}

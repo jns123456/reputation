@@ -100,18 +100,32 @@
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-lg font-semibold text-slate-900">
-        {% if active_area %}{% blocktrans with name=active_area.name %}Trending in {{ name }}{% endblocktrans %}{% else %}{% blocktrans with name=category.name %}Trending in {{ name }}{% endblocktrans %}{% endif %}
+        {% if world_cup_match_layout %}
+          {% trans "Upcoming & live matches" %}
+        {% elif active_area %}
+          {% blocktrans with name=active_area.name %}Trending in {{ name }}{% endblocktrans %}
+        {% else %}
+          {% blocktrans with name=category.name %}Trending in {{ name }}{% endblocktrans %}
+        {% endif %}
       </h2>
-      <a href="{% url 'markets:all' %}?category={{ category.name|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if source_filter_urls.active_source %}&source={{ source_filter_urls.active_source }}{% endif %}" class="text-sm font-medium text-brand-600 hover:underline">
+      {% if world_cup_match_layout %}
+      <p class="text-xs text-slate-500">{% trans "Sorted by kickoff" %}</p>
+      {% else %}
+      <a href="{% url 'markets:all' %}?category={{ category.slug|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if source_filter_urls.active_source %}&source={{ source_filter_urls.active_source }}{% endif %}" class="text-sm font-medium text-brand-600 hover:underline">
         {% trans "Advanced filters" %} →
       </a>
+      {% endif %}
     </div>
 
     {% include "markets/partials/source_filter_pills.html" %}
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 {% if not area_summaries %}2xl:grid-cols-4{% endif %}">
       {% for market in markets %}
-        {% include "markets/partials/market_grid_card.html" %}
+        {% if world_cup_match_layout %}
+          {% include "markets/partials/world_cup_match_card.html" %}
+        {% else %}
+          {% include "markets/partials/market_grid_card.html" %}
+        {% endif %}
       {% empty %}
       <div class="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500">
         {% if search_query %}
@@ -124,6 +138,8 @@
       </div>
       {% endfor %}
     </div>
+
+    {% include "includes/pagination.html" %}
   </section>
 </div>
 </div>

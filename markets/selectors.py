@@ -1,6 +1,7 @@
 from collections import Counter, defaultdict
 
 from django.conf import settings
+from django.db import connection
 from django.db.models import Count, F, Q
 from django.utils import timezone
 
@@ -11,6 +12,7 @@ from markets.categories import (
     get_category_for_slug,
 )
 from markets.browse_areas import (
+    WORLD_CUP_GAMES_AREA_SLUG,
     get_browse_area,
     get_browse_areas_for_category,
     market_matches_browse_area,
@@ -146,6 +148,84 @@ def blend_markets_by_source(markets, *, limit=CATEGORY_BROWSE_LIMIT):
     return blended
 
 
+def _canonical_category_browse_q(category_slug):
+    """ORM filter for markets shown on a category browse page."""
+    category = get_category_for_slug(category_slug)
+    if category is None:
+        return None
+    q = Q(canonical_category_slug=category.slug)
+    # World Cup match forecasts are canonically ``fifa-world-cup-2026`` but
+    # belong under Sports as the ``world-cup-games`` sub-area.
+    if category_slug == "sports":
+        q |= Q(canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG)
+    return q
+
+
+def _apply_market_text_search(qs, search):
+    query = (search or "").strip()
+    if not query:
+        return qs
+    return qs.filter(
+        Q(title__icontains=query)
+        | Q(title_es__icontains=query)
+        | Q(description__icontains=query)
+        | Q(description_es__icontains=query)
+        | Q(category__icontains=query)
+    )
+
+
+def _filter_queryset_by_browse_area(qs, *, category_slug, area_slug):
+    """Filter a queryset to markets in a browse sub-area (portable across DB backends)."""
+    area = get_browse_area(category_slug, area_slug)
+    if area is None:
+        return qs
+    if category_slug == "sports" and area_slug == WORLD_CUP_GAMES_AREA_SLUG:
+        return qs.filter(canonical_category_slug=FIFA_WORLD_CUP_CATEGORY_SLUG)
+    if connection.vendor == "postgresql":
+        return qs.filter(browse_area_slugs__contains=[area_slug])
+    matching_pks = [
+        pk
+        for pk, slugs in qs.values_list("pk", "browse_area_slugs")
+        if area_slug in (slugs or [])
+    ]
+    return qs.filter(pk__in=matching_pks)
+
+
+def get_category_browse_queryset(
+    *,
+    category_slug,
+    area_slug=None,
+    search=None,
+    source=None,
+):
+    """Queryset for paginated category browse (cards + search)."""
+    category_q = _canonical_category_browse_q(category_slug)
+    if category_q is None:
+        return Market.objects.none()
+
+    # When searching, include every locally-open market in the pool — same
+    # spirit as ``/markets/all/`` — not only forecastable rows.
+    visibility_q = open_market_q() if search else discoverable_market_q()
+
+    qs = _public_market_filter(
+        _market_card_queryset(
+            Market.objects.filter(visibility_q).filter(category_q)
+        )
+    ).order_by("-volume_total", "-updated_at")
+
+    if area_slug:
+        qs = _filter_queryset_by_browse_area(
+            qs,
+            category_slug=category_slug,
+            area_slug=area_slug,
+        )
+    if search:
+        qs = _apply_market_text_search(qs, search)
+    if source:
+        qs = qs.filter(source=source)
+    return qs
+
+
 def filter_markets_by_search(*, markets, search):
     """Filter an in-memory market list by title, description, or category text.
 
@@ -205,16 +285,15 @@ def get_category_display_markets(
 
 def get_open_markets_by_canonical_category(*, category_slug, limit=None):
     """Return open markets for a canonical browse category, sorted by volume."""
-    category = get_category_for_slug(category_slug)
-    if category is None:
+    category_q = _canonical_category_browse_q(category_slug)
+    if category_q is None:
         return []
 
     qs = _public_market_filter(
         _market_card_queryset(
             Market.objects.filter(
                 discoverable_market_q(),
-                canonical_category_slug=category.slug,
-            )
+            ).filter(category_q)
         )
     )
     qs = qs.order_by("-volume_total", "-updated_at")
@@ -238,20 +317,33 @@ def get_browse_area_summaries(*, category_slug, markets=None):
 
     counts = Counter()
     if markets is None:
-        category = get_category_for_slug(category_slug)
-        if category is None:
+        category_q = _canonical_category_browse_q(category_slug)
+        if category_q is None:
             return []
-        membership_lists = _public_market_filter(
+        membership_rows = _public_market_filter(
             Market.objects.filter(
                 discoverable_market_q(),
-                canonical_category_slug=category.slug,
-            )
-        ).values_list("browse_area_slugs", flat=True)
-        for slugs in membership_lists:
+            ).filter(category_q)
+        ).values_list("browse_area_slugs", "canonical_category_slug")
+        wc_count = 0
+        for slugs, canonical_slug in membership_rows:
             counts.update(slugs or ())
+            if canonical_slug == FIFA_WORLD_CUP_CATEGORY_SLUG:
+                wc_count += 1
+        if category_slug == "sports" and wc_count:
+            counts[WORLD_CUP_GAMES_AREA_SLUG] = wc_count
     else:
         for market in markets:
             counts.update(market.browse_area_slugs or ())
+        if category_slug == "sports":
+            wc_count = sum(
+                1
+                for market in markets
+                if (getattr(market, "canonical_category_slug", "") or "")
+                == FIFA_WORLD_CUP_CATEGORY_SLUG
+            )
+            if wc_count:
+                counts[WORLD_CUP_GAMES_AREA_SLUG] = wc_count
 
     summaries = [
         {"area": area, "count": counts[area.slug]}
@@ -284,6 +376,10 @@ def get_category_summaries(*, include_empty=False):
         slug = row["canonical_category_slug"] or OTHER_CATEGORY.slug
         counts[slug] = counts.get(slug, 0) + row["count"]
 
+    wc_count = counts.get(FIFA_WORLD_CUP_CATEGORY_SLUG, 0)
+    if wc_count:
+        counts["sports"] = counts.get("sports", 0) + wc_count
+
     summaries = []
     for category in CANONICAL_CATEGORIES:
         count = counts[category.slug]
@@ -301,20 +397,22 @@ def get_category_summaries(*, include_empty=False):
 
 
 def _pin_featured_world_cup_summary(summaries, counts):
-    """Always show FIFA World Cup 2026 first on the landing page."""
+    """Featured shortcut to World Cup match forecasts under Sports."""
     world_cup = get_category_for_slug(FIFA_WORLD_CUP_CATEGORY_SLUG)
     if world_cup is None:
         return summaries
 
     summaries = [item for item in summaries if item["category"].slug != world_cup.slug]
-    count = counts.get(world_cup.slug)
-    if count is None:
+    count = counts.get(world_cup.slug, 0)
+    if not count:
         count = _public_market_filter(
             Market.objects.filter(
                 discoverable_market_q(),
                 canonical_category_slug=world_cup.slug,
             )
         ).count()
+    if not count:
+        return summaries
     return [{"category": world_cup, "count": count}, *summaries]
 
 
@@ -340,15 +438,13 @@ def get_markets_list(*, status=None, category=None, search=None, source=None, en
         qs = qs.filter(status=status)
     category_slug = normalize_category_filter(category)
     if category_slug:
-        qs = qs.filter(canonical_category_slug=category_slug)
+        category_q = _canonical_category_browse_q(category_slug)
+        if category_q is not None:
+            qs = qs.filter(category_q)
     if source:
         qs = qs.filter(source=source)
     if search:
-        qs = qs.filter(
-            Q(title__icontains=search)
-            | Q(description__icontains=search)
-            | Q(category__icontains=search)
-        )
+        qs = _apply_market_text_search(qs, search)
     if ending_within_hours:
         from datetime import timedelta
 
@@ -363,6 +459,32 @@ def get_markets_list(*, status=None, category=None, search=None, source=None, en
     return qs
 
 
+def apply_markets_list_ordering(qs, *, sort="", ending_within_hours=None):
+    """Apply list-page sort order to a filtered markets queryset."""
+    from markets.sort_options import (
+        SORT_ENDING_SOON,
+        SORT_NEWEST,
+        SORT_TRENDING,
+        SORT_VOLUME,
+        normalize_sort_filter,
+    )
+
+    normalized_sort = normalize_sort_filter(sort)
+    if ending_within_hours and not normalized_sort:
+        return qs.order_by(F("close_date").asc(nulls_last=True), "-volume_total")
+    if normalized_sort == SORT_VOLUME:
+        return qs.order_by("-volume_total", "-updated_at")
+    if normalized_sort == SORT_NEWEST:
+        return qs.order_by("-created_at", "-updated_at")
+    if normalized_sort == SORT_TRENDING:
+        return qs.order_by("-volume_24h", "-updated_at")
+    if normalized_sort == SORT_ENDING_SOON:
+        return qs.order_by(F("close_date").asc(nulls_last=True), "-volume_total")
+    if normalized_sort:
+        return qs.order_by("-volume_total", "-updated_at")
+    return qs.order_by("-volume_total", "-updated_at")
+
+
 def get_markets_for_display(
     *,
     status=None,
@@ -373,13 +495,11 @@ def get_markets_for_display(
     ending_within_hours=None,
     limit=100,
 ):
-    """Return markets for list UI, blending sources when browsing open markets."""
+    """Return markets for list UI with consistent filters and ordering."""
     from markets.sort_options import (
-        SORT_ENDING_SOON,
         SORT_LIQUIDITY,
-        SORT_NEWEST,
-        SORT_TRENDING,
-        SORT_VOLUME,
+        normalize_sort_filter,
+        sort_markets,
     )
 
     # An "ending soon" window only makes sense for live (open) markets.
@@ -394,57 +514,30 @@ def get_markets_for_display(
         ending_within_hours=ending_within_hours,
     )
     normalized_sort = normalize_sort_filter(sort)
-    effective_status = status or Market.Status.OPEN
     sorted_limit = limit
     if normalized_sort:
         sorted_limit = max(limit, getattr(settings, "MARKET_LIST_SORTED_LIMIT", 200))
 
-    # When filtering by an ending window, soonest-first ordering is the natural
-    # default unless the user explicitly picked another sort.
     if ending_within_hours and not normalized_sort:
         return list(
-            qs.order_by(F("close_date").asc(nulls_last=True), "-volume_total")[:limit]
-        )
-
-    use_source_blend = (
-        not normalized_sort
-        and not search
-        and not source
-        and not ending_within_hours
-        and effective_status == Market.Status.OPEN
-    )
-    if use_source_blend:
-        return blend_markets_by_source(list(qs), limit=limit)
-
-    if normalized_sort == SORT_VOLUME:
-        return list(
-            qs.order_by("-volume_total", "-updated_at")[:sorted_limit]
-        )
-
-    if normalized_sort == SORT_NEWEST:
-        return list(qs.order_by("-created_at", "-updated_at")[:sorted_limit])
-
-    if normalized_sort == SORT_TRENDING:
-        # ``volume_24h`` is the denormalized trending metric (see display_metadata).
-        return list(qs.order_by("-volume_24h", "-updated_at")[:sorted_limit])
-
-    if normalized_sort == SORT_ENDING_SOON:
-        return list(
-            qs.order_by(
-                F("close_date").asc(nulls_last=True),
-                "-volume_total",
-            )[:sorted_limit]
+            apply_markets_list_ordering(
+                qs,
+                sort=sort,
+                ending_within_hours=ending_within_hours,
+            )[:limit]
         )
 
     if normalized_sort == SORT_LIQUIDITY:
-        # No denormalized liquidity column exists, so liquidity is ranked from the
-        # import payload in memory. Bound the candidate pool by volume first to
-        # avoid materializing the entire table.
         candidates = list(qs.order_by("-volume_total", "-updated_at")[:sorted_limit])
-        return sort_markets(candidates, sort=normalized_sort)
+        return sort_markets(candidates, sort=normalized_sort)[:limit]
 
-    # No explicit sort (e.g. closed/resolved listings): newest-updated first.
-    return list(qs.order_by("-updated_at")[:sorted_limit])
+    return list(
+        apply_markets_list_ordering(
+            qs,
+            sort=sort,
+            ending_within_hours=ending_within_hours,
+        )[:sorted_limit if normalized_sort else limit]
+    )
 
 
 def get_world_cup_match_markets_queryset(*, source=""):
