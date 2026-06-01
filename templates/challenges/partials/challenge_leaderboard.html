@@ -68,7 +68,14 @@
               </td>
               <td>
                 <div class="challenge-leaderboard-player">
-                  <span class="challenge-leaderboard-avatar" aria-hidden="true">{{ row.participant.user.public_name|slice:":1"|upper }}</span>
+                  <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
+                     class="challenge-leaderboard-avatar shrink-0"
+                     tabindex="-1"
+                     aria-hidden="true">
+                    <span class="pr-user-avatar-ring pr-user-avatar-ring--md">
+                      {% include "accounts/partials/user_avatar.html" with user=row.participant.user %}
+                    </span>
+                  </a>
                   <div class="min-w-0">
                     <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
                        class="challenge-leaderboard-name">
@@ -117,6 +124,14 @@
             <span class="challenge-leaderboard-rank-mobile">
               {% if row.rank %}{{ row.rank }}{% else %}—{% endif %}
             </span>
+            <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
+               class="challenge-leaderboard-avatar shrink-0"
+               tabindex="-1"
+               aria-hidden="true">
+              <span class="pr-user-avatar-ring pr-user-avatar-ring--md">
+                {% include "accounts/partials/user_avatar.html" with user=row.participant.user %}
+              </span>
+            </a>
             <div class="min-w-0">
               <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
                  class="font-semibold text-slate-900 dark:text-slate-100">

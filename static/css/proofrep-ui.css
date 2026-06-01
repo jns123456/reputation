@@ -3485,15 +3485,7 @@ html.dark .challenge-leaderboard-row.is-gold {
 .challenge-leaderboard-avatar {
   display: inline-flex;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #fff;
 }
 
 .challenge-leaderboard-name {
