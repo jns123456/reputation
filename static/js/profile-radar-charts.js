@@ -1,24 +1,29 @@
 (function () {
-  function computeRadarBounds(values, allowNegative) {
+  function computeRadarBounds(values) {
     var max = Math.max.apply(null, values.concat([0]));
-    var min = Math.min.apply(null, values.concat([0]));
 
-    if (max === 0 && min === 0) {
+    if (max === 0) {
       return { min: 0, max: 10 };
     }
 
-    var span = Math.max(Math.abs(max), Math.abs(min), 1);
-    var padding = Math.ceil(span * 0.1) || 1;
+    var padding = Math.ceil(max * 0.1) || 1;
 
     return {
-      min: allowNegative && min < 0 ? min - padding : 0,
+      min: 0,
       max: max + padding,
     };
   }
 
+  /** Reputation losses stay at the inner ring (0) until the category turns positive. */
+  function toReputationVisualValues(values) {
+    return values.map(function (v) {
+      return v < 0 ? 0 : v;
+    });
+  }
+
   /**
-   * Zeros plotted at the exact center collapse the polygon and break fill.
-   * Map zero categories to a small inner ring so spokes connect and the area fills.
+   * Zero categories sit on the geometric center and collapse the filled polygon.
+   * Nudge them to a small inner ring so spokes connect and the area fills.
    */
   function prepareRadarDisplayValues(values, bounds) {
     var hasNonZero = values.some(function (v) {
@@ -36,7 +41,7 @@
     });
   }
 
-  function buildDataset(label, values, actualValues, colors, bounds, allowNegative) {
+  function buildDataset(label, values, actualValues, colors, bounds) {
     var displayValues = prepareRadarDisplayValues(values, bounds);
     return {
       label: label,
@@ -56,8 +61,8 @@
     };
   }
 
-  function buildRadarOptions(values, allowNegative) {
-    var bounds = computeRadarBounds(values, allowNegative);
+  function buildRadarOptions(values) {
+    var bounds = computeRadarBounds(values);
     return {
       responsive: true,
       maintainAspectRatio: true,
@@ -102,14 +107,14 @@
     };
   }
 
-  function createRadarChart(canvas, dataset, values, allowNegative) {
+  function createRadarChart(canvas, dataset, values) {
     return new Chart(canvas, {
       type: "radar",
       data: {
         labels: dataset.labels,
         datasets: [dataset.config],
       },
-      options: buildRadarOptions(values, allowNegative),
+      options: buildRadarOptions(values),
     });
   }
 
@@ -122,8 +127,9 @@
     var reputationLabel = config.reputationLabel || "Reputation";
     var popularityLabel = config.popularityLabel || "Popularity";
 
-    var repBounds = computeRadarBounds(reputationValues, true);
-    var popBounds = computeRadarBounds(popularityValues, false);
+    var reputationVisualValues = toReputationVisualValues(reputationValues);
+    var repBounds = computeRadarBounds(reputationVisualValues);
+    var popBounds = computeRadarBounds(popularityValues);
 
     var reputationCanvas = document.getElementById("reputation-radar-chart");
     if (reputationCanvas) {
@@ -133,18 +139,16 @@
           labels: labels,
           config: buildDataset(
             reputationLabel,
-            reputationValues,
+            reputationVisualValues,
             reputationValues,
             {
               fill: "rgba(5, 150, 105, 0.25)",
               stroke: "rgb(5, 150, 105)",
             },
-            repBounds,
-            true
+            repBounds
           ),
         },
-        reputationValues,
-        true
+        reputationVisualValues
       );
     }
 
@@ -162,12 +166,10 @@
               fill: "rgba(217, 119, 6, 0.25)",
               stroke: "rgb(217, 119, 6)",
             },
-            popBounds,
-            false
+            popBounds
           ),
         },
-        popularityValues,
-        false
+        popularityValues
       );
     }
   }
