@@ -570,15 +570,13 @@ msgstr "Tu desafío «%(title)s» terminó en empate."
 msgid "You have a new update on a challenge you joined."
 msgstr "Hay una novedad en un desafío al que te uniste."
 
-#, fuzzy
 #| msgid "Your name"
 msgid "Group name"
-msgstr "Tu nombre"
+msgstr "Nombre del grupo"
 
-#, fuzzy
 #| msgid "Select at least one event."
 msgid "Select at least one member."
-msgstr "Selecciona al menos un evento."
+msgstr "Selecciona al menos un miembro."
 
 msgid "Optional challenge name"
 msgstr "Nombre del desafío (opcional)"
@@ -2052,13 +2050,13 @@ msgid ""
 "accepts — others can still join later."
 msgstr ""
 
-#, fuzzy, python-format
+#, python-format
 #| msgid "%(counter)s event"
 #| msgid_plural "%(counter)s events"
 msgid "%(counter)s member"
 msgid_plural "%(counter)s members"
-msgstr[0] "%(counter)s evento"
-msgstr[1] "%(counter)s eventos"
+msgstr[0] "%(counter)s miembro"
+msgstr[1] "%(counter)s miembros"
 
 msgid "Group selected — all members will be invited."
 msgstr ""
@@ -2218,28 +2216,28 @@ msgstr "Ver evento"
 msgid "Standings after this event"
 msgstr "Posiciones después de este evento"
 
-#, fuzzy
 #| msgid "Edit profile"
 msgid "Edit group"
-msgstr "Tu perfil"
+msgstr "Editar grupo"
 
 msgid "New group"
-msgstr ""
+msgstr "Nuevo grupo"
 
 msgid "Groups"
-msgstr ""
+msgstr "Grupos"
 
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 msgid "group"
-msgstr ""
+msgstr "grupo"
 
 msgid ""
 "Choose a name and select mutual followers to save for future challenges."
 msgstr ""
+"Elige un nombre y selecciona seguidores mutuos para guardarlos en futuros "
+"desafíos."
 
-#, fuzzy
 #| msgid ""
 #| "You need mutual followers to create a challenge. Follow someone who follows "
 #| "you back."
@@ -2247,53 +2245,51 @@ msgid ""
 "You need mutual followers to create a group. Follow someone who follows you "
 "back."
 msgstr ""
-"Necesitas seguidores mutuos para crear un desafío. Sigue a alguien que te "
-"siga."
+"Necesitas seguidores mutuos para crear un grupo. Sigue a alguien que te siga"
+" de vuelta."
 
 msgid "Members"
-msgstr ""
+msgstr "Miembros"
 
-#, fuzzy
 #| msgid "Create a"
 msgid "Create group"
-msgstr "Crea un"
+msgstr "Crear grupo"
 
-#, fuzzy
 #| msgid "Challenges"
 msgid "Challenge groups"
-msgstr "Desafíos"
+msgstr "Grupos de desafío"
 
 msgid ""
 "Save sets of mutual followers to invite them quickly when creating a "
 "challenge."
 msgstr ""
+"Guarda conjuntos de seguidores mutuos para invitarlos rápido al crear un "
+"desafío."
 
-#, fuzzy
 #| msgid "Browse challenges"
 msgid "Back to challenges"
-msgstr "Ver desafíos"
+msgstr "Volver a desafíos"
 
-#, fuzzy
 #| msgid "Delete post?"
 msgid "Delete this group?"
-msgstr "¿Eliminar publicación?"
+msgstr "¿Eliminar este grupo?"
 
 msgid "Delete"
 msgstr "Eliminar"
 
-#, fuzzy
 #| msgid "No predictions yet."
 msgid "No groups yet."
-msgstr "Aún no hay clasificaciones."
+msgstr "Aún no hay grupos."
 
 msgid ""
 "Create a group to reuse the same opponents when starting new challenges."
 msgstr ""
+"Crea un grupo para reutilizar los mismos oponentes al iniciar nuevos "
+"desafíos."
 
-#, fuzzy
 #| msgid "Create your first challenge"
 msgid "Create your first group"
-msgstr "Crea tu primer desafío"
+msgstr "Crea tu primer grupo"
 
 msgid "How it works"
 msgstr "Cómo funciona"

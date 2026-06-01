@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fix Spanish translations for the challenges how-it-works page."""
+"""Fix Spanish translations for challenges pages (how-it-works, groups, forms)."""
 
 from pathlib import Path
 
@@ -121,6 +121,40 @@ TRANSLATIONS = {
     "Manage challenge groups": "Administrar grupos de desafío",
     "− market %": "− % del mercado",
     "− market %%": "− %% del mercado",
+    # Challenge groups list + form
+    "Challenge groups": "Grupos de desafío",
+    "Groups": "Grupos",
+    "New group": "Nuevo grupo",
+    "Edit group": "Editar grupo",
+    "Edit": "Editar",
+    "group": "grupo",
+    "Members": "Miembros",
+    "Group name": "Nombre del grupo",
+    "Create group": "Crear grupo",
+    "Back to challenges": "Volver a desafíos",
+    "Delete this group?": "¿Eliminar este grupo?",
+    "No groups yet.": "Aún no hay grupos.",
+    "Create your first group": "Crea tu primer grupo",
+    "Select at least one member.": "Selecciona al menos un miembro.",
+    "Save sets of mutual followers to invite them quickly when creating a challenge.": (
+        "Guarda conjuntos de seguidores mutuos para invitarlos rápido al crear un desafío."
+    ),
+    "Choose a name and select mutual followers to save for future challenges.": (
+        "Elige un nombre y selecciona seguidores mutuos para guardarlos en futuros desafíos."
+    ),
+    "You need mutual followers to create a group. Follow someone who follows you back.": (
+        "Necesitas seguidores mutuos para crear un grupo. Sigue a alguien que te siga de vuelta."
+    ),
+    "Create a group to reuse the same opponents when starting new challenges.": (
+        "Crea un grupo para reutilizar los mismos oponentes al iniciar nuevos desafíos."
+    ),
+}
+
+PLURALS = {
+    "%(counter)s member": {
+        0: "%(counter)s miembro",
+        1: "%(counter)s miembros",
+    },
 }
 
 
@@ -133,8 +167,14 @@ def main():
             if "fuzzy" in entry.flags:
                 entry.flags.remove("fuzzy")
             applied += 1
+        if entry.msgid in PLURALS:
+            for index, msgstr in PLURALS[entry.msgid].items():
+                entry.msgstr_plural[index] = msgstr
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+            applied += 1
     po.save(str(PO_PATH))
-    print(f"Updated {applied} challenge how-it-works translations")
+    print(f"Updated {applied} challenge Spanish translations")
 
 
 if __name__ == "__main__":
