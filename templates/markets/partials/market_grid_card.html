@@ -51,6 +51,8 @@
     {% endif %}
     {% endwith %}
   </div>
+  {% elif market.is_soccer_match and market.current_probability %}
+  {% include "markets/partials/three_way_outcome_boxes.html" %}
   {% elif market.current_probability %}
   <div class="mt-4 flex gap-2">
     {% for label, prob in market.current_probability.items %}

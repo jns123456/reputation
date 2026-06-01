@@ -27,21 +27,7 @@
   </div>
 
   {% if market.current_probability %}
-  <div class="mt-4 grid grid-cols-3 gap-2">
-    {% for label, prob in market.current_probability.items %}
-    <div class="flex flex-col items-center rounded-lg border py-2.5 transition
-      {% if label|lower == 'draw' %}border-amber-200 bg-amber-50 group-hover:bg-amber-100 dark:border-amber-800/50 dark:bg-amber-950/35 dark:group-hover:border-amber-700/60 dark:group-hover:bg-amber-900/45{% elif forloop.first %}border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/35 dark:group-hover:border-emerald-700/60 dark:group-hover:bg-emerald-900/45{% else %}border-slate-200 bg-slate-50 group-hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/55 dark:group-hover:border-slate-500 dark:group-hover:bg-slate-700/70{% endif %}">
-      <span class="truncate px-1 text-[10px] font-semibold uppercase tracking-wide
-        {% if label|lower == 'draw' %}text-amber-700 dark:text-amber-300{% elif forloop.first %}text-emerald-700 dark:text-emerald-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
-        {% if label|lower == 'draw' %}{% trans "Draw" %}{% else %}{{ label }}{% endif %}
-      </span>
-      <span class="mt-0.5 text-lg font-bold tabular-nums
-        {% if label|lower == 'draw' %}text-amber-800 dark:text-amber-200{% elif forloop.first %}text-emerald-800 dark:text-emerald-200{% else %}text-slate-800 dark:text-slate-100{% endif %}">
-        {{ prob|as_percent }}%
-      </span>
-    </div>
-    {% endfor %}
-  </div>
+  {% include "markets/partials/three_way_outcome_boxes.html" %}
   {% else %}
   <p class="mt-4 text-center text-sm text-slate-400">{% trans "Odds unavailable" %}</p>
   {% endif %}
