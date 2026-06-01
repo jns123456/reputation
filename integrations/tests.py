@@ -1,9 +1,18 @@
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 from accounts.models import User
 from integrations.attestation_services import verify_offchain_attestation
-from integrations.models import AttestationSchema, OffchainAttestation
+from integrations.batch_services import (
+    build_daily_attestation_batch,
+    build_position_close_record,
+    compute_merkle_root,
+    hash_position_close_record,
+    verify_batch_signature,
+    verify_merkle_proof,
+)
+from integrations.models import AttestationBatch, AttestationSchema, OffchainAttestation
 from integrations.services import (
     backfill_market_resolved_outcome,
     import_market_from_normalized,
@@ -11,7 +20,7 @@ from integrations.services import (
 )
 from markets.models import Market
 from predictions.models import Prediction
-from predictions.services import create_prediction, resolve_market_predictions
+from predictions.services import create_prediction, exit_prediction, resolve_market_predictions
 from reputation.models import ReputationEvent
 
 
@@ -308,3 +317,116 @@ class OffchainAttestationTests(TestCase):
 
         self.assertContains(response, "Offchain timestamp")
         self.assertContains(response, "Event timestamp")
+
+
+class DailyAttestationBatchTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="batch-user", password="pass")
+        self.market = Market.objects.create(
+            external_id="batch-m1",
+            title="Batch test market",
+            slug="batch-test",
+            source=Market.Source.MANUAL,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+    def test_early_exit_included_in_daily_batch(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            prediction = create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        batch, created = build_daily_attestation_batch()
+
+        self.assertTrue(created)
+        self.assertEqual(batch.record_count, 1)
+        self.assertTrue(verify_batch_signature(batch))
+        record = batch.records[0]
+        self.assertEqual(record["close_type"], "exited")
+        self.assertEqual(record["points_delta"], 15)
+        self.assertTrue(
+            verify_merkle_proof(
+                leaf_hash=record["leaf_hash"],
+                proof=record["merkle_proof"],
+                root=batch.merkle_root,
+            )
+        )
+
+    def test_resolution_included_in_daily_batch(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            prediction = create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save(update_fields=["status", "resolved_outcome"])
+        with self.captureOnCommitCallbacks(execute=True):
+            resolve_market_predictions(self.market)
+
+        batch, _ = build_daily_attestation_batch()
+
+        self.assertEqual(batch.record_count, 1)
+        self.assertEqual(batch.records[0]["close_type"], "resolved_correct")
+
+    def test_batch_is_idempotent_for_same_period_end(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            prediction = create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
+        self.market.current_probability = {"Yes": 0.5, "No": 0.5}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        first, created_first = build_daily_attestation_batch()
+        second, created_second = build_daily_attestation_batch()
+
+        self.assertTrue(created_first)
+        self.assertFalse(created_second)
+        self.assertEqual(first.pk, second.pk)
+
+    def test_merkle_proof_verifies_against_root(self):
+        leaves = [hash_position_close_record({"a": 1}), hash_position_close_record({"b": 2})]
+        root = compute_merkle_root(leaves)
+        from integrations.batch_services import build_merkle_proofs
+
+        proofs = build_merkle_proofs(leaves)
+        self.assertTrue(
+            verify_merkle_proof(leaf_hash=leaves[0], proof=proofs[leaves[0]], root=root)
+        )
+
+    def test_proof_pages_render(self):
+        batch, _ = build_daily_attestation_batch()
+
+        index = self.client.get("/proof/")
+        self.assertEqual(index.status_code, 200)
+        self.assertContains(index, "Portable proof")
+
+        detail = self.client.get(f"/proof/batches/{batch.merkle_root}/")
+        self.assertEqual(detail.status_code, 200)
+        self.assertContains(detail, batch.merkle_root[:10])
+
+    def test_management_command_builds_batch(self):
+        call_command("build_daily_attestation_batch")
+        self.assertEqual(AttestationBatch.objects.count(), 1)
+
+
+class EasOnchainConfigTests(TestCase):
+    def test_compute_schema_uid_is_deterministic(self):
+        from web3 import Web3
+
+        from integrations.eas_onchain import compute_schema_uid, get_daily_batch_schema_string
+
+        schema = get_daily_batch_schema_string()
+        first = compute_schema_uid(schema=schema)
+        second = compute_schema_uid(schema=schema)
+        self.assertEqual(first, second)
+        self.assertEqual(len(Web3.to_hex(first)), 66)
+
+    def test_onchain_ready_requires_private_key(self):
+        from integrations.eas_onchain import onchain_ready
+
+        with self.settings(
+            EAS_ONCHAIN_ANCHOR_ENABLED=True,
+            EAS_CHAIN_ID=8453,
+            EAS_ANCHOR_PRIVATE_KEY="",
+        ):
+            self.assertFalse(onchain_ready())

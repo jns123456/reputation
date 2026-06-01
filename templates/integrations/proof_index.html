@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Portable proof" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/proof-page.css' %}{% if static_version %}?v={{ static_version }}{% endif %}">
+{% endblock %}
+
+{% block content %}
+<div class="proof-page pr-page pb-20">
+
+  {# ── HERO ── #}
+  <section class="proof-full-bleed relative overflow-hidden border-b border-violet-200/40 dark:border-violet-900/40">
+    <div class="proof-mesh absolute inset-0" aria-hidden="true"></div>
+    <div class="proof-grid-bg absolute inset-0" aria-hidden="true"></div>
+    <div class="proof-orb proof-orb--slow absolute -left-24 top-16 h-80 w-80 bg-violet-500/25" aria-hidden="true"></div>
+    <div class="proof-orb absolute -right-12 top-24 h-64 w-64 bg-emerald-400/20" aria-hidden="true"></div>
+    <div class="proof-orb absolute bottom-0 left-1/2 h-56 w-56 -translate-x-1/2 bg-brand-500/15" aria-hidden="true"></div>
+
+    <div class="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+      <div class="max-w-3xl">
+        <div class="proof-badge">
+          <i data-lucide="shield-check" class="h-3.5 w-3.5" stroke-width="2" aria-hidden="true"></i>
+          {% trans "Ethereum Attestation Service · Base" %}
+        </div>
+
+        <h1 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
+          {% trans "Reputation you can" %}
+          <span class="proof-gradient-text">{% trans "carry with you" %}</span>
+        </h1>
+
+        <p class="mt-6 text-lg leading-relaxed text-slate-600 sm:text-xl dark:text-slate-300">
+          {% blocktrans %}PredictStamp records every realized forecast — including early exits before an event ends — and commits a daily cryptographic ledger to <strong class="text-slate-800 dark:text-white">Base</strong>. Not hype. Not likes. Judgment, signed.{% endblocktrans %}
+        </p>
+
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a href="#how-it-works" class="btn-primary px-6 py-3 text-sm shadow-lg shadow-violet-500/20">
+            {% trans "How it works" %}
+          </a>
+          <a href="https://attest.org/" target="_blank" rel="noopener noreferrer" class="btn-secondary px-6 py-3 text-sm backdrop-blur-sm">
+            {% trans "About EAS" %} ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mx-auto max-w-6xl space-y-24 px-4 pt-20 sm:px-6 sm:space-y-28">
+
+    {# ── PHILOSOPHY ── #}
+    <section id="philosophy" class="scroll-mt-24">
+      <div class="grid gap-10 lg:grid-cols-2 lg:items-start">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">{% trans "Why this matters" %}</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            {% trans "Trust should not live inside a walled garden" %}
+          </h2>
+          <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+            {% trans "Most platforms ask you to trust their database. A score on a screen, controlled by an operator, revocable without explanation. That works for entertainment — not for credibility." %}
+          </p>
+          <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+            {% blocktrans %}<strong class="text-slate-800 dark:text-white">EAS (Ethereum Attestation Service)</strong> is a public-good protocol: anyone can make signed statements about anything, in a standard format other apps and AI agents can verify without calling PredictStamp.{% endblocktrans %}
+          </p>
+        </div>
+
+        <div class="proof-glass proof-card rounded-3xl p-8 sm:p-10">
+          <blockquote class="text-lg font-medium leading-relaxed text-slate-800 dark:text-slate-100">
+            {% trans "“The value of an attestation comes from who makes the claim — and whether anyone can independently check that the claim existed, unchanged, at a point in time.”" %}
+          </blockquote>
+          <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">
+            {% trans "Adapted from the EAS ethos — portable proofs over platform lock-in." %}
+          </p>
+          <ul class="mt-8 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+            <li class="flex gap-3">
+              <span class="proof-icon-ring text-violet-600 dark:text-violet-400"><i data-lucide="fingerprint" class="h-4 w-4" aria-hidden="true"></i></span>
+              {% trans "Your track record is a chain of signed events, not a hidden formula." %}
+            </li>
+            <li class="flex gap-3">
+              <span class="proof-icon-ring text-emerald-600 dark:text-emerald-400"><i data-lucide="link" class="h-4 w-4" aria-hidden="true"></i></span>
+              {% trans "Other ecosystems can read the same proofs — wallets, agents, marketplaces." %}
+            </li>
+            <li class="flex gap-3">
+              <span class="proof-icon-ring text-brand-600 dark:text-brand-400"><i data-lucide="lock" class="h-4 w-4" aria-hidden="true"></i></span>
+              {% trans "Resolved and exited forecasts are immutable. History cannot be quietly rewritten." %}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    {# ── EARLY EXIT ── #}
+    <section id="early-exit" class="scroll-mt-24">
+      <div class="proof-card overflow-hidden rounded-3xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-violet-50 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:via-slate-900 dark:to-violet-950/20">
+        <div class="grid lg:grid-cols-2">
+          <div class="p-8 sm:p-10 lg:p-12">
+            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">{% trans "Before the event ends" %}</p>
+            <h2 class="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">
+              {% trans "Exit early, keep the record" %}
+            </h2>
+            <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+              {% blocktrans %}When you close a forecast before the market resolves, reputation is realized immediately from odds movement — the same mark-to-market logic as Polymarket-style P&amp;L. The event may still be open; your points are not pending.{% endblocktrans %}
+            </p>
+            <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+              {% trans "Every daily batch includes these exits alongside resolved forecasts. Entry snapshot, exit snapshot, points delta — whether the world has moved on or not." %}
+            </p>
+          </div>
+          <div class="flex flex-col justify-center border-t border-emerald-200/60 bg-white/50 p-8 dark:border-emerald-900/40 dark:bg-slate-950/40 lg:border-l lg:border-t-0 sm:p-10">
+            <div class="proof-example rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Example" %}</p>
+              <p class="mt-3 text-sm text-slate-700 dark:text-slate-200">
+                {% trans "Forecast Yes at 40% market odds. Exit at 55% before resolution." %}
+              </p>
+              <p class="mt-4 font-mono text-2xl font-bold text-emerald-600 dark:text-emerald-400">+15 {% trans "reputation" %}</p>
+              <p class="mt-2 text-xs text-slate-500">{% trans "Market still open · points already earned · included in tonight's batch" %}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# ── HOW IT WORKS ── #}
+    <section id="how-it-works" class="scroll-mt-24">
+      <div class="text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">{% trans "Architecture" %}</p>
+        <h2 class="mt-3 text-3xl font-bold text-slate-900 dark:text-white">{% trans "One batch per day" %}</h2>
+        <p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
+          {% trans "We do not spam the chain with every click. Once every 24 hours, PredictStamp bundles every realized position into a Merkle tree and anchors the root on Base." %}
+        </p>
+      </div>
+
+      <ol class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <li class="proof-step proof-card rounded-2xl p-6">
+          <span class="proof-step-num">1</span>
+          <h3 class="mt-4 font-bold text-slate-900 dark:text-white">{% trans "You act" %}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "Enter a market, exit early, or hold to resolution. Reputation changes only when the position closes." %}</p>
+        </li>
+        <li class="proof-step proof-card rounded-2xl p-6">
+          <span class="proof-step-num">2</span>
+          <h3 class="mt-4 font-bold text-slate-900 dark:text-white">{% trans "We sign" %}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "Each event gets an off-chain attestation instantly — no wallet required from you." %}</p>
+        </li>
+        <li class="proof-step proof-card rounded-2xl p-6">
+          <span class="proof-step-num">3</span>
+          <h3 class="mt-4 font-bold text-slate-900 dark:text-white">{% trans "We batch" %}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "Leaves = entry + close + points. Hashed into a Merkle root for the rolling 24h window." %}</p>
+        </li>
+        <li class="proof-step proof-card rounded-2xl p-6">
+          <span class="proof-step-num">4</span>
+          <h3 class="mt-4 font-bold text-slate-900 dark:text-white">{% trans "Base anchors" %}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "One transaction commits the root. Anyone verifies a row with a Merkle proof — pennies per day." %}</p>
+        </li>
+      </ol>
+    </section>
+
+    {# ── LIVE STATUS ── #}
+    <section id="batches" class="scroll-mt-24">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "Ledger" %}</p>
+          <h2 class="mt-3 text-3xl font-bold text-slate-900 dark:text-white">{% trans "Daily batches" %}</h2>
+        </div>
+        {% if stats.latest_batch %}
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          {% blocktrans with count=stats.total_batches %} {{ count }} batches committed {% endblocktrans %}
+        </p>
+        {% endif %}
+      </div>
+
+      <div class="mt-8 grid gap-4 sm:grid-cols-3">
+        <div class="proof-stat proof-card rounded-2xl p-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Latest batch" %}</p>
+          <p class="mt-2 font-mono text-sm text-slate-800 dark:text-slate-200">
+            {% if stats.latest_batch %}{{ stats.latest_batch.short_root }}{% else %}—{% endif %}
+          </p>
+        </div>
+        <div class="proof-stat proof-card rounded-2xl p-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Records (latest)" %}</p>
+          <p class="mt-2 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
+            {% if stats.latest_batch %}{{ stats.latest_batch.record_count }}{% else %}0{% endif %}
+          </p>
+        </div>
+        <div class="proof-stat proof-card rounded-2xl p-5 sm:col-span-2">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Relayer wallet" %}</p>
+          {% if stats.anchor_wallet %}
+          <a href="{{ stats.anchor_wallet_basescan }}" target="_blank" rel="noopener noreferrer"
+             class="mt-2 block break-all font-mono text-sm text-brand-700 hover:underline dark:text-brand-300">
+            {{ stats.anchor_wallet }}
+          </a>
+          {% else %}
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">—</p>
+          {% endif %}
+        </div>
+        <div class="proof-stat proof-card rounded-2xl p-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "On-chain" %}</p>
+          <p class="mt-2 text-sm font-medium text-slate-800 dark:text-slate-200">
+            {% if stats.onchain_enabled %}{% trans "Active" %}{% elif stats.onchain_configured %}{% trans "Awaiting signer key" %}{% else %}{% trans "Off-chain only" %}{% endif %}
+          </p>
+        </div>
+      </div>
+
+      {% if recent_batches %}
+      <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+        <div class="pr-table-wrap">
+          <table class="min-w-full text-left text-sm">
+            <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800/80">
+              <tr>
+                <th class="px-4 py-3 font-semibold">{% trans "Batch date" %}</th>
+                <th class="px-4 py-3 font-semibold">{% trans "Window end" %}</th>
+                <th class="px-4 py-3 font-semibold">{% trans "Records" %}</th>
+                <th class="px-4 py-3 font-semibold">{% trans "Root" %}</th>
+                <th class="px-4 py-3 font-semibold">{% trans "Status" %}</th>
+                <th class="px-4 py-3 font-semibold"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              {% for batch in recent_batches %}
+              <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-200">{{ batch.batch_date|date:"M j, Y" }}</td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-200">{{ batch.period_end|date:"M j, H:i" }} UTC</td>
+                <td class="px-4 py-3 tabular-nums text-slate-700 dark:text-slate-200">{{ batch.record_count }}</td>
+                <td class="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">{{ batch.short_root }}</td>
+                <td class="px-4 py-3">
+                  <span class="proof-status proof-status--{{ batch.status }}">{{ batch.get_status_display }}</span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <a href="{% url 'integrations:batch_detail' merkle_root=batch.merkle_root %}" class="text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300">
+                    {% trans "Inspect" %} →
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="proof-empty mt-8 rounded-2xl border border-dashed border-slate-300 p-10 text-center dark:border-slate-600">
+        <p class="text-slate-600 dark:text-slate-300">{% trans "No batches yet. The first daily ledger will appear after realized forecasts accumulate." %}</p>
+      </div>
+      {% endif %}
+    </section>
+
+    {# ── CTA ── #}
+    <section class="proof-cta proof-full-bleed rounded-3xl px-6 py-12 text-center sm:px-10">
+      <h2 class="text-2xl font-bold text-white sm:text-3xl">{% trans "Build the record worth attesting to" %}</h2>
+      <p class="mx-auto mt-3 max-w-xl text-violet-100/90">
+        {% trans "Every forecast is practice. Every exit and resolution becomes durable proof of judgment." %}
+      </p>
+      <a href="{% url 'markets:list' %}" class="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-violet-900 shadow-lg hover:bg-violet-50">
+        {% trans "Browse markets" %}
+        <i data-lucide="arrow-right" class="h-4 w-4" aria-hidden="true"></i>
+      </a>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

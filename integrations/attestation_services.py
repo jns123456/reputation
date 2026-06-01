@@ -47,6 +47,13 @@ SCHEMA_DEFINITIONS = {
             "uint32 correctCount,uint32 incorrectCount,uint64 asOf,bytes32 eventRoot"
         ),
     },
+    AttestationSchema.Kind.DAILY_BATCH_ANCHOR: {
+        "name": "Daily batch anchor",
+        "schema": (
+            "bytes32 batchRoot,uint32 recordCount,uint64 periodStart,uint64 periodEnd,"
+            "uint16 scoreVersion,bytes32 prevBatchRoot"
+        ),
+    },
 }
 
 

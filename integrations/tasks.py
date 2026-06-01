@@ -78,16 +78,24 @@ def refresh_market_task(self, market_id):
         raise self.retry(exc=exc) from exc
 
 
-@shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
-def refresh_stale_open_markets_task(self):
-    """Periodic refresh of stale open markets from external APIs."""
+@shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=120)
+def build_daily_attestation_batch_task(self):
+    """Build the daily Merkle batch of realized reputation positions."""
+    from django.conf import settings
+
+    if not getattr(settings, "EAS_DAILY_BATCH_ENABLED", True):
+        return
+
+    from integrations.batch_services import build_daily_attestation_batch
+
     try:
-        result = refresh_stale_open_markets()
+        batch, created = build_daily_attestation_batch()
         logger.info(
-            "refresh_stale_open_markets_task finished: refreshed=%s failures=%s",
-            result["refreshed"],
-            result["failures"],
+            "build_daily_attestation_batch_task finished: root=%s created=%s records=%s",
+            batch.short_root,
+            created,
+            batch.record_count,
         )
     except Exception as exc:
-        logger.exception("refresh_stale_open_markets_task failed")
+        logger.exception("build_daily_attestation_batch_task failed")
         raise self.retry(exc=exc) from exc

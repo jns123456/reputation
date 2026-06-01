@@ -29,6 +29,16 @@ class OffchainAttestationAdmin(admin.ModelAdmin):
 
 @admin.register(AttestationBatch)
 class AttestationBatchAdmin(admin.ModelAdmin):
-    list_display = ("merkle_root", "chain_id", "transaction_hash", "timestamped_at", "created_at")
-    search_fields = ("merkle_root", "transaction_hash")
-    readonly_fields = ("created_at",)
+    list_display = (
+        "short_root",
+        "batch_date",
+        "record_count",
+        "status",
+        "chain_id",
+        "transaction_hash",
+        "created_at",
+    )
+    list_filter = ("status", "chain_id")
+    search_fields = ("merkle_root", "transaction_hash", "signer")
+    readonly_fields = ("merkle_root", "created_at", "payload_hash", "signature")
+    date_hierarchy = "batch_date"

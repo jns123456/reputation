@@ -8,6 +8,7 @@ class AttestationSchema(models.Model):
         PREDICTION_RESOLUTION = "prediction_resolution", "Prediction resolution"
         REPUTATION_EVENT = "reputation_event", "Reputation event"
         PROFILE_SUMMARY = "profile_summary", "Profile summary"
+        DAILY_BATCH_ANCHOR = "daily_batch_anchor", "Daily batch anchor"
 
     kind = models.CharField(max_length=50, choices=Kind.choices)
     name = models.CharField(max_length=120)
@@ -105,19 +106,58 @@ class OffchainAttestation(models.Model):
 
 
 class AttestationBatch(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SIGNED = "signed", "Signed off-chain"
+        ANCHORED = "anchored", "Anchored on-chain"
+        FAILED = "failed", "Failed"
+
     merkle_root = models.CharField(max_length=66, unique=True)
+    batch_date = models.DateField(unique=True, db_index=True)
+    period_start = models.DateTimeField()
+    period_end = models.DateTimeField()
+    record_count = models.PositiveIntegerField(default=0)
+    records = models.JSONField(default=list, blank=True)
+    score_version = models.PositiveSmallIntegerField(default=1)
+    prev_batch_root = models.CharField(max_length=66, blank=True)
+    signer = models.CharField(max_length=120, blank=True)
+    signature = models.CharField(max_length=128, blank=True)
+    payload_hash = models.CharField(max_length=66, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
     attestations = models.ManyToManyField(
         OffchainAttestation,
         related_name="batches",
         blank=True,
     )
     transaction_hash = models.CharField(max_length=66, blank=True)
+    on_chain_uid = models.CharField(max_length=66, blank=True)
     chain_id = models.PositiveIntegerField(default=0)
     timestamped_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-period_end"]
 
     def __str__(self):
         return self.merkle_root
+
+    @property
+    def short_root(self):
+        return f"{self.merkle_root[:10]}...{self.merkle_root[-6:]}"
+
+    @property
+    def basescan_tx_url(self):
+        if not self.transaction_hash or self.chain_id != 8453:
+            return ""
+        return f"https://basescan.org/tx/{self.transaction_hash}"
+
+    @property
+    def is_signature_valid(self):
+        from integrations.batch_services import verify_batch_signature
+
+        return verify_batch_signature(self)
