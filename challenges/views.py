@@ -52,6 +52,16 @@ def _sort_challenge_markets_by_expiration(markets):
     return sorted(markets, key=sort_key)
 
 
+def challenge_how_it_works(request):
+    return render(
+        request,
+        "challenges/challenge_how_it_works.html",
+        {
+            "max_challenge_markets": MAX_CHALLENGE_MARKETS,
+        },
+    )
+
+
 @login_required
 def challenge_list(request):
     status_filter = request.GET.get("status", "")

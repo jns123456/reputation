@@ -840,3 +840,15 @@ class MarketSearchTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Bitcoin price 2026")
         self.assertContains(response, "All categories")
+
+
+class ChallengeHowItWorksViewTests(TestCase):
+    def test_page_loads_without_login(self):
+        response = self.client.get("/challenges/how-it-works/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "How challenges work")
+
+    def test_page_mentions_existing_forecasts(self):
+        response = self.client.get("/challenges/how-it-works/")
+        self.assertContains(response, "existing open forecast counts automatically", html=False)
+

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "How challenges work" %}{% endblock %}
+
+{% block content %}
+{% url 'challenges:list' as list_url %}
+{% url 'challenges:create' as create_url %}
+{% url 'dashboard:faq' as faq_url %}
+<div class="pr-page pb-8">
+  <nav class="pr-breadcrumbs" aria-label="{% trans 'Breadcrumb' %}">
+    <a href="{{ list_url }}">{% trans "Challenges" %}</a>
+    <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600" stroke-width="2" aria-hidden="true"></i>
+    <span class="font-medium text-slate-800 dark:text-slate-200">{% trans "How it works" %}</span>
+  </nav>
+
+  {% trans "Social" as hero_eyebrow %}
+  {% trans "How challenges" as hero_title %}
+  {% trans "work" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Head-to-head reputation duels with mutual followers on real-world events. No extra bets — your forecasts are the score.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
+
+  <div class="mb-10 grid gap-4 sm:grid-cols-3">
+    <div class="pr-panel px-5 py-4">
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+        <i data-lucide="users" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+      </div>
+      <h2 class="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{% trans "Mutual followers" %}</h2>
+      <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "You can only challenge people who follow you back." %}</p>
+    </div>
+    <div class="pr-panel px-5 py-4">
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+        <i data-lucide="target" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+      </div>
+      <h2 class="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{% blocktrans with max=max_challenge_markets %}Up to {{ max }} events{% endblocktrans %}</h2>
+      <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Pick open markets everyone will compete on. The duel ends when all of them resolve." %}</p>
+    </div>
+    <div class="pr-panel px-5 py-4">
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+        <i data-lucide="trophy" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+      </div>
+      <h2 class="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{% trans "Highest reputation wins" %}</h2>
+      <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Only predictive reputation counts — likes and votes never affect the score." %}</p>
+    </div>
+  </div>
+
+  <section class="mb-12">
+    <h2 class="pr-section-title mb-4">{% trans "From invitation to winner" %}</h2>
+    <ol class="space-y-4">
+      <li class="pr-panel flex gap-4 px-5 py-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">1</span>
+        <div>
+          <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Create or get invited" %}</p>
+          <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Someone picks the events and invites opponents. You can accept or decline." %}</p>
+        </div>
+      </li>
+      <li class="pr-panel flex gap-4 px-5 py-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">2</span>
+        <div>
+          <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Challenge goes live" %}</p>
+          <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Once everyone has responded, the challenge activates and the clock starts. Group challenges can start when the first invited member accepts." %}</p>
+        </div>
+      </li>
+      <li class="pr-panel flex gap-4 px-5 py-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">3</span>
+        <div>
+          <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Forecast on the events" %}</p>
+          <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "Publish formal forecasts on the challenge markets — or keep an existing one. See the next section." %}</p>
+        </div>
+      </li>
+      <li class="pr-panel flex gap-4 px-5 py-4">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">4</span>
+        <div>
+          <p class="font-medium text-slate-900 dark:text-slate-100">{% trans "Markets resolve" %}</p>
+          <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "When every event in the challenge resolves, we tally final reputation points. The highest total wins; a tie means no single winner." %}</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="pr-section-title mb-2">{% trans "Already forecast on a challenge event?" %}</h2>
+    <p class="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+      {% trans "You do not need to place a new forecast just because an event was added to a challenge." %}
+    </p>
+
+    <div class="pr-panel overflow-hidden border-emerald-200/80 dark:border-emerald-800/50">
+      <div class="border-b border-emerald-100 bg-emerald-50/90 px-5 py-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+        <p class="flex items-start gap-2 text-sm font-medium text-emerald-900 dark:text-emerald-200">
+          <i data-lucide="check-circle" class="mt-0.5 h-5 w-5 shrink-0" stroke-width="2" aria-hidden="true"></i>
+          {% trans "Your existing open forecast counts automatically once the challenge is live." %}
+        </p>
+      </div>
+      <div class="space-y-4 px-5 py-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p>{% blocktrans %}If you already have a <strong class="text-slate-800 dark:text-slate-200">pending forecast</strong> on one of the challenge events, it is included in your challenge score immediately — no duplicate pick required.{% endblocktrans %}</p>
+        <p>{% blocktrans %}While the market is still open, we show <strong class="text-slate-800 dark:text-slate-200">unrealized</strong> reputation (mark-to-market P&amp;L against current odds). When the market resolves or you exit early, those points become <strong class="text-slate-800 dark:text-slate-200">realized</strong>.{% endblocktrans %}</p>
+      </div>
+    </div>
+
+    <div class="mt-4 pr-panel border-amber-200/80 px-5 py-4 dark:border-amber-800/50">
+      <p class="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+        <i data-lucide="info" class="mt-0.5 h-5 w-5 shrink-0" stroke-width="2" aria-hidden="true"></i>
+        <span>{% blocktrans %}<strong class="font-medium">After you accept</strong>, only reputation earned from that moment onward counts toward realized points. Resolutions or early exits that happened before you joined the challenge do not count — but an open forecast you placed earlier still contributes live unrealized points.{% endblocktrans %}</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="pr-section-title mb-4">{% trans "How points are calculated" %}</h2>
+    <p class="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+      {% blocktrans %}Challenges use the same <span class="badge-rep">Reputation</span> rules as the rest of PredictStamp — based on market odds when you forecast, not on votes or popularity.{% endblocktrans %}
+    </p>
+
+    <div class="pr-panel overflow-hidden">
+      <div class="border-b border-slate-100 bg-slate-50/90 px-5 py-4 dark:border-slate-700 dark:bg-slate-800/80">
+        <p class="font-mono text-sm text-slate-700 dark:text-slate-300">
+          {% trans "Correct →" %} <span class="text-emerald-700 dark:text-emerald-400">{% trans "+ (100 − market %)" %}</span>
+          &nbsp;·&nbsp;
+          {% trans "Incorrect →" %} <span class="text-red-600 dark:text-red-400">{% trans "− market %" %}</span>
+        </p>
+      </div>
+      <div class="divide-y divide-slate-100 px-5 dark:divide-slate-700">
+        <div class="grid gap-4 py-5 sm:grid-cols-2">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Realized" %}</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% trans "Points locked in when a market resolves or you exit a forecast early." %}</p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Unrealized" %}</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% trans "Live estimate on open markets — updates as odds move." %}</p>
+          </div>
+        </div>
+        <div class="py-5">
+          <p class="text-sm text-slate-600 dark:text-slate-400">
+            {% blocktrans %}Your challenge total is <strong class="text-slate-800 dark:text-slate-200">realized + unrealized</strong> across all events in the duel. The leaderboard inside each challenge shows both columns.{% endblocktrans %}
+          </p>
+        </div>
+      </div>
+    </div>
+    <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+      {% blocktrans %}For more examples and edge cases, see the <a href="{{ faq_url }}" class="font-medium text-brand-600 hover:underline dark:text-brand-400">FAQ</a>.{% endblocktrans %}
+    </p>
+  </section>
+
+  <section class="mb-12" x-data="{ open: 'no-bet' }">
+    <h2 class="pr-section-title mb-4">{% trans "Common questions" %}</h2>
+    <div class="space-y-3">
+
+      <div class="pr-accordion-item">
+        <button type="button" @click="open = open === 'no-bet' ? null : 'no-bet'" class="pr-accordion-trigger" :aria-expanded="open === 'no-bet'">
+          <span>{% trans "Do I need to bet money or place a special challenge forecast?" %}</span>
+          <span class="inline-flex shrink-0 text-slate-400 transition" :class="open === 'no-bet' && 'rotate-180'"><i data-lucide="chevron-down" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i></span>
+        </button>
+        <div x-show="open === 'no-bet'" x-cloak x-transition class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
+          <p>{% blocktrans %}<strong class="text-slate-800 dark:text-slate-200">No.</strong> PredictStamp has no wallets or real-money betting. A challenge reuses your normal formal forecasts on the selected events — there is no separate wager.{% endblocktrans %}</p>
+        </div>
+      </div>
+
+      <div class="pr-accordion-item">
+        <button type="button" @click="open = open === 'multiple' ? null : 'multiple'" class="pr-accordion-trigger" :aria-expanded="open === 'multiple'">
+          <span>{% trans "Can I join multiple challenges on the same event?" %}</span>
+          <span class="inline-flex shrink-0 text-slate-400 transition" :class="open === 'multiple' && 'rotate-180'"><i data-lucide="chevron-down" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i></span>
+        </button>
+        <div x-show="open === 'multiple'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
+          <p>{% trans "Yes. One forecast on a market can count toward every active challenge that includes that event." %}</p>
+        </div>
+      </div>
+
+      <div class="pr-accordion-item">
+        <button type="button" @click="open = open === 'groups' ? null : 'groups'" class="pr-accordion-trigger" :aria-expanded="open === 'groups'">
+          <span>{% trans "What are challenge groups?" %}</span>
+          <span class="inline-flex shrink-0 text-slate-400 transition" :class="open === 'groups' && 'rotate-180'"><i data-lucide="chevron-down" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i></span>
+        </button>
+        <div x-show="open === 'groups'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
+          <p>{% trans "Saved lists of mutual followers for quick invitations. Group challenges can start as soon as the first invited member accepts, instead of waiting for every response." %}</p>
+        </div>
+      </div>
+
+      <div class="pr-accordion-item">
+        <button type="button" @click="open = open === 'popularity' ? null : 'popularity'" class="pr-accordion-trigger" :aria-expanded="open === 'popularity'">
+          <span>{% trans "Do upvotes affect my challenge score?" %}</span>
+          <span class="inline-flex shrink-0 text-slate-400 transition" :class="open === 'popularity' && 'rotate-180'"><i data-lucide="chevron-down" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i></span>
+        </button>
+        <div x-show="open === 'popularity'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
+          <p>{% blocktrans %}No. <span class="badge-pop">Popularity</span> from votes is completely separate. Only reputation from forecasts determines the winner.{% endblocktrans %}</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="pr-cta-band">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{% trans "Ready to compete?" %}</h2>
+    <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
+      {% trans "Challenge a mutual follower or respond to a pending invitation." %}
+    </p>
+    <div class="mt-5 flex flex-wrap justify-center gap-3">
+      <a href="{{ list_url }}" class="btn-secondary">{% trans "My challenges" %}</a>
+      <a href="{{ create_url }}" class="btn-primary">{% trans "New challenge" %}</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

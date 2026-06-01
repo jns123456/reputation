@@ -6,6 +6,7 @@ app_name = "challenges"
 
 urlpatterns = [
     path("", views.challenge_list, name="list"),
+    path("how-it-works/", views.challenge_how_it_works, name="how_it_works"),
     path("new/", views.challenge_create, name="create"),
     path("groups/", views.challenge_group_list, name="group_list"),
     path("groups/new/", views.challenge_group_create, name="group_create"),
