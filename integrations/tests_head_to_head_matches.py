@@ -16,6 +16,27 @@ from markets.composite_redirect import get_composite_redirect_market, is_orphan_
 from markets.models import Market
 from markets.selectors import filter_markets_by_browse_area, get_markets_list
 
+UFC_H2H_EVENT = {
+    "slug": "ufc-fight-night-belal-gabriel-2026-06-07",
+    "title": "UFC Fight Night: Belal Muhammad vs. Gabriel Bonfim (Welterweight, Main Card)",
+    "tags": [{"slug": "ufc"}, {"slug": "sports"}],
+    "gameStartTime": "2026-06-07T22:00:00Z",
+    "endDate": "2026-06-08T02:00:00Z",
+    "markets": [
+        {
+            "id": "ml-ufc-1",
+            "sportsMarketType": "moneyline",
+            "question": "UFC Fight Night: Belal Muhammad vs. Gabriel Bonfim",
+            "outcomes": '["Belal Muhammad", "Gabriel Bonfim"]',
+            "outcomePrices": '["0.58", "0.42"]',
+            "clobTokenIds": '["token-belal", "token-gabriel"]',
+            "closed": False,
+            "acceptingOrders": True,
+            "gameStartTime": "2026-06-07T22:00:00Z",
+        },
+    ],
+}
+
 NBA_H2H_EVENT = {
     "slug": "nba-nyk-sas-2026-06-03",
     "title": "Knicks vs. Spurs",
@@ -75,6 +96,9 @@ TENNIS_H2H_EVENT = {
 class HeadToHeadMatchDetectionTests(TestCase):
     def test_is_h2h_match_event_nba(self):
         self.assertTrue(is_h2h_match_event(NBA_H2H_EVENT))
+
+    def test_is_h2h_match_event_ufc(self):
+        self.assertTrue(is_h2h_match_event(UFC_H2H_EVENT))
 
     def test_is_h2h_match_event(self):
         self.assertTrue(is_h2h_match_event(TENNIS_H2H_EVENT))
