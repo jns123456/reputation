@@ -487,6 +487,10 @@ REPUTATION_BASE_POINTS = 10
 REPUTATION_BASE_PENALTY = 5
 # Minimum scored forecasts in the ranking denominator (anti-luck for low sample).
 REPUTATION_SCORE_MIN_SAMPLE = env.int("REPUTATION_SCORE_MIN_SAMPLE", default=3)
+# Relative leaderboard: only users with strictly more than this count qualify for rank.
+REPUTATION_RELATIVE_MIN_SCORED_FORECASTS = env.int(
+    "REPUTATION_RELATIVE_MIN_SCORED_FORECASTS", default=10
+)
 POPULARITY_UPVOTE_POINTS = 1
 POPULARITY_DOWNVOTE_POINTS = -1
 POPULARITY_REPOST_POINTS = 1

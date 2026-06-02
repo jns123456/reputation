@@ -20,6 +20,6 @@
   {% if ranking_mode == 'absolute' %}
   {% trans "Total reputation points from all scored forecasts." %}
   {% else %}
-  {% trans "Average reputation per scored forecast." %}
+  {% blocktrans with min=relative_ranking_min_scored %}Average reputation per scored forecast. Only users with more than {{ min }} scored forecasts qualify for ranking.{% endblocktrans %}
   {% endif %}
 </p>

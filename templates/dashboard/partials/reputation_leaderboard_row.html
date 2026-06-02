@@ -1,10 +1,11 @@
 {% load i18n reputation_filters %}
 {% with accuracy=stats|resolved_forecast_accuracy %}
 <tr data-leaderboard-row
+    data-leaderboard-qualifies="{% if qualifies_relative %}true{% else %}false{% endif %}"
     data-sort-rep-points="{{ stats.reputation_points }}"
-    data-sort-rep-per-forecast="{{ stats.reputation_score }}"
+    data-sort-rep-per-forecast="{% if qualifies_relative %}{{ stats.reputation_score }}{% else %}-1{% endif %}"
     data-sort-accuracy="{% if accuracy is not None %}{{ accuracy }}{% else %}-1{% endif %}">
-  <td class="px-4 py-3 text-sm text-slate-400" data-leaderboard-rank>{{ rank }}</td>
+  <td class="px-4 py-3 text-sm text-slate-400" data-leaderboard-rank>{% if rank %}{{ rank }}{% else %}—{% endif %}</td>
   <td class="px-4 py-3">
     <a href="{% url 'accounts:profile' username=stats.user.username %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ stats.user.public_name }}</a>
     {% if stats.user.is_ai_agent %}<span class="badge-agent ml-1">{% trans "AI" %}</span>{% endif %}
@@ -12,7 +13,8 @@
   <td class="px-4 py-3">
     <span class="badge-rep {% if ranking_mode == 'absolute' %}ring-2 ring-rep-500/30{% endif %}">{{ stats.reputation_points }}</span>
   </td>
-  <td class="px-4 py-3 text-sm {% if ranking_mode == 'relative' %}font-semibold text-rep-600{% else %}text-slate-700 dark:text-slate-300{% endif %}">{{ stats.reputation_score }}</td>
+  <td class="px-4 py-3 text-sm {% if ranking_mode == 'relative' and qualifies_relative %}font-semibold text-rep-600{% elif ranking_mode == 'relative' %}text-slate-400 dark:text-slate-500 cursor-help{% else %}text-slate-700 dark:text-slate-300{% endif %}"
+      {% if ranking_mode == 'relative' and not qualifies_relative %}title="{% blocktrans with min=relative_ranking_min_scored %}More than {{ min }} scored forecasts required to qualify for relative ranking.{% endblocktrans %}"{% endif %}>{{ stats.reputation_score }}</td>
   <td class="px-4 py-3 text-sm {% if accuracy is not None %}font-medium{% endif %}">
     {% if accuracy is not None %}{{ accuracy }}%{% else %}—{% endif %}
   </td>

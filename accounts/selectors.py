@@ -17,14 +17,13 @@ def get_user_prediction_history(user, limit=50):
 
 def get_top_predictors(limit=20, *, mode=None):
     from accounts.models import UserProfile
-    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+    from reputation.leaderboard import fetch_ranked_entries
 
-    ranking_mode = normalize_reputation_ranking_mode(mode)
-    if ranking_mode == ABSOLUTE:
-        ordering = ("-reputation_points", "-reputation_score", "-scored_forecast_count")
-    else:
-        ordering = ("-reputation_score", "-reputation_points", "-scored_forecast_count")
-    return UserProfile.objects.select_related("user").order_by(*ordering)[:limit]
+    return fetch_ranked_entries(
+        UserProfile.objects.select_related("user"),
+        limit=limit,
+        mode=mode,
+    )
 
 
 def get_top_popular_users(limit=20):

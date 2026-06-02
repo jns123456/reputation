@@ -176,6 +176,7 @@ class ReputationLeaderboardI18nTests(TestCase):
         self.assertContains(response, "Rep / pronóstico")
         self.assertContains(response, "Exactitud")
         self.assertContains(response, "reputación media por pronóstico puntuado")
+        self.assertContains(response, "Solo califican quienes tienen más de 10 pronósticos puntuados")
         self.assertContains(response, "data-leaderboard-sort")
         self.assertNotContains(response, "Relative ranking")
 

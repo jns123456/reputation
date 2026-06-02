@@ -21,16 +21,22 @@ class ReputationRankingModeTests(TestCase):
 
         self.high_volume = User.objects.create_user(username="volume", password="pass")
         self.high_avg = User.objects.create_user(username="quality", password="pass")
+        self.unqualified = User.objects.create_user(username="newbie", password="pass")
 
         UserProfile.objects.filter(user=self.high_volume).update(
             reputation_points=300,
-            scored_forecast_count=10,
-            reputation_score=30.0,
+            scored_forecast_count=15,
+            reputation_score=20.0,
         )
         UserProfile.objects.filter(user=self.high_avg).update(
             reputation_points=120,
-            scored_forecast_count=3,
+            scored_forecast_count=12,
             reputation_score=40.0,
+        )
+        UserProfile.objects.filter(user=self.unqualified).update(
+            reputation_points=80,
+            scored_forecast_count=5,
+            reputation_score=80.0,
         )
 
     def test_absolute_ranking_orders_by_total_points(self):
@@ -40,12 +46,34 @@ class ReputationRankingModeTests(TestCase):
         leaders = list(get_top_predictors(10, mode=ABSOLUTE))
         self.assertEqual(leaders[0].user.username, "volume")
 
-    def test_relative_ranking_orders_by_average(self):
+    def test_relative_ranking_orders_qualified_by_average(self):
         from accounts.selectors import get_top_predictors
         from reputation.ranking_modes import RELATIVE
 
         leaders = list(get_top_predictors(10, mode=RELATIVE))
         self.assertEqual(leaders[0].user.username, "quality")
+        self.assertEqual(leaders[1].user.username, "volume")
+
+    def test_relative_ranking_lists_unqualified_after_qualified(self):
+        from accounts.selectors import get_top_predictors
+        from reputation.leaderboard import build_leaderboard_rows
+        from reputation.ranking_modes import RELATIVE
+
+        leaders = list(get_top_predictors(10, mode=RELATIVE))
+        usernames = [row.user.username for row in leaders]
+        self.assertIn("newbie", usernames)
+        self.assertGreater(usernames.index("newbie"), usernames.index("quality"))
+
+        rows = build_leaderboard_rows(leaders, ranking_mode=RELATIVE)
+        newbie_row = next(row for row in rows if row["stats"].user.username == "newbie")
+        self.assertIsNone(newbie_row["rank"])
+        self.assertFalse(newbie_row["qualifies_relative"])
+
+    def test_qualifies_for_relative_ranking_requires_more_than_min(self):
+        from reputation.ranking_modes import qualifies_for_relative_ranking
+
+        self.assertFalse(qualifies_for_relative_ranking(10))
+        self.assertTrue(qualifies_for_relative_ranking(11))
 
 
 class ReputationScoreTests(TestCase):

@@ -400,9 +400,11 @@ scored_forecast_count = resolved + exited forecasts that received reputation
 reputation_score = reputation_points / max(scored_forecast_count, REPUTATION_SCORE_MIN_SAMPLE)
 ```
 
-Default `REPUTATION_SCORE_MIN_SAMPLE = 3` so a single lucky forecast cannot beat
-users with sustained track records on the **relative** board. The **absolute** board
-ranks by total points regardless of forecast count.
+Default `REPUTATION_SCORE_MIN_SAMPLE = 3` so a single lucky forecast cannot dominate
+the displayed average. The **relative** leaderboard only assigns rank to users with
+**strictly more than** `REPUTATION_RELATIVE_MIN_SCORED_FORECASTS` (default **10**)
+scored forecasts; others still show Rep/forecast (grey + tooltip) but rank as `—`.
+The **absolute** board ranks by total points regardless of forecast count.
 
 ### Popularity System
 

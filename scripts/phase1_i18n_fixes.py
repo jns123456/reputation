@@ -280,6 +280,12 @@ PHASE1_FIXES.update(
         ),
         "Sort by rep per forecast, highest first": "Ordenar por rep / pronóstico, mayor primero",
         "Sort by accuracy, highest first": "Ordenar por precisión, mayor primero",
+        "Average reputation per scored forecast. Only users with more than %(min)s scored forecasts qualify for ranking.": (
+            "Reputación media por pronóstico puntuado. Solo califican quienes tienen más de %(min)s pronósticos puntuados."
+        ),
+        "More than %(min)s scored forecasts required to qualify for relative ranking.": (
+            "Se requieren más de %(min)s pronósticos puntuados para calificar en el ranking relativo."
+        ),
     }
 )
 

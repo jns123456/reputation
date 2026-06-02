@@ -198,7 +198,8 @@ def home(request):
 
 
 def _reputation_leaderboard_context(request, *, category=None):
-    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+    from reputation.leaderboard import build_leaderboard_rows
+    from reputation.ranking_modes import ABSOLUTE, get_relative_ranking_min_scored_forecasts, normalize_reputation_ranking_mode
 
     ranking_mode = normalize_reputation_ranking_mode(request.GET.get("mode"))
     if category:
@@ -217,11 +218,13 @@ def _reputation_leaderboard_context(request, *, category=None):
 
     return {
         "leaders": leaders,
+        "leaderboard_rows": build_leaderboard_rows(leaders, ranking_mode=ranking_mode),
         "category": category,
         "chart_categories": get_all_chart_categories(),
         "is_category_leaderboard": category is not None,
         "ranking_mode": ranking_mode,
         "hero_description_key": hero_description_key,
+        "relative_ranking_min_scored": get_relative_ranking_min_scored_forecasts(),
     }
 
 

@@ -35,7 +35,7 @@
     {% include "dashboard/partials/leaderboard_category_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" ranking_mode=ranking_mode %}
   </div>
 
-  {% include "dashboard/partials/leaderboard_reputation_mode_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" %}
+  {% include "dashboard/partials/leaderboard_reputation_mode_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" relative_ranking_min_scored=relative_ranking_min_scored %}
 
   <div class="pr-table-wrap mt-6">
     <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
@@ -76,8 +76,8 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-        {% for row in leaders %}
-          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row rank=forloop.counter ranking_mode=ranking_mode show_global=is_category_leaderboard %}
+        {% for row in leaderboard_rows %}
+          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=is_category_leaderboard relative_ranking_min_scored=relative_ranking_min_scored %}
         {% empty %}
           {% if is_category_leaderboard %}
           <tr><td colspan="9" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet for this category." %}</td></tr>

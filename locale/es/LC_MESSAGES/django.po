@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 14:47+0000\n"
+"POT-Creation-Date: 2026-06-02 17:59+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -3941,8 +3941,20 @@ msgstr "Ranking absoluto"
 msgid "Total reputation points from all scored forecasts."
 msgstr "Puntos totales de reputación de todos los pronósticos puntuados."
 
-msgid "Average reputation per scored forecast."
-msgstr "Reputación media por pronóstico puntuado."
+#, python-format
+msgid ""
+"Average reputation per scored forecast. Only users with more than %(min)s "
+"scored forecasts qualify for ranking."
+msgstr ""
+"Reputación media por pronóstico puntuado. Solo califican quienes tienen más "
+"de %(min)s pronósticos puntuados."
+
+#, python-format
+msgid ""
+"More than %(min)s scored forecasts required to qualify for relative ranking."
+msgstr ""
+"Se requieren más de %(min)s pronósticos puntuados para calificar en el "
+"ranking relativo."
 
 #, python-format
 msgid "Hay %(count)s solicitud de verificación pendiente de revisar."
@@ -5700,6 +5712,9 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "Average reputation per scored forecast."
+#~ msgstr "Reputación media por pronóstico puntuado."
 
 #~ msgid ""
 #~ "Ranked by predictive quality across all categories — not social popularity."

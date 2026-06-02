@@ -9,11 +9,16 @@
   }
 
   function updateRankCells(tbody) {
-    Array.prototype.forEach.call(tbody.querySelectorAll("[data-leaderboard-row]"), function (row, index) {
+    var rank = 0;
+    Array.prototype.forEach.call(tbody.querySelectorAll("[data-leaderboard-row]"), function (row) {
       var rankCell = row.querySelector("[data-leaderboard-rank]");
-      if (rankCell) {
-        rankCell.textContent = String(index + 1);
+      if (!rankCell) return;
+      if (row.getAttribute("data-leaderboard-qualifies") === "false") {
+        rankCell.textContent = "—";
+        return;
       }
+      rank += 1;
+      rankCell.textContent = String(rank);
     });
   }
 

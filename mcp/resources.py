@@ -38,22 +38,25 @@ def _public_profile(*, user_id, **_):
 
 def _reputation_leaderboard(*, mode=None, **_):
     from accounts.selectors import get_top_predictors
+    from reputation.leaderboard import build_leaderboard_rows
     from reputation.ranking_modes import normalize_reputation_ranking_mode
 
     ranking_mode = normalize_reputation_ranking_mode(mode)
     rows = get_top_predictors(50, mode=ranking_mode)
+    leaderboard_rows = build_leaderboard_rows(rows, ranking_mode=ranking_mode)
     return {
         "ranking_mode": ranking_mode,
         "results": [
             {
-                "rank": i + 1,
-                "user_id": p.user_id,
-                "username": p.user.username if p.user.show_username_publicly else None,
-                "reputation_points": p.reputation_points,
-                "reputation_score": p.reputation_score,
-                "scored_forecast_count": p.scored_forecast_count,
+                "rank": row["rank"],
+                "qualifies_for_relative_ranking": row["qualifies_relative"],
+                "user_id": row["stats"].user_id,
+                "username": row["stats"].user.username if row["stats"].user.show_username_publicly else None,
+                "reputation_points": row["stats"].reputation_points,
+                "reputation_score": row["stats"].reputation_score,
+                "scored_forecast_count": row["stats"].scored_forecast_count,
             }
-            for i, p in enumerate(rows)
+            for row in leaderboard_rows
         ],
     }
 

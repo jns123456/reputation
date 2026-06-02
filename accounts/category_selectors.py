@@ -27,17 +27,14 @@ def get_user_category_breakdown(user):
 
 
 def get_top_predictors_by_category(category_slug, limit=50, *, mode=None):
-    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+    from reputation.leaderboard import fetch_ranked_entries
 
-    ranking_mode = normalize_reputation_ranking_mode(mode)
-    if ranking_mode == ABSOLUTE:
-        ordering = ("-reputation_points", "-reputation_score", "-scored_forecast_count")
-    else:
-        ordering = ("-reputation_score", "-reputation_points", "-scored_forecast_count")
-    return (
-        UserCategoryStats.objects.filter(category_slug=category_slug)
-        .select_related("user", "user__profile")
-        .order_by(*ordering)[:limit]
+    return fetch_ranked_entries(
+        UserCategoryStats.objects.filter(category_slug=category_slug).select_related(
+            "user", "user__profile"
+        ),
+        limit=limit,
+        mode=mode,
     )
 
 
@@ -79,13 +76,21 @@ def get_user_category_rank(user, category_slug, *, ranking="reputation", mode=No
             reputation_score__gt=stats.reputation_score,
         ).count()
     else:
-        higher = UserCategoryStats.objects.filter(
+        from reputation.ranking_modes import (
+            get_relative_ranking_min_scored_forecasts,
+            qualifies_for_relative_ranking,
+        )
+
+        if not qualifies_for_relative_ranking(stats.scored_forecast_count):
+            return None
+
+        min_scored = get_relative_ranking_min_scored_forecasts()
+        qualified = UserCategoryStats.objects.filter(
             category_slug=category_slug,
-        ).filter(
-            reputation_score__gt=stats.reputation_score,
-        ).count()
-        tied = UserCategoryStats.objects.filter(
-            category_slug=category_slug,
+            scored_forecast_count__gt=min_scored,
+        )
+        higher = qualified.filter(reputation_score__gt=stats.reputation_score).count()
+        tied = qualified.filter(
             reputation_score=stats.reputation_score,
             reputation_points__gt=stats.reputation_points,
         ).count()
