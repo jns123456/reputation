@@ -1463,8 +1463,8 @@ msgstr ""
 msgid "Find users"
 msgstr "Buscar usuarios"
 
-msgid "View list"
-msgstr "Ver publicación"
+msgid "View users"
+msgstr "Ver usuarios"
 
 msgid "Edit profile"
 msgstr "Tu perfil"

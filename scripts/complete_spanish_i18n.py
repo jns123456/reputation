@@ -106,6 +106,7 @@ FIXES.update({
     "following": "siguiendo",
     "Find users…": "Buscar usuarios…",
     "Find users": "Buscar usuarios",
+    "View users": "Ver usuarios",
     "User search results": "Resultados de búsqueda de usuarios",
     'See all results for "%(query)s"': 'Ver todos los resultados de «%(query)s»',
     "Update your email, bio, and how you appear publicly.": "Actualiza tu email, biografía y cómo apareces públicamente.",
