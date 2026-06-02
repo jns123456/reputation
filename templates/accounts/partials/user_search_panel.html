@@ -1,0 +1,23 @@
+{% load i18n %}
+<div class="pr-panel mb-6 p-4 sm:p-5">
+  <form method="get" action="{% url 'accounts:user_list' %}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <div class="min-w-0 flex-1">
+      <label for="user-list-search-q" class="mb-1 block text-xs font-medium text-slate-500">{% trans "Search" %}</label>
+      <input type="search"
+             id="user-list-search-q"
+             name="q"
+             value="{{ search_query|default:'' }}"
+             placeholder="{% trans 'Name, @user, email…' %}"
+             class="form-input"
+             {% if autofocus_search %}autofocus{% endif %}
+             minlength="2">
+    </div>
+    <div class="flex shrink-0 flex-wrap gap-2">
+      <button type="submit" class="btn-primary">{% trans "Search" %}</button>
+      {% if search_query %}
+      <a href="{% url 'accounts:user_list' %}" class="btn-secondary">{% trans "Show all" %}</a>
+      {% endif %}
+    </div>
+  </form>
+  <p class="mt-2 text-xs text-slate-500">{% trans "Enter at least 2 characters, or an email address." %}</p>
+</div>

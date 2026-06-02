@@ -37,7 +37,7 @@
     {% endfor %}
     {% endif %}
   </ul>
-  <a href="{% url 'accounts:user_search' %}?q={{ search_query|urlencode }}" class="x-user-search-more">
+  <a href="{% url 'accounts:user_list' %}?q={{ search_query|urlencode }}" class="x-user-search-more">
     {% blocktrans with query=search_query %}See all results for "{{ query }}"{% endblocktrans %}
   </a>
   {% else %}

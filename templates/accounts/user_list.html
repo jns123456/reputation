@@ -8,17 +8,26 @@
   {% trans "Community" as hero_eyebrow %}
   {% trans "All users" as hero_title %}
   {% blocktrans asvar hero_description %}Browse everyone on PredictStamp and follow forecasters you want to track.{% endblocktrans %}
-  {% url 'accounts:user_search' as search_url %}
-  {% trans "Search users" as search_label %}
-  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description secondary_url=search_url secondary_label=search_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
 
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  {% include "accounts/partials/user_search_panel.html" with autofocus_search=is_searching %}
+
+  {% if is_searching %}
+    {% if not search_ready %}
+    <div class="pr-empty py-10">{% trans "Enter at least 2 characters, or an email address." %}</div>
+    {% else %}
+    <div class="mb-4">
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        {% blocktrans count counter=users|length %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %}
+      </p>
+    </div>
+    {% include "accounts/partials/user_search_results.html" %}
+    {% endif %}
+  {% else %}
+  <div class="mb-4">
     <p class="text-sm text-slate-500 dark:text-slate-400">
       {% blocktrans with count=total_count %}{{ count }} people{% endblocktrans %}
     </p>
-    <a href="{% url 'accounts:user_search' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
-      {% trans "Search users" %} →
-    </a>
   </div>
 
   <div class="space-y-3">
@@ -40,6 +49,7 @@
     <a href="{% url 'accounts:user_list' %}?offset={{ next_offset }}" class="btn-secondary">{% trans "Next" %}</a>
     {% endif %}
   </nav>
+  {% endif %}
   {% endif %}
 </div>
 {% endblock %}

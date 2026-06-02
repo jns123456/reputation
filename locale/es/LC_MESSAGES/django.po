@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 17:59+0000\n"
+"POT-Creation-Date: 2026-06-02 18:21+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1505,6 +1505,16 @@ msgstr "Ningún usuario coincide con «%(query)s»."
 msgid "Search users"
 msgstr "Buscar usuarios"
 
+msgid "Search"
+msgstr "Buscar"
+
+#| msgid "Show less"
+msgid "Show all"
+msgstr "Ver todos"
+
+msgid "Enter at least 2 characters, or an email address."
+msgstr "Introduce al menos 2 caracteres para buscar."
+
 msgid "pop"
 msgstr "pop"
 
@@ -1784,6 +1794,14 @@ msgid ""
 msgstr ""
 
 #, python-format
+#| msgid "%(counter)s forecast"
+#| msgid_plural "%(counter)s forecasts"
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] "%(counter)s resultado"
+msgstr[1] "%(counter)s resultados"
+
+#, python-format
 msgid "%(count)s people"
 msgstr "%(count)s personas"
 
@@ -1803,12 +1821,6 @@ msgid ""
 "Search by name, @username, email, pseudonym, or bio. We also surface similar"
 " accounts when the match is close."
 msgstr ""
-
-msgid "Search"
-msgstr "Buscar"
-
-msgid "Enter at least 2 characters, or an email address."
-msgstr "Introduce al menos 2 caracteres para buscar."
 
 msgid "Start typing to find people on PredictStamp."
 msgstr "Empieza a escribir para encontrar personas en PredictStamp."

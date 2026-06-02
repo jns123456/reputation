@@ -451,23 +451,8 @@ def profile_edit(request):
 
 def user_search(request):
     query = request.GET.get("q", "").strip()
-    search_ready = is_valid_user_search_query(query)
-    results = search_user_matches(query=query) if search_ready else None
-    following_ids = (
-        set(get_following_ids(request.user)) if request.user.is_authenticated else set()
-    )
-    return render(
-        request,
-        "accounts/user_search.html",
-        {
-            "search_query": query,
-            "search_ready": search_ready,
-            "users": results.users if results else [],
-            "exact_users": results.exact_users if results else [],
-            "similar_users": results.similar_users if results else [],
-            "following_ids": following_ids,
-        },
-    )
+    params = {"q": query} if query else {}
+    return redirect(f"{reverse('accounts:user_list')}?{urlencode(params)}" if params else reverse("accounts:user_list"))
 
 
 def user_search_partial(request):
@@ -488,6 +473,28 @@ def user_search_partial(request):
 
 
 def user_list(request):
+    query = request.GET.get("q", "").strip()
+    search_ready = is_valid_user_search_query(query)
+    following_ids = (
+        set(get_following_ids(request.user)) if request.user.is_authenticated else set()
+    )
+
+    if query:
+        results = search_user_matches(query=query) if search_ready else None
+        return render(
+            request,
+            "accounts/user_list.html",
+            {
+                "search_query": query,
+                "search_ready": search_ready,
+                "users": results.users if results else [],
+                "exact_users": results.exact_users if results else [],
+                "similar_users": results.similar_users if results else [],
+                "following_ids": following_ids,
+                "is_searching": True,
+            },
+        )
+
     try:
         offset = max(0, int(request.GET.get("offset", 0)))
     except (TypeError, ValueError):
@@ -497,9 +504,6 @@ def user_list(request):
     total_count = count_browsable_users()
     next_offset = offset + BROWSABLE_USERS_PAGE_SIZE
     prev_offset = max(0, offset - BROWSABLE_USERS_PAGE_SIZE)
-    following_ids = (
-        set(get_following_ids(request.user)) if request.user.is_authenticated else set()
-    )
 
     return render(
         request,
@@ -513,6 +517,8 @@ def user_list(request):
             "next_offset": next_offset,
             "prev_offset": prev_offset,
             "following_ids": following_ids,
+            "search_query": "",
+            "is_searching": False,
         },
     )
 

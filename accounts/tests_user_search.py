@@ -101,27 +101,32 @@ class UserSearchViewTests(TestCase):
         )
         self.client = Client()
 
-    def test_user_search_page_renders(self):
+    def test_user_search_redirects_to_user_list(self):
         response = self.client.get("/accounts/users/search/")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Find users")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/accounts/users/list/")
 
-    def test_user_search_page_finds_user(self):
+    def test_user_search_redirects_with_query(self):
         response = self.client.get("/accounts/users/search/?q=Searchable")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/accounts/users/list/?q=Searchable")
+
+    def test_user_list_page_finds_user(self):
+        response = self.client.get("/accounts/users/list/?q=Searchable")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Searchable User")
 
-    def test_user_search_page_shows_follow_button(self):
+    def test_user_list_page_shows_follow_button(self):
         from conftest import create_user
 
         self.client.force_login(User.objects.get(username="searchable"))
         other = create_user("otheruser", display_name="Other User")
-        response = self.client.get("/accounts/users/search/?q=Other")
+        response = self.client.get("/accounts/users/list/?q=Other")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Follow")
         self.assertContains(response, f"follow-user-{other.username}")
 
-    def test_user_search_page_shows_unfollow_for_followed_user(self):
+    def test_user_list_page_shows_unfollow_for_followed_user(self):
         from accounts.follow_services import toggle_follow
         from conftest import create_user
 
@@ -129,14 +134,20 @@ class UserSearchViewTests(TestCase):
         target = User.objects.get(username="searchable")
         toggle_follow(follower=viewer, following_user=target)
         self.client.force_login(viewer)
-        response = self.client.get("/accounts/users/search/?q=Searchable")
+        response = self.client.get("/accounts/users/list/?q=Searchable")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Unfollow")
 
-    def test_user_search_page_finds_user_by_email(self):
-        response = self.client.get("/accounts/users/search/?q=searchable@example.com")
+    def test_user_list_page_finds_user_by_email(self):
+        response = self.client.get("/accounts/users/list/?q=searchable@example.com")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Searchable User")
+
+    def test_user_list_page_has_search_form(self):
+        response = self.client.get("/accounts/users/list/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="user-list-search-q"')
+        self.assertContains(response, "Search")
 
     def test_user_search_partial_returns_matches(self):
         response = self.client.get("/accounts/users/search/partial/?q=search")
@@ -159,9 +170,10 @@ class UserSearchViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "All users")
         self.assertContains(response, "Searchable User")
+        self.assertNotContains(response, "Search users →")
 
-    def test_user_search_page_has_view_list_link(self):
-        response = self.client.get("/accounts/users/search/")
+    def test_forum_sidebar_links_to_user_list(self):
+        response = self.client.get("/forum/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("accounts:user_list"))
 
@@ -174,8 +186,3 @@ class UserSearchViewTests(TestCase):
         )
         response = self.client.get("/accounts/users/list/")
         self.assertNotContains(response, "Ghost List")
-
-    def test_forum_sidebar_includes_user_search(self):
-        response = self.client.get("/forum/")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Search users")

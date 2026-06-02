@@ -69,7 +69,7 @@
       {% include "accounts/partials/follow_button.html" %}
 
       {% if user.is_authenticated %}
-      <form method="get" action="{% url 'accounts:user_search' %}" class="pr-profile-search">
+      <form method="get" action="{% url 'accounts:user_list' %}" class="pr-profile-search">
         <i data-lucide="search" class="pr-profile-search-icon" stroke-width="2" aria-hidden="true"></i>
         <input type="search"
                name="q"
