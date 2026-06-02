@@ -257,3 +257,19 @@ def build_soccer_match_raw(event: dict, *, normalized: dict) -> dict:
 
 
 build_world_cup_match_raw = build_soccer_match_raw
+
+
+def ordered_soccer_probability_items(market) -> list[tuple[str, float]]:
+    """Return (label, probability) pairs in home → draw → away order."""
+    probs = getattr(market, "current_probability", None) or {}
+    if not probs:
+        return []
+
+    team_a = getattr(market, "match_team_a", "") or ""
+    team_b = getattr(market, "match_team_b", "") or ""
+    if team_a and team_b:
+        labels = [team_a, DRAW_OUTCOME_LABEL, team_b]
+    else:
+        labels = getattr(market, "outcome_labels", None) or list(probs.keys())
+
+    return [(label, probs[label]) for label in labels if label in probs]

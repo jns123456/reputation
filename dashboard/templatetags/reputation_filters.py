@@ -177,6 +177,14 @@ def _sorted_probability_items(market):
 
 
 @register.filter
+def soccer_match_probability_items(market):
+    """3-way soccer outcomes in home → draw → away order."""
+    from integrations.polymarket.soccer_matches import ordered_soccer_probability_items
+
+    return ordered_soccer_probability_items(market)
+
+
+@register.filter
 def probability_items_sorted(market):
     """Outcomes sorted by highest current probability first."""
     return _sorted_probability_items(market)

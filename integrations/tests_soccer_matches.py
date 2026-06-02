@@ -186,6 +186,27 @@ class SoccerMatchNormalizationTests(TestCase):
         self.assertEqual(raw_market["moneyline_markets"]["Colombia"]["yes_token_id"], "token-col")
         self.assertEqual(raw_market["moneyline_markets"][DRAW_OUTCOME_LABEL]["yes_token_id"], "token-draw")
 
+    def test_ordered_soccer_probability_items_home_draw_away(self):
+        from integrations.polymarket.soccer_matches import ordered_soccer_probability_items
+
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT)
+        raw_market = build_world_cup_match_raw(COLOMBIA_VS_COSTA_RICA_EVENT, normalized=normalized)
+        market, _ = import_market_from_normalized(
+            normalized,
+            raw_market=raw_market,
+            raw_event=COLOMBIA_VS_COSTA_RICA_EVENT,
+        )
+        # Simulate scrambled JSON key order (as seen in some stored records).
+        market.current_probability = {
+            DRAW_OUTCOME_LABEL: 0.11,
+            "Costa Rica": 0.05,
+            "Colombia": 0.86,
+        }
+        self.assertEqual(
+            [label for label, _prob in ordered_soccer_probability_items(market)],
+            ["Colombia", DRAW_OUTCOME_LABEL, "Costa Rica"],
+        )
+
 
 class SyncWorldCupMatchMarketsTests(TestCase):
     @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)

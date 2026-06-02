@@ -48,6 +48,12 @@ class ForecastForm(forms.ModelForm):
     def _outcome_labels(self):
         if not self.market:
             return ["Yes", "No"]
+        if self.market.is_soccer_match:
+            from integrations.polymarket.soccer_matches import ordered_soccer_probability_items
+
+            items = ordered_soccer_probability_items(self.market)
+            if len(items) >= 2:
+                return [label for label, _prob in items]
         labels = self.market.outcome_labels
         if len(labels) >= 2:
             return labels
