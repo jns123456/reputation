@@ -20,6 +20,11 @@ from phase2_i18n_fixes import (
     PHASE2_PLURAL_FIXES,
 )
 from phase3_i18n_fixes import PHASE3_FIXES, PHASE3_PLURAL_FIXES
+from proof_i18n_fixes import (
+    PROOF_I18N_BLOCK_FIXES,
+    PROOF_I18N_FIXES,
+    PROOF_I18N_PLURAL_FIXES,
+)
 
 PO_PATH = Path(__file__).resolve().parent.parent / "locale" / "es" / "LC_MESSAGES" / "django.po"
 
@@ -29,11 +34,16 @@ FIXES: dict[str, str] = {
     **PHASE2_FIXES,
     **PHASE3_FIXES,
     **ACHIEVEMENTS_I18N_FIXES,
+    **PROOF_I18N_FIXES,
 }
 PLURAL_FIXES: dict[str, tuple[str, str]] = {
     **PHASE1_PLURAL_FIXES,
     **PHASE2_PLURAL_FIXES,
     **PHASE3_PLURAL_FIXES,
+    **PROOF_I18N_PLURAL_FIXES,
+}
+BLOCK_FIXES: dict[str, str] = {
+    **PROOF_I18N_BLOCK_FIXES,
 }
 
 # msgid -> natural Spanish (preserve %(placeholders)s)
@@ -420,6 +430,13 @@ def apply_fixes() -> tuple[int, int, int]:
 
         if entry.msgid in FIXES:
             entry.msgstr = FIXES[entry.msgid]
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+            updated += 1
+            continue
+
+        if entry.msgid in BLOCK_FIXES:
+            entry.msgstr = BLOCK_FIXES[entry.msgid]
             if "fuzzy" in entry.flags:
                 entry.flags.remove("fuzzy")
             updated += 1

@@ -493,6 +493,8 @@ Shared mobile styles live in `static/css/proofrep-ui.css`. Reuse `.pr-*` compone
 - **Mobile-first Tailwind:** write base classes for phones, add `sm:`/`md:`/`lg:` for larger screens.
 - Touch-friendly action partials: use `.pr-action-bar` / `.pr-touch-target` patterns from `proofrep-ui.css`.
 - Keep templates readable; extract partials for reuse.
+- **Bilingual UI (mandatory):** all user-visible copy uses `{% trans %}` / `{% blocktrans %}` (never raw English in shipped templates). Do **not** nest `{% url %}`, `{% trans %}`, or other block tags inside `{% blocktrans %}` — split the sentence instead.
+- **Ship Spanish with the feature:** after adding/changing strings run `./scripts/sync_spanish_i18n.sh` (or `makemessages -l es` → `python3 scripts/complete_spanish_i18n.py` → `compilemessages`), add new msgids to the appropriate `scripts/*_i18n_fixes.py`, and add a render test with `LANGUAGE_CODE='es'` or `HTTP_ACCEPT_LANGUAGE='es'`.
 
 ### Testing
 
@@ -605,6 +607,7 @@ Before making any change, an AI agent **must**:
 9. **Keep changes minimal** — smallest correct diff; do not refactor unrelated code.
 10. **Match existing conventions** — naming, layering, template patterns, test style.
 11. **Consult and update §18** — read recorded lessons before acting; append or prune entries when something durable was learned or became obsolete.
+12. **If templates or user-facing labels changed:** run `./scripts/sync_spanish_i18n.sh`, commit `locale/es/LC_MESSAGES/django.po` (+ `.mo` if tracked), and verify Spanish in tests — untranslated msgids fall back to English in production.
 
 ### Decision Checklist
 
@@ -620,7 +623,7 @@ Before making any change, an AI agent **must**:
 □ If it touches agents/MCP: is access authenticated, scoped, rate-limited, and audit-logged (§15–§17)?
 □ Do MCP tools call existing services/selectors instead of duplicating logic (§17)?
 □ Are new write paths feature-flagged and dry-run-capable (§17)?
-```
+□ If user-facing copy changed: Spanish synced (`sync_spanish_i18n.sh`) + es render test?
 
 ---
 
@@ -867,7 +870,7 @@ When editing §18, **delete or merge** stale lines — do not only append. Prefe
 [2026-05] integration — Heroku `config:set VAPID_PUBLIC_KEY` from raw `vapid --applicationServerKey` stdout includes `Application Server Key = ` prefix and breaks browser subscribe; store only the base64url key (script `setup_heroku_engagement.sh` uses `sed`; `get_vapid_public_key()` strips as fallback).
 [2026-05] testing — `manage.py test` uses LocMem cache (`_RUNNING_TESTS` in settings) so Redis need not run locally; `create_user()` defaults `onboarding_completed=True` to satisfy `ProfileSetupRequiredMiddleware`. With a real `RESEND_API_KEY` in `.env`, email tests hit the live API (403). `_RUNNING_TESTS` now forces locmem `EMAIL_BACKEND`, blanks `RESEND_API_KEY`, and sets a sentinel `EMAIL_HOST` (runner forces `DEBUG=False`, killing the console fallback) so `mail.outbox` works.
 [2026-05] domain — Scheduled re-engagement emails (daily digest, streak-risk, market-resolving reminders) are OFF by default via `DIGEST_EMAILS_ENABLED` / `STREAK_REMINDER_EMAILS_ENABLED` / `MARKET_RESOLVING_REMINDERS_ENABLED` (each gates both its Celery Beat entry and its send function/task). Transactional (verification) and per-`Notification` emails are unaffected; the latter stay opt-in via `NotificationPreference.notify_email` (default False).
-[2026-05] workflow — Spanish/English UI uses Django i18n (`LocaleMiddleware`, `{% trans %}`, `locale/es/`); navbar language switch uses flags via `i18n_extras.language_flag` (🇺🇸 en, 🇪🇸 es); after new strings run `makemessages -l es` then `compilemessages`; optional `scripts/fill_spanish_po.py` / `apply_manual_spanish.py` for bulk PO updates.
+[2026-05] workflow — Spanish/English UI uses Django i18n (`LocaleMiddleware`, `{% trans %}`, `locale/es/`); navbar language switch uses flags via `i18n_extras.language_flag` (🇺🇸 en, 🇪🇸 es). **Ship checklist for every new page/partial:** wrap copy → `./scripts/sync_spanish_i18n.sh` → add msgids to `scripts/*_i18n_fixes.py` → Spanish render test. Missing `msgstr` = English leak in es locale (e.g. `/proof/` hero). Never put `{% url %}`/`{% trans %}` inside `{% blocktrans %}`.
 [2026-05] architecture — Profile avatars are DiceBear identicons (`AVATAR_DICEBEAR_*`, seed=`user.pk`); no `ImageField` or S3 for avatars. Pulse images still use `USE_S3_MEDIA` on Heroku.
 [2026-05] workflow — baselining pre-existing test failures: chaining `git stash` + run + `git stash pop` with `;`/`&&` can leave changes trapped across multiple stashes (a failed pop is silent) — risking lost work. Safest: `git stash push -u -m msg -- <explicit paths>`, verify `git stash list`/`git status`, run suite, then `git stash pop` as a SEPARATE step. Known env/pre-existing failures (NOT regressions): view POSTs returning 302 (forum/forecasts vote/repost/bookmark — onboarding/email gating middlewares with non-onboarded users), and market-import/translation tests that hit live HTTP (`SSL: CERTIFICATE_VERIFY_FAILED`).
 [2026-05] architecture — Auth0 login is additive (Authlib OIDC) alongside local auth: client lazily registered in `accounts/auth0.py` (only when `AUTH0_ENABLED`); `get_or_create_user_from_auth0` maps by `auth0_sub`→email→new user, trusts Auth0 `email_verified` (stamps `email_verified_at`), sets unusable password; `/accounts/auth0/` is exempt from both gating middlewares; logout does Auth0 federated logout when session has `auth0_id_token`.
@@ -889,4 +892,4 @@ When editing §18, **delete or merge** stale lines — do not only append. Prefe
 
 ---
 
-*Last updated: 2026-05-30. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*
+*Last updated: 2026-06-01. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*

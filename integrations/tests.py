@@ -1,5 +1,5 @@
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from accounts.models import User
@@ -438,6 +438,16 @@ class DailyAttestationBatchTests(TestCase):
         self.assertTrue(is_historical_batch(batch))
         self.assertEqual(batch.record_count, 1)
         self.assertTrue(verify_batch_signature(batch))
+
+
+class ProofPageI18nTests(TestCase):
+    @override_settings(LANGUAGE_CODE="es")
+    def test_proof_index_renders_in_spanish(self):
+        response = self.client.get("/proof/", HTTP_ACCEPT_LANGUAGE="es")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Reputación que puedes")
+        self.assertContains(response, "llevar contigo")
+        self.assertNotContains(response, "Reputation you can")
 
 
 class EasOnchainConfigTests(TestCase):
