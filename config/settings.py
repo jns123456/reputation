@@ -417,6 +417,8 @@ MARKET_STALE_SYNC_INTERVAL_MINUTES = env.int("MARKET_STALE_SYNC_INTERVAL_MINUTES
 ENABLE_EMBEDDED_MARKET_SYNC = env.bool("ENABLE_EMBEDDED_MARKET_SYNC", default=False)
 # 0 = import every available World Cup group-stage match from Polymarket.
 WORLD_CUP_MATCH_SYNC_LIMIT = env.int("WORLD_CUP_MATCH_SYNC_LIMIT", default=0)
+# 0 = import every available H2H match (tennis, NBA, etc.) from Polymarket.
+H2H_MATCH_SYNC_LIMIT = env.int("H2H_MATCH_SYNC_LIMIT", default=0)
 MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=10)
 MARKET_SYNC_STALE_BATCH_SIZE = env.int("MARKET_SYNC_STALE_BATCH_SIZE", default=100)
 MARKET_TRANSLATION_ENABLED = env.bool("MARKET_TRANSLATION_ENABLED", default=False)

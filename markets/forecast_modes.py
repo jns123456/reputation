@@ -12,6 +12,10 @@ from integrations.polymarket.constants import (
     MULTI_OUTCOME_EVENT_KIND,
     POLYMARKET_EVENT_EXTERNAL_PREFIX,
 )
+from integrations.polymarket.head_to_head_matches import (
+    H2H_MATCH_EXTERNAL_PREFIX,
+    H2H_MATCH_KIND,
+)
 
 
 class ForecastMode:
@@ -29,6 +33,8 @@ def get_forecast_mode(market) -> str:
 
     if external_id.startswith(WORLD_CUP_MATCH_EXTERNAL_PREFIX):
         return ForecastMode.PICK_ONE
+    if external_id.startswith(H2H_MATCH_EXTERNAL_PREFIX):
+        return ForecastMode.PICK_ONE
     if external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX):
         return ForecastMode.MULTI_BINARY
 
@@ -38,7 +44,7 @@ def get_forecast_mode(market) -> str:
         raw = getattr(market, "polymarket_raw", None) or {}
     market_kind = raw.get("market_kind", "")
 
-    if market_kind == "soccer_match_3way":
+    if market_kind in {"soccer_match_3way", H2H_MATCH_KIND}:
         return ForecastMode.PICK_ONE
     if market_kind == MULTI_OUTCOME_EVENT_KIND:
         return ForecastMode.MULTI_BINARY

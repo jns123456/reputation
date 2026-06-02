@@ -56,6 +56,14 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
             logger.exception("World Cup match sync failed for category %s", category.slug)
         return summary
 
+    if category.slug == "sports":
+        try:
+            from integrations.services import sync_h2h_match_markets
+
+            summary.absorb(sync_h2h_match_markets())
+        except Exception:
+            logger.exception("H2H sports match sync failed for category %s", category.slug)
+
     if category.polymarket_tag:
         try:
             summary.absorb(

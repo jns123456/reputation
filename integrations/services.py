@@ -195,10 +195,14 @@ def refresh_market_from_polymarket(market):
     if market.source != Market.Source.POLYMARKET or not market.external_id:
         return market
 
+    from integrations.polymarket.head_to_head_matches import is_h2h_match_market
     from integrations.polymarket.soccer_matches import is_world_cup_match_market
 
     if is_world_cup_match_market(market):
         return refresh_world_cup_match_market(market)
+
+    if is_h2h_match_market(market):
+        return refresh_h2h_match_market(market)
 
     if (
         market.external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX)
@@ -272,6 +276,10 @@ def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
     from integrations.polymarket.client import (
         normalize_polymarket_event_record,
     )
+    from integrations.polymarket.head_to_head_matches import (
+        build_h2h_match_raw,
+        normalize_h2h_match_event,
+    )
     from integrations.polymarket.soccer_matches import (
         build_soccer_match_raw,
         normalize_soccer_match_event,
@@ -296,22 +304,30 @@ def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
             event_slug = (raw_event or {}).get("slug")
 
             if event_slug and event_slug not in seen_composite_slugs:
-                composite = normalize_polymarket_event_record(
+                h2h = normalize_h2h_match_event(
                     raw_event,
-                    default_category=raw.get("category") or "",
+                    default_category=raw.get("category") or "Sports",
                 )
                 soccer = normalize_soccer_match_event(
                     raw_event,
                     default_category=raw.get("category") or "Sports",
                 )
-                if composite:
+                composite = normalize_polymarket_event_record(
+                    raw_event,
+                    default_category=raw.get("category") or "",
+                )
+                if h2h:
                     seen_composite_slugs.add(event_slug)
-                    raw_market = build_polymarket_event_raw(raw_event, normalized=composite)
-                    normalized = composite
+                    raw_market = build_h2h_match_raw(raw_event, normalized=h2h)
+                    normalized = h2h
                 elif soccer:
                     seen_composite_slugs.add(event_slug)
                     raw_market = build_soccer_match_raw(raw_event, normalized=soccer)
                     normalized = soccer
+                elif composite:
+                    seen_composite_slugs.add(event_slug)
+                    raw_market = build_polymarket_event_raw(raw_event, normalized=composite)
+                    normalized = composite
                 else:
                     normalized = normalize_polymarket_record(raw)
                     raw_market = raw
@@ -377,6 +393,15 @@ def _import_polymarket_market_pairs(client, pairs, *, default_category=""):
                 from integrations.polymarket.soccer_matches import normalize_soccer_match_event
 
                 normalized = normalize_soccer_match_event(
+                    raw_event or {},
+                    default_category=default_category or raw_market.get("category") or "",
+                )
+                if not normalized:
+                    continue
+            elif raw_market.get("market_kind") == "h2h_match_2way":
+                from integrations.polymarket.head_to_head_matches import normalize_h2h_match_event
+
+                normalized = normalize_h2h_match_event(
                     raw_event or {},
                     default_category=default_category or raw_market.get("category") or "",
                 )
@@ -506,6 +531,92 @@ def sync_world_cup_match_markets(*, limit=None):
             errors.append({"raw_id": event.get("slug"), "error": str(exc)})
 
     return {"imported": imported, "errors": errors}
+
+
+def _h2h_sync_limit(limit):
+    from django.conf import settings
+
+    if limit is None:
+        limit = getattr(settings, "H2H_MATCH_SYNC_LIMIT", 0)
+    if not limit:
+        return None
+    return limit
+
+
+def sync_h2h_match_markets(*, limit=None, tag_slugs=None):
+    """Fetch Polymarket H2H match events (tennis, NBA, etc.) and upsert as pick-one markets."""
+    from integrations.polymarket.head_to_head_matches import (
+        build_h2h_match_raw,
+        normalize_h2h_match_event,
+    )
+
+    client = PolymarketClient()
+    events = client.fetch_h2h_match_events(limit=_h2h_sync_limit(limit), tag_slugs=tag_slugs)
+
+    imported = []
+    errors = []
+
+    for event in events:
+        try:
+            normalized = normalize_h2h_match_event(event, default_category="Sports")
+            if not normalized:
+                continue
+            raw_market = build_h2h_match_raw(event, normalized=normalized)
+            market, created = import_market_from_normalized(
+                normalized,
+                raw_market=raw_market,
+                raw_event=event,
+            )
+            imported.append({"market": market, "created": created, "raw": event})
+        except Exception as exc:
+            logger.exception("Failed to import H2H match event: %s", event.get("slug"))
+            errors.append({"raw_id": event.get("slug"), "error": str(exc)})
+
+    return {"imported": imported, "errors": errors}
+
+
+def refresh_h2h_match_market(market):
+    """Refresh a composite head-to-head match market from its Polymarket event."""
+    from integrations.polymarket.head_to_head_matches import (
+        H2H_MATCH_EXTERNAL_PREFIX,
+        build_h2h_match_raw,
+        is_h2h_match_market,
+        normalize_h2h_match_event,
+    )
+
+    if not is_h2h_match_market(market):
+        return market
+
+    client = PolymarketClient()
+    slug = market.polymarket_slug
+    if not slug and market.external_id.startswith(H2H_MATCH_EXTERNAL_PREFIX):
+        slug = market.external_id.removeprefix(H2H_MATCH_EXTERNAL_PREFIX)
+    if not slug:
+        return market
+
+    try:
+        event = client.fetch_event_by_slug(slug)
+    except Exception:
+        logger.exception("Failed to fetch H2H match event %s", slug)
+        return market
+
+    if not event:
+        return market
+
+    normalized = normalize_h2h_match_event(
+        event,
+        default_category=market.category or "Sports",
+    )
+    if not normalized:
+        return market
+
+    raw_market = build_h2h_match_raw(event, normalized=normalized)
+    market, _ = import_market_from_normalized(
+        normalized,
+        raw_market=raw_market,
+        raw_event=event,
+    )
+    return market
 
 
 def refresh_world_cup_match_market(market):

@@ -382,6 +382,20 @@ class CategoryBrowseViewTests(TestCase):
         self.assertEqual(page_two.status_code, 200)
         self.assertContains(page_two, "Next")
 
+    def test_basketball_tag_alone_does_not_match_nba_browse_area(self):
+        from markets.browse_areas import compute_browse_area_slugs
+
+        market = Market.objects.create(
+            external_id="area-euro-bball",
+            title="CB Murcia vs. Barcelona",
+            slug="murcia-barcelona",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "basketball"}, {"slug": "liga-endesa"}]},
+        )
+        market.refresh_from_db()
+        self.assertNotIn("nba", market.browse_area_slugs)
+        self.assertEqual(compute_browse_area_slugs(market), [])
+
     def test_browse_area_summaries(self):
         Market.objects.create(
             external_id="area-nba",

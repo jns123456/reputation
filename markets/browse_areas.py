@@ -24,7 +24,14 @@ BROWSE_AREAS: tuple[BrowseArea, ...] = (
         "sports",
     ),
     BrowseArea("soccer", "Soccer", frozenset({"soccer", "ucl", "champions-league"}), "sports"),
-    BrowseArea("nba", "NBA", frozenset({"nba", "nba-finals", "nba-champion", "2026-nba-playoffs", "basketball"}), "sports"),
+    # Do not use the generic ``basketball`` tag — Polymarket tags Euroleague/NCAA/etc.
+    # with ``basketball`` only, which would flood the NBA browse area.
+    BrowseArea(
+        "nba",
+        "NBA",
+        frozenset({"nba", "nba-finals", "nba-champion", "2026-nba-playoffs"}),
+        "sports",
+    ),
     BrowseArea("mlb", "MLB", frozenset({"mlb", "baseball"}), "sports"),
     BrowseArea("nhl", "NHL", frozenset({"nhl", "hockey", "stanley-cup", "2026-nhl-playoffs"}), "sports"),
     BrowseArea("nfl", "NFL", frozenset({"nfl", "ncaa", "american-football", "football"}), "sports"),

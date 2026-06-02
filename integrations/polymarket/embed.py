@@ -9,6 +9,7 @@ from integrations.polymarket.chart import (
     build_polymarket_multi_outcome_chart_payload,
     build_polymarket_soccer_match_chart_payload,
 )
+from integrations.polymarket.head_to_head_matches import is_h2h_match_market
 from integrations.polymarket.soccer_matches import is_world_cup_match_market
 from integrations.polymarket.urls import (
     get_polymarket_embed_slug,
@@ -93,7 +94,11 @@ def build_polymarket_embed_context(market):
                 "chart_data": chart_data,
             }
 
-    if is_world_cup_match_market(market) or is_multi_outcome_event_market(market):
+    if (
+        is_world_cup_match_market(market)
+        or is_h2h_match_market(market)
+        or is_multi_outcome_event_market(market)
+    ):
         build_url = build_polymarket_sports_embed_url
     else:
         build_url = build_polymarket_embed_url

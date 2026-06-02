@@ -9,6 +9,10 @@ from integrations.polymarket.constants import (
     POLYMARKET_EVENT_EXTERNAL_PREFIX,
 )
 from integrations.polymarket.client import is_multi_outcome_event_record
+from integrations.polymarket.head_to_head_matches import (
+    H2H_MATCH_EXTERNAL_PREFIX,
+    is_h2h_match_event,
+)
 from integrations.polymarket.soccer_matches import (
     MONEYLINE_TYPE,
     WORLD_CUP_MATCH_EXTERNAL_PREFIX,
@@ -44,6 +48,8 @@ def composite_external_id_for_event(event: dict) -> str | None:
         return None
     if is_soccer_match_event(event):
         return f"{WORLD_CUP_MATCH_EXTERNAL_PREFIX}{slug}"
+    if is_h2h_match_event(event):
+        return f"{H2H_MATCH_EXTERNAL_PREFIX}{slug}"
     if is_multi_outcome_event_record(event, min_outcomes=2, require_open=False):
         return f"{POLYMARKET_EVENT_EXTERNAL_PREFIX}{slug}"
     return None
@@ -52,6 +58,7 @@ def composite_external_id_for_event(event: dict) -> str | None:
 def _candidate_composite_external_ids(event_slug: str) -> tuple[str, ...]:
     return (
         f"{WORLD_CUP_MATCH_EXTERNAL_PREFIX}{event_slug}",
+        f"{H2H_MATCH_EXTERNAL_PREFIX}{event_slug}",
         f"{POLYMARKET_EVENT_EXTERNAL_PREFIX}{event_slug}",
     )
 
@@ -64,14 +71,16 @@ def is_orphan_polymarket_leg(market) -> bool:
         return False
 
     external_id = market.external_id or ""
-    if external_id.startswith(WORLD_CUP_MATCH_EXTERNAL_PREFIX) or external_id.startswith(
-        POLYMARKET_EVENT_EXTERNAL_PREFIX
+    if (
+        external_id.startswith(WORLD_CUP_MATCH_EXTERNAL_PREFIX)
+        or external_id.startswith(H2H_MATCH_EXTERNAL_PREFIX)
+        or external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX)
     ):
         return False
 
     raw = market.polymarket_raw or {}
     market_kind = raw.get("market_kind")
-    if market_kind in {MULTI_OUTCOME_EVENT_KIND, "soccer_match_3way"}:
+    if market_kind in {MULTI_OUTCOME_EVENT_KIND, "soccer_match_3way", "h2h_match_2way"}:
         return False
 
     if raw.get("groupItemTitle"):
@@ -92,8 +101,10 @@ def orphan_polymarket_leg_q() -> Q:
     Prefer ``exclude_orphan_polymarket_legs`` for list querysets: ``exclude(Q)`` on
     JSON lookups is not NULL-safe on SQLite (drops standalone Polymarket rows).
     """
-    composite_external = Q(external_id__startswith=WORLD_CUP_MATCH_EXTERNAL_PREFIX) | Q(
-        external_id__startswith=POLYMARKET_EVENT_EXTERNAL_PREFIX
+    composite_external = (
+        Q(external_id__startswith=WORLD_CUP_MATCH_EXTERNAL_PREFIX)
+        | Q(external_id__startswith=H2H_MATCH_EXTERNAL_PREFIX)
+        | Q(external_id__startswith=POLYMARKET_EVENT_EXTERNAL_PREFIX)
     )
 
     grouped_leg = (
@@ -115,7 +126,8 @@ def _orphan_polymarket_leg_sql() -> str:
     from django.db import connection
 
     composite_guard = (
-        "external_id NOT LIKE 'wc-match:%%' AND external_id NOT LIKE 'pm-event:%%'"
+        "external_id NOT LIKE 'wc-match:%%' AND external_id NOT LIKE 'h2h-match:%%' "
+        "AND external_id NOT LIKE 'pm-event:%%'"
     )
     if connection.vendor == "postgresql":
         payload = """
