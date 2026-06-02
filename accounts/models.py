@@ -151,6 +151,10 @@ class UserProfile(models.Model):
 
     class Meta:
         ordering = ["-reputation_score"]
+        indexes = [
+            models.Index(fields=["-reputation_score"]),
+            models.Index(fields=["-popularity_score"]),
+        ]
 
     def __str__(self):
         return f"Profile: {self.user.username}"

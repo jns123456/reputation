@@ -34,6 +34,7 @@ from accounts.follow_selectors import (
 )
 from accounts.follow_services import toggle_follow
 from accounts import abuse_services
+from accounts.http_utils import enforce_ip_rate_limit, safe_redirect_to_referer
 from accounts.write_guard import write_guard_user_message
 from accounts.forms import NotificationPreferenceForm, ProfileEditForm, ProfileSetupForm, SignUpForm
 from accounts.models import Bookmark, User
@@ -57,6 +58,17 @@ from accounts.user_search_selectors import (
 
 class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
+
+    def post(self, request, *args, **kwargs):
+        try:
+            enforce_ip_rate_limit(request=request, action="login")
+        except abuse_services.RateLimitExceeded:
+            messages.error(
+                request,
+                _("Too many login attempts. Please wait a few minutes and try again."),
+            )
+            return self.render_to_response(self.get_context_data())
+        return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
         if user_requires_email_verification(self.request.user):
@@ -150,6 +162,18 @@ def signup(request):
             return redirect("accounts:profile_setup")
         return redirect("accounts:profile", username=request.user.username)
     if request.method == "POST":
+        try:
+            enforce_ip_rate_limit(request=request, action="registration")
+        except abuse_services.RateLimitExceeded:
+            messages.error(
+                request,
+                _(
+                    "Too many sign-up attempts from this connection. "
+                    "Please try again later."
+                ),
+            )
+            form = SignUpForm(request.POST)
+            return render(request, "accounts/signup.html", _signup_context(request, form))
         form = SignUpForm(request.POST)
         human_check = _run_signup_human_verification(request)
         if not human_check["allowed"]:
@@ -600,7 +624,7 @@ def bookmark_toggle(request):
             bookmark_template,
             bookmark_context,
         )
-    return redirect(request.META.get("HTTP_REFERER", "/"))
+    return safe_redirect_to_referer(request, fallback="/")
 
 
 @login_required

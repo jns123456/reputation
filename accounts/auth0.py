@@ -77,11 +77,13 @@ def get_or_create_user_from_auth0(userinfo: dict) -> User:
 
     Resolution order:
       1. Existing account already linked by ``auth0_sub``.
-      2. Existing local account matched by email (links it to Auth0).
+      2. Existing local account with a **verified** email (same address).
       3. A brand-new account (no usable password; onboarding still required).
 
-    When Auth0 reports the email as verified we trust it and stamp
-    ``email_verified_at`` so the local verification gate is satisfied.
+    Unverified local signups with the same email are **not** linked — that would
+    let an attacker pre-register ``victim@example.com`` and capture the victim's
+    Auth0 login. When Auth0 reports the email as verified we trust it and stamp
+    ``email_verified_at`` on new or legitimately linked accounts.
     """
     sub = (userinfo.get("sub") or "").strip()
     email = (userinfo.get("email") or "").strip().lower()
@@ -94,7 +96,7 @@ def get_or_create_user_from_auth0(userinfo: dict) -> User:
 
     if email:
         existing = User.objects.filter(email__iexact=email).first()
-        if existing is not None:
+        if existing is not None and existing.email_verified_at is not None:
             update_fields = []
             if sub and existing.auth0_sub != sub:
                 existing.auth0_sub = sub

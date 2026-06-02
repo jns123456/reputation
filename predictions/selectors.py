@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db.models import Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 
@@ -6,6 +7,10 @@ from integrations.models import OffchainAttestation
 from markets.models import Market
 from predictions.models import Prediction
 from reputation.display_ranking import DISPLAY_RANK_ORM_FIELDS
+
+
+FORECASTS_MARKET_OPTIONS_CACHE_KEY = "forecasts_market_options_v1"
+FORECASTS_MARKET_OPTIONS_CACHE_SECONDS = 120
 
 
 def _prediction_vote_count_subquery(value):
@@ -228,9 +233,23 @@ def get_forecasts_feed(
 
 
 def get_forecasts_market_options():
+    cached = cache.get(FORECASTS_MARKET_OPTIONS_CACHE_KEY)
+    if cached is not None:
+        return cached
+
     market_ids = (
         Prediction.objects.exclude(status=Prediction.Status.VOID)
         .values_list("market_id", flat=True)
         .distinct()
     )
-    return Market.objects.filter(id__in=market_ids).order_by("title")
+    options = list(Market.objects.filter(id__in=market_ids).order_by("title"))
+    cache.set(
+        FORECASTS_MARKET_OPTIONS_CACHE_KEY,
+        options,
+        FORECASTS_MARKET_OPTIONS_CACHE_SECONDS,
+    )
+    return options
+
+
+def clear_forecasts_market_options_cache():
+    cache.delete(FORECASTS_MARKET_OPTIONS_CACHE_KEY)

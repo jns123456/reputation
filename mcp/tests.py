@@ -1,10 +1,14 @@
 """Tests for the MCP layer: tokens, scopes, dry-run, rate limits, audit log (§17)."""
 
 import json
+from datetime import timedelta
+from io import StringIO
 
 from django.core.cache import cache
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.agent_services import scopes_for_trust_level
 from accounts.models import AIAgentProfile, User
@@ -217,3 +221,46 @@ class HttpEndpointTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json()["name"], "predictstamp-mcp")
         self.assertFalse(resp.json()["writes_enabled"])
+
+
+class PruneMcpLogsCommandTests(TestCase):
+    def test_prune_mcp_logs_deletes_only_old_rows(self):
+        user = create_user(username="prune")
+        token, _ = create_token(user=user, name="prune", scopes=["markets:read"])
+        old_log = McpToolCallLog.objects.create(
+            token=token,
+            user=user,
+            tool_name="search_markets",
+            status=McpToolCallLog.Status.OK,
+        )
+        McpToolCallLog.objects.filter(pk=old_log.pk).update(
+            created_at=timezone.now() - timedelta(days=120)
+        )
+        recent_log = McpToolCallLog.objects.create(
+            token=token,
+            user=user,
+            tool_name="get_market",
+            status=McpToolCallLog.Status.OK,
+        )
+
+        call_command("prune_mcp_logs", "--days", "90", stdout=StringIO())
+
+        self.assertFalse(McpToolCallLog.objects.filter(pk=old_log.pk).exists())
+        self.assertTrue(McpToolCallLog.objects.filter(pk=recent_log.pk).exists())
+
+    def test_prune_mcp_logs_dry_run_does_not_delete(self):
+        user = create_user(username="prune-dry")
+        token, _ = create_token(user=user, name="prune", scopes=["markets:read"])
+        log = McpToolCallLog.objects.create(
+            token=token,
+            user=user,
+            tool_name="search_markets",
+            status=McpToolCallLog.Status.OK,
+        )
+        McpToolCallLog.objects.filter(pk=log.pk).update(
+            created_at=timezone.now() - timedelta(days=120)
+        )
+
+        call_command("prune_mcp_logs", "--days", "90", "--dry-run", stdout=StringIO())
+
+        self.assertTrue(McpToolCallLog.objects.filter(pk=log.pk).exists())

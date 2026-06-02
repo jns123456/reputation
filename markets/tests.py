@@ -7,6 +7,7 @@ from django.utils import timezone
 from markets.ending_filters import ending_window_hours, normalize_ending_filter
 from markets.models import Market
 from markets.selectors import get_market_categories, get_markets_for_display
+from markets.sort_options import SORT_LIQUIDITY
 
 
 class MarketExpirationCountdownTests(TestCase):
@@ -271,3 +272,51 @@ class MarketCategoryFilterTests(TestCase):
         page_two = self.client.get(reverse("markets:all"), {"status": "open", "page": 2})
         self.assertEqual(page_two.status_code, 200)
         self.assertContains(page_two, "Next")
+
+    def test_liquidity_sort_uses_single_denormalized_query(self):
+        for index, liquidity in enumerate((100, 900, 300)):
+            Market.objects.create(
+                external_id=f"liq-sort-{index}",
+                title=f"Liquidity market {index}",
+                slug=f"liquidity-market-{index}",
+                status=Market.Status.OPEN,
+                liquidity_total=float(liquidity),
+                volume_total=float(index),
+                polymarket_raw={"liquidityNum": 1},
+            )
+
+        with self.assertNumQueries(1):
+            markets = get_markets_for_display(sort=SORT_LIQUIDITY, limit=3)
+
+        self.assertEqual(
+            [market.slug for market in markets],
+            ["liquidity-market-1", "liquidity-market-2", "liquidity-market-0"],
+        )
+
+
+class MarketApiTests(TestCase):
+    def setUp(self):
+        self.market = Market.objects.create(
+            external_id="api-raw",
+            title="API market",
+            slug="api-market",
+            status=Market.Status.OPEN,
+            polymarket_raw={"large": "payload"},
+            polymarket_event_raw={"event": "payload"},
+        )
+
+    def test_detail_omits_raw_payload_by_default(self):
+        response = self.client.get(reverse("market-detail", kwargs={"slug": self.market.slug}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("polymarket_raw", response.json())
+        self.assertNotIn("polymarket_event_raw", response.json())
+
+    def test_detail_includes_raw_payload_when_requested(self):
+        response = self.client.get(
+            reverse("market-detail", kwargs={"slug": self.market.slug}),
+            {"include_raw": "1"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["polymarket_raw"], {"large": "payload"})

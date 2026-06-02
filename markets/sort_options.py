@@ -73,6 +73,13 @@ def market_volume(market) -> float:
     return market_volume_for_sort(market)
 
 
+def market_liquidity(market) -> float:
+    """Total liquidity — prefers denormalized DB field for card/list querysets."""
+    from markets.display_metadata import market_liquidity_for_sort
+
+    return market_liquidity_for_sort(market)
+
+
 def sort_markets(markets, *, sort: str):
     sort = normalize_sort_filter(sort)
     if not sort:
@@ -93,6 +100,9 @@ def sort_markets(markets, *, sort: str):
 
     return sorted(
         markets,
-        key=lambda market: (market_sort_metric(market, sort), market.updated_at),
+        key=lambda market: (
+            market_liquidity(market) if sort == SORT_LIQUIDITY else market_sort_metric(market, sort),
+            market.updated_at,
+        ),
         reverse=True,
     )

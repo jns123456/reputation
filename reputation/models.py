@@ -26,6 +26,10 @@ class ReputationEvent(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["prediction", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.event_type}: {self.points_delta} for {self.user.username}"
@@ -81,6 +85,12 @@ class PopularityEvent(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["prediction", "-created_at"]),
+            models.Index(fields=["comment", "-created_at"]),
+            models.Index(fields=["pulse_post", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.event_type}: {self.points_delta} for {self.user.username}"

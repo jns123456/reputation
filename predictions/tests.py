@@ -2,6 +2,7 @@ from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -14,6 +15,8 @@ from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import (
     attach_user_forecasts_to_markets,
+    clear_forecasts_market_options_cache,
+    get_forecasts_market_options,
     get_market_predictions,
     get_user_active_prediction,
     get_user_closed_prediction_history,
@@ -882,3 +885,38 @@ class ExpiredMarketGuardTests(TestCase):
 
         self.assertFalse(market.is_in_play)
         self.assertTrue(market.is_forecastable)
+
+
+class ForecastMarketOptionsCacheTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(username="options-user", password="pass")
+        self.market = Market.objects.create(
+            external_id="options-market",
+            title="Options market",
+            slug="options-market",
+            status=Market.Status.OPEN,
+        )
+        Prediction.objects.create(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+            probability_at_prediction_time={"Yes": 0.5},
+        )
+
+    def test_forecasts_market_options_are_cached(self):
+        with self.assertNumQueries(1):
+            options = get_forecasts_market_options()
+        self.assertEqual([market.slug for market in options], ["options-market"])
+
+        with self.assertNumQueries(0):
+            cached_options = get_forecasts_market_options()
+        self.assertEqual([market.slug for market in cached_options], ["options-market"])
+
+    def test_forecasts_market_options_cache_can_be_cleared(self):
+        get_forecasts_market_options()
+
+        clear_forecasts_market_options_cache()
+
+        with self.assertNumQueries(1):
+            get_forecasts_market_options()

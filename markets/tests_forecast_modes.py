@@ -39,6 +39,36 @@ class ForecastModeTests(SimpleTestCase):
 
 
 class ForecastModeFilterTests(TestCase):
+    def test_deferred_event_market_does_not_fetch_raw_payload(self):
+        market = Market.objects.create(
+            external_id="pm-event:test-winner",
+            title="Winner",
+            slug="winner",
+            outcomes=[{"label": "Alice"}, {"label": "Bob"}],
+            polymarket_raw={"market_kind": MULTI_OUTCOME_EVENT_KIND},
+        )
+        market = Market.objects.defer("polymarket_raw", "polymarket_event_raw").get(pk=market.pk)
+
+        with self.assertNumQueries(0):
+            mode = get_forecast_mode(market)
+
+        self.assertEqual(mode, ForecastMode.MULTI_BINARY)
+
+    def test_deferred_world_cup_match_does_not_fetch_raw_payload(self):
+        market = Market.objects.create(
+            external_id="wc-match:test-match",
+            title="A vs B",
+            slug="test-match",
+            outcomes=[{"label": "A"}, {"label": "Draw"}, {"label": "B"}],
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+        )
+        market = Market.objects.defer("polymarket_raw", "polymarket_event_raw").get(pk=market.pk)
+
+        with self.assertNumQueries(0):
+            mode = get_forecast_mode(market)
+
+        self.assertEqual(mode, ForecastMode.PICK_ONE)
+
     def test_is_multi_outcome_filter_matches_multi_binary_only(self):
         from dashboard.templatetags.reputation_filters import is_multi_outcome_market, is_pick_one_market
 

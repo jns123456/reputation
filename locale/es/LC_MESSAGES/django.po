@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-01 21:05+0000\n"
+"POT-Creation-Date: 2026-06-02 13:03+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -234,14 +234,12 @@ msgstr ""
 msgid "A person using AI assistance"
 msgstr ""
 
-#| msgid "Humans + AI agents"
 msgid "An autonomous AI agent"
 msgstr "Humanos + agentes de IA"
 
 msgid "An AI agent run by an organization"
 msgstr ""
 
-#| msgid "Create account"
 msgid "Who operates this account?"
 msgstr "Crear cuenta"
 
@@ -250,14 +248,12 @@ msgid ""
 "account is against the rules."
 msgstr ""
 
-#| msgid "Operator"
 msgid "Agent operator"
 msgstr "Operador"
 
 msgid "The person or organization accountable for this agent."
 msgstr ""
 
-#| msgid "What you can do:"
 msgid "What does this agent do?"
 msgstr "Qué puedes hacer:"
 
@@ -458,6 +454,11 @@ msgstr "pronóstico"
 msgid "content"
 msgstr "contenido"
 
+msgid "Too many login attempts. Please wait a few minutes and try again."
+msgstr ""
+"Demasiados intentos de inicio de sesión. Espera unos minutos e inténtalo de "
+"nuevo."
+
 msgid "Auth0 sign-in is not available right now."
 msgstr "El inicio de sesión con Auth0 no está disponible ahora."
 
@@ -468,7 +469,11 @@ msgstr ""
 msgid "Auth0 did not return a valid profile."
 msgstr "Auth0 no devolvió un perfil válido."
 
-#| msgid "We couldn't complete the Auth0 sign-in. Please try again."
+msgid ""
+"Too many sign-up attempts from this connection. Please try again later."
+msgstr ""
+"Demasiados intentos de registro desde esta conexión. Inténtalo más tarde."
+
 msgid "We could not verify you are human. Please try again."
 msgstr ""
 "No pudimos completar el inicio de sesión con Auth0. Inténtalo de nuevo."
@@ -523,7 +528,6 @@ msgid "You are now following %(name)s."
 msgstr ""
 
 #, python-format
-#| msgid "All %(name)s"
 msgid "You unfollowed %(name)s."
 msgstr "Todos los %(name)s"
 
@@ -587,14 +591,12 @@ msgstr "Puede seleccionar como máximo %(max)s eventos."
 msgid "You cannot challenge yourself."
 msgstr "No puedes desafiarte a ti mismo."
 
-#| msgid "You can only delete your own posts."
 msgid "You can only use your own saved groups."
 msgstr "Solo puedes eliminar tus propias publicaciones."
 
 msgid "The selected group has no members you can currently challenge."
 msgstr ""
 
-#| msgid "Select at least one user to challenge."
 msgid "Select at least one user to challenge, or choose a saved group."
 msgstr "Seleccione al menos un usuario para desafiar."
 
@@ -677,36 +679,28 @@ msgstr "Solo se pueden cancelar los desafíos pendientes."
 msgid "Enter a group name."
 msgstr ""
 
-#| msgid "You cannot challenge yourself."
 msgid "You cannot add yourself to a group."
 msgstr "No puedes desafiarte a ti mismo."
 
 #, python-format
-#| msgid ""
-#| "You and @%(username)s must follow each other to challenge them."
 msgid "You and @%(username)s must follow each other to add them to a group."
 msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
 
-#| msgid "You already declined this challenge."
 msgid "You already have a group with this name."
 msgstr "Ya has rechazado este desafío."
 
-#| msgid "Challenge created. Waiting for opponents to accept."
 msgid "Group challenge created. It starts when the first member accepts."
 msgstr "Desafío creado. A la espera de que los oponentes acepten."
 
 msgid "Challenge created. Waiting for opponents to accept."
 msgstr "Desafío creado. A la espera de que los oponentes acepten."
 
-#| msgid "Profile updated."
 msgid "Group created."
 msgstr "Perfil actualizado."
 
-#| msgid "Profile updated."
 msgid "Group updated."
 msgstr "Perfil actualizado."
 
-#| msgid "Completed"
 msgid "Group deleted."
 msgstr "Completado"
 
@@ -897,7 +891,6 @@ msgstr "La más reciente"
 msgid "Ending soon"
 msgstr "Termina pronto"
 
-#| msgid "Your name"
 msgid "Token name"
 msgstr "Tu nombre"
 
@@ -973,11 +966,9 @@ msgstr ""
 msgid "Cannot predict on a closed or resolved market."
 msgstr "No puedes pronosticar en un mercado cerrado o resuelto."
 
-#| msgid "This market is no longer open for forecasts."
 msgid "This event has already started and is no longer accepting forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#| msgid "This market is no longer open for forecasts."
 msgid "This market has already closed and is no longer accepting forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
@@ -1311,8 +1302,6 @@ msgstr "Conseguida el %(date)s"
 msgid "Locked"
 msgstr "Bloqueada"
 
-#| msgid "follower"
-#| msgid_plural "followers"
 msgid "Unfollow"
 msgstr "Seguir"
 
@@ -1456,7 +1445,6 @@ msgstr ""
 msgid "Find users"
 msgstr "Buscar usuarios"
 
-#| msgid "View post"
 msgid "View list"
 msgstr "Ver publicación"
 
@@ -1467,19 +1455,15 @@ msgid "Alerts"
 msgstr "Alertas"
 
 #, python-format
-#| msgid "%(name)s sub-areas"
 msgid "%(name)s badge"
 msgstr "Subáreas de %(name)s"
 
-#| msgid "Reactions"
 msgid "Decorations"
 msgstr "Reacciones"
 
-#| msgid "Earned %(date)s"
 msgid "Earned badges"
 msgstr "Conseguida el %(date)s"
 
-#| msgid "All categories"
 msgid "All badges"
 msgstr "Todos los mercados"
 
@@ -1489,7 +1473,6 @@ msgstr "Cuenta verificada"
 msgid "User search results"
 msgstr "Resultados de búsqueda de usuarios"
 
-#| msgid "Verified account"
 msgid "Similar accounts"
 msgstr "Cuenta verificada"
 
@@ -1507,45 +1490,35 @@ msgstr "Buscar usuarios"
 msgid "pop"
 msgstr "pop"
 
-#| msgid "open match"
-#| msgid_plural "open matches"
 msgid "Top matches"
 msgstr "partido abierto"
 
 #, python-format
-#| msgid "All %(name)s"
 msgid "Followers · %(name)s"
 msgstr "Todos los %(name)s"
 
 #, python-format
-#| msgid "All %(name)s"
 msgid "Following · %(name)s"
 msgstr "Todos los %(name)s"
 
 #, python-format
-#| msgid "%(name)s on %(title)s"
 msgid "%(name)s's profile"
 msgstr "%(name)s sobre %(title)s"
 
-#| msgid "Following"
 msgid "Follow lists"
 msgstr "Siguiendo"
 
-#| msgid "started following you"
 msgid "No one is following you yet."
 msgstr "ha empezado a seguirte"
 
 #, python-format
-#| msgid "No mutual followers yet."
 msgid "No followers yet for %(name)s."
 msgstr "Todavía no hay seguidores mutuos."
 
-#| msgid "You have not voted on any challenge events yet."
 msgid "You are not following anyone yet."
 msgstr "Aún no has votado en ningún evento del desafío."
 
 #, python-format
-#| msgid "%(actor)s started following you"
 msgid "%(name)s is not following anyone yet."
 msgstr "%(actor)s empezó a seguirte"
 
@@ -1682,7 +1655,6 @@ msgstr "Historial"
 msgid "View all"
 msgstr "Ver todo"
 
-#| msgid "No match forecasts yet."
 msgid "No closed forecasts yet."
 msgstr "Aún no hay pronósticos de partidos."
 
@@ -1729,7 +1701,6 @@ msgstr ""
 "Paso 2 de 2 — elige tu identidad pública, previsualiza cómo te verán otros y"
 " opcionalmente solicita verificación. Puedes cambiarlo en ajustes."
 
-#| msgid "Account"
 msgid "Account type"
 msgstr "Cuenta"
 
@@ -1773,7 +1744,6 @@ msgstr "Continuar"
 msgid "Already have an account?"
 msgstr "Crear cuenta"
 
-#| msgid "All statuses"
 msgid "All users"
 msgstr "Todos los mercados"
 
@@ -1785,12 +1755,9 @@ msgid ""
 msgstr ""
 
 #, python-format
-#| msgid "%(counter)s like"
-#| msgid_plural "%(counter)s likes"
 msgid "%(count)s people"
 msgstr "%(counter)s voto positivo"
 
-#| msgid "No predictions yet."
 msgid "No users to show yet."
 msgstr "Aún no hay clasificaciones."
 
@@ -1811,7 +1778,6 @@ msgstr ""
 msgid "Search"
 msgstr "Buscar"
 
-#| msgid "Enter at least 2 characters to search."
 msgid "Enter at least 2 characters, or an email address."
 msgstr "Introduce al menos 2 caracteres para buscar."
 
@@ -2014,11 +1980,9 @@ msgstr "Selecciona al menos un seguidor mutuo."
 msgid "Name (optional)"
 msgstr "Nombre (opcional)"
 
-#| msgid "Create a"
 msgid "Saved groups"
 msgstr "Crea un"
 
-#| msgid "Challenges"
 msgid "Manage groups"
 msgstr "Desafíos"
 
@@ -2039,7 +2003,6 @@ msgstr ""
 msgid "Opponents"
 msgstr "Oponentes"
 
-#| msgid "No mutual followers yet."
 msgid "Or pick individual mutual followers below."
 msgstr "Todavía no hay seguidores mutuos."
 
@@ -2107,7 +2070,6 @@ msgid "Created by @%(username)s"
 msgstr "Creado por @%(username)s"
 
 #, python-format
-#| msgid "Your name"
 msgid "Group: %(group_name)s"
 msgstr "Tu nombre"
 
@@ -2653,11 +2615,9 @@ msgstr "Todos los %(name)s"
 msgid "Categories"
 msgstr "Categorías"
 
-#| msgid "Tap a category to browse open forecasts."
 msgid "Tap a category to browse open events."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#| msgid "No open events available."
 msgid "No categories available yet."
 msgstr "No hay eventos disponibles."
 
@@ -2665,7 +2625,6 @@ msgid "All categories"
 msgstr "Todos los mercados"
 
 #, python-format
-#| msgid "Forecasts in %(area)s · %(category_name)s"
 msgid "%(area)s · %(category_name)s"
 msgstr "Pronósticos en %(area)s · %(category_name)s"
 
@@ -2680,7 +2639,6 @@ msgid "Filter by topic"
 msgstr "Filtrar por tema"
 
 #, python-format
-#| msgid "Trending in %(name)s"
 msgid "Events in %(name)s"
 msgstr "Tendencias en %(name)s"
 
@@ -3373,7 +3331,6 @@ msgstr ""
 msgid "Super Admin"
 msgstr ""
 
-#| msgid "Reactions"
 msgid "Moderation"
 msgstr "Reacciones"
 
@@ -3957,7 +3914,6 @@ msgid ""
 "Aprueba para otorgar el badge verificado o rechaza para cerrar la solicitud."
 msgstr ""
 
-#| msgid "Combined"
 msgid "Joined"
 msgstr "Combinado"
 
@@ -4723,18 +4679,15 @@ msgstr "Batch diario"
 msgid "Batch"
 msgstr "Batch"
 
-#| msgid "Full history"
 msgid "Full history Merkle batch"
 msgstr "Batch Merkle de historial completo"
 
 msgid "Daily Merkle batch"
 msgstr "Batch Merkle diario"
 
-#| msgid "Unrealized reputation"
 msgid "All realized reputation"
 msgstr "Toda la reputación realizada"
 
-#| msgid "Signature valid"
 msgid "Batch signature valid"
 msgstr "Firma del batch válida"
 
@@ -4769,19 +4722,15 @@ msgstr "Raíz del batch anterior"
 msgid "On-chain transaction"
 msgstr "Transacción on-chain"
 
-#| msgid "Forecast closed"
 msgid "Position closes"
 msgstr "Cierres de posición"
 
-#| msgid "No likes yet."
 msgid "Early exit"
 msgstr "Salida anticipada"
 
-#| msgid "Resolved outcome"
 msgid "Resolved correct"
 msgstr "Resuelto correcto"
 
-#| msgid "Resolved outcome"
 msgid "Resolved incorrect"
 msgstr "Resuelto incorrecto"
 
@@ -4797,9 +4746,6 @@ msgstr "Hash hoja"
 msgid "Merkle proof valid"
 msgstr "Prueba Merkle válida"
 
-#| msgid ""
-#| "Top predictors in this category — scores sum into the global reputation "
-#| "leaderboard."
 msgid ""
 "No realized positions in this window — quiet day on the reputation ledger."
 msgstr ""
@@ -4815,7 +4761,6 @@ msgstr "Registro verificado"
 msgid "Ethereum Attestation Service · Base"
 msgstr "Ethereum Attestation Service · Base"
 
-#| msgid "Reputation Points"
 msgid "Reputation you can"
 msgstr "Reputación que puedes"
 
@@ -4833,7 +4778,6 @@ msgstr ""
 "criptográfico diario en <strong class=\"text-slate-800 dark:text-"
 "white\">Base</strong>. No hype. No likes. Criterio, firmado."
 
-#| msgid "About"
 msgid "About EAS"
 msgstr "Sobre EAS"
 
@@ -4894,7 +4838,6 @@ msgstr ""
 "Los pronósticos resueltos y cerrados anticipadamente son inmutables. El "
 "historial no se reescribe en silencio."
 
-#| msgid "Forecast on the events"
 msgid "Before the event ends"
 msgstr "Antes de que termine el evento"
 
@@ -4928,7 +4871,6 @@ msgstr "Ejemplo"
 msgid "Forecast Yes at 40%% market odds. Exit at 55%% before resolution."
 msgstr ""
 
-#| msgid "Reputation"
 msgid "reputation"
 msgstr "reputación"
 
@@ -4972,8 +4914,6 @@ msgstr ""
 "Cada evento recibe una attestation off-chain al instante — no necesitás "
 "wallet."
 
-#| msgid "open match"
-#| msgid_plural "open matches"
 msgid "We batch"
 msgstr "Agrupamos"
 
@@ -5067,12 +5007,10 @@ msgstr "Haz tu pronóstico y construye tu reputación."
 msgid "Forecasts are closed because this event has already started."
 msgstr ""
 
-#| msgid "This market is no longer open for forecasts."
 msgid ""
 "Forecasts are closed because this market is no longer accepting forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#| msgid "Choose a valid outcome for this market."
 msgid "Forecasts are closed for this market."
 msgstr "Elija un resultado válido para este mercado."
 
@@ -5092,7 +5030,6 @@ msgstr ""
 msgid "No forecasts yet. Be the first to place one."
 msgstr "Aún no hay pronósticos. Sé el primero en publicar uno."
 
-#| msgid "No forecast yet — place one to score"
 msgid "No forecasts were placed before this market closed."
 msgstr "Sin pronóstico — publica uno para sumar puntos"
 
@@ -5143,9 +5080,6 @@ msgstr[1] ""
 "          "
 
 #, python-format
-#| msgid ""
-#| "No open events match “%(search_query)s”. Try another keyword or browse by "
-#| "category below."
 msgid ""
 "No open events match “%(search_query)s”. Try another keyword or browse by "
 "category above."
@@ -5204,18 +5138,15 @@ msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
 "--categories</code> o importa desde el admin."
 
-#| msgid "to place your forecast on this market."
 msgid "You have a forecast on this market"
 msgstr "para publicar tu pronóstico en este mercado."
 
-#| msgid "Forecast closed"
 msgid "Forecasts closed"
 msgstr "Pronóstico cerrado"
 
 msgid "vs"
 msgstr ""
 
-#| msgid "All outcomes"
 msgid "Top outcomes"
 msgstr "Todos los resultados"
 
@@ -5229,7 +5160,6 @@ msgid "View on Polymarket"
 msgstr "Ver en Polymarket ↗"
 
 #, python-format
-#| msgid "Closes %(date)s"
 msgid "Closed %(date)s"
 msgstr "Cierra el %(date)s"
 
@@ -5318,18 +5248,15 @@ msgstr ""
 msgid "This is the only time the full token is shown. Store it securely."
 msgstr ""
 
-#| msgid "No open events available."
 msgid "No scopes available for this account yet."
 msgstr "No hay eventos disponibles."
 
 msgid "Write scopes only appear once your trust level allows them."
 msgstr ""
 
-#| msgid "Create a"
 msgid "Create token"
 msgstr "Crea un"
 
-#| msgid "Your open"
 msgid "Your tokens"
 msgstr "Tus"
 
@@ -5348,7 +5275,6 @@ msgstr ""
 msgid "Revoke"
 msgstr ""
 
-#| msgid "No likes yet."
 msgid "No tokens yet."
 msgstr "Aún no hay likes."
 
@@ -5446,8 +5372,6 @@ msgstr ""
 "Elige tu resultado abajo. Las cuotas Polymarket en vivo se capturan al "
 "enviar."
 
-#| msgid ""
-#| "Share the argument behind your pick — visible in the public forecast feed."
 msgid "Share the argument behind your pick, then post your forecast."
 msgstr ""
 "Comparte el argumento detrás de tu elección — visible en el feed público de "
@@ -5597,11 +5521,9 @@ msgstr "Entrada"
 msgid "Now"
 msgstr "Ahora"
 
-#| msgid "Resolution"
 msgid "At resolution"
 msgstr "Resolución"
 
-#| msgid "incorrect"
 msgid "if correct"
 msgstr "incorrecto"
 
@@ -5623,12 +5545,10 @@ msgid "Browse markets to open a new reputation-only forecast."
 msgstr "Explora mercados para abrir un nuevo pronóstico solo de reputación."
 
 #, python-format
-#| msgid "Closes %(close_date)s"
 msgid "Closed %(closed_date)s"
 msgstr "Cierra %(close_date)s"
 
 #, python-format
-#| msgid "Earned %(date)s"
 msgid "Entered %(entry_date)s"
 msgstr "Conseguida el %(date)s"
 
@@ -5640,7 +5560,6 @@ msgstr "hace %(timesince)s"
 msgid "Closes %(close_date)s"
 msgstr "Cierra %(close_date)s"
 
-#| msgid "Exited"
 msgid "Exit"
 msgstr "Salido"
 
@@ -5674,62 +5593,48 @@ msgstr "Reputación %(points)s al cerrar"
 msgid "Reputation %(points)s earned"
 msgstr "Reputación %(points)s ganados"
 
-#| msgid "Verification pending"
 msgid "Scoring pending"
 msgstr "Verificación pendiente"
 
 msgid "← Back to market"
 msgstr "← Volver al mercado"
 
-#| msgid "Close forecast"
 msgid "Closed forecasts"
 msgstr "Cerrar pronóstico"
 
 msgid "Resolved predictions and positions you entered and exited early."
 msgstr ""
 
-#| msgid "Exited"
 msgid "Exited early"
 msgstr "Salido"
 
-#| msgid "Close forecast"
 msgid "Closed before resolution"
 msgstr "Cerrar pronóstico"
 
-#| msgid "Based on resolved forecasts only."
 msgid "Based on resolved forecasts only"
 msgstr "Solo cuenta pronósticos ya resueltos."
 
-#| msgid "Open"
 msgid "Open now"
 msgstr "Abierto"
 
-#| msgid "open forecast"
-#| msgid_plural "open forecasts"
 msgid "View open forecasts"
 msgstr "pronóstico abierto"
 
-#| msgid "Open positions"
 msgid "Active positions"
 msgstr "Posiciones abiertas"
 
-#| msgid "track record"
 msgid "Filter track record"
 msgstr "historial"
 
-#| msgid "All outcomes"
 msgid "All closed"
 msgstr "Todos los resultados"
 
-#| msgid "Based on resolved forecasts only."
 msgid "No resolved forecasts yet."
 msgstr "Solo cuenta pronósticos ya resueltos."
 
-#| msgid "No likes yet."
 msgid "No early exits yet."
 msgstr "Aún no hay likes."
 
-#| msgid "Make your first forecast"
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
 

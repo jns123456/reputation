@@ -20,6 +20,7 @@ from markets.models import Market
 from predictions.models import Prediction
 
 from accounts import abuse_services
+from accounts.http_utils import safe_redirect_to_referer
 from accounts.write_guard import ContentRejected, write_guard_user_message
 
 
@@ -286,7 +287,7 @@ def vote_view(request):
             },
         )
 
-    return redirect(request.META.get("HTTP_REFERER", "/"))
+    return safe_redirect_to_referer(request, fallback="/")
 
 
 def vote_reactions_sheet(request):

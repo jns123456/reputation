@@ -1,6 +1,5 @@
 from collections import Counter, defaultdict
 
-from django.conf import settings
 from django.db import connection
 from django.db.models import Count, F, Q
 from django.utils import timezone
@@ -463,6 +462,7 @@ def apply_markets_list_ordering(qs, *, sort="", ending_within_hours=None):
     """Apply list-page sort order to a filtered markets queryset."""
     from markets.sort_options import (
         SORT_ENDING_SOON,
+        SORT_LIQUIDITY,
         SORT_NEWEST,
         SORT_TRENDING,
         SORT_VOLUME,
@@ -478,6 +478,8 @@ def apply_markets_list_ordering(qs, *, sort="", ending_within_hours=None):
         return qs.order_by("-created_at", "-updated_at")
     if normalized_sort == SORT_TRENDING:
         return qs.order_by("-volume_24h", "-updated_at")
+    if normalized_sort == SORT_LIQUIDITY:
+        return qs.order_by("-liquidity_total", "-volume_total", "-updated_at")
     if normalized_sort == SORT_ENDING_SOON:
         return qs.order_by(F("close_date").asc(nulls_last=True), "-volume_total")
     if normalized_sort:
@@ -496,11 +498,7 @@ def get_markets_for_display(
     limit=100,
 ):
     """Return markets for list UI with consistent filters and ordering."""
-    from markets.sort_options import (
-        SORT_LIQUIDITY,
-        normalize_sort_filter,
-        sort_markets,
-    )
+    from markets.sort_options import normalize_sort_filter
 
     # An "ending soon" window only makes sense for live (open) markets.
     if ending_within_hours:
@@ -514,9 +512,6 @@ def get_markets_for_display(
         ending_within_hours=ending_within_hours,
     )
     normalized_sort = normalize_sort_filter(sort)
-    sorted_limit = limit
-    if normalized_sort:
-        sorted_limit = max(limit, getattr(settings, "MARKET_LIST_SORTED_LIMIT", 200))
 
     if ending_within_hours and not normalized_sort:
         return list(
@@ -527,16 +522,12 @@ def get_markets_for_display(
             )[:limit]
         )
 
-    if normalized_sort == SORT_LIQUIDITY:
-        candidates = list(qs.order_by("-volume_total", "-updated_at")[:sorted_limit])
-        return sort_markets(candidates, sort=normalized_sort)[:limit]
-
     return list(
         apply_markets_list_ordering(
             qs,
             sort=sort,
             ending_within_hours=ending_within_hours,
-        )[:sorted_limit if normalized_sort else limit]
+        )[:limit]
     )
 
 

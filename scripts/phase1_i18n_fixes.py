@@ -17,6 +17,12 @@ PHASE1_FIXES: dict[str, str] = {
         "No pudimos completar el inicio de sesión con Auth0. Inténtalo de nuevo."
     ),
     "Auth0 did not return a valid profile.": "Auth0 no devolvió un perfil válido.",
+    "Too many login attempts. Please wait a few minutes and try again.": (
+        "Demasiados intentos de inicio de sesión. Espera unos minutos e inténtalo de nuevo."
+    ),
+    "Too many sign-up attempts from this connection. Please try again later.": (
+        "Demasiados intentos de registro desde esta conexión. Inténtalo más tarde."
+    ),
     # --- Notifications / email subjects ---
     "%(actor)s published a new forecast": "%(actor)s publicó un pronóstico nuevo",
     "%(actor)s started following you": "%(actor)s empezó a seguirte",

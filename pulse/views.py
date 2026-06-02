@@ -7,6 +7,8 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 
+from accounts.http_utils import safe_redirect_to_referer
+
 from pulse.context import get_forum_page_context
 from pulse.forms import CommentForm, PostForm
 from pulse.models import Post
@@ -262,7 +264,7 @@ def repost_toggle(request, post_id):
             )
         return render(request, "forum/partials/repost_response.html", context)
 
-    return redirect(request.META.get("HTTP_REFERER", "/forum/"))
+    return safe_redirect_to_referer(request, fallback=reverse("forum:feed"))
 
 
 @login_required

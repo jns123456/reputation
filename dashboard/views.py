@@ -21,7 +21,6 @@ from markets.selectors import (
     get_browse_area_summaries,
     get_category_browse_queryset,
     get_category_summaries,
-    get_open_markets_by_canonical_category,
     get_world_cup_match_markets_queryset,
 )
 from predictions.selectors import attach_user_forecasts_to_markets
@@ -101,11 +100,10 @@ def category_browse(request, slug):
         slug == "sports" and area_slug == WORLD_CUP_GAMES_AREA_SLUG and not search
     )
 
-    total_markets = get_open_markets_by_canonical_category(category_slug=slug)
-    area_summaries = get_browse_area_summaries(category_slug=slug, markets=total_markets)
-
     active_area = get_browse_area(slug, area_slug) if area_slug else None
     browse_base_url = reverse("dashboard:category_browse", kwargs={"slug": slug})
+    area_summaries = get_browse_area_summaries(category_slug=slug)
+    total_market_count = get_category_browse_queryset(category_slug=slug).count()
 
     if world_cup_match_layout:
         browse_qs = get_world_cup_match_markets_queryset(source=source)
@@ -135,7 +133,7 @@ def category_browse(request, slug):
             "category": category,
             "markets": markets,
             "market_count": market_count,
-            "total_market_count": len(total_markets),
+            "total_market_count": total_market_count,
             "page_obj": page_obj,
             "pagination_query": _pagination_extra_query(request),
             "area_summaries": area_summaries,

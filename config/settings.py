@@ -6,6 +6,8 @@ from pathlib import Path
 import environ
 import ssl
 
+from config.deploy_checks import validate_production_settings
+
 # ``manage.py test`` / pytest should not require a local Redis for Django cache.
 _RUNNING_TESTS = "test" in sys.argv or "pytest" in sys.argv[0]
 
@@ -433,6 +435,14 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "120/hour",
+        "user": "600/hour",
+    },
 }
 
 # --- Anti-abuse & human verification (AGENTS.md §16) -------------------------
@@ -555,3 +565,10 @@ POLYMARKET_EMBED_BORDER = env.bool("POLYMARKET_EMBED_BORDER", default=True)
 POLYMARKET_EMBED_CONTENT_WIDTH = env.int("POLYMARKET_EMBED_CONTENT_WIDTH", default=1200)
 POLYMARKET_EMBED_WIDTH = env("POLYMARKET_EMBED_WIDTH", default="100%")
 POLYMARKET_EMBED_HEIGHT = env.int("POLYMARKET_EMBED_HEIGHT", default=420)
+
+validate_production_settings(
+    debug=DEBUG,
+    secret_key=SECRET_KEY,
+    email_verification_dev_show_link=EMAIL_VERIFICATION_DEV_SHOW_LINK,
+    running_tests=_RUNNING_TESTS,
+)

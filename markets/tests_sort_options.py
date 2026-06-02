@@ -67,6 +67,8 @@ class SortMarketsTests(TestCase):
             slug="sort-low",
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 100, "volume24hr": 10},
+            volume_total=100,
+            volume_24h=10,
             created_at=now - timedelta(days=2),
         )
         self.high_volume = Market.objects.create(
@@ -75,6 +77,8 @@ class SortMarketsTests(TestCase):
             slug="sort-high",
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 5000, "volume24hr": 500},
+            volume_total=5000,
+            volume_24h=500,
             created_at=now - timedelta(days=1),
         )
         self.high_liquidity = Market.objects.create(
@@ -83,6 +87,8 @@ class SortMarketsTests(TestCase):
             slug="sort-liq",
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 200, "liquidityNum": 9000},
+            volume_total=200,
+            liquidity_total=9000,
             created_at=now,
         )
         self.ending_soon = Market.objects.create(
@@ -91,6 +97,7 @@ class SortMarketsTests(TestCase):
             slug="sort-soon",
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 50},
+            volume_total=50,
             close_date=now + timedelta(days=1),
             created_at=now - timedelta(days=3),
         )
@@ -140,6 +147,7 @@ class GetMarketsForDisplaySortTests(TestCase):
             source=Market.Source.POLYMARKET,
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 100},
+            volume_total=100,
         )
         Market.objects.create(
             external_id="display-poly-high",
@@ -148,6 +156,7 @@ class GetMarketsForDisplaySortTests(TestCase):
             source=Market.Source.POLYMARKET,
             status=Market.Status.OPEN,
             polymarket_raw={"volumeNum": 10000},
+            volume_total=10000,
         )
         ordered = get_markets_for_display(sort=SORT_VOLUME, limit=10)
         self.assertEqual(

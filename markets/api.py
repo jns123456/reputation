@@ -26,15 +26,23 @@ class MarketSerializer(serializers.ModelSerializer):
 
 
 class MarketDetailSerializer(MarketSerializer):
-    """Full market payload including raw Polymarket API responses."""
+    """Detail payload without large raw Polymarket API responses by default."""
 
     class Meta(MarketSerializer.Meta):
         fields = MarketSerializer.Meta.fields + (
             "polymarket_slug",
-            "polymarket_raw",
-            "polymarket_event_raw",
             "polymarket_synced_at",
             "updated_at",
+        )
+
+
+class MarketRawDetailSerializer(MarketDetailSerializer):
+    """Opt-in debug/integration payload including raw Polymarket responses."""
+
+    class Meta(MarketDetailSerializer.Meta):
+        fields = MarketDetailSerializer.Meta.fields + (
+            "polymarket_raw",
+            "polymarket_event_raw",
         )
 
 
@@ -45,6 +53,8 @@ class MarketViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_serializer_class(self):
         if self.action == "retrieve":
+            if self.request.query_params.get("include_raw") in {"1", "true", "yes"}:
+                return MarketRawDetailSerializer
             return MarketDetailSerializer
         return MarketSerializer
 

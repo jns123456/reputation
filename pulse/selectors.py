@@ -100,9 +100,10 @@ def build_poll_context(*, post, user, user_poll_votes=None):
     if user_poll_votes is None:
         user_poll_votes = get_user_poll_votes(user, [poll.id])
 
-    options = list(
-        _poll_options_queryset().filter(poll=poll),
-    )
+    if "options" in getattr(poll, "_prefetched_objects_cache", {}):
+        options = list(poll.options.all())
+    else:
+        options = list(_poll_options_queryset().filter(poll=poll))
     total_votes = sum(getattr(option, "vote_count", 0) for option in options)
     user_option_id = user_poll_votes.get(poll.id)
     is_author = user.is_authenticated and user.id == post.user_id

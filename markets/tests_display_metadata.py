@@ -2,6 +2,7 @@ from django.test import TestCase, override_settings
 
 from markets.display_metadata import (
     extract_card_image_url_from_market,
+    extract_liquidity_total_from_market,
     extract_volume_total_from_market,
     format_volume_label,
     sync_market_display_metadata,
@@ -25,6 +26,15 @@ class DisplayMetadataTests(TestCase):
         )
         self.assertEqual(extract_volume_total_from_market(market), 5000.0)
 
+    def test_extract_liquidity_from_polymarket_payloads(self):
+        market = Market(
+            external_id="meta-liq",
+            title="Liquidity test",
+            slug="liquidity-test",
+            polymarket_event_raw={"liquidity": 12000},
+        )
+        self.assertEqual(extract_liquidity_total_from_market(market), 12000.0)
+
     def test_extract_image_from_polymarket_raw(self):
         market = Market(
             external_id="meta-img",
@@ -42,11 +52,16 @@ class DisplayMetadataTests(TestCase):
             external_id="meta-sync",
             title="Sync test",
             slug="sync-test",
-            polymarket_raw={"volumeNum": 9000, "image": "https://example.com/sync.png"},
+            polymarket_raw={
+                "volumeNum": 9000,
+                "liquidityNum": 3000,
+                "image": "https://example.com/sync.png",
+            },
         )
         sync_market_display_metadata(market, save=True)
         market.refresh_from_db()
         self.assertEqual(market.volume_total, 9000.0)
+        self.assertEqual(market.liquidity_total, 3000.0)
         self.assertEqual(market.card_image_url, "https://example.com/sync.png")
 
     def test_image_url_uses_stored_field_without_raw_json(self):

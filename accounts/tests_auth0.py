@@ -38,12 +38,14 @@ class GetOrCreateUserFromAuth0Tests(TestCase):
         self.assertEqual(first.pk, again.pk)
         self.assertEqual(User.objects.count(), 1)
 
-    def test_links_existing_local_account_by_email(self):
+    def test_links_existing_local_account_by_email_when_verified(self):
         existing = User.objects.create_user(
             username="alice_local",
             email="alice@example.com",
             password="pw-not-relevant",
         )
+        existing.email_verified_at = timezone.now()
+        existing.save(update_fields=["email_verified_at"])
         self.assertEqual(existing.auth0_sub, "")
 
         linked = get_or_create_user_from_auth0(self._userinfo())
@@ -74,3 +76,18 @@ class GetOrCreateUserFromAuth0Tests(TestCase):
         linked = get_or_create_user_from_auth0(self._userinfo())
         linked.refresh_from_db()
         self.assertEqual(linked.email_verified_at, original)
+
+    def test_does_not_link_unverified_local_account_prevents_takeover(self):
+        squatter = User.objects.create_user(
+            username="squatter",
+            email="alice@example.com",
+            password="attacker-password",
+        )
+        self.assertIsNone(squatter.email_verified_at)
+
+        owner = get_or_create_user_from_auth0(self._userinfo())
+
+        self.assertNotEqual(owner.pk, squatter.pk)
+        self.assertEqual(owner.auth0_sub, "auth0|abc123")
+        self.assertIsNotNone(owner.email_verified_at)
+        self.assertEqual(User.objects.filter(email__iexact="alice@example.com").count(), 2)

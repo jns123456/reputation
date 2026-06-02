@@ -9,7 +9,7 @@ from integrations.attestation_services import (
     record_prediction_resolution_attestation_safely,
 )
 from predictions.models import Prediction
-from predictions.selectors import get_user_active_prediction
+from predictions.selectors import clear_forecasts_market_options_cache, get_user_active_prediction
 from reputation.services import apply_reputation_for_prediction, apply_reputation_for_prediction_exit
 
 
@@ -93,6 +93,7 @@ def create_prediction(*, user, market, predicted_outcome, predicted_direction=Pr
             apply_category_prediction_created(user, resolve_category_from_market(market))
 
             transaction.on_commit(lambda: record_prediction_claim_attestation_safely(prediction))
+            transaction.on_commit(clear_forecasts_market_options_cache)
     except IntegrityError as exc:
         if "unique_pending_prediction_per_user_market" in str(exc):
             raise ValueError(build_duplicate_forecast_error(user=user, market=market)) from exc

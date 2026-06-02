@@ -8,7 +8,10 @@ Polymarket uses several shapes; PredictStamp maps them to three modes:
   (e.g. "Who will win the nomination?" with per-candidate binaries).
 """
 
-from integrations.polymarket.constants import MULTI_OUTCOME_EVENT_KIND
+from integrations.polymarket.constants import (
+    MULTI_OUTCOME_EVENT_KIND,
+    POLYMARKET_EVENT_EXTERNAL_PREFIX,
+)
 
 
 class ForecastMode:
@@ -17,10 +20,23 @@ class ForecastMode:
     MULTI_BINARY = "multi_binary"
 
 
+WORLD_CUP_MATCH_EXTERNAL_PREFIX = "wc-match:"
+
+
 def get_forecast_mode(market) -> str:
-    raw = getattr(market, "polymarket_raw", None) or {}
-    market_kind = raw.get("market_kind", "")
+    external_id = getattr(market, "external_id", "") or ""
     labels = getattr(market, "outcome_labels", None) or []
+
+    if external_id.startswith(WORLD_CUP_MATCH_EXTERNAL_PREFIX):
+        return ForecastMode.PICK_ONE
+    if external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX):
+        return ForecastMode.MULTI_BINARY
+
+    deferred = getattr(market, "_card_payloads_deferred", None)
+    raw = {}
+    if not callable(deferred) or not deferred():
+        raw = getattr(market, "polymarket_raw", None) or {}
+    market_kind = raw.get("market_kind", "")
 
     if market_kind == "soccer_match_3way":
         return ForecastMode.PICK_ONE

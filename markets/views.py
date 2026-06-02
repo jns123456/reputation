@@ -33,7 +33,7 @@ from markets.selectors import (
     get_markets_list,
     normalize_category_filter,
 )
-from markets.sort_options import MARKET_SORT_CHOICES, SORT_LIQUIDITY, normalize_sort_filter, sort_markets
+from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
 from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction, attach_user_forecasts_to_markets
@@ -118,21 +118,12 @@ def market_list(request):
     )
     page_size = settings.MARKET_LIST_PAGE_SIZE
 
-    if sort == SORT_LIQUIDITY:
-        sorted_limit = max(
-            page_size,
-            getattr(settings, "MARKET_LIST_SORTED_LIMIT", 200),
-        )
-        candidates = list(qs.order_by("-volume_total", "-updated_at")[:sorted_limit])
-        ordered = sort_markets(candidates, sort=SORT_LIQUIDITY)
-        paginator = Paginator(ordered, page_size)
-    else:
-        qs = apply_markets_list_ordering(
-            qs,
-            sort=sort,
-            ending_within_hours=ending_hours,
-        )
-        paginator = Paginator(qs, page_size)
+    qs = apply_markets_list_ordering(
+        qs,
+        sort=sort,
+        ending_within_hours=ending_hours,
+    )
+    paginator = Paginator(qs, page_size)
 
     page_obj = paginator.get_page(request.GET.get("page"))
     markets = attach_user_forecasts_to_markets(request.user, list(page_obj.object_list))
