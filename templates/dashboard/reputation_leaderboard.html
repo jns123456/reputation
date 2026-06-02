@@ -1,8 +1,12 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}
 {% if category %}{% blocktrans with name=category.name %}{{ name }} Reputation{% endblocktrans %}{% else %}{% trans "Reputation Leaderboard" %}{% endif %}
+{% endblock %}
+
+{% block extra_head %}
+<script defer src="{% static 'js/leaderboard-table-sort.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -10,22 +14,34 @@
   {% trans "Leaderboard" as hero_eyebrow %}
   {% if category %}
   {% trans "Reputation" as hero_gradient %}
-  {% blocktrans asvar hero_description %}Top predictors in this category — scores sum into the global reputation leaderboard.{% endblocktrans %}
+  {% if hero_description_key == "category_absolute" %}
+  {% blocktrans asvar hero_description %}Top predictors in this category — ranked by total reputation points.{% endblocktrans %}
+  {% else %}
+  {% blocktrans asvar hero_description %}Top predictors in this category — ranked by average reputation per scored forecast.{% endblocktrans %}
+  {% endif %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=category.name gradient=hero_gradient description=hero_description %}
   {% else %}
   {% trans "Reputation" as hero_title %}
   {% trans "Leaderboard" as hero_gradient %}
-  {% blocktrans asvar hero_description %}Ranked by predictive quality across all categories — not social popularity.{% endblocktrans %}
+  {% if hero_description_key == "global_absolute" %}
+  {% blocktrans asvar hero_description %}Absolute ranking by total reputation points — rewards sustained forecasting. Not social popularity.{% endblocktrans %}
+  {% else %}
+  {% blocktrans asvar hero_description %}Relative ranking by average reputation per scored forecast — rewards predictive quality. Not social popularity.{% endblocktrans %}
+  {% endif %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
   {% endif %}
 
   <div class="mt-2">
-    {% include "dashboard/partials/leaderboard_category_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" %}
+    {% include "dashboard/partials/leaderboard_category_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" ranking_mode=ranking_mode %}
   </div>
+
+  {% include "dashboard/partials/leaderboard_reputation_mode_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" %}
 
   <div class="pr-table-wrap mt-6">
     <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
-    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700"
+           data-leaderboard-table
+           data-default-sort="{% if ranking_mode == 'absolute' %}rep-points{% else %}rep-per-forecast{% endif %}">
       <thead>
         <tr>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
@@ -33,46 +49,42 @@
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
             {% if category %}{% trans "Category reputation" %}{% else %}{% trans "Reputation" %}{% endif %}
           </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="rep-per-forecast"
+                    aria-label="{% trans 'Sort by rep per forecast, highest first' %}">
+              {% trans "Rep / forecast" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="accuracy"
+                    aria-label="{% trans 'Sort by accuracy, highest first' %}">
+              {% trans "Accuracy" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Scored" %}</th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>
-          {% if category %}
+          {% if is_category_leaderboard %}
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Global" %}</th>
           {% endif %}
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-        {% if is_category_leaderboard %}
-          {% for row in leaders %}
-          <tr>
-            <td class="px-4 py-3 text-sm text-slate-400">{{ forloop.counter }}</td>
-            <td class="px-4 py-3">
-              <a href="{% url 'accounts:profile' username=row.user.username %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ row.user.public_name }}</a>
-              {% if row.user.is_ai_agent %}<span class="badge-agent ml-1">{% trans "AI" %}</span>{% endif %}
-            </td>
-            <td class="px-4 py-3"><span class="badge-rep">{{ row.reputation_points }}</span></td>
-            <td class="px-4 py-3 text-sm">{{ row.prediction_count }}</td>
-            <td class="px-4 py-3 text-sm">{{ row.correct_prediction_count }}</td>
-            <td class="px-4 py-3 text-sm text-slate-500">{{ row.user.profile.reputation_points }}</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet for this category." %}</td></tr>
-          {% endfor %}
-        {% else %}
-          {% for profile in leaders %}
-          <tr>
-            <td class="px-4 py-3 text-sm text-slate-400">{{ forloop.counter }}</td>
-            <td class="px-4 py-3">
-              <a href="{% url 'accounts:profile' username=profile.user.username %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ profile.user.public_name }}</a>
-              {% if profile.user.is_ai_agent %}<span class="badge-agent ml-1">{% trans "AI" %}</span>{% endif %}
-            </td>
-            <td class="px-4 py-3"><span class="badge-rep">{{ profile.reputation_points }}</span></td>
-            <td class="px-4 py-3 text-sm">{{ profile.prediction_count }}</td>
-            <td class="px-4 py-3 text-sm">{{ profile.correct_prediction_count }}</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet." %}</td></tr>
-          {% endfor %}
-        {% endif %}
+        {% for row in leaders %}
+          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row rank=forloop.counter ranking_mode=ranking_mode show_global=is_category_leaderboard %}
+        {% empty %}
+          {% if is_category_leaderboard %}
+          <tr><td colspan="9" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet for this category." %}</td></tr>
+          {% else %}
+          <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">{% trans "No data yet." %}</td></tr>
+          {% endif %}
+        {% endfor %}
       </tbody>
     </table>
   </div>

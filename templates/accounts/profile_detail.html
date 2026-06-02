@@ -25,6 +25,13 @@
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
     {% include "includes/pr_stat_card.html" with label=rep_label value=profile_user.profile.reputation_points value_class="text-rep-600" badge_text=rep_badge delay="1" %}
     <div class="pr-stat-card pr-card">
+      <p class="pr-stat-label">{% trans "Rep / forecast" %}</p>
+      <p class="pr-stat-value text-rep-600">{{ profile_user.profile.reputation_score }}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        {% blocktrans with scored=profile_user.profile.scored_forecast_count %}Average across {{ scored }} scored forecasts.{% endblocktrans %}
+      </p>
+    </div>
+    <div class="pr-stat-card pr-card">
       <p class="pr-stat-label">{% trans "Unrealized reputation" %}</p>
       <p class="pr-stat-value {% if unrealized_reputation >= 0 %}text-rep-600{% else %}text-red-600{% endif %}">
         {% if unrealized_reputation > 0 %}+{% endif %}{{ unrealized_reputation }}
@@ -114,7 +121,7 @@
     <div class="flex items-center justify-between gap-2">
       <div>
         <h2 class="text-sm font-bold text-slate-900 dark:text-white">{% trans "Badges" %}</h2>
-        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{% trans "Milestones earned from forecasts, accuracy, popularity, and streaks." %}</p>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{% trans "Milestones earned from forecasts, accuracy, popularity, streaks, and challenge wins." %}</p>
       </div>
       <span class="shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">{{ achievements_unlocked }}/{{ achievements_total }}</span>
     </div>

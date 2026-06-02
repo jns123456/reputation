@@ -243,6 +243,12 @@ def _complete_challenge(challenge):
     from challenges.notification_services import notify_challenge_completed
 
     notify_challenge_completed(challenge=challenge)
+
+    if winner:
+        from accounts.achievement_services import evaluate_achievements
+
+        evaluate_achievements(winner)
+
     return challenge
 
 

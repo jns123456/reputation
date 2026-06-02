@@ -163,3 +163,41 @@ class ForecastsPageTests(TestCase):
                 target_id=self.prediction.id,
             ).exists()
         )
+
+
+class ReputationLeaderboardI18nTests(TestCase):
+    def test_reputation_leaderboard_renders_spanish_relative_mode(self):
+        client = Client()
+        client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
+        response = client.get("/leaderboard/reputation/?mode=relative")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ranking relativo")
+        self.assertContains(response, "Rep / pronóstico")
+        self.assertContains(response, "Exactitud")
+        self.assertContains(response, "reputación media por pronóstico puntuado")
+        self.assertContains(response, "data-leaderboard-sort")
+        self.assertNotContains(response, "Relative ranking")
+
+    def test_reputation_leaderboard_renders_spanish_absolute_mode(self):
+        client = Client()
+        client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
+        response = client.get("/leaderboard/reputation/?mode=absolute")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ranking absoluto")
+        self.assertContains(response, "puntos totales de reputación")
+        self.assertNotContains(response, "Absolute ranking")
+
+
+class ReputationLeaderboardAccuracyFilterTests(TestCase):
+    def test_resolved_forecast_accuracy_filter(self):
+        from types import SimpleNamespace
+
+        from dashboard.templatetags.reputation_filters import resolved_forecast_accuracy
+
+        row = SimpleNamespace(correct_prediction_count=7, incorrect_prediction_count=3)
+        self.assertEqual(resolved_forecast_accuracy(row), 70)
+        self.assertIsNone(
+            resolved_forecast_accuracy(SimpleNamespace(correct_prediction_count=0, incorrect_prediction_count=0))
+        )

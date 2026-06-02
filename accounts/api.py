@@ -33,7 +33,8 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
         qs = super().get_queryset()
         ranking = self.request.query_params.get("ranking")
         if ranking == "reputation":
-            return get_top_predictors(100)
+            mode = self.request.query_params.get("mode")
+            return get_top_predictors(100, mode=mode)
         if ranking == "popularity":
             return get_top_popular_users(100)
         username = self.request.query_params.get("username")

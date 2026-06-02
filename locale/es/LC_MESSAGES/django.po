@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 13:03+0000\n"
+"POT-Creation-Date: 2026-06-02 14:47+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -108,6 +108,24 @@ msgstr "Imparable"
 
 msgid "Reached a 30-day activity streak."
 msgstr "Racha de actividad de 30 días."
+
+msgid "First Victory"
+msgstr "Primera victoria"
+
+msgid "Won your first head-to-head challenge."
+msgstr "Ganaste tu primer desafío cara a cara."
+
+msgid "Challenge Champ"
+msgstr "Campeón de desafíos"
+
+msgid "Won 5 head-to-head challenges."
+msgstr "Ganaste 5 desafíos cara a cara."
+
+msgid "Duel Legend"
+msgstr "Leyenda del duelo"
+
+msgid "Won 10 head-to-head challenges."
+msgstr "Ganaste 10 desafíos cara a cara."
 
 msgid ""
 "Email provider rejected the message. With onboarding@resend.dev you can only"
@@ -1499,11 +1517,11 @@ msgstr "Todos los %(name)s"
 
 #, python-format
 msgid "Following · %(name)s"
-msgstr "Todos los %(name)s"
+msgstr "Siguiendo · %(name)s"
 
 #, python-format
 msgid "%(name)s's profile"
-msgstr "%(name)s sobre %(title)s"
+msgstr "Perfil de %(name)s"
 
 msgid "Follow lists"
 msgstr "Siguiendo"
@@ -1513,14 +1531,14 @@ msgstr "ha empezado a seguirte"
 
 #, python-format
 msgid "No followers yet for %(name)s."
-msgstr "Todavía no hay seguidores mutuos."
+msgstr "Todavía no hay seguidores para %(name)s."
 
 msgid "You are not following anyone yet."
 msgstr "Aún no has votado en ningún evento del desafío."
 
 #, python-format
 msgid "%(name)s is not following anyone yet."
-msgstr "%(actor)s empezó a seguirte"
+msgstr "%(name)s aún no sigue a nadie."
 
 #, python-format
 msgid "Level: %(title)s. "
@@ -1539,6 +1557,13 @@ msgstr "Calidad predictiva"
 
 msgid "Social engagement"
 msgstr "Compromiso social"
+
+msgid "Rep / forecast"
+msgstr "Rep / pronóstico"
+
+#, python-format
+msgid "Average across %(scored)s scored forecasts."
+msgstr "Media en %(scored)s pronósticos puntuados."
 
 msgid "Unrealized reputation"
 msgstr "Reputación no realizada"
@@ -1611,8 +1636,12 @@ msgstr "Popularidad"
 msgid "Badges"
 msgstr "Insignias"
 
-msgid "Milestones earned from forecasts, accuracy, popularity, and streaks."
-msgstr "Hitos conseguidos con pronósticos, aciertos, popularidad y rachas."
+msgid ""
+"Milestones earned from forecasts, accuracy, popularity, streaks, and "
+"challenge wins."
+msgstr ""
+"Hitos conseguidos con pronósticos, aciertos, popularidad, rachas y desafíos "
+"ganados."
 
 msgid "Expertise by category"
 msgstr "Explorar por categoría"
@@ -1756,7 +1785,7 @@ msgstr ""
 
 #, python-format
 msgid "%(count)s people"
-msgstr "%(counter)s voto positivo"
+msgstr "%(count)s personas"
 
 msgid "No users to show yet."
 msgstr "Aún no hay clasificaciones."
@@ -2071,7 +2100,7 @@ msgstr "Creado por @%(username)s"
 
 #, python-format
 msgid "Group: %(group_name)s"
-msgstr "Tu nombre"
+msgstr "Grupo: %(group_name)s"
 
 #, python-format
 msgid "Started %(date)s"
@@ -3903,6 +3932,18 @@ msgstr ""
 msgid "Loading more…"
 msgstr "Cargando más…"
 
+msgid "Relative ranking"
+msgstr "Ranking relativo"
+
+msgid "Absolute ranking"
+msgstr "Ranking absoluto"
+
+msgid "Total reputation points from all scored forecasts."
+msgstr "Puntos totales de reputación de todos los pronósticos puntuados."
+
+msgid "Average reputation per scored forecast."
+msgstr "Reputación media por pronóstico puntuado."
+
 #, python-format
 msgid "Hay %(count)s solicitud de verificación pendiente de revisar."
 msgid_plural ""
@@ -3966,21 +4007,43 @@ msgstr "Reputación de %(name)s"
 msgid "Reputation Leaderboard"
 msgstr "Ranking de reputación"
 
-msgid ""
-"Top predictors in this category — scores sum into the global reputation "
-"leaderboard."
+msgid "Top predictors in this category — ranked by total reputation points."
 msgstr ""
-"Mejores predictores en esta categoría — las puntuaciones suman a la ranking "
-"global de reputación."
+"Mejores pronosticadores en esta categoría — clasificados por puntos totales "
+"de reputación."
 
 msgid ""
-"Ranked by predictive quality across all categories — not social popularity."
+"Top predictors in this category — ranked by average reputation per scored "
+"forecast."
 msgstr ""
-"Clasificados por calidad predictiva en todas las categorías — no por "
-"popularidad social."
+"Mejores pronosticadores en esta categoría — clasificados por reputación "
+"media por pronóstico puntuado."
+
+msgid ""
+"Absolute ranking by total reputation points — rewards sustained forecasting."
+" Not social popularity."
+msgstr ""
+"Ranking absoluto por puntos totales de reputación — premia el volumen "
+"sostenido de pronósticos. No es popularidad social."
+
+msgid ""
+"Relative ranking by average reputation per scored forecast — rewards "
+"predictive quality. Not social popularity."
+msgstr ""
+"Ranking relativo por reputación media por pronóstico puntuado — premia la "
+"calidad predictiva. No es popularidad social."
 
 msgid "Category reputation"
 msgstr "Reputación"
+
+msgid "Sort by rep per forecast, highest first"
+msgstr "Ordenar por rep / pronóstico, mayor primero"
+
+msgid "Sort by accuracy, highest first"
+msgstr "Ordenar por precisión, mayor primero"
+
+msgid "Scored"
+msgstr "Puntuados"
 
 msgid "Terms & Conditions"
 msgstr "Términos y condiciones"
@@ -5546,11 +5609,11 @@ msgstr "Explora mercados para abrir un nuevo pronóstico solo de reputación."
 
 #, python-format
 msgid "Closed %(closed_date)s"
-msgstr "Cierra %(close_date)s"
+msgstr "Cerrado %(closed_date)s"
 
 #, python-format
 msgid "Entered %(entry_date)s"
-msgstr "Conseguida el %(date)s"
+msgstr "Registrado %(entry_date)s"
 
 #, python-format
 msgid "%(timesince)s ago"
@@ -5637,6 +5700,12 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid ""
+#~ "Ranked by predictive quality across all categories — not social popularity."
+#~ msgstr ""
+#~ "Clasificados por calidad predictiva en todas las categorías — no por "
+#~ "popularidad social."
 
 #~ msgid "How challenges"
 #~ msgstr "Cómo funcionan los"

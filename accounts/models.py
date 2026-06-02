@@ -144,7 +144,14 @@ class UserProfile(models.Model):
     correct_prediction_count = models.PositiveIntegerField(default=0)
     incorrect_prediction_count = models.PositiveIntegerField(default=0)
     neutral_prediction_count = models.PositiveIntegerField(default=0)
-    reputation_score = models.FloatField(default=0.0)
+    scored_forecast_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Forecasts that received reputation scoring (resolved or exited).",
+    )
+    reputation_score = models.FloatField(
+        default=0.0,
+        help_text="Average reputation P&L per scored forecast (ranking metric).",
+    )
     popularity_score = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -174,6 +181,7 @@ class UserCategoryStats(models.Model):
     prediction_count = models.PositiveIntegerField(default=0)
     correct_prediction_count = models.PositiveIntegerField(default=0)
     incorrect_prediction_count = models.PositiveIntegerField(default=0)
+    scored_forecast_count = models.PositiveIntegerField(default=0)
     reputation_score = models.FloatField(default=0.0)
     popularity_score = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)

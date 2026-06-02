@@ -39,6 +39,8 @@ class CategoryStatsTests(TestCase):
 
         stats.refresh_from_db()
         self.assertEqual(stats.reputation_points, 80)
+        self.assertEqual(stats.scored_forecast_count, 1)
+        self.assertEqual(stats.reputation_score, 26.67)
         self.assertEqual(stats.correct_prediction_count, 1)
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.reputation_points, 80)

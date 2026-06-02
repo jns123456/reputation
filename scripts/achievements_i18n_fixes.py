@@ -8,6 +8,9 @@ ACHIEVEMENTS_I18N_FIXES: dict[str, str] = {
     "Milestones earned from forecasts, accuracy, popularity, and streaks.": (
         "Hitos conseguidos con pronósticos, aciertos, popularidad y rachas."
     ),
+    "Milestones earned from forecasts, accuracy, popularity, streaks, and challenge wins.": (
+        "Hitos conseguidos con pronósticos, aciertos, popularidad, rachas y desafíos ganados."
+    ),
     "Badge earned: %(name)s": "Insignia conseguida: %(name)s",
     "Badge locked: %(name)s": "Insignia bloqueada: %(name)s",
     "Earned %(date)s": "Conseguida el %(date)s",
@@ -47,4 +50,11 @@ ACHIEVEMENTS_I18N_FIXES: dict[str, str] = {
     "Earned 500 popularity points.": "500 puntos de popularidad conseguidos.",
     "Reached a 7-day activity streak.": "Racha de actividad de 7 días.",
     "Reached a 30-day activity streak.": "Racha de actividad de 30 días.",
+    # Challenge wins
+    "First Victory": "Primera victoria",
+    "Challenge Champ": "Campeón de desafíos",
+    "Duel Legend": "Leyenda del duelo",
+    "Won your first head-to-head challenge.": "Ganaste tu primer desafío cara a cara.",
+    "Won 5 head-to-head challenges.": "Ganaste 5 desafíos cara a cara.",
+    "Won 10 head-to-head challenges.": "Ganaste 10 desafíos cara a cara.",
 }

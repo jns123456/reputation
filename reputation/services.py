@@ -1,6 +1,46 @@
 """Reputation scoring services."""
 
+from django.conf import settings
+
 from reputation.models import ReputationEvent
+
+
+def calculate_reputation_score(*, reputation_points, scored_forecast_count):
+    """Ranking score: average reputation P&L per scored forecast.
+
+    ``reputation_points`` stays the cumulative total shown in the UI.
+    ``reputation_score`` drives leaderboards and content tie-breaking.
+
+    Uses ``max(scored_forecast_count, REPUTATION_SCORE_MIN_SAMPLE)`` so a single
+    lucky forecast cannot dominate users with sustained track records.
+    """
+    if scored_forecast_count <= 0:
+        return 0.0
+    min_sample = max(1, int(getattr(settings, "REPUTATION_SCORE_MIN_SAMPLE", 3)))
+    effective_count = max(scored_forecast_count, min_sample)
+    return round(float(reputation_points) / effective_count, 2)
+
+
+def refresh_profile_reputation_score(profile, *, save=True):
+    """Recompute ``reputation_score`` from stored aggregates."""
+    profile.reputation_score = calculate_reputation_score(
+        reputation_points=profile.reputation_points,
+        scored_forecast_count=profile.scored_forecast_count,
+    )
+    if save:
+        profile.save(update_fields=["reputation_score", "updated_at"])
+    return profile.reputation_score
+
+
+def refresh_category_reputation_score(stats, *, save=True):
+    """Recompute category ``reputation_score`` from stored aggregates."""
+    stats.reputation_score = calculate_reputation_score(
+        reputation_points=stats.reputation_points,
+        scored_forecast_count=stats.scored_forecast_count,
+    )
+    if save:
+        stats.save(update_fields=["reputation_score", "updated_at"])
+    return stats.reputation_score
 
 
 def get_predicted_outcome_probability(predicted_outcome, probability_snapshot, predicted_direction="yes"):
@@ -177,10 +217,12 @@ def apply_reputation_for_prediction_exit(prediction):
 
     profile = prediction.user.profile
     profile.reputation_points += delta
-    profile.reputation_score = float(profile.reputation_points)
+    profile.scored_forecast_count += 1
+    refresh_profile_reputation_score(profile, save=False)
     profile.save(
         update_fields=[
             "reputation_points",
+            "scored_forecast_count",
             "reputation_score",
             "updated_at",
         ]
@@ -258,14 +300,16 @@ def apply_reputation_for_prediction(prediction):
 
     profile = prediction.user.profile
     profile.reputation_points += delta
+    profile.scored_forecast_count += 1
     if is_correct:
         profile.correct_prediction_count += 1
     else:
         profile.incorrect_prediction_count += 1
-    profile.reputation_score = float(profile.reputation_points)
+    refresh_profile_reputation_score(profile, save=False)
     profile.save(
         update_fields=[
             "reputation_points",
+            "scored_forecast_count",
             "correct_prediction_count",
             "incorrect_prediction_count",
             "reputation_score",

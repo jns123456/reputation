@@ -7,6 +7,17 @@ register = template.Library()
 
 
 @register.filter
+def resolved_forecast_accuracy(stats):
+    """Resolved forecast accuracy %% for profile or category stats rows."""
+    correct = int(getattr(stats, "correct_prediction_count", 0) or 0)
+    incorrect = int(getattr(stats, "incorrect_prediction_count", 0) or 0)
+    resolved = correct + incorrect
+    if resolved == 0:
+        return None
+    return round(correct * 100 / resolved)
+
+
+@register.filter
 def as_percent(value):
     try:
         v = float(value)

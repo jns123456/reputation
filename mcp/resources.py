@@ -36,21 +36,32 @@ def _public_profile(*, user_id, **_):
     return serialize_public_profile(profile)
 
 
-def _reputation_leaderboard(**_):
+def _reputation_leaderboard(*, mode=None, **_):
     from accounts.selectors import get_top_predictors
+    from reputation.ranking_modes import normalize_reputation_ranking_mode
 
-    rows = get_top_predictors(50)
+    ranking_mode = normalize_reputation_ranking_mode(mode)
+    rows = get_top_predictors(50, mode=ranking_mode)
     return {
+        "ranking_mode": ranking_mode,
         "results": [
             {
                 "rank": i + 1,
                 "user_id": p.user_id,
                 "username": p.user.username if p.user.show_username_publicly else None,
                 "reputation_points": p.reputation_points,
+                "reputation_score": p.reputation_score,
+                "scored_forecast_count": p.scored_forecast_count,
             }
             for i, p in enumerate(rows)
-        ]
+        ],
     }
+
+
+def _reputation_leaderboard_absolute(**kwargs):
+    from reputation.ranking_modes import ABSOLUTE
+
+    return _reputation_leaderboard(mode=ABSOLUTE, **kwargs)
 
 
 def _popularity_leaderboard(**_):
@@ -76,8 +87,13 @@ def _rules_reputation(**_):
     return {
         "scoring": "Polymarket-style, base 100. correct = +(100 - prob_percent), "
         "incorrect = -(prob_percent). Early exit = mark-to-market P&L.",
+        "ranking": "Two leaderboard modes: absolute = total reputation_points; "
+        "relative = reputation_points / max(scored_forecast_count, "
+        "REPUTATION_SCORE_MIN_SAMPLE). Default leaderboard ranking is relative.",
+        "leaderboard_modes": ["absolute", "relative"],
         "no_user_confidence": True,
         "base_points": getattr(settings, "REPUTATION_BASE_POINTS", 10),
+        "min_sample": getattr(settings, "REPUTATION_SCORE_MIN_SAMPLE", 3),
         "note": "Scoring uses the market-implied probability snapshot at forecast "
         "time and the resolved outcome. There is no user-entered confidence.",
     }
@@ -103,6 +119,7 @@ _RESOURCE_ROUTES = [
     (re.compile(r"^platform://markets/?$"), _markets_list, "markets:read", None),
     (re.compile(r"^platform://market/(?P<value>[^/]+)/?$"), _market_detail, "markets:read", "market_id"),
     (re.compile(r"^platform://user/(?P<value>[^/]+)/public-profile/?$"), _public_profile, "reputation:read", "user_id"),
+    (re.compile(r"^platform://leaderboards/reputation/absolute/?$"), _reputation_leaderboard_absolute, "reputation:read", None),
     (re.compile(r"^platform://leaderboards/reputation/?$"), _reputation_leaderboard, "reputation:read", None),
     (re.compile(r"^platform://leaderboards/popularity/?$"), _popularity_leaderboard, "popularity:read", None),
     (re.compile(r"^platform://rules/reputation/?$"), _rules_reputation, "markets:read", None),
@@ -114,7 +131,8 @@ RESOURCE_CATALOG = [
     {"uri": "platform://markets", "scope": "markets:read", "description": "List inspectable markets/events."},
     {"uri": "platform://market/{market_id}", "scope": "markets:read", "description": "Market detail, status, probabilities, close date, discussion."},
     {"uri": "platform://user/{user_id}/public-profile", "scope": "reputation:read", "description": "Public profile, reputation, popularity, visible history."},
-    {"uri": "platform://leaderboards/reputation", "scope": "reputation:read", "description": "Predictive reputation leaderboard."},
+    {"uri": "platform://leaderboards/reputation", "scope": "reputation:read", "description": "Relative reputation leaderboard (avg per scored forecast)."},
+    {"uri": "platform://leaderboards/reputation/absolute", "scope": "reputation:read", "description": "Absolute reputation leaderboard (total points)."},
     {"uri": "platform://leaderboards/popularity", "scope": "popularity:read", "description": "Popularity leaderboard."},
     {"uri": "platform://rules/reputation", "scope": "markets:read", "description": "Current reputation scoring rules."},
     {"uri": "platform://rules/agent-participation", "scope": "markets:read", "description": "Current AI-agent participation policy."},

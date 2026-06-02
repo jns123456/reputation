@@ -10,8 +10,70 @@ from reputation.models import PopularityEvent, ReputationEvent
 from reputation.services import (
     calculate_exit_reputation_delta,
     calculate_reputation_delta,
+    calculate_reputation_score,
     calculate_reputation_stakes,
 )
+
+
+class ReputationRankingModeTests(TestCase):
+    def setUp(self):
+        from accounts.models import UserProfile
+
+        self.high_volume = User.objects.create_user(username="volume", password="pass")
+        self.high_avg = User.objects.create_user(username="quality", password="pass")
+
+        UserProfile.objects.filter(user=self.high_volume).update(
+            reputation_points=300,
+            scored_forecast_count=10,
+            reputation_score=30.0,
+        )
+        UserProfile.objects.filter(user=self.high_avg).update(
+            reputation_points=120,
+            scored_forecast_count=3,
+            reputation_score=40.0,
+        )
+
+    def test_absolute_ranking_orders_by_total_points(self):
+        from accounts.selectors import get_top_predictors
+        from reputation.ranking_modes import ABSOLUTE
+
+        leaders = list(get_top_predictors(10, mode=ABSOLUTE))
+        self.assertEqual(leaders[0].user.username, "volume")
+
+    def test_relative_ranking_orders_by_average(self):
+        from accounts.selectors import get_top_predictors
+        from reputation.ranking_modes import RELATIVE
+
+        leaders = list(get_top_predictors(10, mode=RELATIVE))
+        self.assertEqual(leaders[0].user.username, "quality")
+
+
+class ReputationScoreTests(TestCase):
+    def test_average_with_min_sample_penalty(self):
+        self.assertEqual(
+            calculate_reputation_score(reputation_points=60, scored_forecast_count=1),
+            20.0,
+        )
+        self.assertEqual(
+            calculate_reputation_score(reputation_points=120, scored_forecast_count=2),
+            40.0,
+        )
+
+    def test_average_uses_true_count_at_or_above_min_sample(self):
+        self.assertEqual(
+            calculate_reputation_score(reputation_points=180, scored_forecast_count=3),
+            60.0,
+        )
+        self.assertEqual(
+            calculate_reputation_score(reputation_points=500, scored_forecast_count=10),
+            50.0,
+        )
+
+    def test_zero_scored_forecasts(self):
+        self.assertEqual(
+            calculate_reputation_score(reputation_points=100, scored_forecast_count=0),
+            0.0,
+        )
 
 
 class ReputationScoringTests(TestCase):
@@ -156,6 +218,8 @@ class PredictionResolutionTests(TestCase):
         self.assertEqual(self.prediction.status, Prediction.Status.RESOLVED)
         self.assertTrue(self.prediction.is_correct)
         self.assertEqual(self.user.profile.reputation_points, 60)
+        self.assertEqual(self.user.profile.scored_forecast_count, 1)
+        self.assertEqual(self.user.profile.reputation_score, 20.0)
         event = ReputationEvent.objects.get(user=self.user)
         self.assertEqual(event.points_delta, 60)
 
@@ -168,6 +232,8 @@ class PredictionResolutionTests(TestCase):
         self.user.profile.refresh_from_db()
         self.assertFalse(self.prediction.is_correct)
         self.assertEqual(self.user.profile.reputation_points, -40)
+        self.assertEqual(self.user.profile.scored_forecast_count, 1)
+        self.assertAlmostEqual(self.user.profile.reputation_score, -13.33)
         event = ReputationEvent.objects.get(user=self.user)
         self.assertEqual(event.points_delta, -40)
 

@@ -37,16 +37,24 @@ def apply_category_reputation_delta(
     *,
     is_correct=None,
 ):
+    from reputation.services import refresh_category_reputation_score
+
     stats = _get_or_create_stats(user, category_slug)
     stats.reputation_points += delta
-    stats.reputation_score = float(stats.reputation_points)
-    update_fields = ["reputation_points", "reputation_score", "updated_at"]
+    stats.scored_forecast_count += 1
+    update_fields = [
+        "reputation_points",
+        "scored_forecast_count",
+        "reputation_score",
+        "updated_at",
+    ]
     if is_correct is True:
         stats.correct_prediction_count += 1
         update_fields.append("correct_prediction_count")
     elif is_correct is False:
         stats.incorrect_prediction_count += 1
         update_fields.append("incorrect_prediction_count")
+    refresh_category_reputation_score(stats, save=False)
     stats.save(update_fields=update_fields)
     return stats
 

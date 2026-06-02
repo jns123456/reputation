@@ -207,6 +207,38 @@ class PriorPredictionChallengeTests(TestCase):
         self.assertEqual(bob_row["unrealized_points"], 0)
         self.assertEqual(bob_row["total_points"], 10)
 
+    def test_challenge_completion_awards_winner_badge(self):
+        from accounts.models import UserAchievement
+        from challenges.services import check_challenge_completion
+        from predictions.services import create_prediction, resolve_market_predictions
+
+        create_prediction(
+            user=self.bob,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Badge duel",
+            market_ids=[self.market.id],
+            opponent_ids=[self.bob.id],
+        )
+        accept_challenge(challenge=challenge, user=self.bob)
+
+        self.market.status = Market.Status.RESOLVED
+        self.market.resolved_outcome = "Yes"
+        self.market.save()
+        resolve_market_predictions(self.market)
+        check_challenge_completion(market=self.market)
+
+        challenge.refresh_from_db()
+        self.assertEqual(challenge.winner, self.bob)
+        self.assertTrue(
+            UserAchievement.objects.filter(
+                user=self.bob, code="challenge_win_1"
+            ).exists()
+        )
+
     def test_pre_challenge_forecast_counts_as_unrealized_while_open(self):
         create_prediction(
             user=self.bob,

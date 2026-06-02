@@ -255,6 +255,22 @@ class AchievementTests(TestCase):
         new = evaluate_achievements(self.user)
         self.assertEqual(new, [])
 
+    def test_challenge_win_awarded(self):
+        from challenges.models import Challenge
+
+        Challenge.objects.create(
+            creator=self.user,
+            status=Challenge.Status.COMPLETED,
+            winner=self.user,
+        )
+        new = evaluate_achievements(self.user)
+        self.assertIn("challenge_win_1", new)
+        self.assertTrue(
+            UserAchievement.objects.filter(
+                user=self.user, code="challenge_win_1"
+            ).exists()
+        )
+
 
 class LinkifyMentionsTests(TestCase):
     def setUp(self):

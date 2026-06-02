@@ -115,7 +115,7 @@ class Achievement:
 
 # ``stats`` keys provided by ``_collect_stats``:
 #   prediction_count, correct_prediction_count, popularity_points,
-#   reputation_points, longest_streak, follower_count
+#   reputation_points, longest_streak, challenges_won
 ACHIEVEMENTS = (
     Achievement(
         "first_forecast",
@@ -180,20 +180,50 @@ ACHIEVEMENTS = (
         "zap",
         lambda s: s["longest_streak"] >= 30,
     ),
+    Achievement(
+        "challenge_win_1",
+        _("First Victory"),
+        _("Won your first head-to-head challenge."),
+        "trophy",
+        lambda s: s["challenges_won"] >= 1,
+    ),
+    Achievement(
+        "challenge_win_5",
+        _("Challenge Champ"),
+        _("Won 5 head-to-head challenges."),
+        "medal",
+        lambda s: s["challenges_won"] >= 5,
+    ),
+    Achievement(
+        "challenge_win_10",
+        _("Duel Legend"),
+        _("Won 10 head-to-head challenges."),
+        "crown",
+        lambda s: s["challenges_won"] >= 10,
+    ),
 )
 
 ACHIEVEMENTS_BY_CODE = {a.code: a for a in ACHIEVEMENTS}
 
 
 def _collect_stats(user):
+    from challenges.models import Challenge
+
     profile = getattr(user, "profile", None)
     streak = getattr(user, "activity_streak", None)
+    challenges_won = 0
+    if user and getattr(user, "pk", None):
+        challenges_won = Challenge.objects.filter(
+            winner=user,
+            status=Challenge.Status.COMPLETED,
+        ).count()
     return {
         "prediction_count": getattr(profile, "prediction_count", 0) or 0,
         "correct_prediction_count": getattr(profile, "correct_prediction_count", 0) or 0,
         "popularity_points": getattr(profile, "popularity_points", 0) or 0,
         "reputation_points": getattr(profile, "reputation_points", 0) or 0,
         "longest_streak": getattr(streak, "longest_streak", 0) or 0,
+        "challenges_won": challenges_won,
     }
 
 

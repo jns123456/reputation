@@ -243,6 +243,46 @@ PHASE1_PLURAL_FIXES: dict[str, tuple[str, str]] = {
     ),
 }
 
+# Reputation ranking (points per scored forecast)
+PHASE1_FIXES.update(
+    {
+        "Rep / forecast": "Rep / pronóstico",
+        "Scored": "Puntuados",
+        "Ranked by average reputation per scored forecast — total points shown for reference. Not social popularity.": (
+            "Clasificación por reputación media por pronóstico puntuado — los puntos totales se muestran como referencia. No es popularidad social."
+        ),
+        "Top predictors in this category — ranked by average reputation per scored forecast.": (
+            "Mejores pronosticadores en esta categoría — clasificados por reputación media por pronóstico puntuado."
+        ),
+        "Average across %(scored)s scored forecasts.": (
+            "Media en %(scored)s pronósticos puntuados."
+        ),
+        "Following · %(name)s": "Siguiendo · %(name)s",
+        "%(name)s's profile": "Perfil de %(name)s",
+        "No followers yet for %(name)s.": "Todavía no hay seguidores para %(name)s.",
+        "%(name)s is not following anyone yet.": "%(name)s aún no sigue a nadie.",
+        "%(count)s people": "%(count)s personas",
+        "Group: %(group_name)s": "Grupo: %(group_name)s",
+        "Closed %(closed_date)s": "Cerrado %(closed_date)s",
+        "Entered %(entry_date)s": "Registrado %(entry_date)s",
+        "Relative ranking": "Ranking relativo",
+        "Absolute ranking": "Ranking absoluto",
+        "Average reputation per scored forecast.": "Reputación media por pronóstico puntuado.",
+        "Total reputation points from all scored forecasts.": "Puntos totales de reputación de todos los pronósticos puntuados.",
+        "Relative ranking by average reputation per scored forecast — rewards predictive quality. Not social popularity.": (
+            "Ranking relativo por reputación media por pronóstico puntuado — premia la calidad predictiva. No es popularidad social."
+        ),
+        "Absolute ranking by total reputation points — rewards sustained forecasting. Not social popularity.": (
+            "Ranking absoluto por puntos totales de reputación — premia el volumen sostenido de pronósticos. No es popularidad social."
+        ),
+        "Top predictors in this category — ranked by total reputation points.": (
+            "Mejores pronosticadores en esta categoría — clasificados por puntos totales de reputación."
+        ),
+        "Sort by rep per forecast, highest first": "Ordenar por rep / pronóstico, mayor primero",
+        "Sort by accuracy, highest first": "Ordenar por precisión, mayor primero",
+    }
+)
+
 # Legacy Spanish msgid (migrate to English source string in code).
 SPANISH_MSGID_FIXES: dict[str, str] = {
     "Confirma tu email en PredictStamp": "Confirma tu email en PredictStamp",

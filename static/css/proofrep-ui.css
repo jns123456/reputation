@@ -5849,3 +5849,26 @@ html.dark .pr-vote-sheet-empty {
   color: rgb(148 163 184);
 }
 
+.pr-leaderboard-sort {
+  min-height: var(--pr-touch-min);
+  padding: 0.25rem 0;
+  font: inherit;
+  font-weight: 500;
+  color: rgb(100 116 139);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.pr-leaderboard-sort.is-active {
+  color: rgb(79 70 229);
+}
+
+.pr-leaderboard-sort.is-active [data-lucide] {
+  opacity: 1;
+}
+
+html.dark .pr-leaderboard-sort.is-active {
+  color: rgb(165 180 252);
+}
+

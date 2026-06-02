@@ -385,6 +385,25 @@ This is intentionally simple and auditable. **No `confidence_multiplier` exists*
 the only inputs are the market probability snapshot, the chosen outcome/direction,
 and the resolved result.
 
+**Ranking score (`reputation_score`) — average P&L per scored forecast:**
+
+`reputation_points` is the cumulative total (shown in UI badges). Two leaderboard
+modes are available:
+
+| Mode | Sort key | Rewards |
+|------|----------|---------|
+| **Relative** (default) | `reputation_score` | Predictive quality per forecast |
+| **Absolute** | `reputation_points` | Sustained cumulative P&L |
+
+```
+scored_forecast_count = resolved + exited forecasts that received reputation
+reputation_score = reputation_points / max(scored_forecast_count, REPUTATION_SCORE_MIN_SAMPLE)
+```
+
+Default `REPUTATION_SCORE_MIN_SAMPLE = 3` so a single lucky forecast cannot beat
+users with sustained track records on the **relative** board. The **absolute** board
+ranks by total points regardless of forecast count.
+
 ### Popularity System
 
 **Principle:** Popularity measures social engagement, **not** predictive accuracy.

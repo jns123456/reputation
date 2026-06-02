@@ -26,11 +26,18 @@ def get_user_category_breakdown(user):
     return breakdown
 
 
-def get_top_predictors_by_category(category_slug, limit=50):
+def get_top_predictors_by_category(category_slug, limit=50, *, mode=None):
+    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+
+    ranking_mode = normalize_reputation_ranking_mode(mode)
+    if ranking_mode == ABSOLUTE:
+        ordering = ("-reputation_points", "-reputation_score", "-scored_forecast_count")
+    else:
+        ordering = ("-reputation_score", "-reputation_points", "-scored_forecast_count")
     return (
         UserCategoryStats.objects.filter(category_slug=category_slug)
         .select_related("user", "user__profile")
-        .order_by("-reputation_score", "-reputation_points")[:limit]
+        .order_by(*ordering)[:limit]
     )
 
 
@@ -42,8 +49,10 @@ def get_top_popular_users_by_category(category_slug, limit=50):
     )
 
 
-def get_user_category_rank(user, category_slug, *, ranking="reputation"):
+def get_user_category_rank(user, category_slug, *, ranking="reputation", mode=None):
     """Return 1-based rank in a category, or None if user has no stats row."""
+    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+
     stats = UserCategoryStats.objects.filter(user=user, category_slug=category_slug).first()
     if stats is None:
         return None
@@ -58,6 +67,16 @@ def get_user_category_rank(user, category_slug, *, ranking="reputation"):
             category_slug=category_slug,
             popularity_score=stats.popularity_score,
             popularity_points__gt=stats.popularity_points,
+        ).count()
+    elif normalize_reputation_ranking_mode(mode) == ABSOLUTE:
+        higher = UserCategoryStats.objects.filter(
+            category_slug=category_slug,
+            reputation_points__gt=stats.reputation_points,
+        ).count()
+        tied = UserCategoryStats.objects.filter(
+            category_slug=category_slug,
+            reputation_points=stats.reputation_points,
+            reputation_score__gt=stats.reputation_score,
         ).count()
     else:
         higher = UserCategoryStats.objects.filter(

@@ -197,26 +197,44 @@ def home(request):
     return redirect("accounts:profile", username=request.user.username)
 
 
+def _reputation_leaderboard_context(request, *, category=None):
+    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+
+    ranking_mode = normalize_reputation_ranking_mode(request.GET.get("mode"))
+    if category:
+        leaders = get_cached_top_predictors(
+            category_slug=category.slug,
+            limit=50,
+            mode=ranking_mode,
+        )
+    else:
+        leaders = get_cached_top_predictors(limit=50, mode=ranking_mode)
+
+    if ranking_mode == ABSOLUTE:
+        hero_description_key = "category_absolute" if category else "global_absolute"
+    else:
+        hero_description_key = "category_relative" if category else "global_relative"
+
+    return {
+        "leaders": leaders,
+        "category": category,
+        "chart_categories": get_all_chart_categories(),
+        "is_category_leaderboard": category is not None,
+        "ranking_mode": ranking_mode,
+        "hero_description_key": hero_description_key,
+    }
+
+
 def reputation_leaderboard(request):
     category_slug = request.GET.get("category", "").strip()
     category = validate_category_slug(category_slug) if category_slug else None
     if category_slug and category is None:
         raise Http404("Category not found")
 
-    if category:
-        leaders = get_cached_top_predictors(category_slug=category.slug, limit=50)
-    else:
-        leaders = get_cached_top_predictors(limit=50)
-
     return render(
         request,
         "dashboard/reputation_leaderboard.html",
-        {
-            "leaders": leaders,
-            "category": category,
-            "chart_categories": get_all_chart_categories(),
-            "is_category_leaderboard": category is not None,
-        },
+        _reputation_leaderboard_context(request, category=category),
     )
 
 
@@ -247,16 +265,10 @@ def reputation_leaderboard_category(request, slug):
     category = get_category_for_slug(slug)
     if category is None:
         raise Http404("Category not found")
-    leaders = get_cached_top_predictors(category_slug=category.slug, limit=50)
     return render(
         request,
         "dashboard/reputation_leaderboard.html",
-        {
-            "leaders": leaders,
-            "category": category,
-            "chart_categories": get_all_chart_categories(),
-            "is_category_leaderboard": True,
-        },
+        _reputation_leaderboard_context(request, category=category),
     )
 
 

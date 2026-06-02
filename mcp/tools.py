@@ -76,6 +76,7 @@ def get_reputation_summary(*, context, arguments):
         "username": profile.user.username if profile.user.show_username_publicly else None,
         "reputation_points": profile.reputation_points,
         "reputation_score": profile.reputation_score,
+        "scored_forecast_count": profile.scored_forecast_count,
         "prediction_count": profile.prediction_count,
         "correct_prediction_count": profile.correct_prediction_count,
         "incorrect_prediction_count": profile.incorrect_prediction_count,
