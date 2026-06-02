@@ -68,6 +68,7 @@ COLOMBIA_VS_COSTA_RICA_EVENT = {
             "gameStartTime": "2026-06-01T23:00:00Z",
             "outcomes": '["Yes", "No"]',
             "outcomePrices": '["0.86", "0.14"]',
+            "clobTokenIds": '["token-col"]',
             "closed": False,
         },
         {
@@ -77,6 +78,7 @@ COLOMBIA_VS_COSTA_RICA_EVENT = {
             "gameStartTime": "2026-06-01T23:00:00Z",
             "outcomes": '["Yes", "No"]',
             "outcomePrices": '["0.11", "0.89"]',
+            "clobTokenIds": '["token-draw"]',
             "closed": False,
         },
         {
@@ -86,6 +88,7 @@ COLOMBIA_VS_COSTA_RICA_EVENT = {
             "gameStartTime": "2026-06-01T23:00:00Z",
             "outcomes": '["Yes", "No"]',
             "outcomePrices": '["0.05", "0.95"]',
+            "clobTokenIds": '["token-cri"]',
             "closed": False,
         },
     ],
@@ -172,6 +175,16 @@ class SoccerMatchNormalizationTests(TestCase):
         self.assertTrue(market.is_soccer_match)
         self.assertEqual(market.canonical_category_slug, "fifa-world-cup-2026")
         self.assertEqual(len(market.outcome_labels), 3)
+
+    def test_build_soccer_match_raw_excludes_draw_from_chart_outcomes(self):
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT)
+        raw_market = build_world_cup_match_raw(COLOMBIA_VS_COSTA_RICA_EVENT, normalized=normalized)
+        self.assertEqual(
+            [item["label"] for item in raw_market["chart_outcomes"]],
+            ["Colombia", "Costa Rica"],
+        )
+        self.assertEqual(raw_market["moneyline_markets"]["Colombia"]["yes_token_id"], "token-col")
+        self.assertEqual(raw_market["moneyline_markets"][DRAW_OUTCOME_LABEL]["yes_token_id"], "token-draw")
 
 
 class SyncWorldCupMatchMarketsTests(TestCase):

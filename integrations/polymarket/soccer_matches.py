@@ -8,6 +8,7 @@ from integrations.polymarket.client import (
     _market_is_resolved_yes,
     _parse_date,
     _parse_json_field,
+    _yes_token_id,
 )
 
 logger = logging.getLogger(__name__)
@@ -216,7 +217,30 @@ def build_soccer_match_raw(event: dict, *, normalized: dict) -> dict:
             "id": raw_market.get("id"),
             "conditionId": raw_market.get("conditionId"),
             "slug": raw_market.get("slug"),
+            "yes_token_id": _yes_token_id(raw_market),
         }
+
+    chart_outcomes = []
+    probs = normalized.get("current_probability") or {}
+    for label in (team_a, team_b):
+        if not label:
+            continue
+        meta = moneyline_markets.get(label) or {}
+        yes_token_id = meta.get("yes_token_id") or ""
+        if not yes_token_id:
+            continue
+        try:
+            probability = float(probs.get(label, 0))
+        except (TypeError, ValueError):
+            probability = 0.0
+        chart_outcomes.append(
+            {
+                "label": label,
+                "probability": probability,
+                "slug": meta.get("slug") or "",
+                "yes_token_id": yes_token_id,
+            }
+        )
 
     return {
         "market_kind": "soccer_match_3way",
@@ -225,6 +249,7 @@ def build_soccer_match_raw(event: dict, *, normalized: dict) -> dict:
         "team_a": team_a,
         "team_b": team_b,
         "moneyline_markets": moneyline_markets,
+        "chart_outcomes": chart_outcomes,
         "volume24hr": event.get("volume24hr") or event.get("volume"),
         "image": event.get("image") or event.get("icon"),
         "icon": event.get("icon") or event.get("image"),

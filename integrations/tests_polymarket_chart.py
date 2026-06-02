@@ -3,7 +3,10 @@ from unittest.mock import patch
 from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 
-from integrations.polymarket.chart import build_polymarket_multi_outcome_chart_payload
+from integrations.polymarket.chart import (
+    build_polymarket_multi_outcome_chart_payload,
+    build_polymarket_soccer_match_chart_payload,
+)
 from integrations.polymarket.client import (
     MULTI_OUTCOME_EVENT_KIND,
     build_polymarket_event_raw,
@@ -176,3 +179,57 @@ class PolymarketMultiOutcomeChartTests(TestCase):
             ["Alpha", "Bravo", "Charlie", "Delta"],
         )
         self.assertEqual(old_market.polymarket_raw["outcome_markets"]["Alpha"]["yes_token_id"], "token-a")
+
+
+class PolymarketSoccerMatchChartTests(TestCase):
+    def setUp(self):
+        self.market = Market.objects.create(
+            external_id="wc-match:col-cri",
+            title="Colombia vs Costa Rica",
+            slug="colombia-vs-costa-rica",
+            polymarket_slug="fif-col-cri-2026-06-01",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[
+                {"label": "Colombia"},
+                {"label": "Draw"},
+                {"label": "Costa Rica"},
+            ],
+            current_probability={
+                "Colombia": 0.86,
+                "Draw": 0.11,
+                "Costa Rica": 0.05,
+            },
+            polymarket_raw={
+                "market_kind": "soccer_match_3way",
+                "team_a": "Colombia",
+                "team_b": "Costa Rica",
+                "chart_outcomes": [
+                    {"label": "Colombia", "probability": 0.86, "slug": "col", "yes_token_id": "token-col"},
+                    {"label": "Costa Rica", "probability": 0.05, "slug": "cri", "yes_token_id": "token-cri"},
+                ],
+            },
+        )
+
+    @patch("integrations.polymarket.chart._fetch_price_points")
+    def test_build_soccer_match_chart_payload_excludes_draw(self, mock_fetch):
+        now = timezone.now()
+        mock_fetch.side_effect = [
+            [{"ts": now, "value": 86.0}],
+            [{"ts": now, "value": 5.0}],
+        ]
+
+        payload = build_polymarket_soccer_match_chart_payload(self.market)
+        self.assertIsNotNone(payload)
+        self.assertEqual(len(payload["series"]), 2)
+        self.assertEqual([item["label"] for item in payload["series"]], ["Colombia", "Costa Rica"])
+        self.assertEqual(payload["series"][0]["color"], "rgb(16 185 129)")
+        self.assertEqual(payload["series"][1]["color"], "rgb(244 63 94)")
+
+    @patch("integrations.polymarket.embed.build_polymarket_soccer_match_chart_payload")
+    def test_embed_context_uses_soccer_match_chart(self, mock_chart):
+        mock_chart.return_value = {"series": [{"label": "Colombia", "points": []}, {"label": "Costa Rica", "points": []}]}
+        ctx = build_polymarket_embed_context(self.market)
+        self.assertEqual(ctx["embed_kind"], "multi_outcome_chart")
+        self.assertIn("chart_data", ctx)
+        self.assertNotIn("embed_url", ctx)

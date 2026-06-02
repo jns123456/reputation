@@ -136,8 +136,10 @@
             <label class="relative cursor-pointer
               {% if form.outcome_count > 3 %}
                 forecast-option-generic
+              {% elif form.outcome_count == 3 and market.is_soccer_match %}
+                {% if radio.choice_label|lower == 'draw' %}forecast-option-draw{% elif radio.choice_label == market.match_team_a %}forecast-option-yes{% elif radio.choice_label == market.match_team_b %}forecast-option-no{% else %}forecast-option-generic{% endif %}
               {% elif form.outcome_count == 3 %}
-                {% if forloop.counter0 == 0 %}forecast-option-yes{% elif forloop.counter0 == 1 %}forecast-option-draw{% else %}forecast-option-away{% endif %}
+                {% if forloop.counter0 == 0 %}forecast-option-yes{% elif forloop.counter0 == 1 %}forecast-option-draw{% else %}forecast-option-no{% endif %}
               {% else %}
                 {% if forloop.counter0 == 0 %}forecast-option-yes{% else %}forecast-option-no{% endif %}
               {% endif %}">
@@ -378,38 +380,6 @@
   }
   html.dark .forecast-option-draw:has(input[type="radio"]:checked) .forecast-choice .text-lg {
     color: rgb(253 230 138);
-  }
-
-  /* Away team — slate (3-way soccer) */
-  .forecast-option-away .forecast-choice:hover {
-    border-color: rgb(100 116 139);
-    background-color: rgb(248 250 252);
-  }
-  .forecast-option-away .forecast-choice:hover .text-lg {
-    color: rgb(51 65 85);
-  }
-  .forecast-option-away:has(input[type="radio"]:checked) .forecast-choice {
-    border-color: rgb(71 85 105);
-    background-color: rgb(226 232 240);
-    box-shadow: 0 0 0 1px rgb(71 85 105);
-  }
-  .forecast-option-away:has(input[type="radio"]:checked) .forecast-choice .text-lg {
-    color: rgb(30 41 59);
-  }
-  html.dark .forecast-option-away .forecast-choice:hover {
-    border-color: rgb(148 163 184);
-    background-color: rgb(51 65 85 / 0.35);
-  }
-  html.dark .forecast-option-away .forecast-choice:hover .text-lg {
-    color: rgb(226 232 240);
-  }
-  html.dark .forecast-option-away:has(input[type="radio"]:checked) .forecast-choice {
-    border-color: rgb(148 163 184);
-    background-color: rgb(51 65 85 / 0.55);
-    box-shadow: 0 0 0 2px rgb(100 116 139 / 0.45);
-  }
-  html.dark .forecast-option-away:has(input[type="radio"]:checked) .forecast-choice .text-lg {
-    color: rgb(226 232 240);
   }
 
   /* Generic multi-outcome events */

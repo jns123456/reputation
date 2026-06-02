@@ -5,7 +5,10 @@ from urllib.parse import urlencode
 from django.conf import settings
 
 from integrations.polymarket.client import is_multi_outcome_event_market
-from integrations.polymarket.chart import build_polymarket_multi_outcome_chart_payload
+from integrations.polymarket.chart import (
+    build_polymarket_multi_outcome_chart_payload,
+    build_polymarket_soccer_match_chart_payload,
+)
 from integrations.polymarket.soccer_matches import is_world_cup_match_market
 from integrations.polymarket.urls import (
     get_polymarket_embed_slug,
@@ -74,6 +77,15 @@ def build_polymarket_embed_context(market):
 
     if is_multi_outcome_event_market(market):
         chart_data = build_polymarket_multi_outcome_chart_payload(market)
+        if chart_data:
+            return {
+                **base_context,
+                "embed_kind": "multi_outcome_chart",
+                "chart_data": chart_data,
+            }
+
+    if is_world_cup_match_market(market):
+        chart_data = build_polymarket_soccer_match_chart_payload(market)
         if chart_data:
             return {
                 **base_context,
