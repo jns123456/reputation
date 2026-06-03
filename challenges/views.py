@@ -64,10 +64,20 @@ def challenge_how_it_works(request):
 
 @login_required
 def challenge_list(request):
-    status_filter = request.GET.get("status", "")
+    raw_status = request.GET.get("status")
+    if raw_status is None:
+        current_status = Challenge.Status.ACTIVE
+        apply_status_filter = True
+    elif raw_status in ("", "all"):
+        current_status = "all"
+        apply_status_filter = False
+    else:
+        current_status = raw_status
+        apply_status_filter = True
+
     challenges = get_user_challenges(request.user)
-    if status_filter:
-        challenges = challenges.filter(status=status_filter)
+    if apply_status_filter:
+        challenges = challenges.filter(status=current_status)
 
     pending_invitations = get_pending_challenge_invitations(request.user)
 
@@ -76,7 +86,7 @@ def challenge_list(request):
         "challenges/challenge_list.html",
         {
             "challenges": challenges,
-            "current_status": status_filter,
+            "current_status": current_status,
             "pending_invitations": pending_invitations,
             "status_choices": Challenge.Status.choices,
         },

@@ -23,13 +23,29 @@
 
 {% block content %}
 <div class="pr-page pb-8">
-  <div class="pr-feed-shell w-full">
-    <header class="pr-feed-header rounded-t-2xl">
-      <p class="pr-eyebrow">{% trans "Community" %}</p>
-      <h1 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">{% trans "Forecasts" %}</h1>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Live forecasts from the community — formal predictions tied to real markets." %}</p>
+  {% trans "Community" as hero_eyebrow %}
+  {% trans "Live" as hero_title %}
+  {% trans "forecasts" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Formal predictions from the community — each card compares entry odds with the current market and live reputation P&L.{% endblocktrans %}
+  {% url 'markets:list' as markets_url %}
+  {% trans "Browse markets" as markets_label %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True show_dot=True title=hero_title gradient=hero_gradient description=hero_description secondary_url=markets_url secondary_label=markets_label %}
 
-      <nav class="mt-4 flex items-center gap-1 overflow-x-auto" aria-label="{% trans 'Feed sort' %}">
+  <section class="mt-6">
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div class="pr-section-head mb-0">
+        <h2 class="pr-section-title">{% trans "Community forecast feed" %}</h2>
+        <p class="pr-section-desc">{% trans "Each card compares entry probability with the current market probability for the same side." %}</p>
+      </div>
+      {% if user.is_authenticated %}
+      <a href="{% url 'predictions:open' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">
+        {% trans "Your open forecasts" %} →
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="mb-4 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
+      <nav class="flex items-center gap-1 overflow-x-auto" aria-label="{% trans 'Feed sort' %}">
         {% url 'dashboard:forecasts' as forecasts_url %}
         <a href="{{ forecasts_url }}?sort=recent{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
            class="pr-feed-tab {% if active_sort == 'recent' %}is-active{% endif %}"
@@ -49,7 +65,7 @@
         <label for="forecasts-market-filter" class="sr-only">{% trans "Filter by market" %}</label>
         <select id="forecasts-market-filter"
                 name="market"
-                class="form-select w-full rounded-xl border-slate-300 bg-slate-50/80 text-sm font-medium dark:border-slate-600 dark:bg-slate-800/80"
+                class="form-select w-full rounded-xl border-slate-300 bg-slate-50/80 text-base font-medium dark:border-slate-600 dark:bg-slate-800/80 sm:text-sm"
                 onchange="this.form.submit()">
           <option value="">{% trans "All markets" %}</option>
           {% for market in market_options %}
@@ -57,10 +73,10 @@
           {% endfor %}
         </select>
       </form>
-    </header>
+    </div>
 
     {% if resolving_soon %}
-    <section class="pr-resolving-soon" aria-label="{% trans 'Resolving soon' %}">
+    <section class="pr-resolving-soon mb-4 rounded-2xl border border-slate-200/80 dark:border-slate-700" aria-label="{% trans 'Resolving soon' %}">
       <div class="pr-resolving-soon-head">
         <span class="pr-resolving-soon-title">⏳ {% trans "Resolving soon" %}</span>
         <span class="pr-resolving-soon-sub">{% trans "Lock in your call before the window closes" %}</span>
@@ -81,9 +97,9 @@
     </section>
     {% endif %}
 
-    <div id="forecasts-feed" class="pr-feed-body rounded-b-2xl">
+    <div id="forecasts-feed" class="grid gap-4">
       {% include "dashboard/partials/forecasts_feed.html" %}
     </div>
-  </div>
+  </section>
 </div>
 {% endblock %}

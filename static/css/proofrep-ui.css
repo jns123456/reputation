@@ -1794,6 +1794,38 @@ html.dark .pr-cta-band {
   transform: translateY(-2px);
 }
 
+.pr-landing-video {
+  margin-inline: auto;
+  max-width: 100%;
+}
+
+.pr-landing-video__media {
+  display: block;
+  width: 100%;
+  max-height: min(52vh, 28rem);
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #0f172a;
+  box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.35);
+  object-fit: contain;
+}
+
+html.dark .pr-landing-video__media {
+  border-color: rgba(71, 85, 105, 0.8);
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 1024px) {
+  .pr-landing-video {
+    margin-inline: 0;
+    max-width: none;
+  }
+
+  .pr-landing-video__media {
+    max-height: min(70vh, 32rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pr-orb, .about-orb, .about-bounce,
   .pr-pulse-icon::before,

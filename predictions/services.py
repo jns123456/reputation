@@ -10,7 +10,15 @@ from integrations.attestation_services import (
 )
 from predictions.models import Prediction
 from predictions.selectors import clear_forecasts_market_options_cache, get_user_active_prediction
-from reputation.services import apply_reputation_for_prediction, apply_reputation_for_prediction_exit
+from reputation.services import (
+    apply_reputation_for_prediction,
+    apply_reputation_for_prediction_exit,
+    calculate_exit_reputation_delta,
+    calculate_reputation_delta,
+    calculate_reputation_stakes,
+    calculate_unrealized_reputation,
+    get_predicted_outcome_probability,
+)
 
 
 def _refresh_market_odds(market):
@@ -245,6 +253,99 @@ def resolve_eliminated_outcome_predictions(market, *, raw_event=None):
         check_challenge_completion(market=market)
 
     return resolved
+
+
+def _side_probability_percent(*, prediction, probability_snapshot):
+    if not probability_snapshot:
+        return None
+    return int(
+        round(
+            get_predicted_outcome_probability(
+                prediction.predicted_outcome,
+                probability_snapshot,
+                predicted_direction=prediction.predicted_direction,
+            )
+            * 100
+        )
+    )
+
+
+def _forecast_realized_reputation_delta(prediction):
+    if prediction.status == Prediction.Status.EXITED:
+        event = prediction.reputation_events.filter(
+            event_type="exited_prediction"
+        ).first()
+        if event:
+            return event.points_delta
+        if prediction.probability_at_exit_time:
+            return calculate_exit_reputation_delta(
+                predicted_outcome=prediction.predicted_outcome,
+                entry_probability_snapshot=prediction.probability_at_prediction_time,
+                exit_probability_snapshot=prediction.probability_at_exit_time,
+                predicted_direction=prediction.predicted_direction,
+            )
+        return None
+
+    if prediction.status != Prediction.Status.RESOLVED or prediction.is_correct is None:
+        return None
+    return calculate_reputation_delta(
+        is_correct=prediction.is_correct,
+        predicted_outcome=prediction.predicted_outcome,
+        probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
+    )
+
+
+def build_forecast_card_metrics(prediction):
+    """Entry/now/P&L display metrics for forecast cards (open book, community feed)."""
+    market = prediction.market
+    entry_percent = _side_probability_percent(
+        prediction=prediction,
+        probability_snapshot=prediction.probability_at_prediction_time,
+    )
+    stakes = calculate_reputation_stakes(
+        predicted_outcome=prediction.predicted_outcome,
+        probability_snapshot=prediction.probability_at_prediction_time,
+        predicted_direction=prediction.predicted_direction,
+    )
+    metrics = {
+        "entry_percent": entry_percent,
+        "now_percent": None,
+        "pnl_delta": None,
+        "middle_label": "now",
+        "resolution_if_correct": stakes["win_points"],
+        "resolution_if_wrong": -stakes["loss_points"],
+        "countdown": None,
+        "show_resolution_note": False,
+    }
+
+    if prediction.status == Prediction.Status.PENDING:
+        metrics["now_percent"] = _side_probability_percent(
+            prediction=prediction,
+            probability_snapshot=market.current_probability or {},
+        )
+        metrics["pnl_delta"] = calculate_unrealized_reputation(prediction)
+        metrics["middle_label"] = "now"
+        metrics["countdown"] = market.expiration_countdown
+        metrics["show_resolution_note"] = True
+        return metrics
+
+    if prediction.status == Prediction.Status.EXITED:
+        metrics["now_percent"] = _side_probability_percent(
+            prediction=prediction,
+            probability_snapshot=prediction.probability_at_exit_time,
+        )
+        metrics["pnl_delta"] = _forecast_realized_reputation_delta(prediction)
+        metrics["middle_label"] = "exit"
+        return metrics
+
+    if prediction.status == Prediction.Status.RESOLVED:
+        metrics["now_percent"] = 100 if prediction.is_correct else 0
+        metrics["pnl_delta"] = _forecast_realized_reputation_delta(prediction)
+        metrics["middle_label"] = "resolution"
+        return metrics
+
+    return metrics
 
 
 def resolve_market_predictions(market):

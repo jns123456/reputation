@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 18:21+0000\n"
+"POT-Creation-Date: 2026-06-03 19:46+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1508,7 +1508,6 @@ msgstr "Buscar usuarios"
 msgid "Search"
 msgstr "Buscar"
 
-#| msgid "Show less"
 msgid "Show all"
 msgstr "Ver todos"
 
@@ -1794,8 +1793,6 @@ msgid ""
 msgstr ""
 
 #, python-format
-#| msgid "%(counter)s forecast"
-#| msgid_plural "%(counter)s forecasts"
 msgid "%(counter)s result"
 msgid_plural "%(counter)s results"
 msgstr[0] "%(counter)s resultado"
@@ -1816,14 +1813,6 @@ msgstr "Anterior"
 
 msgid "Next"
 msgstr "Siguiente"
-
-msgid ""
-"Search by name, @username, email, pseudonym, or bio. We also surface similar"
-" accounts when the match is close."
-msgstr ""
-
-msgid "Start typing to find people on PredictStamp."
-msgstr "Empieza a escribir para encontrar personas en PredictStamp."
 
 msgid "Confirm your email"
 msgstr "Confirma tu email"
@@ -2946,6 +2935,12 @@ msgstr "Empieza a construir tu reputación"
 msgid "Explore the thesis"
 msgstr "Conoce la tesis"
 
+msgid "PredictStamp product overview video"
+msgstr "Video de presentación de PredictStamp"
+
+msgid "Play video"
+msgstr "Reproducir video"
+
 msgid "Scroll down"
 msgstr "Desplázate hacia abajo"
 
@@ -3700,11 +3695,39 @@ msgstr "Sobre el proyecto"
 msgid "Explore categories"
 msgstr "Explorar por categoría"
 
+#| msgid "Live odds"
+msgid "Live"
+msgstr "En vivo"
+
+msgid "forecasts"
+msgstr "pronósticos"
+
 msgid ""
-"Live forecasts from the community — formal predictions tied to real markets."
+"Formal predictions from the community — each card compares entry odds with "
+"the current market and live reputation P&L."
 msgstr ""
-"Pronósticos en vivo de la comunidad — predicciones formales ligadas a "
-"mercados reales."
+"Pronósticos formales de la comunidad: cada tarjeta compara las "
+"probabilidades de entrada con el mercado actual y el P&L de reputación en "
+"vivo."
+
+#| msgid "Community Voice"
+msgid "Community forecast feed"
+msgstr "Feed de pronósticos de la comunidad"
+
+#| msgid ""
+#| "Each card compares your entry probability with the current market "
+#| "probability for the same side."
+msgid ""
+"Each card compares entry probability with the current market probability for"
+" the same side."
+msgstr ""
+"Cada tarjeta compara tu probabilidad de entrada con la probabilidad actual "
+"del mercado para el mismo lado."
+
+#| msgid "open forecast"
+#| msgid_plural "open forecasts"
+msgid "Your open forecasts"
+msgstr "Tus pronósticos abiertos"
 
 msgid "Feed sort"
 msgstr "Orden del feed"
@@ -3883,6 +3906,10 @@ msgstr "Marcar"
 msgid "Log in to bookmark"
 msgstr "Inicia sesión para marcar"
 
+#, python-format
+msgid "opened %(timesince)s ago"
+msgstr "abierto hace %(timesince)s"
+
 msgid ""
 "Unrealized reputation if you exited at current market odds. Updates as the "
 "market moves."
@@ -3900,6 +3927,24 @@ msgstr "%(points)s rep si cierras ahora"
 
 msgid "Break-even if exited now"
 msgstr "Punto de equilibrio si cierras ahora"
+
+msgid "Entry"
+msgstr "Entrada"
+
+msgid "Exit"
+msgstr "Salido"
+
+msgid "Now"
+msgstr "Ahora"
+
+msgid "At resolution"
+msgstr "Resolución"
+
+msgid "if correct"
+msgstr "incorrecto"
+
+msgid "if wrong"
+msgstr ""
 
 msgid "Forecast"
 msgstr "Pronósticos"
@@ -5377,9 +5422,6 @@ msgstr "Posiciones abiertas"
 msgid "Your open"
 msgstr "Tus"
 
-msgid "forecasts"
-msgstr "pronósticos"
-
 msgid ""
 "Track reputation P&L on active forecasts, close positions, and re-enter "
 "whenever your view changes."
@@ -5598,25 +5640,6 @@ msgstr "%(direction)s %(outcome)s"
 msgid "to place your forecast on this event."
 msgstr "para publicar tu pronóstico en este evento."
 
-#, python-format
-msgid "opened %(timesince)s ago"
-msgstr "abierto hace %(timesince)s"
-
-msgid "Entry"
-msgstr "Entrada"
-
-msgid "Now"
-msgstr "Ahora"
-
-msgid "At resolution"
-msgstr "Resolución"
-
-msgid "if correct"
-msgstr "incorrecto"
-
-msgid "if wrong"
-msgstr ""
-
 msgid ""
 "Closing realizes this reputation delta and frees you to forecast again."
 msgstr ""
@@ -5646,9 +5669,6 @@ msgstr "hace %(timesince)s"
 #, python-format
 msgid "Closes %(close_date)s"
 msgstr "Cierra %(close_date)s"
-
-msgid "Exit"
-msgstr "Salido"
 
 #, python-format
 msgid ""
@@ -5724,6 +5744,15 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid ""
+#~ "Live forecasts from the community — formal predictions tied to real markets."
+#~ msgstr ""
+#~ "Pronósticos en vivo de la comunidad — predicciones formales ligadas a "
+#~ "mercados reales."
+
+#~ msgid "Start typing to find people on PredictStamp."
+#~ msgstr "Empieza a escribir para encontrar personas en PredictStamp."
 
 #~ msgid "Average reputation per scored forecast."
 #~ msgstr "Reputación media por pronóstico puntuado."

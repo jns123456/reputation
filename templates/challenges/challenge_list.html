@@ -35,7 +35,7 @@
   {% endif %}
 
   <div class="mb-6 flex flex-wrap gap-2">
-    <a href="{% url 'challenges:list' %}" class="pr-filter-pill {% if not current_status %}is-active{% endif %}">{% trans "All" %}</a>
+    <a href="?status=all" class="pr-filter-pill {% if current_status == 'all' %}is-active{% endif %}">{% trans "All" %}</a>
     {% for value, label in status_choices %}
     <a href="?status={{ value }}" class="pr-filter-pill {% if current_status == value %}is-active{% endif %}">{{ label }}</a>
     {% endfor %}

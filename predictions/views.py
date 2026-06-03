@@ -19,12 +19,8 @@ from predictions.services import (
     create_prediction,
     exit_prediction,
 )
-from reputation.services import (
-    calculate_exit_reputation_delta,
-    calculate_reputation_stakes,
-    calculate_user_unrealized_reputation,
-    get_predicted_outcome_probability,
-)
+from predictions.services import build_forecast_card_metrics
+from reputation.services import calculate_user_unrealized_reputation
 
 from markets.forecast_modes import ForecastMode, get_forecast_mode
 
@@ -39,37 +35,16 @@ def _forecast_form_anchor(market) -> str:
 
 
 def _build_open_position_context(prediction):
-    market = prediction.market
-    entry_probability = get_predicted_outcome_probability(
-        prediction.predicted_outcome,
-        prediction.probability_at_prediction_time,
-        predicted_direction=prediction.predicted_direction,
-    )
-    current_probability = get_predicted_outcome_probability(
-        prediction.predicted_outcome,
-        market.current_probability or {},
-        predicted_direction=prediction.predicted_direction,
-    )
-    current_delta = calculate_exit_reputation_delta(
-        predicted_outcome=prediction.predicted_outcome,
-        entry_probability_snapshot=prediction.probability_at_prediction_time,
-        exit_probability_snapshot=market.current_probability or {},
-        predicted_direction=prediction.predicted_direction,
-    )
-    resolution_stakes = calculate_reputation_stakes(
-        predicted_outcome=prediction.predicted_outcome,
-        probability_snapshot=prediction.probability_at_prediction_time,
-        predicted_direction=prediction.predicted_direction,
-    )
+    metrics = build_forecast_card_metrics(prediction)
     return {
         "prediction": prediction,
-        "market": market,
-        "entry_percent": int(round(entry_probability * 100)),
-        "current_percent": int(round(current_probability * 100)),
-        "current_delta": current_delta,
-        "resolution_if_correct": resolution_stakes["win_points"],
-        "resolution_if_wrong": -resolution_stakes["loss_points"],
-        "countdown": market.expiration_countdown,
+        "market": prediction.market,
+        "entry_percent": metrics["entry_percent"],
+        "current_percent": metrics["now_percent"],
+        "current_delta": metrics["pnl_delta"],
+        "resolution_if_correct": metrics["resolution_if_correct"],
+        "resolution_if_wrong": metrics["resolution_if_wrong"],
+        "countdown": metrics["countdown"],
     }
 
 

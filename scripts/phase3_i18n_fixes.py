@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 PHASE3_FIXES: dict[str, str] = {
+    "PredictStamp product overview video": "Video de presentación de PredictStamp",
     "Welcome to PredictStamp": "Bienvenido a PredictStamp",
     "Welcome to PredictStamp!": "¡Bienvenido a PredictStamp!",
     "Hi %(name)s, thanks for joining PredictStamp.": "Hola %(name)s, gracias por unirte a PredictStamp.",
@@ -73,6 +74,13 @@ PHASE3_FIXES: dict[str, str] = {
         "Confirma tu dirección de email para terminar de crear tu cuenta en PredictStamp."
     ),
     "price": "precio",
+    "Live": "En vivo",
+    "Community forecast feed": "Feed de pronósticos de la comunidad",
+    "Your open forecasts": "Tus pronósticos abiertos",
+    "Formal predictions from the community — each card compares entry odds with the current market and live reputation P&L.": (
+        "Pronósticos formales de la comunidad: cada tarjeta compara las probabilidades de entrada "
+        "con el mercado actual y el P&L de reputación en vivo."
+    ),
 }
 
 PHASE3_PLURAL_FIXES: dict[str, tuple[str, str]] = {}

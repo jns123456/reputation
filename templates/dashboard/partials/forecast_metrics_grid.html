@@ -1,0 +1,41 @@
+{% load i18n %}
+<div class="grid gap-3 sm:grid-cols-3 lg:w-[28rem]">
+  <div class="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Entry" %}</p>
+    <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">
+      {% if entry_percent != None %}{{ entry_percent }}%{% else %}—{% endif %}
+    </p>
+  </div>
+  <div class="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+    {% if middle_label == "exit" %}
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Exit" %}</p>
+    {% elif middle_label == "resolution" %}
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Resolution" %}</p>
+    {% else %}
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Now" %}</p>
+    {% endif %}
+    <p class="mt-1 text-2xl font-bold tabular-nums {% if middle_label == 'resolution' and pnl_delta != None and pnl_delta >= 0 %}text-emerald-700 dark:text-emerald-300{% elif middle_label == 'resolution' and pnl_delta != None %}text-red-700 dark:text-red-300{% else %}text-slate-900 dark:text-slate-50{% endif %}">
+      {% if now_percent != None %}{{ now_percent }}%{% else %}—{% endif %}
+    </p>
+  </div>
+  <div class="rounded-xl border {% if pnl_delta != None and pnl_delta >= 0 %}border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30{% elif pnl_delta != None %}border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30{% else %}border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/40{% endif %} p-3">
+    {% if middle_label == "exit" or middle_label == "resolution" %}
+    <p class="text-xs font-medium uppercase tracking-wide {% if middle_label == 'exit' %}text-amber-700 dark:text-amber-300{% elif pnl_delta != None and pnl_delta >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">{% trans "Realized" %}</p>
+    {% else %}
+    <p class="text-xs font-medium uppercase tracking-wide {% if pnl_delta != None and pnl_delta >= 0 %}text-emerald-700 dark:text-emerald-300{% elif pnl_delta != None %}text-red-700 dark:text-red-300{% else %}text-slate-500 dark:text-slate-400{% endif %}">{% trans "P&L" %}</p>
+    {% endif %}
+    <p class="mt-1 text-2xl font-bold tabular-nums {% if pnl_delta != None and pnl_delta >= 0 %}text-emerald-700 dark:text-emerald-300{% elif pnl_delta != None %}text-red-700 dark:text-red-300{% else %}text-slate-500 dark:text-slate-400{% endif %}">
+      {% if pnl_delta != None %}{% if pnl_delta >= 0 %}+{% endif %}{{ pnl_delta }}{% else %}—{% endif %}
+    </p>
+  </div>
+  {% if show_resolution_note %}
+  <p class="col-span-full text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-right">
+    {% trans "At resolution" %}:
+    <span class="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">+{{ resolution_if_correct }}</span>
+    {% trans "if correct" %}
+    <span class="text-slate-300 dark:text-slate-600" aria-hidden="true">·</span>
+    <span class="font-medium tabular-nums text-red-600 dark:text-red-400">{{ resolution_if_wrong }}</span>
+    {% trans "if wrong" %}
+  </p>
+  {% endif %}
+</div>

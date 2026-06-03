@@ -884,3 +884,37 @@ class ChallengeHowItWorksViewTests(TestCase):
         response = self.client.get("/challenges/how-it-works/")
         self.assertContains(response, "existing open forecast counts automatically", html=False)
 
+
+class ChallengeListViewTests(TestCase):
+    def setUp(self):
+        self.alice = create_user("alice")
+        self.active = Challenge.objects.create(
+            creator=self.alice,
+            title="Active duel",
+            status=Challenge.Status.ACTIVE,
+        )
+        self.completed = Challenge.objects.create(
+            creator=self.alice,
+            title="Finished duel",
+            status=Challenge.Status.COMPLETED,
+        )
+
+    def test_list_defaults_to_active_filter(self):
+        self.client.force_login(self.alice)
+        response = self.client.get("/challenges/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Active duel")
+        self.assertNotContains(response, "Finished duel")
+
+    def test_list_status_all_shows_every_challenge(self):
+        self.client.force_login(self.alice)
+        response = self.client.get("/challenges/?status=all")
+        self.assertContains(response, "Active duel")
+        self.assertContains(response, "Finished duel")
+
+    def test_list_status_active_matches_default(self):
+        self.client.force_login(self.alice)
+        response = self.client.get("/challenges/?status=active")
+        self.assertContains(response, "Active duel")
+        self.assertNotContains(response, "Finished duel")
+

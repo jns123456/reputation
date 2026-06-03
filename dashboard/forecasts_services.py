@@ -6,6 +6,7 @@ from accounts.models import Bookmark
 from comments.selectors import get_user_prediction_votes, get_vote_previews_for_targets
 from comments.models import Vote
 from predictions.selectors import get_forecasts_feed
+from predictions.services import build_forecast_card_metrics
 from reputation.services import calculate_reputation_stakes
 
 FORECASTS_FEED_PAGE_SIZE = 20
@@ -79,6 +80,7 @@ def _build_items(*, user, predictions):
                 probability_snapshot=prediction.probability_at_prediction_time,
                 predicted_direction=prediction.predicted_direction,
             ),
+            "metrics": build_forecast_card_metrics(prediction),
         }
         for prediction in predictions
     ]

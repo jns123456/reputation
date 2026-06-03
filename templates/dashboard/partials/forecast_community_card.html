@@ -1,0 +1,85 @@
+{% load i18n reputation_filters %}
+<article id="forecast-post-{{ prediction.id }}"
+         class="pr-card relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90"
+         data-sort-score="{{ prediction.popularity_score }}"
+         data-sort-time="{{ prediction.created_at|date:'U' }}"
+         data-sort-reputation="{{ prediction.user.profile.reputation_score }}"
+         data-sort-user-popularity="{{ prediction.user.profile.popularity_score }}">
+  <div class="pr-mesh pointer-events-none absolute inset-0 opacity-40" aria-hidden="true"></div>
+
+  <div class="relative p-4 sm:p-5">
+    <div class="flex gap-3">
+      <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="shrink-0">
+        <span class="pr-user-avatar-ring pr-user-avatar-ring--md">
+          {% include "accounts/partials/user_avatar.html" with user=prediction.user %}
+        </span>
+      </a>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm leading-tight">
+          <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="font-bold text-slate-900 hover:underline dark:text-slate-50">
+            {{ prediction.user.public_name }}
+          </a>
+          {% if prediction.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
+          <span class="text-slate-500 dark:text-slate-400">@{{ prediction.user.username }}</span>
+          <span class="text-slate-400 dark:text-slate-600">·</span>
+          <a href="{% url 'markets:detail' slug=market.slug %}#forecast-{{ prediction.id }}" class="text-slate-500 hover:underline dark:text-slate-400">
+            <time datetime="{{ prediction.created_at|date:'c' }}">{% blocktrans with time=prediction.created_at|timesince %}{{ time }} ago{% endblocktrans %}</time>
+          </a>
+          {% include "integrations/partials/attestation_badge.html" with attestation=prediction.verified_attestation %}
+        </div>
+      </div>
+    </div>
+
+    <div class="relative mt-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          {% if prediction.status == "pending" %}
+          <span class="badge-status-open">{% trans "Open" %}</span>
+          {% elif prediction.status == "exited" %}
+          <span class="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800 dark:bg-amber-950/45 dark:text-amber-300">{% trans "Exited" %}</span>
+          {% elif prediction.is_correct %}
+          <span class="rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-800 dark:bg-emerald-950/45 dark:text-emerald-300">{% trans "Correct" %}</span>
+          {% else %}
+          <span class="rounded-full bg-red-100 px-2 py-0.5 font-semibold text-red-800 dark:bg-red-950/45 dark:text-red-300">{% trans "Incorrect" %}</span>
+          {% endif %}
+          {% if market.category %}
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ market.display_category }}</span>
+          {% endif %}
+          {% if metrics.countdown %}
+          <span class="rounded-full px-2 py-0.5 font-semibold tabular-nums
+            {% if metrics.countdown.tone == 'urgent' %}bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200
+            {% elif metrics.countdown.tone == 'soon' %}bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200
+            {% elif metrics.countdown.tone == 'past' %}bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400
+            {% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200{% endif %}">
+            {{ metrics.countdown.text }}
+          </span>
+          {% endif %}
+        </div>
+
+        <a href="{% url 'markets:detail' slug=market.slug %}" class="mt-3 block text-lg font-bold leading-snug text-slate-900 hover:text-brand-700 dark:text-slate-50 dark:hover:text-brand-400">
+          {{ market.display_title }}
+        </a>
+
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          {% trans "Forecast:" %}
+          <strong class="{% if prediction.predicted_direction == 'no' %}text-red-700 dark:text-red-400{% elif prediction.predicted_outcome|lower == 'yes' %}text-emerald-700 dark:text-emerald-400{% elif prediction.predicted_outcome|lower == 'no' %}text-red-700 dark:text-red-400{% else %}text-brand-700 dark:text-brand-400{% endif %}">
+            {% if prediction.predicted_direction == "no" %}{% trans "No" %} {% endif %}
+            {{ prediction.predicted_outcome|localized_outcome }}
+          </strong>
+          <span class="text-slate-400">·</span>
+          {% blocktrans with timesince=prediction.created_at|timesince %}opened {{ timesince }} ago{% endblocktrans %}
+        </p>
+
+        {% if prediction.reasoning %}
+        <p class="mt-3 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{{ prediction.reasoning }}</p>
+        {% endif %}
+      </div>
+
+      {% include "dashboard/partials/forecast_metrics_grid.html" with entry_percent=metrics.entry_percent now_percent=metrics.now_percent pnl_delta=metrics.pnl_delta middle_label=metrics.middle_label resolution_if_correct=metrics.resolution_if_correct resolution_if_wrong=metrics.resolution_if_wrong show_resolution_note=metrics.show_resolution_note %}
+    </div>
+  </div>
+
+  <div class="relative border-t border-slate-100 px-4 py-3 dark:border-slate-700 sm:px-5">
+    {% include "dashboard/partials/forecast_post_actions.html" with share_path=market.slug like_preview=like_preview dislike_preview=dislike_preview %}
+  </div>
+</article>

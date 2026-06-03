@@ -38,30 +38,7 @@
       {% endif %}
     </div>
 
-    <div class="grid gap-3 sm:grid-cols-3 lg:w-[28rem]">
-      <div class="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Entry" %}</p>
-        <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ position.entry_percent }}%</p>
-      </div>
-      <div class="rounded-xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Now" %}</p>
-        <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ position.current_percent }}%</p>
-      </div>
-      <div class="rounded-xl border {% if delta >= 0 %}border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30{% else %}border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30{% endif %} p-3">
-        <p class="text-xs font-medium uppercase tracking-wide {% if delta >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">{% trans "P&L" %}</p>
-        <p class="mt-1 text-2xl font-bold tabular-nums {% if delta >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">
-          {% if delta >= 0 %}+{% endif %}{{ delta }}
-        </p>
-      </div>
-      <p class="col-span-full text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-right">
-        {% trans "At resolution" %}:
-        <span class="font-medium tabular-nums text-emerald-600 dark:text-emerald-400">+{{ position.resolution_if_correct }}</span>
-        {% trans "if correct" %}
-        <span class="text-slate-300 dark:text-slate-600" aria-hidden="true">·</span>
-        <span class="font-medium tabular-nums text-red-600 dark:text-red-400">{{ position.resolution_if_wrong }}</span>
-        {% trans "if wrong" %}
-      </p>
-    </div>
+    {% include "dashboard/partials/forecast_metrics_grid.html" with entry_percent=position.entry_percent now_percent=position.current_percent pnl_delta=delta middle_label="now" resolution_if_correct=position.resolution_if_correct resolution_if_wrong=position.resolution_if_wrong show_resolution_note=True %}
   </div>
 
   <div class="relative mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">

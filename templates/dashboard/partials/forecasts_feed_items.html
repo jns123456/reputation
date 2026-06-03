@@ -1,12 +1,12 @@
 {% load i18n %}
 {% for item in feed_items %}
-  {% include "dashboard/partials/forecast_post.html" with prediction=item.prediction market=item.market comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes like_preview=item.like_preview dislike_preview=item.dislike_preview %}
+  {% include "dashboard/partials/forecast_community_card.html" with prediction=item.prediction market=item.market metrics=item.metrics comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked like_preview=item.like_preview dislike_preview=item.dislike_preview %}
 {% endfor %}
 {% if feed_has_more %}
 <div hx-get="{% url 'dashboard:forecasts_feed' %}?sort={{ active_sort }}&page={{ feed_next_page }}{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
      hx-trigger="revealed"
      hx-swap="outerHTML"
-     class="px-4 py-6 text-center text-sm text-slate-400">
+     class="col-span-full py-8 text-center text-sm text-slate-400">
   <span class="inline-flex items-center gap-2">
     <i data-lucide="loader-2" class="h-4 w-4 animate-spin" aria-hidden="true"></i>
     {% trans "Loading more…" %}
