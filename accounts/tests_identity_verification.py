@@ -106,3 +106,35 @@ class AdminPanelVerificationTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.pending.refresh_from_db()
         self.assertFalse(self.pending.is_verified)
+
+    def test_admin_panel_hides_email_for_anonymous_recent_users(self):
+        anon = create_user(
+            username="anonuser",
+            email="secret-anon@example.com",
+            identity_mode=User.IdentityMode.ANONYMOUS,
+            display_name="Hidden One",
+        )
+        public = create_user(
+            username="publicuser",
+            email="visible@example.com",
+            identity_mode=User.IdentityMode.PUBLIC,
+        )
+        response = self.client.get("/panel/")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "secret-anon@example.com")
+        self.assertContains(response, "visible@example.com")
+        self.assertContains(response, "Hidden One")
+        self.assertContains(response, "@anonuser")
+
+    def test_verification_section_hides_email_for_anonymous_users(self):
+        anon = create_user(
+            username="anonverify",
+            email="anon-verify@example.com",
+            identity_mode=User.IdentityMode.ANONYMOUS,
+            verification_requested=True,
+            is_verified=False,
+        )
+        response = self.client.get("/panel/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "@anonverify")
+        self.assertNotContains(response, "anon-verify@example.com")
