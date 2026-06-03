@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from unittest.mock import patch
 
@@ -10,8 +11,16 @@ from integrations.polymarket.soccer_matches import (
     normalize_world_cup_match_event,
     parse_match_teams,
 )
-from integrations.services import import_market_from_normalized, sync_world_cup_match_markets
+from integrations.services import (
+    import_market_from_normalized,
+    refresh_world_cup_match_market,
+    repair_resolved_markets_with_pending_predictions,
+    sync_world_cup_match_markets,
+)
 from markets.models import Market
+from predictions.models import Prediction
+
+User = get_user_model()
 
 
 MEXICO_VS_RSA_EVENT = {
@@ -247,3 +256,117 @@ class SyncWorldCupMatchMarketsTests(TestCase):
         market = result["imported"][0]["market"]
         self.assertEqual(market.title, "Colombia vs Costa Rica")
         self.assertEqual(market.canonical_category_slug, "sports")
+
+
+COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT = {
+    **COLOMBIA_VS_COSTA_RICA_EVENT,
+    "markets": [
+        {
+            **COLOMBIA_VS_COSTA_RICA_EVENT["markets"][0],
+            "closed": True,
+            "automaticallyResolved": True,
+            "umaResolutionStatus": "resolved",
+            "outcomePrices": '["1", "0"]',
+        },
+        {
+            **COLOMBIA_VS_COSTA_RICA_EVENT["markets"][1],
+            "closed": True,
+            "outcomePrices": '["0", "1"]',
+        },
+        {
+            **COLOMBIA_VS_COSTA_RICA_EVENT["markets"][2],
+            "closed": True,
+            "outcomePrices": '["0", "1"]',
+        },
+    ],
+}
+
+
+class ResolvedSoccerMatchRefreshTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="col-cri-user", password="pass")
+
+    def test_is_soccer_match_event_when_all_moneyline_legs_closed(self):
+        self.assertTrue(is_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT))
+
+    def test_normalize_resolved_soccer_match_after_all_legs_closed(self):
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT)
+        self.assertIsNotNone(normalized)
+        self.assertEqual(normalized["status"], "resolved")
+        self.assertEqual(normalized["resolved_outcome"], "Colombia")
+        self.assertAlmostEqual(normalized["current_probability"]["Colombia"], 1.0)
+
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    @patch("integrations.services.PolymarketClient.fetch_event_by_slug")
+    def test_refresh_resolved_soccer_match_scores_pending_forecast(
+        self, mock_fetch_event, _mock_translate
+    ):
+        mock_fetch_event.return_value = COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT)
+        raw_market = build_world_cup_match_raw(COLOMBIA_VS_COSTA_RICA_EVENT, normalized=normalized)
+        market, _ = import_market_from_normalized(
+            normalized,
+            raw_market=raw_market,
+            raw_event=COLOMBIA_VS_COSTA_RICA_EVENT,
+        )
+        prediction = Prediction.objects.create(
+            user=self.user,
+            market=market,
+            predicted_outcome="Colombia",
+            predicted_direction=Prediction.Direction.YES,
+            probability_at_prediction_time=dict(market.current_probability or {}),
+        )
+
+        refresh_world_cup_match_market(market)
+        prediction.refresh_from_db()
+        market.refresh_from_db()
+
+        self.assertEqual(market.status, Market.Status.RESOLVED)
+        self.assertEqual(market.resolved_outcome, "Colombia")
+        self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
+        self.assertTrue(prediction.is_correct)
+
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    @patch("integrations.services.refresh_market_from_polymarket")
+    def test_repair_batch_refreshes_stuck_soccer_match_forecast(
+        self, mock_refresh, _mock_translate
+    ):
+        def _fake_refresh(m):
+            return refresh_world_cup_match_market(m)
+
+        mock_refresh.side_effect = _fake_refresh
+
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT)
+        raw_market = build_world_cup_match_raw(COLOMBIA_VS_COSTA_RICA_EVENT, normalized=normalized)
+        market, _ = import_market_from_normalized(
+            normalized,
+            raw_market=raw_market,
+            raw_event=COLOMBIA_VS_COSTA_RICA_EVENT,
+        )
+        prediction = Prediction.objects.create(
+            user=self.user,
+            market=market,
+            predicted_outcome="Colombia",
+            predicted_direction=Prediction.Direction.YES,
+            probability_at_prediction_time=dict(market.current_probability or {}),
+        )
+        market.polymarket_event_raw = COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT
+        market.save(update_fields=["polymarket_event_raw", "updated_at"])
+
+        with patch(
+            "integrations.services.PolymarketClient.fetch_event_by_slug",
+            return_value=COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT,
+        ):
+            result = repair_resolved_markets_with_pending_predictions()
+
+        prediction.refresh_from_db()
+        market.refresh_from_db()
+
+        self.assertTrue(
+            result["resolved_predictions"] >= 1 or result["refreshed_markets"] >= 1,
+            msg=f"repair should refresh or score: {result}",
+        )
+        self.assertEqual(market.status, Market.Status.RESOLVED)
+        self.assertEqual(market.resolved_outcome, "Colombia")
+        self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
+        self.assertTrue(prediction.is_correct)

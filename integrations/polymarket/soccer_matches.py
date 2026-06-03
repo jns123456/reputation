@@ -49,7 +49,10 @@ def is_soccer_match_event(event: dict) -> bool:
         return False
     if " vs " not in lowered and " vs. " not in lowered:
         return False
-    return len(_moneyline_markets(event, open_only=True)) == 3
+    # Count all moneyline legs, not only open ones. After a match ends every leg is
+    # closed; requiring open legs made refresh/normalize return None and left forecasts
+    # stuck pending while Polymarket already showed the winner.
+    return len(_moneyline_markets(event, open_only=False)) == 3
 
 
 # Backwards-compatible alias — detection is not World-Cup-specific.
