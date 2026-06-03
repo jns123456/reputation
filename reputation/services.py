@@ -56,6 +56,10 @@ def get_predicted_outcome_probability(predicted_outcome, probability_snapshot, p
                 break
 
     if prob is None:
+        # Missing outcome with other prices present usually means that bucket closed
+        # (e.g. eliminated player removed from open-only sync) — treat as 0, not 50%.
+        if probability_snapshot:
+            return 0.0
         return 0.5
 
     probability = max(0.0, min(1.0, float(prob)))

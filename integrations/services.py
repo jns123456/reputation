@@ -15,7 +15,7 @@ from integrations.polymarket.client import (
     normalize_polymarket_record,
 )
 from markets.models import Market
-from predictions.services import resolve_market_predictions
+from predictions.services import resolve_eliminated_outcome_predictions, resolve_market_predictions
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +120,8 @@ def repair_resolved_markets_with_pending_predictions(*, limit=200):
             repaired_markets += 1
         if market.status == Market.Status.RESOLVED and market.resolved_outcome:
             resolved_predictions += len(resolve_market_predictions(market))
+        elif market.status == Market.Status.OPEN:
+            resolved_predictions += len(resolve_eliminated_outcome_predictions(market))
 
     return {
         "repaired_markets": repaired_markets,
@@ -182,6 +184,8 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
             market = backfill_market_resolved_outcome(market, raw_market=raw_market)
             if market.resolved_outcome:
                 resolve_market_predictions(market)
+        elif market.status == Market.Status.OPEN:
+            resolve_eliminated_outcome_predictions(market, raw_event=raw_event)
 
         from markets.display_metadata import sync_market_display_metadata
 

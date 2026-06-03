@@ -742,6 +742,18 @@ def infer_binary_resolved_outcome(raw, labels=None):
     return ""
 
 
+def grouped_outcome_bucket_lost(raw_market: dict) -> bool:
+    """True when this grouped outcome can no longer win (e.g. player eliminated)."""
+    yes_price = _yes_price(raw_market)
+    if yes_price is None:
+        return False
+    if _market_is_resolved(raw_market):
+        return not _market_is_resolved_yes(raw_market)
+    if raw_market.get("closed") and yes_price <= (1 - _RESOLVED_YES_PRICE_THRESHOLD):
+        return True
+    return False
+
+
 def _market_is_resolved_yes(raw_market: dict) -> bool:
     """True when a grouped/binary sub-market resolved to Yes."""
     if not _market_is_resolved(raw_market):
@@ -852,7 +864,7 @@ def normalize_polymarket_event_record(
         if not label:
             continue
         yes_price = _yes_price(raw_market)
-        if yes_price is not None and not raw_market.get("closed"):
+        if yes_price is not None:
             probabilities[label] = yes_price
         outcome_markets[label] = _outcome_market_meta(raw_market)
         if _market_is_resolved_yes(raw_market):

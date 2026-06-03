@@ -180,6 +180,73 @@ def exit_prediction(*, prediction, user):
     return prediction
 
 
+def resolve_eliminated_outcome_predictions(market, *, raw_event=None):
+    """Resolve pending forecasts whose outcome bucket has definitively lost.
+
+    Tournament-style grouped events (e.g. French Open winner) often stay ``open``
+    until the champion is known, but eliminated players' sub-markets close at 0.
+    """
+    from markets.models import Market
+
+    if market.status == Market.Status.RESOLVED:
+        return []
+
+    from integrations.polymarket.client import (
+        _grouped_outcome_markets,
+        grouped_outcome_bucket_lost,
+    )
+    event = raw_event or market.polymarket_event_raw or {}
+    if not event.get("markets"):
+        return []
+
+    eliminated_labels = []
+    for raw_market in _grouped_outcome_markets(event, open_only=False):
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        if label and grouped_outcome_bucket_lost(raw_market):
+            eliminated_labels.append(label)
+
+    if not eliminated_labels:
+        return []
+
+    resolved = []
+    predictions = Prediction.objects.filter(
+        market=market,
+        status=Prediction.Status.PENDING,
+    ).select_related("user", "user__profile")
+
+    eliminated_lower = {label.lower(): label for label in eliminated_labels}
+    for prediction in predictions:
+        pick = (prediction.predicted_outcome or "").strip()
+        if pick.lower() not in eliminated_lower:
+            continue
+        if prediction.predicted_direction != Prediction.Direction.YES:
+            continue
+
+        prediction.status = Prediction.Status.RESOLVED
+        prediction.is_correct = False
+        prediction.resolved_at = timezone.now()
+        prediction.save(
+            update_fields=["status", "is_correct", "resolved_at", "updated_at"]
+        )
+
+        profile = prediction.user.profile
+        profile.neutral_prediction_count = max(0, profile.neutral_prediction_count - 1)
+        profile.save(update_fields=["neutral_prediction_count", "updated_at"])
+
+        apply_reputation_for_prediction(prediction)
+        transaction.on_commit(
+            lambda p=prediction: record_prediction_resolution_attestation_safely(p)
+        )
+        resolved.append(prediction)
+
+    if resolved:
+        from challenges.services import check_challenge_completion
+
+        check_challenge_completion(market=market)
+
+    return resolved
+
+
 def resolve_market_predictions(market):
     """Resolve all pending predictions when a market is resolved."""
     if market.status != market.Status.RESOLVED or not market.resolved_outcome:
