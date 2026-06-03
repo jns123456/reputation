@@ -1799,20 +1799,83 @@ html.dark .pr-cta-band {
   max-width: 100%;
 }
 
-.pr-landing-video__media {
-  display: block;
-  width: 100%;
-  max-height: min(52vh, 28rem);
+.pr-landing-video__frame {
+  position: relative;
+  overflow: hidden;
   border-radius: 1rem;
   border: 1px solid rgba(226, 232, 240, 0.9);
   background: #0f172a;
   box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.35);
-  object-fit: contain;
 }
 
-html.dark .pr-landing-video__media {
+.pr-landing-video__frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(15, 23, 42, 0.35);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.pr-landing-video__frame--playing::before {
+  opacity: 0;
+}
+
+html.dark .pr-landing-video__frame {
   border-color: rgba(71, 85, 105, 0.8);
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.pr-landing-video__media {
+  display: block;
+  width: 100%;
+  max-height: min(52vh, 28rem);
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.pr-landing-video__frame:not(.pr-landing-video__frame--playing) .pr-landing-video__media {
+  pointer-events: none;
+}
+
+.pr-landing-video__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  min-width: var(--pr-touch-min);
+  min-height: var(--pr-touch-min);
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #4f46e5 0%, #10b981 100%);
+  color: #fff;
+  box-shadow: 0 12px 32px -8px rgba(79, 70, 229, 0.55);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pr-landing-video__play:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow: 0 16px 40px -6px rgba(79, 70, 229, 0.65);
+}
+
+.pr-landing-video__play:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.pr-landing-video__play-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.2rem;
 }
 
 @media (min-width: 1024px) {
@@ -1823,6 +1886,16 @@ html.dark .pr-landing-video__media {
 
   .pr-landing-video__media {
     max-height: min(70vh, 32rem);
+  }
+
+  .pr-landing-video__play {
+    width: 4.75rem;
+    height: 4.75rem;
+  }
+
+  .pr-landing-video__play-icon {
+    width: 2rem;
+    height: 2rem;
   }
 }
 

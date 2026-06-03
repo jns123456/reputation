@@ -79,25 +79,26 @@
       </div>
 
       <figure class="pr-landing-video w-full lg:justify-self-end"
-              x-data="{ videoPlaying: false }">
+              x-data="landingVideo()">
         <div class="pr-landing-video__frame"
              :class="videoPlaying && 'pr-landing-video__frame--playing'">
           <video class="pr-landing-video__media"
                  x-ref="landingVideo"
                  playsinline
-                 preload="metadata"
-                 :controls="videoPlaying"
+                 webkit-playsinline
+                 controls
+                 preload="auto"
                  @play="videoPlaying = true"
                  @pause="videoPlaying = false"
                  @ended="videoPlaying = false"
                  aria-label="{% trans 'PredictStamp product overview video' %}">
-            <source src="{% static 'videos/landing-hero.mp4' %}" type="video/mp4">
+            <source src="{% url 'landing_hero_video' %}" type="video/mp4">
           </video>
           <button type="button"
                   class="pr-landing-video__play pr-touch-target"
                   x-show="!videoPlaying"
                   x-cloak
-                  @click="$refs.landingVideo.play()"
+                  @click.prevent="play()"
                   aria-label="{% trans 'Play video' %}">
             <svg class="pr-landing-video__play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M8 5v14l11-7z"/>

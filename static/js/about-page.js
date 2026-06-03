@@ -23,6 +23,31 @@ document.addEventListener("alpine:init", function () {
     },
   });
 
+  Alpine.data("landingVideo", function () {
+    return {
+      videoPlaying: false,
+      play: function () {
+        var video = this.$refs.landingVideo;
+        if (!video) {
+          return;
+        }
+        video.controls = true;
+        var promise = video.play();
+        if (promise && typeof promise.then === "function") {
+          promise
+            .then(
+              function () {
+                this.videoPlaying = true;
+              }.bind(this)
+            )
+            .catch(function () {});
+        } else {
+          this.videoPlaying = true;
+        }
+      },
+    };
+  });
+
   Alpine.data("aboutPage", function () {
     return {
       leaderboardMode: "reputation",

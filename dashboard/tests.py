@@ -35,7 +35,7 @@ class LandingPageI18nTests(TestCase):
         self.assertContains(response, "What we track")
         self.assertContains(response, "Compete without betting")
         self.assertContains(response, "Reputation vs Popularity")
-        self.assertContains(response, "videos/landing-hero.mp4")
+        self.assertContains(response, "/assets/landing-hero.mp4")
 
     def test_landing_renders_spanish_copy_with_language_cookie(self):
         self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"

@@ -124,7 +124,7 @@ class AdminPanelVerificationTests(TestCase):
         self.assertNotContains(response, "secret-anon@example.com")
         self.assertContains(response, "visible@example.com")
         self.assertContains(response, "Hidden One")
-        self.assertContains(response, "@anonuser")
+        self.assertNotContains(response, "@anonuser")
 
     def test_verification_section_hides_email_for_anonymous_users(self):
         anon = create_user(
@@ -136,5 +136,5 @@ class AdminPanelVerificationTests(TestCase):
         )
         response = self.client.get("/panel/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "@anonverify")
+        self.assertNotContains(response, "@anonverify")
         self.assertNotContains(response, "anon-verify@example.com")
