@@ -107,27 +107,37 @@ class AdminPanelVerificationTests(TestCase):
         self.pending.refresh_from_db()
         self.assertFalse(self.pending.is_verified)
 
-    def test_admin_panel_hides_email_for_anonymous_recent_users(self):
-        anon = create_user(
+    def test_admin_panel_shows_email_for_all_users_including_anonymous(self):
+        create_user(
             username="anonuser",
             email="secret-anon@example.com",
             identity_mode=User.IdentityMode.ANONYMOUS,
             display_name="Hidden One",
         )
-        public = create_user(
+        create_user(
             username="publicuser",
             email="visible@example.com",
             identity_mode=User.IdentityMode.PUBLIC,
         )
         response = self.client.get("/panel/")
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "secret-anon@example.com")
+        self.assertContains(response, "secret-anon@example.com")
         self.assertContains(response, "visible@example.com")
         self.assertContains(response, "Hidden One")
-        self.assertNotContains(response, "@anonuser")
 
-    def test_verification_section_hides_email_for_anonymous_users(self):
-        anon = create_user(
+    def test_non_superuser_cannot_access_admin_panel(self):
+        create_user(
+            username="publicuser",
+            email="visible@example.com",
+            identity_mode=User.IdentityMode.PUBLIC,
+        )
+        create_user(username="regular")
+        self.client.login(username="regular", password="testpass123")
+        response = self.client.get("/panel/")
+        self.assertEqual(response.status_code, 302)
+
+    def test_verification_section_shows_email_for_anonymous_pending_users(self):
+        create_user(
             username="anonverify",
             email="anon-verify@example.com",
             identity_mode=User.IdentityMode.ANONYMOUS,
@@ -136,5 +146,5 @@ class AdminPanelVerificationTests(TestCase):
         )
         response = self.client.get("/panel/")
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "@anonverify")
-        self.assertNotContains(response, "anon-verify@example.com")
+        self.assertContains(response, "anon-verify@example.com")
+        self.assertContains(response, "@anonverify")

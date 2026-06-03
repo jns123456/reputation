@@ -75,11 +75,8 @@
               {% if u.is_superuser %}<span class="badge-rep ml-1">{% trans "Admin" %}</span>{% endif %}
             </a>
             <p class="truncate text-xs text-slate-500 dark:text-slate-400">
-              {% if u.hides_email_in_admin_ui %}
-              <span class="{{ u.identity_mode_badge_class }}">{{ u.get_identity_mode_display }}</span>
-              {% else %}
               {{ u.email|default:u.username }}
-              {% endif %}
+              <span class="ml-1.5 {{ u.identity_mode_badge_class }}">{{ u.get_identity_mode_display }}</span>
             </p>
           </div>
           <span class="shrink-0 text-xs text-slate-400 dark:text-slate-500">{{ u.date_joined|date:"d/m/Y" }}</span>

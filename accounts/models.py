@@ -124,11 +124,6 @@ class User(AbstractUser):
         return self.identity_mode != self.IdentityMode.ANONYMOUS
 
     @property
-    def hides_email_in_admin_ui(self):
-        """Superadmin panel must not surface email or @username for anonymous accounts."""
-        return self.identity_mode == self.IdentityMode.ANONYMOUS
-
-    @property
     def is_email_verified(self):
         return self.email_verified_at is not None
 
