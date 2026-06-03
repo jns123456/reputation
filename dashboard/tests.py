@@ -76,6 +76,27 @@ class ForecastsPageTests(TestCase):
         self.assertContains(response, "Strong signal from on-chain data.")
         self.assertContains(response, "Forecasts test market")
 
+    def test_forecasts_page_hides_handle_for_anonymous_users(self):
+        anon = User.objects.create_user(
+            username="secretanon",
+            email="anon@example.com",
+            password="pass",
+            identity_mode=User.IdentityMode.ANONYMOUS,
+            display_name="TheBagHodler",
+            onboarding_completed=True,
+        )
+        create_prediction(
+            user=anon,
+            market=self.market,
+            predicted_outcome="Yes",
+            reasoning="Anonymous forecast line",
+        )
+        response = self.client.get("/forecasts/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "TheBagHodler")
+        self.assertContains(response, "Anonymous forecast line")
+        self.assertNotContains(response, "@secretanon")
+
     def test_forecasts_feed_filters_by_market(self):
         other_market = Market.objects.create(
             external_id="forecasts-m2",

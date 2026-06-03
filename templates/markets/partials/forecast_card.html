@@ -20,7 +20,9 @@
               {{ prediction.user.public_name }}
             </a>
             {% if prediction.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
+            {% if prediction.user.show_username_publicly %}
             <span class="text-slate-500 dark:text-slate-400">@{{ prediction.user.username }}</span>
+            {% endif %}
             <span class="text-slate-400 dark:text-slate-600">·</span>
             <time datetime="{{ prediction.created_at|date:'c' }}" class="text-slate-500 dark:text-slate-400">{% blocktrans with time=prediction.created_at|timesince %}{{ time }} ago{% endblocktrans %}</time>
             {% include "integrations/partials/attestation_badge.html" with attestation=prediction.verified_attestation %}
