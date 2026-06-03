@@ -315,6 +315,7 @@ def import_markets_from_polymarket(*, limit=50, offset=0, active=True):
                 composite = normalize_polymarket_event_record(
                     raw_event,
                     default_category=raw.get("category") or "",
+                    require_open=False,
                 )
                 if h2h:
                     seen_composite_slugs.add(event_slug)
@@ -386,6 +387,7 @@ def _import_polymarket_market_pairs(client, pairs, *, default_category=""):
                 normalized = normalize_polymarket_event_record(
                     raw_event or {},
                     default_category=default_category or raw_market.get("category") or "",
+                    require_open=False,
                 )
                 if not normalized:
                     continue

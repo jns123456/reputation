@@ -174,7 +174,7 @@ class CollectBinaryMarketPairsTests(SimpleTestCase):
             ],
         }
 
-        normalized = normalize_polymarket_event_record(event, require_open=False)
+        normalized = normalize_polymarket_event_record(event)
 
         self.assertEqual(normalized["status"], "resolved")
         self.assertEqual(normalized["resolved_outcome"], "PSG")

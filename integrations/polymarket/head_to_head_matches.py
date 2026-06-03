@@ -20,10 +20,14 @@ H2H_MATCH_KIND = "h2h_match_2way"
 # ``basketball`` is intentionally omitted: it mixes NBA with Euroleague/NCAA (~40+ events).
 # NBA playoff games are tagged ``nba`` (typically only a few live at once).
 # UFC fight nights use tag ``ufc`` (2-fighter moneyline, same shape as tennis/NBA).
+# NFL/MLB/NHL use the same single moneyline (two team/player names) as NBA tennis.
 H2H_MATCH_TAG_SLUGS = (
     "tennis",
     "nba",
     "ufc",
+    "nfl",
+    "mlb",
+    "nhl",
 )
 
 _RESOLVED_PRICE_THRESHOLD = 0.99

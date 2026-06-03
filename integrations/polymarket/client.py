@@ -532,7 +532,11 @@ def collect_importable_market_pairs_from_events(
                     return pairs
             continue
 
-        composite = normalize_polymarket_event_record(event, default_category=default_category)
+        composite = normalize_polymarket_event_record(
+            event,
+            default_category=default_category,
+            require_open=False,
+        )
         if composite:
             external_id = composite["external_id"]
             if external_id not in seen_ids:
@@ -776,7 +780,7 @@ def is_multi_outcome_event_record(
     event: dict,
     *,
     min_outcomes: int = 2,
-    require_open: bool = True,
+    require_open: bool = False,
 ) -> bool:
     """True for Polymarket grouped events that can be represented as one forecast."""
     slug = event.get("slug") or event.get("id")
@@ -818,7 +822,7 @@ def normalize_polymarket_event_record(
     event: dict,
     *,
     default_category: str = "",
-    require_open: bool = True,
+    require_open: bool = False,
 ) -> dict | None:
     """Convert a grouped Polymarket event into one internal multi-outcome market."""
     if not is_multi_outcome_event_record(event, require_open=require_open):
