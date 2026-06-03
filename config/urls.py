@@ -3,9 +3,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.i18n import set_language
 
-from config import landing_video, pwa_views
+from config import brand_views, landing_video, pwa_views
 
 urlpatterns = [
+    path(
+        "brand/auth0-logo.jpg",
+        brand_views.serve_auth0_logo,
+        name="auth0_logo",
+    ),
     path(
         "assets/landing-hero.mp4",
         landing_video.serve_landing_hero_video,
