@@ -1804,27 +1804,35 @@ html.dark .pr-cta-band {
   overflow: hidden;
   border-radius: 1rem;
   border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+  box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.12);
+}
+
+.pr-landing-video__frame--playing {
   background: #0f172a;
   box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.35);
 }
 
-.pr-landing-video__frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: rgba(15, 23, 42, 0.35);
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
-.pr-landing-video__frame--playing::before {
-  opacity: 0;
-}
-
 html.dark .pr-landing-video__frame {
   border-color: rgba(71, 85, 105, 0.8);
+}
+
+html.dark .pr-landing-video__frame--playing {
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.pr-landing-video__poster {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 10rem;
+  padding: 2rem 1.5rem;
+  object-fit: contain;
+  background: #fff;
+}
+
+html.dark .pr-landing-video__poster {
+  background: #fff;
 }
 
 .pr-landing-video__media {
@@ -1836,6 +1844,12 @@ html.dark .pr-landing-video__frame {
 }
 
 .pr-landing-video__frame:not(.pr-landing-video__frame--playing) .pr-landing-video__media {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
   pointer-events: none;
 }
 

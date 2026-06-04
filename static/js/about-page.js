@@ -32,6 +32,9 @@ document.addEventListener("alpine:init", function () {
           return;
         }
         video.controls = true;
+        if (video.preload === "none") {
+          video.preload = "auto";
+        }
         var promise = video.play();
         if (promise && typeof promise.then === "function") {
           promise

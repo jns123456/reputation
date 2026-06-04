@@ -82,12 +82,21 @@
               x-data="landingVideo()">
         <div class="pr-landing-video__frame"
              :class="videoPlaying && 'pr-landing-video__frame--playing'">
+          <img class="pr-landing-video__poster"
+               x-show="!videoPlaying"
+               x-cloak
+               src="{% static 'images/landing-video-poster.png' %}"
+               width="775"
+               height="187"
+               alt="{% trans 'PredictStamp.com — The social layer for prediction markets' %}"
+               decoding="async">
           <video class="pr-landing-video__media"
                  x-ref="landingVideo"
                  playsinline
                  webkit-playsinline
-                 controls
-                 preload="auto"
+                 preload="none"
+                 :controls="videoPlaying"
+                 poster="{% static 'images/landing-video-poster.png' %}"
                  @play="videoPlaying = true"
                  @pause="videoPlaying = false"
                  @ended="videoPlaying = false"
