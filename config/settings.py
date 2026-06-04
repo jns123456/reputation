@@ -159,8 +159,10 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SAMESITE = "Lax"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -695,6 +697,7 @@ if _RUNNING_TESTS:
 validate_production_settings(
     debug=DEBUG,
     secret_key=SECRET_KEY,
+    eas_offchain_signing_key=EAS_OFFCHAIN_SIGNING_KEY,
     email_verification_dev_show_link=EMAIL_VERIFICATION_DEV_SHOW_LINK,
     running_tests=_RUNNING_TESTS,
 )
