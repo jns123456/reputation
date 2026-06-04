@@ -341,3 +341,20 @@ def profile_following(request, username):
         users=get_following_users(profile_user),
         active_tab="following",
     )
+
+
+def profile_monetize(request, username):
+    """Creator monetization hub (Substack-style) under the user profile."""
+    profile_user = get_object_or_404(
+        User.objects.select_related("profile"),
+        username=username,
+    )
+    is_profile_owner = request.user.is_authenticated and request.user.pk == profile_user.pk
+    return render(
+        request,
+        "accounts/profile_monetize.html",
+        {
+            "profile_user": profile_user,
+            "is_profile_owner": is_profile_owner,
+        },
+    )

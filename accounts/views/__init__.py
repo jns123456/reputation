@@ -28,6 +28,7 @@ __all__ = [
     "bookmarks_list",
     "profile_followers",
     "profile_following",
+    "profile_monetize",
     "follow_toggle",
     "alert_settings",
     "notifications_list",

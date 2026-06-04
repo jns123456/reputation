@@ -149,6 +149,8 @@
               {% endif %}
               <a href="{% url 'accounts:profile' username=user.username %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Your profile" %}</a>
+              <a href="{% url 'accounts:profile_monetize' username=user.username %}"
+                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Monetize content" %}</a>
               <a href="{% url 'predictions:open' %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Open forecasts" %}</a>
               <a href="{% url 'accounts:bookmarks' %}"
