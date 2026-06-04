@@ -2,6 +2,7 @@ import os
 import sys
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 
 import environ
 import ssl
@@ -81,6 +82,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "config.request_id_middleware.RequestIdMiddleware",
+    "config.security_middleware.ContentSecurityPolicyMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -149,8 +152,15 @@ if not DEBUG:
     # Trust the proxy's protocol header so request.build_absolute_uri() yields
     # https:// — required for the Auth0 callback URL to match and be accepted.
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
+    SECURE_REFERRER_POLICY = env("SECURE_REFERRER_POLICY", default="same-origin")
+    SECURE_CONTENT_TYPE_NOSNIFF = True
     SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -314,6 +324,8 @@ VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
 VAPID_CLAIMS_EMAIL = env("VAPID_CLAIMS_EMAIL", default="mailto:admin@predictstamp.app")
 # Push is inert unless both keys are configured — keeps dev/CI clean.
 WEBPUSH_ENABLED = bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY)
+if _RUNNING_TESTS:
+    WEBPUSH_ENABLED = False
 
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard:home"
@@ -365,6 +377,10 @@ CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = dict(CELERY_BROKER_TRANSPORT_OPTIONS)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+if _RUNNING_TESTS:
+    # Run tasks in-process so ``.delay()`` never needs a local Redis broker.
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
 # Heroku Redis uses rediss:// — Celery/kombu need explicit SSL (same as Django cache).
 if _redis_url.startswith("rediss://"):
@@ -424,6 +440,9 @@ H2H_MATCH_SYNC_LIMIT = env.int("H2H_MATCH_SYNC_LIMIT", default=0)
 MARKET_SYNC_STALE_MINUTES = env.int("MARKET_SYNC_STALE_MINUTES", default=10)
 MARKET_SYNC_STALE_BATCH_SIZE = env.int("MARKET_SYNC_STALE_BATCH_SIZE", default=100)
 MARKET_TRANSLATION_ENABLED = env.bool("MARKET_TRANSLATION_ENABLED", default=False)
+if _RUNNING_TESTS:
+    # Never call MyMemory/DeepL during tests (avoids live HTTP + macOS SSL issues).
+    MARKET_TRANSLATION_ENABLED = False
 MARKET_TRANSLATION_CACHE_SECONDS = env.int("MARKET_TRANSLATION_CACHE_SECONDS", default=60 * 60 * 24 * 30)
 MARKET_TRANSLATION_REQUEST_DELAY = env.float("MARKET_TRANSLATION_REQUEST_DELAY", default=0.35)
 DEEPL_AUTH_KEY = env("DEEPL_AUTH_KEY", default="")
@@ -576,9 +595,115 @@ POLYMARKET_EMBED_CONTENT_WIDTH = env.int("POLYMARKET_EMBED_CONTENT_WIDTH", defau
 POLYMARKET_EMBED_WIDTH = env("POLYMARKET_EMBED_WIDTH", default="100%")
 POLYMARKET_EMBED_HEIGHT = env.int("POLYMARKET_EMBED_HEIGHT", default=420)
 
+
+def build_content_security_policy():
+    """Pragmatic CSP for Tailwind/HTMX CDN + Polymarket embeds (report-only rollout)."""
+    embed_hosts = []
+    for url in (POLYMARKET_EMBED_BASE_URL, POLYMARKET_SPORTS_EMBED_BASE_URL):
+        host = urlparse(url).netloc
+        if host and host not in embed_hosts:
+            embed_hosts.append(host)
+    embed_src = " ".join(embed_hosts) if embed_hosts else "embed.polymarket.com"
+    dicebear_host = urlparse(AVATAR_DICEBEAR_BASE_URL).netloc or "api.dicebear.com"
+    api_host = urlparse(POLYMARKET_API_URL).netloc or "gamma-api.polymarket.com"
+    return (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com unpkg.com "
+        "cdn.jsdelivr.net code.iconify.design challenges.cloudflare.com; "
+        f"frame-src 'self' {embed_src}; "
+        "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com; "
+        f"img-src 'self' data: https: {dicebear_host}; "
+        f"connect-src 'self' https://{api_host}; "
+        "font-src 'self' data:; "
+        "object-src 'none'; "
+        "base-uri 'self';"
+    )
+
+
+CSP_ENABLED = env.bool("CSP_ENABLED", default=False)
+CSP_REPORT_ONLY = env.bool("CSP_REPORT_ONLY", default=True)
+CONTENT_SECURITY_POLICY = build_content_security_policy()
+
+LOG_LEVEL = env("LOG_LEVEL", default="DEBUG" if DEBUG else "INFO")
+if _RUNNING_TESTS:
+    LOG_LEVEL = "WARNING"
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+        "request": {
+            "format": "{levelname} {asctime} {name} request_id={request_id} {message}",
+            "style": "{",
+        },
+    },
+    "filters": {
+        "request_id": {
+            "()": "config.logging_filters.RequestIdFilter",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "request_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "request",
+            "filters": ["request_id"],
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+    },
+    "loggers": {
+        "django.request": {
+            "level": "ERROR",
+            "handlers": ["request_console"],
+            "propagate": False,
+        },
+        "celery": {"level": "INFO"},
+        "integrations": {"level": "INFO"},
+        "accounts": {"level": "INFO"},
+    },
+}
+if _RUNNING_TESTS:
+    LOGGING["root"]["level"] = "WARNING"
+    LOGGING["loggers"].update(
+        {
+            "django.request": {
+                "level": "CRITICAL",
+                "handlers": ["request_console"],
+                "propagate": False,
+            },
+            "urllib3": {"level": "WARNING", "propagate": False},
+            "urllib3.connectionpool": {"level": "WARNING", "propagate": False},
+            "PIL": {"level": "WARNING", "propagate": False},
+            "rlp": {"level": "WARNING", "propagate": False},
+            "celery": {"level": "WARNING"},
+            "integrations": {"level": "WARNING"},
+            "integrations.services": {"level": "CRITICAL", "propagate": False},
+            "accounts": {"level": "WARNING"},
+            "accounts.follow_services": {"level": "CRITICAL", "propagate": False},
+        }
+    )
+
 validate_production_settings(
     debug=DEBUG,
     secret_key=SECRET_KEY,
     email_verification_dev_show_link=EMAIL_VERIFICATION_DEV_SHOW_LINK,
     running_tests=_RUNNING_TESTS,
 )
+
+# Error monitoring (optional — no-op when SENTRY_DSN is unset)
+SENTRY_DSN = env("SENTRY_DSN", default="")
+SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT", default="production" if not DEBUG else "development")
+SENTRY_TRACES_SAMPLE_RATE = env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.1)
+
+from config.sentry_init import init_sentry  # noqa: E402
+
+init_sentry()

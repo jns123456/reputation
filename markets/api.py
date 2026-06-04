@@ -1,4 +1,5 @@
 from rest_framework import serializers, viewsets
+from rest_framework.exceptions import PermissionDenied
 
 from markets.models import Market
 from markets.selectors import get_markets_list
@@ -51,9 +52,17 @@ class MarketViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MarketSerializer
     lookup_field = "slug"
 
+    def _include_raw_requested(self):
+        return self.request.query_params.get("include_raw") in {"1", "true", "yes"}
+
     def get_serializer_class(self):
         if self.action == "retrieve":
-            if self.request.query_params.get("include_raw") in {"1", "true", "yes"}:
+            if self._include_raw_requested():
+                user = self.request.user
+                if not user or not user.is_authenticated or not user.is_staff:
+                    raise PermissionDenied(
+                        "include_raw is restricted to staff accounts."
+                    )
                 return MarketRawDetailSerializer
             return MarketDetailSerializer
         return MarketSerializer

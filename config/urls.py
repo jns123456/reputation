@@ -3,9 +3,10 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.i18n import set_language
 
-from config import brand_views, landing_video, pwa_views
+from config import brand_views, health_views, landing_video, pwa_views
 
 urlpatterns = [
+    path("health/", health_views.health, name="health"),
     path(
         "brand/auth0-logo.jpg",
         brand_views.serve_auth0_logo,

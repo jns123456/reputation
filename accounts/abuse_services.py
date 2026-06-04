@@ -52,6 +52,9 @@ DEFAULT_RATE_LIMITS = {
     "login": {
         "ip": (20, 900),
     },
+    "mcp_http": {
+        "ip": (300, 3600),
+    },
     "mcp_call": {
         "new": (60, 3600),
         "standard": (600, 3600),

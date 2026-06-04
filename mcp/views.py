@@ -15,6 +15,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from accounts import abuse_services
+from accounts.http_utils import enforce_ip_rate_limit
 from mcp.auth import authenticate_request
 from mcp.errors import McpError
 from mcp.rpc import PUBLIC_METHODS, discovery_document, handle_method
@@ -39,6 +41,13 @@ def mcp_endpoint(request):
 
     if request.method == "GET":
         return JsonResponse(discovery_document())
+
+    try:
+        enforce_ip_rate_limit(request=request, action="mcp_http")
+    except abuse_services.RateLimitExceeded:
+        return _rpc_error(
+            None, "rate_limited", "Too many MCP requests.", http_status=429
+        )
 
     try:
         payload = json.loads(request.body or b"{}")

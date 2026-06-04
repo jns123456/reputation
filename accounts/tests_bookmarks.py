@@ -1,15 +1,16 @@
 from django.test import Client, TestCase
 
-from accounts.models import Bookmark, User
+from accounts.models import Bookmark
 from accounts.bookmark_services import toggle_bookmark
+from conftest import create_user
 from markets.models import Market
 from predictions.services import create_prediction
 
 
 class BookmarksPageTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="saver", password="pass")
-        self.author = User.objects.create_user(username="author", password="pass")
+        self.user = create_user("saver", password="pass")
+        self.author = create_user("author", password="pass")
         self.market = Market.objects.create(
             external_id="bookmark-m1",
             title="Bookmark market",

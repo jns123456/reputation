@@ -118,7 +118,7 @@ class EmailVerificationViewTests(TestCase):
         response = client.get("/markets/", follow=False)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("accounts:verify_email_pending"))
+        self.assertIn(reverse("accounts:verify_email_pending"), response["Location"])
 
     def test_verify_link_logs_in_and_continues_setup(self):
         user = create_user("verifyme", email_verified_at=None, onboarding_completed=False)

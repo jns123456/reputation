@@ -24,13 +24,16 @@ class RefreshMarketTests(TestCase):
 
 
 class SyncCategoryMarketsTests(TestCase):
+    @patch("integrations.services.sync_h2h_match_markets")
     @patch("integrations.sync.sync_binary_markets_by_tag")
-    def test_sync_category_imports_from_polymarket(self, mock_poly):
+    def test_sync_category_imports_from_polymarket(self, mock_poly, mock_h2h):
         category = get_category_for_slug("sports")
         mock_poly.return_value = {"imported": [{"created": True}], "errors": []}
+        mock_h2h.return_value = {"imported": [], "errors": []}
 
         summary = sync_category_markets(category, limit=12)
 
+        mock_h2h.assert_called_once()
         mock_poly.assert_called_once()
         self.assertEqual(summary.imported, 1)
 

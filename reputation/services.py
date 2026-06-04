@@ -1,6 +1,7 @@
 """Reputation scoring services."""
 
 from django.conf import settings
+from django.db import IntegrityError
 
 from reputation.models import ReputationEvent
 
@@ -207,13 +208,16 @@ def apply_reputation_for_prediction_exit(prediction):
         f"{'+' if delta >= 0 else ''}{delta} reputation)."
     )
 
-    event = ReputationEvent.objects.create(
-        user=prediction.user,
-        prediction=prediction,
-        event_type=ReputationEvent.EventType.EXITED_PREDICTION,
-        points_delta=delta,
-        reason=reason,
-    )
+    try:
+        event = ReputationEvent.objects.create(
+            user=prediction.user,
+            prediction=prediction,
+            event_type=ReputationEvent.EventType.EXITED_PREDICTION,
+            points_delta=delta,
+            reason=reason,
+        )
+    except IntegrityError:
+        return None
 
     from integrations.attestation_services import record_reputation_event_attestation_safely
 
@@ -290,13 +294,16 @@ def apply_reputation_for_prediction(prediction):
         f"{'+' if delta >= 0 else ''}{delta} reputation)."
     )
 
-    event = ReputationEvent.objects.create(
-        user=prediction.user,
-        prediction=prediction,
-        event_type=event_type,
-        points_delta=delta,
-        reason=reason,
-    )
+    try:
+        event = ReputationEvent.objects.create(
+            user=prediction.user,
+            prediction=prediction,
+            event_type=event_type,
+            points_delta=delta,
+            reason=reason,
+        )
+    except IntegrityError:
+        return None
 
     from integrations.attestation_services import record_reputation_event_attestation_safely
 

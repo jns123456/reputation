@@ -73,7 +73,9 @@ class PolymarketEmbedTests(TestCase):
         self.assertIn("buttons=false", url)
         self.assertIn("height=420", url)
 
-    def test_world_cup_match_uses_sports_embed(self):
+    @patch("integrations.polymarket.embed.build_polymarket_soccer_match_chart_payload")
+    def test_world_cup_match_uses_sports_embed(self, mock_soccer_chart):
+        mock_soccer_chart.return_value = None
         match = Market.objects.create(
             external_id="wc-match:fifwc-esp-ksa-2026-06-21",
             title="Spain vs. Saudi Arabia",

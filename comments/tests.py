@@ -1,7 +1,7 @@
 from django.test import Client, TestCase
 
-from accounts.models import User
 from comments.models import Comment, Vote
+from conftest import create_user
 from comments.selectors import get_prediction_comment_threads
 from comments.services import cast_vote, create_comment
 from markets.models import Market
@@ -10,9 +10,9 @@ from predictions.models import Prediction
 
 class PredictionThreadTests(TestCase):
     def setUp(self):
-        self.author = User.objects.create_user(username="forecaster", password="pass")
-        self.commenter = User.objects.create_user(username="debater", password="pass")
-        self.replier = User.objects.create_user(username="replier", password="pass")
+        self.author = create_user("forecaster", password="pass")
+        self.commenter = create_user("debater", password="pass")
+        self.replier = create_user("replier", password="pass")
         self.market = Market.objects.create(
             external_id="thread-m1",
             title="Thread test market",
@@ -288,16 +288,8 @@ class PredictionThreadTests(TestCase):
 
 class VoteReactionsSheetTests(TestCase):
     def setUp(self):
-        self.author = User.objects.create_user(
-            username="forecaster",
-            password="pass",
-            onboarding_completed=True,
-        )
-        self.voter = User.objects.create_user(
-            username="debater",
-            password="pass",
-            onboarding_completed=True,
-        )
+        self.author = create_user("forecaster", password="pass")
+        self.voter = create_user("debater", password="pass")
         self.market = Market.objects.create(
             external_id="reactions-m1",
             title="Reactions test market",

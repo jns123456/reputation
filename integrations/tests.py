@@ -24,6 +24,7 @@ from predictions.services import create_prediction, exit_prediction, resolve_mar
 from reputation.models import ReputationEvent
 
 
+@override_settings(MARKET_TRANSLATION_ENABLED=False)
 class MarketImportServiceTests(TestCase):
     def test_import_creates_market(self):
         data = {
@@ -65,9 +66,12 @@ class MarketImportServiceTests(TestCase):
         self.assertEqual(market.title, "Updated Title")
 
 
+@override_settings(MARKET_TRANSLATION_ENABLED=False)
 class ResolvedMarketRepairTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="repair-user", password="pass")
+        from conftest import create_user
+
+        self.user = create_user("repair-user", password="pass")
         self.raw_market = {
             "id": "repair-psg",
             "question": "Will Paris Saint-Germain FC win on 2026-05-30?",

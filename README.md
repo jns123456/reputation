@@ -141,6 +141,21 @@ python manage.py sync_markets --stale
 - **Backend:** Django 5, DRF, Celery, Redis, PostgreSQL
 - **Frontend:** Django templates, HTMX, Alpine.js, TailwindCSS (CDN)
 
+## Production operations
+
+See **[docs/OPERATIONS.md](docs/OPERATIONS.md)** for deploy, rollback, backups, staging, and security notes.
+
+| Concern | Setup |
+|---------|--------|
+| **Health** | `GET /health/` — DB ping; cache check when `USE_REDIS_CACHE=True` |
+| **Errors** | Set `SENTRY_DSN` (optional); see `.env.example` |
+| **Deploy** | Heroku `release` runs migrations only; market sync is via Celery Beat |
+| **CI** | GitHub Actions (`.github/workflows/ci.yml`) — tests + `pip-audit` on push/PR |
+| **CSP** | `CSP_ENABLED=True` with `CSP_REPORT_ONLY=True` first; tune from browser console |
+| **Logs** | Responses include `X-Request-ID`; set `LOG_LEVEL=INFO` in production |
+
+Reproducible installs: `pip install -r requirements.lock` (generated from the venv).
+
 ## Tests
 
 With the virtual environment active:

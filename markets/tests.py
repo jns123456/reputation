@@ -312,7 +312,27 @@ class MarketApiTests(TestCase):
         self.assertNotIn("polymarket_raw", response.json())
         self.assertNotIn("polymarket_event_raw", response.json())
 
-    def test_detail_includes_raw_payload_when_requested(self):
+    def test_detail_rejects_include_raw_for_anonymous(self):
+        response = self.client.get(
+            reverse("market-detail", kwargs={"slug": self.market.slug}),
+            {"include_raw": "1"},
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_detail_includes_raw_payload_for_staff(self):
+        from django.contrib.auth import get_user_model
+        from django.utils import timezone
+
+        staff = get_user_model().objects.create_user(
+            username="apistaff",
+            email="apistaff@example.com",
+            password="testpass123",
+            is_staff=True,
+            email_verified_at=timezone.now(),
+            onboarding_completed=True,
+        )
+        self.client.force_login(staff)
         response = self.client.get(
             reverse("market-detail", kwargs={"slug": self.market.slug}),
             {"include_raw": "1"},

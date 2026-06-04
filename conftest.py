@@ -6,7 +6,8 @@ from accounts.models import User, UserProfile
 from markets.models import Market
 
 
-def create_user(username="testuser", **kwargs):
+def create_user(username="testuser", password="testpass123", **kwargs):
+    """Test user that passes email-verification and onboarding middleware."""
     email = kwargs.pop("email", f"{username}@example.com")
     if email and "email_verified_at" not in kwargs:
         kwargs.setdefault("email_verified_at", timezone.now())
@@ -14,7 +15,7 @@ def create_user(username="testuser", **kwargs):
     user = User.objects.create_user(
         username=username,
         email=email,
-        password="testpass123",
+        password=password,
         **kwargs,
     )
     return user

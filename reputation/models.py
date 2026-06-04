@@ -30,6 +30,12 @@ class ReputationEvent(models.Model):
             models.Index(fields=["user", "-created_at"]),
             models.Index(fields=["prediction", "-created_at"]),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["prediction", "event_type"],
+                name="reputationevent_unique_prediction_event_type",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.event_type}: {self.points_delta} for {self.user.username}"

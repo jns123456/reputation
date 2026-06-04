@@ -5,6 +5,7 @@ from django.test import Client, TestCase
 from PIL import Image
 
 from accounts.models import Bookmark, User
+from conftest import create_user
 from pulse.models import Post
 from pulse.services import create_post
 
@@ -18,8 +19,8 @@ def _test_image(name="test.png"):
 
 class ForumPageTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="forumuser", password="pass")
-        self.other = User.objects.create_user(username="other", password="pass")
+        self.user = create_user("forumuser", password="pass")
+        self.other = create_user("other", password="pass")
         self.post = create_post(user=self.other, body="Hello Forum!")
         self.client = Client()
 

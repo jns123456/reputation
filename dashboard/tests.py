@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 
 from accounts.models import Bookmark, User
 from accounts.bookmark_services import toggle_bookmark
+from conftest import create_user
 from markets.models import Market
 from predictions.models import Prediction
 from predictions.services import create_prediction
@@ -53,8 +54,8 @@ class LandingPageI18nTests(TestCase):
 
 class ForecastsPageTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="forecastsuser", password="pass")
-        self.other = User.objects.create_user(username="other", password="pass")
+        self.user = create_user("forecastsuser", password="pass")
+        self.other = create_user("other", password="pass")
         self.market = Market.objects.create(
             external_id="forecasts-m1",
             title="Forecasts test market",
