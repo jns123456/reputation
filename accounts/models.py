@@ -894,3 +894,88 @@ class EmailVerificationToken(models.Model):
     @property
     def is_usable(self):
         return self.used_at is None and not self.is_expired
+
+
+class SubscriberAudience(models.TextChoices):
+    """Who can view a piece of creator content (no payment flow — access is membership)."""
+
+    PUBLIC = "public", _lazy("Public")
+    SUBSCRIBERS = "subscribers", _lazy("Subscribers only")
+
+
+class CreatorProgram(models.Model):
+    """Creator monetization settings for a user (subscriptions without on-platform payments)."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="creator_program",
+    )
+    is_enabled = models.BooleanField(
+        default=False,
+        help_text="When enabled, the user can publish subscriber-only content and accept members.",
+    )
+    tagline = models.CharField(max_length=300, blank=True)
+    welcome_message = models.TextField(blank=True)
+    monthly_price_cents = models.PositiveIntegerField(
+        default=500,
+        help_text="Displayed monthly price in cents (no payment processing in MVP).",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"Creator program for {self.user.username}"
+
+    @property
+    def monthly_price_display(self):
+        dollars = self.monthly_price_cents / 100
+        if dollars == int(dollars):
+            return str(int(dollars))
+        return f"{dollars:.2f}"
+
+
+class CreatorSubscription(models.Model):
+    """Membership linking a subscriber to a creator (no wallet or payment state)."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", _lazy("Active")
+        CANCELLED = "cancelled", _lazy("Cancelled")
+
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="creator_subscriptions",
+    )
+    subscriber = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="creator_memberships",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        db_index=True,
+    )
+    started_at = models.DateTimeField(auto_now_add=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-started_at"]
+        indexes = [
+            models.Index(fields=["creator", "status", "-started_at"]),
+            models.Index(fields=["subscriber", "status"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["creator", "subscriber"],
+                name="accounts_unique_creator_subscriber_pair",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.subscriber.username} → {self.creator.username} ({self.status})"

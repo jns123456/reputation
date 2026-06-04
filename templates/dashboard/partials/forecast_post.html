@@ -1,4 +1,4 @@
-{% load reputation_filters i18n %}
+{% load reputation_filters i18n monetization_tags %}
 <article class="border-b border-slate-200 px-4 py-4 transition hover:bg-slate-50/80"
          id="forecast-post-{{ prediction.id }}"
          data-sort-score="{{ prediction.popularity_score }}"
@@ -47,7 +47,11 @@
       </div>
 
       {% if prediction.reasoning %}
+        {% if prediction|can_view_creator_content:user %}
       <p class="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800">{{ prediction.reasoning }}</p>
+        {% else %}
+      {% include "accounts/partials/subscriber_content_locked.html" with creator=prediction.user %}
+        {% endif %}
       {% endif %}
 
       {% include "dashboard/partials/forecast_live_pnl.html" with prediction=prediction %}

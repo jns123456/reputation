@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n monetization_tags %}
 <section class="pr-profile-header">
   <div class="pr-profile-header-banner" aria-hidden="true"></div>
 
@@ -67,6 +67,12 @@
 
     <div class="pr-profile-actions">
       {% include "accounts/partials/follow_button.html" %}
+      {% if user.is_authenticated and user != profile_user and profile_user|creator_program_enabled %}
+      <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn">
+        <i data-lucide="circle-dollar-sign" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Subscribe" %}</span>
+      </a>
+      {% endif %}
 
       {% if user.is_authenticated %}
       <form method="get" action="{% url 'accounts:user_list' %}" class="pr-profile-search">

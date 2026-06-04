@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Creator program setup" %}{% endblock %}
+
+{% block content %}
+<div class="pr-page mx-auto max-w-2xl pb-12">
+  <nav class="mb-6 text-sm text-slate-500 dark:text-slate-400">
+    <a href="{% url 'accounts:profile' username=profile_user.username %}" class="hover:text-brand-600 dark:hover:text-brand-400">{% trans "Profile" %}</a>
+    <span class="mx-2">/</span>
+    <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="hover:text-brand-600 dark:hover:text-brand-400">{% trans "Monetize" %}</a>
+    <span class="mx-2">/</span>
+    <span class="text-slate-700 dark:text-slate-200">{% trans "Setup" %}</span>
+  </nav>
+
+  <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{% trans "Creator program setup" %}</h1>
+  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+    {% trans "Configure your paid feed. Subscriptions are free to activate on-platform until payment processing launches — no wallets or betting." %}
+  </p>
+
+  <form method="post" class="about-card mt-8 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+    {% csrf_token %}
+
+    <label class="flex cursor-pointer items-start gap-3">
+      {{ form.is_enabled }}
+      <span>
+        <span class="block text-sm font-semibold text-slate-900 dark:text-white">{{ form.is_enabled.label }}</span>
+        <span class="mt-1 block text-sm text-slate-500 dark:text-slate-400">{{ form.is_enabled.help_text }}</span>
+      </span>
+    </label>
+
+    <div>
+      <label for="{{ form.tagline.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.tagline.label }}</label>
+      {{ form.tagline }}
+    </div>
+
+    <div>
+      <label for="{{ form.welcome_message.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.welcome_message.label }}</label>
+      {{ form.welcome_message }}
+    </div>
+
+    <div>
+      <label for="{{ form.monthly_price.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.monthly_price.label }}</label>
+      {{ form.monthly_price }}
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ form.monthly_price.help_text }}</p>
+    </div>
+
+    <div class="flex flex-wrap gap-3 pt-2">
+      <button type="submit" class="btn-primary">{% trans "Save program" %}</button>
+      <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="btn-secondary">{% trans "Cancel" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

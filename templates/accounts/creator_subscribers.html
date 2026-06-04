@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Subscribers" %}{% endblock %}
+
+{% block content %}
+<div class="pr-page mx-auto max-w-3xl pb-12">
+  <nav class="mb-6 text-sm text-slate-500 dark:text-slate-400">
+    <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="hover:text-brand-600 dark:hover:text-brand-400">← {% trans "Monetize" %}</a>
+  </nav>
+
+  <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{% trans "Subscribers" %}</h1>
+  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+    {% blocktrans count counter=subscriber_count %}{{ counter }} active subscriber{% plural %}{{ counter }} active subscribers{% endblocktrans %}
+  </p>
+
+  {% if not program or not program.is_enabled %}
+  <p class="mt-8 text-sm text-slate-500">{% trans "Enable your creator program to accept subscribers." %}</p>
+  <a href="{% url 'accounts:creator_setup' username=profile_user.username %}" class="btn-primary mt-4 inline-flex">{% trans "Open setup" %}</a>
+  {% elif subscribers %}
+  <ul class="about-card mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
+    {% for membership in subscribers %}
+    <li class="flex items-center justify-between gap-4 px-4 py-3">
+      <a href="{% url 'accounts:profile' username=membership.subscriber.username %}" class="font-medium text-slate-900 hover:underline dark:text-white">
+        {{ membership.subscriber.public_name }}
+      </a>
+      <time datetime="{{ membership.started_at|date:'c' }}" class="text-xs text-slate-500 dark:text-slate-400">
+        {% blocktrans with date=membership.started_at|date:"M j, Y" %}Since {{ date }}{% endblocktrans %}
+      </time>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">{% trans "No subscribers yet. Share your monetization page to grow your list." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

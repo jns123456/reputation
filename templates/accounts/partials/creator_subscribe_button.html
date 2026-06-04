@@ -1,0 +1,24 @@
+{% load i18n monetization_tags %}
+{% if creator.creator_program.is_enabled %}
+  {% if user.is_authenticated and user != creator %}
+    {% if is_subscribed or user|is_subscribed_to:creator %}
+    <form method="post" action="{% url 'accounts:creator_unsubscribe' %}" class="{% if compact %}mt-3{% else %}inline-block{% endif %}">
+      {% csrf_token %}
+      <input type="hidden" name="creator_id" value="{{ creator.id }}">
+      <button type="submit" class="btn-secondary {% if compact %}w-full sm:w-auto{% endif %} text-sm">
+        {% trans "Cancel subscription" %}
+      </button>
+    </form>
+    {% else %}
+    <form method="post" action="{% url 'accounts:creator_subscribe' %}" class="{% if compact %}mt-3{% else %}inline-block{% endif %}">
+      {% csrf_token %}
+      <input type="hidden" name="creator_id" value="{{ creator.id }}">
+      <button type="submit" class="btn-primary {% if compact %}w-full sm:w-auto{% endif %} text-sm">
+        {% blocktrans with price=creator.creator_program.monthly_price_display %}
+        Subscribe — ${{ price }}/mo
+        {% endblocktrans %}
+      </button>
+    </form>
+    {% endif %}
+  {% endif %}
+{% endif %}

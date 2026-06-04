@@ -548,7 +548,7 @@ if EAS_DAILY_BATCH_ENABLED:
         "task": "integrations.tasks.build_daily_attestation_batch_task",
         "schedule": crontab(minute=5, hour=EAS_DAILY_BATCH_HOUR_UTC),
     }
-# Daily re-engagement digest (Substack-style summary).
+# Daily re-engagement digest (newsletter-style summary).
 if DIGEST_EMAILS_ENABLED:
     CELERY_BEAT_SCHEDULE["send-daily-digest"] = {
         "task": "accounts.tasks.send_daily_digest_task",

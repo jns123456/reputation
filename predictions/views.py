@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -65,11 +66,19 @@ def _exit_reputation_points(exited_prediction):
     return event.points_delta if event else 0
 
 
+def _creator_program_enabled(user):
+    from accounts.monetization_selectors import get_creator_program_or_none
+
+    program = get_creator_program_or_none(user)
+    return program is not None and program.is_enabled
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def create_prediction_view(request, slug):
     market = get_object_or_404(Market, slug=slug)
     existing = get_user_active_prediction(request.user, market)
+    creator_enabled = _creator_program_enabled(request.user)
 
     if request.method == "POST":
         if existing:
@@ -77,7 +86,11 @@ def create_prediction_view(request, slug):
             anchor = _forecast_form_anchor(market)
             return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{anchor}")
 
-        form = ForecastForm(request.POST, market=market)
+        form = ForecastForm(
+            request.POST,
+            market=market,
+            creator_program_enabled=creator_enabled,
+        )
         if form.is_valid():
             try:
                 create_prediction(
@@ -86,8 +99,9 @@ def create_prediction_view(request, slug):
                     predicted_outcome=form.cleaned_data["predicted_outcome"],
                     predicted_direction=form.cleaned_data["predicted_direction"],
                     reasoning=form.cleaned_data.get("reasoning", ""),
+                    audience=form.cleaned_audience_value(),
                 )
-            except (ValueError, ContentRejected) as exc:
+            except (ValueError, ValidationError, ContentRejected) as exc:
                 messages.error(request, write_guard_user_message(exc))
                 return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{_forecast_form_anchor(market)}")
             except abuse_services.RateLimitExceeded as exc:
@@ -96,12 +110,21 @@ def create_prediction_view(request, slug):
             messages.success(request, _("Your forecast was posted."))
             return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
     else:
-        form = ForecastForm(market=market) if not existing else None
+        form = (
+            ForecastForm(market=market, creator_program_enabled=creator_enabled)
+            if not existing
+            else None
+        )
 
     return render(
         request,
         "predictions/prediction_form.html",
-        {"form": form, "market": market, "existing": existing},
+        {
+            "form": form,
+            "market": market,
+            "existing": existing,
+            "creator_program_enabled": creator_enabled,
+        },
     )
 
 

@@ -119,6 +119,10 @@
             ></textarea>
           </div>
 
+          {% if forecast_form and forecast_form.audience %}
+          {% include "accounts/partials/content_audience_field.html" with form=forecast_form %}
+          {% endif %}
+
           <div class="flex flex-wrap items-center gap-2 pt-1">
             <button
               type="submit"

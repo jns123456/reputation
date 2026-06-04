@@ -4,6 +4,8 @@ from accounts.views.auth import *  # noqa: F403
 
 from accounts.views.onboarding import *  # noqa: F403
 
+from accounts.views.monetization import *  # noqa: F403
+
 from accounts.views.profile import *  # noqa: F403
 
 from accounts.views.social import *  # noqa: F403
@@ -29,6 +31,10 @@ __all__ = [
     "profile_followers",
     "profile_following",
     "profile_monetize",
+    "creator_setup",
+    "creator_subscribers",
+    "creator_subscribe",
+    "creator_unsubscribe",
     "follow_toggle",
     "alert_settings",
     "notifications_list",

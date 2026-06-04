@@ -3,6 +3,8 @@ from django.core.validators import MaxLengthValidator
 from django.db import models
 from django.utils import timezone
 
+from accounts.models import SubscriberAudience
+
 
 class Post(models.Model):
     user = models.ForeignKey(
@@ -14,6 +16,12 @@ class Post(models.Model):
         max_length=200,
         blank=True,
         validators=[MaxLengthValidator(200)],
+    )
+    audience = models.CharField(
+        max_length=20,
+        choices=SubscriberAudience.choices,
+        default=SubscriberAudience.PUBLIC,
+        db_index=True,
     )
     image = models.ImageField(upload_to="pulse/posts/%Y/%m/%d/", blank=True)
     reposted_from = models.ForeignKey(

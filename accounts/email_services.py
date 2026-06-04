@@ -276,7 +276,7 @@ def _notification_subject(notification, actor_name):
 
 
 def send_daily_digest(user_id):
-    """Send a once-a-day summary of activity to re-engage a user (Substack-style)."""
+    """Send a once-a-day summary of activity to re-engage a user (digest-style)."""
     if not getattr(settings, "DIGEST_EMAILS_ENABLED", False):
         return False
     if not _emails_enabled():

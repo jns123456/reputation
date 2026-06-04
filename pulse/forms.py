@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from accounts.models import SubscriberAudience
 from pulse.models import Post
 from pulse.poll_forms import PollValidationError, parse_poll_options_from_post, validate_poll_payload
 
@@ -15,6 +16,22 @@ ALLOWED_IMAGE_CONTENT_TYPES = {
 
 
 class PostForm(forms.ModelForm):
+    def __init__(self, *args, creator_program_enabled=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if creator_program_enabled:
+            self.fields["audience"] = forms.ChoiceField(
+                choices=SubscriberAudience.choices,
+                initial=SubscriberAudience.PUBLIC,
+                required=False,
+                label=_("Who can see this post"),
+                widget=forms.RadioSelect,
+            )
+
+    def cleaned_audience_value(self):
+        if "audience" not in self.fields:
+            return SubscriberAudience.PUBLIC
+        return self.cleaned_data.get("audience") or SubscriberAudience.PUBLIC
+
     class Meta:
         model = Post
         fields = ["body", "image"]
@@ -23,7 +40,9 @@ class PostForm(forms.ModelForm):
                 attrs={
                     "rows": 1,
                     "maxlength": "200",
-                    "placeholder": _("What's happening?"),
+                    "placeholder": _(
+                        "Share your take on markets, events, or the community…"
+                    ),
                     "class": "x-compose-textarea form-textarea resize-none border-0 bg-transparent p-0 shadow-none focus:ring-0",
                 }
             ),

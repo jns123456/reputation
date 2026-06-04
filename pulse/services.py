@@ -7,6 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from accounts.models import SubscriberAudience
+from accounts.monetization_services import validate_creator_audience
 from pulse.models import Comment, Poll, PollOption, PollVote, Post
 from reputation.models import PopularityEvent
 from reputation.popularity_services import record_popularity_event
@@ -18,7 +20,7 @@ def _record_streak_activity(user):
     record_activity(user)
 
 
-def create_post(*, user, body="", image=None, poll_payload=None):
+def create_post(*, user, body="", image=None, poll_payload=None, audience=None):
     from accounts.write_guard import guard_write_action
 
     guard_write_action(
@@ -31,8 +33,11 @@ def create_post(*, user, body="", image=None, poll_payload=None):
     if poll_payload and image:
         raise ValueError(_("Polls can't include images."))
 
+    resolved_audience = audience or SubscriberAudience.PUBLIC
+    validate_creator_audience(user=user, audience=resolved_audience)
+
     with transaction.atomic():
-        post = Post(user=user, body=body)
+        post = Post(user=user, body=body, audience=resolved_audience)
         if image:
             post.image = image
         post.save()

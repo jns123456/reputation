@@ -20,6 +20,7 @@ from phase2_i18n_fixes import (
     PHASE2_PLURAL_FIXES,
 )
 from phase3_i18n_fixes import PHASE3_FIXES, PHASE3_PLURAL_FIXES
+from monetize_i18n_fixes import MONETIZE_I18N_FIXES
 from proof_i18n_fixes import (
     PROOF_I18N_BLOCK_FIXES,
     PROOF_I18N_FIXES,
@@ -35,6 +36,7 @@ FIXES: dict[str, str] = {
     **PHASE3_FIXES,
     **ACHIEVEMENTS_I18N_FIXES,
     **PROOF_I18N_FIXES,
+    **MONETIZE_I18N_FIXES,
 }
 PLURAL_FIXES: dict[str, tuple[str, str]] = {
     **PHASE1_PLURAL_FIXES,
@@ -202,6 +204,20 @@ FIXES.update({
     "People": "Personas",
     "What's happening": "Qué está pasando",
     "Who to follow": "A quién seguir",
+    "Share ideas, debate markets, and connect with fellow predictors.": (
+        "Comparte ideas, debate mercados y conecta con otros predictores."
+    ),
+    "Share your take on markets, events, or the community…": (
+        "Comparte tu opinión sobre mercados, eventos o la comunidad…"
+    ),
+    "Discover": "Descubrir",
+    "Suggested voices": "Voces sugeridas",
+    "Live prediction events": "Eventos de predicción en vivo",
+    "Browse imported Polymarket questions": "Explora preguntas importadas de Polymarket",
+    "Formal forecasts with reputation scoring": "Pronósticos formales con puntuación de reputación",
+    "Leaderboard by predictive quality": "Ranking por calidad predictiva",
+    "Follow proven forecasters": "Sigue a predictores con historial",
+    "Discussion": "Debate",
     "Most engaged community members": "Miembros más activos de la comunidad",
     "Back": "Volver",
     "Navigation menu": "Menú de navegación",

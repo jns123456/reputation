@@ -232,7 +232,7 @@ SECTIONS = [
         [
             "Reddit premia karma.",
             "X premia alcance.",
-            "Substack premia audiencia.",
+            "Los medios tradicionales premian la audiencia.",
             "Los mercados predictivos premian dinero ganado.",
             "",
             "PredictStamp premia dos cosas, pero las mantiene separadas: engagement social "

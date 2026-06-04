@@ -15,13 +15,17 @@
 
   <div class="x-forum-main">
     <header class="x-forum-header">
-      <h1>{% trans "Home" %}</h1>
+      <div class="x-forum-header-intro">
+        <p class="x-forum-eyebrow">{% trans "Community" %}</p>
+        <h1>{% trans "Forum" %}</h1>
+        <p class="x-forum-tagline">{% trans "Share ideas, debate markets, and connect with fellow predictors." %}</p>
+      </div>
       <nav class="x-forum-tabs" aria-label="{% trans 'Feed sort' %}">
         {% url 'forum:feed' as forum_url %}
-        <a href="{{ forum_url }}?sort=recent" class="x-forum-tab {% if active_sort == 'recent' %}is-active{% endif %}" {% if active_sort == 'recent' %}aria-current="page"{% endif %}>{% trans "Recent" %}</a>
-        <a href="{{ forum_url }}?sort=hot" class="x-forum-tab {% if active_sort == 'hot' %}is-active{% endif %}" {% if active_sort == 'hot' %}aria-current="page"{% endif %}>🔥 {% trans "Hot" %}</a>
+        <a href="{{ forum_url }}?sort=recent" class="pr-feed-tab {% if active_sort == 'recent' %}is-active{% endif %}" {% if active_sort == 'recent' %}aria-current="page"{% endif %}>{% trans "Recent" %}</a>
+        <a href="{{ forum_url }}?sort=hot" class="pr-feed-tab {% if active_sort == 'hot' %}is-active{% endif %}" {% if active_sort == 'hot' %}aria-current="page"{% endif %}>🔥 {% trans "Hot" %}</a>
         {% if user.is_authenticated %}
-        <a href="{{ forum_url }}?sort=following" class="x-forum-tab {% if active_sort == 'following' %}is-active{% endif %}" {% if active_sort == 'following' %}aria-current="page"{% endif %}>{% trans "Following" %}</a>
+        <a href="{{ forum_url }}?sort=following" class="pr-feed-tab {% if active_sort == 'following' %}is-active{% endif %}" {% if active_sort == 'following' %}aria-current="page"{% endif %}>{% trans "Following" %}</a>
         {% endif %}
       </nav>
     </header>

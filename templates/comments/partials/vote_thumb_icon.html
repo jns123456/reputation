@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if direction == "up" %}
-<i data-lucide="thumbs-up" class="{{ class|default:'h-4 w-4' }}" stroke-width="2" aria-hidden="true"></i>
+<i data-lucide="thumbs-up" class="pr-vote-thumb-icon {{ class|default:'h-4 w-4' }}" stroke-width="2" aria-hidden="true"></i>
 {% else %}
-<i data-lucide="thumbs-down" class="{{ class|default:'h-4 w-4' }}" stroke-width="2" aria-hidden="true"></i>
+<i data-lucide="thumbs-down" class="pr-vote-thumb-icon {{ class|default:'h-4 w-4' }}" stroke-width="2" aria-hidden="true"></i>
 {% endif %}

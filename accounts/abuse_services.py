@@ -46,6 +46,12 @@ DEFAULT_RATE_LIMITS = {
         "trusted": (500, 3600),
         "throttled": (10, 3600),
     },
+    "creator_subscribe": {
+        "new": (20, 3600),
+        "standard": (80, 3600),
+        "trusted": (200, 3600),
+        "throttled": (5, 3600),
+    },
     "registration": {  # keyed by IP, tier is always "ip"
         "ip": (5, 3600),
     },

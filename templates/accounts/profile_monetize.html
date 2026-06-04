@@ -34,7 +34,66 @@
      x-data="monetizePage()"
      x-init="init()">
 
-  {# ── HERO (Substack: Make money doing the work you believe in) ── #}
+  <div class="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
+    <div class="about-card rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800 sm:p-8">
+      {% if is_profile_owner %}
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "Creator dashboard" %}</h2>
+      {% if creator_program and creator_program.is_enabled %}
+      <dl class="mt-4 grid gap-4 sm:grid-cols-3">
+        <div>
+          <dt class="text-xs font-medium uppercase text-slate-500">{% trans "Subscribers" %}</dt>
+          <dd class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{{ subscriber_count }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase text-slate-500">{% trans "Premium forecasts" %}</dt>
+          <dd class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{{ premium_forecast_count }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase text-slate-500">{% trans "Premium forum posts" %}</dt>
+          <dd class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{{ premium_post_count }}</dd>
+        </div>
+      </dl>
+      <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">
+        {% blocktrans with price=creator_program.monthly_price_display %}Listed price: ${{ price }}/month (display only).{% endblocktrans %}
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="{% url 'accounts:creator_setup' username=profile_user.username %}" class="btn-primary text-sm">{% trans "Edit program" %}</a>
+        <a href="{% url 'accounts:creator_subscribers' username=profile_user.username %}" class="btn-secondary text-sm">{% trans "View subscribers" %}</a>
+      </div>
+      {% else %}
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        {% trans "Turn on your creator program to accept subscribers and publish subscriber-only forecasts and posts." %}
+      </p>
+      <a href="{% url 'accounts:creator_setup' username=profile_user.username %}" class="btn-primary mt-4 inline-flex text-sm">
+        {% trans "Set up creator program" %}
+      </a>
+      {% endif %}
+      {% elif creator_program and creator_program.is_enabled %}
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+        {% include "accounts/partials/user_display_name.html" with user=profile_user %}
+      </h2>
+      {% if creator_program.tagline %}
+      <p class="mt-2 text-slate-600 dark:text-slate-300">{{ creator_program.tagline }}</p>
+      {% endif %}
+      {% if creator_program.welcome_message %}
+      <p class="mt-3 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{{ creator_program.welcome_message }}</p>
+      {% endif %}
+      <p class="mt-3 text-sm font-medium text-slate-800 dark:text-slate-100">
+        {% blocktrans with price=creator_program.monthly_price_display %}Membership — ${{ price }}/month{% endblocktrans %}
+      </p>
+      {% if is_subscribed %}
+      <p class="mt-2 text-sm text-emerald-700 dark:text-emerald-400">{% trans "You have access to subscriber-only content." %}</p>
+      {% endif %}
+      {% include "accounts/partials/creator_subscribe_button.html" with creator=profile_user is_subscribed=is_subscribed %}
+      {% else %}
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        {% trans "This creator has not enabled subscriptions yet." %}
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── HERO ── #}
   <section id="monetize-hero"
            class="about-full-bleed relative min-h-[85vh] overflow-hidden border-b border-slate-200/60 dark:border-slate-700/60">
     <div class="about-mesh absolute inset-0"></div>
@@ -61,9 +120,7 @@
         </h1>
 
         <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl dark:text-slate-300">
-          {% blocktrans %}Old media rewards attention. PredictStamp is building a model like{% endblocktrans %}
-          <strong class="text-slate-800 dark:text-white">Substack</strong>{% trans ":" %}
-          {% trans "writers, forecasters, and analysts keep direct relationships with subscribers — powered by a reputation track record, not gambling." %}
+          {% trans "Old media rewards attention. PredictStamp is building a creator model where writers, forecasters, and analysts keep direct relationships with subscribers — powered by a reputation track record, not gambling." %}
         </p>
 
         <p class="mt-4 max-w-2xl text-base text-slate-500 dark:text-slate-400">
@@ -119,14 +176,14 @@
 
   <div class="mx-auto max-w-6xl space-y-24 px-4 pt-24 sm:space-y-32 sm:px-6 lg:px-8">
 
-    {# ── VALUE PILLARS (Substack: Free / 90% / audience / network) ── #}
+    {# ── VALUE PILLARS ── #}
     <section id="monetize-value" class="scroll-mt-28">
       <div class="mb-12 text-center">
         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
           {% trans "A business model that only wins when you do" %}
         </h2>
         <p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
-          {% trans "Inspired by Substack: no platform tiers, no lock-in contracts — start publishing and get paid when subscribers value your work." %}
+          {% trans "No platform tiers, no lock-in contracts — start publishing and get paid when subscribers value your work." %}
         </p>
       </div>
 
@@ -173,7 +230,7 @@
       </div>
     </section>
 
-    {# ── EARNINGS ESTIMATOR (Substack calculator) ── #}
+    {# ── EARNINGS ESTIMATOR ── #}
     <section id="monetize-estimate" class="scroll-mt-28">
       <div class="about-glass about-card rounded-3xl border border-slate-200 p-6 sm:p-10 dark:border-slate-700">
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
@@ -183,7 +240,7 @@
               {% trans "Estimate what you could earn" %}
             </h2>
             <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              {% trans "A few hundred paid subscribers at $5/month can replace a side income. A few thousand makes it a real business — same math as Substack, applied to predictive content." %}
+              {% trans "A few hundred paid subscribers at $5/month can replace a side income. A few thousand makes it a real business — the same simple subscriber math, applied to predictive content." %}
             </p>
             <p class="mt-4 text-sm font-medium text-slate-700 dark:text-slate-200">
               {% trans "Our entire business model depends on your success — we only make money when you do." %}
@@ -234,7 +291,7 @@
               </div>
 
               <p class="text-xs text-slate-500 dark:text-slate-400">
-                {% trans "Creators keep 90% of revenue minus payment processing fees. Illustration only — paid feeds launching soon." %}
+                {% trans "Creators keep 90% of revenue minus payment processing fees. Earnings estimate is illustrative — memberships work today without on-platform payments." %}
               </p>
 
               {% if is_profile_owner %}
@@ -249,7 +306,7 @@
       </div>
     </section>
 
-    {# ── NETWORK (Substack: network that grows with you) ── #}
+    {# ── NETWORK ── #}
     <section id="monetize-network" class="scroll-mt-28">
       <div class="mb-10 text-center">
         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -291,7 +348,7 @@
       </blockquote>
     </section>
 
-    {# ── CREATOR TYPES (Substack: built for every kind of creator) ── #}
+    {# ── CREATOR TYPES ── #}
     <section id="monetize-creators" class="scroll-mt-28">
       <div class="mb-10 text-center">
         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -337,7 +394,7 @@
       </div>
     </section>
 
-    {# ── TRUST (Substack Defender → reputation integrity) ── #}
+    {# ── TRUST ── #}
     <section id="monetize-trust" class="scroll-mt-28">
       <div class="about-card rounded-3xl border border-brand-200/80 bg-gradient-to-br from-brand-50 via-white to-white p-8 dark:border-brand-800/50 dark:from-brand-950/30 dark:via-slate-800 dark:to-slate-900 sm:p-10">
         <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
@@ -347,7 +404,7 @@
               {% trans "Legal and reputational support for your work" %}
             </h2>
             <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              {% trans "Like Substack Defender for publishers, PredictStamp separates predictive reputation from social popularity — so subscribers pay for judgment quality, not vote brigades." %}
+              {% trans "PredictStamp separates predictive reputation from social popularity — so subscribers pay for judgment quality, not vote brigades." %}
             </p>
             <ul class="mt-5 space-y-2 text-sm text-slate-600 dark:text-slate-300">
               <li class="flex gap-2"><span class="text-brand-500">✦</span> {% trans "Immutable resolved forecast history" %}</li>
@@ -376,7 +433,7 @@
       </div>
     </section>
 
-    {# ── BUILT-IN TOOLS (Substack tools section) ── #}
+    {# ── BUILT-IN TOOLS ── #}
     <section id="monetize-tools" class="scroll-mt-28">
       <div class="mb-10 text-center">
         <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -420,7 +477,7 @@
           <i data-lucide="bar-chart-3" class="h-6 w-6 text-brand-600" stroke-width="2" aria-hidden="true"></i>
           <h3 class="mt-3 font-bold text-slate-900 dark:text-white">{% trans "Revenue tools" %}</h3>
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            {% trans "Welcome sequences, paid tiers, conversion analytics, and win-back campaigns — designed like Substack to turn free readers into paid subscribers." %}
+            {% trans "Welcome sequences, paid tiers, conversion analytics, and win-back campaigns — built to turn free readers into paid subscribers." %}
           </p>
         </article>
         <article class="about-card rounded-2xl border border-slate-200 p-6 dark:border-slate-700 dark:bg-slate-800">
@@ -432,21 +489,6 @@
         </article>
       </div>
 
-      {% if is_profile_owner %}
-      <div class="about-card mt-8 rounded-2xl border border-amber-200 bg-amber-50/80 p-6 dark:border-amber-800/50 dark:bg-amber-950/30">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p class="text-sm font-semibold text-amber-900 dark:text-amber-200">{% trans "Paid feeds — coming soon" %}</p>
-            <p class="mt-1 text-sm text-amber-800/90 dark:text-amber-300/90">
-              {% trans "You are on the early creator list. Keep building reputation — we will notify you when subscriptions open." %}
-            </p>
-          </div>
-          <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary shrink-0 px-5 py-2.5 text-sm">
-            {% trans "Enable email alerts" %}
-          </a>
-        </div>
-      </div>
-      {% endif %}
     </section>
 
     {# ── CTA ── #}
@@ -460,9 +502,7 @@
               <span class="about-gradient-text">{% trans "doing the work you love" %}</span>
             </h2>
             <p class="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-              {% blocktrans %}Turn verified judgment into a subscription business — the way{% endblocktrans %}
-              <a href="https://substack.com/about" class="font-medium text-brand-600 hover:underline dark:text-brand-400" rel="noopener noreferrer">Substack</a>
-              {% trans "did for writers, adapted for prediction markets on PredictStamp." %}
+              {% trans "Turn verified judgment into a subscription business — built for prediction markets on PredictStamp." %}
             </p>
             <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
               {% if is_profile_owner %}

@@ -1,4 +1,4 @@
-{% load i18n reputation_filters %}
+{% load i18n reputation_filters monetization_tags %}
 <article class="border-b border-slate-200 px-4 py-4 transition hover:bg-slate-50/80 last:border-b-0 dark:border-slate-700 dark:hover:bg-slate-800/50"
          id="forecast-{{ prediction.id }}"
          data-sort-score="{{ prediction.popularity_score }}"
@@ -20,6 +20,7 @@
               {{ prediction.user.public_name }}
             </a>
             {% if prediction.user.is_ai_agent %}<span class="badge-agent">{% trans "AI" %}</span>{% endif %}
+            {% if prediction|is_subscriber_only %}<span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">{% trans "Subscribers" %}</span>{% endif %}
             {% if prediction.user.show_username_publicly %}
             <span class="text-slate-500 dark:text-slate-400">@{{ prediction.user.username }}</span>
             {% endif %}
@@ -47,7 +48,11 @@
           </div>
 
           {% if prediction.reasoning %}
+            {% if prediction|can_view_creator_content:user %}
           <p class="mt-1.5 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800 dark:text-slate-200">{{ prediction.reasoning }}</p>
+            {% else %}
+          {% include "accounts/partials/subscriber_content_locked.html" with creator=prediction.user %}
+            {% endif %}
           {% endif %}
 
           {% include "dashboard/partials/forecast_live_pnl.html" with prediction=prediction %}

@@ -3,6 +3,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from accounts.models import SubscriberAudience
+
 
 class Prediction(models.Model):
     class Status(models.TextChoices):
@@ -34,6 +36,12 @@ class Prediction(models.Model):
     confidence = models.FloatField(default=0.5)
     probability_at_prediction_time = models.JSONField(default=dict, blank=True)
     reasoning = models.TextField(blank=True)
+    audience = models.CharField(
+        max_length=20,
+        choices=SubscriberAudience.choices,
+        default=SubscriberAudience.PUBLIC,
+        db_index=True,
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,

@@ -6,6 +6,8 @@ from accounts.models import (
     ActivityStreak,
     AIAgentProfile,
     Bookmark,
+    CreatorProgram,
+    CreatorSubscription,
     EmailVerificationToken,
     Notification,
     NotificationPreference,
@@ -273,3 +275,19 @@ class AbuseEventAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(CreatorProgram)
+class CreatorProgramAdmin(admin.ModelAdmin):
+    list_display = ("user", "is_enabled", "monthly_price_cents", "updated_at")
+    list_filter = ("is_enabled",)
+    search_fields = ("user__username", "tagline")
+    raw_id_fields = ("user",)
+
+
+@admin.register(CreatorSubscription)
+class CreatorSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("creator", "subscriber", "status", "started_at", "cancelled_at")
+    list_filter = ("status",)
+    search_fields = ("creator__username", "subscriber__username")
+    raw_id_fields = ("creator", "subscriber")

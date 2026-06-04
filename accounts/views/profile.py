@@ -151,7 +151,7 @@ def user_list(request):
 
 def profile_detail(request, username):
     user = get_object_or_404(
-        User.objects.select_related("profile", "activity_streak"),
+        User.objects.select_related("profile", "activity_streak", "creator_program"),
         username=username,
     )
     predictions = get_user_closed_prediction_history(user, limit=10)
@@ -343,18 +343,3 @@ def profile_following(request, username):
     )
 
 
-def profile_monetize(request, username):
-    """Creator monetization hub (Substack-style) under the user profile."""
-    profile_user = get_object_or_404(
-        User.objects.select_related("profile"),
-        username=username,
-    )
-    is_profile_owner = request.user.is_authenticated and request.user.pk == profile_user.pk
-    return render(
-        request,
-        "accounts/profile_monetize.html",
-        {
-            "profile_user": profile_user,
-            "is_profile_owner": is_profile_owner,
-        },
-    )

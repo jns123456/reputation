@@ -1,6 +1,6 @@
 {% load i18n %}
 {% with original_post=original_post|default:post %}
-<article class="x-tweet"
+<article class="x-tweet x-forum-post"
          id="forum-post-{{ post.id }}"
          x-data="{ showReply: false }"
          data-sort-score="{{ post.popularity_score }}"

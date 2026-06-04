@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from accounts.models import SubscriberAudience
 from predictions.models import Prediction
 
 
@@ -23,9 +24,17 @@ class ForecastForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, market=None, **kwargs):
+    def __init__(self, *args, market=None, creator_program_enabled=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.market = market
+        if creator_program_enabled:
+            self.fields["audience"] = forms.ChoiceField(
+                choices=SubscriberAudience.choices,
+                initial=SubscriberAudience.PUBLIC,
+                required=False,
+                label=_("Who can see this forecast"),
+                widget=forms.RadioSelect,
+            )
         labels = self._outcome_labels()
         self.fields["predicted_outcome"] = forms.ChoiceField(
             choices=[(label, label) for label in labels],
@@ -75,6 +84,11 @@ class ForecastForm(forms.ModelForm):
         if direction not in Prediction.Direction.values:
             raise forms.ValidationError(_("Choose Yes or No for this outcome."))
         return direction
+
+    def cleaned_audience_value(self):
+        if "audience" not in self.fields:
+            return SubscriberAudience.PUBLIC
+        return self.cleaned_data.get("audience") or SubscriberAudience.PUBLIC
 
     def clean(self):
         cleaned = super().clean()

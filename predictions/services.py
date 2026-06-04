@@ -8,6 +8,8 @@ from integrations.attestation_services import (
     record_prediction_claim_attestation_safely,
     record_prediction_resolution_attestation_safely,
 )
+from accounts.models import SubscriberAudience
+from accounts.monetization_services import validate_creator_audience
 from predictions.models import Prediction
 from predictions.selectors import clear_forecasts_market_options_cache, get_user_active_prediction
 from reputation.services import (
@@ -56,7 +58,15 @@ def build_duplicate_forecast_error(*, user, market):
     )
 
 
-def create_prediction(*, user, market, predicted_outcome, predicted_direction=Prediction.Direction.YES, reasoning=""):
+def create_prediction(
+    *,
+    user,
+    market,
+    predicted_outcome,
+    predicted_direction=Prediction.Direction.YES,
+    reasoning="",
+    audience=None,
+):
     from accounts.write_guard import guard_write_action
 
     guard_write_action(
@@ -76,6 +86,9 @@ def create_prediction(*, user, market, predicted_outcome, predicted_direction=Pr
     if get_user_active_prediction(user, market):
         raise ValueError(build_duplicate_forecast_error(user=user, market=market))
 
+    resolved_audience = audience or SubscriberAudience.PUBLIC
+    validate_creator_audience(user=user, audience=resolved_audience)
+
     probability_snapshot = dict(market.current_probability or {})
 
     try:
@@ -87,6 +100,7 @@ def create_prediction(*, user, market, predicted_outcome, predicted_direction=Pr
                 predicted_direction=predicted_direction,
                 probability_at_prediction_time=probability_snapshot,
                 reasoning=reasoning,
+                audience=resolved_audience,
             )
             profile = user.profile
             profile.prediction_count += 1

@@ -1,4 +1,4 @@
-"""Spanish translations for profile monetize (Substack-style) page."""
+"""Spanish translations for profile monetize page."""
 
 from __future__ import annotations
 
@@ -9,11 +9,9 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
     "Your creator hub": "Tu centro de creador",
     "Make money doing the": "Gana dinero haciendo el",
     "work you prove in public": "trabajo que demuestras en público",
-    "Old media rewards attention. PredictStamp is building a model like": (
-        "Los medios tradicionales premian la atención. PredictStamp está construyendo un modelo como"
-    ),
-    "writers, forecasters, and analysts keep direct relationships with subscribers — powered by a reputation track record, not gambling.": (
-        "escritores, pronosticadores y analistas mantienen relaciones directas con suscriptores — "
+    "Old media rewards attention. PredictStamp is building a creator model where writers, forecasters, and analysts keep direct relationships with subscribers — powered by a reputation track record, not gambling.": (
+        "Los medios tradicionales premian la atención. PredictStamp está construyendo un modelo de creador "
+        "donde escritores, pronosticadores y analistas mantienen relaciones directas con suscriptores — "
         "impulsadas por un historial de reputación, no por apuestas."
     ),
     "No betting, wallets, or deposits on PredictStamp. Monetization is subscriptions and premium content around your public judgment.": (
@@ -27,9 +25,8 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
     "90% to you": "90% para ti",
     "Own your audience": "Tu audiencia es tuya",
     "A business model that only wins when you do": "Un modelo de negocio que solo gana cuando tú ganas",
-    "Inspired by Substack: no platform tiers, no lock-in contracts — start publishing and get paid when subscribers value your work.": (
-        "Inspirado en Substack: sin niveles de plataforma ni contratos de permanencia — "
-        "publica y cobra cuando los suscriptores valoran tu trabajo."
+    "No platform tiers, no lock-in contracts — start publishing and get paid when subscribers value your work.": (
+        "Sin niveles de plataforma ni contratos de permanencia — publica y cobra cuando los suscriptores valoran tu trabajo."
     ),
     "Earn money right away": "Gana dinero desde el primer día",
     "No platform fees to open a paid feed. Publish forecasts, analysis, and discussion on PredictStamp at no cost — leave anytime.": (
@@ -52,9 +49,9 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
     ),
     "Revenue": "Ingresos",
     "Estimate what you could earn": "Estima lo que podrías ganar",
-    "A few hundred paid subscribers at $5/month can replace a side income. A few thousand makes it a real business — same math as Substack, applied to predictive content.": (
+    "A few hundred paid subscribers at $5/month can replace a side income. A few thousand makes it a real business — the same simple subscriber math, applied to predictive content.": (
         "Unos cientos de suscriptores de pago a $5/mes pueden reemplazar un ingreso extra. "
-        "Unos miles lo convierten en un negocio real — la misma matemática que Substack, "
+        "Unos miles lo convierten en un negocio real — la misma matemática simple de suscriptores, "
         "aplicada a contenido predictivo."
     ),
     "Our entire business model depends on your success — we only make money when you do.": (
@@ -117,8 +114,8 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
         "automatizados premium con responsabilidad clara del operador."
     ),
     "Legal and reputational support for your work": "Apoyo legal y de reputación para tu trabajo",
-    "Like Substack Defender for publishers, PredictStamp separates predictive reputation from social popularity — so subscribers pay for judgment quality, not vote brigades.": (
-        "Como Substack Defender para editores, PredictStamp separa reputación predictiva de popularidad social — "
+    "PredictStamp separates predictive reputation from social popularity — so subscribers pay for judgment quality, not vote brigades.": (
+        "PredictStamp separa reputación predictiva de popularidad social — "
         "los suscriptores pagan por calidad de juicio, no por brigadas de votos."
     ),
     "Immutable resolved forecast history": "Historial inmutable de pronósticos resueltos",
@@ -148,9 +145,9 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
         "Hilos y comentarios de suscriptores convierten un perfil en una sala — "
         "los participantes debaten resultados contigo."
     ),
-    "Welcome sequences, paid tiers, conversion analytics, and win-back campaigns — designed like Substack to turn free readers into paid subscribers.": (
+    "Welcome sequences, paid tiers, conversion analytics, and win-back campaigns — built to turn free readers into paid subscribers.": (
         "Secuencias de bienvenida, niveles de pago, analítica de conversión y campañas de recuperación — "
-        "diseñadas como Substack para convertir lectores gratis en suscriptores de pago."
+        "pensadas para convertir lectores gratis en suscriptores de pago."
     ),
     "Creator dashboard": "Panel de creador",
     "Track MRR, churn, and reputation growth from this profile hub — starting with your public stats today.": (
@@ -164,11 +161,8 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
     ),
     "You deserve to make money": "Te mereces ganar dinero",
     "doing the work you love": "haciendo el trabajo que amas",
-    "Turn verified judgment into a subscription business — the way": (
-        "Convierte juicio verificado en un negocio por suscripción — como lo hizo"
-    ),
-    "did for writers, adapted for prediction markets on PredictStamp.": (
-        "para escritores, adaptado a mercados de predicción en PredictStamp."
+    "Turn verified judgment into a subscription business — built for prediction markets on PredictStamp.": (
+        "Convierte juicio verificado en un negocio por suscripción — pensado para mercados de predicción en PredictStamp."
     ),
     "Publish your next forecast": "Publica tu próximo pronóstico",
     "Polish your profile": "Pulir tu perfil",
@@ -180,4 +174,65 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
     "Trust": "Confianza",
     "Tools": "Herramientas",
     "Go": "Ir",
+    "Explore the creator monetization hub": "Explora el centro de monetización para creadores",
+    "Creator dashboard": "Panel de creador",
+    "Premium forecasts": "Pronósticos premium",
+    "Premium forum posts": "Posts premium del foro",
+    "Listed price: $%(price)s/month (display only).": "Precio publicado: $%(price)s/mes (solo visualización).",
+    "Edit program": "Editar programa",
+    "View subscribers": "Ver suscriptores",
+    "Turn on your creator program to accept subscribers and publish subscriber-only forecasts and posts.": (
+        "Activa tu programa de creador para aceptar suscriptores y publicar pronósticos y posts solo para suscriptores."
+    ),
+    "Set up creator program": "Configurar programa de creador",
+    "This creator has not enabled subscriptions yet.": "Este creador aún no activó suscripciones.",
+    "Membership — $%(price)s/month": "Membresía — $%(price)s/mes",
+    "You have access to subscriber-only content.": "Tienes acceso al contenido solo para suscriptores.",
+    "Creator program setup": "Configuración del programa de creador",
+    "Configure your paid feed. Subscriptions are free to activate on-platform until payment processing launches — no wallets or betting.": (
+        "Configura tu feed de pago. Las suscripciones se activan gratis en la plataforma hasta que haya procesamiento de pagos — sin wallets ni apuestas."
+    ),
+    "Enable creator program": "Activar programa de creador",
+    "Let others subscribe and publish subscriber-only forecasts and forum posts.": (
+        "Permite que otros se suscriban y publica pronósticos y posts del foro solo para suscriptores."
+    ),
+    "Public tagline": "Eslogan público",
+    "What subscribers get from you": "Qué obtienen los suscriptores de ti",
+    "Shown to new subscribers on your monetization page": "Se muestra a nuevos suscriptores en tu página de monetización",
+    "Monthly price (USD)": "Precio mensual (USD)",
+    "Displayed price only — no payment processing on PredictStamp yet.": (
+        "Solo precio mostrado — aún sin procesamiento de pagos en PredictStamp."
+    ),
+    "Save program": "Guardar programa",
+    "Creator program saved.": "Programa de creador guardado.",
+    "Subscribers": "Suscriptores",
+    "Enable your creator program to accept subscribers.": "Activa tu programa de creador para aceptar suscriptores.",
+    "Open setup": "Abrir configuración",
+    "active subscriber": "suscriptor activo",
+    "active subscribers": "suscriptores activos",
+    "No subscribers yet. Share your monetization page to grow your list.": (
+        "Aún no hay suscriptores. Comparte tu página de monetización para hacer crecer la lista."
+    ),
+    "Subscribe": "Suscribirse",
+    "Subscribe — $%(price)s/mo": "Suscribirse — $%(price)s/mes",
+    "Cancel subscription": "Cancelar suscripción",
+    "You are now subscribed. Subscriber-only content from this creator is unlocked.": (
+        "Ya estás suscrito. Se desbloqueó el contenido exclusivo de este creador."
+    ),
+    "Subscription cancelled.": "Suscripción cancelada.",
+    "Subscriber-only content": "Contenido solo para suscriptores",
+    "Subscribe to unlock the full content. Membership is free on-platform until payment processing launches.": (
+        "Suscríbete para desbloquear el contenido completo. La membresía es gratis en la plataforma hasta que haya procesamiento de pagos."
+    ),
+    "Log in to subscribe": "Inicia sesión para suscribirte",
+    "Who can see this forecast": "Quién puede ver este pronóstico",
+    "Who can see this post": "Quién puede ver este post",
+    "Who can see this": "Quién puede ver esto",
+    "Subscribers only": "Solo suscriptores",
+    "Enable your creator program before publishing subscriber-only content.": (
+        "Activa tu programa de creador antes de publicar contenido solo para suscriptores."
+    ),
+    "Creators keep 90% of revenue minus payment processing fees. Earnings estimate is illustrative — memberships work today without on-platform payments.": (
+        "Los creadores conservan el 90% de los ingresos menos comisiones. La estimación es ilustrativa — las membresías funcionan hoy sin pagos en la plataforma."
+    ),
 }

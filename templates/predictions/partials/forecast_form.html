@@ -202,6 +202,8 @@
           <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.reasoning.errors.0 }}</p>
           {% endif %}
 
+          {% include "accounts/partials/content_audience_field.html" with form=form %}
+
           <button type="submit" class="{% if inline_layout %}mt-auto shrink-0 {% endif %}mt-4 inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto">
             {% trans "Post forecast" %}
           </button>

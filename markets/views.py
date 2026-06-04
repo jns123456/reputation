@@ -218,15 +218,26 @@ def market_detail(request, slug):
     existing_forecast = None
     forecast_form = None
     active_challenges = []
-    if request.user.is_authenticated and market.is_forecastable:
-        existing_forecast = get_user_active_prediction(request.user, market)
-        forecast_form = (
-            ForecastForm(market=market) if not existing_forecast else None
-        )
-        active_challenges = get_active_challenge_contexts_for_market(
-            user=request.user,
-            market=market,
-        )
+    creator_program_enabled = False
+    if request.user.is_authenticated:
+        from accounts.monetization_selectors import get_creator_program_or_none
+
+        program = get_creator_program_or_none(request.user)
+        creator_program_enabled = program is not None and program.is_enabled
+        if market.is_forecastable:
+            existing_forecast = get_user_active_prediction(request.user, market)
+            forecast_form = (
+                ForecastForm(
+                    market=market,
+                    creator_program_enabled=creator_program_enabled,
+                )
+                if not existing_forecast
+                else None
+            )
+            active_challenges = get_active_challenge_contexts_for_market(
+                user=request.user,
+                market=market,
+            )
 
     prediction_sections = [
         {
@@ -257,5 +268,6 @@ def market_detail(request, slug):
             "forecast_form": forecast_form,
             "existing_forecast": existing_forecast,
             "active_challenges": active_challenges,
+            "creator_program_enabled": creator_program_enabled,
         },
     )

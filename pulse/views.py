@@ -28,7 +28,21 @@ from pulse.services import (
 )
 
 from accounts import abuse_services
+from accounts.monetization_selectors import get_creator_program_or_none
 from accounts.write_guard import ContentRejected, write_guard_user_message
+
+
+def _forum_post_form(user):
+    if not user.is_authenticated:
+        return None
+    program = get_creator_program_or_none(user)
+    creator_enabled = program is not None and program.is_enabled
+    return PostForm(creator_program_enabled=creator_enabled)
+
+
+def _creator_program_enabled(user):
+    program = get_creator_program_or_none(user)
+    return program is not None and program.is_enabled
 
 
 @require_GET
@@ -38,7 +52,7 @@ def pulse(request):
         sort=request.GET.get("sort", "recent"),
         page=request.GET.get("page", 1),
     )
-    context["post_form"] = PostForm() if request.user.is_authenticated else None
+    context["post_form"] = _forum_post_form(request.user)
     return render(request, "forum/forum.html", context)
 
 
@@ -57,7 +71,11 @@ def pulse_feed(request):
 @login_required
 @require_POST
 def create_post_view(request):
-    form = PostForm(request.POST, request.FILES)
+    form = PostForm(
+        request.POST,
+        request.FILES,
+        creator_program_enabled=_creator_program_enabled(request.user),
+    )
     if not form.is_valid():
         if request.headers.get("HX-Request"):
             return render(
@@ -74,6 +92,7 @@ def create_post_view(request):
             body=form.cleaned_data["body"],
             image=form.cleaned_data.get("image"),
             poll_payload=form.cleaned_data.get("poll_payload"),
+            audience=form.cleaned_audience_value(),
         )
     except (ValueError, ContentRejected) as exc:
         if request.headers.get("HX-Request"):

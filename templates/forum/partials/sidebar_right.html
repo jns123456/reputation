@@ -2,29 +2,29 @@
 {% include "accounts/partials/user_search_form_forum.html" %}
 
 <div class="x-widget">
-  <h2 class="x-widget-head">{% trans "What's happening" %}</h2>
+  <h2 class="x-widget-head">{% trans "Discover" %}</h2>
   <a href="{% url 'markets:list' %}" class="x-widget-item">
-    <p class="x-widget-label">{% trans "Markets" %} · {% trans "Trending" %}</p>
-    <p class="x-widget-title">{% trans "Prediction markets" %}</p>
-    <p class="x-widget-meta">{% trans "Explore live events" %}</p>
+    <p class="x-widget-label">{% trans "Markets" %}</p>
+    <p class="x-widget-title">{% trans "Live prediction events" %}</p>
+    <p class="x-widget-meta">{% trans "Browse imported Polymarket questions" %}</p>
   </a>
   <a href="{% url 'dashboard:forecasts' %}" class="x-widget-item">
-    <p class="x-widget-label">{% trans "Forecasts" %} · {% trans "Trending" %}</p>
+    <p class="x-widget-label">{% trans "Forecasts" %}</p>
     <p class="x-widget-title">{% trans "Community predictions" %}</p>
-    <p class="x-widget-meta">{% trans "Formal forecasts on markets" %}</p>
+    <p class="x-widget-meta">{% trans "Formal forecasts with reputation scoring" %}</p>
   </a>
   <a href="{% url 'dashboard:reputation_leaderboard' %}" class="x-widget-item">
-    <p class="x-widget-label">{% trans "Reputation" %} · {% trans "Trending" %}</p>
+    <p class="x-widget-label">{% trans "Reputation" %}</p>
     <p class="x-widget-title">{% trans "Top predictors" %}</p>
-    <p class="x-widget-meta">{% trans "Leaderboard rankings" %}</p>
+    <p class="x-widget-meta">{% trans "Leaderboard by predictive quality" %}</p>
   </a>
 </div>
 
 <div class="x-widget">
-  <h2 class="x-widget-head">{% trans "Who to follow" %}</h2>
+  <h2 class="x-widget-head">{% trans "Suggested voices" %}</h2>
   <a href="{% url 'dashboard:reputation_leaderboard' %}" class="x-widget-item">
     <p class="x-widget-title">{% trans "Reputation leaders" %}</p>
-    <p class="x-widget-meta">{% trans "Follow top predictors" %}</p>
+    <p class="x-widget-meta">{% trans "Follow proven forecasters" %}</p>
   </a>
   <a href="{% url 'dashboard:popularity_leaderboard' %}" class="x-widget-item">
     <p class="x-widget-title">{% trans "Popular voices" %}</p>
