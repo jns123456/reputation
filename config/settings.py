@@ -329,6 +329,8 @@ AUTH0_CLIENT_ID = env("AUTH0_CLIENT_ID", default="")
 AUTH0_CLIENT_SECRET = env("AUTH0_CLIENT_SECRET", default="")
 # Optional API audience if you later need Auth0-issued access tokens.
 AUTH0_AUDIENCE = env("AUTH0_AUDIENCE", default="")
+# Auth0 connection name for Google (Dashboard → Authentication → Social → Google).
+AUTH0_GOOGLE_CONNECTION = env("AUTH0_GOOGLE_CONNECTION", default="google-oauth2")
 AUTH0_ENABLED = bool(AUTH0_DOMAIN and AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET)
 
 _redis_url = env("REDIS_URL", default="redis://localhost:6379/0")

@@ -117,7 +117,11 @@ def auth0_login(request):
         messages.error(request, _("Auth0 sign-in is not available right now."))
         return redirect("accounts:login")
     redirect_uri = request.build_absolute_uri(reverse("accounts:auth0_callback"))
-    return client.authorize_redirect(request, redirect_uri)
+    authorize_kwargs = {}
+    connection = (request.GET.get("connection") or "").strip()
+    if connection:
+        authorize_kwargs["connection"] = connection
+    return client.authorize_redirect(request, redirect_uri, **authorize_kwargs)
 
 
 def auth0_callback(request):

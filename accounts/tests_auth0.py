@@ -1,4 +1,8 @@
-from django.test import TestCase
+from unittest.mock import MagicMock, patch
+
+from django.http import HttpResponseRedirect
+from django.test import TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.auth0 import get_or_create_user_from_auth0
@@ -91,3 +95,49 @@ class GetOrCreateUserFromAuth0Tests(TestCase):
         self.assertEqual(owner.auth0_sub, "auth0|abc123")
         self.assertIsNotNone(owner.email_verified_at)
         self.assertEqual(User.objects.filter(email__iexact="alice@example.com").count(), 2)
+
+
+@override_settings(
+    AUTH0_ENABLED=True,
+    AUTH0_DOMAIN="tenant.auth0.com",
+    AUTH0_CLIENT_ID="cid",
+    AUTH0_CLIENT_SECRET="secret",
+    AUTH0_GOOGLE_CONNECTION="google-oauth2",
+)
+class Auth0LoginViewTests(TestCase):
+    @patch("accounts.auth0.get_auth0_client")
+    def test_passes_connection_query_param_to_authorize_redirect(self, mock_client):
+        client = MagicMock()
+        client.authorize_redirect.return_value = HttpResponseRedirect(
+            "https://tenant.auth0.com/authorize"
+        )
+        mock_client.return_value = client
+
+        response = self.client.get(
+            reverse("accounts:auth0_login"),
+            {"connection": "google-oauth2"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        client.authorize_redirect.assert_called_once()
+        _request, redirect_uri = client.authorize_redirect.call_args.args
+        self.assertIn("/accounts/auth0/callback/", redirect_uri)
+        self.assertEqual(
+            client.authorize_redirect.call_args.kwargs.get("connection"),
+            "google-oauth2",
+        )
+
+    @patch("accounts.auth0.get_auth0_client")
+    def test_omits_connection_when_not_in_query(self, mock_client):
+        client = MagicMock()
+        client.authorize_redirect.return_value = HttpResponseRedirect(
+            "https://tenant.auth0.com/authorize"
+        )
+        mock_client.return_value = client
+
+        self.client.get(reverse("accounts:auth0_login"))
+
+        self.assertNotIn(
+            "connection",
+            client.authorize_redirect.call_args.kwargs,
+        )

@@ -25,4 +25,7 @@ def notification_context(request):
 
 def auth0_context(request):
     """Expose whether the Auth0 login option is configured."""
-    return {"auth0_enabled": settings.AUTH0_ENABLED}
+    return {
+        "auth0_enabled": settings.AUTH0_ENABLED,
+        "auth0_google_connection": settings.AUTH0_GOOGLE_CONNECTION,
+    }
