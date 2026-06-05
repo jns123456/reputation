@@ -24,13 +24,13 @@
       {% trans "Create a" %} <span class="pr-gradient-text">{% trans "group" %}</span>
       {% endif %}
     </h1>
-    <p class="challenge-create-desc">{% trans "Choose a name and select mutual followers to save for future challenges." %}</p>
+    <p class="challenge-create-desc">{% trans "Choose a name and select platform users to save for future challenges." %}</p>
   </header>
 
-  {% if not mutual_followers %}
+  {% if not challengeable_users %}
   <div class="challenge-create-alert mb-6" role="status">
     <i data-lucide="triangle-alert" class="challenge-create-alert-icon" stroke-width="2" aria-hidden="true"></i>
-    <p>{% trans "You need mutual followers to create a group. Follow someone who follows you back." %}</p>
+    <p>{% trans "There are no other users on the platform yet. You need at least one member to create a group." %}</p>
   </div>
   {% endif %}
 
@@ -56,7 +56,7 @@
       {% if form.members.errors %}
       <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.members.errors.0 }}</p>
       {% endif %}
-      {% if mutual_followers %}
+      {% if challengeable_users %}
       <div class="challenge-create-opponents">
         {% for checkbox in form.members %}
         <label class="challenge-create-opponent">
@@ -69,14 +69,14 @@
       {% else %}
       <div class="challenge-create-opponents-empty">
         <i data-lucide="users" class="h-8 w-8 text-slate-300 dark:text-slate-600" stroke-width="1.5" aria-hidden="true"></i>
-        <p>{% trans "No mutual followers yet." %}</p>
+        <p>{% trans "No other users on the platform yet." %}</p>
       </div>
       {% endif %}
     </div>
 
     <div class="challenge-create-step-actions">
       <a href="{% url 'challenges:group_list' %}" class="btn-secondary justify-center">{% trans "Cancel" %}</a>
-      <button type="submit" class="btn-primary justify-center" {% if not mutual_followers %}disabled{% endif %}>
+      <button type="submit" class="btn-primary justify-center" {% if not challengeable_users %}disabled{% endif %}>
         {% if is_edit %}{% trans "Save changes" %}{% else %}{% trans "Create group" %}{% endif %}
       </button>
     </div>

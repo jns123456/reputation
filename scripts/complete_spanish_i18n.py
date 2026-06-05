@@ -329,8 +329,8 @@ FIXES.update({
     "No challenges yet.": "Aún no hay desafíos.",
     "Create a": "Crea un",
     "challenge": "desafío",
-    "Choose who you want to challenge. You can only invite mutual followers.": (
-        "Elige a quién quieres desafiar. Solo puedes invitar a seguidores mutuos."
+    "Choose who you want to challenge. You can invite any user on the platform — no mutual follow required.": (
+        "Elige a quién quieres desafiar. Puedes invitar a cualquier usuario de la plataforma — no hace falta seguimiento mutuo."
     ),
     "Pick up to %(max)s open events for your challenge.": (
         "Elige hasta %(max)s eventos abiertos para tu desafío."
@@ -339,7 +339,12 @@ FIXES.update({
     "Challenge creation steps": "Pasos para crear el desafío",
     "Users": "Usuarios",
     "Events": "Eventos",
-    "Select at least one mutual follower.": "Selecciona al menos un seguidor mutuo.",
+    "Select at least one user to challenge.": "Selecciona al menos un usuario para desafiar.",
+    "There are no other users on the platform yet. You need at least one opponent to create a challenge.": (
+        "Aún no hay otros usuarios en la plataforma. Necesitas al menos un oponente para crear un desafío."
+    ),
+    "Or pick individual users below.": "O elige usuarios individuales abajo.",
+    "No other users on the platform yet.": "Aún no hay otros usuarios en la plataforma.",
     "Opponents": "Oponentes",
     "Select at least one user to continue.": "Selecciona al menos un usuario para continuar.",
     "user(s) selected": "usuario(s) seleccionado(s)",
@@ -350,9 +355,11 @@ FIXES.update({
     "Invited": "Invitado",
     "Accepted": "Aceptado",
     "Declined": "Rechazado",
-    "Compete with mutual followers on up to 10 events. Highest reputation score wins.": (
-        "Compite con seguidores mutuos en hasta 10 eventos. Gana quien tenga más reputación."
+    "Compete with anyone on the platform on up to 10 events. Highest reputation score wins.": (
+        "Compite con cualquier usuario de la plataforma en hasta 10 eventos. Gana quien tenga más reputación."
     ),
+    "You cannot challenge @%(username)s.": "No puedes desafiar a @%(username)s.",
+    "You cannot add @%(username)s to a group.": "No puedes añadir a @%(username)s a un grupo.",
 })
 
 PLURAL_FIXES.update({

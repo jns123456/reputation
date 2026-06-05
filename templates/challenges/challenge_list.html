@@ -10,7 +10,7 @@
   {% url 'challenges:how_it_works' as how_it_works_url %}
   {% trans "Social" as hero_eyebrow %}
   {% trans "Challenges" as hero_title %}
-  {% blocktrans asvar hero_description %}Compete with mutual followers on up to 10 events. Highest reputation score wins.{% endblocktrans %}
+  {% blocktrans asvar hero_description %}Compete with anyone on the platform on up to 10 events. Highest reputation score wins.{% endblocktrans %}
   {% trans "New challenge" as hero_action_label %}
   {% trans "How it works" as how_it_works_label %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label secondary_url=how_it_works_url secondary_label=how_it_works_label %}

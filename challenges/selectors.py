@@ -2,6 +2,7 @@
 
 from django.db.models import Q, Sum
 
+from accounts.models import User
 from challenges.models import Challenge, ChallengeGroup, ChallengeParticipant
 from markets.models import Market
 from reputation.models import ReputationEvent
@@ -498,3 +499,31 @@ def get_challenge_group_for_user(*, group_id, user):
         .prefetch_related("members")
         .first()
     )
+
+
+def get_challengeable_user_queryset(*, user):
+    """Active, non-anonymous platform users the given user can challenge."""
+    if not user or not user.is_authenticated:
+        return User.objects.none()
+    return (
+        User.objects.filter(is_active=True)
+        .exclude(identity_mode=User.IdentityMode.ANONYMOUS)
+        .exclude(pk=user.pk)
+        .order_by("username")
+    )
+
+
+def get_challengeable_users(*, user):
+    return list(get_challengeable_user_queryset(user=user))
+
+
+def is_challengeable_user(*, challenger, opponent):
+    if not challenger or not opponent:
+        return False
+    if challenger.pk == opponent.pk:
+        return False
+    if not opponent.is_active:
+        return False
+    if opponent.identity_mode == User.IdentityMode.ANONYMOUS:
+        return False
+    return True

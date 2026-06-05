@@ -5,19 +5,18 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 from django.utils import timezone
 
-from accounts.follow_selectors import are_mutual_followers
 from challenges.models import (
     MAX_CHALLENGE_MARKETS,
     Challenge,
     ChallengeMarket,
     ChallengeParticipant,
 )
-from challenges.selectors import get_challenge_standings
+from challenges.selectors import get_challenge_standings, is_challengeable_user
 from markets.models import Market
 
 
 def create_challenge(*, creator, title="", market_ids, opponent_ids, challenge_group=None):
-    """Create a challenge with up to 10 markets and mutual-follow opponents."""
+    """Create a challenge with up to 10 markets and platform opponents."""
     if not market_ids:
         raise ValidationError(_("Select at least one event."))
     if len(market_ids) > MAX_CHALLENGE_MARKETS:
@@ -44,9 +43,9 @@ def create_challenge(*, creator, title="", market_ids, opponent_ids, challenge_g
         raise ValidationError(_("One or more selected users were not found."))
 
     for opponent in opponents:
-        if not are_mutual_followers(creator, opponent):
+        if not is_challengeable_user(challenger=creator, opponent=opponent):
             raise ValidationError(
-                _("You and @%(username)s must follow each other to challenge them.")
+                _("You cannot challenge @%(username)s.")
                 % {"username": opponent.username}
             )
 
@@ -253,7 +252,7 @@ def _complete_challenge(challenge):
 
 
 def create_challenge_group(*, owner, name, member_ids):
-    """Create a saved opponent group from mutual followers."""
+    """Create a saved opponent group from platform users."""
     name = name.strip()
     if not name:
         raise ValidationError(_("Enter a group name."))
@@ -270,9 +269,9 @@ def create_challenge_group(*, owner, name, member_ids):
     for member in members:
         if member.id == owner.id:
             raise ValidationError(_("You cannot add yourself to a group."))
-        if not are_mutual_followers(owner, member):
+        if not is_challengeable_user(challenger=owner, opponent=member):
             raise ValidationError(
-                _("You and @%(username)s must follow each other to add them to a group.")
+                _("You cannot add @%(username)s to a group.")
                 % {"username": member.username}
             )
 
@@ -305,9 +304,9 @@ def update_challenge_group(*, group, name, member_ids):
     for member in members:
         if member.id == group.owner_id:
             raise ValidationError(_("You cannot add yourself to a group."))
-        if not are_mutual_followers(group.owner, member):
+        if not is_challengeable_user(challenger=group.owner, opponent=member):
             raise ValidationError(
-                _("You and @%(username)s must follow each other to add them to a group.")
+                _("You cannot add @%(username)s to a group.")
                 % {"username": member.username}
             )
 

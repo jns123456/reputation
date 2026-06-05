@@ -131,7 +131,7 @@ class ChallengeParticipant(models.Model):
 
 
 class ChallengeGroup(models.Model):
-    """Saved set of mutual followers for quick challenge invitations."""
+    """Saved set of platform users for quick challenge invitations."""
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

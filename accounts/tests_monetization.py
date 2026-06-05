@@ -90,6 +90,34 @@ class MonetizationViewTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
+    def test_creator_setup_saves_and_redirects(self):
+        owner = create_user("setupowner")
+        self.client.force_login(owner)
+        url = reverse("accounts:creator_setup", kwargs={"username": owner.username})
+        response = self.client.post(
+            url,
+            {
+                "is_enabled": "on",
+                "tagline": "Economic Guru",
+                "welcome_message": "Hi!",
+                "monthly_price": "5.0",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("saved=1", response["Location"])
+        from accounts.models import CreatorProgram
+
+        program = CreatorProgram.objects.get(user=owner)
+        self.assertTrue(program.is_enabled)
+        self.assertEqual(program.tagline, "Economic Guru")
+        self.assertEqual(program.monthly_price_cents, 500)
+
+        monetize_url = reverse("accounts:profile_monetize", kwargs={"username": owner.username})
+        page = self.client.get(f"{monetize_url}?saved=1")
+        self.assertContains(page, "Creator program saved.")
+        self.assertContains(page, "Creator program active")
+        self.assertContains(page, "Economic Guru")
+
     def test_subscribe_via_post(self):
         self.client.force_login(self.subscriber)
         response = self.client.post(
@@ -112,5 +140,4 @@ class MonetizationViewTests(TestCase):
             reverse("accounts:profile_monetize", kwargs={"username": self.creator.username})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Creator dashboard")
-        self.assertContains(response, "1")
+        self.assertContains(response, "Edit program")

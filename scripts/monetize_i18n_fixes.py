@@ -205,6 +205,13 @@ MONETIZE_I18N_FIXES: dict[str, str] = {
     ),
     "Save program": "Guardar programa",
     "Creator program saved.": "Programa de creador guardado.",
+    "Your settings are live. You can now publish subscriber-only forecasts and forum posts.": (
+        "Tu configuración ya está activa. Ahora puedes publicar pronósticos y posts del foro solo para suscriptores."
+    ),
+    "Creator program active": "Programa de creador activo",
+    "Enter a monthly price.": "Ingresa un precio mensual.",
+    "Enter a valid price (e.g. 5 or 5.00).": "Ingresa un precio válido (p. ej. 5 o 5.00).",
+    "Monthly price must be between $0 and $999.": "El precio mensual debe estar entre $0 y $999.",
     "Subscribers": "Suscriptores",
     "Enable your creator program to accept subscribers.": "Activa tu programa de creador para aceptar suscriptores.",
     "Open setup": "Abrir configuración",

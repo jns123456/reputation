@@ -28,11 +28,11 @@ class ChallengeGroupForm(forms.Form):
     def __init__(self, *args, user=None, initial_members=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        from accounts.follow_selectors import get_mutual_followers
+        from challenges.selectors import get_challengeable_users
 
-        mutual = get_mutual_followers(user) if user else []
+        challengeable = get_challengeable_users(user=user) if user else []
         self.fields["members"].choices = [
-            (str(u.id), u.public_name or u.username) for u in mutual
+            (str(u.id), u.public_name or u.username) for u in challengeable
         ]
         if initial_members is not None:
             self.fields["members"].initial = [str(uid) for uid in initial_members]
@@ -79,11 +79,11 @@ class ChallengeCreateForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        from accounts.follow_selectors import get_mutual_followers
+        from challenges.selectors import get_challengeable_users
 
-        mutual = get_mutual_followers(user) if user else []
+        challengeable = get_challengeable_users(user=user) if user else []
         self.fields["opponents"].choices = [
-            (str(u.id), u.public_name or u.username) for u in mutual
+            (str(u.id), u.public_name or u.username) for u in challengeable
         ]
         if user:
             self.fields["challenge_group"].queryset = ChallengeGroup.objects.filter(
@@ -114,12 +114,12 @@ class ChallengeCreateForm(forms.Form):
         if challenge_group:
             if challenge_group.owner_id != self.user.id:
                 raise forms.ValidationError(_("You can only use your own saved groups."))
-            from accounts.follow_selectors import are_mutual_followers
+            from challenges.selectors import is_challengeable_user
 
             eligible_ids = [
                 str(member.id)
                 for member in challenge_group.members.all()
-                if are_mutual_followers(self.user, member)
+                if is_challengeable_user(challenger=self.user, opponent=member)
             ]
             if not eligible_ids:
                 raise forms.ValidationError(

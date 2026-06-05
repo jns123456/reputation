@@ -19,7 +19,7 @@ class ProfileMonetizeViewTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Make money doing the")
-        self.assertContains(response, "Creator dashboard")
+        self.assertContains(response, "Set up creator program")
         self.assertContains(response, "Estimate your earnings")
 
     def test_monetize_page_renders_for_anonymous_visitor(self):

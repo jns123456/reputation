@@ -14,13 +14,13 @@ TRANSLATIONS = {
     "How challenges": "Cómo funcionan los",
     "work": "desafíos",
     "challenges work": "funcionan los desafíos",
-    "Head-to-head reputation duels with mutual followers on real-world events. No extra bets — your forecasts are the score.": (
-        "Duelos de reputación cara a cara con seguidores mutuos en eventos del mundo real. "
+    "Head-to-head reputation duels with anyone on the platform on real-world events. No extra bets — your forecasts are the score.": (
+        "Duelos de reputación cara a cara con cualquier usuario de la plataforma en eventos del mundo real. "
         "Sin apuestas extra — tus pronósticos son la puntuación."
     ),
-    "Mutual followers": "Seguidores mutuos",
-    "You can only challenge people who follow you back.": (
-        "Solo puedes desafiar a personas que te siguen de vuelta."
+    "Anyone on the platform": "Cualquier usuario de la plataforma",
+    "You can challenge any user — mutual follow is not required.": (
+        "Puedes desafiar a cualquier usuario — no hace falta seguimiento mutuo."
     ),
     "Up to %(max)s events": "Hasta %(max)s eventos",
     "Pick open markets everyone will compete on. The duel ends when all of them resolve.": (
@@ -104,8 +104,8 @@ TRANSLATIONS = {
         "Sí. Un pronóstico en un mercado puede contar para cada desafío activo que incluya ese evento."
     ),
     "What are challenge groups?": "¿Qué son los grupos de desafío?",
-    "Saved lists of mutual followers for quick invitations. Group challenges can start as soon as the first invited member accepts, instead of waiting for every response.": (
-        "Listas guardadas de seguidores mutuos para invitar rápido. Los desafíos de grupo pueden empezar "
+    "Saved lists of users for quick invitations. Group challenges can start as soon as the first invited member accepts, instead of waiting for every response.": (
+        "Listas guardadas de usuarios para invitar rápido. Los desafíos de grupo pueden empezar "
         "en cuanto el primer miembro invitado acepta, sin esperar a que todos respondan."
     ),
     "Do upvotes affect my challenge score?": "¿Los votos positivos afectan mi puntuación en el desafío?",
@@ -114,8 +114,8 @@ TRANSLATIONS = {
         "Solo la reputación de los pronósticos determina al ganador."
     ),
     "Ready to compete?": "¿Listo para competir?",
-    "Challenge a mutual follower or respond to a pending invitation.": (
-        "Desafía a un seguidor mutuo o responde a una invitación pendiente."
+    "Challenge someone on the platform or respond to a pending invitation.": (
+        "Desafía a alguien de la plataforma o responde a una invitación pendiente."
     ),
     "My challenges": "Mis desafíos",
     "Manage challenge groups": "Administrar grupos de desafío",
@@ -136,14 +136,14 @@ TRANSLATIONS = {
     "No groups yet.": "Aún no hay grupos.",
     "Create your first group": "Crea tu primer grupo",
     "Select at least one member.": "Selecciona al menos un miembro.",
-    "Save sets of mutual followers to invite them quickly when creating a challenge.": (
-        "Guarda conjuntos de seguidores mutuos para invitarlos rápido al crear un desafío."
+    "Save sets of users to invite them quickly when creating a challenge.": (
+        "Guarda conjuntos de usuarios para invitarlos rápido al crear un desafío."
     ),
-    "Choose a name and select mutual followers to save for future challenges.": (
-        "Elige un nombre y selecciona seguidores mutuos para guardarlos en futuros desafíos."
+    "Choose a name and select platform users to save for future challenges.": (
+        "Elige un nombre y selecciona usuarios de la plataforma para guardarlos en futuros desafíos."
     ),
-    "You need mutual followers to create a group. Follow someone who follows you back.": (
-        "Necesitas seguidores mutuos para crear un grupo. Sigue a alguien que te siga de vuelta."
+    "There are no other users on the platform yet. You need at least one member to create a group.": (
+        "Aún no hay otros usuarios en la plataforma. Necesitas al menos un miembro para crear un grupo."
     ),
     "Create a group to reuse the same opponents when starting new challenges.": (
         "Crea un grupo para reutilizar los mismos oponentes al iniciar nuevos desafíos."

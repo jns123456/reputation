@@ -17,7 +17,7 @@
   {% trans "Social" as hero_eyebrow %}
   {% trans "How" as hero_title %}
   {% trans "challenges work" as hero_gradient %}
-  {% blocktrans asvar hero_description %}Head-to-head reputation duels with mutual followers on real-world events. No extra bets — your forecasts are the score.{% endblocktrans %}
+  {% blocktrans asvar hero_description %}Head-to-head reputation duels with anyone on the platform on real-world events. No extra bets — your forecasts are the score.{% endblocktrans %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
 
   <div class="mb-10 grid gap-4 sm:grid-cols-3">
@@ -25,8 +25,8 @@
       <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
         <i data-lucide="users" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
       </div>
-      <h2 class="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{% trans "Mutual followers" %}</h2>
-      <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "You can only challenge people who follow you back." %}</p>
+      <h2 class="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{% trans "Anyone on the platform" %}</h2>
+      <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{% trans "You can challenge any user — mutual follow is not required." %}</p>
     </div>
     <div class="pr-panel px-5 py-4">
       <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
@@ -172,7 +172,7 @@
           <span class="inline-flex shrink-0 text-slate-400 transition" :class="open === 'groups' && 'rotate-180'"><i data-lucide="chevron-down" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i></span>
         </button>
         <div x-show="open === 'groups'" x-cloak class="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400">
-          <p>{% trans "Saved lists of mutual followers for quick invitations. Group challenges can start as soon as the first invited member accepts, instead of waiting for every response." %}</p>
+          <p>{% trans "Saved lists of users for quick invitations. Group challenges can start as soon as the first invited member accepts, instead of waiting for every response." %}</p>
         </div>
       </div>
 
@@ -192,7 +192,7 @@
   <section class="pr-cta-band">
     <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{% trans "Ready to compete?" %}</h2>
     <p class="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
-      {% trans "Challenge a mutual follower or respond to a pending invitation." %}
+      {% trans "Challenge someone on the platform or respond to a pending invitation." %}
     </p>
     <div class="mt-5 flex flex-wrap justify-center gap-3">
       <a href="{{ list_url }}" class="btn-secondary">{% trans "My challenges" %}</a>

@@ -18,14 +18,14 @@
     <h1 class="challenge-create-title">
       {% trans "Create a" %} <span class="pr-gradient-text">{% trans "challenge" %}</span>
     </h1>
-    <p class="challenge-create-desc" x-show="step === 1" x-cloak>{% trans "Choose who you want to challenge. You can only invite mutual followers." %}</p>
+    <p class="challenge-create-desc" x-show="step === 1" x-cloak>{% trans "Choose who you want to challenge. You can invite any user on the platform — no mutual follow required." %}</p>
     <p class="challenge-create-desc" x-show="step === 2" x-cloak>{% blocktrans with max=max_challenge_markets %}Pick up to {{ max }} open events for your challenge.{% endblocktrans %}</p>
   </header>
 
-  {% if not mutual_followers %}
+  {% if not challengeable_users %}
   <div class="challenge-create-alert mb-6" role="status">
     <i data-lucide="triangle-alert" class="challenge-create-alert-icon" stroke-width="2" aria-hidden="true"></i>
-    <p>{% trans "You need mutual followers to create a challenge. Follow someone who follows you back." %}</p>
+    <p>{% trans "There are no other users on the platform yet. You need at least one opponent to create a challenge." %}</p>
   </div>
   {% endif %}
 
@@ -60,7 +60,7 @@
     <div x-show="step === 1" x-cloak class="challenge-create-step-panel pr-panel">
       <div class="challenge-create-sidebar-head">
         <h2 class="challenge-create-panel-title">{% trans "Users to challenge" %}</h2>
-        <p class="challenge-create-panel-desc">{% trans "Select at least one mutual follower." %}</p>
+        <p class="challenge-create-panel-desc">{% trans "Select at least one user to challenge." %}</p>
       </div>
 
       <div class="challenge-create-field mt-4">
@@ -119,7 +119,7 @@
       <div class="challenge-create-field">
         <label class="challenge-create-label">{% trans "Opponents" %}</label>
         <p class="challenge-create-panel-desc mb-2" x-show="!activeGroupId">
-          {% trans "Or pick individual mutual followers below." %}
+          {% trans "Or pick individual users below." %}
         </p>
         <p class="challenge-create-panel-desc mb-2" x-show="activeGroupId" x-cloak>
           {% trans "Members included from the selected group. Deselect the group above to pick individuals." %}
@@ -127,7 +127,7 @@
         {% if form.opponents.errors %}
         <p class="mb-2 text-sm text-red-600 dark:text-red-400">{{ form.opponents.errors.0 }}</p>
         {% endif %}
-        {% if mutual_followers %}
+        {% if challengeable_users %}
         <div class="challenge-create-opponents">
           {% for checkbox in form.opponents %}
           <label class="challenge-create-opponent" :class="{ 'is-readonly': activeGroupId }">
@@ -151,7 +151,7 @@
         {% else %}
         <div class="challenge-create-opponents-empty">
           <i data-lucide="users" class="h-8 w-8 text-slate-300 dark:text-slate-600" stroke-width="1.5" aria-hidden="true"></i>
-          <p>{% trans "No mutual followers yet." %}</p>
+          <p>{% trans "No other users on the platform yet." %}</p>
         </div>
         {% endif %}
       </div>
@@ -161,7 +161,7 @@
         <button type="button"
                 class="btn-primary justify-center"
                 @click="goToEvents()"
-                :disabled="!canContinueUsers() || !hasMutualFollowers">
+                :disabled="!canContinueUsers() || !hasChallengeableUsers">
           {% trans "Continue" %}
           <i data-lucide="arrow-right" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
         </button>
@@ -275,7 +275,7 @@
       activeGroupEligibleCount: 0,
       syncingGroupSelection: false,
       eligibleMembersByGroup,
-      hasMutualFollowers: {{ mutual_followers|yesno:"true,false" }},
+      hasChallengeableUsers: {{ challengeable_users|yesno:"true,false" }},
       init() {
         this.syncOpponentCount();
         this.initMarkets(initialSelectedIds, initialTitles);

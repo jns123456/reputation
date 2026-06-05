@@ -102,6 +102,11 @@ body:has(.about-page) main {
   padding-top: 3.25rem;
 }
 
+/* Flash messages must clear the fixed about/monetize sub-nav on mobile */
+body:has(.about-page) .mx-auto.max-w-6xl.px-3.pt-3 {
+  padding-top: 5.5rem;
+}
+
 body:has(.about-page) .about-page > .mx-auto.max-w-6xl {
   padding-inline: 1rem;
 }

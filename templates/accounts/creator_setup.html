@@ -18,6 +18,12 @@
     {% trans "Configure your paid feed. Subscriptions are free to activate on-platform until payment processing launches — no wallets or betting." %}
   </p>
 
+  {% if form.non_field_errors %}
+  <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
   <form method="post" class="about-card mt-8 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
     {% csrf_token %}
 
@@ -42,6 +48,9 @@
     <div>
       <label for="{{ form.monthly_price.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{{ form.monthly_price.label }}</label>
       {{ form.monthly_price }}
+      {% if form.monthly_price.errors %}
+      <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.monthly_price.errors.0 }}</p>
+      {% endif %}
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ form.monthly_price.help_text }}</p>
     </div>
 

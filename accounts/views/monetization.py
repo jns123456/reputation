@@ -71,22 +71,29 @@ def creator_setup(request, username):
 
     program = get_or_create_creator_program(profile_user)
 
+    form = CreatorProgramForm(program=program)
+
     if request.method == "POST":
         form = CreatorProgramForm(request.POST, program=program)
         if form.is_valid():
             price = form.cleaned_data["monthly_price"]
             cents = int(round(float(price) * 100))
-            update_creator_program(
-                user=profile_user,
-                is_enabled=form.cleaned_data["is_enabled"],
-                tagline=form.cleaned_data["tagline"],
-                welcome_message=form.cleaned_data["welcome_message"],
-                monthly_price_cents=cents,
-            )
-            messages.success(request, _("Creator program saved."))
-            return redirect("accounts:profile_monetize", username=username)
-    else:
-        form = CreatorProgramForm(program=program)
+            try:
+                update_creator_program(
+                    user=profile_user,
+                    is_enabled=form.cleaned_data["is_enabled"],
+                    tagline=form.cleaned_data["tagline"],
+                    welcome_message=form.cleaned_data["welcome_message"],
+                    monthly_price_cents=cents,
+                )
+            except ValidationError as exc:
+                message = exc.messages[0] if getattr(exc, "messages", None) else str(exc)
+                form.add_error("monthly_price", message)
+            else:
+                messages.success(request, _("Creator program saved."))
+                return redirect(
+                    f"{reverse('accounts:profile_monetize', kwargs={'username': username})}?saved=1"
+                )
 
     return render(
         request,

@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -32,14 +34,17 @@ class CreatorProgramForm(forms.Form):
             }
         ),
     )
-    monthly_price = forms.DecimalField(
-        min_value=0,
-        max_value=999,
-        decimal_places=2,
+    monthly_price = forms.CharField(
         required=True,
         label=_("Monthly price (USD)"),
         help_text=_("Displayed price only — no payment processing on PredictStamp yet."),
-        widget=forms.NumberInput(attrs={"class": "form-input w-full", "step": "0.01"}),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input w-full",
+                "inputmode": "decimal",
+                "placeholder": "5.00",
+            }
+        ),
     )
 
     def __init__(self, *args, program=None, **kwargs):
@@ -48,7 +53,19 @@ class CreatorProgramForm(forms.Form):
             self.fields["is_enabled"].initial = program.is_enabled
             self.fields["tagline"].initial = program.tagline
             self.fields["welcome_message"].initial = program.welcome_message
-            self.fields["monthly_price"].initial = program.monthly_price_cents / 100
+            self.fields["monthly_price"].initial = program.monthly_price_display
+
+    def clean_monthly_price(self):
+        value = (self.cleaned_data.get("monthly_price") or "").strip().replace(",", ".")
+        if not value:
+            raise forms.ValidationError(_("Enter a monthly price."))
+        try:
+            price = Decimal(value)
+        except InvalidOperation as exc:
+            raise forms.ValidationError(_("Enter a valid price (e.g. 5 or 5.00).")) from exc
+        if price < 0 or price > 999:
+            raise forms.ValidationError(_("Monthly price must be between $0 and $999."))
+        return price
 
 
 class SubscriberAudienceMixin:

@@ -72,15 +72,15 @@ class ChallengeCreateTests(TestCase):
         creator_part = challenge.participants.get(user=self.alice)
         self.assertEqual(creator_part.status, ChallengeParticipant.Status.ACCEPTED)
 
-    def test_rejects_non_mutual_follow(self):
+    def test_create_challenge_without_mutual_follow(self):
         carol = create_user("carol")
-        with self.assertRaises(ValidationError):
-            create_challenge(
-                creator=self.alice,
-                title="",
-                market_ids=[self.market1.id],
-                opponent_ids=[carol.id],
-            )
+        challenge = create_challenge(
+            creator=self.alice,
+            title="Open invite",
+            market_ids=[self.market1.id],
+            opponent_ids=[carol.id],
+        )
+        self.assertEqual(challenge.participants.filter(user=carol).count(), 1)
 
     def test_create_challenge_view_accepts_single_market(self):
         self.client.force_login(self.alice)
@@ -639,16 +639,17 @@ class ChallengeGroupTests(TestCase):
         self.assertEqual(group.name, "Weekend crew")
         self.assertEqual(group.members.count(), 2)
 
-    def test_rejects_non_mutual_follow(self):
+    def test_create_group_without_mutual_follow(self):
         from challenges.services import create_challenge_group
 
-        dave = User.objects.create_user(username="dave", password="pass")
-        with self.assertRaises(ValidationError):
-            create_challenge_group(
-                owner=self.alice,
-                name="Invalid",
-                member_ids=[dave.id],
-            )
+        dave = create_user("dave")
+        group = create_challenge_group(
+            owner=self.alice,
+            name="Open crew",
+            member_ids=[dave.id],
+        )
+        self.assertEqual(group.members.count(), 1)
+        self.assertEqual(group.members.get().username, "dave")
 
     def test_group_list_and_create_views(self):
         from challenges.services import create_challenge_group

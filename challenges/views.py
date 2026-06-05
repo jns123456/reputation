@@ -96,9 +96,9 @@ def challenge_list(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def challenge_create(request):
-    from accounts.follow_selectors import get_mutual_followers
+    from challenges.selectors import get_challengeable_users, is_challengeable_user
 
-    mutual_followers = get_mutual_followers(request.user)
+    challengeable_users = get_challengeable_users(user=request.user)
 
     if request.method == "POST":
         form = ChallengeCreateForm(request.POST, user=request.user)
@@ -141,14 +141,13 @@ def challenge_create(request):
     from markets.selectors import get_market_hub_category_summaries
 
     challenge_groups = get_user_challenge_groups(request.user)
-    mutual_follower_ids = {user.id for user in mutual_followers}
     group_eligible_member_ids = {}
     challenge_group_cards = []
     for group in challenge_groups:
         eligible_ids = [
             str(member.id)
             for member in group.members.all()
-            if member.id in mutual_follower_ids
+            if is_challengeable_user(challenger=request.user, opponent=member)
         ]
         group_eligible_member_ids[str(group.pk)] = eligible_ids
         challenge_group_cards.append(
@@ -167,7 +166,7 @@ def challenge_create(request):
         "challenges/challenge_create.html",
         {
             "form": form,
-            "mutual_followers": mutual_followers,
+            "challengeable_users": challengeable_users,
             "challenge_groups": challenge_groups,
             "challenge_group_cards": challenge_group_cards,
             "group_eligible_member_ids_json": json.dumps(group_eligible_member_ids),
@@ -194,9 +193,9 @@ def challenge_group_list(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def challenge_group_create(request):
-    from accounts.follow_selectors import get_mutual_followers
+    from challenges.selectors import get_challengeable_users
 
-    mutual_followers = get_mutual_followers(request.user)
+    challengeable_users = get_challengeable_users(user=request.user)
 
     if request.method == "POST":
         form = ChallengeGroupForm(request.POST, user=request.user)
@@ -224,7 +223,7 @@ def challenge_group_create(request):
         "challenges/challenge_group_form.html",
         {
             "form": form,
-            "mutual_followers": mutual_followers,
+            "challengeable_users": challengeable_users,
             "is_edit": False,
         },
     )
@@ -233,13 +232,13 @@ def challenge_group_create(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def challenge_group_edit(request, pk):
-    from accounts.follow_selectors import get_mutual_followers
+    from challenges.selectors import get_challengeable_users
 
     group = get_challenge_group_for_user(group_id=pk, user=request.user)
     if not group:
         raise Http404("Group not found.")
 
-    mutual_followers = get_mutual_followers(request.user)
+    challengeable_users = get_challengeable_users(user=request.user)
     initial_members = list(group.members.values_list("id", flat=True))
 
     if request.method == "POST":
@@ -273,7 +272,7 @@ def challenge_group_edit(request, pk):
         {
             "form": form,
             "group": group,
-            "mutual_followers": mutual_followers,
+            "challengeable_users": challengeable_users,
             "is_edit": True,
         },
     )

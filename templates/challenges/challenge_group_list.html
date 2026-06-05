@@ -9,7 +9,7 @@
   {% url 'challenges:list' as list_url %}
   {% trans "Challenges" as hero_eyebrow %}
   {% trans "Groups" as hero_title %}
-  {% blocktrans asvar hero_description %}Save sets of mutual followers to invite them quickly when creating a challenge.{% endblocktrans %}
+  {% blocktrans asvar hero_description %}Save sets of users to invite them quickly when creating a challenge.{% endblocktrans %}
   {% trans "New group" as hero_action_label %}
   {% trans "Back to challenges" as secondary_label %}
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient="" description=hero_description action_url=create_url action_label=hero_action_label secondary_url=list_url secondary_label=secondary_label %}
