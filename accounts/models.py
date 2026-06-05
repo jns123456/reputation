@@ -51,6 +51,10 @@ class User(AbstractUser):
         default=IdentityMode.PUBLIC,
         help_text="How the user appears publicly on the platform.",
     )
+    hide_from_user_directory = models.BooleanField(
+        default=False,
+        help_text="When true, the account is omitted from the public user list and search.",
+    )
     is_verified = models.BooleanField(
         default=False,
         help_text="Platform-verified identity (admin-granted).",

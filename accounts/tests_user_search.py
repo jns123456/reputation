@@ -88,6 +88,19 @@ class UserSearchSelectorTests(TestCase):
         usernames = {user.username for user in get_browsable_users()}
         self.assertEqual(usernames, {"alice", "bob"})
 
+    def test_hidden_users_are_excluded_from_search_and_directory(self):
+        User.objects.create_user(
+            username="privateuser",
+            password="pass",
+            email="private@example.com",
+            display_name="Private User",
+            hide_from_user_directory=True,
+        )
+        self.assertEqual(search_users(query="private"), [])
+        self.assertEqual(search_users(query="Private"), [])
+        usernames = {user.username for user in get_browsable_users()}
+        self.assertNotIn("privateuser", usernames)
+
 
 class UserSearchViewTests(TestCase):
     def setUp(self):
@@ -186,3 +199,37 @@ class UserSearchViewTests(TestCase):
         )
         response = self.client.get("/accounts/users/list/")
         self.assertNotContains(response, "Ghost List")
+
+    def test_hidden_user_excluded_from_browsable_list(self):
+        User.objects.create_user(
+            username="hiddenlist",
+            password="pass",
+            display_name="Hidden List User",
+            hide_from_user_directory=True,
+        )
+        response = self.client.get("/accounts/users/list/")
+        self.assertNotContains(response, "Hidden List User")
+
+    def test_profile_edit_can_hide_from_user_directory(self):
+        from conftest import create_user
+
+        user = create_user("edithidden", display_name="Edit Hidden")
+        self.client.force_login(user)
+        response = self.client.post(
+            reverse("accounts:profile_edit"),
+            {
+                "email": user.email,
+                "bio": "",
+                "display_name": "Edit Hidden",
+                "identity_mode": User.IdentityMode.PUBLIC,
+                "hide_from_user_directory": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        user.refresh_from_db()
+        self.assertTrue(user.hide_from_user_directory)
+        self.client.logout()
+        list_response = self.client.get("/accounts/users/list/?q=Edit")
+        self.assertEqual(list_response.status_code, 200)
+        self.assertContains(list_response, "No users match")
+        self.assertNotContains(list_response, f"follow-user-{user.username}")

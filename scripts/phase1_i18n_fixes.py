@@ -106,6 +106,11 @@ PHASE1_FIXES: dict[str, str] = {
     "Achievements": "Logros",
     "username": "usuario",
     "Save changes": "Guardar cambios",
+    "Hide from user directory": "Ocultarse del directorio de usuarios",
+    "When enabled, you won't appear in the public user list or search. Direct profile links and your forecasts and comments still work.": (
+        "Si está activado, no aparecerás en la lista pública de usuarios ni en la búsqueda. "
+        "Los enlaces directos a tu perfil y tus pronósticos y comentarios siguen funcionando."
+    ),
     "Set up your profile": "Configura tu perfil",
     "Step 1 — credentials and email verification.": "Paso 1 — credenciales y verificación de email.",
     "Almost there": "Casi listo",

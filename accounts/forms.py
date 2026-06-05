@@ -91,6 +91,18 @@ class ProfileSetupForm(forms.ModelForm):
             attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
         ),
     )
+    hide_from_user_directory = forms.BooleanField(
+        required=False,
+        initial=False,
+        label=_("Hide from user directory"),
+        help_text=_(
+            "When enabled, you won't appear in the public user list or search. "
+            "Direct profile links and your forecasts and comments still work."
+        ),
+        widget=forms.CheckboxInput(
+            attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+        ),
+    )
     bio = forms.CharField(
         widget=forms.Textarea(
             attrs={
@@ -105,7 +117,13 @@ class ProfileSetupForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ("identity_mode", "display_name", "verification_requested", "bio")
+        fields = (
+            "identity_mode",
+            "display_name",
+            "verification_requested",
+            "hide_from_user_directory",
+            "bio",
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -158,6 +176,17 @@ class ProfileEditForm(forms.ModelForm):
             attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
         ),
     )
+    hide_from_user_directory = forms.BooleanField(
+        required=False,
+        label=_("Hide from user directory"),
+        help_text=_(
+            "When enabled, you won't appear in the public user list or search. "
+            "Direct profile links and your forecasts and comments still work."
+        ),
+        widget=forms.CheckboxInput(
+            attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+        ),
+    )
 
     class Meta:
         model = User
@@ -165,6 +194,7 @@ class ProfileEditForm(forms.ModelForm):
             "display_name",
             "identity_mode",
             "verification_requested",
+            "hide_from_user_directory",
             "bio",
             "email",
         )

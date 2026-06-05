@@ -53,7 +53,7 @@ def _minimum_query_length(cleaned: str) -> bool:
 
 def _visible_users():
     return (
-        User.objects.filter(is_active=True)
+        User.objects.filter(is_active=True, hide_from_user_directory=False)
         .exclude(identity_mode=User.IdentityMode.ANONYMOUS)
         .select_related("profile")
     )
