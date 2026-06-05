@@ -264,6 +264,13 @@
             </span>
             <i data-lucide="chevron-right" class="h-4 w-4 shrink-0 text-slate-400" stroke-width="2" aria-hidden="true"></i>
           </a>
+          <a href="{% url 'accounts:profile_monetize' username=user.username %}" @click="closeMobile()"
+             class="pr-mobile-nav-link mt-2 {% if request.resolver_match.url_name == 'profile_monetize' or request.resolver_match.url_name == 'creator_setup' or request.resolver_match.url_name == 'creator_subscribers' %}is-active{% endif %}">
+            <span class="pr-mobile-nav-link-icon">
+              <i data-lucide="circle-dollar-sign" stroke-width="1.75" aria-hidden="true"></i>
+            </span>
+            {% trans "Monetize content" %}
+          </a>
           {% endif %}
 
           <div class="pr-mobile-nav-section">

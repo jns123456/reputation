@@ -74,6 +74,21 @@
       </a>
       {% endif %}
 
+      {% if user == profile_user %}
+      <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn pr-profile-action-btn--primary-mobile">
+        <i data-lucide="circle-dollar-sign" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Monetize" %}</span>
+      </a>
+      <a href="{% url 'accounts:profile_edit' %}" class="btn-secondary pr-profile-action-btn">
+        <i data-lucide="pencil" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Edit profile" %}</span>
+      </a>
+      <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary pr-profile-action-btn">
+        <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Alerts" %}</span>
+      </a>
+      {% endif %}
+
       {% if user.is_authenticated %}
       <form method="get" action="{% url 'accounts:user_list' %}" class="pr-profile-search">
         <i data-lucide="search" class="pr-profile-search-icon" stroke-width="2" aria-hidden="true"></i>
@@ -87,21 +102,6 @@
       <a href="{% url 'accounts:user_list' %}" class="btn-secondary pr-profile-action-btn">
         <i data-lucide="users" stroke-width="1.75" aria-hidden="true"></i>
         <span>{% trans "View users" %}</span>
-      </a>
-      {% endif %}
-
-      {% if user == profile_user %}
-      <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn">
-        <i data-lucide="circle-dollar-sign" stroke-width="1.75" aria-hidden="true"></i>
-        <span>{% trans "Monetize" %}</span>
-      </a>
-      <a href="{% url 'accounts:profile_edit' %}" class="btn-secondary pr-profile-action-btn">
-        <i data-lucide="pencil" stroke-width="1.75" aria-hidden="true"></i>
-        <span>{% trans "Edit profile" %}</span>
-      </a>
-      <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary pr-profile-action-btn">
-        <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
-        <span>{% trans "Alerts" %}</span>
       </a>
       {% endif %}
     </div>
