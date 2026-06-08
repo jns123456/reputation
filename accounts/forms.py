@@ -3,6 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from accounts.account_deletion_services import can_delete_account
+
 from accounts.models import NotificationPreference, User
 
 
@@ -231,6 +233,65 @@ class ProfileEditForm(forms.ModelForm):
             )
         cleaned_data["display_name"] = display_name
         return cleaned_data
+
+
+class AccountDeletionForm(forms.Form):
+    username_confirm = forms.CharField(
+        label=_("Confirm your username"),
+        help_text=_("Type your username exactly to confirm permanent deletion."),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "autocomplete": "off",
+                "autocorrect": "off",
+                "autocapitalize": "off",
+                "spellcheck": "false",
+            }
+        ),
+    )
+    password = forms.CharField(
+        label=_("Password"),
+        help_text=_("Enter your current password to confirm."),
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-input",
+                "autocomplete": "current-password",
+            }
+        ),
+        required=False,
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        if user is None:
+            raise ValueError("AccountDeletionForm requires a user.")
+        if not user.has_usable_password():
+            del self.fields["password"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        allowed, reason = can_delete_account(self.user)
+        if not allowed:
+            raise ValidationError(reason)
+        return cleaned_data
+
+    def clean_username_confirm(self):
+        value = (self.cleaned_data.get("username_confirm") or "").strip()
+        if value != self.user.username:
+            raise ValidationError(_("Type your username exactly to confirm."))
+        return value
+
+    def clean_password(self):
+        password = self.cleaned_data.get("password")
+        if "password" not in self.fields:
+            return password
+        if not password:
+            raise ValidationError(_("Enter your password to confirm account deletion."))
+        if not self.user.check_password(password):
+            raise ValidationError(_("Incorrect password."))
+        return password
+
 
 class NotificationPreferenceForm(forms.ModelForm):
     class Meta:

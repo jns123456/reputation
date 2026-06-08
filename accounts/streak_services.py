@@ -82,14 +82,21 @@ def _record_activity_locked(*, user, today):
     streak.last_active_date = today
     if streak.current_streak > streak.longest_streak:
         streak.longest_streak = streak.current_streak
-    streak.save(
-        update_fields=[
-            "current_streak",
-            "longest_streak",
-            "last_active_date",
-            "updated_at",
-        ]
-    )
+
+    update_fields = [
+        "current_streak",
+        "longest_streak",
+        "last_active_date",
+        "updated_at",
+    ]
+    if streak.current_streak % 7 == 0:
+        streak.streak_7_completions += 1
+        update_fields.append("streak_7_completions")
+    if streak.current_streak % 30 == 0:
+        streak.streak_30_completions += 1
+        update_fields.append("streak_30_completions")
+
+    streak.save(update_fields=update_fields)
     _invalidate_nav_cache(user.id)
     _maybe_award_milestone(streak)
     return streak

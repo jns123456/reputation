@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rocol — Supercharge your finances</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: '#0b0f19',
+            'gray-custom': '#a1a1aa',
+            light: '#f4f4f5',
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      background-color: #0b0f19;
+    }
+
+    /* Background video */
+    .hero-video {
+      object-fit: cover;
+    }
+
+    /* Gradient overlay */
+    .hero-gradient {
+      background: linear-gradient(
+        to right,
+        rgba(11, 15, 25, 0.9) 0%,
+        rgba(11, 15, 25, 0.4) 50%,
+        rgba(11, 15, 25, 0.8) 100%
+      );
+    }
+
+    /* fadeUp animation */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fadeUp {
+      opacity: 0;
+      animation: fadeUp 0.8s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.5s; }
+    .delay-2 { animation-delay: 1.0s; }
+    .delay-3 { animation-delay: 1.5s; }
+    .delay-4 { animation-delay: 2.0s; }
+    .delay-5 { animation-delay: 2.5s; }
+
+    /* CTA button hover */
+    .btn-primary:hover {
+      background-color: #f4f4f5;
+    }
+
+    /* Nav link hover */
+    .nav-link:hover {
+      color: #ffffff;
+    }
+
+    .auth-link:hover {
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased text-white overflow-x-hidden">
+
+  <!-- Background Video -->
+  <video
+    class="hero-video fixed inset-0 w-full h-full z-0"
+    autoplay
+    muted
+    loop
+    playsinline
+    aria-hidden="true"
+  >
+    <source src="https://cdn.sceneai.art/Hero%20Section%20Video/b42aa08b-868a-4c92-8e5b-973c6be6c534.mp4" type="video/mp4">
+  </video>
+
+  <!-- Gradient Overlay -->
+  <div class="hero-gradient fixed inset-0 z-[1]" aria-hidden="true"></div>
+
+  <!-- Grid Lines Overlay -->
+  <div class="fixed inset-0 z-[2] pointer-events-none" aria-hidden="true">
+    <div class="mx-auto max-w-6xl h-full px-6 lg:px-8 xl:px-0">
+      <div class="grid grid-cols-4 h-full">
+        <div class="border-r border-white/[0.04]"></div>
+        <div class="hidden md:block border-r border-white/[0.04]"></div>
+        <div class="hidden md:block border-r border-white/[0.04]"></div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Page Content -->
+  <div class="relative z-10 flex flex-col min-h-screen">
+
+    <!-- Central Container -->
+    <div class="mx-auto max-w-6xl w-full px-6 lg:px-8 xl:px-0 flex flex-col min-h-screen">
+
+      <!-- Navigation (delay-1) -->
+      <header class="animate-fadeUp delay-1 pt-6 md:pt-8">
+        <nav class="flex items-center justify-between">
+          <!-- Left: Logo & Links -->
+          <div class="flex items-center gap-8">
+            <a href="#" class="text-white text-[22px] font-semibold tracking-tight">
+              rocol<span class="text-[10px] text-gray-custom relative -top-2 ml-0.5">○</span>
+            </a>
+            <div class="hidden md:flex items-center gap-6">
+              <a href="#" class="nav-link text-gray-400 text-sm font-medium transition-colors duration-200">Solutions</a>
+              <a href="#" class="nav-link text-gray-400 text-sm font-medium transition-colors duration-200">About us</a>
+              <a href="#" class="nav-link text-gray-400 text-sm font-medium transition-colors duration-200">Pricing</a>
+            </div>
+          </div>
+
+          <!-- Right: Auth -->
+          <div class="flex items-center gap-4 md:gap-6">
+            <a href="#" class="auth-link hidden sm:block text-gray-300 text-sm font-medium transition-colors duration-200">Login</a>
+            <a href="#" class="bg-white text-black text-sm font-semibold px-5 py-2.5 rounded-md transition-colors duration-200 hover:bg-light">
+              Create account
+            </a>
+          </div>
+        </nav>
+      </header>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 flex items-center py-12 md:py-16">
+        <div class="max-w-[600px] w-full">
+
+          <!-- Headline (delay-2) -->
+          <h1 class="animate-fadeUp delay-2 text-[40px] md:text-[52px] font-medium text-white leading-[1.1] tracking-tight">
+            Supercharge your<br>
+            finances with<br>
+            rocol<span class="text-[30px] text-gray-custom relative -top-5 font-medium">³</span>
+          </h1>
+
+          <!-- Subheadline (delay-3) -->
+          <p class="animate-fadeUp delay-3 mt-6 text-base text-gray-400 max-w-[420px] leading-[1.6]">
+            AI-driven app that streamlines your accounting process. Manage invoices, track expenses, and handle taxes all in one place.
+          </p>
+
+          <!-- Primary Button (delay-4) -->
+          <div class="animate-fadeUp delay-4 mt-8">
+            <a
+              href="#"
+              class="btn-primary group flex items-center justify-between w-full sm:w-[240px] bg-white text-black text-[15px] font-semibold px-6 py-3.5 rounded-md transition-colors duration-200"
+            >
+              <span>Get started</span>
+              <svg class="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- Bottom Footer / Trust Section (delay-5) -->
+      <footer class="animate-fadeUp delay-5 mt-auto pb-8 md:pb-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0 items-end">
+
+          <!-- Left: Text (2 columns) -->
+          <div class="md:col-span-2">
+            <p class="text-white text-[15px] font-medium leading-snug">
+              Trusted by businesses of all sizes worldwide.
+            </p>
+            <p class="mt-1.5 text-gray-400 text-sm leading-relaxed">
+              Regardless of size, from small startups to large corporations.
+            </p>
+          </div>
+
+          <!-- Right: Logos (2 columns) -->
+          <div class="md:col-span-2 opacity-60">
+            <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+
+              <!-- Asana -->
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="6" cy="12" r="3" fill="currentColor"/>
+                  <circle cx="12" cy="6" r="3" fill="currentColor"/>
+                  <circle cx="18" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                <span class="text-white text-[19px] font-semibold tracking-tight">Asana</span>
+              </div>
+
+              <!-- Coinbase -->
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <rect x="8" y="8" width="8" height="8" rx="1.5" fill="currentColor"/>
+                </svg>
+                <span class="text-white text-[19px] font-semibold tracking-tight">Coinbase</span>
+              </div>
+
+              <!-- Framer -->
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M4 4H20V12H12V20H4V4Z" fill="currentColor"/>
+                </svg>
+                <span class="text-white text-[19px] font-semibold tracking-tight">Framer</span>
+              </div>
+
+              <!-- Slack -->
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+                </svg>
+                <span class="text-white text-[19px] font-semibold tracking-tight">slack</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+</body>
+</html>

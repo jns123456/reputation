@@ -45,6 +45,10 @@ def record_popularity_event(
     if category_slug is not None:
         apply_category_popularity_delta(user, category_slug, points_delta)
 
+    from accounts.achievement_services import evaluate_achievements
+
+    evaluate_achievements(user)
+
     return event
 
 

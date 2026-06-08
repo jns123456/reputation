@@ -4,10 +4,13 @@
         class="pr-medal"
         @click.stop="openMedal = openMedal === '{{ achievement.code }}' ? null : '{{ achievement.code }}'"
         :aria-expanded="openMedal === '{{ achievement.code }}'"
-        aria-label="{% blocktrans with name=achievement.name %}{{ name }} badge{% endblocktrans %}">
+        aria-label="{% if count > 1 %}{% blocktrans with name=achievement.name counter=count %}{{ name }} badge, earned {{ counter }} times{% endblocktrans %}{% else %}{% blocktrans with name=achievement.name %}{{ name }} badge{% endblocktrans %}{% endif %}">
   <span class="pr-medal-ribbon pr-medal-ribbon--{{ ribbon_variant }}" aria-hidden="true"></span>
   <span class="pr-medal-disc" aria-hidden="true">
     <i data-lucide="{{ achievement.icon }}"></i>
+    {% if count > 1 %}
+    <span class="pr-medal-stack-count">{{ count }}</span>
+    {% endif %}
   </span>
   <span x-show="openMedal === '{{ achievement.code }}'"
         x-cloak
@@ -17,7 +20,13 @@
     <span class="pr-medal-popover-name">{{ achievement.name }}</span>
     <span class="pr-medal-popover-desc">{{ achievement.description }}</span>
     {% if awarded_at %}
-    <span class="pr-medal-popover-date">{% blocktrans with date=awarded_at|date:"M j, Y" %}Earned {{ date }}{% endblocktrans %}</span>
+    <span class="pr-medal-popover-date">
+      {% if count > 1 %}
+      {% blocktrans with counter=count date=awarded_at|date:"M j, Y" %}Earned {{ counter }}× · latest {{ date }}{% endblocktrans %}
+      {% else %}
+      {% blocktrans with date=awarded_at|date:"M j, Y" %}Earned {{ date }}{% endblocktrans %}
+      {% endif %}
+    </span>
     {% endif %}
   </span>
 </button>

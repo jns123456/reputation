@@ -12,7 +12,7 @@
   <span class="sr-only">{% trans "Earned badges" %}</span>
   {% endif %}
   <div class="pr-profile-medals" role="list" aria-label="{% trans 'Earned badges' %}">
-    {% for achievement, awarded_at in earned_badges %}
+    {% for achievement, awarded_at, count in earned_badges %}
       {% if "popular" in achievement.code %}
         {% with ribbon_variant="pop" %}
           {% include "accounts/partials/profile_medal.html" %}

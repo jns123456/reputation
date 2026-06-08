@@ -15,6 +15,7 @@ from accounts.achievement_services import (
     evaluate_achievements,
     get_level_progress,
     get_pop_level_progress,
+    get_user_achievements,
 )
 from accounts.models import (
     Notification,
@@ -250,6 +251,52 @@ class AchievementTests(TestCase):
         again = evaluate_achievements(self.user)
         self.assertNotIn("first_forecast", again)
         self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 1)
+
+    def test_stackable_forecaster_10(self):
+        self.user.profile.prediction_count = 25
+        self.user.profile.save()
+        new = evaluate_achievements(self.user)
+        self.assertEqual(new.count("forecaster_10"), 2)
+        self.assertEqual(
+            UserAchievement.objects.filter(user=self.user, code="forecaster_10").count(),
+            2,
+        )
+        again = evaluate_achievements(self.user)
+        self.assertEqual(again, [])
+
+    def test_stackable_streak_7_via_completions(self):
+        from accounts.models import ActivityStreak
+
+        streak, _ = ActivityStreak.objects.get_or_create(user=self.user)
+        streak.current_streak = 14
+        streak.longest_streak = 14
+        streak.streak_7_completions = 2
+        streak.save(
+            update_fields=[
+                "current_streak",
+                "longest_streak",
+                "streak_7_completions",
+                "updated_at",
+            ]
+        )
+        new = evaluate_achievements(self.user)
+        self.assertEqual(new.count("streak_7"), 2)
+        self.assertEqual(
+            UserAchievement.objects.filter(user=self.user, code="streak_7").count(),
+            2,
+        )
+
+    def test_get_user_achievements_includes_count(self):
+        self.user.profile.prediction_count = 25
+        self.user.profile.save()
+        evaluate_achievements(self.user)
+        rows = {
+            code: (unlocked, count)
+            for achievement, _at, unlocked, count in get_user_achievements(self.user)
+            for code in [achievement.code]
+        }
+        self.assertTrue(rows["forecaster_10"][0])
+        self.assertEqual(rows["forecaster_10"][1], 2)
 
     def test_no_award_when_unmet(self):
         new = evaluate_achievements(self.user)

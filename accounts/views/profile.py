@@ -3,6 +3,7 @@
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
@@ -12,6 +13,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST, require_http_methods
 
 from accounts import abuse_services
+from accounts.account_deletion_services import AccountDeletionError, delete_user_account
 from accounts.bookmark_selectors import is_bookmarked
 from accounts.bookmark_services import toggle_bookmark
 from accounts.bookmarks_services import build_bookmarks_page_items
@@ -29,8 +31,8 @@ from accounts.follow_selectors import (
     is_following,
 )
 from accounts.follow_services import toggle_follow
-from accounts.forms import ProfileEditForm
-from accounts.http_utils import safe_redirect_to_referer
+from accounts.forms import AccountDeletionForm, ProfileEditForm
+from accounts.http_utils import enforce_ip_rate_limit, safe_redirect_to_referer
 from accounts.models import Bookmark, User
 from accounts.selectors import search_user_matches
 from accounts.user_search_selectors import (
@@ -73,6 +75,39 @@ def profile_edit(request):
     else:
         form = ProfileEditForm(instance=request.user)
     return render(request, "accounts/profile_edit.html", {"form": form})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def account_delete(request):
+    form = AccountDeletionForm(user=request.user)
+    if request.method == "POST":
+        try:
+            enforce_ip_rate_limit(request=request, action="account_deletion")
+        except abuse_services.RateLimitExceeded:
+            messages.error(
+                request,
+                _("Too many attempts. Please wait a few minutes and try again."),
+            )
+            return render(
+                request,
+                "accounts/account_delete.html",
+                {"form": AccountDeletionForm(request.POST, user=request.user)},
+            )
+
+        form = AccountDeletionForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                delete_user_account(user=request.user)
+            except AccountDeletionError as exc:
+                messages.error(request, exc.message)
+                return redirect("accounts:account_delete")
+
+            logout(request)
+            messages.success(request, _("Your account has been permanently deleted."))
+            return redirect("dashboard:landing")
+
+    return render(request, "accounts/account_delete.html", {"form": form})
 
 
 def user_search(request):
@@ -171,11 +206,11 @@ def profile_detail(request, username):
     pop_level = get_pop_level_progress(getattr(profile, "popularity_points", 0))
     achievements = get_user_achievements(user)
     earned_badges = [
-        (achievement, awarded_at)
-        for achievement, awarded_at, unlocked in achievements
+        (achievement, awarded_at, count)
+        for achievement, awarded_at, unlocked, count in achievements
         if unlocked
     ]
-    unlocked_count = len(earned_badges)
+    unlocked_count = sum(1 for _achievement, _at, unlocked, _count in achievements if unlocked)
     from reputation.services import calculate_user_unrealized_reputation
 
     return render(

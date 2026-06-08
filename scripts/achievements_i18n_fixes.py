@@ -12,8 +12,11 @@ ACHIEVEMENTS_I18N_FIXES: dict[str, str] = {
         "Hitos conseguidos con pronósticos, aciertos, popularidad, rachas y desafíos ganados."
     ),
     "Badge earned: %(name)s": "Insignia conseguida: %(name)s",
+    "Badge earned %(counter)s times: %(name)s": "Insignia conseguida %(counter)s veces: %(name)s",
     "Badge locked: %(name)s": "Insignia bloqueada: %(name)s",
     "Earned %(date)s": "Conseguida el %(date)s",
+    "Earned %(counter)s× · latest %(date)s": "Conseguida %(counter)s× · última el %(date)s",
+    "%(name)s badge, earned %(counter)s times": "Insignia %(name)s, conseguida %(counter)s veces",
     "Locked": "Bloqueada",
     # Reputation levels
     "Rookie": "Novato",

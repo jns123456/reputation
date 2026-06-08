@@ -453,6 +453,14 @@ class ActivityStreak(models.Model):
         blank=True,
         help_text="Last date a 'streak at risk' reminder was sent (dedupe guard).",
     )
+    streak_7_completions = models.PositiveIntegerField(
+        default=0,
+        help_text="Times the user reached a 7-day streak milestone (stackable Week Warrior).",
+    )
+    streak_30_completions = models.PositiveIntegerField(
+        default=0,
+        help_text="Times the user reached a 30-day streak milestone (stackable Unstoppable).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -497,9 +505,11 @@ class UserAchievement(models.Model):
     """Immutable record that a user unlocked a catalog achievement.
 
     The catalog itself lives in code (``accounts.achievement_services``); this
-    table only stores *which* achievement a user earned and *when*. Achievements
-    are badges (popularity-flavored social proof) — they never alter predictive
-    reputation (AGENTS.md §6). Records are append-only and never deleted.
+    table stores *which* achievement a user earned and *when*. Stackable
+    milestones (e.g. Week Warrior) may have multiple rows with the same code.
+    Achievements are badges (popularity-flavored social proof) — they never
+    alter predictive reputation (AGENTS.md §6). Records are append-only and
+    never deleted.
     """
 
     user = models.ForeignKey(
@@ -511,7 +521,6 @@ class UserAchievement(models.Model):
     awarded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = [("user", "code")]
         indexes = [
             models.Index(fields=["user", "code"]),
         ]

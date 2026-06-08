@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 19:24+0000\n"
+"POT-Creation-Date: 2026-06-08 20:27+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -15,6 +15,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Superuser accounts cannot be deleted from the platform."
+msgstr ""
+"Las cuentas de superusuario no se pueden eliminar desde la plataforma."
 
 msgid "Rookie"
 msgstr "Novato"
@@ -327,6 +331,29 @@ msgstr ""
 msgid "Your account is already verified."
 msgstr "Tu cuenta ya está verificada."
 
+msgid "Confirm your username"
+msgstr "Confirma tu nombre de usuario"
+
+msgid "Type your username exactly to confirm permanent deletion."
+msgstr ""
+"Escribe tu nombre de usuario exactamente para confirmar la eliminación "
+"permanente."
+
+msgid "Password"
+msgstr "Contraseña"
+
+msgid "Enter your current password to confirm."
+msgstr "Introduce tu contraseña actual para confirmar."
+
+msgid "Type your username exactly to confirm."
+msgstr "Escribe tu nombre de usuario exactamente para confirmar."
+
+msgid "Enter your password to confirm account deletion."
+msgstr "Introduce tu contraseña para confirmar la eliminación de la cuenta."
+
+msgid "Incorrect password."
+msgstr "Contraseña incorrecta."
+
 msgid "Forecasts from users you follow"
 msgstr "Pronósticos de los usuarios que sigues"
 
@@ -611,6 +638,12 @@ msgstr ""
 
 msgid "Profile updated."
 msgstr "Perfil actualizado."
+
+msgid "Too many attempts. Please wait a few minutes and try again."
+msgstr "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."
+
+msgid "Your account has been permanently deleted."
+msgstr "Tu cuenta se eliminó permanentemente."
 
 msgid "Invalid bookmark target"
 msgstr "Destino de marcador no válido"
@@ -1217,6 +1250,40 @@ msgstr ""
 msgid "Poll not found"
 msgstr "Encuesta no encontrada"
 
+msgid "Delete account"
+msgstr "Eliminar cuenta"
+
+msgid "Account"
+msgstr "Cuenta"
+
+msgid ""
+"This permanently removes your profile, forecasts, comments, and all other "
+"data from PredictStamp. This action cannot be undone."
+msgstr ""
+"Esto elimina permanentemente tu perfil, pronósticos, comentarios y todos tus"
+" demás datos de PredictStamp. Esta acción no se puede deshacer."
+
+msgid "What will be deleted"
+msgstr "Qué se eliminará"
+
+msgid "Your profile and account credentials"
+msgstr "Tu perfil y credenciales de acceso"
+
+msgid "All forecasts, comments, forum posts, and votes"
+msgstr "Todos los pronósticos, comentarios, publicaciones del foro y votos"
+
+msgid "Reputation, popularity, streaks, and achievements"
+msgstr "Reputación, popularidad, rachas y logros"
+
+msgid "Notifications, bookmarks, follows, and alert preferences"
+msgstr "Notificaciones, guardados, seguidores y preferencias de alertas"
+
+msgid "Delete my account permanently"
+msgstr "Eliminar mi cuenta permanentemente"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
 msgid "Alert Settings"
 msgstr "Configuración de alertas"
 
@@ -1355,9 +1422,6 @@ msgstr ""
 msgid "Save program"
 msgstr "Guardar programa"
 
-msgid "Cancel"
-msgstr "Cancelar"
-
 msgid "Subscribers"
 msgstr "Suscriptores"
 
@@ -1417,9 +1481,6 @@ msgstr "o"
 
 msgid "Username"
 msgstr "Nombre de usuario"
-
-msgid "Password"
-msgstr "Contraseña"
 
 msgid "No account?"
 msgstr "¿No tienes cuenta?"
@@ -1492,12 +1553,21 @@ msgid "Skip for now"
 msgstr "Omitir por ahora"
 
 #, python-format
+#| msgid "Badge earned: %(name)s"
+msgid "Badge earned %(counter)s times: %(name)s"
+msgstr "Insignia conseguida %(counter)s veces: %(name)s"
+
+#, python-format
 msgid "Badge earned: %(name)s"
 msgstr "Insignia conseguida: %(name)s"
 
 #, python-format
 msgid "Badge locked: %(name)s"
 msgstr "Insignia bloqueada: %(name)s"
+
+#, python-format
+msgid "Earned %(counter)s× · latest %(date)s"
+msgstr "Conseguida %(counter)s× · última el %(date)s"
 
 #, python-format
 msgid "Earned %(date)s"
@@ -1670,6 +1740,10 @@ msgstr "Buscar usuarios"
 
 msgid "View users"
 msgstr "Ver usuarios"
+
+#, python-format
+msgid "%(name)s badge, earned %(counter)s times"
+msgstr "Insignia %(name)s, conseguida %(counter)s veces"
 
 #, python-format
 msgid "%(name)s badge"
@@ -1931,6 +2005,14 @@ msgstr "Perfil e identidad"
 
 msgid "Save changes"
 msgstr "Guardar cambios"
+
+msgid "Danger zone"
+msgstr "Zona de peligro"
+
+msgid ""
+"Permanently delete your account and remove all your data from PredictStamp."
+msgstr ""
+"Elimina permanentemente tu cuenta y borra todos tus datos de PredictStamp."
 
 msgid "Monetize your content"
 msgstr "Monetiza tu contenido"
@@ -4620,7 +4702,6 @@ msgstr ""
 msgid "Loading more…"
 msgstr "Cargando más…"
 
-#| msgid "Your open forecasts"
 msgid "Featured open forecasts"
 msgstr "Pronósticos abiertos destacados"
 
@@ -5362,9 +5443,6 @@ msgstr "Menú"
 
 msgid "Close menu"
 msgstr "Cerrar menú"
-
-msgid "Account"
-msgstr "Cuenta"
 
 #, python-format
 msgid ""

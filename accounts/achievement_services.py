@@ -4,8 +4,13 @@ Both systems are **popularity-flavored social proof**: they reflect activity and
 milestones, and must never alter predictive reputation points (AGENTS.md §6).
 Reputation levels use ``reputation_points``; popularity levels use
 ``popularity_points``. Achievements are durable, append-only badges.
+
+One-time badges (first forecast, first correct, first challenge win) are awarded
+once. Milestone badges (10 forecasts, 7-day streaks, etc.) are **stackable** —
+each time the threshold is crossed again, a new row is appended for the same code.
 """
 
+from collections import Counter
 from dataclasses import dataclass
 from typing import Callable
 
@@ -113,9 +118,34 @@ class Achievement:
     predicate: Callable[[dict], bool]
 
 
+# One-time badges — awarded at most once per user.
+ONE_TIME_ACHIEVEMENT_CODES = frozenset(
+    {
+        "first_forecast",
+        "first_correct",
+        "challenge_win_1",
+    }
+)
+
+# Stackable milestones — (stats key, threshold). Target count = value // threshold
+# (or value directly when threshold is 1, e.g. streak completions).
+STACKABLE_METRICS = {
+    "forecaster_10": ("prediction_count", 10),
+    "forecaster_50": ("prediction_count", 50),
+    "sharp_10": ("correct_prediction_count", 10),
+    "popular_100": ("popularity_points", 100),
+    "popular_500": ("popularity_points", 500),
+    "challenge_win_5": ("challenges_won", 5),
+    "challenge_win_10": ("challenges_won", 10),
+    "streak_7": ("streak_7_completions", 1),
+    "streak_30": ("streak_30_completions", 1),
+}
+
+
 # ``stats`` keys provided by ``_collect_stats``:
 #   prediction_count, correct_prediction_count, popularity_points,
-#   reputation_points, longest_streak, challenges_won
+#   reputation_points, longest_streak, streak_7_completions,
+#   streak_30_completions, challenges_won
 ACHIEVEMENTS = (
     Achievement(
         "first_forecast",
@@ -171,14 +201,14 @@ ACHIEVEMENTS = (
         _("Week Warrior"),
         _("Reached a 7-day activity streak."),
         "flame",
-        lambda s: s["longest_streak"] >= 7,
+        lambda s: s["streak_7_completions"] >= 1,
     ),
     Achievement(
         "streak_30",
         _("Unstoppable"),
         _("Reached a 30-day activity streak."),
         "zap",
-        lambda s: s["longest_streak"] >= 30,
+        lambda s: s["streak_30_completions"] >= 1,
     ),
     Achievement(
         "challenge_win_1",
@@ -206,13 +236,23 @@ ACHIEVEMENTS = (
 ACHIEVEMENTS_BY_CODE = {a.code: a for a in ACHIEVEMENTS}
 
 
+def _target_stack_count(code, stats):
+    key, threshold = STACKABLE_METRICS[code]
+    value = stats.get(key, 0) or 0
+    if threshold <= 1:
+        return int(value)
+    return int(value) // threshold
+
+
 def _collect_stats(user):
+    from accounts.models import ActivityStreak
     from challenges.models import Challenge
 
     profile = getattr(user, "profile", None)
-    streak = getattr(user, "activity_streak", None)
+    streak = None
     challenges_won = 0
     if user and getattr(user, "pk", None):
+        streak = ActivityStreak.objects.filter(user=user).first()
         challenges_won = Challenge.objects.filter(
             winner=user,
             status=Challenge.Status.COMPLETED,
@@ -223,6 +263,8 @@ def _collect_stats(user):
         "popularity_points": getattr(profile, "popularity_points", 0) or 0,
         "reputation_points": getattr(profile, "reputation_points", 0) or 0,
         "longest_streak": getattr(streak, "longest_streak", 0) or 0,
+        "streak_7_completions": getattr(streak, "streak_7_completions", 0) or 0,
+        "streak_30_completions": getattr(streak, "streak_30_completions", 0) or 0,
         "challenges_won": challenges_won,
     }
 
@@ -230,9 +272,9 @@ def _collect_stats(user):
 def evaluate_achievements(user):
     """Award any newly-met achievements for ``user``. Returns list of new codes.
 
-    Idempotent and safe to call on every engagement action — already-earned
-    achievements are skipped via a unique (user, code) constraint. Never raises
-    into the caller's flow.
+    Idempotent and safe to call on every engagement action. One-time badges
+    skip when already earned; stackable badges create rows until the earned
+    count matches the current milestone target. Never raises into the caller.
     """
     if not user or not getattr(user, "is_authenticated", False):
         return []
@@ -240,21 +282,26 @@ def evaluate_achievements(user):
     from accounts.models import UserAchievement
 
     try:
-        earned = set(
+        earned_counts = Counter(
             UserAchievement.objects.filter(user=user).values_list("code", flat=True)
         )
         stats = _collect_stats(user)
         newly = []
         for achievement in ACHIEVEMENTS:
-            if achievement.code in earned:
-                continue
-            if achievement.predicate(stats):
-                _, created = UserAchievement.objects.get_or_create(
-                    user=user,
-                    code=achievement.code,
-                )
-                if created:
-                    newly.append(achievement.code)
+            code = achievement.code
+            if code in ONE_TIME_ACHIEVEMENT_CODES:
+                if earned_counts.get(code, 0) >= 1:
+                    continue
+                if achievement.predicate(stats):
+                    UserAchievement.objects.create(user=user, code=code)
+                    newly.append(code)
+            elif code in STACKABLE_METRICS:
+                target = _target_stack_count(code, stats)
+                current = earned_counts.get(code, 0)
+                while current < target:
+                    UserAchievement.objects.create(user=user, code=code)
+                    current += 1
+                    newly.append(code)
         return newly
     except Exception:  # pragma: no cover - gamification must never break core flows
         import logging
@@ -266,21 +313,27 @@ def evaluate_achievements(user):
 
 
 def get_user_achievements(user):
-    """Return ``[(Achievement, awarded_at_or_None, unlocked_bool), ...]`` for display.
+    """Return ``[(Achievement, awarded_at_or_None, unlocked_bool, count), ...]``.
 
-    Includes locked achievements (awarded_at=None) so the profile can show
-    progress toward the full catalog.
+    Includes locked achievements (awarded_at=None, count=0) so the profile can
+    show progress toward the full catalog. ``awarded_at`` is the most recent
+    award for that code; ``count`` is the total stack size.
     """
     from accounts.models import UserAchievement
 
-    awarded = {}
+    counts = Counter()
+    latest = {}
     if user and getattr(user, "id", None):
-        awarded = dict(
-            UserAchievement.objects.filter(user=user).values_list("code", "awarded_at")
-        )
+        for code, awarded_at in UserAchievement.objects.filter(user=user).values_list(
+            "code", "awarded_at"
+        ):
+            counts[code] += 1
+            if code not in latest or awarded_at > latest[code]:
+                latest[code] = awarded_at
 
     rows = []
     for achievement in ACHIEVEMENTS:
-        awarded_at = awarded.get(achievement.code)
-        rows.append((achievement, awarded_at, awarded_at is not None))
+        count = counts.get(achievement.code, 0)
+        awarded_at = latest.get(achievement.code)
+        rows.append((achievement, awarded_at, count > 0, count))
     return rows

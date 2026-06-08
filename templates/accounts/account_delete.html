@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete account" %}{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% trans "Account" as hero_eyebrow %}
+  {% trans "Delete account" as hero_title %}
+  {% blocktrans asvar hero_description %}This permanently removes your profile, forecasts, comments, and all other data from PredictStamp. This action cannot be undone.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title description=hero_description %}
+
+  <form method="post"
+        class="mx-auto max-w-3xl space-y-5 overflow-hidden rounded-2xl border border-red-200/80 bg-white/90 p-5 shadow-lg backdrop-blur-sm dark:border-red-900/50 dark:bg-slate-800/90 sm:p-8">
+    {% csrf_token %}
+
+    <div class="rounded-xl border border-red-100 bg-red-50/80 p-4 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-100">
+      <p class="font-semibold">{% trans "What will be deleted" %}</p>
+      <ul class="mt-2 list-disc space-y-1 pl-5">
+        <li>{% trans "Your profile and account credentials" %}</li>
+        <li>{% trans "All forecasts, comments, forum posts, and votes" %}</li>
+        <li>{% trans "Reputation, popularity, streaks, and achievements" %}</li>
+        <li>{% trans "Notifications, bookmarks, follows, and alert preferences" %}</li>
+      </ul>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+      {{ form.non_field_errors.0 }}
+    </div>
+    {% endif %}
+
+    <div>
+      <label for="{{ form.username_confirm.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+        {{ form.username_confirm.label }}
+      </label>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ form.username_confirm.help_text }}</p>
+      <div class="mt-1.5">{{ form.username_confirm }}</div>
+      {% if form.username_confirm.errors %}<p class="mt-1 text-sm text-red-600">{{ form.username_confirm.errors.0 }}</p>{% endif %}
+    </div>
+
+    {% if form.password %}
+    <div>
+      <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+        {{ form.password.label }}
+      </label>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ form.password.help_text }}</p>
+      <div class="mt-1.5">{{ form.password }}</div>
+      {% if form.password.errors %}<p class="mt-1 text-sm text-red-600">{{ form.password.errors.0 }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+      <button type="submit"
+              class="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-red-600 bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+        {% trans "Delete my account permanently" %}
+      </button>
+      <a href="{% url 'accounts:profile' username=user.username %}" class="btn-secondary min-h-[44px]">
+        {% trans "Cancel" %}
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

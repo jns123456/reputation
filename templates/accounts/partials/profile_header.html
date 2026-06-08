@@ -87,6 +87,10 @@
         <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
         <span>{% trans "Alerts" %}</span>
       </a>
+      <a href="{% url 'accounts:account_delete' %}" class="btn-secondary pr-profile-action-btn text-red-700 dark:text-red-300">
+        <i data-lucide="user-x" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Delete account" %}</span>
+      </a>
       {% endif %}
 
       {% if user.is_authenticated %}

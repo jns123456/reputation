@@ -1,10 +1,13 @@
 {% load i18n %}
 {# Single earned/locked badge — description always visible (mobile-friendly). #}
 <div class="pr-badge-card flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center {% if unlocked %}border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30{% else %}border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/40{% endif %}"
-     aria-label="{% if unlocked %}{% blocktrans with name=achievement.name %}Badge earned: {{ name }}{% endblocktrans %}{% else %}{% blocktrans with name=achievement.name %}Badge locked: {{ name }}{% endblocktrans %}{% endif %}">
-  <span class="inline-flex h-9 w-9 items-center justify-center rounded-full {% if unlocked %}bg-amber-100 dark:bg-amber-900/50{% else %}bg-slate-200/80 dark:bg-slate-700/60{% endif %}"
+     aria-label="{% if unlocked %}{% if count > 1 %}{% blocktrans with name=achievement.name counter=count %}Badge earned {{ counter }} times: {{ name }}{% endblocktrans %}{% else %}{% blocktrans with name=achievement.name %}Badge earned: {{ name }}{% endblocktrans %}{% endif %}{% else %}{% blocktrans with name=achievement.name %}Badge locked: {{ name }}{% endblocktrans %}{% endif %}">
+  <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-full {% if unlocked %}bg-amber-100 dark:bg-amber-900/50{% else %}bg-slate-200/80 dark:bg-slate-700/60{% endif %}"
         aria-hidden="true">
     <i data-lucide="{{ achievement.icon }}" class="h-5 w-5 {% if unlocked %}text-amber-600 dark:text-amber-400{% else %}text-slate-400{% endif %}"></i>
+    {% if unlocked and count > 1 %}
+    <span class="pr-badge-stack-count" aria-hidden="true">{{ count }}</span>
+    {% endif %}
   </span>
   <span class="text-[0.6875rem] font-semibold leading-tight {% if unlocked %}text-amber-800 dark:text-amber-300{% else %}text-slate-600 dark:text-slate-400{% endif %}">
     {{ achievement.name }}
@@ -14,7 +17,11 @@
   </p>
   {% if unlocked and awarded_at %}
   <p class="text-[0.5625rem] text-amber-700/70 dark:text-amber-400/60">
+    {% if count > 1 %}
+    {% blocktrans with counter=count date=awarded_at|date:"M j, Y" %}Earned {{ counter }}× · latest {{ date }}{% endblocktrans %}
+    {% else %}
     {% blocktrans with date=awarded_at|date:"M j, Y" %}Earned {{ date }}{% endblocktrans %}
+    {% endif %}
   </p>
   {% elif not unlocked %}
   <p class="text-[0.5625rem] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{% trans "Locked" %}</p>

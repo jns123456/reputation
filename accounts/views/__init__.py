@@ -22,6 +22,7 @@ __all__ = [
     "profile_setup",
     "onboarding",
     "profile_edit",
+    "account_delete",
     "user_search",
     "user_search_partial",
     "user_list",

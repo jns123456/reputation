@@ -300,6 +300,42 @@ PHASE1_FIXES.update(
     }
 )
 
+PHASE1_FIXES.update(
+    {
+        "Delete account": "Eliminar cuenta",
+        "Danger zone": "Zona de peligro",
+        "Permanently delete your account and remove all your data from PredictStamp.": (
+            "Elimina permanentemente tu cuenta y borra todos tus datos de PredictStamp."
+        ),
+        "This permanently removes your profile, forecasts, comments, and all other data from PredictStamp. This action cannot be undone.": (
+            "Esto elimina permanentemente tu perfil, pronósticos, comentarios y todos tus demás datos de PredictStamp. Esta acción no se puede deshacer."
+        ),
+        "What will be deleted": "Qué se eliminará",
+        "Your profile and account credentials": "Tu perfil y credenciales de acceso",
+        "All forecasts, comments, forum posts, and votes": "Todos los pronósticos, comentarios, publicaciones del foro y votos",
+        "Reputation, popularity, streaks, and achievements": "Reputación, popularidad, rachas y logros",
+        "Notifications, bookmarks, follows, and alert preferences": "Notificaciones, guardados, seguidores y preferencias de alertas",
+        "Confirm your username": "Confirma tu nombre de usuario",
+        "Type your username exactly to confirm permanent deletion.": (
+            "Escribe tu nombre de usuario exactamente para confirmar la eliminación permanente."
+        ),
+        "Enter your current password to confirm.": "Introduce tu contraseña actual para confirmar.",
+        "Type your username exactly to confirm.": "Escribe tu nombre de usuario exactamente para confirmar.",
+        "Enter your password to confirm account deletion.": (
+            "Introduce tu contraseña para confirmar la eliminación de la cuenta."
+        ),
+        "Incorrect password.": "Contraseña incorrecta.",
+        "Delete my account permanently": "Eliminar mi cuenta permanentemente",
+        "Your account has been permanently deleted.": "Tu cuenta se eliminó permanentemente.",
+        "Superuser accounts cannot be deleted from the platform.": (
+            "Las cuentas de superusuario no se pueden eliminar desde la plataforma."
+        ),
+        "Too many attempts. Please wait a few minutes and try again.": (
+            "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."
+        ),
+    }
+)
+
 # Legacy Spanish msgid (migrate to English source string in code).
 SPANISH_MSGID_FIXES: dict[str, str] = {
     "Confirma tu email en PredictStamp": "Confirma tu email en PredictStamp",
