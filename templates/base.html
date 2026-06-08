@@ -380,6 +380,7 @@
   </footer>
   {% include "includes/mobile_bottom_nav.html" %}
   <div id="vote-reactions-portal"></div>
+  <div id="share-sheet-portal"></div>
   {% block extra_js %}{% endblock %}
   <script src="{% static 'js/lucide-icons.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/theme.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
@@ -389,9 +390,18 @@
       linkCopied: "{% filter escapejs %}{% trans 'Link copied!' %}{% endfilter %}",
       copyLinkPrompt: "{% filter escapejs %}{% trans 'Copy this link:' %}{% endfilter %}",
       shareForecastTitle: "{% filter escapejs %}{% trans 'Forecast on PredictStamp' %}{% endfilter %}",
-      shareForecast: "{% filter escapejs %}{% trans 'Share forecast' %}{% endfilter %}"
+      shareForecast: "{% filter escapejs %}{% trans 'Share forecast' %}{% endfilter %}",
+      shareEvent: "{% filter escapejs %}{% trans 'Share event' %}{% endfilter %}",
+      shareEventTitle: "{% filter escapejs %}{% trans 'Event on PredictStamp' %}{% endfilter %}",
+      shareSection: "{% filter escapejs %}{% trans 'Share' %}{% endfilter %}",
+      shareCopyLink: "{% filter escapejs %}{% trans 'Copy link' %}{% endfilter %}",
+      shareEmail: "{% filter escapejs %}{% trans 'Email' %}{% endfilter %}",
+      shareMore: "{% filter escapejs %}{% trans 'More' %}{% endfilter %}",
+      sharePlaceForecast: "{% filter escapejs %}{% trans 'Place a forecast' %}{% endfilter %}",
+      shareClose: "{% filter escapejs %}{% trans 'Close' %}{% endfilter %}"
     };
   </script>
+  <script src="{% static 'js/share-sheet.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/forum-actions.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}{% if static_version %}?v={{ static_version }}{% endif %}" defer></script>{% endif %}
   <script>

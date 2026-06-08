@@ -27,6 +27,11 @@
   };
 
   window.shareForumPost = function (button) {
+    if (window.openShareSheetFromButton) {
+      window.openShareSheetFromButton(button);
+      return;
+    }
+
     var url = button.getAttribute("data-share-url");
     var title = button.getAttribute("data-share-title") || i18n.shareForecastTitle || "Forecast on PredictStamp";
     if (!url) return;

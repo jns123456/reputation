@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 15:10+0000\n"
+"POT-Creation-Date: 2026-06-08 15:31+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -2595,6 +2595,27 @@ msgstr "Pronóstico en PredictStamp"
 msgid "Share forecast"
 msgstr "Pronósticos"
 
+msgid "Share event"
+msgstr "Compartir evento"
+
+msgid "Event on PredictStamp"
+msgstr "Evento en PredictStamp"
+
+msgid "Share"
+msgstr "Compartir"
+
+msgid "Copy link"
+msgstr "Copiar enlace"
+
+msgid "More"
+msgstr "Más"
+
+msgid "Place a forecast"
+msgstr "Hacer un pronóstico"
+
+msgid "Close"
+msgstr "Cerrar"
+
 msgid "New challenge"
 msgstr "Nuevo desafío"
 
@@ -3511,9 +3532,6 @@ msgid_plural "%(counter)s dislikes"
 msgstr[0] "%(counter)s voto negativo"
 msgstr[1] "%(counter)s votos negativos"
 
-msgid "Close"
-msgstr "Cerrar"
-
 msgid "Reactions"
 msgstr "Reacciones"
 
@@ -3561,7 +3579,6 @@ msgstr "Empieza a construir tu reputación"
 msgid "Explore the thesis"
 msgstr "Conoce la tesis"
 
-#| msgid "PredictStamp.com — The social layer for prediction markets"
 msgid "PredictStamp — The social layer for prediction markets"
 msgstr "PredictStamp — La capa social de los mercados de predicción"
 
@@ -5133,12 +5150,6 @@ msgstr "Respuesta publicada."
 msgid "%(time)s"
 msgstr "Hace %(time)s"
 
-msgid "More"
-msgstr "Más"
-
-msgid "Copy link"
-msgstr "Copiar enlace"
-
 msgid "Delete comment"
 msgstr "Eliminar comentario"
 
@@ -5902,6 +5913,10 @@ msgstr "Leer más"
 msgid "Show less"
 msgstr "Ver menos"
 
+#, python-format
+msgid "Forecast %(title)s on PredictStamp"
+msgstr "Pronostica %(title)s en PredictStamp"
+
 msgid "View on Polymarket"
 msgstr "Ver en Polymarket ↗"
 
@@ -6097,9 +6112,6 @@ msgstr "Reputación realizada"
 
 msgid "Position closed — you can forecast again."
 msgstr "Posición cerrada — puedes pronosticar de nuevo."
-
-msgid "Place a forecast"
-msgstr "Publicar pronóstico"
 
 #, python-format
 msgid ""
