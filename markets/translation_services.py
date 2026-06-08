@@ -157,7 +157,11 @@ def _translate_with_mymemory(text: str) -> str:
             if exc.code == 429 and attempt < 4:
                 time.sleep(2**attempt + 1)
                 continue
-            raise
+            logger.warning("MyMemory translation failed (%s): %s", exc.code, text[:80])
+            return text
+        except OSError:
+            logger.exception("MyMemory translation request failed")
+            return text
     translated = payload.get("responseData", {}).get("translatedText", text)
     if not translated:
         return text

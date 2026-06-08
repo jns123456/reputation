@@ -1362,6 +1362,217 @@ html.dark .about-card:hover {
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.45);
 }
 
+/* Neumorphic market event cards */
+:root {
+  --neo-surface: #f1f5f9;
+  --neo-shadow-dark: rgba(148, 163, 184, 0.42);
+  --neo-shadow-light: rgba(255, 255, 255, 0.92);
+}
+
+html.dark {
+  --neo-surface: #1e293b;
+  --neo-shadow-dark: rgba(0, 0, 0, 0.48);
+  --neo-shadow-light: rgba(255, 255, 255, 0.05);
+}
+
+.pr-card--neomorphic {
+  border: none;
+  background: var(--neo-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    6px 6px 14px var(--neo-shadow-dark),
+    -6px -6px 14px var(--neo-shadow-light);
+}
+
+.pr-card--neomorphic:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    8px 8px 18px var(--neo-shadow-dark),
+    -8px -8px 18px var(--neo-shadow-light);
+}
+
+.pr-card--neomorphic:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 4px 4px 10px var(--neo-shadow-dark),
+    inset -4px -4px 10px var(--neo-shadow-light);
+}
+
+html.dark .pr-card--neomorphic:hover {
+  box-shadow:
+    8px 8px 18px var(--neo-shadow-dark),
+    -8px -8px 18px var(--neo-shadow-light);
+}
+
+.pr-card--neomorphic .pr-card-neo-tint {
+  opacity: 0.55;
+}
+
+.pr-neo-icon {
+  border: none;
+  box-shadow:
+    inset 2px 2px 5px var(--neo-shadow-dark),
+    inset -2px -2px 5px var(--neo-shadow-light);
+}
+
+.pr-neo-icon--rose {
+  background: #fff1f2;
+}
+
+html.dark .pr-neo-icon--rose {
+  background: rgba(136, 19, 55, 0.28);
+}
+
+.pr-neo-thumb {
+  border: none;
+  background: var(--neo-surface);
+  box-shadow:
+    inset 3px 3px 6px var(--neo-shadow-dark),
+    inset -3px -3px 6px var(--neo-shadow-light);
+}
+
+.pr-neo-thumb--fallback {
+  color: #64748b;
+  font-weight: 700;
+}
+
+html.dark .pr-neo-thumb--fallback {
+  color: #cbd5e1;
+}
+
+.pr-neo-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.pr-neo-chip--yes {
+  background: #e8f8f0;
+  color: #047857;
+  box-shadow:
+    inset 2px 2px 5px rgba(16, 185, 129, 0.18),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.85);
+}
+
+.pr-neo-chip--no {
+  background: #fdeef1;
+  color: #be123c;
+  box-shadow:
+    inset 2px 2px 5px rgba(244, 63, 94, 0.16),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.85);
+}
+
+html.dark .pr-neo-chip--yes {
+  background: rgba(6, 78, 59, 0.35);
+  color: #6ee7b7;
+  box-shadow:
+    inset 2px 2px 5px rgba(0, 0, 0, 0.35),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.04);
+}
+
+html.dark .pr-neo-chip--no {
+  background: rgba(136, 19, 55, 0.35);
+  color: #fda4af;
+  box-shadow:
+    inset 2px 2px 5px rgba(0, 0, 0, 0.35),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.04);
+}
+
+.pr-neo-outcome {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.625rem 0;
+  background: var(--neo-surface);
+  transition: box-shadow 0.25s ease;
+}
+
+.pr-neo-outcome--yes {
+  box-shadow:
+    inset 3px 3px 7px rgba(16, 185, 129, 0.14),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.88);
+}
+
+.pr-neo-outcome--no {
+  box-shadow:
+    inset 3px 3px 7px rgba(244, 63, 94, 0.12),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.88);
+}
+
+.pr-neo-outcome--neutral {
+  box-shadow:
+    inset 3px 3px 7px var(--neo-shadow-dark),
+    inset -3px -3px 7px var(--neo-shadow-light);
+}
+
+.group:hover .pr-neo-outcome--yes {
+  box-shadow:
+    inset 2px 2px 5px rgba(16, 185, 129, 0.2),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.95);
+}
+
+.group:hover .pr-neo-outcome--no {
+  box-shadow:
+    inset 2px 2px 5px rgba(244, 63, 94, 0.18),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.95);
+}
+
+html.dark .pr-neo-outcome--yes,
+html.dark .pr-neo-outcome--no,
+html.dark .pr-neo-outcome--neutral {
+  box-shadow:
+    inset 3px 3px 7px rgba(0, 0, 0, 0.4),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.04);
+}
+
+.pr-neo-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: none;
+  padding: 0.125rem 0.5rem;
+  font-weight: 500;
+  background: var(--neo-surface);
+  color: #64748b;
+  box-shadow:
+    2px 2px 5px var(--neo-shadow-dark),
+    -2px -2px 5px var(--neo-shadow-light);
+}
+
+.pr-neo-tag--brand {
+  color: #4338ca;
+  background: #eef2ff;
+  box-shadow:
+    2px 2px 5px rgba(99, 102, 241, 0.18),
+    -2px -2px 5px rgba(255, 255, 255, 0.9);
+}
+
+html.dark .pr-neo-tag {
+  color: #cbd5e1;
+}
+
+html.dark .pr-neo-tag--brand {
+  color: #c7d2fe;
+  background: rgba(49, 46, 129, 0.45);
+  box-shadow:
+    2px 2px 5px rgba(0, 0, 0, 0.4),
+    -2px -2px 5px rgba(255, 255, 255, 0.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pr-card--neomorphic:hover,
+  .pr-card--neomorphic:active {
+    transform: none;
+  }
+}
+
 .pr-panel {
   overflow: hidden;
   border-radius: 1rem;
@@ -1973,6 +2184,7 @@ html.dark .pr-landing-video__poster {
     transform: none !important;
   }
   .pr-card:hover, .about-card:hover,
+  .pr-card--neomorphic:hover, .pr-card--neomorphic:active,
   .about-por-pillar:not([class*="ring-2"]):hover,
   .btn-primary:hover, .btn-secondary:hover {
     transform: none !important;

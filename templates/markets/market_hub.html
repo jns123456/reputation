@@ -12,8 +12,8 @@
   {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
 
   <a href="{% url 'markets:all' %}?ending=24h{% if active_source %}&source={{ active_source }}{% endif %}"
-     class="group mb-6 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-brand-700">
-    <span class="pr-pulse-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
+     class="pr-card pr-card--neomorphic group mb-6 flex items-center gap-4 rounded-2xl p-4 transition">
+    <span class="pr-neo-icon pr-neo-icon--rose flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-rose-600 dark:text-rose-400">
       <i data-lucide="clock" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
     </span>
     <span class="min-w-0 flex-1">
