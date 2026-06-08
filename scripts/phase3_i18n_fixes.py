@@ -4,8 +4,8 @@ from __future__ import annotations
 
 PHASE3_FIXES: dict[str, str] = {
     "PredictStamp product overview video": "Video de presentación de PredictStamp",
-    "PredictStamp.com — The social layer for prediction markets": (
-        "PredictStamp.com — La capa social de los mercados de predicción"
+    "PredictStamp — The social layer for prediction markets": (
+        "PredictStamp — La capa social de los mercados de predicción"
     ),
     "Play video": "Reproducir video",
     "Welcome to PredictStamp": "Bienvenido a PredictStamp",
