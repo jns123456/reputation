@@ -17,7 +17,7 @@
     <template x-for="section in $store.aboutNav.sections" :key="section.id">
       <button type="button"
               @click="$store.aboutNav.scrollTo(section.id)"
-              class="about-nav-pill shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
+              class="about-nav-pill pr-pill-neomorphic shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
               :class="$store.aboutNav.activeSection === section.id && 'is-active'"
               x-text="section.label"></button>
     </template>
@@ -42,7 +42,7 @@
 
     <div class="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-center gap-10 px-4 py-20 sm:px-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-8">
       <div class="max-w-4xl lg:max-w-none">
-        <div class="inline-flex items-center gap-2 rounded-full border border-brand-200/80 bg-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 backdrop-blur-sm dark:border-brand-500/30 dark:bg-slate-900/50 dark:text-brand-300">
+        <div class="pr-neo-tag pr-neo-tag--brand inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 dark:text-brand-300">
           <span class="relative flex h-2 w-2">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -72,7 +72,7 @@
           </a>
           <button type="button"
                   @click="scrollTo('thesis')"
-                  class="btn-secondary px-6 py-3 text-sm backdrop-blur-sm">
+                  class="btn-secondary pr-btn-neomorphic px-6 py-3 text-sm">
             {% trans "Explore the thesis" %}
           </button>
         </div>
@@ -80,7 +80,7 @@
 
       <figure class="pr-landing-video w-full lg:justify-self-end"
               x-data="landingVideo()">
-        <div class="pr-landing-video__frame"
+        <div class="pr-landing-video__frame pr-landing-video__frame--neomorphic"
              :class="videoPlaying && 'pr-landing-video__frame--playing'">
           <img class="pr-landing-video__poster"
                x-show="!videoPlaying"
@@ -140,8 +140,7 @@
           </p>
         </div>
 
-        <div class="about-glass about-card rounded-3xl p-6 sm:p-8"
-            >
+        <div class="about-card pr-card--neomorphic rounded-3xl p-6 sm:p-8">
           <div class="flex items-center justify-between gap-4">
             <span class="text-sm font-medium text-slate-500">{% trans "What gets measured" %}</span>
             <div class="flex rounded-full bg-slate-100 p-1 dark:bg-slate-800">
@@ -210,8 +209,8 @@
       </div>
 
       <div class="mx-auto mt-10 max-w-3xl">
-        <div class="about-card rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-brand-50 p-8 shadow-lg shadow-emerald-500/10 dark:border-emerald-800 dark:from-emerald-950/40 dark:via-slate-800 dark:to-brand-950/30 sm:p-10">
-          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/50">
+        <div class="about-card about-card--neo-tint-emerald pr-card--neomorphic rounded-3xl p-8 sm:p-10">
+          <div class="pr-neo-icon flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/50">
             <i data-lucide="sparkles" class="h-7 w-7 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h3 class="mt-6 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Secures with track record" %}</h3>
@@ -228,11 +227,9 @@
         <button type="button"
                 @click="expandedPor = expandedPor === 'predictions' ? null : 'predictions'"
                 :aria-expanded="expandedPor === 'predictions'"
-                class="about-por-pillar about-card rounded-2xl border p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-                :class="expandedPor === 'predictions'
-                  ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
-                  : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+                class="about-por-pillar about-card pr-card--neomorphic rounded-2xl p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                :class="expandedPor === 'predictions' && 'ring-2 ring-emerald-200 dark:ring-emerald-800'">
+          <div class="pr-neo-icon flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
             <i data-lucide="chart-line" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Predictions" %}</h4>
@@ -250,11 +247,9 @@
         <button type="button"
                 @click="expandedPor = expandedPor === 'resolution' ? null : 'resolution'"
                 :aria-expanded="expandedPor === 'resolution'"
-                class="about-por-pillar about-card rounded-2xl border p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-                :class="expandedPor === 'resolution'
-                  ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
-                  : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+                class="about-por-pillar about-card pr-card--neomorphic rounded-2xl p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                :class="expandedPor === 'resolution' && 'ring-2 ring-emerald-200 dark:ring-emerald-800'">
+          <div class="pr-neo-icon flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
             <i data-lucide="circle-check" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Resolution" %}</h4>
@@ -272,11 +267,9 @@
         <button type="button"
                 @click="expandedPor = expandedPor === 'history' ? null : 'history'"
                 :aria-expanded="expandedPor === 'history'"
-                class="about-por-pillar about-card rounded-2xl border p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-                :class="expandedPor === 'history'
-                  ? 'border-emerald-300 bg-white shadow-lg ring-2 ring-emerald-200 dark:border-emerald-700 dark:bg-slate-800 dark:ring-emerald-800'
-                  : 'border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-800'">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+                class="about-por-pillar about-card pr-card--neomorphic rounded-2xl p-6 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                :class="expandedPor === 'history' && 'ring-2 ring-emerald-200 dark:ring-emerald-800'">
+          <div class="pr-neo-icon flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
             <i data-lucide="clock" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
           </div>
           <h4 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Verifiable history" %}</h4>
@@ -313,14 +306,14 @@
       <div class="mt-10 text-center">
         <p class="text-sm text-slate-500 dark:text-slate-400">{% trans "Domains and topics:" %}</p>
         <div class="mt-4 flex flex-wrap justify-center gap-2">
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Geopolitics" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Sports" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Crypto" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Elections" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Macro" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Energy" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Tech" %}</span>
-          <span class="rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">{% trans "Culture" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Geopolitics" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Sports" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Crypto" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Elections" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Macro" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Energy" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Tech" %}</span>
+          <span class="pr-neo-tag px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{% trans "Culture" %}</span>
         </div>
         <p class="mx-auto mt-4 max-w-xl text-sm font-medium text-emerald-700 dark:text-emerald-400">
           {% trans "A living map of who has good judgment — by specialty, not one blended score." %}
@@ -335,38 +328,38 @@
           </p>
         </div>
         <ul class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <li class="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
+          <li class="about-feature-row pr-card--neomorphic flex items-center gap-3 rounded-2xl">
+            <div class="pr-neo-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
               <i data-lucide="lightbulb" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
             </div>
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Why do you believe this?" %}</p>
           </li>
-          <li class="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
+          <li class="about-feature-row pr-card--neomorphic flex items-center gap-3 rounded-2xl">
+            <div class="pr-neo-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
               <i data-lucide="chart-column" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
             </div>
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "How confident are you?" %}</p>
           </li>
-          <li class="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
+          <li class="about-feature-row pr-card--neomorphic flex items-center gap-3 rounded-2xl">
+            <div class="pr-neo-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
               <i data-lucide="refresh-cw" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
             </div>
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Did you change your mind?" %}</p>
           </li>
-          <li class="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
+          <li class="about-feature-row pr-card--neomorphic flex items-center gap-3 rounded-2xl">
+            <div class="pr-neo-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
               <i data-lucide="timer" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
             </div>
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Were you early or late?" %}</p>
           </li>
-          <li class="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
+          <li class="about-feature-row pr-card--neomorphic flex items-center gap-3 rounded-2xl">
+            <div class="pr-neo-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
               <i data-lucide="trending-up" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
             </div>
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Did your reasoning age well?" %}</p>
           </li>
-          <li class="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 dark:border-slate-700 dark:bg-slate-800">
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
+          <li class="about-feature-row pr-card--neomorphic flex items-center gap-3 rounded-2xl">
+            <div class="pr-neo-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 dark:bg-brand-950/50">
               <i data-lucide="target" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
             </div>
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Are you right in this domain?" %}</p>
@@ -405,10 +398,10 @@
         <button type="button"
                 @click="scoreFocus = 'reputation'"
                 :aria-pressed="scoreFocus === 'reputation'"
-                class="about-card w-full rounded-3xl border p-8 text-left transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                class="about-card about-card--neo-tint-emerald pr-card--neomorphic w-full rounded-3xl p-8 text-left transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                 :class="scoreFocus === 'reputation'
-                  ? 'md:scale-105 border-emerald-300 bg-gradient-to-br from-emerald-50 to-white shadow-2xl ring-2 ring-emerald-200 dark:border-emerald-700 dark:from-emerald-950/40 dark:to-slate-800 dark:ring-emerald-800'
-                  : 'border-slate-200 bg-white opacity-75 md:scale-95 dark:border-slate-700 dark:bg-slate-800'">
+                  ? 'md:scale-105 ring-2 ring-emerald-200 dark:ring-emerald-800'
+                  : 'opacity-75 md:scale-95'">
           <span class="badge-rep">{% trans "Reputation" %}</span>
           <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">{% trans "Demonstrated judgment" %}</h3>
           <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -419,11 +412,10 @@
         <button type="button"
                 @click="scoreFocus = 'popularity'"
                 :aria-pressed="scoreFocus === 'popularity'"
-                class="about-card w-full rounded-3xl border p-8 text-left transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
-               
+                class="about-card about-card--neo-tint-amber pr-card--neomorphic w-full rounded-3xl p-8 text-left transition-all duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                 :class="scoreFocus === 'popularity'
-                  ? 'md:scale-105 border-amber-300 bg-gradient-to-br from-amber-50 to-white shadow-2xl ring-2 ring-amber-200 dark:border-amber-700 dark:from-amber-950/40 dark:to-slate-800 dark:ring-amber-800'
-                  : 'border-slate-200 bg-white opacity-75 md:scale-95 dark:border-slate-700 dark:bg-slate-800'">
+                  ? 'md:scale-105 ring-2 ring-amber-200 dark:ring-amber-800'
+                  : 'opacity-75 md:scale-95'">
           <span class="badge-pop">{% trans "Popularity" %}</span>
           <h3 class="mt-4 text-xl font-bold text-slate-900 dark:text-white">{% trans "Attention" %}</h3>
           <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -467,7 +459,7 @@
 
           <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <template x-for="(metric, idx) in (leaderboardMode === 'reputation' ? reputationMetrics : moneyMetrics)" :key="metric">
-              <div class="about-card rounded-2xl border border-slate-200/80 bg-white/80 p-5 dark:border-slate-700 dark:bg-slate-800/80">
+              <div class="about-card pr-card--neomorphic rounded-2xl p-5">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" x-text="rankByPrefix + metric"></p>
                 <div class="mt-3 flex items-end gap-2">
                   <span class="text-3xl font-bold tabular-nums"
@@ -498,8 +490,7 @@
       </div>
 
       <div class="grid gap-6 lg:grid-cols-5">
-        <article class="about-card lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-700 dark:bg-slate-800"
-                >
+        <article class="about-card pr-card--neomorphic lg:col-span-3 rounded-3xl p-8">
           <p class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "Social" %}</p>
           <h3 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Challenges between friends" %}</h3>
           <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -513,15 +504,14 @@
           </a>
         </article>
 
-        <article class="about-card lg:col-span-2 rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-8 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900"
-                >
+        <article class="about-card pr-card--neomorphic lg:col-span-2 rounded-3xl p-8">
           <h3 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "Not a betting platform" %}</h3>
           <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">{% trans "No wallets. No deposits. No financial settlements." %}</p>
           <div class="mt-5 flex flex-wrap gap-2">
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">{% trans "No betting" %}</span>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">{% trans "No wallets" %}</span>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700 dark:text-slate-200">{% trans "No custody" %}</span>
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-200">{% trans "Free to use" %}</span>
+            <span class="pr-neo-tag px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-200">{% trans "No betting" %}</span>
+            <span class="pr-neo-tag px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-200">{% trans "No wallets" %}</span>
+            <span class="pr-neo-tag px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-200">{% trans "No custody" %}</span>
+            <span class="pr-neo-tag px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-200">{% trans "Free to use" %}</span>
           </div>
         </article>
       </div>
@@ -539,8 +529,7 @@
       </div>
 
       <div class="grid gap-6 lg:grid-cols-2">
-        <article class="about-card rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-50 via-white to-white p-8 dark:border-amber-800/50 dark:from-amber-950/30 dark:via-slate-800 dark:to-slate-900"
-                >
+        <article class="about-card about-card--neo-tint-amber pr-card--neomorphic rounded-3xl p-8">
           <p class="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">{% trans "Future" %}</p>
           <h3 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Monetizing reputation" %}</h3>
           <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -548,8 +537,7 @@
           </p>
         </article>
 
-        <article class="about-card rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-white p-8 dark:border-violet-800/50 dark:from-violet-950/30 dark:via-slate-800 dark:to-slate-900"
-                >
+        <article class="about-card about-card--neo-tint-violet pr-card--neomorphic rounded-3xl p-8">
           <p class="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">{% trans "AI-native" %}</p>
           <h3 class="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{% trans "Humans + AI agents" %}</h3>
           <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -582,7 +570,7 @@
             </p>
             <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
               <a href="{% url 'markets:list' %}" class="btn-primary px-8 py-3 shadow-lg shadow-brand-500/25">{% trans "Start building reputation" %}</a>
-              <a href="{% url 'markets:all' %}" class="btn-secondary px-8 py-3 backdrop-blur-sm">{% trans "Browse markets" %}</a>
+              <a href="{% url 'markets:all' %}" class="btn-secondary pr-btn-neomorphic px-8 py-3">{% trans "Browse markets" %}</a>
               <a href="{% url 'accounts:signup' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "Create account" %}</a>
               <a href="{% url 'dashboard:faq' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "Read the FAQ" %}</a>
             </div>

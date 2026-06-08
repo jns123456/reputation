@@ -47,6 +47,14 @@ body:has(.site-header) {
   --about-glow-emerald: var(--pr-glow-emerald);
 }
 
+body:has(.about-page) {
+  background-color: var(--neo-surface, #f1f5f9);
+}
+
+html.dark body:has(.about-page) {
+  background-color: var(--neo-surface, #1e293b);
+}
+
 /* Layout — full-bleed breakout (safe when parent is narrower than viewport) */
 .pr-full-bleed {
   width: 100vw;
@@ -71,17 +79,20 @@ body:has(.about-page) .about-full-bleed {
   right: 0;
   z-index: 49;
   min-height: 2.75rem;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.08);
+  background-color: var(--neo-surface, #f1f5f9);
+  border-bottom: none;
+  box-shadow:
+    0 6px 14px var(--neo-shadow-dark, rgba(148, 163, 184, 0.22)),
+    0 -2px 8px var(--neo-shadow-light, rgba(255, 255, 255, 0.65));
   isolation: isolate;
   transform: translateZ(0);
 }
 
 html.dark .about-section-nav {
-  background-color: #0f172a;
-  border-bottom-color: #334155;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.35);
+  background-color: var(--neo-surface, #1e293b);
+  box-shadow:
+    0 6px 14px var(--neo-shadow-dark, rgba(0, 0, 0, 0.42)),
+    0 -2px 8px var(--neo-shadow-light, rgba(255, 255, 255, 0.04));
 }
 
 /* About page: solid header over long-scroll sections */
@@ -1566,6 +1577,123 @@ html.dark .pr-neo-tag--brand {
     -2px -2px 5px rgba(255, 255, 255, 0.04);
 }
 
+/* About / landing neomorphism */
+.about-card.pr-card--neomorphic {
+  border: none;
+  background: var(--neo-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    6px 6px 14px var(--neo-shadow-dark),
+    -6px -6px 14px var(--neo-shadow-light);
+}
+
+.about-card.pr-card--neomorphic:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    8px 8px 18px var(--neo-shadow-dark),
+    -8px -8px 18px var(--neo-shadow-light);
+}
+
+.about-card.pr-card--neomorphic.about-card--neo-tint-emerald {
+  background: linear-gradient(145deg, #ecfdf5 0%, var(--neo-surface) 55%);
+}
+
+.about-card.pr-card--neomorphic.about-card--neo-tint-amber {
+  background: linear-gradient(145deg, #fffbeb 0%, var(--neo-surface) 55%);
+}
+
+.about-card.pr-card--neomorphic.about-card--neo-tint-violet {
+  background: linear-gradient(145deg, #f5f3ff 0%, var(--neo-surface) 55%);
+}
+
+html.dark .about-card.pr-card--neomorphic.about-card--neo-tint-emerald {
+  background: linear-gradient(145deg, rgba(6, 78, 59, 0.35) 0%, var(--neo-surface) 55%);
+}
+
+html.dark .about-card.pr-card--neomorphic.about-card--neo-tint-amber {
+  background: linear-gradient(145deg, rgba(120, 53, 15, 0.28) 0%, var(--neo-surface) 55%);
+}
+
+html.dark .about-card.pr-card--neomorphic.about-card--neo-tint-violet {
+  background: linear-gradient(145deg, rgba(76, 29, 149, 0.28) 0%, var(--neo-surface) 55%);
+}
+
+.pr-btn-neomorphic {
+  border: none !important;
+  background: var(--neo-surface) !important;
+  color: #334155 !important;
+  box-shadow:
+    6px 6px 14px var(--neo-shadow-dark),
+    -6px -6px 14px var(--neo-shadow-light);
+}
+
+.pr-btn-neomorphic:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    8px 8px 18px var(--neo-shadow-dark),
+    -8px -8px 18px var(--neo-shadow-light);
+}
+
+.pr-btn-neomorphic:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 4px 4px 10px var(--neo-shadow-dark),
+    inset -4px -4px 10px var(--neo-shadow-light);
+}
+
+html.dark .pr-btn-neomorphic {
+  color: #e2e8f0 !important;
+}
+
+.pr-pill-neomorphic {
+  border: none;
+  background: var(--neo-surface);
+  color: #475569;
+  box-shadow:
+    4px 4px 10px var(--neo-shadow-dark),
+    -4px -4px 10px var(--neo-shadow-light);
+}
+
+html.dark .pr-pill-neomorphic {
+  color: #cbd5e1;
+}
+
+.about-nav-pill.pr-pill-neomorphic:not(.is-active):hover {
+  transform: translateY(-1px);
+}
+
+.about-nav-pill.pr-pill-neomorphic.is-active {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  box-shadow:
+    inset 3px 3px 8px rgba(15, 23, 42, 0.28),
+    4px 4px 12px rgba(79, 70, 229, 0.35);
+}
+
+.pr-landing-video__frame--neomorphic {
+  border: none;
+  background: var(--neo-surface);
+  box-shadow:
+    10px 10px 22px var(--neo-shadow-dark),
+    -10px -10px 22px var(--neo-shadow-light);
+}
+
+.pr-landing-video__frame--neomorphic.pr-landing-video__frame--playing {
+  background: #0f172a;
+  box-shadow:
+    inset 6px 6px 14px rgba(0, 0, 0, 0.45),
+    8px 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.about-feature-row.pr-card--neomorphic {
+  padding: 0.875rem 1rem;
+}
+
+.about-feature-row .pr-neo-icon {
+  border-radius: 0.75rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pr-card--neomorphic:hover,
   .pr-card--neomorphic:active {
@@ -2185,8 +2313,10 @@ html.dark .pr-landing-video__poster {
   }
   .pr-card:hover, .about-card:hover,
   .pr-card--neomorphic:hover, .pr-card--neomorphic:active,
+  .about-card.pr-card--neomorphic:hover,
   .about-por-pillar:not([class*="ring-2"]):hover,
-  .btn-primary:hover, .btn-secondary:hover {
+  .btn-primary:hover, .btn-secondary:hover,
+  .pr-btn-neomorphic:hover, .pr-btn-neomorphic:active {
     transform: none !important;
   }
 }
