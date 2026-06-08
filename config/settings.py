@@ -115,6 +115,7 @@ TEMPLATES = [
                 "challenges.context_processors.challenge_context",
                 "config.context_processors.static_version",
                 "config.context_processors.platform_context",
+                "markets.tape_context.tape_markets_context",
             ],
         },
     },

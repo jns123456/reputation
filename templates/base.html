@@ -363,6 +363,7 @@
   {% endif %}
 
   <main class="{% block main_class %}mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-8{% endblock %}">
+    {% include "dashboard/partials/landing_market_tape.html" %}
     {% block content %}{% endblock %}
   </main>
 
@@ -403,6 +404,7 @@
   </script>
   <script src="{% static 'js/share-sheet.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/forum-actions.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
+  <script src="{% static 'js/market-tape.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}{% if static_version %}?v={{ static_version }}{% endif %}" defer></script>{% endif %}
   <script>
     window.focusDiscussionComposer = function (discussionId) {

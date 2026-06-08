@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from markets.ending_filters import ending_window_hours, normalize_ending_filter
 from markets.models import Market
-from markets.selectors import get_market_categories, get_markets_for_display
+from markets.selectors import get_landing_tape_markets, get_market_categories, get_markets_for_display
 from markets.sort_options import SORT_LIQUIDITY
 
 
@@ -340,3 +340,46 @@ class MarketApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["polymarket_raw"], {"large": "payload"})
+
+
+class LandingTapeSelectorTests(TestCase):
+    def _forecastable_market(self, *, slug, title, image_url=""):
+        return Market.objects.create(
+            external_id=f"tape-{slug}",
+            title=title,
+            slug=slug,
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=timezone.now() + timedelta(days=7),
+            card_image_url=image_url,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+
+    def test_returns_only_markets_with_images(self):
+        with_image = self._forecastable_market(
+            slug="tape-with-image",
+            title="Election winner",
+            image_url="https://example.com/election.png",
+        )
+        self._forecastable_market(
+            slug="tape-no-image",
+            title="No image market",
+        )
+
+        results = get_landing_tape_markets(limit=10)
+
+        self.assertEqual([market.pk for market in results], [with_image.pk])
+
+    def test_excludes_non_forecastable_markets(self):
+        self._forecastable_market(
+            slug="tape-closed",
+            title="Closed market",
+            image_url="https://example.com/closed.png",
+        )
+        Market.objects.filter(slug="tape-closed").update(
+            status=Market.Status.CLOSED,
+            accepting_orders=False,
+        )
+
+        self.assertEqual(get_landing_tape_markets(limit=10), [])

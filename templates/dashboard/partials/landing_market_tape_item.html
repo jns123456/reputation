@@ -1,0 +1,8 @@
+<a href="{% url 'markets:detail' slug=market.slug %}"
+   class="pr-market-tape__item pr-touch-target group"
+   aria-label="{{ market.display_title }}">
+  <span class="pr-market-tape__thumb" aria-hidden="true">
+    <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="lazy" decoding="async">
+  </span>
+  <span class="pr-market-tape__title">{{ market.display_title }}</span>
+</a>

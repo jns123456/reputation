@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 15:31+0000\n"
+"POT-Creation-Date: 2026-06-08 19:24+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -3547,9 +3547,6 @@ msgstr "Aún no hay likes."
 msgid "No dislikes yet."
 msgstr "Aún no hay dislikes."
 
-msgid "PredictStamp"
-msgstr "PredictStamp"
-
 msgid "The social layer for"
 msgstr "La capa social para"
 
@@ -3620,6 +3617,9 @@ msgstr "Ranking de criterio: se gana con pronósticos resueltos."
 
 msgid "The idea"
 msgstr "La idea"
+
+msgid "PredictStamp"
+msgstr "PredictStamp"
 
 msgid ""
 "Credibility earned through a public history of judgment — not luck, not "
@@ -4619,6 +4619,10 @@ msgstr ""
 
 msgid "Loading more…"
 msgstr "Cargando más…"
+
+#| msgid "Your open forecasts"
+msgid "Featured open forecasts"
+msgstr "Pronósticos abiertos destacados"
 
 msgid "Relative ranking"
 msgstr "Ranking relativo"

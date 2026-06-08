@@ -1,0 +1,18 @@
+{% load i18n %}
+{% if landing_tape_markets %}
+<div class="pr-market-tape-wrap px-4">
+  <section class="pr-market-tape mx-auto max-w-6xl" aria-label="{% trans 'Featured open forecasts' %}">
+    <div class="pr-market-tape__viewport">
+      <div class="pr-market-tape__track">
+        {% for _ in "01" %}
+        <div class="pr-market-tape__group{% if forloop.counter > 1 %} pr-market-tape__group--clone{% endif %}">
+          {% for market in landing_tape_markets %}
+            {% include "dashboard/partials/landing_market_tape_item.html" %}
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endif %}

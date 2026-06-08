@@ -1,5 +1,9 @@
+from datetime import timedelta
+
 from django.conf import settings
+from django.core.cache import cache
 from django.test import Client, TestCase
+from django.utils import timezone
 
 from accounts.models import Bookmark, User
 from accounts.bookmark_services import toggle_bookmark
@@ -28,6 +32,9 @@ class StaticPageTests(TestCase):
 
 
 class LandingPageI18nTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
     def test_landing_renders_english_copy_by_default(self):
         response = self.client.get("/")
 
@@ -40,6 +47,27 @@ class LandingPageI18nTests(TestCase):
         self.assertContains(response, "landing-video-poster.png")
         self.assertContains(response, "pr-landing-video__play")
 
+    def test_landing_renders_market_tape_when_images_exist(self):
+        Market.objects.create(
+            external_id="landing-tape-1",
+            title="Bitcoin hits 150k",
+            slug="landing-tape-bitcoin",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=timezone.now() + timedelta(days=30),
+            card_image_url="https://example.com/bitcoin.png",
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "pr-market-tape")
+        self.assertContains(response, "Bitcoin hits 150k")
+        self.assertContains(response, "https://example.com/bitcoin.png")
+        self.assertContains(response, "/markets/landing-tape-bitcoin/")
+
     def test_landing_renders_spanish_copy_with_language_cookie(self):
         self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
         response = self.client.get("/")
@@ -50,6 +78,25 @@ class LandingPageI18nTests(TestCase):
         self.assertContains(response, "Compite sin apostar")
         self.assertContains(response, "Reputación vs. Popularidad")
         self.assertNotContains(response, "Domains and topics:")
+
+    def test_landing_renders_spanish_tape_label_with_language_cookie(self):
+        Market.objects.create(
+            external_id="landing-tape-es",
+            title="Elecciones 2028",
+            slug="landing-tape-elecciones",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=timezone.now() + timedelta(days=30),
+            card_image_url="https://example.com/election.png",
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.5, "No": 0.5},
+        )
+        self.client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pronósticos abiertos destacados")
+        self.assertNotContains(response, "Featured open forecasts")
 
 
 class ForecastsPageTests(TestCase):

@@ -8,6 +8,7 @@ PHASE3_FIXES: dict[str, str] = {
         "PredictStamp — La capa social de los mercados de predicción"
     ),
     "Play video": "Reproducir video",
+    "Featured open forecasts": "Pronósticos abiertos destacados",
     "Welcome to PredictStamp": "Bienvenido a PredictStamp",
     "Welcome to PredictStamp!": "¡Bienvenido a PredictStamp!",
     "Hi %(name)s, thanks for joining PredictStamp.": "Hola %(name)s, gracias por unirte a PredictStamp.",

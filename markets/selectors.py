@@ -1,3 +1,4 @@
+import random
 from collections import Counter, defaultdict
 
 from django.db import connection
@@ -577,6 +578,28 @@ def get_popular_open_markets(*, limit=6):
         _market_card_queryset(Market.objects.filter(forecastable_market_q()))
     ).order_by("-volume_total", "-created_at")
     return list(qs[:limit])
+
+
+LANDING_TAPE_POOL_SIZE = 100
+LANDING_TAPE_DEFAULT_LIMIT = 20
+
+
+def get_landing_tape_markets(*, limit=LANDING_TAPE_DEFAULT_LIMIT, pool_size=LANDING_TAPE_POOL_SIZE):
+    """Random discoverable markets with Polymarket images — landing marquee tape."""
+    qs = _public_market_filter(
+        _market_card_queryset(
+            Market.objects.filter(
+                discoverable_market_q(),
+            ).exclude(card_image_url="")
+        )
+    ).order_by("-volume_total", "-created_at")
+    pool = list(qs[:pool_size])
+    if not pool:
+        return []
+    if len(pool) <= limit:
+        random.shuffle(pool)
+        return pool
+    return random.sample(pool, limit)
 
 
 def get_market_categories():
