@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 20:27+0000\n"
+"POT-Creation-Date: 2026-06-10 15:04+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1553,7 +1553,6 @@ msgid "Skip for now"
 msgstr "Omitir por ahora"
 
 #, python-format
-#| msgid "Badge earned: %(name)s"
 msgid "Badge earned %(counter)s times: %(name)s"
 msgstr "Insignia conseguida %(counter)s veces: %(name)s"
 
@@ -1575,6 +1574,27 @@ msgstr "Conseguida el %(date)s"
 
 msgid "Locked"
 msgstr "Bloqueada"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Create account"
+msgstr "Crear cuenta"
+
+msgid "Create an account to post your forecast on this event."
+msgstr "Crea una cuenta para publicar tu pronóstico en este evento."
+
+msgid "Join free to publish forecasts and build reputation."
+msgstr "Únete gratis para publicar pronósticos y construir reputación."
+
+msgid "Email address"
+msgstr "Correo electrónico"
+
+msgid "Password confirmation"
+msgstr "Confirmación de contraseña"
+
+msgid "Already have an account?"
+msgstr "¿Ya tienes cuenta?"
 
 msgid "Cancel subscription"
 msgstr "Cancelar suscripción"
@@ -2483,9 +2503,6 @@ msgstr ""
 "Crea tu cuenta en segundos. Después, elige cómo quieres aparecer "
 "públicamente."
 
-msgid "Create account"
-msgstr "Crear cuenta"
-
 msgid "Step 1 — credentials and email verification."
 msgstr "Paso 1 — credenciales y verificación de email."
 
@@ -2497,9 +2514,6 @@ msgstr "Requisitos de contraseña"
 
 msgid "Continue"
 msgstr "Continuar"
-
-msgid "Already have an account?"
-msgstr "Crear cuenta"
 
 msgid "All users"
 msgstr "Todos los mercados"
@@ -2694,9 +2708,6 @@ msgstr "Más"
 
 msgid "Place a forecast"
 msgstr "Hacer un pronóstico"
-
-msgid "Close"
-msgstr "Cerrar"
 
 msgid "New challenge"
 msgstr "Nuevo desafío"
@@ -6300,9 +6311,6 @@ msgstr ""
 msgid "Post forecast"
 msgstr "Pronosticar"
 
-msgid "to place your forecast on this market."
-msgstr "para publicar tu pronóstico en este mercado."
-
 msgid "All outcomes"
 msgstr "Todos los resultados"
 
@@ -6344,9 +6352,6 @@ msgstr "Explica tu No en %(outcome_label)s"
 #, python-format
 msgid "%(direction)s %(outcome)s"
 msgstr "%(direction)s %(outcome)s"
-
-msgid "to place your forecast on this event."
-msgstr "para publicar tu pronóstico en este evento."
 
 msgid ""
 "Closing realizes this reputation delta and frees you to forecast again."
@@ -6452,6 +6457,9 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "to place your forecast on this market."
+#~ msgstr "para publicar tu pronóstico en este mercado."
 
 #, python-format
 #~ msgid "You and @%(username)s must follow each other to challenge them."

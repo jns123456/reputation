@@ -382,6 +382,9 @@
   {% include "includes/mobile_bottom_nav.html" %}
   <div id="vote-reactions-portal"></div>
   <div id="share-sheet-portal"></div>
+  {% if not user.is_authenticated %}
+  {% include "accounts/partials/auth_modal.html" %}
+  {% endif %}
   {% block extra_js %}{% endblock %}
   <script src="{% static 'js/lucide-icons.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/theme.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
@@ -402,6 +405,9 @@
       shareClose: "{% filter escapejs %}{% trans 'Close' %}{% endfilter %}"
     };
   </script>
+  {% if not user.is_authenticated %}
+  <script src="{% static 'js/auth-modal.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
+  {% endif %}
   <script src="{% static 'js/share-sheet.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/forum-actions.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/market-tape.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>

@@ -226,18 +226,16 @@ def market_detail(request, slug):
         creator_program_enabled = program is not None and program.is_enabled
         if market.is_forecastable:
             existing_forecast = get_user_active_prediction(request.user, market)
-            forecast_form = (
-                ForecastForm(
-                    market=market,
-                    creator_program_enabled=creator_program_enabled,
-                )
-                if not existing_forecast
-                else None
-            )
             active_challenges = get_active_challenge_contexts_for_market(
                 user=request.user,
                 market=market,
             )
+
+    if market.is_forecastable and not existing_forecast:
+        forecast_form = ForecastForm(
+            market=market,
+            creator_program_enabled=creator_program_enabled,
+        )
 
     prediction_sections = [
         {

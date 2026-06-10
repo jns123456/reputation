@@ -1,6 +1,6 @@
 {% load i18n reputation_filters %}
 <section id="place-forecast" class="forecast-section{% if inline_layout %} forecast-section--paired flex h-full min-h-0 flex-col{% endif %}{% if not inline_layout %} mt-10{% endif %} overflow-hidden rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-sm dark:border-brand-800/50 dark:from-slate-800 dark:to-slate-900 dark:shadow-lg dark:shadow-black/25"
-  {% if not existing and user.is_authenticated and form %}
+  {% if not existing and form %}
   x-data="{ activeOutcome: {% if form.predicted_outcome.value %}'{{ form.predicted_outcome.value|escapejs }}'{% else %}null{% endif %} }"
   {% endif %}
 >
@@ -33,11 +33,9 @@
     <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">
       {% if existing %}
         {% blocktrans with timesince=existing.created_at|timesince %}Posted {{ timesince }} ago. You can exit this forecast at the current market price and enter again later.{% endblocktrans %}
-      {% elif user.is_authenticated and form %}
+      {% elif form %}
         <span x-show="!activeOutcome">{% blocktrans %}Pick your outcome below. Live Polymarket odds are captured when you submit.{% endblocktrans %}</span>
         <span x-show="activeOutcome" x-cloak>{% trans "Share the argument behind your pick, then post your forecast." %}</span>
-      {% else %}
-        {% blocktrans %}Pick your outcome below. Live Polymarket odds are captured when you submit.{% endblocktrans %}
       {% endif %}
     </p>
     {% if market.close_date %}
@@ -49,8 +47,7 @@
 
   <div class="{% if inline_layout %}flex min-h-0 flex-1 flex-col {% endif %}px-4 py-4 sm:px-6 sm:py-5">
     {% include "predictions/partials/challenge_forecast_alert.html" with active_challenges=active_challenges existing=existing compact=False %}
-    {% if user.is_authenticated %}
-      {% if existing %}
+    {% if existing and user.is_authenticated %}
       <div class="space-y-4">
         <div class="rounded-xl border-2 border-brand-200 px-5 py-4 dark:border-brand-700/50 forecast-pick-card">
           <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Your pick" %}</p>
@@ -104,10 +101,14 @@
           {% include "integrations/partials/attestation_badge.html" with attestation=existing.verified_attestation %}
         </div>
       </div>
-      {% else %}
+    {% elif form %}
       <form
+        {% if user.is_authenticated %}
         method="post"
         action="{% url 'predictions:create' slug=market.slug %}"
+        {% else %}
+        @submit.prevent="window.openAuthModal({ tab: 'signup', intent: 'forecast', next: '{% url 'markets:detail' slug=market.slug %}#place-forecast' })"
+        {% endif %}
         x-ref="forecastForm"
         class="{% if inline_layout %}flex min-h-0 flex-1 flex-col {% endif %}"
         @change="if ($event.target.name === 'predicted_outcome') { activeOutcome = $event.target.value; $nextTick(() => $refs.forecastForm.querySelector('.forecast-reasoning-input')?.focus()) }"
@@ -202,19 +203,15 @@
           <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.reasoning.errors.0 }}</p>
           {% endif %}
 
+          {% if user.is_authenticated %}
           {% include "accounts/partials/content_audience_field.html" with form=form %}
+          {% endif %}
 
           <button type="submit" class="{% if inline_layout %}mt-auto shrink-0 {% endif %}mt-4 inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto">
             {% trans "Post forecast" %}
           </button>
         </div>
       </form>
-      {% endif %}
-    {% else %}
-      <p class="text-sm text-slate-600 dark:text-slate-300">
-        <a href="{% url 'accounts:login' %}?next={% url 'markets:detail' slug=market.slug %}#place-forecast" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "Log in" %}</a>
-        {% trans "to place your forecast on this market." %}
-      </p>
     {% endif %}
   </div>
 </section>

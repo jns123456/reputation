@@ -28,4 +28,5 @@ def auth0_context(request):
     return {
         "auth0_enabled": settings.AUTH0_ENABLED,
         "auth0_google_connection": settings.AUTH0_GOOGLE_CONNECTION,
+        "turnstile_site_key": getattr(settings, "TURNSTILE_SITE_KEY", ""),
     }

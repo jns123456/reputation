@@ -920,3 +920,47 @@ class ForecastMarketOptionsCacheTests(TestCase):
 
         with self.assertNumQueries(1):
             get_forecasts_market_options()
+
+
+class GuestForecastAccessTests(TestCase):
+    def setUp(self):
+        self.market = Market.objects.create(
+            external_id="guest-forecast-m1",
+            title="Guest forecast market",
+            slug="guest-forecast-market",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=timezone.now() + timedelta(days=3),
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+    def test_anonymous_market_detail_shows_forecast_form(self):
+        response = self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="place-forecast"')
+        self.assertContains(response, "Post forecast")
+        self.assertContains(response, "openAuthModal")
+        self.assertNotContains(response, "to place your forecast on this market")
+
+    def test_anonymous_market_detail_includes_auth_modal(self):
+        response = self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "pr-auth-modal")
+        self.assertContains(response, "auth-modal.js")
+
+    def test_anonymous_market_detail_auth_modal_renders_spanish(self):
+        response = self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug}),
+            HTTP_ACCEPT_LANGUAGE="es",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Crear cuenta")
+        self.assertContains(response, "Crea una cuenta para publicar tu pronóstico en este evento.")

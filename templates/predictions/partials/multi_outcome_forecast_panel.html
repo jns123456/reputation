@@ -43,7 +43,7 @@
           {{ outcome.prob_percent }}%
         </div>
         <div class="col-span-2 flex gap-2 sm:col-span-1">
-          {% if user.is_authenticated and market.is_forecastable and not existing_forecast %}
+          {% if market.is_forecastable and not existing_forecast %}
           <button
             type="button"
             class="flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold transition"
@@ -79,7 +79,7 @@
         </div>
       </div>
 
-      {% if user.is_authenticated and market.is_forecastable and not existing_forecast %}
+      {% if market.is_forecastable and not existing_forecast %}
       <div
         x-show="activeKey === {{ forloop.counter0 }}"
         x-cloak
@@ -88,7 +88,15 @@
         x-transition:enter-end="opacity-100 translate-y-0"
         class="border-t border-slate-100 bg-slate-50/80 px-4 py-4 dark:border-slate-700 dark:bg-slate-900/40 sm:px-6"
       >
-        <form method="post" action="{% url 'predictions:create' slug=market.slug %}" class="space-y-3">
+        <form
+          {% if user.is_authenticated %}
+          method="post"
+          action="{% url 'predictions:create' slug=market.slug %}"
+          {% else %}
+          @submit.prevent="window.openAuthModal({ tab: 'signup', intent: 'forecast', next: '{% url 'markets:detail' slug=market.slug %}#multi-outcome-forecasts' })"
+          {% endif %}
+          class="space-y-3"
+        >
           {% csrf_token %}
           <input type="hidden" name="predicted_outcome" value="{{ outcome.label }}">
           <input type="hidden" name="predicted_direction" x-bind:value="activeDirection">
@@ -119,7 +127,7 @@
             ></textarea>
           </div>
 
-          {% if forecast_form and forecast_form.audience %}
+          {% if user.is_authenticated and forecast_form and forecast_form.audience %}
           {% include "accounts/partials/content_audience_field.html" with form=forecast_form %}
           {% endif %}
 
@@ -183,12 +191,6 @@
     {% endfor %}
   </div>
 
-  {% if not user.is_authenticated %}
-  <div class="border-t border-slate-200 px-4 py-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300 sm:px-6">
-    <a href="{% url 'accounts:login' %}?next={% url 'markets:detail' slug=market.slug %}" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "Log in" %}</a>
-    {% trans "to place your forecast on this event." %}
-  </div>
-  {% endif %}
 </section>
 
 <script>

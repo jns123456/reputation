@@ -7,6 +7,15 @@ PHASE1_FIXES: dict[str, str] = {
     # --- Navbar / auth priority ---
     "or": "o",
     "No account?": "¿No tienes cuenta?",
+    "Already have an account?": "¿Ya tienes cuenta?",
+    "Join free to publish forecasts and build reputation.": (
+        "Únete gratis para publicar pronósticos y construir reputación."
+    ),
+    "Create an account to post your forecast on this event.": (
+        "Crea una cuenta para publicar tu pronóstico en este evento."
+    ),
+    "Password confirmation": "Confirmación de contraseña",
+    "Email address": "Correo electrónico",
     "Open forecasts": "Pronósticos abiertos",
     "Open Forecasts": "Pronósticos abiertos",
     "Close menu": "Cerrar menú",

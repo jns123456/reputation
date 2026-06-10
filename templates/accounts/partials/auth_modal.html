@@ -1,0 +1,248 @@
+{% load i18n %}
+<div
+  x-data="authModalState()"
+  x-on:auth-modal:open.window="openFromEvent($event)"
+  x-show="open"
+  x-cloak
+  x-transition:enter="transition ease-out duration-200"
+  x-transition:enter-start="opacity-0"
+  x-transition:enter-end="opacity-100"
+  x-transition:leave="transition ease-in duration-150"
+  x-transition:leave-start="opacity-100"
+  x-transition:leave-end="opacity-0"
+  class="pr-auth-modal"
+  role="dialog"
+  aria-modal="true"
+  :aria-labelledby="tab === 'signup' ? 'auth-modal-signup-title' : 'auth-modal-login-title'"
+  @keydown.escape.window="close()"
+>
+  <button
+    type="button"
+    class="pr-auth-modal-backdrop"
+    aria-label="{% trans 'Close' %}"
+    @click="close()"
+  ></button>
+
+  <div
+    class="pr-auth-modal-panel"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+    x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+    @click.stop
+  >
+    <button
+      type="button"
+      class="pr-auth-modal-close"
+      @click="close()"
+      aria-label="{% trans 'Close' %}"
+    >
+      <i data-lucide="x" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+    </button>
+
+    <div class="pr-auth-modal-header">
+      <h2
+        id="auth-modal-signup-title"
+        class="text-xl font-bold tracking-tight text-slate-900 dark:text-white"
+        x-show="tab === 'signup'"
+        x-cloak
+      >
+        {% trans "Create account" %}
+      </h2>
+      <h2
+        id="auth-modal-login-title"
+        class="text-xl font-bold tracking-tight text-slate-900 dark:text-white"
+        x-show="tab === 'login'"
+        x-cloak
+      >
+        {% trans "Log in" %}
+      </h2>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" x-show="tab === 'signup'" x-cloak>
+        <span x-show="intent === 'forecast'">{% trans "Create an account to post your forecast on this event." %}</span>
+        <span x-show="intent !== 'forecast'">{% trans "Join free to publish forecasts and build reputation." %}</span>
+      </p>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" x-show="tab === 'login'" x-cloak>
+        {% trans "Enter your credentials to access your account." %}
+      </p>
+    </div>
+
+    <div class="auth-form px-5 py-6 sm:px-8 sm:py-7">
+      {% if auth0_enabled %}
+      <a
+        :href="'{% url 'accounts:auth0_login' %}?connection={{ auth0_google_connection }}'"
+        class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+      >
+        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        {% trans "Continue with Google" %}
+      </a>
+      <div class="my-5 flex items-center gap-3" aria-hidden="true">
+        <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+        <span class="text-xs font-medium uppercase tracking-wide text-slate-400">{% trans "or" %}</span>
+        <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+      </div>
+      {% endif %}
+
+      <form
+        x-show="tab === 'login'"
+        x-cloak
+        method="post"
+        action="{% url 'accounts:login' %}"
+        class="space-y-5"
+      >
+        {% csrf_token %}
+        <input type="hidden" name="next" :value="nextUrl">
+
+        <div>
+          <label for="auth-modal-username" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Username" %}</label>
+          <div class="relative mt-1.5">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i data-lucide="user" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="text"
+              name="username"
+              id="auth-modal-username"
+              required
+              autocomplete="username"
+              class="form-input pl-10"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label for="auth-modal-password" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Password" %}</label>
+          <div class="relative mt-1.5">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i data-lucide="lock" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="password"
+              name="password"
+              id="auth-modal-password"
+              required
+              autocomplete="current-password"
+              class="form-input pl-10"
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm shadow-brand-500/20">
+          {% trans "Log in" %}
+        </button>
+      </form>
+
+      <form
+        x-show="tab === 'signup'"
+        x-cloak
+        method="post"
+        action="{% url 'accounts:signup' %}"
+        class="space-y-5"
+      >
+        {% csrf_token %}
+
+        <div>
+          <label for="auth-modal-signup-username" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Username" %}</label>
+          <div class="relative mt-1.5">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i data-lucide="user" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="text"
+              name="username"
+              id="auth-modal-signup-username"
+              required
+              maxlength="150"
+              autocomplete="username"
+              class="form-input pl-10"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label for="auth-modal-signup-email" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Email address" %}</label>
+          <div class="relative mt-1.5">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i data-lucide="mail" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="email"
+              name="email"
+              id="auth-modal-signup-email"
+              required
+              autocomplete="email"
+              class="form-input pl-10"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label for="auth-modal-signup-password1" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Password" %}</label>
+          <div class="relative mt-1.5">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i data-lucide="lock" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="password"
+              name="password1"
+              id="auth-modal-signup-password1"
+              required
+              autocomplete="new-password"
+              class="form-input pl-10"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label for="auth-modal-signup-password2" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Password confirmation" %}</label>
+          <div class="relative mt-1.5">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <i data-lucide="lock" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="password"
+              name="password2"
+              id="auth-modal-signup-password2"
+              required
+              autocomplete="new-password"
+              class="form-input pl-10"
+            >
+          </div>
+        </div>
+
+        {% if turnstile_site_key %}
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+        {% endif %}
+
+        <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm shadow-brand-500/20">
+          {% trans "Create account" %}
+        </button>
+      </form>
+    </div>
+
+    <div class="border-t border-slate-100 bg-slate-50/80 px-5 py-4 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400 sm:px-8">
+      <span x-show="tab === 'login'" x-cloak>
+        {% trans "No account?" %}
+        <button type="button" class="font-medium text-brand-600 hover:text-brand-700 hover:underline dark:text-brand-400" @click="tab = 'signup'">
+          {% trans "Create one free" %}
+        </button>
+      </span>
+      <span x-show="tab === 'signup'" x-cloak>
+        {% trans "Already have an account?" %}
+        <button type="button" class="font-medium text-brand-600 hover:text-brand-700 hover:underline dark:text-brand-400" @click="tab = 'login'">
+          {% trans "Log in" %}
+        </button>
+      </span>
+    </div>
+  </div>
+</div>
+
+{% if turnstile_site_key %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
