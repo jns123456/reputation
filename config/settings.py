@@ -25,6 +25,14 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-key-change-in-production")
 DEBUG = env("DEBUG")
+# Set DJANGO_ENV=production in deployed environments so deploy checks can
+# reject DEBUG=True (which would silently disable HTTPS/HSTS/secure cookies).
+DJANGO_ENV = env("DJANGO_ENV", default="development")
+# Django admin mount point. Override in production with a non-guessable path
+# (e.g. ADMIN_URL_PATH=ops-7f3a9c/) to cut credential-stuffing noise.
+ADMIN_URL_PATH = env("ADMIN_URL_PATH", default="admin/").lstrip("/")
+if not ADMIN_URL_PATH.endswith("/"):
+    ADMIN_URL_PATH += "/"
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 if not CSRF_TRUSTED_ORIGINS and not DEBUG:
@@ -385,9 +393,14 @@ if _RUNNING_TESTS:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
 
-# Heroku Redis uses rediss:// — Celery/kombu need explicit SSL (same as Django cache).
+# Heroku Redis uses rediss:// with self-signed certs, so verification must stay
+# off there (REDIS_TLS_VERIFY=False, the default). On providers with CA-backed
+# certs (AWS ElastiCache, Redis Cloud, etc.) set REDIS_TLS_VERIFY=True to
+# protect the Redis path against MITM.
+REDIS_TLS_VERIFY = env.bool("REDIS_TLS_VERIFY", default=False)
+_redis_ssl_cert_reqs = ssl.CERT_REQUIRED if REDIS_TLS_VERIFY else ssl.CERT_NONE
 if _redis_url.startswith("rediss://"):
-    _redis_ssl = {"ssl_cert_reqs": ssl.CERT_NONE}
+    _redis_ssl = {"ssl_cert_reqs": _redis_ssl_cert_reqs}
     CELERY_BROKER_USE_SSL = _redis_ssl
     CELERY_REDIS_BACKEND_USE_SSL = _redis_ssl
 
@@ -401,7 +414,9 @@ if _redis_url and USE_REDIS_CACHE:
         "retry_on_timeout": True,
     }
     if redis_url.startswith("rediss://"):
-        redis_cache_options["ssl_cert_reqs"] = None
+        redis_cache_options["ssl_cert_reqs"] = (
+            _redis_ssl_cert_reqs if REDIS_TLS_VERIFY else None
+        )
     CACHES = {
         "default": {
             "BACKEND": "config.cache_backends.ResilientRedisCache",
@@ -456,6 +471,11 @@ CATEGORY_SYNC_FAILURE_COOLDOWN_SECONDS = env.int(
 )
 
 REST_FRAMEWORK = {
+    # Session-only: DRF's default includes BasicAuthentication, which would
+    # let attackers brute-force account passwords against /api/ endpoints.
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
@@ -700,6 +720,8 @@ validate_production_settings(
     secret_key=SECRET_KEY,
     eas_offchain_signing_key=EAS_OFFCHAIN_SIGNING_KEY,
     email_verification_dev_show_link=EMAIL_VERIFICATION_DEV_SHOW_LINK,
+    allowed_hosts=ALLOWED_HOSTS,
+    environment=DJANGO_ENV,
     running_tests=_RUNNING_TESTS,
 )
 

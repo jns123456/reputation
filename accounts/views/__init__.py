@@ -13,6 +13,10 @@ from accounts.views.social import *  # noqa: F403
 __all__ = [
     "CustomLoginView",
     "CustomLogoutView",
+    "CustomPasswordResetView",
+    "CustomPasswordResetDoneView",
+    "CustomPasswordResetConfirmView",
+    "CustomPasswordResetCompleteView",
     "auth0_login",
     "auth0_callback",
     "signup",

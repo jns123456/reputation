@@ -52,15 +52,15 @@ class UserSearchSelectorTests(TestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].username, "alice")
 
-    def test_search_matches_email(self):
-        results = search_users(query="alice@predictstamp.app")
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].username, "alice")
+    def test_search_does_not_match_full_email(self):
+        # Looking up a full address must not confirm the account exists.
+        for user in search_users(query="bob.sports@example.com"):
+            self.assertNotEqual(user.username, "bob")
 
-    def test_search_matches_partial_email(self):
-        results = search_users(query="bob.sports")
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].username, "bob")
+    def test_search_never_matches_email(self):
+        # Email matching would let anyone confirm which addresses have
+        # accounts (enumeration) — it must never surface results.
+        self.assertEqual(search_users(query="bob.sports"), [])
 
     def test_search_matches_bio(self):
         results = search_users(query="Sports")

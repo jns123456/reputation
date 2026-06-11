@@ -18,9 +18,15 @@ from mcp.tokens import resolve_token
 
 class StdioMcpServer:
     def __init__(self, *, raw_token="", stdin=None, stdout=None):
-        self.token = resolve_token(raw_token) if raw_token else None
+        # Keep only the raw token and re-resolve it per request so revocation,
+        # expiry, and trust changes apply immediately (not just at startup).
+        self._raw_token = raw_token
         self.stdin = stdin or sys.stdin
         self.stdout = stdout or sys.stdout
+
+    @property
+    def token(self):
+        return resolve_token(self._raw_token) if self._raw_token else None
 
     def _write(self, message):
         self.stdout.write(json.dumps(message) + "\n")

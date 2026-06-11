@@ -66,10 +66,11 @@ def _text_similarity(left: str, right: str) -> float:
 
 
 def _score_user(user: User, *, cleaned: str, tokens: list[str]) -> float:
+    # Email is intentionally excluded from matching/scoring: public search
+    # must never confirm which email addresses have accounts (enumeration).
     query = cleaned.lower()
     username = user.username.lower()
     display_name = (user.display_name or "").lower()
-    email = (user.email or "").lower()
     bio = (user.bio or "").lower()
     score = 0.0
 
@@ -77,24 +78,18 @@ def _score_user(user: User, *, cleaned: str, tokens: list[str]) -> float:
         score += 200
     if display_name == query:
         score += 180
-    if email == query:
-        score += 170
 
     if username.startswith(query):
         score += 80
     if display_name.startswith(query):
         score += 70
-    if email.startswith(query):
-        score += 65
 
     if query in username:
         score += 35
     if query in display_name:
         score += 30
-    if query in email:
-        score += 28
     if query in bio:
-        score += 10
+        score += 12
 
     for token in tokens:
         token_lower = token.lower()
@@ -102,12 +97,10 @@ def _score_user(user: User, *, cleaned: str, tokens: list[str]) -> float:
             score += 15
         if token_lower in display_name:
             score += 12
-        if token_lower in email:
-            score += 10
         if token_lower in bio:
-            score += 4
+            score += 5
 
-    for field in (username, display_name, email):
+    for field in (username, display_name):
         ratio = _text_similarity(cleaned, field)
         if ratio >= 0.55:
             score += ratio * 40
@@ -126,10 +119,11 @@ def _contains_filter(*, cleaned: str, tokens: list[str]) -> Q:
 
     combined = Q()
     for token in tokens:
+        # Email is intentionally excluded: matching on it lets anyone confirm
+        # which email addresses have accounts (enumeration/discovery risk).
         token_match = (
             Q(username__icontains=token)
             | Q(display_name__icontains=token)
-            | Q(email__icontains=token)
             | Q(bio__icontains=token)
         )
         combined &= token_match
@@ -143,7 +137,6 @@ def _postgres_fuzzy_candidates(*, cleaned: str, limit: int):
     similarity = Greatest(
         TrigramSimilarity("username", cleaned),
         TrigramSimilarity("display_name", cleaned),
-        TrigramSimilarity("email", cleaned),
         TrigramSimilarity("bio", cleaned),
     )
     return (
@@ -185,7 +178,7 @@ def is_valid_user_search_query(query: str) -> bool:
 
 
 def search_user_matches(*, query="", limit=20) -> UserSearchResults:
-    """Rank users by name, username, email, bio, and fuzzy similarity."""
+    """Rank users by name, username, bio, and fuzzy similarity (never email)."""
     cleaned = normalize_user_search_query(query)
     if not _minimum_query_length(cleaned):
         return UserSearchResults(exact=(), similar=())

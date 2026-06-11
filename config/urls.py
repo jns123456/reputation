@@ -20,7 +20,7 @@ urlpatterns = [
     path("i18n/setlang/", set_language, name="set_language"),
     path("sw.js", pwa_views.service_worker, name="service_worker"),
     path("manifest.webmanifest", pwa_views.webmanifest, name="webmanifest"),
-    path("admin/", admin.site.urls),
+    path(settings.ADMIN_URL_PATH, admin.site.urls),
     path("", include("dashboard.urls")),
     path("accounts/", include("accounts.urls")),
     path("markets/", include("markets.urls")),

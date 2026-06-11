@@ -13,6 +13,26 @@ urlpatterns = [
     path("welcome/", views.onboarding, name="onboarding"),
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", views.CustomLogoutView.as_view(), name="logout"),
+    path(
+        "password-reset/",
+        views.CustomPasswordResetView.as_view(),
+        name="password_reset",
+    ),
+    path(
+        "password-reset/sent/",
+        views.CustomPasswordResetDoneView.as_view(),
+        name="password_reset_done",
+    ),
+    path(
+        "password-reset/<uidb64>/<token>/",
+        views.CustomPasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
+    ),
+    path(
+        "password-reset/done/",
+        views.CustomPasswordResetCompleteView.as_view(),
+        name="password_reset_complete",
+    ),
     path("auth0/login/", views.auth0_login, name="auth0_login"),
     path("auth0/callback/", views.auth0_callback, name="auth0_callback"),
     path("profile/edit/", views.profile_edit, name="profile_edit"),

@@ -102,8 +102,11 @@ def create_comment_view(request, slug):
 @require_POST
 def vote_view(request):
     target_type = request.POST.get("target_type")
-    target_id = request.POST.get("target_id")
-    value = int(request.POST.get("value", 0))
+    try:
+        target_id = int(request.POST.get("target_id", ""))
+        value = int(request.POST.get("value", 0))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest(_("Invalid vote"))
 
     if target_type not in (
         Vote.TargetType.COMMENT,

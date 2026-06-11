@@ -37,6 +37,13 @@ def save_subscription(*, user, subscription, user_agent=""):
     if not endpoint or not p256dh or not auth:
         raise ValueError("Invalid push subscription payload.")
 
+    # Never silently reassign an endpoint registered by another account: a
+    # leaked subscription payload must not let an attacker capture the
+    # victim's device push channel under their own user record.
+    existing = PushSubscription.objects.filter(endpoint=endpoint).first()
+    if existing is not None and existing.user_id != user.id:
+        raise ValueError("This push endpoint is registered to another account.")
+
     obj, _created = PushSubscription.objects.update_or_create(
         endpoint=endpoint,
         defaults={

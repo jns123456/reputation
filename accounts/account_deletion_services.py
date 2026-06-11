@@ -2,10 +2,23 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import logging
+import secrets
+
+from django.core.cache import cache
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import User
+
+logger = logging.getLogger(__name__)
+
+# Re-auth for password-less (OAuth) accounts: a short-lived emailed code must be
+# confirmed before deletion, so a stolen session alone cannot destroy the account.
+DELETION_CODE_TTL_SECONDS = 15 * 60
+DELETION_CODE_RESEND_COOLDOWN_SECONDS = 60
 
 
 class AccountDeletionError(Exception):
@@ -21,6 +34,68 @@ def can_delete_account(user: User) -> tuple[bool, str]:
     if user.is_superuser:
         return False, str(_("Superuser accounts cannot be deleted from the platform."))
     return True, ""
+
+
+def deletion_requires_email_code(user: User) -> bool:
+    """OAuth/password-less accounts re-authenticate via an emailed code."""
+    return not user.has_usable_password()
+
+
+def _deletion_code_cache_key(user: User) -> str:
+    return f"account_deletion_code:{user.pk}"
+
+
+def _hash_deletion_code(code: str) -> str:
+    return hashlib.sha256(code.encode("utf-8")).hexdigest()
+
+
+def send_deletion_confirmation_code(user: User) -> tuple[bool, str]:
+    """Email a one-time confirmation code; returns (sent, user_message)."""
+    from accounts.email_services import EmailDeliveryError, _send
+
+    if not user.email:
+        return False, str(_("Add an email address to your profile first."))
+
+    cooldown_key = f"{_deletion_code_cache_key(user)}:cooldown"
+    if cache.get(cooldown_key):
+        return False, str(_("Please wait a minute before requesting another code."))
+
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    cache.set(_deletion_code_cache_key(user), _hash_deletion_code(code), DELETION_CODE_TTL_SECONDS)
+
+    try:
+        sent = _send(
+            subject=lambda: _("Confirm your PredictStamp account deletion"),
+            recipient_email=user.email,
+            template_base="account_deletion_code",
+            context={
+                "recipient": user,
+                "code": code,
+                "expires_minutes": DELETION_CODE_TTL_SECONDS // 60,
+            },
+        )
+    except EmailDeliveryError as exc:
+        logger.warning("Deletion code email failed for user_id=%s: %s", user.pk, exc)
+        cache.delete(_deletion_code_cache_key(user))
+        return False, str(_("We couldn't send the confirmation email. Try again later."))
+
+    if not sent:
+        cache.delete(_deletion_code_cache_key(user))
+        return False, str(_("We couldn't send the confirmation email. Try again later."))
+
+    cache.set(cooldown_key, True, DELETION_CODE_RESEND_COOLDOWN_SECONDS)
+    return True, str(_("We emailed you a confirmation code. It expires in 15 minutes."))
+
+
+def verify_deletion_confirmation_code(user: User, code: str) -> bool:
+    """Check (and consume) the emailed confirmation code."""
+    stored = cache.get(_deletion_code_cache_key(user))
+    if not stored or not code:
+        return False
+    if not hmac.compare_digest(stored, _hash_deletion_code(code.strip())):
+        return False
+    cache.delete(_deletion_code_cache_key(user))
+    return True
 
 
 def delete_user_account(*, user: User) -> int:

@@ -1,6 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, UserCreationForm
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from accounts.account_deletion_services import can_delete_account
@@ -30,7 +31,65 @@ class SignUpForm(UserCreationForm):
         email = (self.cleaned_data.get("email") or "").strip().lower()
         if not email:
             raise ValidationError(_("Enter a valid email address."))
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(
+                _("An account with this email already exists. Try signing in instead.")
+            )
         return email
+
+
+class StyledPasswordResetForm(PasswordResetForm):
+    """Password reset request styled for the site and delivered via our email layer."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs.update(
+            {"class": "form-input pl-10", "autocomplete": "email"}
+        )
+
+    def send_mail(
+        self,
+        subject_template_name,
+        email_template_name,
+        context,
+        from_email,
+        to_email,
+        html_email_template_name=None,
+    ):
+        # Route through accounts.email_services so Resend/SMTP selection and
+        # bilingual templates match every other transactional email.
+        import logging
+
+        from accounts.email_services import EmailDeliveryError, _send, absolute_url
+
+        reset_path = reverse(
+            "accounts:password_reset_confirm",
+            kwargs={"uidb64": context["uid"], "token": context["token"]},
+        )
+        try:
+            _send(
+                subject=lambda: _("Reset your PredictStamp password"),
+                recipient_email=to_email,
+                template_base="password_reset",
+                context={
+                    "recipient": context.get("user"),
+                    "reset_url": absolute_url(reset_path),
+                },
+            )
+        except EmailDeliveryError as exc:
+            # Fail silently to the visitor (anti-enumeration); log for ops.
+            logging.getLogger(__name__).warning(
+                "Password reset email failed for %s: %s", to_email, exc
+            )
+
+
+class StyledSetPasswordForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ("new_password1", "new_password2"):
+            self.fields[name].widget.attrs.update(
+                {"class": "form-input pl-10", "autocomplete": "new-password"}
+            )
 
 
 class ProfileSetupForm(forms.ModelForm):
@@ -261,13 +320,30 @@ class AccountDeletionForm(forms.Form):
         required=False,
     )
 
+    confirmation_code = forms.CharField(
+        label=_("Email confirmation code"),
+        help_text=_("Enter the 6-digit code we emailed you."),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-input",
+                "autocomplete": "one-time-code",
+                "inputmode": "numeric",
+            }
+        ),
+    )
+
     def __init__(self, *args, user=None, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
         if user is None:
             raise ValueError("AccountDeletionForm requires a user.")
         if not user.has_usable_password():
+            # OAuth/password-less accounts re-authenticate with an emailed code
+            # instead — a stolen session alone must not be enough to delete.
             del self.fields["password"]
+        else:
+            del self.fields["confirmation_code"]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -291,6 +367,18 @@ class AccountDeletionForm(forms.Form):
         if not self.user.check_password(password):
             raise ValidationError(_("Incorrect password."))
         return password
+
+    def clean_confirmation_code(self):
+        from accounts.account_deletion_services import verify_deletion_confirmation_code
+
+        code = (self.cleaned_data.get("confirmation_code") or "").strip()
+        if "confirmation_code" not in self.fields:
+            return code
+        if not code:
+            raise ValidationError(_("Enter the 6-digit code we emailed you."))
+        if not verify_deletion_confirmation_code(self.user, code):
+            raise ValidationError(_("Invalid or expired confirmation code."))
+        return code
 
 
 class NotificationPreferenceForm(forms.ModelForm):

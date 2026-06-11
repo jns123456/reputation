@@ -52,7 +52,7 @@ class EmailVerificationRequiredMiddleware:
         "/accounts/auth0/",
         "/accounts/delete/",
         "/accounts/push/",
-        "/admin/",
+        "/accounts/password-reset/",
         "/health/",
         "/static/",
         "/media/",
@@ -64,11 +64,13 @@ class EmailVerificationRequiredMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
+        # Admin mount point is configurable (ADMIN_URL_PATH); exempt it dynamically.
+        self.exempt_prefixes = self.EXEMPT_PREFIXES + ("/" + settings.ADMIN_URL_PATH,)
 
     def __call__(self, request):
         if request.user.is_authenticated and user_requires_email_verification(request.user):
             path = request.path
-            if not any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
+            if not any(path.startswith(prefix) for prefix in self.exempt_prefixes):
                 return redirect_response(
                     request,
                     reverse("accounts:verify_email_pending"),
@@ -89,7 +91,7 @@ class ProfileSetupRequiredMiddleware:
         "/accounts/auth0/",
         "/accounts/delete/",
         "/accounts/push/",
-        "/admin/",
+        "/accounts/password-reset/",
         "/health/",
         "/static/",
         "/assets/",
@@ -100,11 +102,13 @@ class ProfileSetupRequiredMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
+        # Admin mount point is configurable (ADMIN_URL_PATH); exempt it dynamically.
+        self.exempt_prefixes = self.EXEMPT_PREFIXES + ("/" + settings.ADMIN_URL_PATH,)
 
     def __call__(self, request):
         if request.user.is_authenticated and not request.user.onboarding_completed:
             path = request.path
-            if not any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
+            if not any(path.startswith(prefix) for prefix in self.exempt_prefixes):
                 return redirect_response(
                     request,
                     reverse("accounts:profile_setup"),

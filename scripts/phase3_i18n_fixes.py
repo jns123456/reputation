@@ -81,6 +81,104 @@ PHASE3_FIXES: dict[str, str] = {
     "price": "precio",
     "Live": "En vivo",
     "Community forecast feed": "Feed de pronósticos de la comunidad",
+    "An account with this email already exists. Try signing in instead.": (
+        "Ya existe una cuenta con este email. Prueba iniciar sesión."
+    ),
+    "Invalid vote": "Voto inválido",
+    # --- Password reset flow ---
+    "Reset password": "Restablecer contraseña",
+    "Account recovery": "Recuperación de cuenta",
+    "Forgot your": "¿Olvidaste tu",
+    "password?": "contraseña?",
+    "Enter the email linked to your account and we'll send you a secure link to choose a new password.": (
+        "Ingresa el email vinculado a tu cuenta y te enviaremos un enlace seguro para elegir una nueva contraseña."
+    ),
+    "Reset your password": "Restablece tu contraseña",
+    "We'll email you a one-time reset link.": "Te enviaremos un enlace de un solo uso por email.",
+    "Send reset link": "Enviar enlace de restablecimiento",
+    "Remembered it?": "¿La recordaste?",
+    "Back to login": "Volver al inicio de sesión",
+    "Check your email": "Revisa tu email",
+    "Check your": "Revisa tu",
+    "inbox": "bandeja de entrada",
+    "If an account exists with that email, a reset link is on its way.": (
+        "Si existe una cuenta con ese email, el enlace de restablecimiento está en camino."
+    ),
+    "Email sent": "Email enviado",
+    "If an account exists with the email you entered, we've sent a password reset link. The link expires after a short time and can be used once.": (
+        "Si existe una cuenta con el email que ingresaste, enviamos un enlace para restablecer la contraseña. "
+        "El enlace caduca en poco tiempo y solo puede usarse una vez."
+    ),
+    "Didn't get it? Check your spam folder or try again in a few minutes.": (
+        "¿No llegó? Revisa tu carpeta de spam o vuelve a intentarlo en unos minutos."
+    ),
+    "Choose a new password": "Elige una nueva contraseña",
+    "Choose a new": "Elige una nueva",
+    "Pick a strong password you haven't used elsewhere.": (
+        "Elige una contraseña fuerte que no hayas usado en otro sitio."
+    ),
+    "Set new password": "Definir nueva contraseña",
+    "New password": "Nueva contraseña",
+    "Confirm new password": "Confirmar nueva contraseña",
+    "Save new password": "Guardar nueva contraseña",
+    "This reset link is invalid or has already been used. Request a new one below.": (
+        "Este enlace es inválido o ya fue usado. Solicita uno nuevo abajo."
+    ),
+    "Request a new link": "Solicitar un nuevo enlace",
+    "Password updated": "Contraseña actualizada",
+    "You're all": "Ya estás",
+    "set": "listo",
+    "Your password was updated. Sign in with your new credentials.": (
+        "Tu contraseña fue actualizada. Inicia sesión con tus nuevas credenciales."
+    ),
+    "Your new password is active. You can log in now.": (
+        "Tu nueva contraseña está activa. Ya puedes iniciar sesión."
+    ),
+    "Forgot your password?": "¿Olvidaste tu contraseña?",
+    "Reset your PredictStamp password": "Restablece tu contraseña de PredictStamp",
+    "Too many reset requests. Please wait a while and try again.": (
+        "Demasiadas solicitudes de restablecimiento. Espera un momento y vuelve a intentarlo."
+    ),
+    "Someone requested a password reset for your PredictStamp account. Use this link to choose a new password:": (
+        "Alguien solicitó restablecer la contraseña de tu cuenta de PredictStamp. Usa este enlace para elegir una nueva:"
+    ),
+    "The link can only be used once. If it expires, you can request a new one from the login page.": (
+        "El enlace solo puede usarse una vez. Si caduca, puedes solicitar uno nuevo desde la página de inicio de sesión."
+    ),
+    "If you did not request this, ignore this message — your password will stay the same.": (
+        "Si no solicitaste esto, ignora este mensaje: tu contraseña seguirá siendo la misma."
+    ),
+    # --- OAuth account deletion re-auth ---
+    "Email confirmation code": "Código de confirmación por email",
+    "Enter the 6-digit code we emailed you.": "Ingresa el código de 6 dígitos que te enviamos por email.",
+    "Invalid or expired confirmation code.": "Código de confirmación inválido o caducado.",
+    "Email me a code": "Enviarme un código",
+    "Please wait a minute before requesting another code.": (
+        "Espera un minuto antes de solicitar otro código."
+    ),
+    "We couldn't send the confirmation email. Try again later.": (
+        "No pudimos enviar el email de confirmación. Inténtalo más tarde."
+    ),
+    "We emailed you a confirmation code. It expires in 15 minutes.": (
+        "Te enviamos un código de confirmación por email. Caduca en 15 minutos."
+    ),
+    "Confirm your PredictStamp account deletion": (
+        "Confirma la eliminación de tu cuenta de PredictStamp"
+    ),
+    "Someone requested to permanently delete your PredictStamp account. Use this code to confirm:": (
+        "Alguien solicitó eliminar permanentemente tu cuenta de PredictStamp. Usa este código para confirmar:"
+    ),
+    "This code expires in %(minutes)s minutes and can only be used once.": (
+        "Este código caduca en %(minutes)s minutos y solo puede usarse una vez."
+    ),
+    "If you did not request this, ignore this message and consider reviewing your account security.": (
+        "Si no solicitaste esto, ignora este mensaje y considera revisar la seguridad de tu cuenta."
+    ),
+    # --- Auth0 linking denial ---
+    "We couldn't sign you in: your identity provider has not verified this email address. Verify it there, or sign in with your password.": (
+        "No pudimos iniciar tu sesión: tu proveedor de identidad no verificó esta dirección de email. "
+        "Verifícala allí o inicia sesión con tu contraseña."
+    ),
     "Your open forecasts": "Tus pronósticos abiertos",
     "Formal predictions from the community — each card compares entry odds with the current market and live reputation P&L.": (
         "Pronósticos formales de la comunidad: cada tarjeta compara las probabilidades de entrada "

@@ -368,6 +368,21 @@ class PushSubscriptionServiceTests(TestCase):
         with self.assertRaises(ValueError):
             save_subscription(user=self.user, subscription={"endpoint": ""})
 
+    def test_save_subscription_cannot_steal_another_users_endpoint(self):
+        save_subscription(user=self.user, subscription=self.sub_payload)
+        attacker = create_user("pushattacker")
+        with self.assertRaises(ValueError):
+            save_subscription(user=attacker, subscription=self.sub_payload)
+        # Original owner keeps the endpoint.
+        sub = PushSubscription.objects.get(endpoint=self.sub_payload["endpoint"])
+        self.assertEqual(sub.user, self.user)
+
+    def test_save_subscription_owner_can_refresh_keys(self):
+        save_subscription(user=self.user, subscription=self.sub_payload)
+        refreshed = dict(self.sub_payload, keys={"p256dh": "new", "auth": "new"})
+        sub = save_subscription(user=self.user, subscription=refreshed)
+        self.assertEqual(sub.p256dh, "new")
+
     def test_send_disabled_is_noop(self):
         save_subscription(user=self.user, subscription=self.sub_payload)
         # WEBPUSH_ENABLED defaults False in tests.

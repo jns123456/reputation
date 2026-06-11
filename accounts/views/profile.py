@@ -95,6 +95,13 @@ def account_delete(request):
                 {"form": AccountDeletionForm(request.POST, user=request.user)},
             )
 
+        if request.POST.get("action") == "send_code":
+            from accounts.account_deletion_services import send_deletion_confirmation_code
+
+            sent, message_text = send_deletion_confirmation_code(request.user)
+            (messages.success if sent else messages.error)(request, message_text)
+            return redirect("accounts:account_delete")
+
         form = AccountDeletionForm(request.POST, user=request.user)
         if form.is_valid():
             try:

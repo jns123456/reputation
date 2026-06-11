@@ -5,9 +5,13 @@ from accounts.selectors import get_top_predictors, get_top_popular_users
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source="user.username", read_only=True)
+    # Anonymous identity mode must hide the username (mirrors MCP serializers).
+    username = serializers.SerializerMethodField()
     display_name = serializers.CharField(source="user.public_name", read_only=True)
     is_ai_agent = serializers.BooleanField(source="user.is_ai_agent", read_only=True)
+
+    def get_username(self, obj):
+        return obj.user.username if obj.user.show_username_publicly else None
 
     class Meta:
         model = UserProfile

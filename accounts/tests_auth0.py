@@ -81,6 +81,25 @@ class GetOrCreateUserFromAuth0Tests(TestCase):
         linked.refresh_from_db()
         self.assertEqual(linked.email_verified_at, original)
 
+    def test_denies_link_when_idp_email_unverified_prevents_takeover(self):
+        # Attacker controls an Auth0 identity carrying the victim's email but
+        # the IdP has NOT verified it — linking must be refused outright.
+        from accounts.auth0 import Auth0LinkDenied
+
+        victim = User.objects.create_user(
+            username="victim",
+            email="alice@example.com",
+            password="victim-password",
+        )
+        victim.email_verified_at = timezone.now()
+        victim.save(update_fields=["email_verified_at"])
+
+        with self.assertRaises(Auth0LinkDenied):
+            get_or_create_user_from_auth0(self._userinfo(email_verified=False))
+
+        victim.refresh_from_db()
+        self.assertEqual(victim.auth0_sub, "")
+
     def test_does_not_link_unverified_local_account_prevents_takeover(self):
         squatter = User.objects.create_user(
             username="squatter",

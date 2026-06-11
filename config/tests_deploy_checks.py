@@ -74,3 +74,25 @@ class ValidateProductionSettingsTests(SimpleTestCase):
 
     def test_passes_with_safe_production_settings(self):
         self._call()
+
+    def test_rejects_debug_true_in_production_environment(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(debug=True, environment="production")
+        self.assertIn("DEBUG", str(ctx.exception))
+
+    def test_allows_debug_true_outside_production_environment(self):
+        self._call(debug=True, environment="development")
+        self._call(debug=True, environment="")
+
+    def test_rejects_wildcard_allowed_hosts(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(allowed_hosts=["*"])
+        self.assertIn("ALLOWED_HOSTS", str(ctx.exception))
+
+    def test_rejects_empty_allowed_hosts(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(allowed_hosts=[])
+        self.assertIn("ALLOWED_HOSTS", str(ctx.exception))
+
+    def test_passes_with_explicit_allowed_hosts(self):
+        self._call(allowed_hosts=["predictstamp.com", "www.predictstamp.com"])

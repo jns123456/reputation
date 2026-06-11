@@ -30,9 +30,14 @@ def create_token(*, user, name, scopes=None, rate_limit_tier=None, expires_at=No
     from accounts.agent_services import account_allowed_scopes
 
     prefix, raw = _generate_raw()
+    allowed = account_allowed_scopes(user)
     if scopes is None:
         # Default to what the account is allowed today (read-only for new agents).
-        scopes = account_allowed_scopes(user)
+        scopes = allowed
+    else:
+        # Clip to the account's live allowed scopes so admin/shell/rotation paths
+        # can never mint a token broader than the account itself (§17).
+        scopes = [scope for scope in scopes if scope in allowed]
     if rate_limit_tier is None:
         agent_profile = getattr(user, "agent_profile", None)
         rate_limit_tier = (

@@ -155,17 +155,43 @@ class WriteToolGatingTests(TestCase):
     @override_settings(MCP_WRITES_ENABLED=True, MCP_SUBMIT_PREDICTION_ENABLED=True)
     def test_write_denied_for_low_trust_agent(self):
         new_agent, profile = make_agent_user(username="newbie", trust=AIAgentProfile.TrustLevel.NEW)
-        # Force the token to carry the write scope even though trust is too low.
-        token, _ = create_token(
-            user=new_agent, name="lowtrust", scopes=["markets:read", "predictions:write"]
-        )
+        # Force the write scope directly onto the row (bypassing create_token's
+        # clipping) to simulate a stale/tampered token. The live account-scope
+        # check must still deny the write.
+        token, _ = create_token(user=new_agent, name="lowtrust", scopes=["markets:read"])
+        token.scopes = ["markets:read", "predictions:write"]
+        token.save(update_fields=["scopes"])
         with self.assertRaises(McpError) as ctx:
             execute_tool(
                 context=context_for(token),
                 tool_name="submit_prediction",
                 arguments={"market_id": self.market.id, "predicted_outcome": "Yes"},
             )
-        self.assertEqual(ctx.exception.code, "insufficient_trust")
+        self.assertEqual(ctx.exception.code, "insufficient_scope")
+
+    def test_create_token_clips_scopes_beyond_account(self):
+        # A new (read-only) agent cannot mint a token carrying write scopes,
+        # even via shell/admin paths that bypass the self-service form.
+        new_agent, _ = make_agent_user(username="clipme", trust=AIAgentProfile.TrustLevel.NEW)
+        token, _ = create_token(
+            user=new_agent, name="clipped", scopes=["markets:read", "predictions:write"]
+        )
+        self.assertNotIn("predictions:write", token.scopes)
+        self.assertIn("markets:read", token.scopes)
+
+    @override_settings(MCP_WRITES_ENABLED=True, MCP_SUBMIT_PREDICTION_ENABLED=True)
+    def test_trust_demotion_revokes_writes_on_existing_token(self):
+        # Token minted while trusted keeps the write scope frozen, but demoting
+        # the agent must deny writes immediately (live account-scope check).
+        self.profile.trust_level = AIAgentProfile.TrustLevel.RESTRICTED
+        self.profile.save(update_fields=["trust_level"])
+        with self.assertRaises(McpError) as ctx:
+            execute_tool(
+                context=context_for(self.token),
+                tool_name="submit_prediction",
+                arguments={"market_id": self.market.id, "predicted_outcome": "Yes"},
+            )
+        self.assertEqual(ctx.exception.code, "insufficient_scope")
 
 
 @override_settings(ABUSE_RATE_LIMITS={"mcp_call": {"standard": (2, 3600)}})

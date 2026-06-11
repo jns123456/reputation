@@ -1,10 +1,18 @@
 """Tests for permanent account deletion."""
 
 from django.contrib.auth import get_user_model
+from django.core import mail
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from accounts.account_deletion_services import AccountDeletionError, delete_user_account
+from accounts.account_deletion_services import (
+    AccountDeletionError,
+    delete_user_account,
+    deletion_requires_email_code,
+    send_deletion_confirmation_code,
+    verify_deletion_confirmation_code,
+)
 from accounts.models import UserProfile
 from comments.models import Comment, Vote
 from comments.services import cast_vote, create_comment
@@ -142,3 +150,68 @@ class AccountDeletionViewTests(TestCase):
         self.client.login(username="view-deleter", password="secret123")
         response = self.client.get(reverse("accounts:profile_edit"))
         self.assertContains(response, reverse("accounts:account_delete"))
+
+
+class OAuthAccountDeletionReauthTests(TestCase):
+    """Password-less (OAuth) accounts must confirm deletion with an emailed code."""
+
+    def setUp(self):
+        cache.clear()
+        self.user = create_user("oauth-deleter")
+        self.user.set_unusable_password()
+        self.user.email = "oauth-deleter@test.com"
+        self.user.save(update_fields=["password", "email"])
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_oauth_account_requires_email_code(self):
+        self.assertTrue(deletion_requires_email_code(self.user))
+
+    def test_password_account_does_not_require_code(self):
+        pw_user = create_user("pw-user", password="secret123")
+        self.assertFalse(deletion_requires_email_code(pw_user))
+
+    def test_send_code_emails_and_verifies(self):
+        sent, _msg = send_deletion_confirmation_code(self.user)
+        self.assertTrue(sent)
+        self.assertEqual(len(mail.outbox), 1)
+        body = mail.outbox[0].body
+        # Extract the 6-digit code from the email body.
+        import re
+
+        code = re.search(r"\b(\d{6})\b", body).group(1)
+        self.assertTrue(verify_deletion_confirmation_code(self.user, code))
+        # Single-use: second verification fails.
+        self.assertFalse(verify_deletion_confirmation_code(self.user, code))
+
+    def test_wrong_code_fails(self):
+        send_deletion_confirmation_code(self.user)
+        self.assertFalse(verify_deletion_confirmation_code(self.user, "000000"))
+
+    def test_delete_without_code_is_rejected(self):
+        response = self.client.post(
+            reverse("accounts:account_delete"),
+            {"username_confirm": "oauth-deleter"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(User.objects.filter(username="oauth-deleter").exists())
+
+    def test_delete_with_valid_code_succeeds(self):
+        import re
+
+        send_deletion_confirmation_code(self.user)
+        code = re.search(r"\b(\d{6})\b", mail.outbox[0].body).group(1)
+        response = self.client.post(
+            reverse("accounts:account_delete"),
+            {"username_confirm": "oauth-deleter", "confirmation_code": code},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(User.objects.filter(username="oauth-deleter").exists())
+
+    def test_send_code_action_from_view(self):
+        response = self.client.post(
+            reverse("accounts:account_delete"),
+            {"action": "send_code"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)

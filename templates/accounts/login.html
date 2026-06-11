@@ -77,6 +77,12 @@
   <button type="submit" class="btn-primary w-full justify-center py-2.5 text-sm font-semibold shadow-sm shadow-brand-500/20">
     {% trans "Log in" %}
   </button>
+
+  <p class="text-center text-sm">
+    <a href="{% url 'accounts:password_reset' %}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline dark:text-brand-400">
+      {% trans "Forgot your password?" %}
+    </a>
+  </p>
 </form>
 {% endblock %}
 

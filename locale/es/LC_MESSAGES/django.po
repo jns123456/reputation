@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-10 15:04+0000\n"
+"POT-Creation-Date: 2026-06-11 16:42+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -19,6 +19,25 @@ msgstr ""
 msgid "Superuser accounts cannot be deleted from the platform."
 msgstr ""
 "Las cuentas de superusuario no se pueden eliminar desde la plataforma."
+
+msgid "Add an email address to your profile first."
+msgstr "Añade primero un email a tu perfil."
+
+#| msgid "Please wait a minute before requesting another email."
+msgid "Please wait a minute before requesting another code."
+msgstr "Espera un minuto antes de solicitar otro código."
+
+#| msgid "Confirm your email on PredictStamp"
+msgid "Confirm your PredictStamp account deletion"
+msgstr "Confirma la eliminación de tu cuenta de PredictStamp"
+
+#| msgid "Could not send the verification email."
+msgid "We couldn't send the confirmation email. Try again later."
+msgstr "No pudimos enviar el email de confirmación. Inténtalo más tarde."
+
+msgid "We emailed you a confirmation code. It expires in 15 minutes."
+msgstr ""
+"Te enviamos un código de confirmación por email. Caduca en 15 minutos."
 
 msgid "Rookie"
 msgstr "Novato"
@@ -210,9 +229,6 @@ msgstr "No se pudo enviar el email de verificación."
 msgid "Your email is already verified."
 msgstr "Tu cuenta ya está verificada."
 
-msgid "Add an email address to your profile first."
-msgstr "Añade primero un email a tu perfil."
-
 msgid "Please wait a minute before requesting another email."
 msgstr "Espera un minuto antes de solicitar otro email."
 
@@ -249,6 +265,13 @@ msgstr "No puedes seguirte a ti mismo."
 
 msgid "Enter a valid email address."
 msgstr "Introduce una dirección de email válida."
+
+msgid "An account with this email already exists. Try signing in instead."
+msgstr "Ya existe una cuenta con este email. Prueba iniciar sesión."
+
+#| msgid "Your PredictStamp digest"
+msgid "Reset your PredictStamp password"
+msgstr "Restablece tu contraseña de PredictStamp"
 
 msgid "A person (no automation)"
 msgstr ""
@@ -345,6 +368,13 @@ msgstr "Contraseña"
 msgid "Enter your current password to confirm."
 msgstr "Introduce tu contraseña actual para confirmar."
 
+#| msgid "Email notifications"
+msgid "Email confirmation code"
+msgstr "Código de confirmación por email"
+
+msgid "Enter the 6-digit code we emailed you."
+msgstr "Ingresa el código de 6 dígitos que te enviamos por email."
+
 msgid "Type your username exactly to confirm."
 msgstr "Escribe tu nombre de usuario exactamente para confirmar."
 
@@ -353,6 +383,9 @@ msgstr "Introduce tu contraseña para confirmar la eliminación de la cuenta."
 
 msgid "Incorrect password."
 msgstr "Contraseña incorrecta."
+
+msgid "Invalid or expired confirmation code."
+msgstr "Código de confirmación inválido o caducado."
 
 msgid "Forecasts from users you follow"
 msgstr "Pronósticos de los usuarios que sigues"
@@ -566,6 +599,12 @@ msgstr ""
 "Demasiados intentos de inicio de sesión. Espera unos minutos e inténtalo de "
 "nuevo."
 
+#| msgid "Too many attempts. Please wait a few minutes and try again."
+msgid "Too many reset requests. Please wait a while and try again."
+msgstr ""
+"Demasiadas solicitudes de restablecimiento. Espera un momento y vuelve a "
+"intentarlo."
+
 msgid "Auth0 sign-in is not available right now."
 msgstr "El inicio de sesión con Auth0 no está disponible ahora."
 
@@ -575,6 +614,13 @@ msgstr ""
 
 msgid "Auth0 did not return a valid profile."
 msgstr "Auth0 no devolvió un perfil válido."
+
+msgid ""
+"We couldn't sign you in: your identity provider has not verified this email "
+"address. Verify it there, or sign in with your password."
+msgstr ""
+"No pudimos iniciar tu sesión: tu proveedor de identidad no verificó esta "
+"dirección de email. Verifícala allí o inicia sesión con tu contraseña."
 
 msgid ""
 "Too many sign-up attempts from this connection. Please try again later."
@@ -877,6 +923,9 @@ msgstr "Comentario no válido"
 
 msgid "Comments must be posted on a forecast thread."
 msgstr "Los comentarios deben publicarse en un hilo de pronóstico."
+
+msgid "Invalid vote"
+msgstr "Voto inválido"
 
 msgid "Invalid target type"
 msgstr "Tipo de destino no válido"
@@ -1278,6 +1327,10 @@ msgstr "Reputación, popularidad, rachas y logros"
 msgid "Notifications, bookmarks, follows, and alert preferences"
 msgstr "Notificaciones, guardados, seguidores y preferencias de alertas"
 
+#| msgid "Email address"
+msgid "Email me a code"
+msgstr "Enviarme un código"
+
 msgid "Delete my account permanently"
 msgstr "Eliminar mi cuenta permanentemente"
 
@@ -1481,6 +1534,10 @@ msgstr "o"
 
 msgid "Username"
 msgstr "Nombre de usuario"
+
+#| msgid "Incorrect password."
+msgid "Forgot your password?"
+msgstr "¿Olvidaste tu contraseña?"
 
 msgid "No account?"
 msgstr "¿No tienes cuenta?"
@@ -1825,6 +1882,139 @@ msgstr "pop"
 
 msgid "Top matches"
 msgstr "partido abierto"
+
+#| msgid "Password"
+msgid "Password updated"
+msgstr "Contraseña actualizada"
+
+#| msgid "Account type"
+msgid "Account recovery"
+msgstr "Recuperación de cuenta"
+
+#| msgid "You're in"
+msgid "You're all"
+msgstr "Ya estás"
+
+#| msgid "Inspect"
+msgid "set"
+msgstr "listo"
+
+msgid "Your password was updated. Sign in with your new credentials."
+msgstr ""
+"Tu contraseña fue actualizada. Inicia sesión con tus nuevas credenciales."
+
+msgid "Your new password is active. You can log in now."
+msgstr "Tu nueva contraseña está activa. Ya puedes iniciar sesión."
+
+msgid "Choose a new password"
+msgstr "Elige una nueva contraseña"
+
+#| msgid "Choose how you"
+msgid "Choose a new"
+msgstr "Elige una nueva"
+
+#| msgid "Password"
+msgid "password"
+msgstr "Contraseña"
+
+msgid "Pick a strong password you haven't used elsewhere."
+msgstr "Elige una contraseña fuerte que no hayas usado en otro sitio."
+
+#| msgid "Incorrect password."
+msgid "Set new password"
+msgstr "Definir nueva contraseña"
+
+#| msgid "Password"
+msgid "New password"
+msgstr "Nueva contraseña"
+
+#| msgid "Incorrect password."
+msgid "Confirm new password"
+msgstr "Confirmar nueva contraseña"
+
+#| msgid "Incorrect password."
+msgid "Save new password"
+msgstr "Guardar nueva contraseña"
+
+#| msgid "This verification link has expired. Request a new one."
+msgid ""
+"This reset link is invalid or has already been used. Request a new one "
+"below."
+msgstr "Este enlace es inválido o ya fue usado. Solicita uno nuevo abajo."
+
+msgid "Request a new link"
+msgstr "Solicitar un nuevo enlace"
+
+#| msgid "Back to profile"
+msgid "Back to login"
+msgstr "Volver al inicio de sesión"
+
+#| msgid "Check your inbox"
+msgid "Check your email"
+msgstr "Revisa tu email"
+
+#| msgid "Check your inbox"
+msgid "Check your"
+msgstr "Revisa tu"
+
+msgid "inbox"
+msgstr "bandeja de entrada"
+
+#| msgid ""
+#| "An account with this email already exists. Try signing in instead."
+msgid "If an account exists with that email, a reset link is on its way."
+msgstr ""
+"Si existe una cuenta con ese email, el enlace de restablecimiento está en "
+"camino."
+
+#| msgid "Email"
+msgid "Email sent"
+msgstr "Email enviado"
+
+msgid ""
+"If an account exists with the email you entered, we've sent a password reset"
+" link. The link expires after a short time and can be used once."
+msgstr ""
+"Si existe una cuenta con el email que ingresaste, enviamos un enlace para "
+"restablecer la contraseña. El enlace caduca en poco tiempo y solo puede "
+"usarse una vez."
+
+msgid "Didn't get it? Check your spam folder or try again in a few minutes."
+msgstr ""
+"¿No llegó? Revisa tu carpeta de spam o vuelve a intentarlo en unos minutos."
+
+#| msgid "Incorrect password."
+msgid "Reset password"
+msgstr "Restablecer contraseña"
+
+msgid "Forgot your"
+msgstr "¿Olvidaste tu"
+
+#| msgid "Password"
+msgid "password?"
+msgstr "contraseña?"
+
+msgid ""
+"Enter the email linked to your account and we'll send you a secure link to "
+"choose a new password."
+msgstr ""
+"Ingresa el email vinculado a tu cuenta y te enviaremos un enlace seguro para"
+" elegir una nueva contraseña."
+
+msgid "Reset your password"
+msgstr "Restablece tu contraseña"
+
+msgid "We'll email you a one-time reset link."
+msgstr "Te enviaremos un enlace de un solo uso por email."
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Send reset link"
+msgstr "Enviar enlace de restablecimiento"
+
+msgid "Remembered it?"
+msgstr "¿La recordaste?"
 
 #, python-format
 msgid "Followers · %(name)s"
@@ -2604,9 +2794,6 @@ msgstr "Cierra sesión y regístrate de nuevo"
 
 msgid "Email verification"
 msgstr "Verificación de email"
-
-msgid "Email"
-msgstr "Email"
 
 msgid "Link"
 msgstr "Enlace"
@@ -3489,13 +3676,6 @@ msgstr ""
 
 msgid "Post comment"
 msgstr "Comentario de la publicación"
-
-#, python-format
-msgid "Score: %(score)s"
-msgstr "Puntuación: %(score)s"
-
-msgid "No comments yet. Start the discussion."
-msgstr "Aún no hay comentarios. Inicie la discusión."
 
 msgid "Discussion"
 msgstr "Debate"
@@ -5025,6 +5205,31 @@ msgstr ""
 "Los mercados se sincronizan automáticamente desde Polymarket — actualiza en "
 "un momento."
 
+#, python-format
+msgid "Hi %(name)s,"
+msgstr "Todos los %(name)s"
+
+msgid ""
+"Someone requested to permanently delete your PredictStamp account. Use this "
+"code to confirm:"
+msgstr ""
+"Alguien solicitó eliminar permanentemente tu cuenta de PredictStamp. Usa "
+"este código para confirmar:"
+
+#, python-format
+#| msgid ""
+#| "This link expires in %(hours)s hours and can only be used once."
+msgid "This code expires in %(minutes)s minutes and can only be used once."
+msgstr ""
+"Este código caduca en %(minutes)s minutos y solo puede usarse una vez."
+
+msgid ""
+"If you did not request this, ignore this message and consider reviewing your"
+" account security."
+msgstr ""
+"Si no solicitaste esto, ignora este mensaje y considera revisar la seguridad"
+" de tu cuenta."
+
 msgid ""
 "You receive this email because you enabled email alerts on PredictStamp."
 msgstr ""
@@ -5035,10 +5240,6 @@ msgstr "Administrar alertas"
 
 msgid "You receive this email because you signed up on PredictStamp."
 msgstr "Recibís este email porque te registraste en PredictStamp."
-
-#, python-format
-msgid "Hi %(name)s,"
-msgstr "Todos los %(name)s"
 
 #, python-format
 msgid "Result: %(outcome)s"
@@ -5106,6 +5307,27 @@ msgstr "Si no creaste una cuenta, puedes ignorar este mensaje."
 #, python-format
 msgid "Hi %(name)s, there's new activity on your PredictStamp account."
 msgstr "Hola %(name)s, hay actividad nueva en tu cuenta de PredictStamp."
+
+msgid ""
+"Someone requested a password reset for your PredictStamp account. Use this "
+"link to choose a new password:"
+msgstr ""
+"Alguien solicitó restablecer la contraseña de tu cuenta de PredictStamp. Usa"
+" este enlace para elegir una nueva:"
+
+msgid ""
+"The link can only be used once. If it expires, you can request a new one "
+"from the login page."
+msgstr ""
+"El enlace solo puede usarse una vez. Si caduca, puedes solicitar uno nuevo "
+"desde la página de inicio de sesión."
+
+msgid ""
+"If you did not request this, ignore this message — your password will stay "
+"the same."
+msgstr ""
+"Si no solicitaste esto, ignora este mensaje: tu contraseña seguirá siendo la"
+" misma."
 
 #, python-format
 msgid "Don't lose your %(days)s-day streak"
@@ -6457,6 +6679,13 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#, python-format
+#~ msgid "Score: %(score)s"
+#~ msgstr "Puntuación: %(score)s"
+
+#~ msgid "No comments yet. Start the discussion."
+#~ msgstr "Aún no hay comentarios. Inicie la discusión."
 
 #~ msgid "to place your forecast on this market."
 #~ msgstr "para publicar tu pronóstico en este mercado."

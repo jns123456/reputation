@@ -18,7 +18,17 @@ class McpTokenAdmin(admin.ModelAdmin):
     list_filter = ("is_active", "rate_limit_tier")
     search_fields = ("prefix", "name", "user__username")
     # token_hash is a one-way hash; never editable and never shows the raw secret.
-    readonly_fields = ("token_hash", "prefix", "created_at", "last_used_at")
+    # scopes/rate_limit_tier/user are readonly so a compromised staff account
+    # cannot escalate an existing token; changes go through the self-service UI.
+    readonly_fields = (
+        "token_hash",
+        "prefix",
+        "user",
+        "scopes",
+        "rate_limit_tier",
+        "created_at",
+        "last_used_at",
+    )
     actions = ["revoke_tokens"]
 
     @admin.action(description="Revoke selected tokens")

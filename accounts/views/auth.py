@@ -4,7 +4,15 @@ from urllib.parse import urlencode
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
+)
+from django.urls import reverse_lazy
 from django.contrib import messages
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -21,7 +29,7 @@ from accounts.email_verification_services import (
     verify_email_with_token,
 )
 from accounts.email_services import EmailDeliveryError
-from accounts.forms import SignUpForm
+from accounts.forms import SignUpForm, StyledPasswordResetForm, StyledSetPasswordForm
 from accounts.http_utils import enforce_ip_rate_limit
 from accounts.models import User
 from accounts.notification_services import queue_login_notification_toast
@@ -72,6 +80,39 @@ class CustomLogoutView(LogoutView):
         return response
 
 
+class CustomPasswordResetView(PasswordResetView):
+    """Rate-limited password reset request; email delivery via our email layer."""
+
+    template_name = "accounts/password_reset_form.html"
+    form_class = StyledPasswordResetForm
+    success_url = reverse_lazy("accounts:password_reset_done")
+
+    def post(self, request, *args, **kwargs):
+        try:
+            enforce_ip_rate_limit(request=request, action="password_reset")
+        except abuse_services.RateLimitExceeded:
+            messages.error(
+                request,
+                _("Too many reset requests. Please wait a while and try again."),
+            )
+            return self.render_to_response(self.get_context_data())
+        return super().post(request, *args, **kwargs)
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = "accounts/password_reset_done.html"
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = "accounts/password_reset_confirm.html"
+    form_class = StyledSetPasswordForm
+    success_url = reverse_lazy("accounts:password_reset_complete")
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = "accounts/password_reset_complete.html"
+
+
 def _post_auth_redirect(user):
     """Where to send a freshly authenticated user (shared by login flows)."""
     if not user.onboarding_completed:
@@ -90,17 +131,28 @@ def auth0_login(request):
     redirect_uri = request.build_absolute_uri(reverse("accounts:auth0_callback"))
     authorize_kwargs = {}
     connection = (request.GET.get("connection") or "").strip()
-    if connection:
+    # Allowlist: only connections we intentionally expose may be requested,
+    # so attackers can't probe arbitrary Auth0 IdP connections.
+    if connection and connection == settings.AUTH0_GOOGLE_CONNECTION:
         authorize_kwargs["connection"] = connection
     return client.authorize_redirect(request, redirect_uri, **authorize_kwargs)
 
 
 def auth0_callback(request):
     """Handle the Auth0 redirect: exchange the code, map the user, log in."""
-    from accounts.auth0 import get_auth0_client, get_or_create_user_from_auth0
+    from accounts.auth0 import Auth0LinkDenied, get_auth0_client, get_or_create_user_from_auth0
 
     client = get_auth0_client()
     if client is None:
+        return redirect("accounts:login")
+
+    try:
+        enforce_ip_rate_limit(request=request, action="login")
+    except abuse_services.RateLimitExceeded:
+        messages.error(
+            request,
+            _("Too many login attempts. Please wait a few minutes and try again."),
+        )
         return redirect("accounts:login")
 
     try:
@@ -122,7 +174,17 @@ def auth0_callback(request):
         messages.error(request, _("Auth0 did not return a valid profile."))
         return redirect("accounts:login")
 
-    user = get_or_create_user_from_auth0(userinfo)
+    try:
+        user = get_or_create_user_from_auth0(userinfo)
+    except Auth0LinkDenied:
+        messages.error(
+            request,
+            _(
+                "We couldn't sign you in: your identity provider has not verified "
+                "this email address. Verify it there, or sign in with your password."
+            ),
+        )
+        return redirect("accounts:login")
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session["auth0_id_token"] = token.get("id_token", "")
     queue_login_notification_toast(request=request)

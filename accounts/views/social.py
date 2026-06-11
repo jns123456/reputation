@@ -128,7 +128,11 @@ def notifications_dropdown(request):
 def notification_mark_read(request, notification_id):
     from accounts.models import Notification
 
-    notification = get_object_or_404(Notification, pk=notification_id)
+    # Scope the lookup to the recipient: cross-user probes get a 404 instead
+    # of reaching the service layer (which would raise an unhandled 500).
+    notification = get_object_or_404(
+        Notification, pk=notification_id, recipient=request.user
+    )
     mark_notification_read(notification=notification, user=request.user)
 
     if request.headers.get("HX-Request"):

@@ -31,6 +31,29 @@ class LoginRateLimitTests(TestCase):
         )
 
 
+class SignupEmailUniquenessTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def test_signup_rejects_duplicate_email(self):
+        from accounts.forms import SignUpForm
+        from accounts.models import User
+
+        User.objects.create_user(
+            username="orig", email="taken@test.com", password="ComplexPass123!"
+        )
+        form = SignUpForm(
+            data={
+                "username": "copycat",
+                "email": "TAKEN@test.com",
+                "password1": "ComplexPass123!",
+                "password2": "ComplexPass123!",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+
+
 class RegistrationRateLimitTests(TestCase):
     def setUp(self):
         cache.clear()

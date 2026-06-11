@@ -4,7 +4,11 @@ from comments.models import Comment
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source="user.username", read_only=True)
+    # Anonymous identity mode must hide the username (mirrors MCP serializers).
+    username = serializers.SerializerMethodField()
+
+    def get_username(self, obj):
+        return obj.user.username if obj.user.show_username_publicly else None
 
     class Meta:
         model = Comment

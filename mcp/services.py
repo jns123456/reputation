@@ -10,19 +10,22 @@ MVP boundaries — it only orchestrates the checks and delegates to domain servi
 
 import hashlib
 import json
+import logging
 import uuid
 from dataclasses import dataclass
 
 from django.conf import settings
 
 from accounts import abuse_services
-from accounts.agent_services import can_agent_write, is_write_scope
+from accounts.agent_services import account_allowed_scopes, can_agent_write, is_write_scope
 from accounts.risk_services import calculate_account_risk_score
 from accounts.write_guard import ContentRejected
 from mcp.errors import McpError
 from mcp.models import McpToolCallLog
 from mcp.registry import get_tool
 from mcp.resources import match_resource
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -57,11 +60,22 @@ def _log(*, context, tool_name, arguments, status, error_code="", risk_score=0):
             request_id=context.request_id or "",
         )
     except Exception:  # noqa: BLE001 - logging must not break the call
-        pass
+        # Never break the call, but never lose the audit trail silently either.
+        logger.exception("Failed to write McpToolCallLog for tool %s", tool_name)
 
 
 def _token_has_scope(token, scope):
     return scope in (token.scopes or [])
+
+
+def _scope_allowed(token, user, scope):
+    """Token scope AND the account's *live* allowed scopes must both grant it.
+
+    Token scopes are frozen at mint time; checking ``account_allowed_scopes``
+    here means an admin lowering trust or stripping ``allowed_scopes`` takes
+    effect immediately for existing tokens.
+    """
+    return _token_has_scope(token, scope) and scope in account_allowed_scopes(user)
 
 
 def _check_writes_enabled(tool):
@@ -103,8 +117,8 @@ def execute_tool(*, context: McpContext, tool_name: str, arguments: dict = None)
         if tool.is_write and abuse_services.is_circuit_open(breaker_name):
             raise McpError("circuit_open", "This tool is temporarily disabled due to abuse.", http_status=503)
 
-        # 3. Token scope.
-        if not _token_has_scope(context.token, tool.scope):
+        # 3. Token scope + live account scope.
+        if not _scope_allowed(context.token, context.user, tool.scope):
             raise McpError("insufficient_scope", f"Token lacks scope '{tool.scope}'.", http_status=403)
 
         # 4. Trust gate for writes.
@@ -162,7 +176,7 @@ def read_resource(*, context: McpContext, uri: str):
     tool_label = f"resource:{uri}"
     try:
         handler, scope, kwargs = match_resource(uri)
-        if not _token_has_scope(context.token, scope):
+        if not _scope_allowed(context.token, context.user, scope):
             raise McpError("insufficient_scope", f"Token lacks scope '{scope}'.", http_status=403)
         tier = context.token.rate_limit_tier or abuse_services.get_rate_limit_tier(context.user)
         abuse_services.enforce_rate_limit(

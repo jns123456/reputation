@@ -14,3 +14,4 @@ web3>=7.0,<8.0
 eth-account>=0.13,<0.14
 eth-abi>=5.0,<6.0
 sentry-sdk[django,celery]>=2.0,<3.0
+django-storages[s3]>=1.14,<2.0

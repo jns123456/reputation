@@ -50,6 +50,23 @@
     </div>
     {% endif %}
 
+    {% if form.confirmation_code %}
+    <div>
+      <label for="{{ form.confirmation_code.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+        {{ form.confirmation_code.label }}
+      </label>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ form.confirmation_code.help_text }}</p>
+      <div class="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-center">
+        {{ form.confirmation_code }}
+        <button type="submit" name="action" value="send_code" formnovalidate
+                class="btn-secondary min-h-[44px] whitespace-nowrap">
+          {% trans "Email me a code" %}
+        </button>
+      </div>
+      {% if form.confirmation_code.errors %}<p class="mt-1 text-sm text-red-600">{{ form.confirmation_code.errors.0 }}</p>{% endif %}
+    </div>
+    {% endif %}
+
     <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
       <button type="submit"
               class="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-red-600 bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">

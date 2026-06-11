@@ -64,6 +64,23 @@ class PostForm(forms.ModelForm):
         if content_type and content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
             raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image."))
 
+        # The client-sent Content-Type is spoofable; verify the actual bytes
+        # are a real image of an allowed format before storing publicly.
+        from PIL import Image, UnidentifiedImageError
+
+        allowed_formats = {"JPEG", "PNG", "WEBP", "GIF"}
+        try:
+            with Image.open(image) as probe:
+                probe.verify()
+                detected = (probe.format or "").upper()
+        except (UnidentifiedImageError, OSError, ValueError) as exc:
+            raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image.")) from exc
+        finally:
+            # verify() consumes the stream; rewind so storage saves the full file.
+            image.seek(0)
+        if detected not in allowed_formats:
+            raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image."))
+
         return image
 
     def clean(self):

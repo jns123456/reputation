@@ -45,6 +45,7 @@
       }
     }
   </script>
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script>
     (function () {
@@ -52,6 +53,13 @@
       htmx.config.responseHandling.splice(catchAll, 0, { code: "422", swap: true });
     })();
     document.addEventListener("htmx:configRequest", function (event) {
+      // Prefer the meta tag: in production the CSRF cookie is HttpOnly and
+      // unreadable from document.cookie.
+      var meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta && meta.content) {
+        event.detail.headers["X-CSRFToken"] = meta.content;
+        return;
+      }
       var match = document.cookie.match("(^|;)\\s*csrftoken\\s*=\\s*([^;]+)");
       if (match) {
         event.detail.headers["X-CSRFToken"] = decodeURIComponent(match.pop());

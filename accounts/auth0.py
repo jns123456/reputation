@@ -22,6 +22,15 @@ oauth = OAuth()
 _REGISTERED = False
 
 
+class Auth0LinkDenied(Exception):
+    """Raised when an Auth0 identity may not be linked to a local account.
+
+    Linking by email is only safe when the IdP itself verified ownership of
+    the address. Without that, an attacker could register an Auth0 identity
+    with a victim's email and capture their verified local account.
+    """
+
+
 def get_auth0_client():
     """Return the registered Authlib Auth0 client, registering it on first use.
 
@@ -82,8 +91,10 @@ def get_or_create_user_from_auth0(userinfo: dict) -> User:
 
     Unverified local signups with the same email are **not** linked — that would
     let an attacker pre-register ``victim@example.com`` and capture the victim's
-    Auth0 login. When Auth0 reports the email as verified we trust it and stamp
-    ``email_verified_at`` on new or legitimately linked accounts.
+    Auth0 login. Linking the other way requires the **IdP** to have verified the
+    email (``email_verified``): otherwise an attacker-controlled Auth0 identity
+    carrying a victim's address could capture the victim's verified local
+    account, so we raise :class:`Auth0LinkDenied` instead.
     """
     sub = (userinfo.get("sub") or "").strip()
     email = (userinfo.get("email") or "").strip().lower()
@@ -97,13 +108,14 @@ def get_or_create_user_from_auth0(userinfo: dict) -> User:
     if email:
         existing = User.objects.filter(email__iexact=email).first()
         if existing is not None and existing.email_verified_at is not None:
+            if not email_verified:
+                raise Auth0LinkDenied(
+                    "Identity provider did not verify this email address."
+                )
             update_fields = []
             if sub and existing.auth0_sub != sub:
                 existing.auth0_sub = sub
                 update_fields.append("auth0_sub")
-            if email_verified and existing.email_verified_at is None:
-                existing.email_verified_at = timezone.now()
-                update_fields.append("email_verified_at")
             if update_fields:
                 existing.save(update_fields=update_fields)
             return existing

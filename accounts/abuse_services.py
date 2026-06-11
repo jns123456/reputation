@@ -61,6 +61,9 @@ DEFAULT_RATE_LIMITS = {
     "account_deletion": {
         "ip": (5, 3600),
     },
+    "password_reset": {
+        "ip": (5, 3600),
+    },
     "mcp_http": {
         "ip": (300, 3600),
     },
