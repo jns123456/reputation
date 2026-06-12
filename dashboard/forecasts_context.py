@@ -14,6 +14,8 @@ def _normalize_sort(sort, *, user):
         sort = "recent"
     if sort == "following" and not (user and user.is_authenticated):
         sort = "recent"
+    if sort == "for_you" and not (user and user.is_authenticated):
+        sort = "hot"
     return sort
 
 

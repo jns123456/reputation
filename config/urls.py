@@ -4,8 +4,25 @@ from django.urls import include, path
 from django.views.i18n import set_language
 
 from config import brand_views, health_views, landing_video, pwa_views
+from predictions import views as prediction_card_views
 
 urlpatterns = [
+    # Short, public, shareable forecast-card permalinks (no auth required).
+    path(
+        "p/<int:prediction_id>/",
+        prediction_card_views.prediction_detail,
+        name="prediction_card",
+    ),
+    path(
+        "p/<int:prediction_id>/og.png",
+        prediction_card_views.prediction_og_image,
+        name="prediction_card_og",
+    ),
+    path(
+        "p/<int:prediction_id>/share/",
+        prediction_card_views.prediction_share,
+        name="prediction_card_share",
+    ),
     path("health/", health_views.health, name="health"),
     path(
         "brand/auth0-logo.jpg",

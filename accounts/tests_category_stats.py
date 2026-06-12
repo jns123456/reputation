@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.test import TestCase
 
 from accounts.category_selectors import get_user_category_breakdown
@@ -6,6 +7,7 @@ from comments.models import Vote
 from comments.services import cast_vote, create_comment
 from markets.models import Market
 from predictions.services import create_prediction, exit_prediction, resolve_market_predictions
+from reputation.models import PopularityEvent
 
 
 class CategoryStatsTests(TestCase):
@@ -53,6 +55,9 @@ class CategoryStatsTests(TestCase):
 
     def test_vote_updates_category_popularity(self):
         comment = create_comment(user=self.user, market=self.market, body="BTC moon")
+        # Daily-mission rewards may add global popularity; measure the vote delta.
+        self.user.profile.refresh_from_db()
+        popularity_before_vote = self.user.profile.popularity_points
         cast_vote(
             user=self.voter,
             target_type=Vote.TargetType.COMMENT,
@@ -62,7 +67,7 @@ class CategoryStatsTests(TestCase):
         stats = UserCategoryStats.objects.get(user=self.user, category_slug="crypto")
         self.assertEqual(stats.popularity_points, 1)
         self.user.profile.refresh_from_db()
-        self.assertEqual(self.user.profile.popularity_points, 1)
+        self.assertEqual(self.user.profile.popularity_points, popularity_before_vote + 1)
 
     def test_category_scores_sum_to_global_on_single_category_activity(self):
         create_prediction(user=self.user, market=self.market, predicted_outcome="Yes")
@@ -84,7 +89,16 @@ class CategoryStatsTests(TestCase):
         total_pop = sum(row["popularity_points"] for row in breakdown)
         self.user.profile.refresh_from_db()
         self.assertEqual(total_rep, self.user.profile.reputation_points)
-        self.assertEqual(total_pop, self.user.profile.popularity_points)
+        # Mission rewards are global-only (not category-scoped), so subtract them
+        # before checking that category popularity sums match the global total.
+        mission_points = (
+            PopularityEvent.objects.filter(
+                user=self.user,
+                event_type=PopularityEvent.EventType.MISSION_COMPLETED,
+            ).aggregate(total=Sum("points_delta"))["total"]
+            or 0
+        )
+        self.assertEqual(total_pop, self.user.profile.popularity_points - mission_points)
 
     def test_exit_updates_category_correct_counts(self):
         prediction = create_prediction(

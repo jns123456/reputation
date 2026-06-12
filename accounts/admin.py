@@ -9,15 +9,37 @@ from accounts.models import (
     CreatorProgram,
     CreatorSubscription,
     EmailVerificationToken,
+    MarketWatch,
     Notification,
     NotificationPreference,
     PushSubscription,
+    TopicFollow,
     User,
     UserAchievement,
     UserCategoryStats,
     UserFollow,
+    UserMission,
     UserProfile,
 )
+
+
+@admin.register(TopicFollow)
+class TopicFollowAdmin(admin.ModelAdmin):
+    list_display = ("user", "category_slug", "created_at")
+    search_fields = ("user__username", "category_slug")
+
+
+@admin.register(MarketWatch)
+class MarketWatchAdmin(admin.ModelAdmin):
+    list_display = ("user", "market", "created_at")
+    search_fields = ("user__username", "market__slug")
+
+
+@admin.register(UserMission)
+class UserMissionAdmin(admin.ModelAdmin):
+    list_display = ("user", "code", "period_date", "progress", "completed_at")
+    list_filter = ("code",)
+    search_fields = ("user__username",)
 
 
 class UserProfileInline(admin.StackedInline):

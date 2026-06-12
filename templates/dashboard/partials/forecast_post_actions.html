@@ -17,8 +17,9 @@
   <button type="button"
           class="forecast-action group flex items-center rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/40 dark:hover:text-brand-400"
           title="{% trans 'Share forecast' %}"
-          data-share-url="{{ request.scheme }}://{{ request.get_host }}{% url 'markets:detail' slug=market.slug %}#forecast-{{ prediction.id }}"
+          data-share-url="{{ request.scheme }}://{{ request.get_host }}{% url 'prediction_card' prediction.id %}"
           data-share-title="{% blocktrans with name=prediction.user.public_name title=market.display_title|truncatechars:40 %}{{ name }} on {{ title }}{% endblocktrans %}"
+          data-share-ping="{% url 'prediction_card_share' prediction.id %}"
           onclick="window.shareForumPost && window.shareForumPost(this)">
     <i data-lucide="share" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
   </button>

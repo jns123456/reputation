@@ -1,0 +1,37 @@
+{% load i18n %}
+{% if daily_missions %}
+<section class="mb-4 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90"
+         x-data="{ open: false }">
+  <button type="button" class="flex w-full items-center justify-between gap-2 text-left" @click="open = !open" :aria-expanded="open">
+    <div class="flex items-center gap-2">
+      <i data-lucide="list-checks" class="h-4 w-4 text-brand-600 dark:text-brand-400" stroke-width="2.25" aria-hidden="true"></i>
+      <h2 class="text-sm font-bold text-slate-900 dark:text-slate-100">{% trans "Daily missions" %}</h2>
+      <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+        {{ completed_mission_count }}/{{ daily_missions|length }}
+      </span>
+    </div>
+    <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400 transition" :class="open ? 'rotate-180' : ''" stroke-width="2" aria-hidden="true"></i>
+  </button>
+
+  <div x-show="open" x-cloak class="mt-3 grid gap-2 sm:grid-cols-2">
+    {% for card in daily_missions %}
+    <div class="flex items-start gap-3 rounded-xl border px-3 py-2.5 {% if card.completed %}border-emerald-200 bg-emerald-50/60 dark:border-emerald-800/50 dark:bg-emerald-950/30{% else %}border-slate-200 dark:border-slate-700{% endif %}">
+      <i data-lucide="{% if card.completed %}check-circle-2{% else %}{{ card.mission.icon }}{% endif %}"
+         class="mt-0.5 h-4 w-4 shrink-0 {% if card.completed %}text-emerald-600 dark:text-emerald-400{% else %}text-slate-400 dark:text-slate-500{% endif %}"
+         stroke-width="2" aria-hidden="true"></i>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold {% if card.completed %}text-emerald-800 dark:text-emerald-300{% else %}text-slate-800 dark:text-slate-200{% endif %}">{{ card.mission.name }}</p>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ card.mission.description }}</p>
+        {% if not card.completed and card.target > 1 %}
+        <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+          <div class="h-full rounded-full bg-brand-500" style="width: {{ card.progress_percent }}%"></div>
+        </div>
+        <p class="mt-0.5 text-[11px] tabular-nums text-slate-400">{{ card.progress }}/{{ card.target }}</p>
+        {% endif %}
+      </div>
+      <span class="shrink-0 rounded-full bg-pop-500/10 px-2 py-0.5 text-[11px] font-semibold text-pop-600 dark:text-amber-300" title="{% trans 'Popularity points on completion' %}">+{{ card.mission.reward_points }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

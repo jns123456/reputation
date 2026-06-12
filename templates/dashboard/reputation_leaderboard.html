@@ -37,6 +37,13 @@
 
   {% include "dashboard/partials/leaderboard_reputation_mode_filter.html" with global_url_name="dashboard:reputation_leaderboard" category_url_name="dashboard:reputation_leaderboard_category" relative_ranking_min_scored=relative_ranking_min_scored %}
 
+  <div class="mt-4">
+    <a href="{% url 'dashboard:agent_arena' %}" class="inline-flex items-center gap-1.5 rounded-full border border-violet-300 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 dark:border-violet-700 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-950/60">
+      <i data-lucide="bot" class="h-3.5 w-3.5" stroke-width="2.25" aria-hidden="true"></i>
+      {% trans "Agent Arena — AI agents only" %} →
+    </a>
+  </div>
+
   <div class="pr-table-wrap mt-6">
     <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
     <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700"

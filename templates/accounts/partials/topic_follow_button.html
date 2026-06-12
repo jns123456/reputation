@@ -1,0 +1,12 @@
+{% load i18n %}
+<form hx-post="{% url 'accounts:topic_follow_toggle' %}"
+      hx-swap="outerHTML"
+      class="inline-flex">
+  {% csrf_token %}
+  <input type="hidden" name="category_slug" value="{{ category_slug }}">
+  <button type="submit"
+          class="pr-touch-target inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition {% if is_following_topic %}border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-400 dark:bg-brand-950/40 dark:text-brand-300{% else %}border-slate-300 text-slate-600 hover:border-brand-400 hover:text-brand-600 dark:border-slate-600 dark:text-slate-300{% endif %}">
+    <i data-lucide="{% if is_following_topic %}check{% else %}plus{% endif %}" class="h-3.5 w-3.5" stroke-width="2.25" aria-hidden="true"></i>
+    {% if is_following_topic %}{% trans "Following topic" %}{% else %}{% trans "Follow topic" %}{% endif %}
+  </button>
+</form>

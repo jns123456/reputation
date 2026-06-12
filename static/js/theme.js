@@ -9,15 +9,11 @@
     }
   }
 
-  function getSystemTheme() {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-
   function resolveTheme(stored) {
     if (stored === "dark" || stored === "light") {
       return stored;
     }
-    return getSystemTheme();
+    return "light";
   }
 
   function applyTheme(theme) {
@@ -52,9 +48,4 @@
     },
   };
 
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function (event) {
-    if (!getStoredTheme()) {
-      applyTheme(event.matches ? "dark" : "light");
-    }
-  });
 })();

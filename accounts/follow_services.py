@@ -40,6 +40,54 @@ def toggle_follow(*, follower, following_user):
     return True
 
 
+def toggle_topic_follow(*, user, category_slug):
+    """Follow/unfollow a canonical category. Returns True when now following."""
+    from markets.categories import get_category_for_slug
+
+    if get_category_for_slug(category_slug) is None:
+        raise ValidationError(_("Unknown topic."))
+
+    from accounts.models import TopicFollow
+
+    existing = TopicFollow.objects.filter(user=user, category_slug=category_slug).first()
+    if existing:
+        existing.delete()
+        _clear_affinity(user)
+        return False
+
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(action="follow", user=user)
+    TopicFollow.objects.create(user=user, category_slug=category_slug)
+    _clear_affinity(user)
+    return True
+
+
+def toggle_market_watch(*, user, market):
+    """Watch/unwatch a market. Returns True when now watching."""
+    from accounts.models import MarketWatch
+
+    existing = MarketWatch.objects.filter(user=user, market=market).first()
+    if existing:
+        existing.delete()
+        return False
+
+    from accounts.write_guard import guard_write_action
+
+    guard_write_action(action="follow", user=user)
+    MarketWatch.objects.create(user=user, market=market)
+    return True
+
+
+def _clear_affinity(user):
+    try:
+        from dashboard.personalization import clear_user_affinity_cache
+
+        clear_user_affinity_cache(user)
+    except Exception:
+        logger.exception("Failed clearing affinity cache for user=%s", user.pk)
+
+
 def ensure_mutual_follows_among_active_users(*, dry_run=False):
     """Create missing follow edges so every active user follows every other active user."""
     from django.contrib.auth import get_user_model

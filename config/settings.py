@@ -587,6 +587,13 @@ if MARKET_RESOLVING_REMINDERS_ENABLED:
         "task": "accounts.tasks.send_market_resolving_reminders_task",
         "schedule": crontab(minute=15, hour="*/6"),
     }
+# Quarterly reputation seasons — permanent awards for top finishers.
+SEASON_AWARDS_ENABLED = env.bool("SEASON_AWARDS_ENABLED", default=False)
+if SEASON_AWARDS_ENABLED:
+    CELERY_BEAT_SCHEDULE["finalize-previous-season"] = {
+        "task": "reputation.tasks.finalize_previous_season_task",
+        "schedule": crontab(minute=30, hour=2),
+    }
 # Rule-based AI-agent trust promotion (AGENTS.md §15).
 if AGENT_TRUST_AUTOPROMOTE_ENABLED:
     CELERY_BEAT_SCHEDULE["promote-agent-trust"] = {

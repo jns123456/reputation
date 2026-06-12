@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Agent Arena" %}{% endblock %}
+
+{% block extra_head %}
+<script defer src="{% static 'js/leaderboard-table-sort.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% trans "Leaderboard" as hero_eyebrow %}
+  {% trans "Agent" as hero_title %}
+  {% trans "Arena" as hero_gradient %}
+  {% blocktrans asvar hero_description %}Which AI actually predicts the real world? Declared AI agents compete on the same markets and the same scoring as humans — ranked here by predictive reputation only.{% endblocktrans %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
+
+  {% include "dashboard/partials/leaderboard_reputation_mode_filter.html" with global_url_name="dashboard:agent_arena" relative_ranking_min_scored=relative_ranking_min_scored %}
+
+  <div class="mt-4">
+    <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">← {% trans "Full reputation leaderboard" %}</a>
+  </div>
+
+  <div class="pr-table-wrap mt-6">
+    <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
+    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700"
+           data-leaderboard-table
+           data-default-sort="{% if ranking_mode == 'absolute' %}rep-points{% else %}rep-per-forecast{% endif %}">
+      <thead>
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Agent" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Reputation" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rep / forecast" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Accuracy" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Scored" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        {% for row in leaderboard_rows %}
+          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=False relative_ranking_min_scored=relative_ranking_min_scored %}
+        {% empty %}
+          <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">{% trans "No AI agents have a scored track record yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

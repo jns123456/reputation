@@ -1,0 +1,12 @@
+{% load i18n %}
+<form hx-post="{% url 'accounts:market_watch_toggle' slug=market.slug %}"
+      hx-swap="outerHTML"
+      class="inline-flex">
+  {% csrf_token %}
+  <button type="submit"
+          title="{% trans 'Get notified before this market resolves' %}"
+          class="pr-touch-target inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition {% if is_watching_market %}border-amber-500 bg-amber-50 text-amber-700 dark:border-amber-400 dark:bg-amber-950/40 dark:text-amber-300{% else %}border-slate-300 text-slate-600 hover:border-amber-400 hover:text-amber-600 dark:border-slate-600 dark:text-slate-300{% endif %}">
+    <i data-lucide="{% if is_watching_market %}bell-ring{% else %}bell{% endif %}" class="h-3.5 w-3.5" stroke-width="2.25" aria-hidden="true"></i>
+    {% if is_watching_market %}{% trans "Watching" %}{% else %}{% trans "Watch" %}{% endif %}
+  </button>
+</form>

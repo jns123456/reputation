@@ -26,7 +26,20 @@
     window.prompt(copyPrompt, url);
   };
 
+  function sendSharePing(button) {
+    var pingUrl = button.getAttribute("data-share-ping");
+    if (!pingUrl || button.dataset.sharePinged) return;
+    button.dataset.sharePinged = "1";
+
+    var headers = {};
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.content) headers["X-CSRFToken"] = meta.content;
+    fetch(pingUrl, { method: "POST", headers: headers, credentials: "same-origin" }).catch(function () {});
+  }
+
   window.shareForumPost = function (button) {
+    sendSharePing(button);
+
     if (window.openShareSheetFromButton) {
       window.openShareSheetFromButton(button);
       return;

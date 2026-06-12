@@ -188,11 +188,13 @@ def get_forecasts_feed(
     offset=0,
     sort="recent",
     following_ids=None,
+    user=None,
 ):
-    """Forecasts feed supporting recent / hot / following sorts.
+    """Forecasts feed supporting recent / hot / following / for_you sorts.
 
-    ``recent`` and ``following`` paginate by offset/limit; ``hot`` returns a
-    bounded, time-decayed snapshot (not paginated). Always returns a list.
+    ``recent`` and ``following`` paginate by offset/limit; ``hot`` and
+    ``for_you`` return a bounded, time-decayed snapshot (not paginated).
+    Always returns a list.
     """
     from dashboard.ranking import hot_score
 
@@ -229,7 +231,81 @@ def get_forecasts_feed(
         )
         return candidates[:limit]
 
+    if sort == "for_you":
+        from dashboard.personalization import personalize_feed
+
+        candidates = list(qs.order_by("-created_at")[:HOT_CANDIDATE_POOL])
+        return personalize_feed(
+            user=user,
+            candidates=candidates,
+            limit=limit,
+            get_author_id=lambda p: p.user_id,
+            get_category_slug=lambda p: p.market.canonical_category_slug,
+            get_market_id=lambda p: p.market_id,
+            get_points=lambda p: p.popularity_score,
+            get_created_at=lambda p: p.created_at,
+            get_engagement=lambda p: p.comment_count,
+        )
+
     return list(qs.order_by("-created_at")[offset : offset + limit])
+
+
+CALIBRATION_BUCKETS = ((0, 20), (20, 40), (40, 60), (60, 80), (80, 100))
+CALIBRATION_MAX_SAMPLE = 500
+
+
+def get_user_calibration(user):
+    """Accuracy by entry-probability bucket for resolved forecasts.
+
+    Shows whether a forecaster's hit rate matches the market-implied odds they
+    entered at (display-only — never feeds scoring). Returns a list of bucket
+    dicts ordered low→high probability.
+    """
+    from reputation.services import get_predicted_outcome_probability
+
+    predictions = Prediction.objects.filter(
+        user=user,
+        status=Prediction.Status.RESOLVED,
+        is_correct__isnull=False,
+    ).order_by("-resolved_at")[:CALIBRATION_MAX_SAMPLE]
+
+    counts = {bucket: [0, 0] for bucket in CALIBRATION_BUCKETS}  # bucket -> [total, correct]
+    for prediction in predictions:
+        snapshot = prediction.probability_at_prediction_time or {}
+        if not snapshot:
+            continue
+        try:
+            entry_percent = (
+                get_predicted_outcome_probability(
+                    prediction.predicted_outcome,
+                    snapshot,
+                    predicted_direction=prediction.predicted_direction,
+                )
+                * 100
+            )
+        except Exception:
+            continue
+        for low, high in CALIBRATION_BUCKETS:
+            if low <= entry_percent < high or (high == 100 and entry_percent == 100):
+                counts[(low, high)][0] += 1
+                if prediction.is_correct:
+                    counts[(low, high)][1] += 1
+                break
+
+    rows = []
+    for low, high in CALIBRATION_BUCKETS:
+        total, correct = counts[(low, high)]
+        rows.append(
+            {
+                "low": low,
+                "high": high,
+                "total": total,
+                "correct": correct,
+                "accuracy_pct": round(correct * 100 / total) if total else None,
+                "midpoint": (low + high) // 2,
+            }
+        )
+    return rows
 
 
 def get_forecasts_market_options():

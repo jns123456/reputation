@@ -79,6 +79,62 @@ def follow_toggle(request):
     return redirect("accounts:profile", username=target_user.username)
 
 
+@require_POST
+def topic_follow_toggle(request):
+    """Follow/unfollow a canonical market category (HTMX-friendly)."""
+    if not request.user.is_authenticated:
+        login_url = f"{reverse('accounts:login')}?{urlencode({'next': request.POST.get('next', '/')})}"
+        return redirect_response(request, login_url)
+
+    category_slug = request.POST.get("category_slug", "").strip()
+    if not category_slug:
+        return HttpResponseBadRequest(_("Missing topic"))
+
+    from accounts.follow_services import toggle_topic_follow
+
+    try:
+        is_following_now = toggle_topic_follow(user=request.user, category_slug=category_slug)
+    except ValidationError as exc:
+        return HttpResponseBadRequest(str(exc))
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "accounts/partials/topic_follow_button.html",
+            {"category_slug": category_slug, "is_following_topic": is_following_now},
+        )
+    return redirect(request.POST.get("next") or "markets:list")
+
+
+@require_POST
+def market_watch_toggle(request, slug):
+    """Watch/unwatch a market (HTMX-friendly)."""
+    if not request.user.is_authenticated:
+        login_url = f"{reverse('accounts:login')}?{urlencode({'next': reverse('markets:detail', kwargs={'slug': slug})})}"
+        return redirect_response(request, login_url)
+
+    from markets.models import Market
+
+    market = get_object_or_404(Market, slug=slug)
+
+    from accounts.follow_services import toggle_market_watch
+
+    try:
+        is_watching_now = toggle_market_watch(user=request.user, market=market)
+    except abuse_services.RateLimitExceeded as exc:
+        return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "accounts/partials/market_watch_button.html",
+            {"market": market, "is_watching_market": is_watching_now},
+        )
+    return redirect("markets:detail", slug=market.slug)
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def alert_settings(request):

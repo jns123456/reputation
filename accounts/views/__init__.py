@@ -41,6 +41,8 @@ __all__ = [
     "creator_subscribe",
     "creator_unsubscribe",
     "follow_toggle",
+    "topic_follow_toggle",
+    "market_watch_toggle",
     "alert_settings",
     "notifications_list",
     "notifications_dropdown",

@@ -251,16 +251,17 @@ def notify_market_resolving(*, market):
     Respects each user's ``notify_market_resolving`` preference. The reminder is
     a popularity-neutral nudge — it never touches reputation (AGENTS.md §6).
     """
+    from accounts.models import MarketWatch
     from predictions.models import Prediction
 
-    recipient_ids = list(
-        Prediction.objects.filter(
-            market=market,
-            status=Prediction.Status.PENDING,
-        )
-        .values_list("user_id", flat=True)
-        .distinct()
+    forecaster_ids = Prediction.objects.filter(
+        market=market,
+        status=Prediction.Status.PENDING,
+    ).values_list("user_id", flat=True)
+    watcher_ids = MarketWatch.objects.filter(market=market).values_list(
+        "user_id", flat=True
     )
+    recipient_ids = list(set(forecaster_ids) | set(watcher_ids))
     if not recipient_ids:
         return []
 

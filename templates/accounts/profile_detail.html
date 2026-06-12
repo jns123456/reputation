@@ -133,6 +133,54 @@
   </section>
   {% endif %}
 
+  {% if season_awards %}
+  <section class="mt-10">
+    <h2 class="pr-section-title">{% trans "Season awards" %}</h2>
+    <p class="pr-section-desc">{% trans "Permanent badges for top finishes in quarterly reputation seasons." %}</p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {% for award in season_awards %}
+      <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+            title="{% blocktrans with points=award.reputation_points count_n=award.scored_forecast_count %}{{ points }} reputation over {{ count_n }} scored forecasts{% endblocktrans %}">
+        <i data-lucide="trophy" class="h-3.5 w-3.5" stroke-width="2.25" aria-hidden="true"></i>
+        {% blocktrans with rank=award.rank season=award.season %}#{{ rank }} · Season {{ season }}{% endblocktrans %}
+      </span>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if has_calibration_data %}
+  <section class="mt-10">
+    <h2 class="pr-section-title">{% trans "Calibration" %}</h2>
+    <p class="pr-section-desc">{% trans "Hit rate by market-implied entry probability. A well-calibrated forecaster lands near the diagonal — winning ~30% of 30% calls and ~90% of 90% calls." %}</p>
+    <div class="pr-panel mt-4 p-5">
+      <div class="grid grid-cols-5 gap-3">
+        {% for row in calibration %}
+        <div class="flex flex-col items-center gap-1.5">
+          <div class="flex h-32 w-full items-end justify-center gap-1 rounded-lg bg-slate-50 px-1.5 pb-0 dark:bg-slate-800/60">
+            <div class="w-3 rounded-t bg-slate-300 dark:bg-slate-600" style="height: {{ row.midpoint }}%" title="{% trans 'Market-implied' %}: {{ row.midpoint }}%"></div>
+            {% if row.accuracy_pct is not None %}
+            <div class="w-3 rounded-t bg-rep-500" style="height: {{ row.accuracy_pct }}%" title="{% trans 'Actual accuracy' %}: {{ row.accuracy_pct }}%"></div>
+            {% else %}
+            <div class="w-3 rounded-t bg-slate-200 dark:bg-slate-700" style="height: 2%"></div>
+            {% endif %}
+          </div>
+          <p class="text-[11px] font-medium tabular-nums text-slate-500 dark:text-slate-400">{{ row.low }}–{{ row.high }}%</p>
+          <p class="text-[11px] tabular-nums {% if row.accuracy_pct is not None %}font-semibold text-rep-600{% else %}text-slate-400{% endif %}">
+            {% if row.accuracy_pct is not None %}{{ row.accuracy_pct }}%{% else %}—{% endif %}
+            <span class="text-slate-400 dark:text-slate-500">({{ row.total }})</span>
+          </p>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="mt-4 flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-slate-300 dark:bg-slate-600"></span>{% trans "Market-implied" %}</span>
+        <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-rep-500"></span>{% trans "Actual accuracy" %}</span>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   <section class="mt-10">
     <h2 class="pr-section-title">{% trans "Expertise by category" %}</h2>
     <p class="pr-section-desc">{% trans "Reputation and popularity broken down by topic — spot specialists in crypto, politics, sports, and more." %}</p>

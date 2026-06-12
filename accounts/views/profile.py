@@ -218,12 +218,20 @@ def profile_detail(request, username):
         if unlocked
     ]
     unlocked_count = sum(1 for _achievement, _at, unlocked, _count in achievements if unlocked)
+    from predictions.selectors import get_user_calibration
+    from reputation.season_services import get_user_season_awards
     from reputation.services import calculate_user_unrealized_reputation
+
+    calibration = get_user_calibration(user)
+    has_calibration_data = any(row["total"] for row in calibration)
 
     return render(
         request,
         "accounts/profile_detail.html",
         {
+            "calibration": calibration,
+            "has_calibration_data": has_calibration_data,
+            "season_awards": get_user_season_awards(user),
             "profile_user": user,
             "predictions": predictions,
             "prediction_summary": prediction_summary,

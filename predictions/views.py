@@ -215,6 +215,60 @@ def open_predictions(request):
     )
 
 
+def prediction_detail(request, prediction_id):
+    """Public, shareable forecast card page (works logged-out for virality)."""
+    prediction = get_object_or_404(
+        Prediction.objects.select_related("user", "user__profile", "market"),
+        pk=prediction_id,
+    )
+    metrics = build_forecast_card_metrics(prediction)
+    return render(
+        request,
+        "predictions/prediction_detail.html",
+        {
+            "prediction": prediction,
+            "market": prediction.market,
+            "metrics": metrics,
+            "share_url": request.build_absolute_uri(
+                reverse("prediction_card", args=[prediction.id])
+            ),
+        },
+    )
+
+
+def prediction_og_image(request, prediction_id):
+    """PNG share image for the forecast card (Open Graph / link previews)."""
+    from django.http import HttpResponse
+
+    from predictions.og_images import get_prediction_og_image
+
+    prediction = get_object_or_404(
+        Prediction.objects.select_related("user", "market"),
+        pk=prediction_id,
+    )
+    metrics = build_forecast_card_metrics(prediction)
+    png_bytes = get_prediction_og_image(prediction, metrics)
+    response = HttpResponse(png_bytes, content_type="image/png")
+    response["Cache-Control"] = "public, max-age=3600"
+    return response
+
+
+@require_POST
+def prediction_share(request, prediction_id):
+    """Record a share click (popularity only, deduped + capped in the service)."""
+    from django.http import JsonResponse
+
+    from reputation.popularity_services import record_prediction_share
+
+    prediction = get_object_or_404(
+        Prediction.objects.select_related("user", "user__profile"),
+        pk=prediction_id,
+    )
+    viewer = request.user if request.user.is_authenticated else None
+    event = record_prediction_share(prediction=prediction, viewer=viewer)
+    return JsonResponse({"recorded": event is not None})
+
+
 def prediction_history(request, username):
     from accounts.models import User
 

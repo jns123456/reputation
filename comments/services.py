@@ -29,6 +29,10 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
     if prediction and prediction.market_id != market.id:
         raise ValueError(_("Prediction belongs to a different market."))
 
+    from markets.live_rooms import enforce_live_slow_mode
+
+    enforce_live_slow_mode(user=user, market=market)
+
     _assert_can_comment_on_prediction(
         user=user,
         prediction=prediction,
@@ -76,6 +80,10 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
         exclude_user_ids=reply_recipient_ids,
     )
     record_activity(user)
+
+    from accounts.mission_services import ACTION_COMMENT, record_mission_action
+
+    record_mission_action(user, ACTION_COMMENT)
     return comment
 
 
@@ -151,6 +159,11 @@ def cast_vote(*, user, target_type, target_id, value):
     from accounts.streak_services import record_activity
 
     record_activity(user)
+
+    if created:
+        from accounts.mission_services import ACTION_VOTE, record_mission_action
+
+        record_mission_action(user, ACTION_VOTE)
     return vote
 
 

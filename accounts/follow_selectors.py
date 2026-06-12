@@ -1,6 +1,30 @@
 """User follow read queries."""
 
-from accounts.models import UserFollow
+from accounts.models import MarketWatch, TopicFollow, UserFollow
+
+
+def get_followed_topic_slugs(user):
+    if not user or not user.is_authenticated:
+        return []
+    return list(TopicFollow.objects.filter(user=user).values_list("category_slug", flat=True))
+
+
+def is_following_topic(*, user, category_slug):
+    if not user or not user.is_authenticated:
+        return False
+    return TopicFollow.objects.filter(user=user, category_slug=category_slug).exists()
+
+
+def get_watched_market_ids(user):
+    if not user or not user.is_authenticated:
+        return []
+    return list(MarketWatch.objects.filter(user=user).values_list("market_id", flat=True))
+
+
+def is_watching_market(*, user, market):
+    if not user or not user.is_authenticated:
+        return False
+    return MarketWatch.objects.filter(user=user, market=market).exists()
 
 
 def is_following(*, follower, following_user):

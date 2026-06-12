@@ -10,19 +10,22 @@ from predictions.services import build_forecast_card_metrics
 from reputation.services import calculate_reputation_stakes
 
 FORECASTS_FEED_PAGE_SIZE = 20
-VALID_FORECAST_SORTS = ("recent", "hot", "following")
+VALID_FORECAST_SORTS = ("for_you", "recent", "hot", "following")
 
 
 def build_forecasts_feed(*, user, market_slug=None, sort="recent", page=1, page_size=FORECASTS_FEED_PAGE_SIZE):
     """Return ``(items, has_more)`` for the requested feed page.
 
-    ``hot`` is a single bounded snapshot (never has_more). ``following`` is only
-    meaningful for an authenticated user; anonymous users get an empty result.
+    ``hot`` and ``for_you`` are single bounded snapshots (never has_more).
+    ``following`` and ``for_you`` are only meaningful for an authenticated
+    user; anonymous users fall back to empty / hot respectively.
     """
     if sort not in VALID_FORECAST_SORTS:
         sort = "recent"
     if sort == "following" and not (user and user.is_authenticated):
         return [], False
+    if sort == "for_you" and not (user and user.is_authenticated):
+        sort = "hot"
 
     page = max(1, page)
     following_ids = None
@@ -31,9 +34,14 @@ def build_forecasts_feed(*, user, market_slug=None, sort="recent", page=1, page_
         if not following_ids:
             return [], False
 
-    if sort == "hot":
+    if sort in ("hot", "for_you"):
         predictions = list(
-            get_forecasts_feed(market_slug=market_slug, limit=page_size, sort="hot")
+            get_forecasts_feed(
+                market_slug=market_slug,
+                limit=page_size,
+                sort=sort,
+                user=user,
+            )
         )
         has_more = False
     else:

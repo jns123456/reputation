@@ -430,6 +430,54 @@ class UserFollow(models.Model):
             raise ValidationError(_("Users cannot follow themselves."))
 
 
+class TopicFollow(models.Model):
+    """A user following a canonical market category (topic).
+
+    Powers For You personalization and topic-scoped discovery. Slugs come from
+    ``markets.categories.CANONICAL_CATEGORIES`` — never raw Polymarket tags.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="topic_follows",
+    )
+    category_slug = models.SlugField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "category_slug")]
+        indexes = [models.Index(fields=["user"])]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} follows topic {self.category_slug}"
+
+
+class MarketWatch(models.Model):
+    """A user watching a specific market (resolution reminders + feed boost)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="market_watches",
+    )
+    market = models.ForeignKey(
+        "markets.Market",
+        on_delete=models.CASCADE,
+        related_name="watchers",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "market")]
+        indexes = [models.Index(fields=["user"]), models.Index(fields=["market"])]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} watches {self.market.slug}"
+
+
 class ActivityStreak(models.Model):
     """Consecutive-day engagement streak for a user.
 
@@ -460,6 +508,10 @@ class ActivityStreak(models.Model):
     streak_30_completions = models.PositiveIntegerField(
         default=0,
         help_text="Times the user reached a 30-day streak milestone (stackable Unstoppable).",
+    )
+    freeze_tokens = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Streak freezes available; one is consumed automatically when exactly one day is missed.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -528,6 +580,37 @@ class UserAchievement(models.Model):
 
     def __str__(self):
         return f"{self.user.username} unlocked {self.code}"
+
+
+class UserMission(models.Model):
+    """Daily mission progress for a user.
+
+    The mission catalog lives in code (``accounts.mission_services``); this
+    table tracks per-day progress. Completing a mission awards a small, capped
+    POPULARITY bonus and never touches predictive reputation (AGENTS.md §6).
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="missions",
+    )
+    code = models.CharField(max_length=50)
+    period_date = models.DateField()
+    progress = models.PositiveIntegerField(default=0)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [("user", "code", "period_date")]
+        indexes = [
+            models.Index(fields=["user", "period_date"]),
+        ]
+        ordering = ["-period_date"]
+
+    def __str__(self):
+        return f"{self.user.username} mission {self.code} ({self.period_date})"
 
 
 class PushSubscription(models.Model):

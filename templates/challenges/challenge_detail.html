@@ -90,6 +90,27 @@
 </div>
 {% endif %}
 
+{% if duel_opponent and head_to_head and head_to_head.total %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 dark:border-brand-800 dark:bg-brand-950/30">
+  <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+    {% blocktrans with name=duel_opponent.public_name wins=head_to_head.wins losses=head_to_head.losses ties=head_to_head.ties %}Head to head vs {{ name }}: {{ wins }}W · {{ losses }}L · {{ ties }}T{% endblocktrans %}
+  </p>
+  {% if challenge.status == 'completed' %}
+  <a href="{% url 'challenges:create' %}?rematch={{ challenge.pk }}"
+     class="pr-touch-target inline-flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
+    <i data-lucide="swords" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+    {% trans "Rematch" %}
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if is_spectator %}
+<div class="mb-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+  {% trans "You are spectating this challenge — only participants can forecast for the leaderboard." %}
+</div>
+{% endif %}
+
 {% include "challenges/partials/challenge_leaderboard.html" %}
 
 <div class="space-y-8">

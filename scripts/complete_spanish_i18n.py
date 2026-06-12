@@ -20,6 +20,7 @@ from phase2_i18n_fixes import (
     PHASE2_PLURAL_FIXES,
 )
 from phase3_i18n_fixes import PHASE3_FIXES, PHASE3_PLURAL_FIXES
+from growth_i18n_fixes import GROWTH_I18N_FIXES
 from monetize_i18n_fixes import MONETIZE_I18N_FIXES
 from proof_i18n_fixes import (
     PROOF_I18N_BLOCK_FIXES,
@@ -37,6 +38,7 @@ FIXES: dict[str, str] = {
     **ACHIEVEMENTS_I18N_FIXES,
     **PROOF_I18N_FIXES,
     **MONETIZE_I18N_FIXES,
+    **GROWTH_I18N_FIXES,
 }
 PLURAL_FIXES: dict[str, tuple[str, str]] = {
     **PHASE1_PLURAL_FIXES,

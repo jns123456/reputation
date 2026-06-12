@@ -330,6 +330,58 @@ def get_challenge_for_user(*, challenge_id, user):
     )
 
 
+def get_challenge_for_spectator(challenge_id):
+    """Read-only fetch for non-participants (public spectating).
+
+    Only started or finished challenges are spectatable — pending invitations
+    stay private to the invited users.
+    """
+    return (
+        Challenge.objects.filter(
+            pk=challenge_id,
+            status__in=[Challenge.Status.ACTIVE, Challenge.Status.COMPLETED],
+        )
+        .select_related("creator", "winner", "challenge_group")
+        .prefetch_related("challenge_markets__market", "participants__user__profile")
+        .first()
+    )
+
+
+def get_head_to_head_record(*, user, opponent):
+    """Completed 1v1 duel record between two users.
+
+    Returns ``{"wins": int, "losses": int, "ties": int, "total": int}`` from
+    ``user``'s perspective. Only counts completed challenges where exactly the
+    two users were accepted participants.
+    """
+    from django.db.models import Count
+
+    duel_ids = (
+        ChallengeParticipant.objects.filter(
+            status=ChallengeParticipant.Status.ACCEPTED,
+            challenge__status=Challenge.Status.COMPLETED,
+        )
+        .values("challenge_id")
+        .annotate(
+            accepted_count=Count("id"),
+            has_user=Count("id", filter=Q(user=user)),
+            has_opponent=Count("id", filter=Q(user=opponent)),
+        )
+        .filter(accepted_count=2, has_user=1, has_opponent=1)
+        .values_list("challenge_id", flat=True)
+    )
+    duels = Challenge.objects.filter(pk__in=list(duel_ids))
+    wins = losses = ties = 0
+    for challenge in duels:
+        if challenge.winner_id == user.id:
+            wins += 1
+        elif challenge.winner_id == opponent.id:
+            losses += 1
+        else:
+            ties += 1
+    return {"wins": wins, "losses": losses, "ties": ties, "total": wins + losses + ties}
+
+
 def get_user_participation(*, challenge, user):
     return ChallengeParticipant.objects.filter(challenge=challenge, user=user).first()
 

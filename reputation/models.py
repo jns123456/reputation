@@ -41,6 +41,40 @@ class ReputationEvent(models.Model):
         return f"{self.event_type}: {self.points_delta} for {self.user.username}"
 
 
+class SeasonAward(models.Model):
+    """Permanent badge for a top finish in a quarterly reputation season.
+
+    Awards are append-only social proof derived from immutable
+    ``ReputationEvent`` history — they never alter scoring. ``category_slug``
+    is blank for the global season board.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="season_awards",
+    )
+    season = models.CharField(max_length=10)  # e.g. "2026-Q2"
+    category_slug = models.SlugField(max_length=100, blank=True, default="")
+    rank = models.PositiveSmallIntegerField()
+    reputation_points = models.IntegerField(default=0)
+    reputation_score = models.FloatField(default=0)
+    scored_forecast_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "season", "category_slug")]
+        indexes = [
+            models.Index(fields=["season", "category_slug", "rank"]),
+            models.Index(fields=["user", "-created_at"]),
+        ]
+        ordering = ["season", "category_slug", "rank"]
+
+    def __str__(self):
+        scope = self.category_slug or "global"
+        return f"{self.user.username} #{self.rank} {scope} {self.season}"
+
+
 class PopularityEvent(models.Model):
     class EventType(models.TextChoices):
         UPVOTE_RECEIVED = "upvote_received", "Upvote received"
@@ -50,6 +84,8 @@ class PopularityEvent(models.Model):
         POST_PUBLISHED = "post_published", "Post published"
         REPOST_RECEIVED = "repost_received", "Repost received"
         STREAK_MILESTONE = "streak_milestone", "Activity streak milestone"
+        SHARE_RECEIVED = "share_received", "Share received"
+        MISSION_COMPLETED = "mission_completed", "Mission completed"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

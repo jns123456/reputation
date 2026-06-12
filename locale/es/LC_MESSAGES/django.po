@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-11 16:42+0000\n"
+"POT-Creation-Date: 2026-06-12 06:03+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -23,15 +23,12 @@ msgstr ""
 msgid "Add an email address to your profile first."
 msgstr "Añade primero un email a tu perfil."
 
-#| msgid "Please wait a minute before requesting another email."
 msgid "Please wait a minute before requesting another code."
 msgstr "Espera un minuto antes de solicitar otro código."
 
-#| msgid "Confirm your email on PredictStamp"
 msgid "Confirm your PredictStamp account deletion"
 msgstr "Confirma la eliminación de tu cuenta de PredictStamp"
 
-#| msgid "Could not send the verification email."
 msgid "We couldn't send the confirmation email. Try again later."
 msgstr "No pudimos enviar el email de confirmación. Inténtalo más tarde."
 
@@ -263,13 +260,15 @@ msgstr "Tu dirección de email está confirmada."
 msgid "Users cannot follow themselves."
 msgstr "No puedes seguirte a ti mismo."
 
+msgid "Unknown topic."
+msgstr "Tema desconocido."
+
 msgid "Enter a valid email address."
 msgstr "Introduce una dirección de email válida."
 
 msgid "An account with this email already exists. Try signing in instead."
 msgstr "Ya existe una cuenta con este email. Prueba iniciar sesión."
 
-#| msgid "Your PredictStamp digest"
 msgid "Reset your PredictStamp password"
 msgstr "Restablece tu contraseña de PredictStamp"
 
@@ -368,7 +367,6 @@ msgstr "Contraseña"
 msgid "Enter your current password to confirm."
 msgstr "Introduce tu contraseña actual para confirmar."
 
-#| msgid "Email notifications"
 msgid "Email confirmation code"
 msgstr "Código de confirmación por email"
 
@@ -473,6 +471,36 @@ msgid "Send alerts to your email address (when email is configured)."
 msgstr ""
 "Envíe alertas a su dirección de correo electrónico (cuando el correo "
 "electrónico esté configurado)."
+
+#| msgid "Place a forecast"
+msgid "Make a forecast"
+msgstr "Haz un pronóstico"
+
+#| msgid "to place your forecast on this market."
+msgid "Place one forecast on any open market today."
+msgstr "Publica un pronóstico en cualquier mercado abierto hoy."
+
+msgid "Defend a thesis"
+msgstr "Defiende una tesis"
+
+#| msgid "Publish formal forecasts with your reasoning."
+msgid "Publish a forecast with written reasoning (100+ characters)."
+msgstr "Publica un pronóstico con razonamiento escrito (100+ caracteres)."
+
+#| msgid "Discussion"
+msgid "Join a discussion"
+msgstr "Únete a una conversación"
+
+#| msgid "Parent comment belongs to a different forecast thread."
+msgid "Post a comment in any forecast thread."
+msgstr "Publica un comentario en cualquier hilo de pronósticos."
+
+#| msgid "Create one free"
+msgid "Curate the feed"
+msgstr "Cura el feed"
+
+msgid "Vote on three forecasts or comments you find insightful."
+msgstr "Vota tres pronósticos o comentarios que te parezcan valiosos."
 
 msgid "Anonymous"
 msgstr "Anónimo"
@@ -599,7 +627,6 @@ msgstr ""
 "Demasiados intentos de inicio de sesión. Espera unos minutos e inténtalo de "
 "nuevo."
 
-#| msgid "Too many attempts. Please wait a few minutes and try again."
 msgid "Too many reset requests. Please wait a while and try again."
 msgstr ""
 "Demasiadas solicitudes de restablecimiento. Espera un momento y vuelve a "
@@ -704,6 +731,10 @@ msgstr ""
 #, python-format
 msgid "You unfollowed %(name)s."
 msgstr "Todos los %(name)s"
+
+#| msgid "Missing creator."
+msgid "Missing topic"
+msgstr "Falta el tema"
 
 msgid "Alert preferences saved."
 msgstr "Preferencias de alerta guardadas."
@@ -1063,6 +1094,12 @@ msgstr "Próximas 72h"
 msgid "Next week"
 msgstr "Próxima semana"
 
+msgid ""
+"Slow mode is on for this live event — wait a few seconds between comments."
+msgstr ""
+"El modo lento está activado para este evento en vivo — espera unos segundos "
+"entre comentarios."
+
 msgid "Yes"
 msgstr "Sí"
 
@@ -1327,7 +1364,6 @@ msgstr "Reputación, popularidad, rachas y logros"
 msgid "Notifications, bookmarks, follows, and alert preferences"
 msgstr "Notificaciones, guardados, seguidores y preferencias de alertas"
 
-#| msgid "Email address"
 msgid "Email me a code"
 msgstr "Enviarme un código"
 
@@ -1535,7 +1571,6 @@ msgstr "o"
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#| msgid "Incorrect password."
 msgid "Forgot your password?"
 msgstr "¿Olvidaste tu contraseña?"
 
@@ -1758,6 +1793,18 @@ msgstr "Descartar alertas"
 msgid "View all notifications"
 msgstr "Notificaciones"
 
+#| msgid "Complete unmodified Polymarket market response"
+msgid "Get notified before this market resolves"
+msgstr "Recibe un aviso antes de que este mercado se resuelva"
+
+#| msgid "We batch"
+msgid "Watching"
+msgstr "Siguiendo"
+
+#| msgid "Batch"
+msgid "Watch"
+msgstr "Seguir"
+
 #, python-format
 msgid "%(time)s ago"
 msgstr "hace %(time)s"
@@ -1848,6 +1895,14 @@ msgstr ""
 msgid "Log in to subscribe"
 msgstr "Inicia sesión para suscribirte"
 
+#| msgid "Following"
+msgid "Following topic"
+msgstr "Siguiendo tema"
+
+#| msgid "Follow top predictors"
+msgid "Follow topic"
+msgstr "Seguir tema"
+
 msgid "Verified account"
 msgstr "Cuenta verificada"
 
@@ -1883,19 +1938,15 @@ msgstr "pop"
 msgid "Top matches"
 msgstr "partido abierto"
 
-#| msgid "Password"
 msgid "Password updated"
 msgstr "Contraseña actualizada"
 
-#| msgid "Account type"
 msgid "Account recovery"
 msgstr "Recuperación de cuenta"
 
-#| msgid "You're in"
 msgid "You're all"
 msgstr "Ya estás"
 
-#| msgid "Inspect"
 msgid "set"
 msgstr "listo"
 
@@ -1909,34 +1960,27 @@ msgstr "Tu nueva contraseña está activa. Ya puedes iniciar sesión."
 msgid "Choose a new password"
 msgstr "Elige una nueva contraseña"
 
-#| msgid "Choose how you"
 msgid "Choose a new"
 msgstr "Elige una nueva"
 
-#| msgid "Password"
 msgid "password"
 msgstr "Contraseña"
 
 msgid "Pick a strong password you haven't used elsewhere."
 msgstr "Elige una contraseña fuerte que no hayas usado en otro sitio."
 
-#| msgid "Incorrect password."
 msgid "Set new password"
 msgstr "Definir nueva contraseña"
 
-#| msgid "Password"
 msgid "New password"
 msgstr "Nueva contraseña"
 
-#| msgid "Incorrect password."
 msgid "Confirm new password"
 msgstr "Confirmar nueva contraseña"
 
-#| msgid "Incorrect password."
 msgid "Save new password"
 msgstr "Guardar nueva contraseña"
 
-#| msgid "This verification link has expired. Request a new one."
 msgid ""
 "This reset link is invalid or has already been used. Request a new one "
 "below."
@@ -1945,29 +1989,23 @@ msgstr "Este enlace es inválido o ya fue usado. Solicita uno nuevo abajo."
 msgid "Request a new link"
 msgstr "Solicitar un nuevo enlace"
 
-#| msgid "Back to profile"
 msgid "Back to login"
 msgstr "Volver al inicio de sesión"
 
-#| msgid "Check your inbox"
 msgid "Check your email"
 msgstr "Revisa tu email"
 
-#| msgid "Check your inbox"
 msgid "Check your"
 msgstr "Revisa tu"
 
 msgid "inbox"
 msgstr "bandeja de entrada"
 
-#| msgid ""
-#| "An account with this email already exists. Try signing in instead."
 msgid "If an account exists with that email, a reset link is on its way."
 msgstr ""
 "Si existe una cuenta con ese email, el enlace de restablecimiento está en "
 "camino."
 
-#| msgid "Email"
 msgid "Email sent"
 msgstr "Email enviado"
 
@@ -1983,14 +2021,12 @@ msgid "Didn't get it? Check your spam folder or try again in a few minutes."
 msgstr ""
 "¿No llegó? Revisa tu carpeta de spam o vuelve a intentarlo en unos minutos."
 
-#| msgid "Incorrect password."
 msgid "Reset password"
 msgstr "Restablecer contraseña"
 
 msgid "Forgot your"
 msgstr "¿Olvidaste tu"
 
-#| msgid "Password"
 msgid "password?"
 msgstr "contraseña?"
 
@@ -2144,6 +2180,44 @@ msgid ""
 msgstr ""
 "Hitos conseguidos con pronósticos, aciertos, popularidad, rachas y desafíos "
 "ganados."
+
+msgid "Season awards"
+msgstr "Premios de temporada"
+
+msgid "Permanent badges for top finishes in quarterly reputation seasons."
+msgstr ""
+"Insignias permanentes por los mejores puestos en las temporadas trimestrales"
+" de reputación."
+
+#, python-format
+#| msgid "Total reputation points from all scored forecasts."
+msgid "%(points)s reputation over %(count_n)s scored forecasts"
+msgstr "%(points)s de reputación en %(count_n)s pronósticos puntuados"
+
+#, python-format
+msgid "#%(rank)s · Season %(season)s"
+msgstr "#%(rank)s · Temporada %(season)s"
+
+msgid "Calibration"
+msgstr "Calibración"
+
+#, python-format
+msgid ""
+"Hit rate by market-implied entry probability. A well-calibrated forecaster "
+"lands near the diagonal — winning ~30%% of 30%% calls and ~90%% of 90%% "
+"calls."
+msgstr ""
+"Tasa de acierto según la probabilidad de entrada implícita del mercado. Un "
+"pronosticador bien calibrado queda cerca de la diagonal: acierta ~30%% de "
+"sus apuestas al 30%% y ~90%% de las del 90%%."
+
+#| msgid "Market"
+msgid "Market-implied"
+msgstr "Implícita del mercado"
+
+#| msgid "Accuracy"
+msgid "Actual accuracy"
+msgstr "Precisión real"
 
 msgid "Expertise by category"
 msgstr "Explorar por categoría"
@@ -3074,6 +3148,22 @@ msgstr ""
 
 msgid "Tie — no winner"
 msgstr "Empate — sin ganador"
+
+#, python-format
+msgid "Head to head vs %(name)s: %(wins)sW · %(losses)sL · %(ties)sT"
+msgstr "Cara a cara vs %(name)s: %(wins)sG · %(losses)sP · %(ties)sE"
+
+#| msgid "open match"
+#| msgid_plural "open matches"
+msgid "Rematch"
+msgstr "Revancha"
+
+msgid ""
+"You are spectating this challenge — only participants can forecast for the "
+"leaderboard."
+msgstr ""
+"Estás viendo este desafío como espectador — solo los participantes puntúan "
+"en la tabla."
 
 #, python-format
 msgid "Events (%(count)s)"
@@ -4242,9 +4332,6 @@ msgstr "Rendimiento por tema y en el tiempo"
 msgid "Open to anyone — judgment is the entry fee"
 msgstr "Abierto a todos — el criterio es la entrada"
 
-msgid "Calibration"
-msgstr "Calibración"
-
 msgid "Early conviction"
 msgstr "Convicción temprana"
 
@@ -4298,6 +4385,39 @@ msgstr "Mercados de predicción"
 
 msgid "Sin predicciones todavía."
 msgstr "Aún no hay clasificaciones."
+
+#| msgid "Agent operator"
+msgid "Agent Arena"
+msgstr "Arena de Agentes"
+
+#| msgid "AI Agent"
+msgid "Agent"
+msgstr "Agente"
+
+msgid "Arena"
+msgstr "Arena"
+
+msgid ""
+"Which AI actually predicts the real world? Declared AI agents compete on the"
+" same markets and the same scoring as humans — ranked here by predictive "
+"reputation only."
+msgstr ""
+"¿Qué IA predice realmente el mundo real? Los agentes de IA declarados "
+"compiten en los mismos mercados y con la misma puntuación que los humanos — "
+"clasificados aquí solo por reputación predictiva."
+
+#| msgid "Reputation Leaderboard"
+msgid "Full reputation leaderboard"
+msgstr "Tabla completa de reputación"
+
+msgid "Scored"
+msgstr "Puntuados"
+
+msgid "Correct"
+msgstr "Correcto"
+
+msgid "No AI agents have a scored track record yet."
+msgstr "Ningún agente de IA tiene todavía un historial puntuado."
 
 #, python-format
 msgid "Forecasts in %(area)s · %(category_name)s"
@@ -4636,6 +4756,10 @@ msgstr "Tus pronósticos abiertos"
 msgid "Feed sort"
 msgstr "Orden del feed"
 
+#| msgid "Forgot your"
+msgid "For you"
+msgstr "Para ti"
+
 msgid "Recent"
 msgstr "Recientes"
 
@@ -4681,9 +4805,6 @@ msgstr "Pronósticos abiertos"
 
 msgid "Forecast:"
 msgstr "Pronóstico:"
-
-msgid "Correct"
-msgstr "Correcto"
 
 msgid "Incorrect"
 msgstr "Incorrecto"
@@ -4801,6 +4922,13 @@ msgstr ""
 "Nada en PredictStamp es asesoramiento financiero, de inversión, legal, "
 "fiscal o profesional."
 
+msgid "Daily missions"
+msgstr "Misiones diarias"
+
+#| msgid "Popularity Points"
+msgid "Popularity points on completion"
+msgstr "Puntos de popularidad al completar"
+
 msgid "Remove bookmark"
 msgstr "Quitar marcador"
 
@@ -4901,6 +5029,14 @@ msgstr "Ranking relativo"
 
 msgid "Absolute ranking"
 msgstr "Ranking absoluto"
+
+#| msgid "All outcomes"
+msgid "All time"
+msgstr "Histórico"
+
+#| msgid "3 days"
+msgid "Last 30 days"
+msgstr "Últimos 30 días"
 
 msgid "Total reputation points from all scored forecasts."
 msgstr "Puntos totales de reputación de todos los pronósticos puntuados."
@@ -5009,6 +5145,9 @@ msgstr ""
 "Ranking relativo por reputación media por pronóstico puntuado — premia la "
 "calidad predictiva. No es popularidad social."
 
+msgid "Agent Arena — AI agents only"
+msgstr "Arena de Agentes — solo agentes de IA"
+
 msgid "Category reputation"
 msgstr "Reputación"
 
@@ -5017,9 +5156,6 @@ msgstr "Ordenar por rep / pronóstico, mayor primero"
 
 msgid "Sort by accuracy, highest first"
 msgstr "Ordenar por precisión, mayor primero"
-
-msgid "Scored"
-msgstr "Puntuados"
 
 msgid "Terms & Conditions"
 msgstr "Términos y condiciones"
@@ -5217,8 +5353,6 @@ msgstr ""
 "este código para confirmar:"
 
 #, python-format
-#| msgid ""
-#| "This link expires in %(hours)s hours and can only be used once."
 msgid "This code expires in %(minutes)s minutes and can only be used once."
 msgstr ""
 "Este código caduca en %(minutes)s minutos y solo puede usarse una vez."
@@ -6076,6 +6210,19 @@ msgstr ""
 msgid "Make your call and build your reputation."
 msgstr "Haz tu pronóstico y construye tu reputación."
 
+#| msgid "View event"
+msgid "Live event room"
+msgstr "Sala del evento en vivo"
+
+#, python-format
+#| msgid "Forecasts closed"
+msgid "Forecasts lock %(date)s UTC"
+msgstr "Los pronósticos se cierran el %(date)s UTC"
+
+#| msgid "Lock in your call before the window closes"
+msgid "Lock in your call before it closes"
+msgstr "Asegura tu pronóstico antes de que cierre"
+
 msgid "Forecasts are closed because this event has already started."
 msgstr ""
 
@@ -6209,6 +6356,14 @@ msgid ""
 msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
 "--categories</code> o importa desde el admin."
+
+#| msgid "This poll has ended."
+msgid "This live room has ended."
+msgstr "Esta sala en vivo ha terminado."
+
+#| msgid "No comments yet — be the first to reply."
+msgid "No comments yet — say something while it's live."
+msgstr "Aún no hay comentarios — di algo mientras está en vivo."
 
 msgid "You have a forecast on this market"
 msgstr "para publicar tu pronóstico en este mercado."
@@ -6638,6 +6793,52 @@ msgstr "Reputación %(points)s ganados"
 msgid "Scoring pending"
 msgstr "Verificación pendiente"
 
+#, python-format
+#| msgid "Created by @%(username)s"
+msgid "Forecast by %(name)s"
+msgstr "Pronóstico de %(name)s"
+
+#, python-format
+msgid "entry at %(percent)s%%"
+msgstr "entrada al %(percent)s%%"
+
+#, python-format
+#| msgid "Exited forecast, +%(points)s reputation realized"
+msgid "+%(points)s reputation earned"
+msgstr "+%(points)s de reputación ganada"
+
+#, python-format
+#| msgid "%(name)s Reputation"
+msgid "%(points)s reputation lost"
+msgstr "%(points)s de reputación perdida"
+
+#, python-format
+#| msgid "Exited forecast, %(points)s reputation realized"
+msgid "Exited early · %(points)s reputation realized"
+msgstr "Salida anticipada · %(points)s de reputación realizada"
+
+#| msgid "Share forecast"
+msgid "Share this forecast"
+msgstr "Compartir este pronóstico"
+
+#| msgid "View on Polymarket"
+msgid "View market"
+msgstr "Ver mercado"
+
+msgid "Think you can call it better?"
+msgstr "¿Crees que puedes predecirlo mejor?"
+
+msgid ""
+"Make your own forecast and build a public track record — no money, just "
+"reputation."
+msgstr ""
+"Haz tu propio pronóstico y construye un historial público — sin dinero, solo"
+" reputación."
+
+#| msgid "PredictStamp"
+msgid "Join PredictStamp"
+msgstr "Únete a PredictStamp"
+
 msgid "← Back to market"
 msgstr "← Volver al mercado"
 
@@ -6686,9 +6887,6 @@ msgstr "Haz tu primer pronóstico"
 
 #~ msgid "No comments yet. Start the discussion."
 #~ msgstr "Aún no hay comentarios. Inicie la discusión."
-
-#~ msgid "to place your forecast on this market."
-#~ msgstr "para publicar tu pronóstico en este mercado."
 
 #, python-format
 #~ msgid "You and @%(username)s must follow each other to challenge them."
@@ -6787,9 +6985,6 @@ msgstr "Haz tu primer pronóstico"
 
 #~ msgid "Who to follow"
 #~ msgstr "A quién seguir"
-
-#~ msgid "Follow top predictors"
-#~ msgstr "Sigue a los mejores predictores"
 
 #~ msgid "Old media rewards attention. PredictStamp is building a model like"
 #~ msgstr ""

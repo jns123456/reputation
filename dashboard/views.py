@@ -148,8 +148,15 @@ def category_browse(request, slug):
                 source=source,
                 area=area_slug,
             ),
+            "is_following_topic": _is_following_topic(request.user, slug),
         },
     )
+
+
+def _is_following_topic(user, category_slug):
+    from accounts.follow_selectors import is_following_topic
+
+    return is_following_topic(user=user, category_slug=category_slug)
 
 
 def _pagination_extra_query(request, *, exclude=("page",)):
@@ -198,11 +205,22 @@ def home(request):
 
 
 def _reputation_leaderboard_context(request, *, category=None):
+    from dashboard.leaderboard_cache import get_cached_top_predictors_for_period
     from reputation.leaderboard import build_leaderboard_rows
+    from reputation.period_leaderboard import PERIOD_ALL, normalize_leaderboard_period
     from reputation.ranking_modes import ABSOLUTE, get_relative_ranking_min_scored_forecasts, normalize_reputation_ranking_mode
 
     ranking_mode = normalize_reputation_ranking_mode(request.GET.get("mode"))
-    if category:
+    period = normalize_leaderboard_period(request.GET.get("period"))
+
+    if period != PERIOD_ALL:
+        leaders = get_cached_top_predictors_for_period(
+            period=period,
+            category_slug=category.slug if category else "",
+            limit=50,
+            mode=ranking_mode,
+        )
+    elif category:
         leaders = get_cached_top_predictors(
             category_slug=category.slug,
             limit=50,
@@ -223,6 +241,7 @@ def _reputation_leaderboard_context(request, *, category=None):
         "chart_categories": get_all_chart_categories(),
         "is_category_leaderboard": category is not None,
         "ranking_mode": ranking_mode,
+        "leaderboard_period": period,
         "hero_description_key": hero_description_key,
         "relative_ranking_min_scored": get_relative_ranking_min_scored_forecasts(),
     }
@@ -260,6 +279,43 @@ def popularity_leaderboard(request):
             "category": category,
             "chart_categories": get_all_chart_categories(),
             "is_category_leaderboard": category is not None,
+        },
+    )
+
+
+def agent_arena(request):
+    """Agent Arena — reputation leaderboard restricted to declared AI agents."""
+    from dashboard.leaderboard_cache import (
+        get_cached_top_agent_predictors,
+        get_cached_top_predictors_for_period,
+    )
+    from reputation.leaderboard import build_leaderboard_rows
+    from reputation.period_leaderboard import PERIOD_ALL, normalize_leaderboard_period
+    from reputation.ranking_modes import get_relative_ranking_min_scored_forecasts, normalize_reputation_ranking_mode
+
+    ranking_mode = normalize_reputation_ranking_mode(request.GET.get("mode"))
+    period = normalize_leaderboard_period(request.GET.get("period"))
+
+    if period != PERIOD_ALL:
+        leaders = get_cached_top_predictors_for_period(
+            period=period,
+            limit=50,
+            mode=ranking_mode,
+            agents_only=True,
+        )
+    else:
+        leaders = get_cached_top_agent_predictors(limit=50, mode=ranking_mode)
+
+    return render(
+        request,
+        "dashboard/agent_arena.html",
+        {
+            "leaders": leaders,
+            "leaderboard_rows": build_leaderboard_rows(leaders, ranking_mode=ranking_mode),
+            "ranking_mode": ranking_mode,
+            "leaderboard_period": period,
+            "is_category_leaderboard": False,
+            "relative_ranking_min_scored": get_relative_ranking_min_scored_forecasts(),
         },
     )
 
@@ -330,6 +386,12 @@ def forecasts(request):
         page=request.GET.get("page", 1),
     )
     context["resolving_soon"] = _load_resolving_soon()
+
+    from accounts.mission_services import get_daily_missions
+
+    missions = get_daily_missions(request.user)
+    context["daily_missions"] = missions
+    context["completed_mission_count"] = sum(1 for card in missions if card["completed"])
     return render(request, "dashboard/forecasts.html", context)
 
 

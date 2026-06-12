@@ -121,11 +121,20 @@ def create_prediction(
             raise ValueError(build_duplicate_forecast_error(user=user, market=market)) from exc
         raise
 
+    from accounts.mission_services import (
+        ACTION_PREDICTION,
+        ACTION_REASONED_PREDICTION,
+        REASONED_PREDICTION_MIN_CHARS,
+        record_mission_action,
+    )
     from accounts.notification_services import notify_followers_of_prediction
     from accounts.streak_services import record_activity
 
     notify_followers_of_prediction(prediction=prediction)
     record_activity(user)
+    record_mission_action(user, ACTION_PREDICTION)
+    if len((reasoning or "").strip()) >= REASONED_PREDICTION_MIN_CHARS:
+        record_mission_action(user, ACTION_REASONED_PREDICTION)
 
     return prediction
 

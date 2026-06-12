@@ -127,7 +127,20 @@ def challenge_create(request):
                 else:
                     form.add_error(None, exc.messages[0] if exc.messages else str(exc))
     else:
-        form = ChallengeCreateForm(user=request.user)
+        initial = {}
+        rematch_pk = request.GET.get("rematch", "")
+        if rematch_pk.isdigit():
+            previous = get_challenge_for_user(challenge_id=int(rematch_pk), user=request.user)
+            if previous:
+                initial["opponents"] = [
+                    str(participant.user_id)
+                    for participant in previous.participants.all()
+                    if participant.status == ChallengeParticipant.Status.ACCEPTED
+                    and participant.user_id != request.user.id
+                ]
+                if previous.title:
+                    initial["title"] = previous.title
+        form = ChallengeCreateForm(user=request.user, initial=initial)
 
     selected_market_ids = []
     if request.method == "POST":
@@ -357,11 +370,31 @@ def challenge_market_search(request):
 
 @login_required
 def challenge_detail(request, pk):
+    from challenges.selectors import get_challenge_for_spectator, get_head_to_head_record
+
     challenge = get_challenge_for_user(challenge_id=pk, user=request.user)
+    is_spectator = False
+    if not challenge:
+        challenge = get_challenge_for_spectator(pk)
+        is_spectator = challenge is not None
     if not challenge:
         raise Http404("Challenge not found.")
 
     participation = get_user_participation(challenge=challenge, user=request.user)
+
+    # Head-to-head record + rematch only make sense for completed 1v1 duels.
+    accepted_participants = [
+        participant
+        for participant in challenge.participants.all()
+        if participant.status == ChallengeParticipant.Status.ACCEPTED
+    ]
+    duel_opponent = None
+    head_to_head = None
+    if not is_spectator and len(accepted_participants) == 2:
+        others = [p.user for p in accepted_participants if p.user_id != request.user.id]
+        if len(others) == 1:
+            duel_opponent = others[0]
+            head_to_head = get_head_to_head_record(user=request.user, opponent=duel_opponent)
     standings = get_challenge_leaderboard(challenge)
     markets = get_challenge_markets(challenge)
     markets = _sort_challenge_markets_by_expiration(markets)
@@ -416,6 +449,9 @@ def challenge_detail(request, pk):
             "event_progress": get_challenge_event_progress(challenge),
             "resolution_snapshots": get_challenge_resolution_snapshots(challenge),
             "is_creator": challenge.creator_id == request.user.id,
+            "is_spectator": is_spectator,
+            "duel_opponent": duel_opponent,
+            "head_to_head": head_to_head,
         },
     )
 

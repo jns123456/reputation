@@ -44,9 +44,16 @@
       {% endif %}
     </div>
 
+    {% include "dashboard/partials/daily_missions_card.html" %}
+
     <div class="mb-4 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
       <nav class="flex items-center gap-1 overflow-x-auto" aria-label="{% trans 'Feed sort' %}">
         {% url 'dashboard:forecasts' as forecasts_url %}
+        {% if user.is_authenticated %}
+        <a href="{{ forecasts_url }}?sort=for_you{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
+           class="pr-feed-tab {% if active_sort == 'for_you' %}is-active{% endif %}"
+           {% if active_sort == 'for_you' %}aria-current="page"{% endif %}>{% trans "For you" %}</a>
+        {% endif %}
         <a href="{{ forecasts_url }}?sort=recent{% if active_market_slug %}&market={{ active_market_slug }}{% endif %}"
            class="pr-feed-tab {% if active_sort == 'recent' %}is-active{% endif %}"
            {% if active_sort == 'recent' %}aria-current="page"{% endif %}>{% trans "Recent" %}</a>

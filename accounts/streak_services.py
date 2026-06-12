@@ -20,6 +20,10 @@ STREAK_MILESTONES = {7: 5, 30: 25, 100: 100, 365: 500}
 # Minimum streak length before we bother someone with a "don't lose it" reminder.
 STREAK_RISK_MIN_DAYS = 2
 
+# Streak freezes: earned at each 7-day milestone, capped; one is consumed
+# automatically when the user misses exactly one day (Duolingo-style churn saver).
+STREAK_FREEZE_CAP = 2
+
 
 def get_streak(user):
     from accounts.models import ActivityStreak
@@ -74,8 +78,24 @@ def _record_activity_locked(*, user, today):
     if streak.last_active_date == today:
         return streak
 
+    update_fields = [
+        "current_streak",
+        "longest_streak",
+        "last_active_date",
+        "updated_at",
+    ]
+
     if streak.last_active_date == today - timedelta(days=1):
         streak.current_streak += 1
+    elif (
+        streak.last_active_date == today - timedelta(days=2)
+        and streak.freeze_tokens > 0
+        and streak.current_streak > 0
+    ):
+        # Missed exactly one day: a freeze token silently bridges the gap.
+        streak.freeze_tokens -= 1
+        streak.current_streak += 1
+        update_fields.append("freeze_tokens")
     else:
         streak.current_streak = 1
 
@@ -83,15 +103,13 @@ def _record_activity_locked(*, user, today):
     if streak.current_streak > streak.longest_streak:
         streak.longest_streak = streak.current_streak
 
-    update_fields = [
-        "current_streak",
-        "longest_streak",
-        "last_active_date",
-        "updated_at",
-    ]
     if streak.current_streak % 7 == 0:
         streak.streak_7_completions += 1
         update_fields.append("streak_7_completions")
+        if streak.freeze_tokens < STREAK_FREEZE_CAP:
+            streak.freeze_tokens += 1
+            if "freeze_tokens" not in update_fields:
+                update_fields.append("freeze_tokens")
     if streak.current_streak % 30 == 0:
         streak.streak_30_completions += 1
         update_fields.append("streak_30_completions")

@@ -1,8 +1,15 @@
 """Popularity scoring services."""
 
 from django.conf import settings
+from django.core.cache import cache
 
 from reputation.models import PopularityEvent
+
+# Shares feed POPULARITY only (never reputation, §6) and are tightly capped so
+# the share button cannot become an engagement-farming vector.
+SHARE_POINTS = 1
+SHARE_DEDUPE_SECONDS = 60 * 60 * 24 * 30
+SHARE_DAILY_OWNER_CAP = 20
 
 
 def record_popularity_event(
@@ -49,6 +56,46 @@ def record_popularity_event(
 
     evaluate_achievements(user)
 
+    return event
+
+
+def record_prediction_share(*, prediction, viewer):
+    """Award a small popularity bonus when someone shares a forecast card.
+
+    Deduped per (viewer, prediction) and capped per owner per day so repeated
+    clicks or coordinated sharing cannot farm popularity. Anonymous viewers and
+    self-shares never award points.
+    """
+    if viewer is None or not viewer.is_authenticated:
+        return None
+    if viewer.id == prediction.user_id:
+        return None
+
+    dedupe_key = f"share-dedupe:{viewer.id}:{prediction.id}"
+    if not cache.add(dedupe_key, 1, SHARE_DEDUPE_SECONDS):
+        return None
+
+    from django.utils import timezone
+
+    cap_key = f"share-owner-cap:{prediction.user_id}:{timezone.localdate().isoformat()}"
+    try:
+        daily_total = cache.incr(cap_key)
+    except ValueError:
+        cache.add(cap_key, 1, 60 * 60 * 24)
+        daily_total = 1
+    if daily_total > SHARE_DAILY_OWNER_CAP:
+        return None
+
+    event = record_popularity_event(
+        user=prediction.user,
+        points_delta=SHARE_POINTS,
+        event_type=PopularityEvent.EventType.SHARE_RECEIVED,
+        reason=f"Forecast shared by {viewer.username}",
+        prediction=prediction,
+    )
+
+    prediction.popularity_score = (prediction.popularity_score or 0) + SHARE_POINTS
+    prediction.save(update_fields=["popularity_score", "updated_at"])
     return event
 
 

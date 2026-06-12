@@ -60,6 +60,12 @@ urlpatterns = [
     path("bookmarks/toggle/", views.bookmark_toggle, name="bookmark_toggle"),
     path("bookmarks/", views.bookmarks_list, name="bookmarks"),
     path("follow/toggle/", views.follow_toggle, name="follow_toggle"),
+    path("follow/topic/", views.topic_follow_toggle, name="topic_follow_toggle"),
+    path(
+        "watch/markets/<slug:slug>/",
+        views.market_watch_toggle,
+        name="market_watch_toggle",
+    ),
     path("creator/subscribe/", views.creator_subscribe, name="creator_subscribe"),
     path("creator/unsubscribe/", views.creator_unsubscribe, name="creator_unsubscribe"),
     path("users/search/partial/", views.user_search_partial, name="user_search_partial"),
