@@ -117,9 +117,9 @@
                  id="notifications-dropdown-panel"
                  class="absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800"
                  hx-get="{% url 'accounts:notifications_dropdown' %}"
-                 hx-trigger="click from:#notifications-bell-btn once"
+                 hx-trigger="load delay:300ms once, click from:#notifications-bell-btn once"
                  hx-swap="innerHTML">
-              <div class="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">{% trans "Loading notifications…" %}</div>
+              <div class="hidden px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400 [.htmx-request_&]:block">{% trans "Loading notifications…" %}</div>
             </div>
           </div>
 

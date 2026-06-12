@@ -17,7 +17,7 @@ from accounts.follow_services import toggle_follow
 from accounts.forms import NotificationPreferenceForm
 from accounts.htmx_utils import redirect_response
 from accounts.models import User
-from accounts.notification_selectors import get_recent_notifications, get_user_notifications
+from accounts.notification_selectors import get_user_notifications
 from accounts.notification_services import (
     get_or_create_notification_preferences,
     mark_all_notifications_read,
@@ -166,14 +166,19 @@ def notifications_list(request):
 
 @login_required
 def notifications_dropdown(request):
-    from accounts.nav_cache import get_cached_unread_notification_count
+    from accounts.nav_cache import (
+        get_cached_recent_notifications,
+        get_cached_unread_notification_count,
+    )
 
-    notifications = get_recent_notifications(user=request.user, limit=8)
     return render(
         request,
         "accounts/partials/notifications_dropdown.html",
         {
-            "recent_notifications": notifications,
+            "recent_notifications": get_cached_recent_notifications(
+                user=request.user,
+                limit=8,
+            ),
             "unread_notification_count": get_cached_unread_notification_count(user=request.user),
         },
     )

@@ -236,6 +236,9 @@ class FollowerNotificationTests(TestCase):
 
 class LoginNotificationToastTests(TestCase):
     def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()
         self.follower = create_user("toastfollower")
         self.target = create_user("toasttarget")
         self.client = Client()
@@ -417,6 +420,9 @@ class NotificationViewsPerformanceTests(SkipMarketRefreshTestsMixin, TestCase):
 
     def setUp(self):
         super().setUp()
+        from django.core.cache import cache
+
+        cache.clear()
         from django.utils import timezone
 
         from accounts.models import UserFollow
@@ -504,3 +510,21 @@ class NotificationViewsPerformanceTests(SkipMarketRefreshTestsMixin, TestCase):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(after.captured_queries), baseline_count)
+
+    def test_dropdown_uses_cached_recent_notifications_on_repeat(self):
+        from django.core.cache import cache
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        url = reverse("accounts:notifications_dropdown")
+        cache.clear()
+        with CaptureQueriesContext(connection) as first:
+            self.client.get(url)
+        first_count = len(first.captured_queries)
+
+        with CaptureQueriesContext(connection) as second:
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Perf challenge")
+        self.assertLess(len(second.captured_queries), first_count)
+        self.assertLessEqual(len(second.captured_queries), 2)

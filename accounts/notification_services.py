@@ -327,7 +327,9 @@ def queue_login_notification_toast(*, request):
     """Flag the next authenticated page load to show unread notification alerts."""
     if not request.user.is_authenticated:
         return
-    if get_unread_notification_count(user=request.user) > 0:
+    from accounts.nav_cache import get_cached_unread_notification_count
+
+    if get_cached_unread_notification_count(user=request.user) > 0:
         request.session[LOGIN_NOTIFICATION_TOAST_SESSION_KEY] = True
 
 
@@ -344,8 +346,9 @@ def consume_login_notification_toast(*, request):
     if not notifications:
         return None
 
-    unread_count = get_unread_notification_count(user=request.user)
+    from accounts.nav_cache import get_cached_unread_notification_count
+
     return {
-        "count": unread_count,
+        "count": get_cached_unread_notification_count(user=request.user),
         "notifications": notifications,
     }
