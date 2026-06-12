@@ -72,8 +72,11 @@
 
       <figure class="pr-landing-video w-full lg:justify-self-end"
               x-data="landingVideo()">
-        <div class="pr-landing-video__frame pr-landing-video__frame--neomorphic"
-             :class="videoPlaying && 'pr-landing-video__frame--playing'">
+        <div class="pr-laptop">
+          <div class="pr-laptop__screen">
+            <span class="pr-laptop__camera" aria-hidden="true"></span>
+            <div class="pr-landing-video__frame pr-landing-video__frame--neomorphic"
+                 :class="videoPlaying && 'pr-landing-video__frame--playing'">
           <img class="pr-landing-video__poster"
                x-show="!videoPlaying"
                x-cloak
@@ -105,6 +108,11 @@
               <path d="M8 5v14l11-7z"/>
             </svg>
           </button>
+            </div>
+          </div>
+          <div class="pr-laptop__base" aria-hidden="true">
+            <span class="pr-laptop__notch"></span>
+          </div>
         </div>
       </figure>
 

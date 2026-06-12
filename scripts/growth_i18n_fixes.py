@@ -1,5 +1,5 @@
 """Spanish translations for the growth feature set (cards, For You, arena,
-live rooms, missions, follows, duels, calibration, seasons)."""
+missions, follows, duels, calibration, seasons)."""
 
 GROWTH_I18N_FIXES: dict[str, str] = {
     # --- Prediction cards (/p/<id>/) ---
@@ -35,17 +35,6 @@ GROWTH_I18N_FIXES: dict[str, str] = {
         "Ningún agente de IA tiene todavía un historial puntuado."
     ),
     "Agent Arena — AI agents only": "Arena de Agentes — solo agentes de IA",
-    # --- Live event rooms ---
-    "Live event room": "Sala del evento en vivo",
-    "Forecasts lock %(date)s UTC": "Los pronósticos se cierran el %(date)s UTC",
-    "Lock in your call before it closes": "Asegura tu pronóstico antes de que cierre",
-    "This live room has ended.": "Esta sala en vivo ha terminado.",
-    "No comments yet — say something while it's live.": (
-        "Aún no hay comentarios — di algo mientras está en vivo."
-    ),
-    "Slow mode is on for this live event — wait a few seconds between comments.": (
-        "El modo lento está activado para este evento en vivo — espera unos segundos entre comentarios."
-    ),
     # --- Daily missions ---
     "Daily missions": "Misiones diarias",
     "Popularity points on completion": "Puntos de popularidad al completar",

@@ -2353,6 +2353,92 @@ html.dark .pr-cta-band {
   max-width: 100%;
 }
 
+/* Laptop mockup wrapping the landing video.
+   The laptop itself is sized (video width + bezel) and clamped to its container;
+   the frame inside simply fills it, so the screen can never outgrow the bezel. */
+.pr-laptop {
+  --pr-laptop-bezel-x: 0.75rem;
+  position: relative;
+  width: min(100%, calc(min(52vh, 28rem) * 16 / 9 + var(--pr-laptop-bezel-x) * 2));
+  margin-inline: auto;
+  filter: drop-shadow(0 24px 40px rgba(15, 23, 42, 0.25));
+}
+
+@media (min-width: 1024px) {
+  .pr-laptop {
+    width: min(100%, calc(min(70vh, 32rem) * 16 / 9 + var(--pr-laptop-bezel-x) * 2));
+  }
+}
+
+.pr-laptop__screen {
+  position: relative;
+  padding: 1.4rem var(--pr-laptop-bezel-x) 0.9rem;
+  border-radius: 1.1rem 1.1rem 0 0;
+  background: linear-gradient(180deg, #334155 0%, #1e293b 8%, #0f172a 100%);
+}
+
+.pr-laptop__camera {
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  width: 0.4rem;
+  height: 0.4rem;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: #475569;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.pr-laptop__base {
+  position: relative;
+  height: 0.9rem;
+  margin-inline: -4%;
+  border-radius: 0 0 0.9rem 0.9rem;
+  background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 55%, #94a3b8 100%);
+}
+
+.pr-laptop__notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 16%;
+  height: 0.4rem;
+  transform: translateX(-50%);
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: #94a3b8;
+  box-shadow: inset 0 -1px 2px rgba(15, 23, 42, 0.25);
+}
+
+html.dark .pr-laptop {
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.55));
+}
+
+html.dark .pr-laptop__base {
+  background: linear-gradient(180deg, #475569 0%, #334155 55%, #1e293b 100%);
+}
+
+html.dark .pr-laptop__notch {
+  background: #1e293b;
+}
+
+/* Inside the laptop the frame becomes the "screen": flatter radius, no outer shadow */
+.pr-laptop .pr-landing-video__frame,
+.pr-laptop .pr-landing-video__frame--neomorphic,
+.pr-laptop .pr-landing-video__frame--neomorphic.pr-landing-video__frame--playing,
+html.dark .pr-laptop .pr-landing-video__frame,
+html.dark .pr-laptop .pr-landing-video__frame--playing {
+  border: none;
+  border-radius: 0.45rem;
+  box-shadow: none;
+}
+
+/* The laptop wrapper already enforces the size; the frame just fills the screen area */
+.pr-laptop .pr-landing-video__frame {
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+}
+
 .pr-landing-video__frame {
   --pr-landing-video-max-h: min(52vh, 28rem);
   position: relative;

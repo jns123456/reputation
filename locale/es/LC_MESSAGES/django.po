@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-12 06:03+0000\n"
+"POT-Creation-Date: 2026-06-12 06:30+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -472,30 +472,24 @@ msgstr ""
 "Envíe alertas a su dirección de correo electrónico (cuando el correo "
 "electrónico esté configurado)."
 
-#| msgid "Place a forecast"
 msgid "Make a forecast"
 msgstr "Haz un pronóstico"
 
-#| msgid "to place your forecast on this market."
 msgid "Place one forecast on any open market today."
 msgstr "Publica un pronóstico en cualquier mercado abierto hoy."
 
 msgid "Defend a thesis"
 msgstr "Defiende una tesis"
 
-#| msgid "Publish formal forecasts with your reasoning."
 msgid "Publish a forecast with written reasoning (100+ characters)."
 msgstr "Publica un pronóstico con razonamiento escrito (100+ caracteres)."
 
-#| msgid "Discussion"
 msgid "Join a discussion"
 msgstr "Únete a una conversación"
 
-#| msgid "Parent comment belongs to a different forecast thread."
 msgid "Post a comment in any forecast thread."
 msgstr "Publica un comentario en cualquier hilo de pronósticos."
 
-#| msgid "Create one free"
 msgid "Curate the feed"
 msgstr "Cura el feed"
 
@@ -732,7 +726,6 @@ msgstr ""
 msgid "You unfollowed %(name)s."
 msgstr "Todos los %(name)s"
 
-#| msgid "Missing creator."
 msgid "Missing topic"
 msgstr "Falta el tema"
 
@@ -1793,15 +1786,12 @@ msgstr "Descartar alertas"
 msgid "View all notifications"
 msgstr "Notificaciones"
 
-#| msgid "Complete unmodified Polymarket market response"
 msgid "Get notified before this market resolves"
 msgstr "Recibe un aviso antes de que este mercado se resuelva"
 
-#| msgid "We batch"
 msgid "Watching"
 msgstr "Siguiendo"
 
-#| msgid "Batch"
 msgid "Watch"
 msgstr "Seguir"
 
@@ -1895,11 +1885,9 @@ msgstr ""
 msgid "Log in to subscribe"
 msgstr "Inicia sesión para suscribirte"
 
-#| msgid "Following"
 msgid "Following topic"
 msgstr "Siguiendo tema"
 
-#| msgid "Follow top predictors"
 msgid "Follow topic"
 msgstr "Seguir tema"
 
@@ -2190,7 +2178,6 @@ msgstr ""
 " de reputación."
 
 #, python-format
-#| msgid "Total reputation points from all scored forecasts."
 msgid "%(points)s reputation over %(count_n)s scored forecasts"
 msgstr "%(points)s de reputación en %(count_n)s pronósticos puntuados"
 
@@ -2211,11 +2198,9 @@ msgstr ""
 "pronosticador bien calibrado queda cerca de la diagonal: acierta ~30%% de "
 "sus apuestas al 30%% y ~90%% de las del 90%%."
 
-#| msgid "Market"
 msgid "Market-implied"
 msgstr "Implícita del mercado"
 
-#| msgid "Accuracy"
 msgid "Actual accuracy"
 msgstr "Precisión real"
 
@@ -3153,8 +3138,6 @@ msgstr "Empate — sin ganador"
 msgid "Head to head vs %(name)s: %(wins)sW · %(losses)sL · %(ties)sT"
 msgstr "Cara a cara vs %(name)s: %(wins)sG · %(losses)sP · %(ties)sE"
 
-#| msgid "open match"
-#| msgid_plural "open matches"
 msgid "Rematch"
 msgstr "Revancha"
 
@@ -4386,11 +4369,9 @@ msgstr "Mercados de predicción"
 msgid "Sin predicciones todavía."
 msgstr "Aún no hay clasificaciones."
 
-#| msgid "Agent operator"
 msgid "Agent Arena"
 msgstr "Arena de Agentes"
 
-#| msgid "AI Agent"
 msgid "Agent"
 msgstr "Agente"
 
@@ -4406,7 +4387,6 @@ msgstr ""
 "compiten en los mismos mercados y con la misma puntuación que los humanos — "
 "clasificados aquí solo por reputación predictiva."
 
-#| msgid "Reputation Leaderboard"
 msgid "Full reputation leaderboard"
 msgstr "Tabla completa de reputación"
 
@@ -4756,7 +4736,6 @@ msgstr "Tus pronósticos abiertos"
 msgid "Feed sort"
 msgstr "Orden del feed"
 
-#| msgid "Forgot your"
 msgid "For you"
 msgstr "Para ti"
 
@@ -4925,7 +4904,6 @@ msgstr ""
 msgid "Daily missions"
 msgstr "Misiones diarias"
 
-#| msgid "Popularity Points"
 msgid "Popularity points on completion"
 msgstr "Puntos de popularidad al completar"
 
@@ -5030,11 +5008,9 @@ msgstr "Ranking relativo"
 msgid "Absolute ranking"
 msgstr "Ranking absoluto"
 
-#| msgid "All outcomes"
 msgid "All time"
 msgstr "Histórico"
 
-#| msgid "3 days"
 msgid "Last 30 days"
 msgstr "Últimos 30 días"
 
@@ -6210,16 +6186,20 @@ msgstr ""
 msgid "Make your call and build your reputation."
 msgstr "Haz tu pronóstico y construye tu reputación."
 
-#| msgid "View event"
 msgid "Live event room"
 msgstr "Sala del evento en vivo"
 
 #, python-format
-#| msgid "Forecasts closed"
 msgid "Forecasts lock %(date)s UTC"
 msgstr "Los pronósticos se cierran el %(date)s UTC"
 
-#| msgid "Lock in your call before the window closes"
+msgid ""
+"Comments in the live stream come from Discussion threads below — post a "
+"comment on any forecast to show up here."
+msgstr ""
+"Los comentarios del stream salen de los hilos Discussion más abajo — publica"
+" en cualquier pronóstico para aparecer aquí."
+
 msgid "Lock in your call before it closes"
 msgstr "Asegura tu pronóstico antes de que cierre"
 
@@ -6357,11 +6337,9 @@ msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
 "--categories</code> o importa desde el admin."
 
-#| msgid "This poll has ended."
 msgid "This live room has ended."
 msgstr "Esta sala en vivo ha terminado."
 
-#| msgid "No comments yet — be the first to reply."
 msgid "No comments yet — say something while it's live."
 msgstr "Aún no hay comentarios — di algo mientras está en vivo."
 
@@ -6794,7 +6772,6 @@ msgid "Scoring pending"
 msgstr "Verificación pendiente"
 
 #, python-format
-#| msgid "Created by @%(username)s"
 msgid "Forecast by %(name)s"
 msgstr "Pronóstico de %(name)s"
 
@@ -6803,25 +6780,20 @@ msgid "entry at %(percent)s%%"
 msgstr "entrada al %(percent)s%%"
 
 #, python-format
-#| msgid "Exited forecast, +%(points)s reputation realized"
 msgid "+%(points)s reputation earned"
 msgstr "+%(points)s de reputación ganada"
 
 #, python-format
-#| msgid "%(name)s Reputation"
 msgid "%(points)s reputation lost"
 msgstr "%(points)s de reputación perdida"
 
 #, python-format
-#| msgid "Exited forecast, %(points)s reputation realized"
 msgid "Exited early · %(points)s reputation realized"
 msgstr "Salida anticipada · %(points)s de reputación realizada"
 
-#| msgid "Share forecast"
 msgid "Share this forecast"
 msgstr "Compartir este pronóstico"
 
-#| msgid "View on Polymarket"
 msgid "View market"
 msgstr "Ver mercado"
 
@@ -6835,7 +6807,6 @@ msgstr ""
 "Haz tu propio pronóstico y construye un historial público — sin dinero, solo"
 " reputación."
 
-#| msgid "PredictStamp"
 msgid "Join PredictStamp"
 msgstr "Únete a PredictStamp"
 

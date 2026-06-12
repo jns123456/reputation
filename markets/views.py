@@ -256,10 +256,6 @@ def market_detail(request, slug):
     ]
 
     from accounts.follow_selectors import is_watching_market
-    from markets.live_rooms import build_live_room_context, get_live_stream_comments
-
-    live_room = build_live_room_context(market)
-    live_comments = get_live_stream_comments(market) if live_room else []
 
     return render(
         request,
@@ -274,25 +270,5 @@ def market_detail(request, slug):
             "active_challenges": active_challenges,
             "creator_program_enabled": creator_program_enabled,
             "is_watching_market": is_watching_market(user=request.user, market=market),
-            "live_room": live_room,
-            "live_comments": live_comments,
         },
-    )
-
-
-def market_live_stream(request, slug):
-    """HTMX-polled latest-comments partial for live event rooms."""
-    from markets.live_rooms import get_live_stream_comments, is_live_room
-
-    market = get_object_or_404(Market, slug=slug)
-    if not is_live_room(market):
-        return render(
-            request,
-            "markets/partials/live_stream.html",
-            {"market": market, "live_comments": [], "live_ended": True},
-        )
-    return render(
-        request,
-        "markets/partials/live_stream.html",
-        {"market": market, "live_comments": get_live_stream_comments(market)},
     )

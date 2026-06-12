@@ -29,10 +29,6 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
     if prediction and prediction.market_id != market.id:
         raise ValueError(_("Prediction belongs to a different market."))
 
-    from markets.live_rooms import enforce_live_slow_mode
-
-    enforce_live_slow_mode(user=user, market=market)
-
     _assert_can_comment_on_prediction(
         user=user,
         prediction=prediction,
