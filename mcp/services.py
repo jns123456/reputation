@@ -5,7 +5,7 @@ feature flags → circuit breaker → scope → trust (writes) → rate limits �
 with ``dry_run`` support and a ``McpToolCallLog`` audit record for every call.
 
 MCP must never bypass existing permissions, rate limits, scoring, moderation, or
-MVP boundaries — it only orchestrates the checks and delegates to domain services.
+product boundaries (§2) — it only orchestrates the checks and delegates to domain services.
 """
 
 import hashlib

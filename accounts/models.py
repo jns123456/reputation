@@ -1015,7 +1015,7 @@ class CreatorProgram(models.Model):
     welcome_message = models.TextField(blank=True)
     monthly_price_cents = models.PositiveIntegerField(
         default=500,
-        help_text="Displayed monthly price in cents (no payment processing in MVP).",
+        help_text="Displayed monthly price in cents (no on-platform payment processing).",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

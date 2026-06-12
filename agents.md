@@ -36,13 +36,17 @@ A user can be highly popular but have weak predictive reputation, or the opposit
 
 **This platform must NOT allow users to bet money, deposit funds, trade, hold balances, or execute financial transactions.**
 
-The MVP is a **social and reputational platform**, not a betting, trading, or gambling platform.
+It is a **social and reputational platform**, not a betting, trading, or gambling platform — at every product stage.
 
 ---
 
-## 2. MVP Scope and Boundaries
+## 2. Product Scope and Boundaries
 
-### Must Have (MVP)
+### Product stage
+
+PredictStamp completed its **first iteration** (historically called the MVP) and ships as a **V1 / beta platform**: core prediction and reputation flows are live, with engagement, AI-agent, and production layers on top. New work should preserve hard boundaries below; scope decisions weigh retention and clarity, not “is the idea valid?”
+
+### Core platform (first iteration — complete)
 
 - User authentication
 - User profiles (anonymous or real-name)
@@ -60,29 +64,56 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 - Basic admin panel
 - Data structure prepared for AI agents as non-human users
 
-### Should Have (MVP stretch)
+Also shipped from the original stretch goals: market tags/categories, search, status filters, badges/achievements, Polymarket-style reputation scoring, comment vs. prediction separation, and probability snapshots at forecast time.
 
-- Market tags or categories
-- Event search
-- Filters by status: open, closed, resolved
-- Basic badge system
-- Reputation model rewarding early correct predictions and penalizing incorrect ones
-- Clear separation between general comments and formal predictions
-- Snapshots of Polymarket probabilities at the time of each prediction
+### Extended features (shipped beyond first iteration)
 
-### Do NOT Build Yet
+| Area | What exists |
+|------|-------------|
+| **`challenges`** | Head-to-head prediction duels, challenge groups, standings |
+| **`pulse`** | Social forum (`/forum/`): posts, reposts, polls, images, subscriber-only audience |
+| **`mcp`** | MCP server: tokens, scopes, read tools, feature-flagged writes, audit logs (§17) |
+| **Engagement** | Activity streaks, daily missions, achievements, levels, seasons (`SeasonAward`) |
+| **Notifications** | In-app, email (Resend), web push (PWA) |
+| **Social graph** | Follows, topic follows, market watch, bookmarks, @mentions |
+| **Creator program** | Membership tiers and subscriber-only content — **display price only, no on-platform payments** |
+| **Trust & abuse** | Account classification, agent trust tiers, risk scoring, rate limits, moderation queue |
+| **Auth & onboarding** | Auth0 (optional), email verification, profile setup, Turnstile screening |
+| **i18n** | Bilingual UI (en/es), optional market translation at sync (DeepL) |
+| **Proof layer** | EAS off-chain attestations + optional on-chain anchor (`/proof/`) |
+| **Discovery** | Category browse areas, forecasts feed, category leaderboards, agent arena |
+| **Sharing** | Public forecast cards (`/p/<id>/`) with OG images |
+| **Ops** | Health check, Sentry, CI, CSP, `docs/OPERATIONS.md`, custom admin panel |
+
+### Feature flags (gradual rollout)
+
+Some capabilities ship in code but stay off until enabled in env — do not assume they are live in every deployment:
+
+| Flag | Capability |
+|------|------------|
+| `MCP_WRITES_ENABLED` (+ per-tool flags) | Agent prediction/comment writes via MCP |
+| `DIGEST_EMAILS_ENABLED` | Daily digest email |
+| `STREAK_REMINDER_EMAILS_ENABLED` | Streak-at-risk email |
+| `MARKET_RESOLVING_REMINDERS_ENABLED` | Market closing soon email |
+| `SEASON_AWARDS_ENABLED` | Quarterly season finalization |
+| `WEBPUSH_ENABLED` | Browser push (requires VAPID keys) |
+| `EAS_ONCHAIN_ANCHOR_ENABLED` | On-chain attestation anchoring |
+| `MARKET_TRANSLATION_ENABLED` | Translate imported market copy |
+
+### Do NOT Build Yet (hard boundaries)
+
+These limits apply regardless of product stage:
 
 - Real-money betting
 - User wallets
 - Custody of funds
-- Mandatory blockchain integration
+- Mandatory blockchain integration (optional EAS/proof is fine)
 - Native token
-- Payment marketplace
-- Complex monetization system
+- On-platform payment processing or checkout (creator UI may show a price; no Stripe/wallet flow)
 - Native mobile app (mobile-first **web** is the primary surface; ~95% of usage expected on phones)
 - Matching engine
 - Internal trading system
-- Production smart contracts
+- Production smart contracts as a core product requirement
 
 ---
 
@@ -95,7 +126,7 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 | Language | Python 3.12+ |
 | Framework | Django 5.x |
 | API | Django REST Framework |
-| Authentication | Django auth initially; future compatibility for Auth0, OAuth, social login |
+| Authentication | Django auth (local email/password) + optional Auth0 OIDC |
 | Async tasks | Celery |
 | Cache / queue | Redis |
 | Database | PostgreSQL |
@@ -129,9 +160,9 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 - Import markets, events, outcomes, resolution status, metadata, and probabilities via public APIs or CLI.
 - **Never** enable trading, wallet, settlement, or betting functionality.
 
-**EAS (future)**
-- Optional future integration for reputation attestations, proofs, or hashes.
-- Do not implement blockchain in the MVP unless explicitly requested.
+**EAS / Proof (optional)**
+- Off-chain reputation attestations and daily batches (`integrations/`, `/proof/`).
+- Optional on-chain anchoring behind `EAS_ONCHAIN_ANCHOR_ENABLED` — not a core user-facing requirement.
 
 **MCP (implemented — see §17)**
 - Concrete MCP layer lives in the `mcp` app. Read-only by default; writes are feature-flagged and scoped.
@@ -145,13 +176,16 @@ The MVP is a **social and reputational platform**, not a betting, trading, or ga
 
 | App | Purpose |
 |-----|---------|
-| `accounts` | Users, profiles, authentication, AI agent profiles |
+| `accounts` | Users, profiles, authentication, AI agent profiles, engagement, notifications |
 | `markets` | Polymarket imports, market metadata, status, resolution |
 | `predictions` | Formal predictions, scoring, resolution |
-| `comments` | Discussion threads, comments, votes |
-| `reputation` | Reputation events, scoring logic, rankings |
-| `integrations` | External integrations (Polymarket) |
-| `dashboard` | User dashboard and platform pages |
+| `comments` | Market discussion threads, comments, votes |
+| `reputation` | Reputation events, scoring logic, rankings, seasons |
+| `integrations` | Polymarket import (read-only), EAS attestations |
+| `dashboard` | Landing, dashboard, leaderboards, admin panel pages |
+| `challenges` | Head-to-head prediction challenges and groups |
+| `pulse` | Forum feed: posts, reposts, polls (`/forum/`) |
+| `mcp` | MCP server: tokens, scopes, resources/tools/prompts, audit logs (§17) |
 
 ### Design Principles
 
@@ -183,10 +217,6 @@ admin.py       → Django Admin registration
 - Internal services/selectors are the single source of truth — the `mcp` app and DRF API both call them (§17).
 - Maintain clear traceability between human and AI agent actions; every agent write is audit-logged (§17).
 - AI agents may publish predictions and reasoning but must be clearly identified, rate-limited, and screened (§15, §16).
-
-| App | Purpose |
-|-----|---------|
-| `mcp` | MCP server: tokens, scopes, resources/tools/prompts, audit logs (§17) |
 
 Anti-abuse, risk scoring, and agent-classification services live in `accounts`
 (`agent_services`, `risk_services`, `abuse_services`, `human_verification`).
@@ -586,25 +616,25 @@ Do not conflate `reputation` with `popularity` in variable names, UI labels, or 
 
 ## 11. Development Workflow
 
-Work incrementally. Do not generate the entire application in one step.
+Work incrementally — smallest correct change per PR. The bootstrap checklist below is **historical** (first iteration complete); ongoing work follows §12–§13.
 
-| Step | Task |
-|------|------|
-| 1 | Create `agents.md` (this file) |
-| 2 | Create Django project structure |
-| 3 | Create initial Django apps |
-| 4 | Define initial models and migrations |
-| 5 | Create basic admin registrations |
-| 6 | Create market import abstraction for Polymarket |
-| 7 | Create basic pages (templates, HTMX, Alpine.js, TailwindCSS) |
-| 8 | Implement prediction and comment flows |
-| 9 | Implement basic popularity and reputation scoring |
-| 10 | Add dashboards and leaderboards |
-| 11 | Add tests for models, scoring logic, and key views |
+| Step | Task | Status |
+|------|------|--------|
+| 1 | Create `agents.md` (this file) | Done |
+| 2 | Create Django project structure | Done |
+| 3 | Create initial Django apps | Done (+ `challenges`, `pulse`, `mcp`) |
+| 4 | Define initial models and migrations | Done |
+| 5 | Create basic admin registrations | Done |
+| 6 | Create market import abstraction for Polymarket | Done |
+| 7 | Create basic pages (templates, HTMX, Alpine.js, TailwindCSS) | Done |
+| 8 | Implement prediction and comment flows | Done |
+| 9 | Implement basic popularity and reputation scoring | Done |
+| 10 | Add dashboards and leaderboards | Done |
+| 11 | Add tests for models, scoring logic, and key views | Ongoing |
 
 ### Quality Bar
 
-- Production-minded but MVP-friendly.
+- Production-minded: ops, tests, and traceability are expected, not deferred.
 - Models clear and extensible.
 - Scoring logic testable and auditable.
 - External integration logic isolated.
@@ -620,7 +650,7 @@ Before making any change, an AI agent **must**:
 1. **Read this file** (`agents.md`) in full or at minimum the relevant sections.
 2. **Inspect the current repository structure** — understand what exists before adding code.
 3. **Identify which Django app** owns the concern being modified.
-4. **Check MVP boundaries** — confirm the feature is in scope and not in the "Do NOT Build Yet" list.
+4. **Check product boundaries (§2)** — confirm the feature does not violate "Do NOT Build Yet" and fits the current stage.
 5. **Verify separation of concerns** — reputation logic in `reputation/`, popularity in appropriate services, Polymarket in `integrations/`.
 6. **Preserve immutability** — never delete or silently overwrite resolved predictions or event records.
 7. **Ensure traceability** — every score change must produce an explainable event record.
@@ -633,8 +663,7 @@ Before making any change, an AI agent **must**:
 ### Decision Checklist
 
 ```
-□ Is this feature in MVP scope?
-□ Does it avoid betting/wallet/trading functionality?
+□ Does it respect hard boundaries in §2 (no betting/wallets/on-platform payments)?
 □ Are reputation and popularity kept separate?
 □ Is business logic in services.py, not views?
 □ Are immutable event records created for score changes?
@@ -660,7 +689,9 @@ If a proposed feature violates any of these principles, redesign before implemen
 
 ---
 
-## 14. Acceptance Criteria (First Iteration)
+## 14. Acceptance Criteria (First Iteration — historical)
+
+> **Completed.** Kept as a record of the original bootstrap; the platform has since grown into V1 (§2).
 
 - [x] Repository contains this `agents.md` with complete project context
 - [x] Django project runs locally
@@ -679,7 +710,7 @@ If a proposed feature violates any of these principles, redesign before implemen
 ## 15. AI-Agent Participation & Account Classification
 
 This section makes §4 "AI-Native Design" concrete. It governs **who** may act and
-**what** they may do. It does not restate the MVP boundaries (§2) or scoring (§6).
+**what** they may do. It does not restate the product boundaries (§2) or scoring (§6).
 
 ### Account types (`User.account_type`)
 
@@ -784,7 +815,7 @@ manipulation, and reputation gaming. Controls are layered and centralized in
 AI-native access layer implementing the Model Context Protocol concepts. **Read-only by
 default; writes are feature-flagged, scoped, dry-run-capable, and audit-logged.** MCP is a
 thin adapter — it calls existing services/selectors and **never** duplicates business logic
-or bypasses permissions, rate limits, scoring, moderation, or MVP boundaries (§2).
+or bypasses permissions, rate limits, scoring, moderation, or product boundaries (§2).
 
 ### Purpose
 
@@ -853,7 +884,7 @@ This section is **operational memory**, not product spec. It grows from real wor
 
 | Record | Skip |
 |--------|------|
-| Grave mistakes (data loss, security, MVP boundary violations, broken immutability) | One-off typos or obvious bugs |
+| Grave mistakes (data loss, security, product boundary violations, broken immutability) | One-off typos or obvious bugs |
 | User corrections that change how this repo must be handled | Facts already documented above |
 | Non-obvious traps (env, migrations, integrations, deploy) discovered the hard way | Session-only or task-specific context |
 | Patterns that failed twice or would mislead the next agent | Preferences unless the user asks they be permanent |
@@ -913,8 +944,9 @@ When editing §18, **delete or merge** stale lines — do not only append. Prefe
 [2026-06] security — Auth flows round 2: Auth0 email-linking requires the IdP's `email_verified=True` or `Auth0LinkDenied` is raised (never link a verified local account to an unverified IdP identity); OAuth/password-less account deletion re-authenticates via an emailed 6-digit code (`account_deletion_services.send/verify_deletion_confirmation_code`, cache-backed, single-use, 15 min); password reset uses Django CBVs at `/accounts/password-reset/` with `StyledPasswordResetForm.send_mail` routed through `accounts.email_services._send` (Resend-aware; built-in `send_mail` would silently miss Resend) + IP rate limit (`password_reset` bucket) + middleware exemptions; Redis TLS verification is opt-in via `REDIS_TLS_VERIFY=True` (must stay False on Heroku's self-signed certs).
 [2026-06] domain — Growth layer: daily-mission rewards (`accounts.mission_services`) and prediction-share points (`record_prediction_share`) are POPULARITY-only and global (not category-scoped) — `UserCategoryStats` sums no longer equal `profile.popularity_points`; tests must subtract `MISSION_COMPLETED` events. Seasons (`reputation.season_services.finalize_season`, flag `SEASON_AWARDS_ENABLED`) award permanent `SeasonAward` badges from period reputation events; `/p/<id>/` prediction cards are public (exempt in both gating middlewares) with Pillow OG images.
 [2026-05] integration — Grouped Polymarket winners may be `automaticallyResolved` with `outcomePrices` `["1","0"]` but no `resolvedOutcome`; `_market_is_resolved_yes` must infer Yes from prices (≥0.99). Stale refresh must include `closed` markets with empty `resolved_outcome`. **Sports composites:** 3-way soccer `is_soccer_match_event` counts all moneyline legs (`open_only=False`). H2H sync tags: `tennis`, `nba`, `ufc`, `nfl`, `mlb`, `nhl` (`H2H_MATCH_TAG_SLUGS`). Grouped `normalize_polymarket_event_record` defaults `require_open=False`; persist **closed** sub-market prices in `current_probability` (never drop eliminated players). `resolve_eliminated_outcome_predictions` scores pending picks when a player's bucket is definitively lost (e.g. French Open winner after QF exit) even if the event stays `open`.
+[2026-06] workflow — Docs still labeled the product "MVP" after first-iteration scope shipped (`challenges`, `pulse`, `mcp`, engagement layers) → treat §2 as **Product Scope & Boundaries** (V1/beta); hard no-betting/no-wallet limits live in "Do NOT Build Yet"; check §2 feature flags before assuming a capability is live in prod.
 ```
 
 ---
 
-*Last updated: 2026-06-04. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*
+*Last updated: 2026-06-12. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*

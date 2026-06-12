@@ -2,8 +2,7 @@
 
 Centralized here so views, the DRF API, and the MCP layer (§17) share one set of
 limits and one audit trail (``AbuseEvent``). Limits are cache-backed (Redis in
-prod, LocMem in dev/test) using fixed windows — simple and good enough for the
-MVP without extra infrastructure.
+prod, LocMem in dev/test) using fixed windows — simple and sufficient without extra infrastructure.
 """
 
 import hashlib
