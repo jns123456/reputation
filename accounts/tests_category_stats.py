@@ -5,7 +5,7 @@ from accounts.models import User, UserCategoryStats
 from comments.models import Vote
 from comments.services import cast_vote, create_comment
 from markets.models import Market
-from predictions.services import create_prediction, resolve_market_predictions
+from predictions.services import create_prediction, exit_prediction, resolve_market_predictions
 
 
 class CategoryStatsTests(TestCase):
@@ -85,3 +85,19 @@ class CategoryStatsTests(TestCase):
         self.user.profile.refresh_from_db()
         self.assertEqual(total_rep, self.user.profile.reputation_points)
         self.assertEqual(total_pop, self.user.profile.popularity_points)
+
+    def test_exit_updates_category_correct_counts(self):
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        stats = UserCategoryStats.objects.get(user=self.user, category_slug="crypto")
+        self.assertEqual(stats.scored_forecast_count, 1)
+        self.assertEqual(stats.correct_prediction_count, 1)
+        self.assertEqual(stats.incorrect_prediction_count, 0)
+        self.assertEqual(stats.reputation_points, 35)

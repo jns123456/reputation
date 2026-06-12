@@ -164,6 +164,15 @@ def calculate_user_unrealized_reputation(user, *, limit=100):
     return total
 
 
+def exit_delta_counts_as_correct(delta):
+    """Map early-exit P&L to win/loss for aggregate accuracy stats."""
+    if delta > 0:
+        return True
+    if delta < 0:
+        return False
+    return None
+
+
 def apply_reputation_for_prediction_exit(prediction):
     """Apply reputation scoring when a user exits an active prediction."""
     if prediction.status != prediction.Status.EXITED:
@@ -226,15 +235,21 @@ def apply_reputation_for_prediction_exit(prediction):
     profile = prediction.user.profile
     profile.reputation_points += delta
     profile.scored_forecast_count += 1
+    exit_is_correct = exit_delta_counts_as_correct(delta)
+    update_fields = [
+        "reputation_points",
+        "scored_forecast_count",
+        "reputation_score",
+        "updated_at",
+    ]
+    if exit_is_correct is True:
+        profile.correct_prediction_count += 1
+        update_fields.append("correct_prediction_count")
+    elif exit_is_correct is False:
+        profile.incorrect_prediction_count += 1
+        update_fields.append("incorrect_prediction_count")
     refresh_profile_reputation_score(profile, save=False)
-    profile.save(
-        update_fields=[
-            "reputation_points",
-            "scored_forecast_count",
-            "reputation_score",
-            "updated_at",
-        ]
-    )
+    profile.save(update_fields=update_fields)
 
     from accounts.category_stats_services import (
         apply_category_reputation_delta,
@@ -245,7 +260,12 @@ def apply_reputation_for_prediction_exit(prediction):
         prediction.user,
         resolve_category_from_market(prediction.market),
         delta,
+        is_correct=exit_is_correct,
     )
+
+    from accounts.achievement_services import evaluate_achievements
+
+    evaluate_achievements(prediction.user)
 
     return event
 

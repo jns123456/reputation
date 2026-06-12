@@ -267,7 +267,8 @@ class PredictionExitTests(TestCase):
         self.assertEqual(exited.probability_at_exit_time["Yes"], 0.55)
         self.assertEqual(self.user.profile.reputation_points, 15)
         self.assertEqual(self.user.profile.neutral_prediction_count, 0)
-        self.assertEqual(self.user.profile.correct_prediction_count, 0)
+        self.assertEqual(self.user.profile.scored_forecast_count, 1)
+        self.assertEqual(self.user.profile.correct_prediction_count, 1)
         self.assertEqual(self.user.profile.incorrect_prediction_count, 0)
         self.assertIsNone(get_user_active_prediction(self.user, self.market))
         self.assertEqual(
@@ -296,6 +297,9 @@ class PredictionExitTests(TestCase):
         self.user.profile.refresh_from_db()
 
         self.assertEqual(self.user.profile.reputation_points, -30)
+        self.assertEqual(self.user.profile.scored_forecast_count, 1)
+        self.assertEqual(self.user.profile.correct_prediction_count, 0)
+        self.assertEqual(self.user.profile.incorrect_prediction_count, 1)
 
     def test_other_user_cannot_exit_prediction(self):
         prediction = create_prediction(

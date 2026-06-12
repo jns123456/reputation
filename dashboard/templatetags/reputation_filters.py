@@ -8,7 +8,7 @@ register = template.Library()
 
 @register.filter
 def resolved_forecast_accuracy(stats):
-    """Resolved forecast accuracy %% for profile or category stats rows."""
+    """Scored forecast accuracy % for profile or category stats rows (resolved + exited)."""
     correct = int(getattr(stats, "correct_prediction_count", 0) or 0)
     incorrect = int(getattr(stats, "incorrect_prediction_count", 0) or 0)
     resolved = correct + incorrect

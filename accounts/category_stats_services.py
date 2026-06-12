@@ -102,6 +102,10 @@ def rebuild_all_category_stats():
             is_correct = True
         elif event.event_type == ReputationEvent.EventType.INCORRECT_PREDICTION:
             is_correct = False
+        elif event.event_type == ReputationEvent.EventType.EXITED_PREDICTION:
+            from reputation.services import exit_delta_counts_as_correct
+
+            is_correct = exit_delta_counts_as_correct(event.points_delta)
         apply_category_reputation_delta(
             event.user,
             category_slug,

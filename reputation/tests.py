@@ -282,6 +282,38 @@ class PredictionResolutionTests(TestCase):
             )
 
 
+class PredictionExitReputationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="exit-stats", password="pass")
+        self.market = Market.objects.create(
+            external_id="exit-stats-m1",
+            title="Exit stats market",
+            slug="exit-stats-market",
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+
+    def test_exit_updates_leaderboard_accuracy_counters(self):
+        from dashboard.templatetags.reputation_filters import resolved_forecast_accuracy
+        from predictions.services import exit_prediction
+
+        prediction = create_prediction(
+            user=self.user,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.market.current_probability = {"Yes": 0.55, "No": 0.45}
+        self.market.save(update_fields=["current_probability"])
+        exit_prediction(prediction=prediction, user=self.user)
+
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.scored_forecast_count, 1)
+        self.assertEqual(self.user.profile.correct_prediction_count, 1)
+        self.assertEqual(self.user.profile.incorrect_prediction_count, 0)
+        self.assertEqual(resolved_forecast_accuracy(self.user.profile), 100)
+
+
 class MarketImportNormalizationTests(TestCase):
     def test_normalize_polymarket_record(self):
         from integrations.polymarket.client import normalize_polymarket_record
