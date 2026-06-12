@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-12 06:30+0000\n"
+"POT-Creation-Date: 2026-06-12 06:56+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1086,12 +1086,6 @@ msgstr "Próximas 72h"
 
 msgid "Next week"
 msgstr "Próxima semana"
-
-msgid ""
-"Slow mode is on for this live event — wait a few seconds between comments."
-msgstr ""
-"El modo lento está activado para este evento en vivo — espera unos segundos "
-"entre comentarios."
 
 msgid "Yes"
 msgstr "Sí"
@@ -6186,23 +6180,6 @@ msgstr ""
 msgid "Make your call and build your reputation."
 msgstr "Haz tu pronóstico y construye tu reputación."
 
-msgid "Live event room"
-msgstr "Sala del evento en vivo"
-
-#, python-format
-msgid "Forecasts lock %(date)s UTC"
-msgstr "Los pronósticos se cierran el %(date)s UTC"
-
-msgid ""
-"Comments in the live stream come from Discussion threads below — post a "
-"comment on any forecast to show up here."
-msgstr ""
-"Los comentarios del stream salen de los hilos Discussion más abajo — publica"
-" en cualquier pronóstico para aparecer aquí."
-
-msgid "Lock in your call before it closes"
-msgstr "Asegura tu pronóstico antes de que cierre"
-
 msgid "Forecasts are closed because this event has already started."
 msgstr ""
 
@@ -6250,16 +6227,6 @@ msgstr ""
 "Eventos que cierran en las próximas 24 horas — pronostica antes de que se "
 "bloqueen."
 
-msgid "Tap a category to browse open forecasts."
-msgstr "Elige un tema para explorar pronósticos abiertos."
-
-msgid ""
-"No categories yet. Run <code class=\"text-xs\">sync_markets --top-"
-"volume</code> to import Polymarket markets."
-msgstr ""
-"Aún no hay categorías. Ejecuta <code class=\"text-xs\">sync_markets --top-"
-"volume</code> para importar mercados de Polymarket."
-
 #, python-format
 msgid ""
 "\n"
@@ -6279,12 +6246,25 @@ msgstr[1] ""
 "          "
 
 #, python-format
+#| msgid ""
+#| "No open events match “%(search_query)s”. Try another keyword or browse by "
+#| "category above."
 msgid ""
 "No open events match “%(search_query)s”. Try another keyword or browse by "
-"category above."
+"category below."
 msgstr ""
 "Ningún evento abierto coincide con «%(search_query)s». Prueba otra palabra o"
 " explora por categoría."
+
+msgid "Tap a category to browse open forecasts."
+msgstr "Elige un tema para explorar pronósticos abiertos."
+
+msgid ""
+"No categories yet. Run <code class=\"text-xs\">sync_markets --top-"
+"volume</code> to import Polymarket markets."
+msgstr ""
+"Aún no hay categorías. Ejecuta <code class=\"text-xs\">sync_markets --top-"
+"volume</code> para importar mercados de Polymarket."
 
 msgid "markets"
 msgstr "Mercados"
@@ -6336,12 +6316,6 @@ msgid ""
 msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
 "--categories</code> o importa desde el admin."
-
-msgid "This live room has ended."
-msgstr "Esta sala en vivo ha terminado."
-
-msgid "No comments yet — say something while it's live."
-msgstr "Aún no hay comentarios — di algo mientras está en vivo."
 
 msgid "You have a forecast on this market"
 msgstr "para publicar tu pronóstico en este mercado."
@@ -6851,6 +6825,35 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid ""
+#~ "Slow mode is on for this live event — wait a few seconds between comments."
+#~ msgstr ""
+#~ "El modo lento está activado para este evento en vivo — espera unos segundos "
+#~ "entre comentarios."
+
+#~ msgid "Live event room"
+#~ msgstr "Sala del evento en vivo"
+
+#, python-format
+#~ msgid "Forecasts lock %(date)s UTC"
+#~ msgstr "Los pronósticos se cierran el %(date)s UTC"
+
+#~ msgid ""
+#~ "Comments in the live stream come from Discussion threads below — post a "
+#~ "comment on any forecast to show up here."
+#~ msgstr ""
+#~ "Los comentarios del stream salen de los hilos Discussion más abajo — publica"
+#~ " en cualquier pronóstico para aparecer aquí."
+
+#~ msgid "Lock in your call before it closes"
+#~ msgstr "Asegura tu pronóstico antes de que cierre"
+
+#~ msgid "This live room has ended."
+#~ msgstr "Esta sala en vivo ha terminado."
+
+#~ msgid "No comments yet — say something while it's live."
+#~ msgstr "Aún no hay comentarios — di algo mientras está en vivo."
 
 #, python-format
 #~ msgid "Score: %(score)s"
