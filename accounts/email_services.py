@@ -14,6 +14,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils import translation
+from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
@@ -145,7 +146,7 @@ def _send_via_resend(*, api_key, subject, recipient_email, text_body, html_body)
     payload = {
         "from": from_email,
         "to": [recipient_email],
-        "subject": subject,
+        "subject": force_str(subject),
         "text": text_body,
     }
     if html_body:
