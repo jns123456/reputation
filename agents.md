@@ -950,3 +950,15 @@ When editing §18, **delete or merge** stale lines — do not only append. Prefe
 ---
 
 *Last updated: 2026-06-12. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*
+
+## Cursor Cloud specific instructions
+
+Setup for this Django app is documented in `README.md` ("Local (SQLite, no Docker)"). Notes below are the non-obvious caveats for working in the Cursor Cloud VM.
+
+- **Virtualenv:** dependencies live in `.venv` (gitignored; created/refreshed by the startup update script). Prefix every command with `.venv/bin/python` / `.venv/bin/pip` — there is no auto-activation.
+- **System packages** (`python3.12-venv` for the venv, `gettext` for `compilemessages`/`makemessages`) are part of the base VM image, intentionally NOT in the update script. The committed `locale/es/LC_MESSAGES/django.mo` means the app runs without `gettext`; you only need it for the i18n workflow.
+- **No external services needed for dev or tests.** Default dev uses SQLite; tests run Celery eager + locmem cache + locmem email. Redis/PostgreSQL/Celery are only for the Docker/prod topology (`docker-compose.yml`). Don't run gunicorn/celery for normal dev — use `.venv/bin/python manage.py runserver 0.0.0.0:8000` (http://127.0.0.1:8000).
+- **Sample data caveat:** `load_sample_data` only seeds demo users (`demo`/`demo123`, `admin`/`admin123`); it does NOT create markets (README's "3 manual markets" note is stale). For forecastable markets, import from the read-only public Polymarket API (needs internet): `.venv/bin/python manage.py import_polymarket_markets --limit 5`.
+- **Tests:** `.venv/bin/python manage.py test` (~777 tests). The `ConnectionError: redis down` / "Cache set failed" tracebacks printed mid-run are intentional fault-injection in resilience tests, not failures — only the final `OK` / `FAILED` line matters. CI (`.github/workflows/ci.yml`) adds a second run with `ABUSE_WRITE_GUARD_ENABLED=1` and `pip-audit -r requirements.lock`.
+- **Lint:** there is no ruff/flake8; `.venv/bin/python manage.py check` is the sanity check.
+- **Migrations:** the startup update script does NOT migrate, and `db.sqlite3` persists in the VM snapshot. After pulling a branch that adds migrations, run `.venv/bin/python manage.py migrate` manually.
