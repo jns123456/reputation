@@ -94,7 +94,8 @@ def _send(*, subject, recipient_email, template_base, context, language=None):
     """Render a text (+ optional html) template pair and send one message."""
     lang = _email_language(context, language)
     with translation.override(lang):
-        resolved_subject = subject() if callable(subject) else str(subject)
+        raw_subject = subject() if callable(subject) else subject
+        resolved_subject = str(raw_subject)
         render_context = {**context, "subject": resolved_subject, "LANGUAGE_CODE": lang}
         text_body = render_to_string(f"emails/{template_base}.txt", render_context)
         html_body = ""

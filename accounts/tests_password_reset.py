@@ -1,6 +1,8 @@
 """Tests for the password reset flow (request → email → confirm → complete)."""
 
+import json
 import re
+from unittest.mock import patch
 
 from django.core import mail
 from django.core.cache import cache
@@ -71,6 +73,24 @@ class PasswordResetFlowTests(TestCase):
         response = self.client.get("/accounts/password-reset/abc/def-token/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "invalid")
+
+    @override_settings(RESEND_API_KEY="re_test_key")
+    @patch("requests.post")
+    def test_request_via_resend_serializes_translated_subject(self, mock_post):
+        mock_post.return_value.status_code = 200
+
+        response = self.client.post(
+            reverse("accounts:password_reset"),
+            {"email": "resetter@test.com"},
+            HTTP_ACCEPT_LANGUAGE="es",
+        )
+
+        self.assertRedirects(response, reverse("accounts:password_reset_done"))
+        mock_post.assert_called_once()
+        payload = mock_post.call_args.kwargs["json"]
+        json.dumps(payload)
+        self.assertIsInstance(payload["subject"], str)
+        self.assertIn("contraseña", payload["subject"].lower())
 
     @override_settings(ABUSE_RATE_LIMITS={"password_reset": {"ip": (1, 3600)}})
     def test_request_is_rate_limited_by_ip(self):
