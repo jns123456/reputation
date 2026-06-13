@@ -5313,7 +5313,7 @@ msgstr ""
 
 #, python-format
 msgid "Hi %(name)s,"
-msgstr "Todos los %(name)s"
+msgstr "Hola %(name)s,"
 
 msgid ""
 "Someone requested to permanently delete your PredictStamp account. Use this "

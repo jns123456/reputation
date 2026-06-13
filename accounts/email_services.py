@@ -96,7 +96,13 @@ def _send(*, subject, recipient_email, template_base, context, language=None):
     with translation.override(lang):
         raw_subject = subject() if callable(subject) else subject
         resolved_subject = str(raw_subject)
-        render_context = {**context, "subject": resolved_subject, "LANGUAGE_CODE": lang}
+        render_context = {
+            **context,
+            "subject": resolved_subject,
+            "LANGUAGE_CODE": lang,
+            "site_url": absolute_url(""),
+            "logo_url": absolute_url("/static/images/favicon.svg"),
+        }
         text_body = render_to_string(f"emails/{template_base}.txt", render_context)
         html_body = ""
         try:

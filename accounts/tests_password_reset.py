@@ -91,6 +91,10 @@ class PasswordResetFlowTests(TestCase):
         json.dumps(payload)
         self.assertIsInstance(payload["subject"], str)
         self.assertIn("contraseña", payload["subject"].lower())
+        self.assertIn("html", payload)
+        self.assertIn("favicon.svg", payload["html"])
+        self.assertIn("Hola", payload["text"])
+        self.assertNotIn("Todos los", payload["text"])
 
     @override_settings(ABUSE_RATE_LIMITS={"password_reset": {"ip": (1, 3600)}})
     def test_request_is_rate_limited_by_ip(self):
