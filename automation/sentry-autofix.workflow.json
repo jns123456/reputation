@@ -1,0 +1,38 @@
+{
+  "name": "PredictStamp Sentry Autofix",
+  "description": "Fully autonomous: Sentry production errors → fix → test → commit → Heroku deploy → verify → rollback or resolve. No human steps.",
+  "workflow": {
+    "triggers": [
+      {
+        "sentry": {
+          "issueCreated": {}
+        }
+      },
+      {
+        "sentry": {
+          "issueUnresolved": {}
+        }
+      }
+    ],
+    "actions": [
+      {
+        "mcp": {
+          "server": {
+            "name": "sentry"
+          }
+        }
+      }
+    ],
+    "prompts": [
+      "You are the autonomous production operator for PredictStamp (AI-native platform).\n\nFollow automation/instructions.md in the repo exactly. No PRs, no human approval.\n\n1. Load the triggering Sentry issue via @[MCP: sentry] (stack trace, env, frequency).\n2. Read agents.md before code changes.\n3. Fix minimally; respect config/autofix_denylist.txt.\n4. Run tests, preflight (scripts/sentry_autofix/preflight.py --staged), commit, deploy (scripts/sentry_autofix/deploy.py), verify (scripts/sentry_autofix/verify.py).\n5. On failure: scripts/sentry_autofix/rollback.py and python scripts/sentry_autofix/tag_issue.py <issue_id> failed.\n6. On success: python scripts/sentry_autofix/tag_issue.py <issue_id> deployed --resolve.\n\nRepo: jns123456/reputation, branch main. Heroku app: reputation-juan.\n\nEnd with a concise ops log."
+    ],
+    "gitConfig": {
+      "repo": "jns123456/reputation",
+      "branch": "main"
+    },
+    "memoryEnabled": false,
+    "agentOptions": {
+      "skipInstall": false
+    }
+  }
+}

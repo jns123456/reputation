@@ -1,0 +1,21 @@
+# Paths the Sentry autofix agent must never modify (glob-style, / separators).
+# Used by scripts/sentry_autofix/preflight.py
+
+reputation/services.py
+reputation/migrations/
+**/migrations/
+mcp/tokens.py
+accounts/migrations/
+markets/migrations/
+predictions/migrations/
+comments/migrations/
+pulse/migrations/
+challenges/migrations/
+integrations/migrations/
+dashboard/migrations/
+config/settings.py
+.env
+.env.*
+requirements.lock
+Procfile
+locale/
