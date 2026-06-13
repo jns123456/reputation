@@ -1766,18 +1766,10 @@ html.dark .pr-stat-card {
   color: #64748b;
 }
 
-html.dark .pr-stat-label {
-  color: #94a3b8;
-}
-
 .pr-stat-value {
   margin-top: 0.25rem;
   font-size: 1.875rem;
   font-weight: 700;
-}
-
-html.dark .pr-stat-value {
-  color: #f1f5f9;
 }
 
 /* Tables — horizontal scroll on narrow screens */

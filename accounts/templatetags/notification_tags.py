@@ -7,14 +7,8 @@ from accounts.models import Notification
 
 register = template.Library()
 
-LINK_CLASS = (
-    "text-brand-600 hover:text-brand-700 hover:underline "
-    "dark:text-brand-300 dark:hover:text-brand-200"
-)
-ACTOR_LINK_CLASS = (
-    "font-semibold text-brand-600 hover:text-brand-700 hover:underline "
-    "dark:text-brand-300 dark:hover:text-brand-200"
-)
+LINK_CLASS = "text-brand-600 hover:underline dark:text-brand-400"
+ACTOR_LINK_CLASS = "font-semibold text-brand-600 hover:underline dark:text-brand-400"
 
 
 def _actor_link(notification):

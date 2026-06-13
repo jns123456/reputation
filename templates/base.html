@@ -37,20 +37,8 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              300: '#a5b4fc',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
-              950: '#1e1b4b',
-            },
-            rep: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+            brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+            rep: { 500: '#059669', 600: '#047857' },
             pop: { 500: '#d97706', 600: '#b45309' },
           }
         }
@@ -340,13 +328,7 @@
     html.dark .hover\:text-brand-600:hover { color: rgb(165 180 252) !important; }
     html.dark .text-brand-600 { color: rgb(129 140 248) !important; }
     html.dark .text-brand-700 { color: rgb(165 180 252) !important; }
-    html.dark .text-brand-400 { color: rgb(165 180 252) !important; }
-    html.dark .text-brand-300 { color: rgb(199 210 254) !important; }
     html.dark .group-hover\:text-brand-700:is(.group:hover *) { color: rgb(165 180 252) !important; }
-    html.dark .group-hover\:text-brand-400:is(.group:hover *) { color: rgb(199 210 254) !important; }
-
-    html.dark .text-rep-600,
-    html.dark .text-rep-500 { color: rgb(52 211 153) !important; }
 
     html.dark .border-red-200 { border-color: rgb(127 29 29 / 0.5) !important; }
     html.dark .bg-red-50 { background-color: rgb(127 29 29 / 0.25) !important; }
