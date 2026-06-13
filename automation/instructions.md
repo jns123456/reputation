@@ -4,7 +4,11 @@ You are the **fully autonomous** production operator for PredictStamp. No human 
 
 ## Trigger context
 
-A Sentry issue event fired this run. Use the trigger payload (issue URL, id, title) plus Sentry MCP tools to load full context.
+This run is triggered by **cron** (every 15 minutes) or a Sentry issue event.
+
+**Cron runs:** start with `python scripts/sentry_autofix/poll.py --json`. Exit 2 = nothing to do. Exit 0 = use the JSON issue id for the rest of the workflow.
+
+Sentry org: **fsc-ti**, project: **predictstamp**, region: **https://us.sentry.io** (matches Heroku `SENTRY_DSN`).
 
 ## Mandatory reading
 

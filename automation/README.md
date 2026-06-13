@@ -1,54 +1,54 @@
 # PredictStamp — Sentry autofix (100% Cursor)
 
-Autonomous pipeline: Sentry issue → fix → test → commit → push → Heroku → verify → rollback or resolve.
+Autonomous pipeline: Sentry poll → fix → test → commit → push → Heroku → verify → rollback or resolve.
 
-## Activar en Cursor (pasos)
+## Por qué no usar trigger Sentry (naranja)
 
-1. **Commit y push** este repo a `main` (los scripts deben estar en GitHub para el Cloud Agent).
-2. Cursor → **Automations** → **New automation**.
-3. Trigger: **Sentry** → *Issue created* + *Issue unresolved* → selecciona el proyecto PredictStamp.
-4. Tools: habilita **MCP → sentry** (conectar OAuth si hace falta).
-5. Repo: `jns123456/reputation`, branch `main`, **Cloud Agent** activado.
-6. Copia el prompt de `automation/sentry-autofix.workflow.json` o referencia `automation/instructions.md`.
-7. **Secrets** en Cloud Agent (Settings → Environment):
+- Producción envía errores a **Sentry US cloud** (`ingest.us.sentry.io`), org **`fsc-ti`**, proyecto **`predictstamp`**.
+- El trigger nativo de Cursor a veces queda en *Requires connection* aunque Integrations muestre Sentry conectado.
+- **Solución:** trigger **cron cada 15 min** + `scripts/sentry_autofix/poll.py` (no requiere Connect en triggers).
+
+## Activar en Cursor (3 minutos)
+
+1. **Automations → New** (o edita la existente).
+2. **Quita** triggers Sentry si siguen en naranja.
+3. **+ Add Trigger → On a schedule → cada 15 minutos** (o importa `sentry-autofix.workflow.json`).
+4. Repo: `jns123456/reputation`, branch `main`, Cloud Agent ON.
+5. Tools: **+ Add Tool or MCP → sentry**.
+6. Agent Instructions: copia el bloque `prompts` de `sentry-autofix.workflow.json`.
+7. Cloud Agent env vars: copia `cloud-agent.env.example` y rellena tokens.
+8. Save + Active.
+
+Opcional: pedir a Cursor Agent **“open automation from sentry-autofix.workflow.json”** en Agents Window.
+
+## Variables de entorno (Cloud Agent)
 
 | Variable | Valor |
 |----------|--------|
-| `HEROKU_API_KEY` | API key de Heroku |
+| `HEROKU_API_KEY` | Heroku API key |
 | `HEROKU_APP` | `reputation-juan` |
-| `SITE_BASE_URL` | URL pública prod (ej. `https://predictstamp.app`) |
-| `SENTRY_AUTH_TOKEN` | Token de integración interna Sentry |
-| `SENTRY_ORG` | slug de la org en Sentry |
+| `SITE_BASE_URL` | URL prod |
+| `SENTRY_AUTH_TOKEN` | Token con `event:read`, `project:read`, `org:read` |
+| `SENTRY_ORG` | `fsc-ti` |
+| `SENTRY_PROJECT` | `predictstamp` |
+| `SENTRY_REGION_URL` | `https://us.sentry.io` |
 
-8. En Heroku: el remote `git` debe aceptar push (API key o deploy key). El script usa `git push heroku main`.
-9. Guardar y activar la automation.
-
-Opcional: en Sentry, conectar la integración **Cursor** para que los triggers lleguen en tiempo real.
-
-## Triggers
-
-- Sentry **issue created** (new errors)
-- Sentry **issue unresolved** (regressions)
-
-## Scripts (run by the agent)
+## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `preflight.py` | Denylist, diff size, secret scan |
-| `deploy.py` | `git push origin main` + `git push heroku main` |
-| `verify.py` | Poll `/health/` after deploy |
+| `poll.py` | Siguiente issue a arreglar (cron entrypoint) |
+| `preflight.py` | Denylist + diff limits |
+| `deploy.py` | push origin + heroku |
+| `verify.py` | `/health/` |
 | `rollback.py` | Heroku rollback + git revert |
-| `tag_issue.py` | Tag issue `autofix:deployed` / `autofix:skipped` |
+| `tag_issue.py` | Nota + resolve en Sentry |
 
-## Safety
-
-Denylist: `config/autofix_denylist.txt` — reputation scoring, migrations, secrets paths blocked.
-
-## Manual test
+## Probar poll local
 
 ```bash
-export SITE_BASE_URL=https://predictstamp.app
-python scripts/sentry_autofix/verify.py
-
-git add -A && python scripts/sentry_autofix/preflight.py --staged
+export SENTRY_AUTH_TOKEN=...
+export SENTRY_ORG=fsc-ti
+export SENTRY_REGION_URL=https://us.sentry.io
+python scripts/sentry_autofix/poll.py
 ```

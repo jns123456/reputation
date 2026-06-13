@@ -6,13 +6,19 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from pathlib import Path
 
 import requests
 
-SENTRY_API = "https://sentry.io/api/0"
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from _config import sentry_api_base, sentry_org  # noqa: E402
 
 
 def resolve_issue_id(
+    api: str,
     headers: dict[str, str],
     org: str,
     issue_ref: str,
@@ -20,7 +26,7 @@ def resolve_issue_id(
     """Return (numeric_issue_id, project_slug)."""
     if issue_ref.isdigit():
         detail = requests.get(
-            f"{SENTRY_API}/issues/{issue_ref}/",
+            f"{api}/issues/{issue_ref}/",
             headers=headers,
             timeout=30,
         )
@@ -30,7 +36,7 @@ def resolve_issue_id(
         return issue_ref, project.get("slug")
 
     search = requests.get(
-        f"{SENTRY_API}/organizations/{org}/issues/",
+        f"{api}/organizations/{org}/issues/",
         headers=headers,
         params={"query": issue_ref, "limit": 1},
         timeout=30,
@@ -48,7 +54,7 @@ def main() -> int:
         "marker",
         help="Marker e.g. deployed, skipped, failed",
     )
-    parser.add_argument("--org", default=os.environ.get("SENTRY_ORG", ""))
+    parser.add_argument("--org", default=sentry_org())
     parser.add_argument("--resolve", action="store_true", help="Resolve issue if deployed")
     args = parser.parse_args()
 
@@ -57,8 +63,9 @@ def main() -> int:
         print("tag_issue FAIL: set SENTRY_AUTH_TOKEN and SENTRY_ORG")
         return 1
 
+    api = sentry_api_base()
     headers = {"Authorization": f"Bearer {token}"}
-    issue_id, project_slug = resolve_issue_id(headers, args.org, args.issue_ref)
+    issue_id, project_slug = resolve_issue_id(api, headers, args.org, args.issue_ref)
     if not issue_id:
         print("tag_issue FAIL: could not resolve issue")
         return 1
@@ -66,7 +73,7 @@ def main() -> int:
     note_text = f"[autofix:{args.marker}] Cursor autonomous fix pipeline"
     if project_slug:
         note_resp = requests.post(
-            f"{SENTRY_API}/projects/{args.org}/{project_slug}/issues/{issue_id}/notes/",
+            f"{api}/projects/{args.org}/{project_slug}/issues/{issue_id}/notes/",
             headers=headers,
             json={"text": note_text},
             timeout=30,
@@ -78,7 +85,7 @@ def main() -> int:
 
     if args.resolve and args.marker == "deployed":
         resolve_resp = requests.put(
-            f"{SENTRY_API}/issues/{issue_id}/",
+            f"{api}/issues/{issue_id}/",
             headers=headers,
             json={"status": "resolved"},
             timeout=30,
