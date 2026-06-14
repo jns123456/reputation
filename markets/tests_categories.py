@@ -12,6 +12,7 @@ from markets.selectors import (
     filter_markets_by_browse_area,
     filter_markets_by_search,
     get_browse_area_summaries,
+    get_category_display_markets,
     get_category_summaries,
     get_open_markets_by_canonical_category,
 )
@@ -559,3 +560,70 @@ class BlendMarketsBySourceTests(TestCase):
         )
         blended = blend_markets_by_source([low, high], limit=2)
         self.assertEqual([market.pk for market in blended], [high.pk, low.pk])
+
+
+class CategoryChronologicalSortTests(TestCase):
+    def test_sort_markets_chronologically_orders_by_event_date(self):
+        from datetime import timedelta
+
+        from markets.selectors import sort_markets_chronologically
+
+        now = timezone.now()
+        later = Market(
+            external_id="chrono-later",
+            title="Later event",
+            slug="chrono-later",
+            status=Market.Status.OPEN,
+            close_date=now + timedelta(days=20),
+        )
+        soon = Market(
+            external_id="chrono-soon",
+            title="Soon event",
+            slug="chrono-soon",
+            status=Market.Status.OPEN,
+            close_date=now + timedelta(days=2),
+        )
+        kickoff = Market(
+            external_id="chrono-kickoff",
+            title="Kickoff event",
+            slug="chrono-kickoff",
+            status=Market.Status.OPEN,
+            close_date=now + timedelta(days=30),
+            game_start_time=now + timedelta(hours=8),
+        )
+
+        ordered = sort_markets_chronologically([later, kickoff, soon])
+        self.assertEqual(
+            [market.slug for market in ordered],
+            ["chrono-kickoff", "chrono-soon", "chrono-later"],
+        )
+
+    def test_get_category_display_markets_returns_chronological_subset(self):
+        from datetime import timedelta
+
+        from markets.selectors import get_category_display_markets
+
+        now = timezone.now()
+        markets = [
+            Market(
+                external_id="display-later",
+                title="Later event",
+                slug="display-later",
+                status=Market.Status.OPEN,
+                close_date=now + timedelta(days=20),
+            ),
+            Market(
+                external_id="display-soon",
+                title="Soon event",
+                slug="display-soon",
+                status=Market.Status.OPEN,
+                close_date=now + timedelta(days=2),
+            ),
+        ]
+
+        ordered = get_category_display_markets(
+            category_slug="crypto",
+            limit=10,
+            markets=markets,
+        )
+        self.assertEqual([market.slug for market in ordered], ["display-soon", "display-later"])

@@ -1,8 +1,11 @@
 import random
 from collections import Counter, defaultdict
 
+from datetime import datetime, timezone as dt_timezone
+
 from django.db import connection
-from django.db.models import Count, F, Q
+from django.db.models import Count, DateTimeField, F, Q
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from markets.categories import (
@@ -103,6 +106,38 @@ def normalize_category_filter(category):
         ):
             return candidate.slug
     return ""
+
+
+def _chronological_far_future() -> datetime:
+    return datetime(9999, 12, 31, 23, 59, 59, tzinfo=dt_timezone.utc)
+
+
+def market_event_datetime(market):
+    """Primary chronological key: scheduled start, else market close."""
+    return market.game_start_time or market.close_date
+
+
+def sort_markets_chronologically(markets):
+    """Sort an in-memory market list soonest event first; undated markets last."""
+    far_future = _chronological_far_future()
+    return sorted(
+        markets,
+        key=lambda market: (
+            market_event_datetime(market) or far_future,
+            (market.title or "").casefold(),
+        ),
+    )
+
+
+def order_markets_chronologically(qs):
+    """Queryset ordering: ``game_start_time`` then ``close_date``, then title."""
+    return qs.annotate(
+        event_at=Coalesce(
+            F("game_start_time"),
+            F("close_date"),
+            output_field=DateTimeField(),
+        )
+    ).order_by(F("event_at").asc(nulls_last=True), "title")
 
 
 def _sort_markets_by_volume(markets):
@@ -211,7 +246,7 @@ def get_category_browse_queryset(
         _market_card_queryset(
             Market.objects.filter(visibility_q).filter(category_q)
         )
-    ).order_by("-volume_total", "-updated_at")
+    )
 
     if area_slug:
         qs = _filter_queryset_by_browse_area(
@@ -223,7 +258,7 @@ def get_category_browse_queryset(
         qs = _apply_market_text_search(qs, search)
     if source:
         qs = qs.filter(source=source)
-    return qs
+    return order_markets_chronologically(qs)
 
 
 def filter_markets_by_search(*, markets, search):
@@ -264,7 +299,7 @@ def get_category_display_markets(
     search=None,
     markets=None,
 ):
-    """Markets for category browse cards, balanced across external sources."""
+    """Markets for category browse cards, ordered soonest event first."""
     if markets is None:
         markets = get_open_markets_by_canonical_category(category_slug=category_slug)
     if area_slug:
@@ -277,14 +312,11 @@ def get_category_display_markets(
         markets = filter_markets_by_search(markets=markets, search=search)
     if source:
         markets = [market for market in markets if market.source == source]
-        return _sort_markets_by_volume(markets)[:limit]
-    if search:
-        return _sort_markets_by_volume(markets)[:limit]
-    return blend_markets_by_source(markets, limit=limit)
+    return sort_markets_chronologically(markets)[:limit]
 
 
 def get_open_markets_by_canonical_category(*, category_slug, limit=None):
-    """Return open markets for a canonical browse category, sorted by volume."""
+    """Return open markets for a canonical browse category, ordered chronologically."""
     category_q = _canonical_category_browse_q(category_slug)
     if category_q is None:
         return []
@@ -296,7 +328,7 @@ def get_open_markets_by_canonical_category(*, category_slug, limit=None):
             ).filter(category_q)
         )
     )
-    qs = qs.order_by("-volume_total", "-updated_at")
+    qs = order_markets_chronologically(qs)
 
     if limit is not None:
         return list(qs[:limit])
@@ -544,7 +576,7 @@ def get_world_cup_match_markets_queryset(*, source=""):
     )
     if source:
         qs = qs.filter(source=source)
-    return qs.order_by("close_date", "title")
+    return order_markets_chronologically(qs)
 
 
 def get_markets_resolving_soon(*, within_hours=72, limit=8):

@@ -104,18 +104,19 @@
     </div>
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h2 class="text-lg font-semibold text-slate-900">
-        {% if world_cup_match_layout %}
-          {% trans "Upcoming & live matches" %}
-        {% elif active_area %}
-          {% blocktrans with name=active_area.name %}Trending in {{ name }}{% endblocktrans %}
-        {% else %}
-          {% blocktrans with name=category.name %}Trending in {{ name }}{% endblocktrans %}
-        {% endif %}
-      </h2>
-      {% if world_cup_match_layout %}
-      <p class="text-xs text-slate-500">{% trans "Sorted by kickoff" %}</p>
-      {% else %}
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">
+          {% if world_cup_match_layout %}
+            {% trans "Upcoming & live matches" %}
+          {% elif active_area %}
+            {% blocktrans with name=active_area.name %}Events in {{ name }}{% endblocktrans %}
+          {% else %}
+            {% blocktrans with name=category.name %}Events in {{ name }}{% endblocktrans %}
+          {% endif %}
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{% trans "Sorted by date" %}</p>
+      </div>
+      {% if not world_cup_match_layout %}
       <a href="{% url 'markets:all' %}?category={{ category.slug|urlencode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if source_filter_urls.active_source %}&source={{ source_filter_urls.active_source }}{% endif %}" class="text-sm font-medium text-brand-600 hover:underline">
         {% trans "Advanced filters" %} →
       </a>

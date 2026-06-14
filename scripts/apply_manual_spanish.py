@@ -81,6 +81,8 @@ MANUAL = {
     "open match": "partido abierto",
     "Upcoming & live matches": "Próximos y en vivo",
     "Sorted by kickoff": "Ordenados por inicio",
+    "Sorted by date": "Ordenados por fecha",
+    "Events in %(name)s": "Eventos en %(name)s",
     "No match forecasts yet.": "Aún no hay pronósticos de partidos.",
     "Markets sync automatically from Polymarket — refresh in a moment.": "Los mercados se sincronizan automáticamente desde Polymarket — actualiza en un momento.",
     "Short posts from the community — text and photos, up to 200 characters.": "Publicaciones breves de la comunidad — texto y fotos, hasta 200 caracteres.",

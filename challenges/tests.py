@@ -493,6 +493,32 @@ class ChallengeEventSortTests(TestCase):
         ordered = _sort_challenge_markets_by_expiration([later, no_date, soon])
         self.assertEqual([market.slug for market in ordered], ["sort-soon", "sort-later", "sort-none"])
 
+    def test_markets_sorted_by_game_start_time_before_close_date(self):
+        from datetime import timedelta
+
+        from challenges.views import _sort_challenge_markets_by_expiration
+
+        kickoff_soon = timezone.now() + timedelta(hours=6)
+        kickoff_later = timezone.now() + timedelta(days=5)
+        by_kickoff = Market.objects.create(
+            external_id="sort-kickoff-soon",
+            title="Kickoff soon",
+            slug="sort-kickoff-soon",
+            status=Market.Status.OPEN,
+            close_date=timezone.now() + timedelta(days=30),
+            game_start_time=kickoff_soon,
+        )
+        by_close = Market.objects.create(
+            external_id="sort-close-sooner",
+            title="Close sooner",
+            slug="sort-close-sooner",
+            status=Market.Status.OPEN,
+            close_date=timezone.now() + timedelta(days=1),
+        )
+
+        ordered = _sort_challenge_markets_by_expiration([by_close, by_kickoff])
+        self.assertEqual([market.slug for market in ordered], ["sort-kickoff-soon", "sort-close-sooner"])
+
 
 class ChallengeNotificationTests(TestCase):
     def setUp(self):
@@ -962,6 +988,38 @@ class MarketSearchTests(TestCase):
         self.assertContains(response, "Bitcoin price 2026")
         self.assertContains(response, "pr-neo-outcome--yes")
         self.assertContains(response, "pr-neo-outcome--no")
+
+    def test_market_browse_category_orders_events_chronologically(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        now = timezone.now()
+        self.market_a.close_date = now + timedelta(days=10)
+        self.market_a.save(update_fields=["close_date"])
+        Market.objects.create(
+            external_id="crypto-soon",
+            title="Soon crypto event",
+            slug="soon-crypto-event",
+            category="Crypto",
+            status=Market.Status.OPEN,
+            close_date=now + timedelta(days=1),
+            outcomes=[{"label": "Yes"}],
+            current_probability={"Yes": 0.5},
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            "/challenges/markets/browse/",
+            {"category": "crypto"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertLess(
+            content.index("Soon crypto event"),
+            content.index("Bitcoin price 2026"),
+        )
 
 
 class ChallengeHowItWorksViewTests(TestCase):

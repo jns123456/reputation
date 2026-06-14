@@ -422,23 +422,28 @@ def user_can_view_challenge(*, challenge, user):
 
 def search_open_markets_for_challenge(*, query="", limit=50, selected_ids=None):
     """Open markets for challenge picker, optionally filtered by search text."""
-    from markets.selectors import forecastable_market_q, get_markets_list
+    from markets.selectors import forecastable_market_q, order_markets_chronologically, sort_markets_chronologically
 
-    qs = (
-        get_markets_list(status=Market.Status.OPEN, search=query or None)
-        .filter(forecastable_market_q())
-        .order_by("title")
+    qs = order_markets_chronologically(
+        get_markets_list(status=Market.Status.OPEN, search=query or None).filter(
+            forecastable_market_q()
+        )
     )
 
     selected_ids = {int(pk) for pk in (selected_ids or []) if str(pk).isdigit()}
+    markets = list(qs[:limit])
     if selected_ids:
-        selected_qs = Market.objects.filter(
-            forecastable_market_q(),
-            id__in=selected_ids,
-        )
-        qs = (selected_qs | qs).distinct().order_by("title")
-
-    return qs[:limit]
+        existing_ids = {market.id for market in markets}
+        extra_ids = selected_ids - existing_ids
+        if extra_ids:
+            extras = list(
+                Market.objects.filter(
+                    forecastable_market_q(),
+                    id__in=extra_ids,
+                )
+            )
+            markets = sort_markets_chronologically(extras + markets)[:limit]
+    return markets[:limit]
 
 
 CHALLENGE_CATEGORY_MARKET_LIMIT = 100
@@ -488,12 +493,12 @@ def get_challenge_category_browse_context(*, category_slug, area_slug="", search
         existing_ids = {market.id for market in markets}
         extra_ids = selected_ids_set - existing_ids
         if extra_ids:
-            from markets.selectors import forecastable_market_q
+            from markets.selectors import forecastable_market_q, sort_markets_chronologically
 
             extras = list(
                 Market.objects.filter(forecastable_market_q(), id__in=extra_ids)
             )
-            markets = extras + list(markets)
+            markets = sort_markets_chronologically(extras + list(markets))
 
     return {
         "category": category,

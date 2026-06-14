@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -41,15 +40,10 @@ from challenges.services import (
 
 
 def _sort_challenge_markets_by_expiration(markets):
-    """Soonest close_date first; events without a date last."""
-    far_future = timezone.now().replace(year=9999, month=12, day=31)
+    """Soonest event first (kickoff or close); undated markets last."""
+    from markets.selectors import sort_markets_chronologically
 
-    def sort_key(market):
-        if market.close_date:
-            return (0, market.close_date)
-        return (1, far_future)
-
-    return sorted(markets, key=sort_key)
+    return sort_markets_chronologically(markets)
 
 
 def challenge_how_it_works(request):
