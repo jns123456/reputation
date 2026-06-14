@@ -96,7 +96,7 @@ def _send(*, subject, recipient_email, template_base, context, language=None):
     lang = _email_language(context, language)
     with translation.override(lang):
         raw_subject = subject() if callable(subject) else subject
-        resolved_subject = str(raw_subject)
+        resolved_subject = force_str(raw_subject)
         render_context = {
             **context,
             "subject": resolved_subject,

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from accounts.account_deletion_services import can_delete_account
 
@@ -68,7 +68,7 @@ class StyledPasswordResetForm(PasswordResetForm):
         )
         try:
             _send(
-                subject=lambda: _("Reset your PredictStamp password"),
+                subject=lambda: gettext("Reset your PredictStamp password"),
                 recipient_email=to_email,
                 template_base="password_reset",
                 context={
