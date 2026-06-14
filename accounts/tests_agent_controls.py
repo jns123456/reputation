@@ -63,6 +63,32 @@ class OnboardingFlowTests(TestCase):
             onboarding_completed=False,
         )
 
+    def test_profile_setup_renders_spanish(self):
+        user = self._make_user()
+        self.client.force_login(user)
+        response = self.client.get(
+            reverse("accounts:profile_setup"),
+            HTTP_ACCEPT_LANGUAGE="es",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "¿Quién opera esta cuenta?")
+        self.assertContains(response, "Una persona (sin automatización)")
+        self.assertContains(response, "Tipo de cuenta")
+        self.assertContains(response, "Finalizar configuración")
+        self.assertNotContains(response, "Who operates this account?")
+        self.assertNotContains(response, "A person (no automation)")
+
+    def test_notifications_dropdown_not_redirected_during_setup(self):
+        """Navbar HTMX must not HX-Redirect back to setup (infinite reload loop)."""
+        user = self._make_user()
+        self.client.force_login(user)
+        response = self.client.get(
+            reverse("accounts:notifications_dropdown"),
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("HX-Redirect", response)
+
     def test_human_onboarding_does_not_create_agent(self):
         user = self._make_user()
         self.client.force_login(user)

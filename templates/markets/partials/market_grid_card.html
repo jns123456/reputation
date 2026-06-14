@@ -10,6 +10,10 @@
     <i data-lucide="check" class="h-3.5 w-3.5" stroke-width="3" aria-hidden="true"></i>
   </span>
   {% endif %}
+
+  {% if market.is_soccer_match or market.is_h2h_match %}
+  {% include "markets/partials/market_card_match_header.html" with show_forecasts_closed_badge=True match_icon_slug=market.canonical_category_slug|default:"sports" %}
+  {% else %}
   <div class="flex gap-3">
     {% if market.image_url %}
     <div class="pr-neo-thumb flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl p-1">
@@ -30,58 +34,8 @@
     <span class="badge-status-closed">{% trans "Forecasts closed" %}</span>
   </div>
   {% endif %}
-
-  {% if market.is_multi_binary_market %}
-  <div class="mt-4 space-y-2">
-    {% for outcome in market|top_probability_items:2 %}
-    <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 text-sm">
-      <span class="min-w-0 truncate font-medium text-slate-700 dark:text-slate-200">{{ outcome.label|localized_outcome }}</span>
-      <span class="w-12 text-right font-semibold tabular-nums text-slate-900 dark:text-slate-50">{{ outcome.prob_percent }}%</span>
-      <span class="flex shrink-0 gap-1">
-        <span class="pr-neo-chip pr-neo-chip--yes px-2 py-1 text-xs">{% trans "Yes" %}</span>
-        <span class="pr-neo-chip pr-neo-chip--no px-2 py-1 text-xs">{% trans "No" %}</span>
-      </span>
-    </div>
-    {% endfor %}
-    {% with extra_count=market|remaining_probability_count:2 %}
-    {% if extra_count %}
-    <p class="text-xs font-medium text-slate-400 dark:text-slate-500">
-      {% blocktrans count counter=extra_count %}+{{ counter }} more outcome{% plural %}+{{ counter }} more outcomes{% endblocktrans %}
-    </p>
-    {% endif %}
-    {% endwith %}
-  </div>
-  {% elif market.is_soccer_match and market.current_probability %}
-  {% include "markets/partials/three_way_outcome_boxes.html" %}
-  {% elif market.current_probability %}
-  <div class="mt-4 flex gap-2">
-    {% for label, prob in market.current_probability.items %}
-    <div class="pr-neo-outcome py-2.5
-      {% if label|lower == 'yes' %}pr-neo-outcome--yes{% elif label|lower == 'no' %}pr-neo-outcome--no{% else %}pr-neo-outcome--neutral{% endif %}">
-      <span class="text-xs font-semibold uppercase tracking-wide {% if label|lower == 'yes' %}text-emerald-700 dark:text-emerald-300{% elif label|lower == 'no' %}text-rose-700 dark:text-rose-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
-        {% if label|lower == 'yes' %}{% trans "Yes" %}{% elif label|lower == 'no' %}{% trans "No" %}{% else %}{{ label }}{% endif %}
-      </span>
-      <span class="mt-0.5 text-xl font-bold tabular-nums {% if label|lower == 'yes' %}text-emerald-800 dark:text-emerald-200{% elif label|lower == 'no' %}text-rose-800 dark:text-rose-200{% else %}text-slate-800 dark:text-slate-100{% endif %}">
-        {{ prob|as_percent }}%
-      </span>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <p class="mt-4 text-center text-sm text-slate-400">{% trans "Odds unavailable" %}</p>
   {% endif %}
 
-  <div class="mt-auto flex items-center justify-between gap-2 pt-4 text-xs text-slate-400 dark:text-slate-500">
-    <span class="truncate font-medium">
-      {% if market.volume_label %}{{ market.volume_label }}{% endif %}
-    </span>
-    <div class="flex shrink-0 items-center gap-1.5">
-      {% if market.source == "polymarket" %}
-      <span class="pr-neo-tag pr-neo-tag--brand">{{ market.display_source }}</span>
-      {% endif %}
-      {% if market.category %}
-      <span class="pr-neo-tag">{{ market.display_category }}</span>
-      {% endif %}
-    </div>
-  </div>
+  {% include "markets/partials/market_card_outcomes.html" %}
+  {% include "markets/partials/market_card_footer.html" with use_neo_tags=True %}
 </a>

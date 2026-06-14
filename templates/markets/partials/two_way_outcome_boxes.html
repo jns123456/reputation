@@ -1,0 +1,16 @@
+{% load i18n reputation_filters %}
+<div class="mt-4 grid grid-cols-2 gap-2">
+  {% for label, prob in market|h2h_match_probability_items %}
+  <div class="flex min-w-0 flex-col items-center justify-center rounded-lg border px-1 py-2.5 text-center transition
+    {% if label == market.match_team_a %}border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/35 dark:group-hover:border-emerald-700/60 dark:group-hover:bg-emerald-900/45{% elif label == market.match_team_b %}border-rose-200 bg-rose-50 group-hover:bg-rose-100 dark:border-rose-800/50 dark:bg-rose-950/35 dark:group-hover:border-rose-700/60 dark:group-hover:bg-rose-900/45{% else %}border-slate-200 bg-slate-50 group-hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/55 dark:group-hover:border-slate-500 dark:group-hover:bg-slate-700/70{% endif %}">
+    <span class="flex min-h-[2rem] w-full items-center justify-center text-center text-[10px] font-semibold uppercase leading-tight line-clamp-2
+      {% if label == market.match_team_a %}text-emerald-700 dark:text-emerald-300{% elif label == market.match_team_b %}text-rose-700 dark:text-rose-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
+      {{ label|localized_outcome }}
+    </span>
+    <span class="mt-0.5 shrink-0 text-lg font-bold tabular-nums
+      {% if label == market.match_team_a %}text-emerald-800 dark:text-emerald-200{% elif label == market.match_team_b %}text-rose-800 dark:text-rose-200{% else %}text-slate-800 dark:text-slate-100{% endif %}">
+      {{ prob|as_percent }}%
+    </span>
+  </div>
+  {% endfor %}
+</div>

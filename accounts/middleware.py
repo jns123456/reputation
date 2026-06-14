@@ -45,6 +45,7 @@ class EmailVerificationRequiredMiddleware:
     """Block unverified users until they confirm their email address."""
 
     EXEMPT_PREFIXES = (
+        "/accounts/notifications/",
         "/accounts/verify-email/",
         "/accounts/logout/",
         "/accounts/login/",
@@ -85,6 +86,7 @@ class ProfileSetupRequiredMiddleware:
 
     EXEMPT_PREFIXES = (
         "/accounts/setup/",
+        "/accounts/notifications/",
         "/accounts/verify-email/",
         "/accounts/logout/",
         "/accounts/login/",

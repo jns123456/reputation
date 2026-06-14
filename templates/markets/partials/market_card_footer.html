@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="mt-auto flex items-center justify-between gap-2 pt-4 text-xs text-slate-400 dark:text-slate-500">
+  <span class="truncate font-medium">
+    {% if market.volume_label %}
+      {{ market.volume_label }}
+    {% elif market.is_soccer_match %}
+      {% trans "3-way result" %}
+    {% elif market.is_h2h_match %}
+      {% trans "Match winner" %}
+    {% endif %}
+  </span>
+  <div class="flex shrink-0 items-center gap-1.5">
+    {% if market.source == "polymarket" %}
+    <span class="{% if use_neo_tags %}pr-neo-tag pr-neo-tag--brand{% else %}rounded-full bg-indigo-50 px-2 py-0.5 font-medium text-indigo-700 dark:bg-indigo-950/45 dark:text-indigo-300{% endif %}">{{ market.display_source }}</span>
+    {% endif %}
+    {% if market.category %}
+    <span class="{% if use_neo_tags %}pr-neo-tag{% else %}rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500 dark:bg-slate-700 dark:text-slate-300{% endif %}">{{ market.display_category }}</span>
+    {% endif %}
+  </div>
+</div>

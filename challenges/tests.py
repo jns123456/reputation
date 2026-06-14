@@ -874,6 +874,95 @@ class MarketSearchTests(TestCase):
         self.assertContains(response, "Bitcoin price 2026")
         self.assertContains(response, "All categories")
 
+    def test_market_browse_soccer_match_card_shows_kickoff_and_colored_outcomes(self):
+        from django.utils import timezone
+
+        kickoff = timezone.datetime(2026, 6, 14, 17, 0, tzinfo=timezone.utc)
+        Market.objects.create(
+            external_id="wc-match:picker-soccer",
+            title="Germany vs. Curaçao",
+            slug="germany-vs-curacao-picker",
+            status=Market.Status.OPEN,
+            canonical_category_slug="fifa-world-cup-2026",
+            close_date=kickoff,
+            game_start_time=kickoff,
+            polymarket_raw={
+                "market_kind": "soccer_match_3way",
+                "team_a": "Germany",
+                "team_b": "Curaçao",
+                "kickoff_at": kickoff.isoformat(),
+            },
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+            outcomes=[{"label": "Germany"}, {"label": "Draw"}, {"label": "Curaçao"}],
+            current_probability={"Germany": 0.94, "Draw": 0.04, "Curaçao": 0.02},
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            "/challenges/markets/browse/",
+            {"category": "fifa-world-cup-2026"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Germany vs. Curaçao")
+        self.assertContains(response, "UTC")
+        self.assertContains(response, "border-emerald-200 bg-emerald-50")
+        self.assertContains(response, "border-amber-200 bg-amber-50")
+        self.assertContains(response, "border-rose-200 bg-rose-50")
+        self.assertContains(response, "3-way result")
+
+    def test_market_browse_h2h_match_card_shows_kickoff_and_colored_outcomes(self):
+        from django.utils import timezone
+
+        kickoff = timezone.datetime(2026, 6, 14, 20, 0, tzinfo=timezone.utc)
+        Market.objects.create(
+            external_id="h2h-match:picker-nba",
+            title="Lakers vs. Celtics",
+            slug="lakers-vs-celtics-picker",
+            status=Market.Status.OPEN,
+            canonical_category_slug="sports",
+            close_date=kickoff,
+            game_start_time=kickoff,
+            polymarket_raw={
+                "market_kind": "h2h_match_2way",
+                "team_a": "Lakers",
+                "team_b": "Celtics",
+            },
+            polymarket_event_raw={"tags": [{"slug": "nba"}]},
+            outcomes=[{"label": "Lakers"}, {"label": "Celtics"}],
+            current_probability={"Lakers": 0.58, "Celtics": 0.42},
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            "/challenges/markets/browse/",
+            {"category": "sports", "area": "nba"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Lakers vs. Celtics")
+        self.assertContains(response, "UTC")
+        self.assertContains(response, "border-emerald-200 bg-emerald-50")
+        self.assertContains(response, "border-rose-200 bg-rose-50")
+        self.assertContains(response, "Match winner")
+
+    def test_market_browse_binary_market_shows_yes_no_colors(self):
+        self.market_a.canonical_category_slug = "crypto"
+        self.market_a.outcomes = [{"label": "Yes"}, {"label": "No"}]
+        self.market_a.current_probability = {"Yes": 0.62, "No": 0.38}
+        self.market_a.save(update_fields=["canonical_category_slug", "outcomes", "current_probability"])
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            "/challenges/markets/browse/",
+            {"category": "crypto"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bitcoin price 2026")
+        self.assertContains(response, "pr-neo-outcome--yes")
+        self.assertContains(response, "pr-neo-outcome--no")
+
 
 class ChallengeHowItWorksViewTests(TestCase):
     def test_page_loads_without_login(self):

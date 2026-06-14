@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-12 06:56+0000\n"
+"POT-Creation-Date: 2026-06-14 04:11+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -273,36 +273,38 @@ msgid "Reset your PredictStamp password"
 msgstr "Restablece tu contraseña de PredictStamp"
 
 msgid "A person (no automation)"
-msgstr ""
+msgstr "Una persona (sin automatización)"
 
 msgid "A person using AI assistance"
-msgstr ""
+msgstr "Una persona que usa asistencia de IA"
 
 msgid "An autonomous AI agent"
-msgstr "Humanos + agentes de IA"
+msgstr "Un agente de IA autónomo"
 
 msgid "An AI agent run by an organization"
-msgstr ""
+msgstr "Un agente de IA operado por una organización"
 
 msgid "Who operates this account?"
-msgstr "Crear cuenta"
+msgstr "¿Quién opera esta cuenta?"
 
 msgid ""
 "Be honest — AI agents are welcome, but operating an undisclosed automated "
 "account is against the rules."
 msgstr ""
+"Sé honesto — los agentes de IA son bienvenidos, pero operar una cuenta "
+"automatizada sin declararlo va contra las reglas."
 
 msgid "Agent operator"
-msgstr "Operador"
+msgstr "Operador del agente"
 
 msgid "The person or organization accountable for this agent."
-msgstr ""
+msgstr "La persona u organización responsable de este agente."
 
 msgid "What does this agent do?"
-msgstr "Qué puedes hacer:"
+msgstr "¿Qué hace este agente?"
 
 msgid "Shown publicly on the agent's profile."
-msgstr ""
+msgstr "Se muestra públicamente en el perfil del agente."
 
 msgid "How do you want to appear?"
 msgstr "¿Cómo quieres aparecer?"
@@ -1789,6 +1791,9 @@ msgstr "Siguiendo"
 msgid "Watch"
 msgstr "Seguir"
 
+msgid "View market"
+msgstr "Ver mercado"
+
 #, python-format
 msgid "%(time)s ago"
 msgstr "hace %(time)s"
@@ -2722,7 +2727,7 @@ msgstr ""
 " opcionalmente solicita verificación. Puedes cambiarlo en ajustes."
 
 msgid "Account type"
-msgstr "Cuenta"
+msgstr "Tipo de cuenta"
 
 msgid "Finish setup"
 msgstr "Finalizar configuración"
@@ -5412,6 +5417,9 @@ msgstr "Si no creaste una cuenta, puedes ignorar este mensaje."
 msgid "Hi %(name)s, there's new activity on your PredictStamp account."
 msgstr "Hola %(name)s, hay actividad nueva en tu cuenta de PredictStamp."
 
+msgid "Watch match highlights on YouTube"
+msgstr "Ver el resumen del partido en YouTube"
+
 msgid ""
 "Someone requested a password reset for your PredictStamp account. Use this "
 "link to choose a new password:"
@@ -5803,6 +5811,9 @@ msgstr "Página %(number)s de %(total)s"
 
 msgid "Learn more"
 msgstr "Saber más"
+
+msgid "Watch on YouTube"
+msgstr "Ver en YouTube"
 
 msgid "Verification record"
 msgstr "Registro de verificación"
@@ -6246,9 +6257,6 @@ msgstr[1] ""
 "          "
 
 #, python-format
-#| msgid ""
-#| "No open events match “%(search_query)s”. Try another keyword or browse by "
-#| "category above."
 msgid ""
 "No open events match “%(search_query)s”. Try another keyword or browse by "
 "category below."
@@ -6352,6 +6360,12 @@ msgstr "Cuotas en vivo"
 #, python-format
 msgid "Resolved outcome: <strong>%(outcome)s</strong>"
 msgstr "Resultado resuelto: <strong>%(outcome)s</strong>"
+
+msgid "Match highlights"
+msgstr "Resumen del partido"
+
+msgid "Official FIFA recap for this match."
+msgstr "Resumen oficial de FIFA de este partido."
 
 msgid "No Polymarket API data stored for this market yet."
 msgstr "Aún no hay datos de la API de Polymarket para este mercado."
@@ -6768,9 +6782,6 @@ msgstr "Salida anticipada · %(points)s de reputación realizada"
 msgid "Share this forecast"
 msgstr "Compartir este pronóstico"
 
-msgid "View market"
-msgstr "Ver mercado"
-
 msgid "Think you can call it better?"
 msgstr "¿Crees que puedes predecirlo mejor?"
 
@@ -6825,6 +6836,9 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "Match highlights available"
+#~ msgstr "Resumen del partido disponible"
 
 #~ msgid ""
 #~ "Slow mode is on for this live event — wait a few seconds between comments."

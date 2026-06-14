@@ -147,6 +147,7 @@ MANUAL = {
     "Source": "Fuente",
     "Draw": "Empate",
     "3-way result": "Resultado triple",
+    "Match winner": "Ganador del partido",
     "Place a forecast": "Publicar pronóstico",
     "Posted %(timesince)s ago. Forecasts are permanent and cannot be edited.": "Publicado hace %(timesince)s. Los pronósticos son permanentes y no se pueden editar.",
     "Pick your outcome below. Live Polymarket odds are captured when you submit.": "Elige tu resultado abajo. Las cuotas Polymarket en vivo se capturan al enviar.",

@@ -196,6 +196,23 @@ def soccer_match_probability_items(market):
 
 
 @register.filter
+def h2h_match_probability_items(market):
+    """2-way H2H outcomes in team_a → team_b order."""
+    probs = getattr(market, "current_probability", None) or {}
+    if not probs:
+        return []
+
+    team_a = getattr(market, "match_team_a", "") or ""
+    team_b = getattr(market, "match_team_b", "") or ""
+    if team_a and team_b:
+        labels = [team_a, team_b]
+    else:
+        labels = getattr(market, "outcome_labels", None) or list(probs.keys())
+
+    return [(label, probs[label]) for label in labels if label in probs]
+
+
+@register.filter
 def probability_items_sorted(market):
     """Outcomes sorted by highest current probability first."""
     return _sorted_probability_items(market)

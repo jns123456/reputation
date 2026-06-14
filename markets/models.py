@@ -196,14 +196,35 @@ class Market(models.Model):
         return is_world_cup_match_market(self)
 
     @property
+    def is_h2h_match(self):
+        from integrations.polymarket.head_to_head_matches import is_h2h_match_market
+
+        return is_h2h_match_market(self)
+
+    def _match_team_names(self):
+        if self._card_payloads_deferred():
+            labels = self.outcome_labels
+        else:
+            raw = self.polymarket_raw or {}
+            team_a = raw.get("team_a") or ""
+            team_b = raw.get("team_b") or ""
+            if team_a and team_b:
+                return team_a, team_b
+            labels = self.outcome_labels
+
+        if len(labels) >= 3 and str(labels[1]).strip().lower() == "draw":
+            return str(labels[0]), str(labels[2])
+        if len(labels) == 2 and {str(label).strip().lower() for label in labels} != {"yes", "no"}:
+            return str(labels[0]), str(labels[1])
+        return "", ""
+
+    @property
     def match_team_a(self):
-        raw = self.polymarket_raw or {}
-        return raw.get("team_a") or ""
+        return self._match_team_names()[0]
 
     @property
     def match_team_b(self):
-        raw = self.polymarket_raw or {}
-        return raw.get("team_b") or ""
+        return self._match_team_names()[1]
 
     @property
     def forecast_mode(self) -> str:
@@ -219,6 +240,8 @@ class Market(models.Model):
 
     @property
     def kickoff_at(self):
+        if self.game_start_time:
+            return self.game_start_time
         raw = self.polymarket_raw or {}
         kickoff = raw.get("kickoff_at")
         if not kickoff:
