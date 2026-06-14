@@ -133,3 +133,31 @@ class WorldCupPaginationTests(TestCase):
             + "?area=world-cup-games",
             fetch_redirect_response=False,
         )
+
+    @patch("dashboard.views.enqueue_category_sync")
+    def test_world_cup_match_card_shows_forecast_checkmark(self, mock_enqueue):
+        from conftest import create_user
+        from django.urls import reverse
+        from predictions.services import create_prediction
+
+        user = create_user("wc_forecaster")
+        market = Market.objects.create(
+            external_id="wc-match:forecast-check",
+            title="Germany vs. Curaçao",
+            slug="germany-vs-curacao-check",
+            status=Market.Status.OPEN,
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+            polymarket_event_raw={"tags": [{"slug": "fifa-world-cup"}]},
+            current_probability={"Germany": 0.94, "Draw": 0.04, "Curaçao": 0.02},
+        )
+        create_prediction(user=user, market=market, predicted_outcome="Germany")
+
+        self.client.force_login(user)
+        response = self.client.get(
+            reverse("dashboard:category_browse", kwargs={"slug": "sports"}),
+            {"area": "world-cup-games"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "You have a forecast on this market")
+        self.assertContains(response, "Germany vs. Curaçao")

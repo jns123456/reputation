@@ -175,13 +175,14 @@ def _world_cup_games_context(request, *, category=None):
     total_count = queryset.count()
     paginator = Paginator(queryset, settings.WORLD_CUP_MATCHES_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get("page"))
+    markets = attach_user_forecasts_to_markets(request.user, list(page_obj.object_list))
     source_filter_urls = build_source_filter_urls(
         base_url=reverse("dashboard:category_browse", kwargs={"slug": FIFA_WORLD_CUP_CATEGORY_SLUG}),
         active_source=source,
     )
     return {
         "category": category,
-        "markets": page_obj.object_list,
+        "markets": markets,
         "market_count": total_count,
         "page_obj": page_obj,
         "pagination_query": _pagination_extra_query(request),
