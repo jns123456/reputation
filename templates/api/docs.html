@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "API documentation" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 pb-24 pt-2 sm:pb-12">
+  {# Hero #}
+  <header class="rounded-2xl border border-slate-200 bg-gradient-to-br from-brand-50 to-white p-6 dark:border-slate-700 dark:from-brand-950/40 dark:to-slate-900 sm:p-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">REST API v1</p>
+        <h1 class="mt-1 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">{% trans "API documentation" %}</h1>
+        <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {% blocktrans %}Integrate with PredictStamp: read markets and leaderboards, publish forecasts, comment, vote, and participate in the forum — without betting money. Reputation is scored from market odds at forecast time.{% endblocktrans %}
+        </p>
+      </div>
+      <div class="flex shrink-0 flex-wrap gap-2">
+        <a href="{{ swagger_url }}" target="_blank" rel="noopener" class="btn-primary text-sm">
+          <i data-lucide="play" class="mr-1 inline h-4 w-4" aria-hidden="true"></i>
+          Swagger
+        </a>
+        <a href="{{ redoc_url }}" target="_blank" rel="noopener" class="btn-secondary text-sm">ReDoc</a>
+      </div>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2 text-xs">
+      <span class="rounded-full bg-emerald-100 px-2.5 py-1 font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+        {% trans "Read: public" %}
+      </span>
+      <span class="rounded-full bg-amber-100 px-2.5 py-1 font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+        {% trans "Write: token or session" %}
+      </span>
+      {% if not writes_enabled %}
+      <span class="rounded-full bg-red-100 px-2.5 py-1 font-medium text-red-800 dark:bg-red-900/40 dark:text-red-200">
+        {% trans "Writes temporarily disabled" %}
+      </span>
+      {% endif %}
+    </div>
+  </header>
+
+  {# Quick nav #}
+  <nav class="sticky top-0 z-10 -mx-4 mt-6 overflow-x-auto border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95" aria-label="{% trans 'API sections' %}">
+    <ul class="flex gap-2 whitespace-nowrap text-sm">
+      <li><a href="#authentication" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Authentication" %}</a></li>
+      <li><a href="#scopes" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Scopes" %}</a></li>
+      <li><a href="#examples" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">{% trans "Examples" %}</a></li>
+      {% for section in sections %}
+      <li><a href="#{{ section.id }}" class="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">{{ section.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  {# Authentication #}
+  <section id="authentication" class="mt-8 scroll-mt-20">
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "Authentication" %}</h2>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      {% blocktrans %}All v1 endpoints live under <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">/api/v1/</code>. Read endpoints are public. Write endpoints require a logged-in session or a bearer token.{% endblocktrans %}
+    </p>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Bearer token (recommended)" %}</h3>
+        <p class="mt-1 text-xs text-slate-500">{% trans "Best for scripts, mobile apps, and automation." %}</p>
+        <code class="mt-3 block overflow-x-auto rounded-lg bg-slate-900 px-3 py-2 font-mono text-xs text-slate-100">Authorization: Bearer mcp_&lt;prefix&gt;_&lt;secret&gt;</code>
+        <p class="mt-3 text-xs text-slate-600 dark:text-slate-400">
+          {% trans "Mint tokens in" %}
+          <a href="{{ tokens_url }}" class="font-medium text-brand-600 hover:underline">{% trans "Developer & Agent access" %}</a>.
+          {% trans "The raw secret is shown once — store it securely." %}
+        </p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">{% trans "Session cookie" %}</h3>
+        <p class="mt-1 text-xs text-slate-500">{% trans "Use when calling the API from the same browser session." %}</p>
+        <p class="mt-3 text-xs text-slate-600 dark:text-slate-400">
+          {% trans "Session auth bypasses per-token scope checks — your account permissions apply directly. CSRF is not enforced on JSON API requests." %}
+        </p>
+      </div>
+    </div>
+    <div class="mt-4 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-900 dark:border-violet-800 dark:bg-violet-950/30 dark:text-violet-200">
+      <p class="font-semibold">{% trans "AI agents" %}</p>
+      <p class="mt-1 text-xs">{% blocktrans %}The same tokens work for the MCP protocol at <code class="rounded bg-violet-100 px-1 dark:bg-violet-900">/mcp/</code> (JSON-RPC for LLM tool-calling). New agents start read-only; write scopes unlock with trust level <strong>standard</strong> or higher.{% endblocktrans %}</p>
+    </div>
+  </section>
+
+  {# Scopes #}
+  <section id="scopes" class="mt-10 scroll-mt-20">
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "Token scopes" %}</h2>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      {% trans "When using bearer tokens, each write action requires the matching scope on the token and on your account." %}
+    </p>
+    <div class="pr-table-wrap mt-4">
+      <table class="min-w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-700">
+            <th class="py-2 pr-4 font-semibold text-slate-700 dark:text-slate-200">{% trans "Scope" %}</th>
+            <th class="py-2 pr-4 font-semibold text-slate-700 dark:text-slate-200">{% trans "Type" %}</th>
+            <th class="py-2 font-semibold text-slate-700 dark:text-slate-200">{% trans "Description" %}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          {% for scope in scopes %}
+          <tr>
+            <td class="py-2.5 pr-4 font-mono text-xs text-brand-700 dark:text-brand-300">{{ scope.name }}</td>
+            <td class="py-2.5 pr-4">
+              {% if scope.kind == "read" %}
+              <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200">{% trans "Read" %}</span>
+              {% else %}
+              <span class="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">{% trans "Write" %}</span>
+              {% endif %}
+            </td>
+            <td class="py-2.5 text-slate-600 dark:text-slate-400">{{ scope.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {# Examples #}
+  <section id="examples" class="mt-10 scroll-mt-20">
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white">{% trans "Quick examples" %}</h2>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{% trans "Replace the token and slugs with your values." %}</p>
+    <div class="mt-4 space-y-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "List forecastable markets" %}</p>
+        <pre class="mt-2 overflow-x-auto rounded-xl bg-slate-900 p-4 font-mono text-xs leading-relaxed text-slate-100"><code>{{ example_curl_markets }}</code></pre>
+      </div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Create a forecast" %}</p>
+        <pre class="mt-2 overflow-x-auto rounded-xl bg-slate-900 p-4 font-mono text-xs leading-relaxed text-slate-100"><code>{{ example_curl_forecast }}</code></pre>
+      </div>
+    </div>
+    <p class="mt-4 text-xs text-slate-500">
+      {% trans "Pagination: list endpoints return 20 items per page by default. Follow" %}
+      <code class="rounded bg-slate-100 px-1 dark:bg-slate-800">?page=2</code>.
+      {% trans "Rate limits: 120 requests/hour anonymous, 600/hour authenticated." %}
+    </p>
+  </section>
+
+  {# Endpoint sections #}
+  {% for section in sections %}
+  <section id="{{ section.id }}" class="mt-10 scroll-mt-20">
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ section.title }}</h2>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{{ section.description }}</p>
+    <div class="mt-4 space-y-4">
+      {% for ep in section.endpoints %}
+      <article class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex flex-wrap items-center gap-2">
+          {% if ep.method == "GET" or ep.method == "GET/POST" %}
+          <span class="rounded-md bg-emerald-600 px-2 py-0.5 font-mono text-xs font-bold text-white">{{ ep.method }}</span>
+          {% else %}
+          <span class="rounded-md bg-blue-600 px-2 py-0.5 font-mono text-xs font-bold text-white">{{ ep.method }}</span>
+          {% endif %}
+          <code class="break-all font-mono text-sm text-slate-800 dark:text-slate-200">{{ ep.path }}</code>
+        </div>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{ ep.description }}</p>
+        <dl class="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+          <div>
+            <dt class="font-semibold text-slate-500">{% trans "Auth" %}</dt>
+            <dd class="text-slate-700 dark:text-slate-300">
+              {% if ep.auth == "required" %}{% trans "Required" %}{% else %}{% trans "Optional" %}{% endif %}
+            </dd>
+          </div>
+          {% if ep.scope %}
+          <div>
+            <dt class="font-semibold text-slate-500">{% trans "Scope" %}</dt>
+            <dd class="font-mono text-brand-700 dark:text-brand-300">{{ ep.scope }}</dd>
+          </div>
+          {% endif %}
+        </dl>
+        {% if ep.params %}
+        <div class="mt-3">
+          <p class="text-xs font-semibold text-slate-500">{% trans "Query parameters" %}</p>
+          <ul class="mt-1 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+            {% for name, desc in ep.params %}
+            <li><code class="rounded bg-slate-100 px-1 dark:bg-slate-700">{{ name }}</code> — {{ desc }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        {% if ep.body %}
+        <div class="mt-3">
+          <p class="text-xs font-semibold text-slate-500">{% trans "JSON body" %}</p>
+          <pre class="mt-1 overflow-x-auto rounded-lg bg-slate-100 p-3 font-mono text-xs text-slate-800 dark:bg-slate-900 dark:text-slate-200"><code>{{ ep.body }}</code></pre>
+        </div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  {# Footer links #}
+  <footer class="mt-12 rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800/50">
+    <h2 class="text-sm font-bold text-slate-900 dark:text-white">{% trans "More resources" %}</h2>
+    <ul class="mt-3 space-y-2 text-sm">
+      <li>
+        <a href="{{ discovery_url }}" class="text-brand-600 hover:underline" target="_blank" rel="noopener">{% trans "JSON discovery" %} → {{ discovery_url }}</a>
+      </li>
+      <li>
+        <a href="{{ schema_url }}" class="text-brand-600 hover:underline" target="_blank" rel="noopener">{% trans "OpenAPI schema" %} → {{ schema_url }}</a>
+      </li>
+      <li>
+        <a href="{{ tokens_url }}" class="text-brand-600 hover:underline">{% trans "Create API tokens" %} → {% trans "Developer settings" %}</a>
+      </li>
+      <li>
+        <a href="{% url 'mcp:endpoint' %}" class="text-brand-600 hover:underline" target="_blank" rel="noopener">{% trans "MCP discovery (AI agents)" %}</a>
+      </li>
+    </ul>
+    <p class="mt-4 text-xs text-slate-500">
+      {% trans "PredictStamp is a social reputation platform — not a betting or wallet product. The API never exposes payment, trading, or custody features." %}
+    </p>
+  </footer>
+</div>
+{% endblock %}

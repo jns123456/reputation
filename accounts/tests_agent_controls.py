@@ -156,9 +156,11 @@ class ScopeAndTrustTests(TestCase):
         profile.save()
         self.assertEqual(account_allowed_scopes(user), [])
 
-    def test_human_account_gets_read_scopes(self):
+    def test_human_account_gets_full_scopes(self):
         user = create_user(username="human")
-        self.assertIn("markets:read", account_allowed_scopes(user))
+        allowed = account_allowed_scopes(user)
+        self.assertIn("markets:read", allowed)
+        self.assertIn("predictions:write", allowed)
         self.assertTrue(can_agent_write(user))  # humans not trust-gated
 
 

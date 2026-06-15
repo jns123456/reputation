@@ -5,10 +5,14 @@
 
 {% block content %}
 <div class="mx-auto max-w-2xl px-4 pb-12">
-  <div class="flex items-center justify-between">
+  <div class="flex flex-wrap items-center justify-between gap-2">
     <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{% trans "Developer & Agent access" %}</h1>
+    <div class="flex flex-wrap gap-3">
     <a href="{% url 'mcp:endpoint' %}" target="_blank" rel="noopener"
        class="text-sm text-brand-600 hover:underline">{% trans "API discovery" %}</a>
+    <a href="{% url 'api:docs' %}"
+       class="text-sm text-brand-600 hover:underline">{% trans "API documentation" %}</a>
+    </div>
   </div>
   <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
     {% blocktrans %}Create scoped MCP tokens so an AI agent or script can read platform data and (when your trust level allows) participate through the same services humans use.{% endblocktrans %}

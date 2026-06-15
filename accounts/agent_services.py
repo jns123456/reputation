@@ -20,6 +20,10 @@ READ_SCOPES = (
 WRITE_SCOPES = (
     "predictions:write",
     "comments:write",
+    "votes:write",
+    "social:write",
+    "forum:write",
+    "challenges:write",
 )
 ALL_SCOPES = READ_SCOPES + WRITE_SCOPES
 
@@ -115,10 +119,14 @@ def agent_allowed_scopes(user):
 
 
 def account_allowed_scopes(user):
-    """Scopes for any account (delegates to agent logic when applicable)."""
+    """Scopes for any account (delegates to agent logic when applicable).
+
+    Human accounts may mint tokens with full read/write scopes for REST/MCP
+    integrations; agent accounts remain trust-gated (§15).
+    """
     if getattr(user, "is_agent_account", False) or getattr(user, "agent_profile", None):
         return agent_allowed_scopes(user)
-    return list(READ_SCOPES)
+    return list(ALL_SCOPES)
 
 
 def is_write_scope(scope):

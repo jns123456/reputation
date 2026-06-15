@@ -76,6 +76,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
+    "api",
     "accounts",
     "markets",
     "predictions",
@@ -471,10 +473,11 @@ CATEGORY_SYNC_FAILURE_COOLDOWN_SECONDS = env.int(
 )
 
 REST_FRAMEWORK = {
-    # Session-only: DRF's default includes BasicAuthentication, which would
-    # let attackers brute-force account passwords against /api/ endpoints.
+    # Bearer tokens (MCP credentials) + session cookies. BasicAuth is excluded
+    # so attackers cannot brute-force passwords against /api/ endpoints.
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
+        "api.authentication.McpBearerAuthentication",
+        "api.authentication.ApiSessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
@@ -489,6 +492,21 @@ REST_FRAMEWORK = {
         "anon": "120/hour",
         "user": "600/hour",
     },
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "api.exceptions.api_exception_handler",
+}
+
+API_WRITES_ENABLED = env.bool("API_WRITES_ENABLED", default=True)
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "PredictStamp API",
+    "DESCRIPTION": (
+        "REST API for markets, forecasts, reputation, forum, and challenges. "
+        "Authenticate with session cookies or Bearer tokens minted at /mcp/tokens/."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": r"/api/v1",
 }
 
 # --- Anti-abuse & human verification (AGENTS.md §16) -------------------------
