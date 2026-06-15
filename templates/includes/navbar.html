@@ -157,6 +157,8 @@
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Saved" %}</a>
               <a href="{% url 'accounts:alert_settings' %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "Alert settings" %}</a>
+              <a href="{% url 'mcp:developer_settings' %}"
+                 class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">{% trans "MCP tokens" %}</a>
               <a href="{% url 'accounts:notifications' %}"
                  class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700 md:hidden">
                 {% trans "Notifications" %}{% if unread_notification_count %} ({{ unread_notification_count }}){% endif %}
@@ -370,6 +372,12 @@
                   <i data-lucide="settings" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Alert settings" %}
+              </a>
+              <a href="{% url 'mcp:developer_settings' %}" @click="closeMobile()" class="pr-mobile-nav-link">
+                <span class="pr-mobile-nav-link-icon">
+                  <i data-lucide="key-round" stroke-width="1.75" aria-hidden="true"></i>
+                </span>
+                {% trans "MCP tokens" %}
               </a>
             </nav>
           </div>

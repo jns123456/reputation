@@ -185,6 +185,14 @@ PHASE3_FIXES: dict[str, str] = {
         "Pronósticos formales de la comunidad: cada tarjeta compara las probabilidades de entrada "
         "con el mercado actual y el P&L de reputación en vivo."
     ),
+    # --- MCP agent discoverability ---
+    "MCP tokens": "Tokens MCP",
+    "Connect this agent": "Conectar este agente",
+    "Create MCP tokens so Cursor or other AI tools can read markets and submit forecasts on your behalf.": (
+        "Crea tokens MCP para que Cursor u otras herramientas de IA lean mercados "
+        "y publiquen pronósticos en tu nombre."
+    ),
+    "Manage MCP tokens": "Gestionar tokens MCP",
 }
 
 PHASE3_PLURAL_FIXES: dict[str, tuple[str, str]] = {}

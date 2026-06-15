@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-14 04:11+0000\n"
+"POT-Creation-Date: 2026-06-15 01:55+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1791,9 +1791,6 @@ msgstr "Siguiendo"
 msgid "Watch"
 msgstr "Seguir"
 
-msgid "View market"
-msgstr "Ver mercado"
-
 #, python-format
 msgid "%(time)s ago"
 msgstr "hace %(time)s"
@@ -1841,6 +1838,10 @@ msgstr "Suscribirse"
 
 msgid "Edit profile"
 msgstr "Tu perfil"
+
+#| msgid "Your tokens"
+msgid "MCP tokens"
+msgstr "Tokens MCP"
 
 msgid "Alerts"
 msgstr "Alertas"
@@ -2079,6 +2080,21 @@ msgstr "%(rep)s reputación · %(pop)s popularidad en PredictStamp."
 #, python-format
 msgid "%(rep)s reputation points on PredictStamp."
 msgstr "%(rep)s puntos de reputación en PredictStamp."
+
+#| msgid "What does this agent do?"
+msgid "Connect this agent"
+msgstr "Conectar este agente"
+
+msgid ""
+"Create MCP tokens so Cursor or other AI tools can read markets and submit "
+"forecasts on your behalf."
+msgstr ""
+"Crea tokens MCP para que Cursor u otras herramientas de IA lean mercados y "
+"publiquen pronósticos en tu nombre."
+
+#| msgid "Manage groups"
+msgid "Manage MCP tokens"
+msgstr "Gestionar tokens MCP"
 
 msgid "Predictive quality"
 msgstr "Calidad predictiva"
@@ -3671,6 +3687,10 @@ msgstr "Filtrar por tema"
 msgid "Events in %(name)s"
 msgstr "Tendencias en %(name)s"
 
+#| msgid "Started %(date)s"
+msgid "Sorted by date"
+msgstr "Iniciado el %(date)s"
+
 #, python-format
 msgid "%(counter)s forecast"
 msgid_plural "%(counter)s forecasts"
@@ -4419,13 +4439,6 @@ msgstr "Popularidad"
 
 msgid "Upcoming & live matches"
 msgstr "Próximos y en vivo"
-
-#, python-format
-msgid "Trending in %(name)s"
-msgstr "Tendencias en %(name)s"
-
-msgid "Sorted by kickoff"
-msgstr "Ordenados por inicio"
 
 msgid "Advanced filters"
 msgstr "Filtros avanzados"
@@ -5417,9 +5430,6 @@ msgstr "Si no creaste una cuenta, puedes ignorar este mensaje."
 msgid "Hi %(name)s, there's new activity on your PredictStamp account."
 msgstr "Hola %(name)s, hay actividad nueva en tu cuenta de PredictStamp."
 
-msgid "Watch match highlights on YouTube"
-msgstr "Ver el resumen del partido en YouTube"
-
 msgid ""
 "Someone requested a password reset for your PredictStamp account. Use this "
 "link to choose a new password:"
@@ -5811,9 +5821,6 @@ msgstr "Página %(number)s de %(total)s"
 
 msgid "Learn more"
 msgstr "Saber más"
-
-msgid "Watch on YouTube"
-msgstr "Ver en YouTube"
 
 msgid "Verification record"
 msgstr "Registro de verificación"
@@ -6325,11 +6332,18 @@ msgstr ""
 "No se encontraron mercados. Ejecuta <code class=\"text-xs\">sync_markets "
 "--categories</code> o importa desde el admin."
 
-msgid "You have a forecast on this market"
-msgstr "para publicar tu pronóstico en este mercado."
+msgid "3-way result"
+msgstr "Resultado triple"
+
+#| msgid "Watching"
+msgid "Match winner"
+msgstr "Siguiendo"
 
 msgid "Forecasts closed"
 msgstr "Pronóstico cerrado"
+
+msgid "You have a forecast on this market"
+msgstr "para publicar tu pronóstico en este mercado."
 
 msgid "vs"
 msgstr ""
@@ -6360,12 +6374,6 @@ msgstr "Cuotas en vivo"
 #, python-format
 msgid "Resolved outcome: <strong>%(outcome)s</strong>"
 msgstr "Resultado resuelto: <strong>%(outcome)s</strong>"
-
-msgid "Match highlights"
-msgstr "Resumen del partido"
-
-msgid "Official FIFA recap for this match."
-msgstr "Resumen oficial de FIFA de este partido."
 
 msgid "No Polymarket API data stored for this market yet."
 msgstr "Aún no hay datos de la API de Polymarket para este mercado."
@@ -6415,9 +6423,6 @@ msgstr "Gráfico de mercado Polymarket — %(market_title)s"
 
 msgid "Source"
 msgstr "Fuente"
-
-msgid "3-way result"
-msgstr "Resultado triple"
 
 msgid "API discovery"
 msgstr ""
@@ -6782,6 +6787,9 @@ msgstr "Salida anticipada · %(points)s de reputación realizada"
 msgid "Share this forecast"
 msgstr "Compartir este pronóstico"
 
+msgid "View market"
+msgstr "Ver mercado"
+
 msgid "Think you can call it better?"
 msgstr "¿Crees que puedes predecirlo mejor?"
 
@@ -6836,6 +6844,25 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#, python-format
+#~ msgid "Trending in %(name)s"
+#~ msgstr "Tendencias en %(name)s"
+
+#~ msgid "Sorted by kickoff"
+#~ msgstr "Ordenados por inicio"
+
+#~ msgid "Watch match highlights on YouTube"
+#~ msgstr "Ver el resumen del partido en YouTube"
+
+#~ msgid "Watch on YouTube"
+#~ msgstr "Ver en YouTube"
+
+#~ msgid "Match highlights"
+#~ msgstr "Resumen del partido"
+
+#~ msgid "Official FIFA recap for this match."
+#~ msgstr "Resumen oficial de FIFA de este partido."
 
 #~ msgid "Match highlights available"
 #~ msgstr "Resumen del partido disponible"

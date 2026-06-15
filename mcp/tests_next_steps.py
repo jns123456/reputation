@@ -4,7 +4,7 @@ import io
 import json
 
 from django.core.cache import cache
-from django.test import TestCase, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from accounts.models import AIAgentProfile, User
@@ -114,3 +114,57 @@ class StdioTransportTests(TestCase):
         StdioMcpServer(raw_token="", stdin=stdin, stdout=stdout).serve_forever()
         out = json.loads(stdout.getvalue().strip())
         self.assertEqual(out["result"]["name"], "predictstamp-mcp")
+
+
+class McpNavDiscoverabilityTests(TestCase):
+    def setUp(self):
+        self.agent = create_user(
+            username="bagagent",
+            account_type=User.AccountType.DECLARED_AGENT,
+        )
+        AIAgentProfile.objects.create(
+            user=self.agent,
+            agent_name="bagagent",
+            trust_level=AIAgentProfile.TrustLevel.NEW,
+        )
+        self.visitor = create_user(username="visitor")
+        self.client = Client()
+        self.mcp_url = reverse("mcp:developer_settings")
+
+    def test_profile_shows_mcp_link_for_owner(self):
+        self.client.force_login(self.agent)
+        response = self.client.get(
+            reverse("accounts:profile", kwargs={"username": self.agent.username})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.mcp_url)
+        self.assertContains(response, "MCP tokens")
+        self.assertContains(response, "Connect this agent")
+        self.assertContains(response, "Manage MCP tokens")
+
+    def test_profile_hides_agent_callout_for_other_users(self):
+        self.client.force_login(self.visitor)
+        response = self.client.get(
+            reverse("accounts:profile", kwargs={"username": self.agent.username})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Connect this agent")
+        self.assertNotContains(response, "Manage MCP tokens")
+
+    def test_navbar_shows_mcp_link_when_authenticated(self):
+        self.client.force_login(self.agent)
+        response = self.client.get(reverse("markets:list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.mcp_url)
+        self.assertContains(response, "MCP tokens")
+
+    def test_profile_mcp_nav_renders_in_spanish(self):
+        self.client.force_login(self.agent)
+        with self.settings(LANGUAGE_CODE="es"):
+            response = self.client.get(
+                reverse("accounts:profile", kwargs={"username": self.agent.username}),
+                HTTP_ACCEPT_LANGUAGE="es",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.mcp_url)
+        self.assertContains(response, "Conectar este agente")
