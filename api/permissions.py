@@ -51,3 +51,13 @@ class HasApiScope(BasePermission):
         if not getattr(settings, "API_WRITES_ENABLED", True):
             return False
         return request_has_scope(request, self.scope)
+
+
+def scoped_permission(scope):
+    """Return a permission class for DRF permission_classes (not an instance)."""
+    class _ScopedPermission(HasApiScope):
+        def __init__(self):
+            super().__init__(scope)
+
+    _ScopedPermission.__name__ = f"HasApiScope_{scope.replace(':', '_')}"
+    return _ScopedPermission

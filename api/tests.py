@@ -40,6 +40,13 @@ class ApiDiscoveryTests(TestCase):
         serializer = ReputationEventSerializer()
         self.assertIn("prediction_id", serializer.fields)
 
+    def test_openapi_schema_generates(self):
+        """Regression: /api/v1/schema/ must return OpenAPI (PREDICTSTAMP-3)."""
+        client = APIClient()
+        resp = client.get("/api/v1/schema/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b"openapi: 3.0.3", resp.content)
+
 
 class ApiReadTests(TestCase):
     def setUp(self):
