@@ -20,7 +20,7 @@
       {% include "markets/partials/polymarket_embed.html" with inline_layout=True %}
     </div>
     <div class="flex min-w-0 flex-col">
-      {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast inline_layout=True %}
+      {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast inline_layout=True return_url=return_url %}
     </div>
   </div>
   {% else %}
@@ -29,12 +29,12 @@
     {% endif %}
 
     {% if market.is_multi_binary_market %}
-      {% include "predictions/partials/multi_outcome_forecast_panel.html" %}
+      {% include "predictions/partials/multi_outcome_forecast_panel.html" with return_url=return_url %}
     {% endif %}
 
     {% if market.is_forecastable and not market.is_multi_binary_market %}
       <div>
-        {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast %}
+        {% include "predictions/partials/forecast_form.html" with form=forecast_form existing=existing_forecast return_url=return_url %}
       </div>
     {% endif %}
   {% endif %}
@@ -68,5 +68,34 @@
       {% endfor %}
     </div>
   </section>
+
+  {% if forecast_posted and return_url %}
+  <script>
+    (function () {
+      var returnUrl = "{{ return_url|escapejs }}";
+      var marketPath = "{% url 'markets:detail' slug=market.slug %}";
+      if (!returnUrl || !window.history || !window.history.replaceState) return;
+
+      var url = new URL(window.location.href);
+      if (url.searchParams.get("posted") !== "1") return;
+      url.searchParams.delete("posted");
+      var cleanHref = url.pathname + (url.search ? url.search : "") + url.hash;
+      window.history.replaceState(null, "", cleanHref);
+
+      var referrerPath = "";
+      try {
+        referrerPath = new URL(document.referrer || "", window.location.origin).pathname;
+      } catch (e) {}
+
+      if (!referrerPath.endsWith("/create/")) return;
+
+      window.addEventListener("popstate", function () {
+        if (window.location.pathname === marketPath && window.location.hash !== "#forecasts") {
+          window.location.replace(returnUrl);
+        }
+      });
+    })();
+  </script>
+  {% endif %}
 </div>
 {% endblock %}

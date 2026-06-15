@@ -26,7 +26,28 @@ from reputation.services import calculate_user_unrealized_reputation
 from markets.forecast_modes import ForecastMode, get_forecast_mode
 
 from accounts import abuse_services
+from accounts.http_utils import resolve_safe_return_url
 from accounts.write_guard import ContentRejected, write_guard_user_message
+from markets.navigation import market_return_session_key, resolve_market_return_url
+
+
+def _persist_market_return_url(request, *, slug: str) -> str:
+    return_url = resolve_safe_return_url(
+        request,
+        exclude_paths=(
+            reverse("markets:detail", kwargs={"slug": slug}),
+            reverse("predictions:create", kwargs={"slug": slug}),
+        ),
+    )
+    if return_url:
+        request.session[market_return_session_key(slug)] = return_url
+    return return_url or request.session.get(market_return_session_key(slug), "")
+
+
+def _forecast_success_redirect(request, *, slug: str):
+    _persist_market_return_url(request, slug=slug)
+    detail_url = reverse("markets:detail", kwargs={"slug": slug})
+    return redirect(f"{detail_url}?posted=1#forecasts")
 
 
 def _forecast_form_anchor(market) -> str:
@@ -108,13 +129,15 @@ def create_prediction_view(request, slug):
                 messages.error(request, write_guard_user_message(exc))
                 return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{_forecast_form_anchor(market)}")
             messages.success(request, _("Your forecast was posted."))
-            return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}#forecasts")
+            return _forecast_success_redirect(request, slug=slug)
     else:
         form = (
             ForecastForm(market=market, creator_program_enabled=creator_enabled)
             if not existing
             else None
         )
+
+    return_url = resolve_market_return_url(request, slug=slug)
 
     return render(
         request,
@@ -124,6 +147,7 @@ def create_prediction_view(request, slug):
             "market": market,
             "existing": existing,
             "creator_program_enabled": creator_enabled,
+            "return_url": return_url,
         },
     )
 

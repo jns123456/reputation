@@ -97,6 +97,9 @@
         <p class="text-sm text-slate-500 dark:text-slate-400">
           <a href="#forecasts" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "View in public feed" %}</a>
         </p>
+        <div class="flex flex-wrap items-center gap-3">
+          {% include "predictions/partials/forecast_return_link.html" %}
+        </div>
         <div>
           {% include "integrations/partials/attestation_badge.html" with attestation=existing.verified_attestation %}
         </div>
@@ -114,6 +117,7 @@
         @change="if ($event.target.name === 'predicted_outcome') { activeOutcome = $event.target.value; $nextTick(() => $refs.forecastForm.querySelector('.forecast-reasoning-input')?.focus()) }"
       >
         {% csrf_token %}
+        {% include "predictions/partials/forecast_return_hidden.html" %}
         {% if form.non_field_errors %}
         <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-200">
           {{ form.non_field_errors.0 }}

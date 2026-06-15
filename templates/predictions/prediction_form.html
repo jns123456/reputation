@@ -5,8 +5,14 @@
 
 {% block content %}
 <div class="mx-auto max-w-xl">
-  <p class="text-sm text-slate-500"><a href="{% url 'markets:detail' slug=market.slug %}" class="text-brand-600 hover:underline">{% trans "← Back to market" %}</a></p>
+  <p class="text-sm text-slate-500">
+    {% if return_url %}
+    {% include "predictions/partials/forecast_return_link.html" %}
+    {% else %}
+    <a href="{% url 'markets:detail' slug=market.slug %}" class="text-brand-600 hover:underline">{% trans "← Back to market" %}</a>
+    {% endif %}
+  </p>
   <h1 class="mt-2 text-2xl font-bold">{{ market.display_title }}</h1>
-  {% include "predictions/partials/forecast_form.html" with form=form existing=existing %}
+  {% include "predictions/partials/forecast_form.html" with form=form existing=existing return_url=return_url %}
 </div>
 {% endblock %}

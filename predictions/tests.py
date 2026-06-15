@@ -968,3 +968,70 @@ class GuestForecastAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Crear cuenta")
         self.assertContains(response, "Crea una cuenta para publicar tu pronóstico en este evento.")
+
+
+class MarketReturnNavigationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="return-nav-user",
+            password="pass",
+            onboarding_completed=True,
+        )
+        self.market = Market.objects.create(
+            external_id="return-nav-m1",
+            title="Return navigation market",
+            slug="return-navigation-market",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=timezone.now() + timedelta(days=2),
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            current_probability={"Yes": 0.4, "No": 0.6},
+        )
+        self.client.force_login(self.user)
+
+    def test_market_detail_remembers_referer_for_back_navigation(self):
+        referer = reverse("markets:list")
+        absolute_referer = self.client.request().wsgi_request.build_absolute_uri(referer)
+        response = self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug}),
+            HTTP_REFERER=absolute_referer,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'name="next" value="{absolute_referer}"')
+
+    def test_successful_forecast_redirect_includes_posted_flag(self):
+        list_url = reverse("markets:list")
+        self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug}),
+            HTTP_REFERER=self.client.request().wsgi_request.build_absolute_uri(list_url),
+        )
+
+        response = self.client.post(
+            reverse("predictions:create", kwargs={"slug": self.market.slug}),
+            {"predicted_outcome": "Yes", "next": list_url},
+        )
+
+        self.assertRedirects(
+            response,
+            f"{reverse('markets:detail', kwargs={'slug': self.market.slug})}?posted=1#forecasts",
+            fetch_redirect_response=False,
+        )
+
+    def test_back_link_shown_after_forecast(self):
+        list_url = reverse("markets:list")
+        self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug}),
+            HTTP_REFERER=self.client.request().wsgi_request.build_absolute_uri(list_url),
+        )
+        self.client.post(
+            reverse("predictions:create", kwargs={"slug": self.market.slug}),
+            {"predicted_outcome": "Yes", "next": list_url},
+        )
+
+        response = self.client.get(
+            reverse("markets:detail", kwargs={"slug": self.market.slug}),
+        )
+
+        self.assertContains(response, f'href="{list_url}"')
+        self.assertContains(response, "← Back")

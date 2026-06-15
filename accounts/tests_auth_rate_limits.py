@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from accounts.http_utils import safe_redirect_to_referer
+from accounts.http_utils import resolve_safe_return_url, safe_redirect_to_referer
 from accounts.models import AbuseEvent
 
 User = get_user_model()
@@ -100,6 +100,30 @@ class SafeRedirectTests(TestCase):
         response = safe_redirect_to_referer(request, fallback="/")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, referer)
+
+    def test_resolve_safe_return_url_prefers_next_param(self):
+        request = self.client.get("/markets/detail/?next=/browse/politics/").wsgi_request
+        self.assertEqual(
+            resolve_safe_return_url(request, exclude_paths=("/markets/detail/",)),
+            "/browse/politics/",
+        )
+
+    def test_resolve_safe_return_url_rejects_external_next(self):
+        request = self.client.get("/").wsgi_request
+        request.GET = request.GET.copy()
+        request.GET["next"] = "https://evil.example/phish"
+        self.assertEqual(resolve_safe_return_url(request), "")
+
+    def test_resolve_safe_return_url_excludes_current_market(self):
+        request = self.client.get("/markets/event-slug/").wsgi_request
+        request.META["HTTP_REFERER"] = request.build_absolute_uri("/markets/event-slug/")
+        self.assertEqual(
+            resolve_safe_return_url(
+                request,
+                exclude_paths=("/markets/event-slug/", "/markets/event-slug/create/"),
+            ),
+            "",
+        )
 
 
 class DRFThrottleConfigTests(TestCase):

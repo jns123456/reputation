@@ -256,6 +256,9 @@ def market_detail(request, slug):
     ]
 
     from accounts.follow_selectors import is_watching_market
+    from markets.navigation import resolve_market_return_url
+
+    return_url = resolve_market_return_url(request, slug=slug)
 
     return render(
         request,
@@ -270,5 +273,7 @@ def market_detail(request, slug):
             "active_challenges": active_challenges,
             "creator_program_enabled": creator_program_enabled,
             "is_watching_market": is_watching_market(user=request.user, market=market),
+            "return_url": return_url,
+            "forecast_posted": request.GET.get("posted") == "1",
         },
     )
