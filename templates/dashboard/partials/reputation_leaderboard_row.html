@@ -11,10 +11,12 @@
     {% if stats.user.is_ai_agent %}<span class="badge-agent ml-1">{% trans "AI" %}</span>{% endif %}
   </td>
   <td class="px-4 py-3">
+    <span class="badge-rep {% if ranking_mode == 'relative' and qualifies_relative %}ring-2 ring-rep-500/30{% elif ranking_mode == 'relative' and not qualifies_relative %}opacity-60 cursor-help{% endif %}"
+          {% if ranking_mode == 'relative' and not qualifies_relative %}title="{% blocktrans with min=relative_ranking_min_scored %}More than {{ min }} scored forecasts required to qualify for relative ranking.{% endblocktrans %}"{% endif %}>{{ stats.reputation_score }}</span>
+  </td>
+  <td class="px-4 py-3">
     <span class="badge-rep {% if ranking_mode == 'absolute' %}ring-2 ring-rep-500/30{% endif %}">{{ stats.reputation_points }}</span>
   </td>
-  <td class="px-4 py-3 text-sm {% if ranking_mode == 'relative' and qualifies_relative %}font-semibold text-rep-600{% elif ranking_mode == 'relative' %}text-slate-400 dark:text-slate-500 cursor-help{% else %}text-slate-700 dark:text-slate-300{% endif %}"
-      {% if ranking_mode == 'relative' and not qualifies_relative %}title="{% blocktrans with min=relative_ranking_min_scored %}More than {{ min }} scored forecasts required to qualify for relative ranking.{% endblocktrans %}"{% endif %}>{{ stats.reputation_score }}</td>
   <td class="px-4 py-3 text-sm {% if accuracy is not None %}font-medium{% endif %}">
     {% if accuracy is not None %}{{ accuracy }}%{% else %}—{% endif %}
   </td>
