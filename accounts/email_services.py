@@ -144,13 +144,13 @@ def _send_via_resend(*, api_key, subject, recipient_email, text_body, html_body)
         getattr(settings, "DEFAULT_FROM_EMAIL", "PredictStamp <onboarding@resend.dev>"),
     )
     payload = {
-        "from": from_email,
+        "from": force_str(from_email),
         "to": [recipient_email],
         "subject": force_str(subject),
-        "text": text_body,
+        "text": force_str(text_body),
     }
     if html_body:
-        payload["html"] = html_body
+        payload["html"] = force_str(html_body)
 
     response = requests.post(
         "https://api.resend.com/emails",
