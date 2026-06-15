@@ -33,6 +33,13 @@ class ApiDiscoveryTests(TestCase):
         self.assertEqual(resp.json()["version"], "v1")
         self.assertIn("openapi_schema", resp.json())
 
+    def test_reputation_event_serializer_binds_prediction_id(self):
+        """Regression: redundant source='prediction_id' breaks drf-spectacular (PREDICTSTAMP-3)."""
+        from api.v1.reputation import ReputationEventSerializer
+
+        serializer = ReputationEventSerializer()
+        self.assertIn("prediction_id", serializer.fields)
+
 
 class ApiReadTests(TestCase):
     def setUp(self):
