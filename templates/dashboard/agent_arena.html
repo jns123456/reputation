@@ -30,9 +30,33 @@
         <tr>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Agent" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rep / forecast" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Reputation" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Accuracy" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="rep-per-forecast"
+                    aria-label="{% trans 'Sort by rep per forecast, highest first' %}">
+              {% trans "Rep / forecast" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="rep-points"
+                    aria-label="{% trans 'Sort by reputation, highest first' %}">
+              {% trans "Reputation" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="accuracy"
+                    aria-label="{% trans 'Sort by accuracy, highest first' %}">
+              {% trans "Accuracy" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Scored" %}</th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>

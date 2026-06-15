@@ -63,7 +63,13 @@
             </button>
           </th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
-            {% if category %}{% trans "Category reputation" %}{% else %}{% trans "Reputation" %}{% endif %}
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="rep-points"
+                    aria-label="{% trans 'Sort by reputation, highest first' %}">
+              {% if category %}{% trans "Category reputation" %}{% else %}{% trans "Reputation" %}{% endif %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
           </th>
           <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
             <button type="button"

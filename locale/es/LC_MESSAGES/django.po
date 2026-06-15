@@ -5142,6 +5142,9 @@ msgstr "Reputación"
 msgid "Sort by rep per forecast, highest first"
 msgstr "Ordenar por rep / pronóstico, mayor primero"
 
+msgid "Sort by reputation, highest first"
+msgstr "Ordenar por reputación, mayor primero"
+
 msgid "Sort by accuracy, highest first"
 msgstr "Ordenar por precisión, mayor primero"
 
