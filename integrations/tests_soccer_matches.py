@@ -124,6 +124,18 @@ class SoccerMatchNormalizationTests(TestCase):
             "South Africa",
         )
 
+    def test_classify_moneyline_outcome_hyphenated_title_vs_and_in_question(self):
+        """Polymarket event titles and leg questions can spell the same team differently."""
+        team_a, team_b = "Canada", "Bosnia-Herzegovina"
+        self.assertEqual(
+            classify_moneyline_outcome(
+                "Will Bosnia and Herzegovina win on 2026-06-12?",
+                team_a,
+                team_b,
+            ),
+            "Bosnia-Herzegovina",
+        )
+
     def test_is_world_cup_match_event(self):
         self.assertTrue(is_world_cup_match_event(MEXICO_VS_RSA_EVENT))
         self.assertTrue(is_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT))
@@ -258,6 +270,72 @@ class SyncWorldCupMatchMarketsTests(TestCase):
         self.assertEqual(market.canonical_category_slug, "sports")
 
 
+CANADA_VS_BOSNIA_EVENT = {
+    "slug": "fifwc-can-bih-2026-06-12",
+    "title": "Canada vs. Bosnia and Herzegovina",
+    "startDate": "2026-04-06T22:48:44.921385Z",
+    "endDate": "2026-06-12T19:00:00Z",
+    "volume24hr": 85000,
+    "tags": [{"slug": "fifa-world-cup", "label": "FIFA World Cup"}],
+    "markets": [
+        {
+            "id": "can-win",
+            "question": "Will Canada win on 2026-06-12?",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-12T19:00:00Z",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["0.53", "0.47"]',
+            "closed": False,
+        },
+        {
+            "id": "draw",
+            "question": "Will Canada vs. Bosnia and Herzegovina end in a draw?",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-12T19:00:00Z",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["0.27", "0.73"]',
+            "closed": False,
+        },
+        {
+            "id": "bih-win",
+            "question": "Will Bosnia and Herzegovina win on 2026-06-12?",
+            "sportsMarketType": "moneyline",
+            "gameStartTime": "2026-06-12T19:00:00Z",
+            "outcomes": '["Yes", "No"]',
+            "outcomePrices": '["0.20", "0.80"]',
+            "closed": False,
+        },
+    ],
+}
+
+
+CANADA_VS_BOSNIA_RESOLVED_EVENT = {
+    **CANADA_VS_BOSNIA_EVENT,
+    "title": "Canada vs. Bosnia-Herzegovina",
+    "closed": True,
+    "markets": [
+        {
+            **CANADA_VS_BOSNIA_EVENT["markets"][0],
+            "closed": True,
+            "automaticallyResolved": True,
+            "outcomePrices": '["0", "1"]',
+        },
+        {
+            **CANADA_VS_BOSNIA_EVENT["markets"][1],
+            "closed": True,
+            "automaticallyResolved": True,
+            "outcomePrices": '["1", "0"]',
+        },
+        {
+            **CANADA_VS_BOSNIA_EVENT["markets"][2],
+            "closed": True,
+            "automaticallyResolved": True,
+            "outcomePrices": '["0", "1"]',
+        },
+    ],
+}
+
+
 COLOMBIA_VS_COSTA_RICA_RESOLVED_EVENT = {
     **COLOMBIA_VS_COSTA_RICA_EVENT,
     "markets": [
@@ -296,6 +374,13 @@ class ResolvedSoccerMatchRefreshTests(TestCase):
         self.assertEqual(normalized["resolved_outcome"], "Colombia")
         self.assertAlmostEqual(normalized["current_probability"]["Colombia"], 1.0)
 
+    def test_normalize_resolved_canada_bosnia_draw_with_hyphenated_title(self):
+        normalized = normalize_world_cup_match_event(CANADA_VS_BOSNIA_RESOLVED_EVENT)
+        self.assertIsNotNone(normalized)
+        self.assertEqual(normalized["status"], "resolved")
+        self.assertEqual(normalized["resolved_outcome"], DRAW_OUTCOME_LABEL)
+        self.assertAlmostEqual(normalized["current_probability"][DRAW_OUTCOME_LABEL], 1.0)
+
     @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
     @patch("integrations.services.PolymarketClient.fetch_event_by_slug")
     def test_refresh_resolved_soccer_match_scores_pending_forecast(
@@ -325,6 +410,36 @@ class ResolvedSoccerMatchRefreshTests(TestCase):
         self.assertEqual(market.resolved_outcome, "Colombia")
         self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
         self.assertTrue(prediction.is_correct)
+
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    @patch("integrations.services.PolymarketClient.fetch_event_by_slug")
+    def test_refresh_canada_bosnia_draw_scores_pending_canada_forecast(
+        self, mock_fetch_event, _mock_translate
+    ):
+        mock_fetch_event.return_value = CANADA_VS_BOSNIA_RESOLVED_EVENT
+        normalized = normalize_world_cup_match_event(CANADA_VS_BOSNIA_EVENT)
+        raw_market = build_world_cup_match_raw(CANADA_VS_BOSNIA_EVENT, normalized=normalized)
+        market, _ = import_market_from_normalized(
+            normalized,
+            raw_market=raw_market,
+            raw_event=CANADA_VS_BOSNIA_EVENT,
+        )
+        prediction = Prediction.objects.create(
+            user=self.user,
+            market=market,
+            predicted_outcome="Canada",
+            predicted_direction=Prediction.Direction.YES,
+            probability_at_prediction_time=dict(market.current_probability or {}),
+        )
+
+        refresh_world_cup_match_market(market)
+        prediction.refresh_from_db()
+        market.refresh_from_db()
+
+        self.assertEqual(market.status, Market.Status.RESOLVED)
+        self.assertEqual(market.resolved_outcome, DRAW_OUTCOME_LABEL)
+        self.assertEqual(prediction.status, Prediction.Status.RESOLVED)
+        self.assertFalse(prediction.is_correct)
 
     @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
     @patch("integrations.services.refresh_market_from_polymarket")

@@ -75,12 +75,30 @@ def parse_match_teams(title: str) -> tuple[str | None, str | None]:
     return parts[0].strip(), parts[1].strip()
 
 
+def _normalize_team_name_for_match(name: str) -> str:
+    """Collapse hyphens, ``and``, and spacing so title vs question variants still match."""
+    lowered = name.lower().strip()
+    lowered = re.sub(r"\s+and\s+", " ", lowered)
+    lowered = lowered.replace("-", " ")
+    return re.sub(r"\s+", " ", lowered).strip()
+
+
+def _team_name_in_question(team: str, question_lower: str) -> bool:
+    if team.lower() in question_lower:
+        return True
+    normalized_team = _normalize_team_name_for_match(team)
+    normalized_question = _normalize_team_name_for_match(question_lower)
+    return bool(normalized_team and normalized_team in normalized_question)
+
+
 def classify_moneyline_outcome(question: str, team_a: str, team_b: str) -> str | None:
     question_lower = question.lower()
     if "draw" in question_lower:
         return DRAW_OUTCOME_LABEL
+    if "win" not in question_lower:
+        return None
     for team in (team_a, team_b):
-        if team.lower() in question_lower and "win" in question_lower:
+        if _team_name_in_question(team, question_lower):
             return team
     return None
 
