@@ -124,6 +124,7 @@
 
   <div class="mx-auto mt-8 max-w-5xl">
     <div class="grid gap-6 lg:grid-cols-5 lg:items-start lg:gap-10">
+      {% block auth_sidebar %}
       <aside class="space-y-3 lg:col-span-2">
         {% block auth_benefits %}
         <div class="auth-benefit">
@@ -155,8 +156,9 @@
         </div>
         {% endblock %}
       </aside>
+      {% endblock %}
 
-      <div class="lg:col-span-3">
+      <div class="{% block auth_form_column_class %}lg:col-span-3{% endblock %}">
         <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-lg backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90">
           <div class="border-b border-slate-100 bg-gradient-to-r from-brand-50/80 to-white px-5 py-5 sm:px-8 dark:border-slate-700 dark:from-brand-950/30 dark:to-slate-800">
             <h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">

@@ -86,6 +86,9 @@
 </form>
 {% endblock %}
 
+{% block auth_sidebar %}{% endblock %}
+{% block auth_form_column_class %}lg:col-span-5 max-w-lg mx-auto w-full{% endblock %}
+
 {% block auth_footer %}
 {% trans "No account?" %}
 <a href="{% url 'accounts:signup' %}" class="font-medium text-brand-600 hover:text-brand-700 hover:underline dark:text-brand-400">{% trans "Create one free" %}</a>
