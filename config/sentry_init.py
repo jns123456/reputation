@@ -28,16 +28,24 @@ def _event_message(event):
         message = logentry.get("message") or logentry.get("formatted")
         if message:
             return message
-    return event.get("message") or ""
+    message = event.get("message") or ""
+    if isinstance(message, dict):
+        return message.get("formatted") or ""
+    return message
 
 
 def _before_send(event, hint):
     """Drop expected Celery worker SIGTERM noise during Heroku dyno cycling."""
-    if event.get("logger") != "multiprocessing":
-        return event
+    exc_info = hint.get("exc_info")
+    if exc_info and exc_info[0] is not None:
+        exc_name = getattr(exc_info[0], "__name__", "")
+        if exc_name in {"WorkerLostError", "WorkerTerminate"}:
+            return None
+
     message = _event_message(event)
     if "ForkPoolWorker" in message and "SIGTERM" in message:
         return None
+
     return event
 
 
