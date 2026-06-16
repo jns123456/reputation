@@ -39,3 +39,16 @@ class ContentSecurityPolicyMiddlewareTests(SimpleTestCase):
         response = self.middleware(request)
         header = response["Content-Security-Policy-Report-Only"]
         self.assertIn("frame-src 'self' embed.polymarket.com challenges.cloudflare.com;", header)
+
+    @override_settings(
+        CSP_ENABLED=True,
+        CSP_REPORT_ONLY=True,
+        CONTENT_SECURITY_POLICY=(
+            "default-src 'self'; font-src 'self' data:; connect-src 'self';"
+        ),
+    )
+    def test_google_fonts_host_added_to_font_src(self):
+        request = self.factory.get("/")
+        response = self.middleware(request)
+        header = response["Content-Security-Policy-Report-Only"]
+        self.assertIn("font-src 'self' data: fonts.gstatic.com;", header)
