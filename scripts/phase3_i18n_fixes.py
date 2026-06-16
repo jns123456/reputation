@@ -85,6 +85,9 @@ PHASE3_FIXES: dict[str, str] = {
     "An account with this email already exists. Try signing in instead.": (
         "Ya existe una cuenta con este email. Prueba iniciar sesión."
     ),
+    "If this email is already registered, sign in or reset your password.": (
+        "Si este correo ya está registrado, inicia sesión o restablece tu contraseña."
+    ),
     "Invalid vote": "Voto inválido",
     # --- Password reset flow ---
     "Reset password": "Restablecer contraseña",

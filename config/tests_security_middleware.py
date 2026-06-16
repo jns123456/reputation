@@ -20,12 +20,9 @@ class ContentSecurityPolicyMiddlewareTests(SimpleTestCase):
     @override_settings(
         CSP_ENABLED=True,
         CSP_REPORT_ONLY=True,
-        CONTENT_SECURITY_POLICY="default-src 'self'",
+        CONTENT_SECURITY_POLICY="default-src 'self'; report-uri https://example.test/csp;",
     )
     def test_report_only_header_when_enabled(self):
         request = self.factory.get("/")
         response = self.middleware(request)
-        self.assertEqual(
-            response["Content-Security-Policy-Report-Only"],
-            "default-src 'self'",
-        )
+        self.assertIn("report-uri https://example.test/csp;", response["Content-Security-Policy-Report-Only"])

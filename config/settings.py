@@ -649,8 +649,10 @@ POLYMARKET_EMBED_WIDTH = env("POLYMARKET_EMBED_WIDTH", default="100%")
 POLYMARKET_EMBED_HEIGHT = env.int("POLYMARKET_EMBED_HEIGHT", default=420)
 
 
-def build_content_security_policy():
+def build_content_security_policy(*, sentry_dsn=""):
     """Pragmatic CSP for Tailwind/HTMX CDN + Polymarket embeds (report-only rollout)."""
+    from config.csp_helpers import sentry_csp_report_uri
+
     embed_hosts = []
     for url in (POLYMARKET_EMBED_BASE_URL, POLYMARKET_SPORTS_EMBED_BASE_URL):
         host = urlparse(url).netloc
@@ -659,23 +661,37 @@ def build_content_security_policy():
     embed_src = " ".join(embed_hosts) if embed_hosts else "embed.polymarket.com"
     dicebear_host = urlparse(AVATAR_DICEBEAR_BASE_URL).netloc or "api.dicebear.com"
     api_host = urlparse(POLYMARKET_API_URL).netloc or "gamma-api.polymarket.com"
-    return (
+
+    connect_hosts = ["'self'", f"https://{api_host}", "https://challenges.cloudflare.com"]
+    report_uri = sentry_csp_report_uri(sentry_dsn)
+    if report_uri:
+        report_host = urlparse(report_uri).hostname
+        if report_host:
+            connect_hosts.append(f"https://{report_host}")
+
+    policy = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com unpkg.com "
         "cdn.jsdelivr.net code.iconify.design challenges.cloudflare.com; "
         f"frame-src 'self' {embed_src}; "
         "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com; "
         f"img-src 'self' data: https: {dicebear_host}; "
-        f"connect-src 'self' https://{api_host}; "
+        f"connect-src {' '.join(connect_hosts)}; "
         "font-src 'self' data:; "
         "object-src 'none'; "
         "base-uri 'self';"
     )
+    if report_uri:
+        policy += f" report-uri {report_uri};"
+    return policy
 
+
+# Optional error monitoring — also feeds CSP violation reports when set.
+SENTRY_DSN = env("SENTRY_DSN", default="")
 
 CSP_ENABLED = env.bool("CSP_ENABLED", default=not DEBUG)
 CSP_REPORT_ONLY = env.bool("CSP_REPORT_ONLY", default=True)
-CONTENT_SECURITY_POLICY = build_content_security_policy()
+CONTENT_SECURITY_POLICY = build_content_security_policy(sentry_dsn=SENTRY_DSN)
 
 LOG_LEVEL = env("LOG_LEVEL", default="DEBUG" if DEBUG else "INFO")
 if _RUNNING_TESTS:
@@ -757,7 +773,6 @@ validate_production_settings(
 )
 
 # Error monitoring (optional — no-op when SENTRY_DSN is unset)
-SENTRY_DSN = env("SENTRY_DSN", default="")
 SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT", default="production" if not DEBUG else "development")
 SENTRY_TRACES_SAMPLE_RATE = env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.1)
 

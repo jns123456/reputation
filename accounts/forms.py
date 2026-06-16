@@ -33,7 +33,9 @@ class SignUpForm(UserCreationForm):
             raise ValidationError(_("Enter a valid email address."))
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError(
-                _("An account with this email already exists. Try signing in instead.")
+                _(
+                    "If this email is already registered, sign in or reset your password."
+                )
             )
         return email
 

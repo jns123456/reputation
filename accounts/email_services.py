@@ -165,10 +165,12 @@ def _send_via_resend(*, api_key, subject, recipient_email, text_body, html_body)
         detail = response.text[:500]
         logger.warning("Resend API error %s: %s", response.status_code, detail)
         raise EmailDeliveryError(
-            _(
-                "Email provider rejected the message. "
-                "With onboarding@resend.dev you can only send to your Resend account email "
-                "until you verify a domain."
+            force_str(
+                _(
+                    "Email provider rejected the message. "
+                    "With onboarding@resend.dev you can only send to your Resend account email "
+                    "until you verify a domain."
+                )
             ),
             provider="resend",
         )

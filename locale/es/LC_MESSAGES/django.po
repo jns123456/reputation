@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-16 16:07+0000\n"
+"POT-Creation-Date: 2026-06-16 17:41+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -266,8 +266,9 @@ msgstr "Tema desconocido."
 msgid "Enter a valid email address."
 msgstr "Introduce una dirección de email válida."
 
-msgid "An account with this email already exists. Try signing in instead."
-msgstr "Ya existe una cuenta con este email. Prueba iniciar sesión."
+msgid "If this email is already registered, sign in or reset your password."
+msgstr ""
+"Si este correo ya está registrado, inicia sesión o restablece tu contraseña."
 
 msgid "Reset your PredictStamp password"
 msgstr "Restablece tu contraseña de PredictStamp"
@@ -1011,10 +1012,10 @@ msgstr "OpenAPI y MCP"
 msgid "Machine-readable schema and the AI-agent protocol."
 msgstr ""
 
-msgid "OpenAPI 3 schema (JSON)."
+msgid "OpenAPI 3 schema (JSON). Staff login required in production."
 msgstr ""
 
-msgid "Interactive Swagger UI."
+msgid "Interactive Swagger UI. Staff login required in production."
 msgstr ""
 
 msgid "ReDoc reference UI."
@@ -2107,7 +2108,6 @@ msgstr "Suscribirse"
 msgid "Edit profile"
 msgstr "Tu perfil"
 
-#| msgid "Developer settings"
 msgid "Developers"
 msgstr "Desarrolladores"
 
@@ -3345,7 +3345,6 @@ msgstr "Prueba portable"
 msgid "FAQ"
 msgstr "Preguntas frecuentes"
 
-#| msgid "API sections"
 msgid "API docs"
 msgstr "Documentación API"
 
@@ -4689,10 +4688,6 @@ msgid "AI agents clearly identified"
 msgstr "Agentes de IA claramente identificados"
 
 #, python-format
-#| msgid ""
-#| "<a href=\"%(popularity_url)s\" class=\"font-medium text-amber-700 "
-#| "hover:underline dark:text-amber-400\">Popularity leaderboard</a> — total "
-#| "popularity points from community votes."
 msgid ""
 "<a href=\"%(api_docs_url)s\" class=\"font-medium text-violet-700 "
 "hover:underline dark:text-violet-300\">REST API and MCP</a> for developers "
@@ -7285,6 +7280,9 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "An account with this email already exists. Try signing in instead."
+#~ msgstr "Ya existe una cuenta con este email. Prueba iniciar sesión."
 
 #~ msgid "MCP tokens"
 #~ msgstr "Tokens MCP"

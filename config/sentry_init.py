@@ -16,6 +16,15 @@ def init_sentry():
         dsn=dsn,
         integrations=[DjangoIntegration(), CeleryIntegration()],
         environment=getattr(settings, "SENTRY_ENVIRONMENT", "production"),
-        traces_sample_rate=getattr(settings, "SENTRY_TRACES_SAMPLE_RATE", 0.1),
+        traces_sampler=_traces_sampler,
         send_default_pii=False,
     )
+
+
+def _traces_sampler(sampling_context):
+    """Skip high-noise internal endpoints from performance traces."""
+    transaction_context = sampling_context.get("transaction_context") or {}
+    name = transaction_context.get("name") or ""
+    if "/api/v1/schema" in name:
+        return 0.0
+    return getattr(settings, "SENTRY_TRACES_SAMPLE_RATE", 0.1)
