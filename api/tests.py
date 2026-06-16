@@ -41,6 +41,25 @@ class ApiDiscoveryTests(TestCase):
         self.assertEqual(resp.json()["version"], "v1")
         self.assertIn("openapi_schema", resp.json())
 
+    @override_settings(DEBUG=False, API_OPENAPI_STAFF_ONLY=True)
+    def test_discovery_hides_openapi_urls_for_anonymous(self):
+        client = APIClient()
+        resp = client.get("/api/v1/")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertNotIn("openapi_schema", data)
+        self.assertNotIn("documentation", data)
+
+    @override_settings(DEBUG=False, API_OPENAPI_STAFF_ONLY=True)
+    def test_discovery_includes_openapi_urls_for_staff(self):
+        staff = create_user(username="apistaff", is_staff=True)
+        client = APIClient()
+        client.force_authenticate(user=staff)
+        resp = client.get("/api/v1/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("openapi_schema", resp.json())
+        self.assertIn("documentation", resp.json())
+
     def test_openapi_schema_endpoint_returns_schema(self):
         client = APIClient()
         resp = client.get(reverse("v1-schema"))
@@ -48,6 +67,17 @@ class ApiDiscoveryTests(TestCase):
         self.assertIn("application/vnd.oai.openapi", resp["Content-Type"])
         self.assertIn(b"PredictStamp API", resp.content)
         self.assertIn(b"openapi:", resp.content)
+
+    @override_settings(DEBUG=False, API_OPENAPI_STAFF_ONLY=True)
+    def test_openapi_schema_requires_staff_in_production(self):
+        client = APIClient()
+        resp = client.get(reverse("v1-schema"))
+        self.assertIn(resp.status_code, (401, 403))
+
+        staff = create_user(username="schemastaff", is_staff=True)
+        client.force_authenticate(user=staff)
+        resp = client.get(reverse("v1-schema"))
+        self.assertEqual(resp.status_code, 200)
 
     def test_reputation_event_serializer_binds_prediction_id(self):
         """Regression: redundant source='prediction_id' breaks drf-spectacular (PREDICTSTAMP-3)."""

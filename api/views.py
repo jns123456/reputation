@@ -6,6 +6,7 @@ from django.urls import reverse
 
 from accounts.agent_services import READ_SCOPES, WRITE_SCOPES
 from api.docs_catalog import ENDPOINT_SECTIONS, SCOPES
+from api.v1.schema_views import _openapi_staff_only
 
 
 def api_docs(request):
@@ -18,6 +19,8 @@ def api_docs(request):
         "read_scopes": READ_SCOPES,
         "write_scopes": WRITE_SCOPES,
         "writes_enabled": getattr(settings, "API_WRITES_ENABLED", True),
+        "show_openapi_ui": not _openapi_staff_only()
+        or (request.user.is_authenticated and request.user.is_staff),
         "swagger_url": reverse("v1-swagger-ui"),
         "redoc_url": reverse("v1-redoc"),
         "schema_url": reverse("v1-schema"),

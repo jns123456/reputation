@@ -6,30 +6,35 @@ from rest_framework.views import APIView
 
 from accounts.agent_services import ALL_SCOPES, READ_SCOPES, WRITE_SCOPES
 from api.permissions import IsReadOnlyOrAuthenticated
+from api.v1.schema_views import _openapi_staff_only
 
 
 class ApiDiscoveryView(APIView):
     permission_classes = [IsReadOnlyOrAuthenticated]
 
     def get(self, request):
-        return Response(
-            {
-                "name": "PredictStamp REST API",
-                "version": "v1",
-                "documentation": request.build_absolute_uri("/api/v1/schema/swagger-ui/"),
-                "openapi_schema": request.build_absolute_uri("/api/v1/schema/"),
-                "authentication": {
-                    "session": "Cookie-based session (browser clients)",
-                    "bearer": "Authorization: Bearer mcp_<prefix>_<secret> (mint at /mcp/tokens/)",
-                },
-                "scopes": {
-                    "read": list(READ_SCOPES),
-                    "write": list(WRITE_SCOPES),
-                    "all": list(ALL_SCOPES),
-                },
-                "writes_enabled": getattr(settings, "API_WRITES_ENABLED", True),
-            }
-        )
+        payload = {
+            "name": "PredictStamp REST API",
+            "version": "v1",
+            "authentication": {
+                "session": "Cookie-based session (browser clients)",
+                "bearer": "Authorization: Bearer mcp_<prefix>_<secret> (mint at /mcp/tokens/)",
+            },
+            "scopes": {
+                "read": list(READ_SCOPES),
+                "write": list(WRITE_SCOPES),
+                "all": list(ALL_SCOPES),
+            },
+            "writes_enabled": getattr(settings, "API_WRITES_ENABLED", True),
+        }
+        if not _openapi_staff_only() or (
+            request.user.is_authenticated and request.user.is_staff
+        ):
+            payload["documentation"] = request.build_absolute_uri(
+                "/api/v1/schema/swagger-ui/"
+            )
+            payload["openapi_schema"] = request.build_absolute_uri("/api/v1/schema/")
+        return Response(payload)
 
 
 class ReputationRulesView(APIView):

@@ -21,6 +21,7 @@ class ValidateProductionSettingsTests(SimpleTestCase):
             "secret_key": self._strong_key(),
             "eas_offchain_signing_key": self._eas_key(),
             "email_verification_dev_show_link": False,
+            "admin_url_path": "ops-7f3a9c/",
         }
         defaults.update(kwargs)
         validate_production_settings(**defaults)
@@ -96,3 +97,11 @@ class ValidateProductionSettingsTests(SimpleTestCase):
 
     def test_passes_with_explicit_allowed_hosts(self):
         self._call(allowed_hosts=["predictstamp.com", "www.predictstamp.com"])
+
+    def test_rejects_default_admin_url_path(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(admin_url_path="admin/")
+        self.assertIn("ADMIN_URL_PATH", str(ctx.exception))
+
+    def test_passes_with_custom_admin_url_path(self):
+        self._call(admin_url_path="ops-7f3a9c/")

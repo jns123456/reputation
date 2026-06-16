@@ -16,11 +16,13 @@
         </p>
       </div>
       <div class="flex shrink-0 flex-wrap gap-2">
+        {% if show_openapi_ui %}
         <a href="{{ swagger_url }}" target="_blank" rel="noopener" class="btn-primary text-sm">
           <i data-lucide="play" class="mr-1 inline h-4 w-4" aria-hidden="true"></i>
           Swagger
         </a>
         <a href="{{ redoc_url }}" target="_blank" rel="noopener" class="btn-secondary text-sm">ReDoc</a>
+        {% endif %}
       </div>
     </div>
     <div class="mt-4 flex flex-wrap gap-2 text-xs">
@@ -196,9 +198,11 @@
       <li>
         <a href="{{ discovery_url }}" class="text-brand-600 hover:underline" target="_blank" rel="noopener">{% trans "JSON discovery" %} → {{ discovery_url }}</a>
       </li>
+      {% if show_openapi_ui %}
       <li>
         <a href="{{ schema_url }}" class="text-brand-600 hover:underline" target="_blank" rel="noopener">{% trans "OpenAPI schema" %} → {{ schema_url }}</a>
       </li>
+      {% endif %}
       <li>
         <a href="{{ tokens_url }}" class="text-brand-600 hover:underline">{% trans "Create API tokens" %} → {% trans "Developer settings" %}</a>
       </li>

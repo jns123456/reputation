@@ -1,11 +1,6 @@
 """API v1 URL routing."""
 
 from django.urls import include, path
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
 from rest_framework.routers import DefaultRouter
 
 from api.v1.challenges import ChallengeViewSet
@@ -21,6 +16,11 @@ from api.v1.predictions import PredictionViewSet
 from api.v1.profiles import UserProfileViewSet
 from api.v1.reputation import ReputationEventViewSet
 from api.v1.rules import AgentParticipationRulesView, ApiDiscoveryView, ReputationRulesView
+from api.v1.schema_views import (
+    PredictStampSpectacularAPIView,
+    PredictStampSpectacularRedocView,
+    PredictStampSpectacularSwaggerView,
+)
 from api.v1.social import (
     BookmarkView,
     FollowTopicView,
@@ -68,15 +68,15 @@ urlpatterns = [
     path("social/follow-topic/", FollowTopicView.as_view(), name="v1-social-follow-topic"),
     path("social/market-watch/", MarketWatchView.as_view(), name="v1-social-market-watch"),
     path("social/bookmark/", BookmarkView.as_view(), name="v1-social-bookmark"),
-    path("schema/", SpectacularAPIView.as_view(), name="v1-schema"),
+    path("schema/", PredictStampSpectacularAPIView.as_view(), name="v1-schema"),
     path(
         "schema/swagger-ui/",
-        SpectacularSwaggerView.as_view(url_name="v1-schema"),
+        PredictStampSpectacularSwaggerView.as_view(url_name="v1-schema"),
         name="v1-swagger-ui",
     ),
     path(
         "schema/redoc/",
-        SpectacularRedocView.as_view(url_name="v1-schema"),
+        PredictStampSpectacularRedocView.as_view(url_name="v1-schema"),
         name="v1-redoc",
     ),
 ]

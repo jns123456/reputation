@@ -497,6 +497,11 @@ REST_FRAMEWORK = {
 }
 
 API_WRITES_ENABLED = env.bool("API_WRITES_ENABLED", default=True)
+# OpenAPI/Swagger/ReDoc: public in DEBUG; staff-only in production (tests stay public).
+API_OPENAPI_STAFF_ONLY = env.bool(
+    "API_OPENAPI_STAFF_ONLY",
+    default=(not DEBUG and not _RUNNING_TESTS),
+)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "PredictStamp API",
@@ -668,7 +673,7 @@ def build_content_security_policy():
     )
 
 
-CSP_ENABLED = env.bool("CSP_ENABLED", default=False)
+CSP_ENABLED = env.bool("CSP_ENABLED", default=not DEBUG)
 CSP_REPORT_ONLY = env.bool("CSP_REPORT_ONLY", default=True)
 CONTENT_SECURITY_POLICY = build_content_security_policy()
 
@@ -746,6 +751,7 @@ validate_production_settings(
     eas_offchain_signing_key=EAS_OFFCHAIN_SIGNING_KEY,
     email_verification_dev_show_link=EMAIL_VERIFICATION_DEV_SHOW_LINK,
     allowed_hosts=ALLOWED_HOSTS,
+    admin_url_path=ADMIN_URL_PATH,
     environment=DJANGO_ENV,
     running_tests=_RUNNING_TESTS,
 )

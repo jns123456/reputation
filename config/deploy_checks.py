@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 INSECURE_SECRET_KEY = "django-insecure-dev-key-change-in-production"
 INSECURE_EAS_OFFCHAIN_SIGNING_KEY = "change-me-for-production-attestations"
+DEFAULT_ADMIN_URL_PATH = "admin/"
 MIN_SECRET_KEY_LENGTH = 50
 PRODUCTION_ENVIRONMENT = "production"
 
@@ -15,6 +16,7 @@ def validate_production_settings(
     eas_offchain_signing_key: str,
     email_verification_dev_show_link: bool,
     allowed_hosts: list[str] | None = None,
+    admin_url_path: str = DEFAULT_ADMIN_URL_PATH,
     environment: str = "",
     running_tests: bool = False,
 ) -> None:
@@ -74,6 +76,13 @@ def validate_production_settings(
     elif len(eas_offchain_signing_key) < MIN_SECRET_KEY_LENGTH:
         errors.append(
             f"EAS_OFFCHAIN_SIGNING_KEY must be at least {MIN_SECRET_KEY_LENGTH} characters in production."
+        )
+
+    normalized_admin = (admin_url_path or "").strip().strip("/")
+    if normalized_admin in {"", "admin"}:
+        errors.append(
+            "ADMIN_URL_PATH must be a non-guessable path in production "
+            "(never use the default 'admin/')."
         )
 
     if errors:
