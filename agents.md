@@ -154,6 +154,32 @@ These limits apply regardless of product stage:
 | Monitoring | Sentry (recommended) |
 | Logging | Structured logs |
 
+### Production CLI access (Heroku + Sentry)
+
+Agents and developers **always have CLI access** to inspect production/staging — use it proactively for security audits, incident response, and deploy verification. Do not infer live env state from `.env.example` or code defaults alone.
+
+**Heroku** (production app: `reputation-juan`):
+
+| Task | Command |
+|------|---------|
+| Verify login / list apps | `heroku auth:whoami`, `heroku apps` |
+| Read one config var | `heroku config:get VAR -a reputation-juan` |
+| Dyno status | `heroku ps -a reputation-juan` |
+| Recent logs | `heroku logs -n 200 -a reputation-juan` |
+| Releases | `heroku releases -a reputation-juan` |
+
+Prefer **`heroku config:get VAR`** per variable. Avoid `heroku config` (full dump) in agent output — it exposes secrets. For audits, check non-secret vars (`DEBUG`, `DJANGO_ENV`, `ALLOWED_HOSTS`, `CSP_*`, `HUMAN_VERIFICATION_*`, `USE_REDIS_CACHE`) and report secret *presence* only (SET/UNSET, length for keys).
+
+**Sentry** (production has `SENTRY_DSN` set):
+
+| Task | Access |
+|------|--------|
+| Issues, events, traces in Cursor | Sentry MCP server (`CallMcpTool`, server `sentry`) |
+| Terminal / scripts | `sentry-cli` when installed (`sentry-cli issues list`, `sentry-cli info`) |
+| Web UI | Project linked from the org DSN |
+
+See also `docs/OPERATIONS.md` for health checks, CSP rollout, and staging guidance.
+
 ### External Integrations
 
 **Polymarket**
@@ -658,7 +684,8 @@ Before making any change, an AI agent **must**:
 9. **Keep changes minimal** — smallest correct diff; do not refactor unrelated code.
 10. **Match existing conventions** — naming, layering, template patterns, test style.
 11. **Consult and update §18** — read recorded lessons before acting; append or prune entries when something durable was learned or became obsolete.
-12. **If templates or user-facing labels changed:** run `./scripts/sync_spanish_i18n.sh`, commit `locale/es/LC_MESSAGES/django.po` (+ `.mo` if tracked), and verify Spanish in tests — untranslated msgids fall back to English in production.
+12. **For security/ops audits or production incidents:** check live state via **Heroku CLI** (`heroku config:get … -a reputation-juan`, `heroku ps`, `heroku logs`) and **Sentry** (MCP or `sentry-cli`) before recommending env changes — see §3 Production CLI access.
+13. **If templates or user-facing labels changed:** run `./scripts/sync_spanish_i18n.sh`, commit `locale/es/LC_MESSAGES/django.po` (+ `.mo` if tracked), and verify Spanish in tests — untranslated msgids fall back to English in production.
 
 ### Decision Checklist
 
@@ -938,7 +965,7 @@ When editing §18, **delete or merge** stale lines — do not only append. Prefe
 [2026-05] domain — Forecast gating must NOT trust imported `status` alone (Polymarket sync can lag, leaving closed/decided events locally `OPEN`). `Market.is_forecastable` = `is_open and not is_expired and accepting_orders and not is_in_play`. Browse/list/count pages must use `markets.selectors.discoverable_market_q()` (alias of `forecastable_market_q`) so non-forecastable rows never appear in discovery — they stay reachable via direct URL and user prediction history only. **New-forecast** surfaces (forecast form, challenge picker, onboarding, resolving-soon) also use `forecastable_market_q()` / `market.is_forecastable`. **Exits** use `market.is_exitable` (`is_open` only) — users may close pending forecasts even when new ones are blocked.
 [2026-05] workflow — PostgreSQL rejects `select_for_update()` across nullable outer joins (e.g. reverse `user__profile` OneToOne) with "FOR UPDATE cannot be applied to the nullable side of an outer join"; use `select_for_update(of=("self",))` and lock related rows in separate queries.
 [2026-05] architecture — `User.account_type` (§15) is the real classification; `is_ai_agent` is a legacy bridge. Legacy code/tests/fixtures still set `is_ai_agent=True` directly (e.g. `load_forum_sample_posts`), so `User.save()` syncs BOTH ways (agent `account_type`→bool, and a lone `is_ai_agent=True`→`declared_agent`). Don't make the bridge one-directional or a default `account_type=human` will silently clobber `is_ai_agent`. MCP write gating is layered and order-sensitive: feature-flag → circuit-breaker → token scope → agent trust (`standard`+) → rate limit; tokens are hashed (`mcp.tokens`) and resolved only if valid.
-[2026-06] workflow — Production ops: `/health/`, optional `SENTRY_DSN`, CI in `.github/workflows/ci.yml` (`pip-audit` + Postgres tests), `docs/OPERATIONS.md`. Release phase is migrate-only; market sync stays on Celery Beat. Account HTTP views live under ``accounts/views/`` (auth, onboarding, profile, social). Admin panel stats use ``dashboard.admin_panel_selectors`` aggregates, not per-metric COUNT loops.
+[2026-06] workflow — Production ops: `/health/`, `SENTRY_DSN` on Heroku, CI in `.github/workflows/ci.yml` (`pip-audit` + Postgres tests), `docs/OPERATIONS.md`. **Heroku + Sentry CLI always available** — use `heroku config:get VAR -a reputation-juan` (not full config dump) and Sentry MCP/`sentry-cli` for live audits; never paste secrets in chat/commits. Release phase is migrate-only; market sync stays on Celery Beat (`beat` dyno must be scaled). Account HTTP views live under ``accounts/views/`` (auth, onboarding, profile, social). Admin panel stats use ``dashboard.admin_panel_selectors`` aggregates, not per-metric COUNT loops.
 [2026-05] architecture — Unified write guard lives in ``accounts.write_guard.guard_write_action``; all domain write services (``create_prediction``, ``create_comment``, ``cast_vote``, ``create_post``, ``create_pulse_comment``, ``toggle_follow``, repost create) call it before persisting so web and MCP share rate limits + ``assess_content``. MCP transport keeps its own ``mcp_call``/``mcp_write`` buckets; domain ``ContentRejected``/``RateLimitExceeded`` from handlers map to MCP errors in ``mcp/services.execute_tool``.
 [2026-06] security — Security-audit quick wins: deploy checks now reject `DEBUG=True` when `DJANGO_ENV=production` and validate `ALLOWED_HOSTS` (set `DJANGO_ENV=production` + optional `ADMIN_URL_PATH` on Heroku or the guard is inert); DRF is session-auth only (no BasicAuth); MCP enforces *live* `account_allowed_scopes` at execute/mint time (frozen token scopes alone are not enough — trust demotion must revoke writes immediately); stdio transport re-resolves the token per request; public user search/serializers must never match or expose email/username of anonymous users.
 [2026-06] security — Auth flows round 2: Auth0 email-linking requires the IdP's `email_verified=True` or `Auth0LinkDenied` is raised (never link a verified local account to an unverified IdP identity); OAuth/password-less account deletion re-authenticates via an emailed 6-digit code (`account_deletion_services.send/verify_deletion_confirmation_code`, cache-backed, single-use, 15 min); password reset uses Django CBVs at `/accounts/password-reset/` with `StyledPasswordResetForm.send_mail` routed through `accounts.email_services._send` (Resend-aware; built-in `send_mail` would silently miss Resend) + IP rate limit (`password_reset` bucket) + middleware exemptions; Redis TLS verification is opt-in via `REDIS_TLS_VERIFY=True` (must stay False on Heroku's self-signed certs).
@@ -949,4 +976,4 @@ When editing §18, **delete or merge** stale lines — do not only append. Prefe
 
 ---
 
-*Last updated: 2026-06-12. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*
+*Last updated: 2026-06-16. Update §1–17 when architecture, scope, or conventions change; update §18 when durable lessons are learned or retired.*
