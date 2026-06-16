@@ -26,3 +26,16 @@ class ContentSecurityPolicyMiddlewareTests(SimpleTestCase):
         request = self.factory.get("/")
         response = self.middleware(request)
         self.assertIn("report-uri https://example.test/csp;", response["Content-Security-Policy-Report-Only"])
+
+    @override_settings(
+        CSP_ENABLED=True,
+        CSP_REPORT_ONLY=True,
+        CONTENT_SECURITY_POLICY=(
+            "default-src 'self'; frame-src 'self' embed.polymarket.com; connect-src 'self';"
+        ),
+    )
+    def test_turnstile_host_added_to_frame_src(self):
+        request = self.factory.get("/")
+        response = self.middleware(request)
+        header = response["Content-Security-Policy-Report-Only"]
+        self.assertIn("frame-src 'self' embed.polymarket.com challenges.cloudflare.com;", header)

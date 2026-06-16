@@ -2,6 +2,8 @@
 
 from django.conf import settings
 
+from config.csp_helpers import ensure_turnstile_frame_src
+
 
 class ContentSecurityPolicyMiddleware:
     """Attach a CSP header when ``CSP_ENABLED`` is true."""
@@ -13,7 +15,9 @@ class ContentSecurityPolicyMiddleware:
         response = self.get_response(request)
         if not getattr(settings, "CSP_ENABLED", False):
             return response
-        policy = getattr(settings, "CONTENT_SECURITY_POLICY", "")
+        policy = ensure_turnstile_frame_src(
+            getattr(settings, "CONTENT_SECURITY_POLICY", "")
+        )
         if not policy:
             return response
         header = (
