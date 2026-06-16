@@ -67,4 +67,5 @@ API_I18N_FIXES: dict[str, str] = {
     "JSON body": "Cuerpo JSON",
     "Auth": "Auth",
     "API sections": "Secciones de la API",
+    "API docs": "Documentación API",
 }

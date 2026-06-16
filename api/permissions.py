@@ -39,25 +39,17 @@ class IsReadOnlyOrAuthenticated(BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
 
-class HasApiScope(BasePermission):
-    """Require a specific scope for write operations when using bearer tokens."""
+def HasApiScope(scope):
+    """Factory returning a DRF permission class for a required write scope."""
 
-    def __init__(self, scope):
-        self.scope = scope
+    class _HasApiScope(BasePermission):
+        def has_permission(self, request, view):
+            if request.method in SAFE_METHODS:
+                return True
+            if not getattr(settings, "API_WRITES_ENABLED", True):
+                return False
+            return request_has_scope(request, scope)
 
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        if not getattr(settings, "API_WRITES_ENABLED", True):
-            return False
-        return request_has_scope(request, self.scope)
-
-
-def scoped_permission(scope):
-    """Return a permission class for DRF permission_classes (not an instance)."""
-    class _ScopedPermission(HasApiScope):
-        def __init__(self):
-            super().__init__(scope)
-
-    _ScopedPermission.__name__ = f"HasApiScope_{scope.replace(':', '_')}"
-    return _ScopedPermission
+    _HasApiScope.__name__ = f"HasApiScope_{scope.replace(':', '_')}"
+    _HasApiScope.__qualname__ = _HasApiScope.__name__
+    return _HasApiScope

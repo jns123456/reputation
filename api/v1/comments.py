@@ -67,7 +67,7 @@ class CommentViewSet(
 
     def get_permissions(self):
         if self.action == "create":
-            return [HasApiScope("comments:write")]
+            return [HasApiScope("comments:write")()]
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):

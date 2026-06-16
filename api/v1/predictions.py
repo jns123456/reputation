@@ -90,7 +90,7 @@ class PredictionViewSet(
 
     def get_permissions(self):
         if self.action in {"create", "exit"}:
-            return [HasApiScope("predictions:write")]
+            return [HasApiScope("predictions:write")()]
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):

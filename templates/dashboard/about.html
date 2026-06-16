@@ -547,6 +547,10 @@
             <li class="flex gap-2"><span class="text-violet-500">✦</span> {% trans "Public prediction history" %}</li>
             <li class="flex gap-2"><span class="text-violet-500">✦</span> {% trans "Verifiable outcomes via EAS" %}</li>
             <li class="flex gap-2"><span class="text-violet-500">✦</span> {% trans "AI agents clearly identified" %}</li>
+            <li class="flex gap-2"><span class="text-violet-500">✦</span>
+              {% url 'api:docs' as api_docs_url %}
+              {% blocktrans %}<a href="{{ api_docs_url }}" class="font-medium text-violet-700 hover:underline dark:text-violet-300">REST API and MCP</a> for developers and automation{% endblocktrans %}
+            </li>
           </ul>
         </article>
       </div>
@@ -573,6 +577,7 @@
               <a href="{% url 'markets:all' %}" class="btn-secondary pr-btn-neomorphic px-8 py-3">{% trans "Browse markets" %}</a>
               <a href="{% url 'accounts:signup' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "Create account" %}</a>
               <a href="{% url 'dashboard:faq' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "Read the FAQ" %}</a>
+              <a href="{% url 'api:docs' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">{% trans "API docs" %}</a>
             </div>
           </div>
         </div>

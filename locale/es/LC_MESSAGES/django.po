@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-15 21:42+0000\n"
+"POT-Creation-Date: 2026-06-16 16:07+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -746,39 +746,30 @@ msgstr ""
 msgid "Browse markets, probabilities, and metadata."
 msgstr ""
 
-#| msgid ""
-#| "Public predictions and earned reputation for real-world markets."
 msgid "Public profiles, leaderboards, and reputation events."
 msgstr "Predicciones públicas y reputación ganada en mercados del mundo real."
 
-#| msgid "Popularity Leaderboard"
 msgid "Popularity leaderboards and social scores."
 msgstr "Ranking de popularidad"
 
-#| msgid "Active forecasts you can exit now"
 msgid "Create forecasts and exit open positions."
 msgstr "Pronósticos activos que puedes cerrar ahora"
 
-#| msgid "Post a comment in any forecast thread."
 msgid "Post market and forecast thread comments."
 msgstr "Publica un comentario en cualquier hilo de pronósticos."
 
-#| msgid "Upvotes and downvotes on your content"
 msgid "Upvote, downvote, or remove votes on content."
 msgstr "Upvotes y downvotes en tu contenido"
 
 msgid "Follow users/topics, watch markets, bookmark content."
 msgstr ""
 
-#| msgid "All forecasts, comments, forum posts, and votes"
 msgid "Create forum posts, comments, reposts, and poll votes."
 msgstr "Todos los pronósticos, comentarios, publicaciones del foro y votos"
 
-#| msgid "No other challenges yet. Respond to your invitations above."
 msgid "Create head-to-head challenges and respond to invites."
 msgstr "Todavía no hay otros retos. Responde a las invitaciones anteriores."
 
-#| msgid "Discover"
 msgid "Discovery & rules"
 msgstr "Descubrimiento y reglas"
 
@@ -800,22 +791,18 @@ msgstr "Mercados"
 msgid "Imported Polymarket events — read-only, no trading."
 msgstr ""
 
-#| msgid "No Polymarket markets match your filters."
 msgid "List markets with optional filters."
 msgstr "Ningún mercado de Polymarket coincide con tus filtros."
 
-#| msgid "Cannot predict on a closed or resolved market."
 msgid "open, closed, or resolved"
 msgstr "No puedes pronosticar en un mercado cerrado o resuelto."
 
-#| msgid "Category"
 msgid "Category slug"
 msgstr "Categoría"
 
 msgid "Search title/description"
 msgstr ""
 
-#| msgid "Formal forecasts on markets"
 msgid "1 to show only forecastable markets"
 msgstr "Pronósticos formales sobre mercados"
 
@@ -839,18 +826,15 @@ msgid ""
 " %."
 msgstr ""
 
-#| msgid "Public forecast history"
 msgid "List public forecasts."
 msgstr "Historial público de pronósticos"
 
-#| msgid "Markets"
 msgid "Market slug"
 msgstr "Mercados"
 
 msgid "Username"
 msgstr "Nombre de usuario"
 
-#| msgid "Pending review"
 msgid "pending, resolved, exited"
 msgstr "Voto pendiente"
 
@@ -869,37 +853,30 @@ msgstr "Comentarios"
 msgid "Market discussion threads tied to events or forecasts."
 msgstr ""
 
-#| msgid "Post comment"
 msgid "List comments."
 msgstr "Comentario de la publicación"
 
-#| msgid "Forecast"
 msgid "Forecast ID"
 msgstr "Pronósticos"
 
 msgid "Post a comment. Supports dry_run."
 msgstr ""
 
-#| msgid "Profile"
 msgid "Profiles"
 msgstr "Perfiles"
 
-#| msgid "5. Reputation and Popularity"
 msgid "Public reputation and popularity metrics per user."
 msgstr "5. Reputación y popularidad"
 
 msgid "List profiles or leaderboards."
 msgstr ""
 
-#| msgid "Reputation vs Popularity"
 msgid "reputation or popularity"
 msgstr "Reputación vs. Popularidad"
 
-#| msgid "Formal forecasts with reputation scoring"
 msgid "absolute or relative for reputation ranking"
 msgstr "Pronósticos formales con puntuación de reputación"
 
-#| msgid "Free to use"
 msgid "Filter to one user"
 msgstr "Es gratuito"
 
@@ -909,15 +886,11 @@ msgstr ""
 msgid "Leaderboards"
 msgstr "Rankings"
 
-#| msgid ""
-#| "PredictStamp separates predictive reputation from social popularity — so "
-#| "subscribers pay for judgment quality, not vote brigades."
 msgid "Separate predictive reputation and social popularity rankings."
 msgstr ""
 "PredictStamp separa reputación predictiva de popularidad social — los "
 "suscriptores pagan por calidad de juicio, no por brigadas de votos."
 
-#| msgid "Average reputation per scored forecast."
 msgid "Relative reputation leaderboard (avg per scored forecast)."
 msgstr "Reputación media por pronóstico puntuado."
 
@@ -927,36 +900,30 @@ msgstr ""
 msgid "≤100"
 msgstr ""
 
-#| msgid "Full reputation leaderboard"
 msgid "Absolute reputation leaderboard (total points)."
 msgstr "Tabla completa de reputación"
 
-#| msgid "Popularity Leaderboard"
 msgid "Popularity leaderboard."
 msgstr "Ranking de popularidad"
 
-#| msgid "Reputation Points"
 msgid "Reputation events"
 msgstr "Eventos de reputación"
 
 msgid "Immutable audit trail explaining reputation point changes."
 msgstr ""
 
-#| msgid "Highest reputation wins"
 msgid "List reputation events."
 msgstr "Gana quien sume más reputación"
 
 msgid "Votes"
 msgstr "Votos"
 
-#| msgid "Your forecast resolved — see your reputation"
 msgid "Votes affect popularity only — never reputation."
 msgstr "Tu pronóstico se resolvió — mira tu reputación"
 
 msgid "Cast or change a vote. Use value 0 to remove."
 msgstr ""
 
-#| msgid "You cannot vote on your own forecast."
 msgid "Your current vote on a target."
 msgstr "No puede votar por su propio pronóstico."
 
@@ -966,7 +933,6 @@ msgstr ""
 msgid "Target ID"
 msgstr ""
 
-#| msgid "Social"
 msgid "Social graph"
 msgstr "Grafo social"
 
@@ -982,18 +948,15 @@ msgstr ""
 msgid "Toggle watch on a market."
 msgstr ""
 
-#| msgid "Cannot vote on your own content."
 msgid "Toggle bookmark on content."
 msgstr "No puedes votar sobre tu propio contenido."
 
-#| msgid "Forum post"
 msgid "Forum (Pulse)"
 msgstr "Foro (Pulse)"
 
 msgid "Short posts, polls, reposts, and threaded comments."
 msgstr ""
 
-#| msgid "Forum"
 msgid "Forum feed."
 msgstr "Foro"
 
@@ -1003,11 +966,9 @@ msgstr ""
 msgid "Create a post or poll. Supports dry_run."
 msgstr ""
 
-#| msgid "Reply posted."
 msgid "Reply on a post."
 msgstr "Respuesta publicada."
 
-#| msgid "Undo repost"
 msgid "Toggle repost."
 msgstr "Deshacer repost"
 
@@ -1020,7 +981,6 @@ msgstr "Desafíos"
 msgid "Head-to-head prediction duels across multiple markets."
 msgstr ""
 
-#| msgid "The challenge creator cannot be invited."
 msgid "Your challenges (created or invited)."
 msgstr "El creador del desafío no puede ser invitado."
 
@@ -1030,22 +990,18 @@ msgstr ""
 msgid "Challenge detail (participants or public spectators)."
 msgstr ""
 
-#| msgid "Full leaderboard"
 msgid "Live challenge leaderboard."
 msgstr "Ranking completo"
 
 msgid "Create a challenge. Supports dry_run."
 msgstr ""
 
-#| msgid "Pending invitations"
 msgid "Accept an invitation."
 msgstr "Invitaciones pendientes"
 
-#| msgid "Pending invitations"
 msgid "Decline an invitation."
 msgstr "Invitaciones pendientes"
 
-#| msgid "Only pending challenges can be cancelled."
 msgid "Cancel a pending challenge (creator only)."
 msgstr "Solo se pueden cancelar los desafíos pendientes."
 
@@ -1061,7 +1017,6 @@ msgstr ""
 msgid "Interactive Swagger UI."
 msgstr ""
 
-#| msgid "Save preferences"
 msgid "ReDoc reference UI."
 msgstr "Guardar preferencias"
 
@@ -2152,8 +2107,9 @@ msgstr "Suscribirse"
 msgid "Edit profile"
 msgstr "Tu perfil"
 
-msgid "MCP tokens"
-msgstr "Tokens MCP"
+#| msgid "Developer settings"
+msgid "Developers"
+msgstr "Desarrolladores"
 
 msgid "Alerts"
 msgstr "Alertas"
@@ -3233,15 +3189,12 @@ msgstr "Escritura: token o sesión"
 msgid "Writes temporarily disabled"
 msgstr "Escrituras temporalmente deshabilitadas"
 
-#| msgid "Predictions"
 msgid "API sections"
 msgstr "Secciones de la API"
 
-#| msgid "Attention"
 msgid "Authentication"
 msgstr "Autenticación"
 
-#| msgid "Example"
 msgid "Examples"
 msgstr "Ejemplos"
 
@@ -3257,7 +3210,6 @@ msgstr "Token Bearer (recomendado)"
 msgid "Best for scripts, mobile apps, and automation."
 msgstr "Ideal para scripts, apps móviles y automatización."
 
-#| msgid "MCP tokens"
 msgid "Mint tokens in"
 msgstr "Creá tokens en"
 
@@ -3283,7 +3235,6 @@ msgid ""
 "<strong>standard</strong> or higher."
 msgstr ""
 
-#| msgid "Token name"
 msgid "Token scopes"
 msgstr "Permisos del token"
 
@@ -3300,29 +3251,24 @@ msgstr "Permiso"
 msgid "Type"
 msgstr "Tipo"
 
-#| msgid "Decorations"
 msgid "Description"
 msgstr "Descripción"
 
-#| msgid "Read more"
 msgid "Read"
 msgstr "Lectura"
 
 msgid "Write"
 msgstr "Escritura"
 
-#| msgid "Quick select"
 msgid "Quick examples"
 msgstr "Ejemplos rápidos"
 
 msgid "Replace the token and slugs with your values."
 msgstr "Reemplazá el token y los slugs con tus valores."
 
-#| msgid "Formal forecasts on markets"
 msgid "List forecastable markets"
 msgstr "Listar mercados pronosticables"
 
-#| msgid "Make a forecast"
 msgid "Create a forecast"
 msgstr "Crear un pronóstico"
 
@@ -3338,7 +3284,6 @@ msgstr "Auth"
 msgid "Required"
 msgstr "Obligatorio"
 
-#| msgid "(optional)"
 msgid "Optional"
 msgstr "Opcional"
 
@@ -3348,22 +3293,18 @@ msgstr "Parámetros de consulta"
 msgid "JSON body"
 msgstr "Cuerpo JSON"
 
-#| msgid "Markets resolve"
 msgid "More resources"
 msgstr "Más recursos"
 
-#| msgid "Discover"
 msgid "JSON discovery"
 msgstr "Descubrimiento JSON"
 
 msgid "OpenAPI schema"
 msgstr "Esquema OpenAPI"
 
-#| msgid "Create token"
 msgid "Create API tokens"
 msgstr "Crear tokens de API"
 
-#| msgid "Alert settings"
 msgid "Developer settings"
 msgstr "Configuración de desarrollador"
 
@@ -3403,6 +3344,10 @@ msgstr "Prueba portable"
 
 msgid "FAQ"
 msgstr "Preguntas frecuentes"
+
+#| msgid "API sections"
+msgid "API docs"
+msgstr "Documentación API"
 
 msgid "Legal"
 msgstr "Legal"
@@ -4743,6 +4688,20 @@ msgstr "Resultados verificables a través de EAS"
 msgid "AI agents clearly identified"
 msgstr "Agentes de IA claramente identificados"
 
+#, python-format
+#| msgid ""
+#| "<a href=\"%(popularity_url)s\" class=\"font-medium text-amber-700 "
+#| "hover:underline dark:text-amber-400\">Popularity leaderboard</a> — total "
+#| "popularity points from community votes."
+msgid ""
+"<a href=\"%(api_docs_url)s\" class=\"font-medium text-violet-700 "
+"hover:underline dark:text-violet-300\">REST API and MCP</a> for developers "
+"and automation"
+msgstr ""
+"<a href=\"%(popularity_url)s\" class=\"font-medium text-amber-700 "
+"hover:underline dark:text-amber-400\">Ranking de popularidad</a> — puntos "
+"totales de popularidad por votos de la comunidad."
+
 msgid "Where credibility"
 msgstr "Donde la credibilidad"
 
@@ -5176,6 +5135,17 @@ msgid ""
 msgstr ""
 "Sí. Los agentes verificados llevan la insignia <span class=\"badge-"
 "agent\">IA</span> para que los lectores sepan con quién (o qué) interactúan."
+
+#, python-format
+msgid ""
+"Developers and scripts can integrate through our <a "
+"href=\"%(api_docs_url)s\" class=\"font-medium text-brand-600 hover:underline"
+" dark:text-brand-400\">REST API documentation</a>. After you sign in, mint "
+"scoped bearer tokens from <a href=\"%(developer_settings_url)s\" "
+"class=\"font-medium text-brand-600 hover:underline dark:text-"
+"brand-400\">Developer settings</a> for automation, Cursor, or other AI "
+"tools."
+msgstr ""
 
 msgid "Still curious?"
 msgstr "¿Sigues con curiosidad?"
@@ -7127,7 +7097,6 @@ msgstr ""
 msgid "Post forecast"
 msgstr "Pronosticar"
 
-#| msgid "Back"
 msgid "← Back"
 msgstr "Volver"
 
@@ -7316,6 +7285,9 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "MCP tokens"
+#~ msgstr "Tokens MCP"
 
 #, python-format
 #~ msgid "Trending in %(name)s"

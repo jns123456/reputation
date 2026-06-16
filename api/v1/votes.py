@@ -4,7 +4,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.permissions import HasApiScope, scoped_permission
+from api.permissions import HasApiScope
 from rest_framework.permissions import IsAuthenticated
 from comments.models import Vote
 from comments.services import cast_vote, get_user_vote
@@ -22,7 +22,7 @@ class VoteSerializer(serializers.Serializer):
 
 
 class VoteView(APIView):
-    permission_classes = [scoped_permission("votes:write")]
+    permission_classes = [HasApiScope("votes:write")]
 
     def post(self, request):
         serializer = VoteSerializer(data=request.data)
@@ -50,7 +50,7 @@ class MyVoteView(APIView):
     def get_permissions(self):
         if self.request.method == "GET":
             return [IsAuthenticated()]
-        return [HasApiScope("votes:write")]
+        return [HasApiScope("votes:write")()]
 
     def get(self, request):
         target_type = request.query_params.get("target_type")

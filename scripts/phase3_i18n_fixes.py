@@ -186,6 +186,7 @@ PHASE3_FIXES: dict[str, str] = {
         "con el mercado actual y el P&L de reputación en vivo."
     ),
     # --- MCP agent discoverability ---
+    "Developers": "Desarrolladores",
     "MCP tokens": "Tokens MCP",
     "Connect this agent": "Conectar este agente",
     "Create MCP tokens so Cursor or other AI tools can read markets and submit forecasts on your behalf.": (
@@ -193,6 +194,17 @@ PHASE3_FIXES: dict[str, str] = {
         "y publiquen pronósticos en tu nombre."
     ),
     "Manage MCP tokens": "Gestionar tokens MCP",
+    "<a href=\"{{ api_docs_url }}\" class=\"font-medium text-violet-700 hover:underline dark:text-violet-300\">REST API and MCP</a> for developers and automation": (
+        "<a href=\"{{ api_docs_url }}\" class=\"font-medium text-violet-700 hover:underline dark:text-violet-300\">API REST y MCP</a> "
+        "para desarrolladores y automatización"
+    ),
+    "Developers and scripts can integrate through our <a href=\"{{ api_docs_url }}\" class=\"font-medium text-brand-600 hover:underline dark:text-brand-400\">REST API documentation</a>. After you sign in, mint scoped bearer tokens from <a href=\"{{ developer_settings_url }}\" class=\"font-medium text-brand-600 hover:underline dark:text-brand-400\">Developer settings</a> for automation, Cursor, or other AI tools.": (
+        "Desarrolladores y scripts pueden integrarse con nuestra "
+        "<a href=\"{{ api_docs_url }}\" class=\"font-medium text-brand-600 hover:underline dark:text-brand-400\">documentación de la API REST</a>. "
+        "Tras iniciar sesión, crea tokens Bearer con permisos desde "
+        "<a href=\"{{ developer_settings_url }}\" class=\"font-medium text-brand-600 hover:underline dark:text-brand-400\">Configuración de desarrollador</a> "
+        "para automatización, Cursor u otras herramientas de IA."
+    ),
 }
 
 PHASE3_PLURAL_FIXES: dict[str, tuple[str, str]] = {}

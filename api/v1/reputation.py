@@ -8,7 +8,6 @@ from reputation.models import ReputationEvent
 
 class ReputationEventSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
-    prediction_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = ReputationEvent

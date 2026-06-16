@@ -138,7 +138,7 @@ class McpNavDiscoverabilityTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.mcp_url)
-        self.assertContains(response, "MCP tokens")
+        self.assertContains(response, "Developers")
         self.assertContains(response, "Connect this agent")
         self.assertContains(response, "Manage MCP tokens")
 
@@ -156,7 +156,7 @@ class McpNavDiscoverabilityTests(TestCase):
         response = self.client.get(reverse("markets:list"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.mcp_url)
-        self.assertContains(response, "MCP tokens")
+        self.assertContains(response, "Developers")
 
     def test_profile_mcp_nav_renders_in_spanish(self):
         self.client.force_login(self.agent)

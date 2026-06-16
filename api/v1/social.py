@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from accounts.bookmark_services import toggle_bookmark
 from accounts.follow_services import toggle_follow, toggle_market_watch, toggle_topic_follow
 from accounts.models import Bookmark
-from api.permissions import scoped_permission
+from api.permissions import HasApiScope
 from markets.models import Market
 
 User = get_user_model()
@@ -19,7 +19,7 @@ class FollowUserSerializer(serializers.Serializer):
 
 
 class FollowUserView(APIView):
-    permission_classes = [scoped_permission("social:write")]
+    permission_classes = [HasApiScope("social:write")]
 
     def post(self, request):
         serializer = FollowUserSerializer(data=request.data)
@@ -36,7 +36,7 @@ class FollowTopicSerializer(serializers.Serializer):
 
 
 class FollowTopicView(APIView):
-    permission_classes = [scoped_permission("social:write")]
+    permission_classes = [HasApiScope("social:write")]
 
     def post(self, request):
         serializer = FollowTopicSerializer(data=request.data)
@@ -58,7 +58,7 @@ class MarketWatchSerializer(serializers.Serializer):
 
 
 class MarketWatchView(APIView):
-    permission_classes = [scoped_permission("social:write")]
+    permission_classes = [HasApiScope("social:write")]
 
     def post(self, request):
         serializer = MarketWatchSerializer(data=request.data)
@@ -81,7 +81,7 @@ class BookmarkSerializer(serializers.Serializer):
 
 
 class BookmarkView(APIView):
-    permission_classes = [scoped_permission("social:write")]
+    permission_classes = [HasApiScope("social:write")]
 
     def post(self, request):
         serializer = BookmarkSerializer(data=request.data)

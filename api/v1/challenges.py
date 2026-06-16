@@ -130,7 +130,7 @@ class ChallengeViewSet(
 
     def get_permissions(self):
         if self.action in {"create", "accept", "decline", "cancel"}:
-            return [HasApiScope("challenges:write")]
+            return [HasApiScope("challenges:write")()]
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):

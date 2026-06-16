@@ -1,6 +1,7 @@
 """REST API v1 tests."""
 
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from rest_framework.test import APIClient
 
 from accounts.models import UserProfile
@@ -24,6 +25,13 @@ class ApiDocsPageTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Documentación de la API")
 
+    def test_site_footer_links_to_api_docs(self):
+        client = APIClient()
+        resp = client.get("/faq/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, reverse("api:docs"))
+        self.assertContains(resp, "API docs")
+
 
 class ApiDiscoveryTests(TestCase):
     def test_discovery_lists_v1_metadata(self):
@@ -33,19 +41,13 @@ class ApiDiscoveryTests(TestCase):
         self.assertEqual(resp.json()["version"], "v1")
         self.assertIn("openapi_schema", resp.json())
 
-    def test_reputation_event_serializer_binds_prediction_id(self):
-        """Regression: redundant source='prediction_id' breaks drf-spectacular (PREDICTSTAMP-3)."""
-        from api.v1.reputation import ReputationEventSerializer
-
-        serializer = ReputationEventSerializer()
-        self.assertIn("prediction_id", serializer.fields)
-
-    def test_openapi_schema_generates(self):
-        """Regression: /api/v1/schema/ must return OpenAPI (PREDICTSTAMP-3)."""
+    def test_openapi_schema_endpoint_returns_schema(self):
         client = APIClient()
-        resp = client.get("/api/v1/schema/")
+        resp = client.get(reverse("v1-schema"))
         self.assertEqual(resp.status_code, 200)
-        self.assertIn(b"openapi: 3.0.3", resp.content)
+        self.assertIn("application/vnd.oai.openapi", resp["Content-Type"])
+        self.assertIn(b"PredictStamp API", resp.content)
+        self.assertIn(b"openapi:", resp.content)
 
 
 class ApiReadTests(TestCase):

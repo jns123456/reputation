@@ -82,7 +82,7 @@ class PulsePostViewSet(
 
     def get_permissions(self):
         if self.action in {"create", "comment", "repost", "poll_vote"}:
-            return [HasApiScope("forum:write")]
+            return [HasApiScope("forum:write")()]
         return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
