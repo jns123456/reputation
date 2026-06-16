@@ -30,7 +30,14 @@
     }, 0);
   });
 
-  document.body.addEventListener("htmx:afterSwap", function (event) {
-    renderLucideIcons(event.detail.target);
-  });
+  function renderLucideIconsAfterHtmx(event) {
+    var target = event.detail.target;
+    if (!target) {
+      return;
+    }
+    renderLucideIcons(target);
+  }
+
+  document.body.addEventListener("htmx:afterSwap", renderLucideIconsAfterHtmx);
+  document.body.addEventListener("htmx:afterSettle", renderLucideIconsAfterHtmx);
 })();

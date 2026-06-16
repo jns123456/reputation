@@ -259,10 +259,11 @@ def vote_view(request):
         if layout == "forecasts":
             return render(
                 request,
-                "dashboard/partials/forecast_vote_section.html",
+                "dashboard/partials/forecast_vote_preview_oob.html",
                 {
                     "prediction": prediction,
                     "prediction_vote": user_vote.value if user_vote else 0,
+                    "vote_oob": True,
                     **_vote_preview_context(
                         target_type=target_type,
                         target_id=prediction.id,

@@ -182,6 +182,8 @@ class ForecastsPageTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "is-active")
+        self.assertContains(response, "pr-vote-thumb-icon")
+        self.assertContains(response, "hx-swap-oob")
 
         response = self.client.post(
             "/comments/vote/",

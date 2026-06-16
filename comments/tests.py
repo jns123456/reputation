@@ -338,4 +338,6 @@ class VoteReactionsSheetTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Liked by")
         self.assertContains(response, self.voter.public_name)
+        self.assertContains(response, "pr-vote-thumb-icon")
+        self.assertContains(response, "hx-swap-oob")
 
