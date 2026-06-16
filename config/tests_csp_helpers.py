@@ -23,6 +23,16 @@ class SentryCspReportUriTests(SimpleTestCase):
         self.assertEqual(sentry_csp_report_uri(""), "")
 
 
+class BuildContentSecurityPolicyTests(SimpleTestCase):
+    def test_turnstile_allowed_in_frame_src(self):
+        from config.settings import build_content_security_policy
+
+        policy = build_content_security_policy()
+        frame_part = policy.split("frame-src")[1].split(";")[0]
+        self.assertIn("challenges.cloudflare.com", frame_part)
+        self.assertIn("embed.polymarket.com", frame_part)
+
+
 class EnsureFrameSrcHostTests(SimpleTestCase):
     def test_adds_host_to_frame_src(self):
         policy = "default-src 'self'; frame-src 'self' embed.polymarket.com; connect-src 'self';"

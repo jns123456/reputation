@@ -673,7 +673,7 @@ def build_content_security_policy(*, sentry_dsn=""):
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com unpkg.com "
         "cdn.jsdelivr.net code.iconify.design challenges.cloudflare.com; "
-        f"frame-src 'self' {embed_src}; "
+        f"frame-src 'self' {embed_src} challenges.cloudflare.com; "
         "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com; "
         f"img-src 'self' data: https: {dicebear_host}; "
         f"connect-src {' '.join(connect_hosts)}; "
