@@ -7,6 +7,12 @@ from urllib.parse import urlparse
 TURNSTILE_FRAME_HOST = "challenges.cloudflare.com"
 # Turnstile and other third-party widgets load webfonts from Google Fonts CDN.
 GOOGLE_FONTS_STATIC_HOST = "fonts.gstatic.com"
+# Iconify web component fetches icon JSON from these API hosts (connect-src).
+ICONIFY_CONNECT_HOSTS = (
+    "api.iconify.design",
+    "api.simplesvg.com",
+    "api.unisvg.com",
+)
 
 
 def ensure_frame_src_host(policy: str, host: str) -> str:
@@ -51,6 +57,30 @@ def ensure_font_src_host(policy: str, host: str) -> str:
 def ensure_google_fonts_font_src(policy: str) -> str:
     """Allow Google Fonts static files used by third-party widgets."""
     return ensure_font_src_host(policy, GOOGLE_FONTS_STATIC_HOST)
+
+
+def ensure_connect_src_host(policy: str, host: str) -> str:
+    """Add *host* to connect-src when missing (idempotent)."""
+    policy = policy or ""
+    host = (host or "").strip()
+    if not policy or not host:
+        return policy
+
+    match = re.search(r"connect-src\s+([^;]+)", policy)
+    if not match:
+        return policy
+    if host in match.group(1).split():
+        return policy
+
+    start, end = match.span(1)
+    return f"{policy[:end]} {host}{policy[end:]}"
+
+
+def ensure_iconify_connect_src(policy: str) -> str:
+    """Allow Iconify icon API fetches used by ``<iconify-icon>``."""
+    for host in ICONIFY_CONNECT_HOSTS:
+        policy = ensure_connect_src_host(policy, host)
+    return policy
 
 
 def sentry_csp_report_uri(dsn: str) -> str:

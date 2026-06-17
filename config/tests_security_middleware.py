@@ -52,3 +52,18 @@ class ContentSecurityPolicyMiddlewareTests(SimpleTestCase):
         response = self.middleware(request)
         header = response["Content-Security-Policy-Report-Only"]
         self.assertIn("font-src 'self' data: fonts.gstatic.com;", header)
+
+    @override_settings(
+        CSP_ENABLED=True,
+        CSP_REPORT_ONLY=True,
+        CONTENT_SECURITY_POLICY=(
+            "default-src 'self'; connect-src 'self' https://gamma-api.polymarket.com;"
+        ),
+    )
+    def test_iconify_hosts_added_to_connect_src(self):
+        request = self.factory.get("/")
+        response = self.middleware(request)
+        header = response["Content-Security-Policy-Report-Only"]
+        self.assertIn("api.simplesvg.com", header)
+        self.assertIn("api.iconify.design", header)
+        self.assertIn("api.unisvg.com", header)

@@ -2,7 +2,11 @@
 
 from django.conf import settings
 
-from config.csp_helpers import ensure_google_fonts_font_src, ensure_turnstile_frame_src
+from config.csp_helpers import (
+    ensure_google_fonts_font_src,
+    ensure_iconify_connect_src,
+    ensure_turnstile_frame_src,
+)
 
 
 class ContentSecurityPolicyMiddleware:
@@ -15,9 +19,11 @@ class ContentSecurityPolicyMiddleware:
         response = self.get_response(request)
         if not getattr(settings, "CSP_ENABLED", False):
             return response
-        policy = ensure_google_fonts_font_src(
-            ensure_turnstile_frame_src(
-                getattr(settings, "CONTENT_SECURITY_POLICY", "")
+        policy = ensure_iconify_connect_src(
+            ensure_google_fonts_font_src(
+                ensure_turnstile_frame_src(
+                    getattr(settings, "CONTENT_SECURITY_POLICY", "")
+                )
             )
         )
         if not policy:
