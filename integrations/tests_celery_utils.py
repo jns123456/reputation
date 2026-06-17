@@ -37,6 +37,15 @@ class CeleryBrokerAvailabilityTests(SimpleTestCase):
     def test_enqueue_skips_when_broker_unavailable(self, _mock_available):
         self.assertFalse(enqueue_category_sync("economy"))
 
+    @patch("integrations.celery_utils.cache")
+    @patch("integrations.celery_utils.celery_broker_available", return_value=True)
+    @patch("integrations.tasks.sync_category_markets_task")
+    def test_enqueue_category_sync_swallows_broker_errors(self, mock_task, _mock_broker, mock_cache):
+        mock_task.delay.side_effect = ConnectionError("redis ssl eof")
+
+        self.assertFalse(enqueue_category_sync("politics"))
+        mock_cache.set.assert_called_once_with("celery_broker_available", False, 60)
+
 
 class MarketRefreshEnqueueTests(SimpleTestCase):
     def test_market_is_stale_when_never_synced(self):
