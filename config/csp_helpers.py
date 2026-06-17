@@ -9,9 +9,9 @@ TURNSTILE_FRAME_HOST = "challenges.cloudflare.com"
 GOOGLE_FONTS_STATIC_HOST = "fonts.gstatic.com"
 # Iconify web component fetches icon JSON from these API hosts (connect-src).
 ICONIFY_CONNECT_HOSTS = (
-    "api.iconify.design",
-    "api.simplesvg.com",
-    "api.unisvg.com",
+    "https://api.iconify.design",
+    "https://api.simplesvg.com",
+    "https://api.unisvg.com",
 )
 
 

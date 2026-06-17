@@ -64,6 +64,6 @@ class ContentSecurityPolicyMiddlewareTests(SimpleTestCase):
         request = self.factory.get("/")
         response = self.middleware(request)
         header = response["Content-Security-Policy-Report-Only"]
-        self.assertIn("api.simplesvg.com", header)
-        self.assertIn("api.iconify.design", header)
-        self.assertIn("api.unisvg.com", header)
+        self.assertIn("https://api.simplesvg.com", header)
+        self.assertIn("https://api.iconify.design", header)
+        self.assertIn("https://api.unisvg.com", header)

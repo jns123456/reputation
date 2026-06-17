@@ -78,14 +78,15 @@ class EnsureConnectSrcHostTests(SimpleTestCase):
     def test_adds_host_to_connect_src(self):
         policy = "default-src 'self'; connect-src 'self' https://gamma-api.polymarket.com;"
         patched = ensure_iconify_connect_src(policy)
-        self.assertIn("api.simplesvg.com", patched)
-        self.assertIn("api.iconify.design", patched)
-        self.assertIn("api.unisvg.com", patched)
+        self.assertIn("https://api.simplesvg.com", patched)
+        self.assertIn("https://api.iconify.design", patched)
+        self.assertIn("https://api.unisvg.com", patched)
 
     def test_idempotent_when_host_present(self):
         policy = (
             "default-src 'self'; "
-            "connect-src 'self' api.simplesvg.com api.iconify.design api.unisvg.com;"
+            "connect-src 'self' https://api.simplesvg.com https://api.iconify.design "
+            "https://api.unisvg.com;"
         )
         self.assertEqual(ensure_iconify_connect_src(policy), policy)
 
