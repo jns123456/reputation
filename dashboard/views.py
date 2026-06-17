@@ -73,10 +73,11 @@ def _enqueue_category_sync_if_needed(category):
     if cache.get(poly_cache_key):
         return
 
-    cache.set(poly_cache_key, True, settings.MARKET_SYNC_CACHE_SECONDS)
-
     if not enqueue_category_sync(category.slug):
         logger.debug("Category sync for %s not queued; Celery broker unavailable", category.slug)
+        return
+
+    cache.set(poly_cache_key, True, settings.MARKET_SYNC_CACHE_SECONDS)
 
 
 def category_browse(request, slug):
