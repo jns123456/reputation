@@ -67,3 +67,17 @@ class ContentSecurityPolicyMiddlewareTests(SimpleTestCase):
         self.assertIn("https://api.simplesvg.com", header)
         self.assertIn("https://api.iconify.design", header)
         self.assertIn("https://api.unisvg.com", header)
+
+    @override_settings(
+        CSP_ENABLED=True,
+        CSP_REPORT_ONLY=False,
+        CONTENT_SECURITY_POLICY=(
+            "default-src 'self'; connect-src 'self' https://https://api.unisvg.com;"
+        ),
+    )
+    def test_strips_malformed_double_scheme_connect_src(self):
+        request = self.factory.get("/")
+        response = self.middleware(request)
+        header = response["Content-Security-Policy"]
+        self.assertNotIn("https://https://", header)
+        self.assertIn("https://api.unisvg.com", header)

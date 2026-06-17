@@ -83,6 +83,13 @@ def ensure_iconify_connect_src(policy: str) -> str:
     return policy
 
 
+def sanitize_malformed_connect_src(policy: str) -> str:
+    """Strip double-scheme connect-src entries from older CSP builders."""
+    if not policy or "https://https://" not in policy:
+        return policy
+    return policy.replace("https://https://", "https://")
+
+
 def sentry_csp_report_uri(dsn: str) -> str:
     """Build Sentry security endpoint for CSP violation reports."""
     dsn = (dsn or "").strip()

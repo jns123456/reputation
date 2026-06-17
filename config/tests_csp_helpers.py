@@ -9,6 +9,7 @@ from config.csp_helpers import (
     ensure_google_fonts_font_src,
     ensure_iconify_connect_src,
     ensure_turnstile_frame_src,
+    sanitize_malformed_connect_src,
     sentry_csp_report_uri,
 )
 
@@ -82,6 +83,21 @@ class EnsureFontSrcHostTests(SimpleTestCase):
     def test_noop_without_font_src(self):
         policy = "default-src 'self'; connect-src 'self';"
         self.assertEqual(ensure_font_src_host(policy, "fonts.gstatic.com"), policy)
+
+
+class SanitizeMalformedConnectSrcTests(SimpleTestCase):
+    def test_strips_double_scheme_urls(self):
+        policy = (
+            "connect-src 'self' https://https://api.unisvg.com "
+            "https://api.iconify.design;"
+        )
+        cleaned = sanitize_malformed_connect_src(policy)
+        self.assertNotIn("https://https://", cleaned)
+        self.assertIn("https://api.unisvg.com", cleaned)
+
+    def test_noop_when_clean(self):
+        policy = "connect-src 'self' https://api.unisvg.com;"
+        self.assertEqual(sanitize_malformed_connect_src(policy), policy)
 
 
 class EnsureConnectSrcHostTests(SimpleTestCase):
