@@ -36,10 +36,30 @@ class SentryBeforeSendTests(SimpleTestCase):
         for message in (
             "Failed to enqueue category sync for politics; continuing",
             "Failed to enqueue market refresh for 42; continuing",
+            "Failed to enqueue category sync for politics; continuing (ConnectionError: redis ssl eof)",
         ):
             with self.subTest(message=message):
                 event = {"logentry": {"message": message}, "logger": "integrations.celery_utils"}
                 self.assertIsNone(_before_send(event, {}))
+
+    def test_drops_celery_utils_redis_connection_errors(self):
+        event = {
+            "logger": "integrations.celery_utils",
+            "exception": {
+                "values": [
+                    {
+                        "type": "OperationalError",
+                        "value": "Error 8 connecting to redis:18560",
+                        "stacktrace": {
+                            "frames": [
+                                {"module": "integrations.celery_utils", "function": "enqueue_category_sync"},
+                            ],
+                        },
+                    },
+                ],
+            },
+        }
+        self.assertIsNone(_before_send(event, {}))
 
     def test_keeps_other_multiprocessing_errors(self):
         event = {

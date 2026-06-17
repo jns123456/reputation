@@ -11,6 +11,17 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
+def _log_enqueue_failure(action: str, target, exc: BaseException) -> None:
+    """Log best-effort enqueue failure without attaching a traceback to Sentry."""
+    logger.warning(
+        "Failed to enqueue %s for %s; continuing (%s: %s)",
+        action,
+        target,
+        type(exc).__name__,
+        exc,
+    )
+
+
 def safe_cache_delete(key: str) -> bool:
     """Delete a cache key, swallowing backend (Redis) connection errors.
 
@@ -61,14 +72,14 @@ def enqueue_category_sync(category_slug: str) -> bool:
 
     from integrations.tasks import sync_category_markets_task
 
+    enqueue_error = None
     try:
         sync_category_markets_task.delay(category_slug)
-    except Exception:
+    except Exception as exc:
         cache.set(CELERY_BROKER_AVAILABLE_CACHE_KEY, False, CELERY_BROKER_CHECK_SECONDS)
-        logger.warning(
-            "Failed to enqueue category sync for %s; continuing",
-            category_slug,
-        )
+        enqueue_error = exc
+    if enqueue_error is not None:
+        _log_enqueue_failure("category sync", category_slug, enqueue_error)
         return False
 
     return True
@@ -104,14 +115,14 @@ def enqueue_market_refresh_if_stale(market) -> bool:
 
     from integrations.tasks import refresh_market_task
 
+    enqueue_error = None
     try:
         refresh_market_task.delay(market.pk)
-    except Exception:
+    except Exception as exc:
         cache.set(CELERY_BROKER_AVAILABLE_CACHE_KEY, False, CELERY_BROKER_CHECK_SECONDS)
-        logger.warning(
-            "Failed to enqueue market refresh for %s; continuing",
-            market.pk,
-        )
+        enqueue_error = exc
+    if enqueue_error is not None:
+        _log_enqueue_failure("market refresh", market.pk, enqueue_error)
         return False
 
     cache.set(cache_key, True, MARKET_REFRESH_ENQUEUE_SECONDS)

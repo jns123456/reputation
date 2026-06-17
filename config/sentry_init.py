@@ -34,6 +34,35 @@ def _event_message(event):
     return message
 
 
+def _frames_include_module(event, module_name: str) -> bool:
+    for entry in event.get("exception", {}).get("values", []):
+        for frame in entry.get("stacktrace", {}).get("frames", []):
+            if frame.get("module") == module_name:
+                return True
+    return False
+
+
+def _is_best_effort_enqueue_noise(event, hint) -> bool:
+    message = _event_message(event)
+    if "Failed to enqueue category sync" in message or "Failed to enqueue market refresh" in message:
+        return True
+    if event.get("logger") != "integrations.celery_utils":
+        return False
+    if "Failed to enqueue" in message:
+        return True
+    if not _frames_include_module(event, "integrations.celery_utils"):
+        return False
+    exc_info = hint.get("exc_info")
+    if exc_info and exc_info[0] is not None:
+        exc_name = getattr(exc_info[0], "__name__", "")
+        if exc_name in {"ConnectionError", "OperationalError", "SSLError", "SSLEOFError"}:
+            return True
+    for entry in event.get("exception", {}).get("values", []):
+        if entry.get("type") in {"ConnectionError", "OperationalError", "SSLError", "SSLEOFError"}:
+            return True
+    return False
+
+
 def _before_send(event, hint):
     """Drop expected Celery worker SIGTERM noise during Heroku dyno cycling."""
     exc_info = hint.get("exc_info")
@@ -46,7 +75,7 @@ def _before_send(event, hint):
     if "ForkPoolWorker" in message and "SIGTERM" in message:
         return None
 
-    if "Failed to enqueue category sync" in message or "Failed to enqueue market refresh" in message:
+    if _is_best_effort_enqueue_noise(event, hint):
         return None
 
     return event
