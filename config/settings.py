@@ -652,7 +652,7 @@ POLYMARKET_EMBED_HEIGHT = env.int("POLYMARKET_EMBED_HEIGHT", default=420)
 
 def build_content_security_policy(*, sentry_dsn=""):
     """Pragmatic CSP for Tailwind/HTMX CDN + Polymarket embeds (report-only rollout)."""
-    from config.csp_helpers import sentry_csp_report_uri
+    from config.csp_helpers import ICONIFY_CONNECT_HOSTS, sentry_csp_report_uri
 
     embed_hosts = []
     for url in (POLYMARKET_EMBED_BASE_URL, POLYMARKET_SPORTS_EMBED_BASE_URL):
@@ -664,6 +664,7 @@ def build_content_security_policy(*, sentry_dsn=""):
     api_host = urlparse(POLYMARKET_API_URL).netloc or "gamma-api.polymarket.com"
 
     connect_hosts = ["'self'", f"https://{api_host}", "https://challenges.cloudflare.com"]
+    connect_hosts.extend(f"https://{host}" for host in ICONIFY_CONNECT_HOSTS)
     report_uri = sentry_csp_report_uri(sentry_dsn)
     if report_uri:
         report_host = urlparse(report_uri).hostname

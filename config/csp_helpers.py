@@ -5,6 +5,12 @@ from urllib.parse import urlparse
 
 # Cloudflare Turnstile renders challenge UI in an iframe on this host.
 TURNSTILE_FRAME_HOST = "challenges.cloudflare.com"
+# Iconify web component fetches icon JSON from these API mirrors at runtime.
+ICONIFY_CONNECT_HOSTS = (
+    "api.iconify.design",
+    "api.simplesvg.com",
+    "api.unisvg.com",
+)
 # Turnstile and other third-party widgets load webfonts from Google Fonts CDN.
 GOOGLE_FONTS_STATIC_HOST = "fonts.gstatic.com"
 # Iconify web component fetches icon JSON from these API hosts (connect-src).

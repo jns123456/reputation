@@ -36,6 +36,15 @@ class BuildContentSecurityPolicyTests(SimpleTestCase):
         self.assertIn("challenges.cloudflare.com", frame_part)
         self.assertIn("embed.polymarket.com", frame_part)
 
+    def test_iconify_api_hosts_allowed_in_connect_src(self):
+        from config.settings import build_content_security_policy
+
+        policy = build_content_security_policy()
+        connect_part = policy.split("connect-src")[1].split(";")[0]
+        self.assertIn("https://api.iconify.design", connect_part)
+        self.assertIn("https://api.simplesvg.com", connect_part)
+        self.assertIn("https://api.unisvg.com", connect_part)
+
 
 class EnsureFrameSrcHostTests(SimpleTestCase):
     def test_adds_host_to_frame_src(self):
