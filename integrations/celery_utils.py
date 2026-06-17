@@ -68,7 +68,6 @@ def enqueue_category_sync(category_slug: str) -> bool:
         logger.warning(
             "Failed to enqueue category sync for %s; continuing",
             category_slug,
-            exc_info=True,
         )
         return False
 
@@ -112,7 +111,6 @@ def enqueue_market_refresh_if_stale(market) -> bool:
         logger.warning(
             "Failed to enqueue market refresh for %s; continuing",
             market.pk,
-            exc_info=True,
         )
         return False
 

@@ -46,6 +46,9 @@ def _before_send(event, hint):
     if "ForkPoolWorker" in message and "SIGTERM" in message:
         return None
 
+    if "Failed to enqueue category sync" in message or "Failed to enqueue market refresh" in message:
+        return None
+
     return event
 
 

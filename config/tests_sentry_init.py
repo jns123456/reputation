@@ -32,6 +32,15 @@ class SentryBeforeSendTests(SimpleTestCase):
         }
         self.assertIsNone(_before_send(event, {}))
 
+    def test_drops_best_effort_celery_enqueue_warnings(self):
+        for message in (
+            "Failed to enqueue category sync for politics; continuing",
+            "Failed to enqueue market refresh for 42; continuing",
+        ):
+            with self.subTest(message=message):
+                event = {"logentry": {"message": message}, "logger": "integrations.celery_utils"}
+                self.assertIsNone(_before_send(event, {}))
+
     def test_keeps_other_multiprocessing_errors(self):
         event = {
             "logger": "multiprocessing",
