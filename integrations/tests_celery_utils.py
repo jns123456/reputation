@@ -67,3 +67,18 @@ class MarketRefreshEnqueueTests(SimpleTestCase):
         self.assertTrue(enqueue_market_refresh_if_stale(market))
         mock_task.delay.assert_called_once_with(42)
         mock_cache.set.assert_called_once()
+
+    @patch("integrations.celery_utils.cache")
+    @patch("integrations.celery_utils.celery_broker_available", return_value=True)
+    @patch("integrations.tasks.refresh_market_task")
+    def test_enqueue_market_refresh_swallows_broker_errors(self, mock_task, _mock_broker, mock_cache):
+        mock_cache.get.return_value = None
+        mock_task.delay.side_effect = ConnectionError("redis ssl eof")
+        market = MagicMock()
+        market.pk = 42
+        market.source = "polymarket"
+        market.status = "open"
+        market.polymarket_synced_at = None
+
+        self.assertFalse(enqueue_market_refresh_if_stale(market))
+        mock_cache.set.assert_called_once_with("celery_broker_available", False, 60)

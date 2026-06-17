@@ -65,7 +65,11 @@ def enqueue_category_sync(category_slug: str) -> bool:
         sync_category_markets_task.delay(category_slug)
     except Exception:
         cache.set(CELERY_BROKER_AVAILABLE_CACHE_KEY, False, CELERY_BROKER_CHECK_SECONDS)
-        logger.exception("Failed to enqueue category sync for %s", category_slug)
+        logger.warning(
+            "Failed to enqueue category sync for %s; continuing",
+            category_slug,
+            exc_info=True,
+        )
         return False
 
     return True
@@ -105,7 +109,11 @@ def enqueue_market_refresh_if_stale(market) -> bool:
         refresh_market_task.delay(market.pk)
     except Exception:
         cache.set(CELERY_BROKER_AVAILABLE_CACHE_KEY, False, CELERY_BROKER_CHECK_SECONDS)
-        logger.exception("Failed to enqueue market refresh for %s", market.pk)
+        logger.warning(
+            "Failed to enqueue market refresh for %s; continuing",
+            market.pk,
+            exc_info=True,
+        )
         return False
 
     cache.set(cache_key, True, MARKET_REFRESH_ENQUEUE_SECONDS)
