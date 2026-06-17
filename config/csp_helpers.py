@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 TURNSTILE_FRAME_HOST = "challenges.cloudflare.com"
 # Turnstile and other third-party widgets load webfonts from Google Fonts CDN.
 GOOGLE_FONTS_STATIC_HOST = "fonts.gstatic.com"
+# Iconify fetches MDI (and related) icon JSON from the unisvg API.
+ICONIFY_UNISVG_CONNECT_HOST = "https://api.unisvg.com"
 
 
 def ensure_frame_src_host(policy: str, host: str) -> str:
@@ -51,6 +53,32 @@ def ensure_font_src_host(policy: str, host: str) -> str:
 def ensure_google_fonts_font_src(policy: str) -> str:
     """Allow Google Fonts static files used by third-party widgets."""
     return ensure_font_src_host(policy, GOOGLE_FONTS_STATIC_HOST)
+
+
+def ensure_connect_src_host(policy: str, host: str) -> str:
+    """Add *host* to connect-src when missing (idempotent)."""
+    policy = policy or ""
+    host = (host or "").strip()
+    if not policy or not host:
+        return policy
+
+    match = re.search(r"connect-src\s+([^;]+)", policy)
+    if not match:
+        return policy
+    sources = match.group(1).split()
+    if host in sources:
+        return policy
+    bare = host.removeprefix("https://").removeprefix("http://")
+    if bare in sources or f"https://{bare}" in sources:
+        return policy
+
+    start, end = match.span(1)
+    return f"{policy[:end]} {host}{policy[end:]}"
+
+
+def ensure_iconify_connect_src(policy: str) -> str:
+    """Allow Iconify runtime fetches for MDI and related icon sets."""
+    return ensure_connect_src_host(policy, ICONIFY_UNISVG_CONNECT_HOST)
 
 
 def sentry_csp_report_uri(dsn: str) -> str:

@@ -3,9 +3,11 @@
 from django.test import SimpleTestCase
 
 from config.csp_helpers import (
+    ensure_connect_src_host,
     ensure_font_src_host,
     ensure_frame_src_host,
     ensure_google_fonts_font_src,
+    ensure_iconify_connect_src,
     ensure_turnstile_frame_src,
     sentry_csp_report_uri,
 )
@@ -70,3 +72,30 @@ class EnsureFontSrcHostTests(SimpleTestCase):
     def test_noop_without_font_src(self):
         policy = "default-src 'self'; connect-src 'self';"
         self.assertEqual(ensure_font_src_host(policy, "fonts.gstatic.com"), policy)
+
+
+class EnsureConnectSrcHostTests(SimpleTestCase):
+    def test_adds_host_to_connect_src(self):
+        policy = "default-src 'self'; connect-src 'self' https://gamma-api.polymarket.com;"
+        patched = ensure_iconify_connect_src(policy)
+        self.assertIn(
+            "connect-src 'self' https://gamma-api.polymarket.com https://api.unisvg.com;",
+            patched,
+        )
+
+    def test_idempotent_when_host_present(self):
+        policy = (
+            "default-src 'self'; "
+            "connect-src 'self' https://api.unisvg.com;"
+        )
+        self.assertEqual(ensure_iconify_connect_src(policy), policy)
+
+    def test_idempotent_when_bare_host_present(self):
+        policy = "default-src 'self'; connect-src 'self' api.unisvg.com;"
+        self.assertEqual(ensure_iconify_connect_src(policy), policy)
+
+    def test_noop_without_connect_src(self):
+        policy = "default-src 'self'; font-src 'self' data:;"
+        self.assertEqual(
+            ensure_connect_src_host(policy, "https://api.unisvg.com"), policy
+        )
