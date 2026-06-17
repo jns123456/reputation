@@ -26,6 +26,11 @@ class Command(BaseCommand):
             help="Import FIFA World Cup match markets as 3-outcome forecasts (win/draw/loss)",
         )
         parser.add_argument(
+            "--f1",
+            action="store_true",
+            help="Import Formula 1 props and futures from Polymarket",
+        )
+        parser.add_argument(
             "--tag",
             type=str,
             default="",
@@ -51,6 +56,10 @@ class Command(BaseCommand):
             from integrations.services import sync_world_cup_match_markets
 
             result = sync_world_cup_match_markets()
+        elif options["f1"]:
+            from integrations.services import sync_f1_markets
+
+            result = sync_f1_markets(limit=options["limit"] or None)
         elif options["tag"]:
             from integrations.services import sync_binary_markets_by_tag
 

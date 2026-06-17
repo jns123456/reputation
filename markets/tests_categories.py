@@ -416,6 +416,43 @@ class CategoryBrowseViewTests(TestCase):
         self.assertEqual(summaries["nba"], 1)
         self.assertEqual(summaries["soccer"], 1)
 
+    def test_formula1_browse_area_from_polymarket_tags(self):
+        from markets.browse_areas import compute_browse_area_slugs
+
+        market = Market.objects.create(
+            external_id="area-f1-drivers",
+            title="F1 Drivers' Champion",
+            slug="f1-drivers-champion",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "sports"}, {"slug": "formula1"}, {"slug": "f1"}]},
+        )
+        market.refresh_from_db()
+        self.assertIn("formula-1", market.browse_area_slugs)
+        self.assertEqual(compute_browse_area_slugs(market), ["formula-1"])
+
+    def test_filter_markets_by_formula1_browse_area(self):
+        f1 = Market.objects.create(
+            external_id="filter-f1",
+            title="Austrian Grand Prix: Driver Winner",
+            slug="f1-austria-winner",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "f1"}, {"slug": "formula1"}]},
+        )
+        Market.objects.create(
+            external_id="filter-f1-soccer",
+            title="Soccer",
+            slug="f1-soccer-only",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "soccer"}]},
+        )
+        sports = get_open_markets_by_canonical_category(category_slug="sports")
+        filtered = filter_markets_by_browse_area(
+            markets=sports,
+            category_slug="sports",
+            area_slug="formula-1",
+        )
+        self.assertEqual([market.pk for market in filtered], [f1.pk])
+
     def test_filter_markets_by_browse_area(self):
         nba = Market.objects.create(
             external_id="filter-nba",

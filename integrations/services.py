@@ -512,6 +512,25 @@ def sync_crypto_binary_markets(*, limit=48):
     )
 
 
+def _f1_sync_limit(limit):
+    from django.conf import settings
+
+    if limit is None:
+        limit = getattr(settings, "F1_MARKET_SYNC_LIMIT", 0)
+    if not limit:
+        return 50
+    return limit
+
+
+def sync_f1_markets(*, limit=None):
+    """Fetch F1 props and futures from Polymarket and upsert locally."""
+    return sync_binary_markets_by_tag(
+        tag_slug="f1",
+        default_category="Sports",
+        limit=_f1_sync_limit(limit),
+    )
+
+
 def _world_cup_sync_limit(limit):
     """Resolve sync cap; 0 or None means import all available group-stage matches."""
     from django.conf import settings

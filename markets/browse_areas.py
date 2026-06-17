@@ -37,6 +37,7 @@ BROWSE_AREAS: tuple[BrowseArea, ...] = (
     BrowseArea("nfl", "NFL", frozenset({"nfl", "ncaa", "american-football", "football"}), "sports"),
     BrowseArea("ufc", "UFC", frozenset({"ufc", "mma"}), "sports"),
     BrowseArea("tennis", "Tennis", frozenset({"tennis"}), "sports"),
+    BrowseArea("formula-1", "Formula 1", frozenset({"f1", "formula1"}), "sports"),
     BrowseArea("cricket", "Cricket", frozenset({"cricket"}), "sports"),
     # Crypto
     BrowseArea("bitcoin", "Bitcoin", frozenset({"bitcoin"}), "crypto"),

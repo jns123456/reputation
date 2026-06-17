@@ -119,6 +119,8 @@ CANONICAL_CATEGORIES: tuple[CanonicalCategory, ...] = (
                 "tennis",
                 "mma",
                 "ufc",
+                "f1",
+                "formula1",
             }
         ),
         category_names=frozenset({"sports"}),

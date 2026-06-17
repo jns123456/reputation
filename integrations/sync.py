@@ -58,11 +58,12 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
 
     if category.slug == "sports":
         try:
-            from integrations.services import sync_h2h_match_markets
+            from integrations.services import sync_f1_markets, sync_h2h_match_markets
 
             summary.absorb(sync_h2h_match_markets())
+            summary.absorb(sync_f1_markets())
         except Exception:
-            logger.exception("H2H sports match sync failed for category %s", category.slug)
+            logger.exception("H2H/F1 sports sync failed for category %s", category.slug)
 
     if category.polymarket_tag:
         try:
