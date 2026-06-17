@@ -72,6 +72,38 @@ def _is_best_effort_enqueue_noise(event, hint) -> bool:
     return False
 
 
+def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
+    """Drop handled Polymarket upstream timeouts from integrations.services."""
+    if event.get("logger") != "integrations.services":
+        return False
+
+    message = _event_message(event)
+    if not (
+        message.startswith("Failed to fetch World Cup match event")
+        or message.startswith("Failed to fetch H2H match event")
+        or message.startswith("Failed to fetch Polymarket market")
+    ):
+        return False
+
+    transient_types = {
+        "ReadTimeout",
+        "Timeout",
+        "ConnectionError",
+        "ConnectTimeout",
+        "ReadTimeoutError",
+    }
+    exc_info = hint.get("exc_info")
+    if exc_info and exc_info[0] is not None:
+        exc_name = getattr(exc_info[0], "__name__", "")
+        if exc_name in transient_types:
+            return True
+
+    for entry in event.get("exception", {}).get("values", []):
+        if entry.get("type") in transient_types:
+            return True
+    return False
+
+
 def _is_handled_redis_cache_error(event, hint) -> bool:
     """Drop Redis cache failures already swallowed by ResilientRedisCache."""
     exc_info = hint.get("exc_info")
@@ -104,6 +136,9 @@ def _before_send(event, hint):
         return None
 
     if _is_best_effort_enqueue_noise(event, hint):
+        return None
+
+    if _is_transient_polymarket_fetch_noise(event, hint):
         return None
 
     return event

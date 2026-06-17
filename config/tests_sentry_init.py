@@ -115,6 +115,30 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (OutOfMemoryError, OutOfMemoryError("maxmemory"), None)}
         self.assertIsNone(_before_send(event, hint))
 
+    def test_drops_transient_polymarket_fetch_timeouts(self):
+        class ReadTimeout(Exception):
+            pass
+
+        ReadTimeout.__module__ = "requests.exceptions"
+        event = {
+            "logger": "integrations.services",
+            "logentry": {"message": "Failed to fetch World Cup match event fifwc-can-qat-2026-06-18"},
+            "exception": {
+                "values": [
+                    {
+                        "type": "ReadTimeout",
+                        "stacktrace": {
+                            "frames": [
+                                {"module": "integrations.polymarket.client", "function": "fetch_event_by_slug"},
+                            ],
+                        },
+                    },
+                ],
+            },
+        }
+        hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
+        self.assertIsNone(_before_send(event, hint))
+
     def test_keeps_redis_errors_outside_cache_backend(self):
         class ConnectionError(Exception):
             pass
