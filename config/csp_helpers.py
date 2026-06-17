@@ -13,12 +13,6 @@ ICONIFY_CONNECT_HOSTS = (
 )
 # Turnstile and other third-party widgets load webfonts from Google Fonts CDN.
 GOOGLE_FONTS_STATIC_HOST = "fonts.gstatic.com"
-# Iconify web component fetches icon JSON from these API hosts (connect-src).
-ICONIFY_CONNECT_HOSTS = (
-    "https://api.iconify.design",
-    "https://api.simplesvg.com",
-    "https://api.unisvg.com",
-)
 
 
 def ensure_frame_src_host(policy: str, host: str) -> str:
@@ -85,7 +79,7 @@ def ensure_connect_src_host(policy: str, host: str) -> str:
 def ensure_iconify_connect_src(policy: str) -> str:
     """Allow Iconify icon API fetches used by ``<iconify-icon>``."""
     for host in ICONIFY_CONNECT_HOSTS:
-        policy = ensure_connect_src_host(policy, host)
+        policy = ensure_connect_src_host(policy, f"https://{host}")
     return policy
 
 

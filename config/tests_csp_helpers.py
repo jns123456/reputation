@@ -44,6 +44,7 @@ class BuildContentSecurityPolicyTests(SimpleTestCase):
         self.assertIn("https://api.iconify.design", connect_part)
         self.assertIn("https://api.simplesvg.com", connect_part)
         self.assertIn("https://api.unisvg.com", connect_part)
+        self.assertNotIn("https://https://", connect_part)
 
 
 class EnsureFrameSrcHostTests(SimpleTestCase):
