@@ -42,6 +42,15 @@ def _frames_include_module(event, module_name: str) -> bool:
     return False
 
 
+def _stack_includes_filename(event, filename_suffix: str) -> bool:
+    for entry in event.get("exception", {}).get("values", []):
+        for frame in entry.get("stacktrace", {}).get("frames", []):
+            filename = frame.get("filename") or frame.get("abs_path") or ""
+            if filename.endswith(filename_suffix):
+                return True
+    return False
+
+
 def _is_best_effort_enqueue_noise(event, hint) -> bool:
     message = _event_message(event)
     if "Failed to enqueue category sync" in message or "Failed to enqueue market refresh" in message:
@@ -63,6 +72,22 @@ def _is_best_effort_enqueue_noise(event, hint) -> bool:
     return False
 
 
+def _is_handled_redis_cache_error(event, hint) -> bool:
+    """Drop Redis cache failures already swallowed by ResilientRedisCache."""
+    exc_info = hint.get("exc_info")
+    if not exc_info or exc_info[0] is None:
+        return False
+
+    exc_name = getattr(exc_info[0], "__name__", "")
+    exc_module = getattr(exc_info[0], "__module__", "")
+    if exc_module != "redis.exceptions":
+        return False
+    if exc_name not in {"ConnectionError", "OutOfMemoryError", "TimeoutError"}:
+        return False
+
+    return _stack_includes_filename(event, "cache_backends.py")
+
+
 def _before_send(event, hint):
     """Drop expected Celery worker SIGTERM noise during Heroku dyno cycling."""
     exc_info = hint.get("exc_info")
@@ -70,6 +95,9 @@ def _before_send(event, hint):
         exc_name = getattr(exc_info[0], "__name__", "")
         if exc_name in {"WorkerLostError", "WorkerTerminate"}:
             return None
+
+    if _is_handled_redis_cache_error(event, hint):
+        return None
 
     message = _event_message(event)
     if "ForkPoolWorker" in message and "SIGTERM" in message:

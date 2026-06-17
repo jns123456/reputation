@@ -73,6 +73,57 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (ValueError, ValueError("boom"), None)}
         self.assertIs(event, _before_send(event, hint))
 
+    def test_drops_handled_redis_cache_connection_error(self):
+        class ConnectionError(Exception):
+            pass
+
+        ConnectionError.__module__ = "redis.exceptions"
+        event = {
+            "exception": {
+                "values": [
+                    {
+                        "stacktrace": {
+                            "frames": [
+                                {"filename": "/app/config/cache_backends.py", "lineno": 29},
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+        hint = {"exc_info": (ConnectionError, ConnectionError("reset by peer"), None)}
+        self.assertIsNone(_before_send(event, hint))
+
+    def test_drops_handled_redis_cache_out_of_memory_error(self):
+        class OutOfMemoryError(Exception):
+            pass
+
+        OutOfMemoryError.__module__ = "redis.exceptions"
+        event = {
+            "exception": {
+                "values": [
+                    {
+                        "stacktrace": {
+                            "frames": [
+                                {"filename": "config/cache_backends.py", "lineno": 29},
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+        hint = {"exc_info": (OutOfMemoryError, OutOfMemoryError("maxmemory"), None)}
+        self.assertIsNone(_before_send(event, hint))
+
+    def test_keeps_redis_errors_outside_cache_backend(self):
+        class ConnectionError(Exception):
+            pass
+
+        ConnectionError.__module__ = "redis.exceptions"
+        event = {"exception": {"values": [{"stacktrace": {"frames": [{"filename": "celery/worker.py"}]}}]}}
+        hint = {"exc_info": (ConnectionError, ConnectionError("broker down"), None)}
+        self.assertIs(event, _before_send(event, hint))
+
     def test_event_message_prefers_logentry(self):
         event = {
             "logentry": {"message": "from logentry"},

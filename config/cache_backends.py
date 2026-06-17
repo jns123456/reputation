@@ -15,7 +15,13 @@ class ResilientRedisCache(RedisCache):
     """
 
     def _log_cache_error(self, operation: str, key, exc: Exception) -> None:
-        logger.warning("Cache %s failed for %r; treating as miss/no-op", operation, key, exc_info=exc)
+        logger.warning(
+            "Cache %s failed for %r (%s: %s); treating as miss/no-op",
+            operation,
+            key,
+            type(exc).__name__,
+            exc,
+        )
 
     def get(self, key, default=None, version=None):
         try:
