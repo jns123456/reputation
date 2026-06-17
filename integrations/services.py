@@ -2,6 +2,7 @@
 
 import logging
 
+import requests
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -18,6 +19,19 @@ from markets.models import Market
 from predictions.services import resolve_eliminated_outcome_predictions, resolve_market_predictions
 
 logger = logging.getLogger(__name__)
+
+_TRANSIENT_POLYMARKET_ERRORS = (
+    requests.exceptions.Timeout,
+    requests.exceptions.ConnectionError,
+)
+
+
+def _log_polymarket_fetch_failure(exc, message, *args):
+    """Log transient upstream timeouts as warnings to avoid Sentry noise."""
+    if isinstance(exc, _TRANSIENT_POLYMARKET_ERRORS):
+        logger.warning(message, *args)
+    else:
+        logger.exception(message, *args)
 
 
 def _fetch_event_for_market(client, raw_market, raw_event=None):
@@ -40,15 +54,15 @@ def _fetch_event_for_market(client, raw_market, raw_event=None):
             fetched = client.fetch_event_by_slug(event_slug)
             if fetched and fetched.get("slug"):
                 raw_event = fetched
-        except Exception:
-            logger.exception("Failed to fetch Polymarket event %s", event_slug)
+        except Exception as exc:
+            _log_polymarket_fetch_failure(exc, "Failed to fetch Polymarket event %s", event_slug)
     elif event_slug and raw_event and not raw_event.get("markets"):
         try:
             fetched = client.fetch_event_by_slug(event_slug)
             if fetched and fetched.get("markets"):
                 raw_event = fetched
-        except Exception:
-            logger.exception("Failed to fetch Polymarket event %s", event_slug)
+        except Exception as exc:
+            _log_polymarket_fetch_failure(exc, "Failed to fetch Polymarket event %s", event_slug)
 
     return raw_event or {}
 
@@ -252,8 +266,8 @@ def refresh_polymarket_multi_outcome_market(market):
 
     try:
         event = client.fetch_event_by_slug(slug)
-    except Exception:
-        logger.exception("Failed to fetch Polymarket event %s", slug)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(exc, "Failed to fetch Polymarket event %s", slug)
         return market
     if not event:
         return market
@@ -373,8 +387,10 @@ def _import_polymarket_market_pairs(client, pairs, *, default_category=""):
                         try:
                             fetched = client.fetch_event_by_slug(event_slug)
                             event_cache[event_slug] = fetched if fetched else (raw_event or {})
-                        except Exception:
-                            logger.exception("Failed to fetch Polymarket event %s", event_slug)
+                        except Exception as exc:
+                            _log_polymarket_fetch_failure(
+                                exc, "Failed to fetch Polymarket event %s", event_slug
+                            )
                             event_cache[event_slug] = raw_event or {}
                     else:
                         event_cache[event_slug] = raw_event or {}
@@ -602,8 +618,8 @@ def refresh_h2h_match_market(market):
 
     try:
         event = client.fetch_event_by_slug(slug)
-    except Exception:
-        logger.exception("Failed to fetch H2H match event %s", slug)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(exc, "Failed to fetch H2H match event %s", slug)
         return market
 
     if not event:
@@ -646,8 +662,8 @@ def refresh_world_cup_match_market(market):
 
     try:
         event = client.fetch_event_by_slug(slug)
-    except Exception:
-        logger.exception("Failed to fetch World Cup match event %s", slug)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(exc, "Failed to fetch World Cup match event %s", slug)
         return market
 
     if not event:

@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import time
 from datetime import datetime
 from datetime import timedelta
 
@@ -18,6 +19,11 @@ from integrations.polymarket.constants import (
 )
 
 logger = logging.getLogger(__name__)
+
+_TRANSIENT_REQUEST_ERRORS = (
+    requests.exceptions.Timeout,
+    requests.exceptions.ConnectionError,
+)
 
 ECONOMY_TAG_SLUG = "economy"
 CRYPTO_TAG_SLUG = "crypto"
@@ -35,6 +41,21 @@ class PolymarketClient:
         self.base_url = (base_url or settings.POLYMARKET_API_URL).rstrip("/")
         self.session = requests.Session()
         self.session.headers.update({"Accept": "application/json"})
+
+    def _get_with_retry(self, url, *, params=None, timeout=30, max_attempts=3):
+        """GET with short backoff on transient Polymarket network failures."""
+        last_exc = None
+        for attempt in range(max_attempts):
+            try:
+                return self.session.get(url, params=params, timeout=timeout)
+            except _TRANSIENT_REQUEST_ERRORS as exc:
+                last_exc = exc
+                if attempt + 1 >= max_attempts:
+                    raise
+                time.sleep(2**attempt)
+        if last_exc is not None:
+            raise last_exc
+        raise RuntimeError("unreachable")
 
     def fetch_markets(
         self,
@@ -421,7 +442,7 @@ class PolymarketClient:
 
     def fetch_event_by_slug(self, slug):
         url = f"{self.base_url}/events/slug/{slug}"
-        response = self.session.get(url, timeout=30)
+        response = self._get_with_retry(url, timeout=30)
         if response.status_code == 404:
             return None
         response.raise_for_status()

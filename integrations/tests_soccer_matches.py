@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from unittest.mock import patch
 
+import requests
+
 from integrations.polymarket.soccer_matches import (
     DRAW_OUTCOME_LABEL,
     WORLD_CUP_MATCH_EXTERNAL_PREFIX,
@@ -380,6 +382,26 @@ class ResolvedSoccerMatchRefreshTests(TestCase):
         self.assertEqual(normalized["status"], "resolved")
         self.assertEqual(normalized["resolved_outcome"], DRAW_OUTCOME_LABEL)
         self.assertAlmostEqual(normalized["current_probability"][DRAW_OUTCOME_LABEL], 1.0)
+
+    @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
+    @patch("integrations.services.PolymarketClient.fetch_event_by_slug")
+    def test_refresh_world_cup_match_timeout_keeps_market_unchanged(
+        self, mock_fetch_event, _mock_translate
+    ):
+        mock_fetch_event.side_effect = requests.exceptions.ReadTimeout("read timed out")
+        normalized = normalize_world_cup_match_event(COLOMBIA_VS_COSTA_RICA_EVENT)
+        raw_market = build_world_cup_match_raw(COLOMBIA_VS_COSTA_RICA_EVENT, normalized=normalized)
+        market, _ = import_market_from_normalized(
+            normalized,
+            raw_market=raw_market,
+            raw_event=COLOMBIA_VS_COSTA_RICA_EVENT,
+        )
+        before = market.status
+
+        result = refresh_world_cup_match_market(market)
+
+        self.assertEqual(result.pk, market.pk)
+        self.assertEqual(result.status, before)
 
     @patch("markets.translation_services.translate_market_copy", side_effect=lambda text: text)
     @patch("integrations.services.PolymarketClient.fetch_event_by_slug")
