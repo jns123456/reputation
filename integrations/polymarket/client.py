@@ -74,7 +74,7 @@ class PolymarketClient:
             params["order"] = order
             params["ascending"] = "false"
         url = f"{self.base_url}/markets"
-        response = self.session.get(url, params=params, timeout=30)
+        response = self._get_with_retry(url, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
         if isinstance(data, list):

@@ -5,7 +5,12 @@ import requests
 from django.test import TestCase
 from django.utils import timezone
 
-from integrations.sync import refresh_market, refresh_stale_open_markets, sync_category_markets
+from integrations.sync import (
+    refresh_market,
+    refresh_stale_open_markets,
+    sync_all_category_markets,
+    sync_category_markets,
+)
 from markets.categories import get_category_for_slug
 from markets.models import Market
 
@@ -59,6 +64,28 @@ class SyncCategoryMarketsTests(TestCase):
             any("H2H/F1 sports sync failed for category sports" in msg for msg in logs.output)
         )
         mock_f1.assert_not_called()
+
+
+class SyncAllCategoryMarketsTests(TestCase):
+    @patch("integrations.sync.sync_category_markets")
+    @patch("integrations.sync.sync_top_volume_polymarket_markets")
+    def test_top_volume_sync_logs_transient_timeout_as_warning(
+        self, mock_top_volume, mock_category
+    ):
+        mock_top_volume.side_effect = requests.exceptions.ReadTimeout("read timed out")
+        mock_category.return_value = type(
+            "Summary",
+            (),
+            {"imported": 0, "updated": 0, "errors": []},
+        )()
+
+        with self.assertLogs("integrations.services", level="WARNING") as logs:
+            result = sync_all_category_markets(limit=5)
+
+        self.assertEqual(result["imported"], 0)
+        self.assertTrue(
+            any("Polymarket top-volume sync failed" in msg for msg in logs.output)
+        )
 
 
 class RefreshStaleOpenMarketsTests(TestCase):

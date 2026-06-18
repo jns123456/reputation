@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from integrations.services import (
+    _log_polymarket_fetch_failure,
     refresh_market_from_polymarket,
     sync_binary_markets_by_tag,
     sync_top_volume_polymarket_markets,
@@ -58,11 +59,7 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
 
     if category.slug == "sports":
         try:
-            from integrations.services import (
-                _log_polymarket_fetch_failure,
-                sync_f1_markets,
-                sync_h2h_match_markets,
-            )
+            from integrations.services import sync_f1_markets, sync_h2h_match_markets
 
             summary.absorb(sync_h2h_match_markets())
             summary.absorb(sync_f1_markets())
@@ -80,8 +77,10 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
                     limit=limit,
                 )
             )
-        except Exception:
-            logger.exception("Polymarket category sync failed for %s", category.slug)
+        except Exception as exc:
+            _log_polymarket_fetch_failure(
+                exc, "Polymarket category sync failed for %s", category.slug
+            )
 
     return summary
 
@@ -94,8 +93,8 @@ def sync_all_category_markets(*, limit=None) -> dict:
 
     try:
         totals.absorb(sync_top_volume_polymarket_markets())
-    except Exception:
-        logger.exception("Polymarket top-volume sync failed")
+    except Exception as exc:
+        _log_polymarket_fetch_failure(exc, "Polymarket top-volume sync failed")
 
     for category in CANONICAL_CATEGORIES:
         if not category.polymarket_tag:
