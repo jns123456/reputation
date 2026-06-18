@@ -1,6 +1,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
+import requests
 from django.test import TestCase
 from django.utils import timezone
 
@@ -39,6 +40,25 @@ class SyncCategoryMarketsTests(TestCase):
         mock_f1.assert_called_once()
         mock_poly.assert_called_once()
         self.assertEqual(summary.imported, 1)
+
+    @patch("integrations.sync.sync_binary_markets_by_tag")
+    @patch("integrations.services.sync_f1_markets")
+    @patch("integrations.services.sync_h2h_match_markets")
+    def test_sports_sync_logs_transient_timeout_as_warning(
+        self, mock_h2h, mock_f1, mock_poly
+    ):
+        category = get_category_for_slug("sports")
+        mock_h2h.side_effect = requests.exceptions.ReadTimeout("read timed out")
+        mock_poly.return_value = {"imported": [], "errors": []}
+
+        with self.assertLogs("integrations.services", level="WARNING") as logs:
+            summary = sync_category_markets(category, limit=12)
+
+        self.assertEqual(summary.imported, 0)
+        self.assertTrue(
+            any("H2H/F1 sports sync failed for category sports" in msg for msg in logs.output)
+        )
+        mock_f1.assert_not_called()
 
 
 class RefreshStaleOpenMarketsTests(TestCase):
