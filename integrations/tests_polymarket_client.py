@@ -40,3 +40,22 @@ class PolymarketClientRetryTests(SimpleTestCase):
 
         self.assertEqual(self.client.session.get.call_count, 3)
         self.assertEqual(mock_sleep.call_count, 2)
+
+    @patch("integrations.polymarket.client.time.sleep")
+    def test_fetch_events_retries_transient_timeout(self, mock_sleep):
+        ok_response = MagicMock()
+        ok_response.status_code = 200
+        ok_response.json.return_value = [{"slug": "demo-event"}]
+
+        self.client.session.get = MagicMock(
+            side_effect=[
+                requests.exceptions.ReadTimeout("read timed out"),
+                ok_response,
+            ]
+        )
+
+        events = self.client.fetch_events(tag_slug="mlb", limit=100, offset=100)
+
+        self.assertEqual(events[0]["slug"], "demo-event")
+        self.assertEqual(self.client.session.get.call_count, 2)
+        mock_sleep.assert_called_once_with(1)
