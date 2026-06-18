@@ -139,6 +139,45 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
         self.assertIsNone(_before_send(event, hint))
 
+    def test_drops_transient_polymarket_fetch_500_errors(self):
+        class HTTPError(Exception):
+            pass
+
+        HTTPError.__module__ = "requests.exceptions"
+
+        class FakeResponse:
+            status_code = 500
+
+        event = {
+            "logger": "integrations.services",
+            "logentry": {
+                "message": "Failed to fetch Polymarket event fifwc-prt-cdr-2026-06-17-saves-jose-sa-gte4",
+            },
+            "exception": {
+                "values": [
+                    {
+                        "type": "HTTPError",
+                        "value": (
+                            "500 Server Error: Internal Server Error for url: "
+                            "https://gamma-api.polymarket.com/events/slug/demo"
+                        ),
+                        "stacktrace": {
+                            "frames": [
+                                {
+                                    "module": "integrations.polymarket.client",
+                                    "function": "fetch_event_by_slug",
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        }
+        exc = HTTPError("500 Server Error")
+        exc.response = FakeResponse()
+        hint = {"exc_info": (HTTPError, exc, None)}
+        self.assertIsNone(_before_send(event, hint))
+
     def test_keeps_redis_errors_outside_cache_backend(self):
         class ConnectionError(Exception):
             pass

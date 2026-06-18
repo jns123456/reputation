@@ -26,9 +26,20 @@ _TRANSIENT_POLYMARKET_ERRORS = (
 )
 
 
-def _log_polymarket_fetch_failure(exc, message, *args):
-    """Log transient upstream timeouts as warnings to avoid Sentry noise."""
+def _is_transient_polymarket_upstream_error(exc) -> bool:
     if isinstance(exc, _TRANSIENT_POLYMARKET_ERRORS):
+        return True
+    response = getattr(exc, "response", None)
+    return (
+        isinstance(exc, requests.HTTPError)
+        and response is not None
+        and response.status_code >= 500
+    )
+
+
+def _log_polymarket_fetch_failure(exc, message, *args):
+    """Log transient upstream failures as warnings to avoid Sentry noise."""
+    if _is_transient_polymarket_upstream_error(exc):
         logger.warning(message, *args)
     else:
         logger.exception(message, *args)

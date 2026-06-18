@@ -82,6 +82,7 @@ def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
         message.startswith("Failed to fetch World Cup match event")
         or message.startswith("Failed to fetch H2H match event")
         or message.startswith("Failed to fetch Polymarket market")
+        or message.startswith("Failed to fetch Polymarket event")
     ):
         return False
 
@@ -97,10 +98,22 @@ def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
         exc_name = getattr(exc_info[0], "__name__", "")
         if exc_name in transient_types:
             return True
+        if exc_name == "HTTPError":
+            exc = exc_info[1]
+            response = getattr(exc, "response", None)
+            if response is not None and response.status_code >= 500:
+                return True
 
     for entry in event.get("exception", {}).get("values", []):
-        if entry.get("type") in transient_types:
+        entry_type = entry.get("type")
+        if entry_type in transient_types:
             return True
+        if entry_type == "HTTPError":
+            value = entry.get("value") or ""
+            if "Server Error" in value and any(
+                token in value for token in (" 500 ", " 502 ", " 503 ", " 504 ")
+            ):
+                return True
     return False
 
 

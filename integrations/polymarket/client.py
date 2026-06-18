@@ -43,16 +43,22 @@ class PolymarketClient:
         self.session.headers.update({"Accept": "application/json"})
 
     def _get_with_retry(self, url, *, params=None, timeout=30, max_attempts=3):
-        """GET with short backoff on transient Polymarket network failures."""
+        """GET with short backoff on transient Polymarket network/server failures."""
         last_exc = None
         for attempt in range(max_attempts):
             try:
-                return self.session.get(url, params=params, timeout=timeout)
+                response = self.session.get(url, params=params, timeout=timeout)
             except _TRANSIENT_REQUEST_ERRORS as exc:
                 last_exc = exc
                 if attempt + 1 >= max_attempts:
                     raise
                 time.sleep(2**attempt)
+                continue
+            if response.status_code < 500:
+                return response
+            if attempt + 1 >= max_attempts:
+                return response
+            time.sleep(2**attempt)
         if last_exc is not None:
             raise last_exc
         raise RuntimeError("unreachable")
@@ -444,6 +450,13 @@ class PolymarketClient:
         url = f"{self.base_url}/events/slug/{slug}"
         response = self._get_with_retry(url, timeout=30)
         if response.status_code == 404:
+            return None
+        if response.status_code >= 500:
+            logger.warning(
+                "Polymarket event %s unavailable (HTTP %s)",
+                slug,
+                response.status_code,
+            )
             return None
         response.raise_for_status()
         return response.json()
