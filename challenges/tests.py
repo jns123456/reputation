@@ -901,9 +901,11 @@ class MarketSearchTests(TestCase):
         self.assertContains(response, "All categories")
 
     def test_market_browse_soccer_match_card_shows_kickoff_and_colored_outcomes(self):
+        from datetime import timedelta
+
         from django.utils import timezone
 
-        kickoff = timezone.datetime(2026, 6, 14, 17, 0, tzinfo=timezone.utc)
+        kickoff = timezone.now() + timedelta(days=7)
         Market.objects.create(
             external_id="wc-match:picker-soccer",
             title="Germany vs. Curaçao",
@@ -938,9 +940,11 @@ class MarketSearchTests(TestCase):
         self.assertContains(response, "3-way result")
 
     def test_market_browse_h2h_match_card_shows_kickoff_and_colored_outcomes(self):
+        from datetime import timedelta
+
         from django.utils import timezone
 
-        kickoff = timezone.datetime(2026, 6, 14, 20, 0, tzinfo=timezone.utc)
+        kickoff = timezone.now() + timedelta(days=7)
         Market.objects.create(
             external_id="h2h-match:picker-nba",
             title="Lakers vs. Celtics",

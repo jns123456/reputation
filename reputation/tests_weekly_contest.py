@@ -122,6 +122,8 @@ class WeeklyContestViewTests(TestCase):
             HTTP_ACCEPT_LANGUAGE="es",
         )
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Concurso")
+        self.assertContains(response, "Semanal")
 
     @override_settings(WEEKLY_CONTEST_ENABLED=False)
     def test_weekly_contest_disabled_returns_404(self):

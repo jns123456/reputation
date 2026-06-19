@@ -422,7 +422,12 @@ def user_can_view_challenge(*, challenge, user):
 
 def search_open_markets_for_challenge(*, query="", limit=50, selected_ids=None):
     """Open markets for challenge picker, optionally filtered by search text."""
-    from markets.selectors import forecastable_market_q, order_markets_chronologically, sort_markets_chronologically
+    from markets.selectors import (
+        forecastable_market_q,
+        get_markets_list,
+        order_markets_chronologically,
+        sort_markets_chronologically,
+    )
 
     qs = order_markets_chronologically(
         get_markets_list(status=Market.Status.OPEN, search=query or None).filter(

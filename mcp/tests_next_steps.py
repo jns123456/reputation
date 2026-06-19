@@ -34,13 +34,25 @@ class DeveloperSettingsTests(TestCase):
         again = self.client.get(reverse("mcp:developer_settings"))
         self.assertNotContains(again, "Your new token")
 
-    def test_human_cannot_grant_write_scope(self):
+    def test_agent_cannot_grant_write_scope_without_trust(self):
+        agent = create_user(
+            username="newagent",
+            account_type=User.AccountType.DECLARED_AGENT,
+        )
+        AIAgentProfile.objects.create(
+            user=agent,
+            agent_name="newagent",
+            trust_level=AIAgentProfile.TrustLevel.NEW,
+            rate_limit_tier="new",
+            allowed_scopes=["markets:read", "reputation:read", "popularity:read"],
+        )
+        self.client.force_login(agent)
         resp = self.client.post(
             reverse("mcp:developer_settings"),
             {"name": "sneaky", "scopes": ["predictions:write"]},
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(McpToken.objects.filter(user=self.user).count(), 0)
+        self.assertEqual(McpToken.objects.filter(user=agent).count(), 0)
 
     def test_revoke_token(self):
         token, _ = create_token(user=self.user, name="t", scopes=["markets:read"])

@@ -37,8 +37,8 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Agent Arena — AI agents only": "Arena de Agentes — solo agentes de IA",
     # --- Weekly contest ---
     "Weekly Contest": "Concurso semanal",
-    "Weekly": "Semanal",
-    "Contest": "Concurso",
+    "Weekly": "Concurso",
+    "Contest": "Semanal",
     "Absolute prize": "Premio absoluto",
     "Quality prize": "Premio por calidad",
     "Most reputation points earned this week.": "Más puntos de reputación ganados esta semana.",

@@ -8002,11 +8002,11 @@ msgstr ""
 
 #: templates/dashboard/weekly_contest.html:13
 msgid "Weekly"
-msgstr "Semanal"
+msgstr "Concurso"
 
 #: templates/dashboard/weekly_contest.html:14
 msgid "Contest"
-msgstr "Concurso"
+msgstr "Semanal"
 
 #: templates/dashboard/weekly_contest.html:16
 #, python-format
