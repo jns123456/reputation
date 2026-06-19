@@ -70,8 +70,51 @@ def week_code_for_date(date):
     return sunday_start_for_date(date).isoformat()
 
 
+def get_first_contest_week_start():
+    """First Sunday when the weekly contest counts reputation (launch date)."""
+    raw = getattr(settings, "WEEKLY_CONTEST_FIRST_WEEK_START", "2026-06-21")
+    if hasattr(raw, "year"):
+        start = raw
+    else:
+        start = datetime.strptime(str(raw), "%Y-%m-%d").date()
+    return sunday_start_for_date(start)
+
+
+def normalize_contest_week_code(week_code):
+    """Clamp requested weeks to the first contest Sunday onward."""
+    first = get_first_contest_week_start()
+    start_date = datetime.strptime(week_code, "%Y-%m-%d").date()
+    if start_date < first:
+        return first.isoformat()
+    return week_code
+
+
 def current_week_code(*, today=None):
-    return week_code_for_date(today or timezone.localdate())
+    """Active contest week — never before ``WEEKLY_CONTEST_FIRST_WEEK_START``."""
+    today = today or timezone.localdate()
+    first = get_first_contest_week_start()
+    if today < first:
+        return first.isoformat()
+    natural = sunday_start_for_date(today)
+    if natural < first:
+        return first.isoformat()
+    return natural.isoformat()
+
+
+def is_live_contest_week(*, today=None, week_code=None):
+    today = today or timezone.localdate()
+    week_code = normalize_contest_week_code(week_code or current_week_code(today=today))
+    since, until = week_date_range(week_code)
+    start = timezone.localtime(since).date()
+    end = (timezone.localtime(until) - timedelta(seconds=1)).date()
+    return start >= get_first_contest_week_start() and start <= today <= end
+
+
+def is_upcoming_contest_week(*, today=None, week_code=None):
+    today = today or timezone.localdate()
+    week_code = normalize_contest_week_code(week_code or current_week_code(today=today))
+    since, _until = week_date_range(week_code)
+    return today < timezone.localtime(since).date()
 
 
 def week_date_range(week_code):
@@ -84,28 +127,32 @@ def week_date_range(week_code):
 
 
 def current_week_bounds(*, today=None):
-    """Bounds for the Sun–Sat contest week containing ``today``."""
-    today = today or timezone.localdate()
-    start_date = sunday_start_for_date(today)
-    tz = timezone.get_current_timezone()
-    since = timezone.make_aware(datetime.combine(start_date, time.min), tz)
-    until = since + timedelta(days=7)
-    return since, until
+    """Bounds for the active Sun–Sat contest week (respects launch date)."""
+    week_code = current_week_code(today=today)
+    return week_date_range(week_code)
 
 
 def previous_week_code(*, today=None):
     today = today or timezone.localdate()
-    return week_code_for_date(sunday_start_for_date(today) - timedelta(days=7))
+    current_start = datetime.strptime(current_week_code(today=today), "%Y-%m-%d").date()
+    prev = current_start - timedelta(days=7)
+    first = get_first_contest_week_start()
+    if prev < first:
+        return None
+    return prev.isoformat()
 
 
 def get_announcement_context():
     since, until = current_week_bounds()
+    week_code = current_week_code()
     return {
-        "week_code": current_week_code(),
+        "week_code": week_code,
         "week_start": since,
         "week_end": until - timedelta(seconds=1),
         "prize_usd": weekly_contest_prize_usd(),
         "min_scored": get_weekly_contest_min_scored_forecasts(),
+        "is_live": is_live_contest_week(week_code=week_code),
+        "is_upcoming": is_upcoming_contest_week(week_code=week_code),
         "contest_url_name": "dashboard:weekly_contest",
         "dismiss_url_name": "dashboard:weekly_contest_dismiss_announcement",
     }
@@ -147,7 +194,11 @@ def finalize_weekly_contest(week_code=None, *, prize_usd=None):
     from reputation.ranking_modes import ABSOLUTE, RELATIVE
 
     week_code = week_code or previous_week_code()
+    if not week_code:
+        return 0
     since, until = week_date_range(week_code)
+    if timezone.localtime(since).date() < get_first_contest_week_start():
+        return 0
     if until > timezone.now():
         return 0
 

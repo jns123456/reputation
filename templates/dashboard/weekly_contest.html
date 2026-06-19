@@ -50,6 +50,8 @@
     {% blocktrans with start=week_start|date:"M j" end=week_end|date:"M j, Y" %}Contest week · Sunday {{ start }} – Saturday {{ end }}{% endblocktrans %}
     {% if is_current_week %}
     <span class="ml-2 inline-flex rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">{% trans "Live" %}</span>
+    {% elif is_upcoming_week %}
+    <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">{% trans "Starts soon" %}</span>
     {% endif %}
   </p>
 

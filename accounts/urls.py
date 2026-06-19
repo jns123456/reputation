@@ -80,5 +80,10 @@ urlpatterns = [
         name="creator_subscribers",
     ),
     path("users/<str:username>/monetize/", views.profile_monetize, name="profile_monetize"),
+    path(
+        "users/<str:username>/contest-earnings/",
+        views.profile_contest_earnings,
+        name="profile_contest_earnings",
+    ),
     path("users/<str:username>/", views.profile_detail, name="profile"),
 ]

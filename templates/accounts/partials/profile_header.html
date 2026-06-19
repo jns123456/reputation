@@ -75,7 +75,13 @@
       {% endif %}
 
       {% if user == profile_user %}
-      <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn pr-profile-action-btn--primary-mobile">
+      {% if contest_payouts_enabled %}
+      <a href="{% url 'accounts:profile_contest_earnings' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn pr-profile-action-btn--primary-mobile">
+        <i data-lucide="wallet" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Contest earnings" %}</span>
+      </a>
+      {% endif %}
+      <a href="{% url 'accounts:profile_monetize' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn{% if not contest_payouts_enabled %} pr-profile-action-btn--primary-mobile{% endif %}">
         <i data-lucide="circle-dollar-sign" stroke-width="1.75" aria-hidden="true"></i>
         <span>{% trans "Monetize" %}</span>
       </a>

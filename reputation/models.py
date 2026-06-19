@@ -116,6 +116,51 @@ class WeeklyContestWinner(models.Model):
         return f"{self.user.username} {self.prize_type} {self.week_code}"
 
 
+class ContestPayoutRequest(models.Model):
+    """Off-platform USDC withdrawal request for weekly contest earnings.
+
+    PredictStamp does not custody funds — admins mark requests paid manually.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending review"
+        PAID = "paid", "Paid"
+        REJECTED = "rejected", "Rejected"
+        CANCELLED = "cancelled", "Cancelled"
+
+    class Chain(models.TextChoices):
+        BASE = "base", "Base"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="contest_payout_requests",
+    )
+    amount_usd = models.DecimalField(max_digits=8, decimal_places=2)
+    usdc_address = models.CharField(max_length=42)
+    chain = models.CharField(max_length=20, choices=Chain.choices, default=Chain.BASE)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    admin_note = models.TextField(blank=True)
+    tx_hash = models.CharField(max_length=66, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["status", "-created_at"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} ${self.amount_usd} {self.status}"
+
+
 class PopularityEvent(models.Model):
     class EventType(models.TextChoices):
         UPVOTE_RECEIVED = "upvote_received", "Upvote received"

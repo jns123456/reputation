@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 21:33+0000\n"
+"POT-Creation-Date: 2026-06-19 21:53+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -339,40 +339,40 @@ msgstr "No puedes seguirte a ti mismo."
 msgid "Unknown topic."
 msgstr "Tema desconocido."
 
-#: accounts/forms.py:33
+#: accounts/forms.py:35
 msgid "Enter a valid email address."
 msgstr "Introduce una dirección de email válida."
 
-#: accounts/forms.py:37
+#: accounts/forms.py:39
 msgid "If this email is already registered, sign in or reset your password."
 msgstr ""
 "Si este correo ya está registrado, inicia sesión o restablece tu contraseña."
 
-#: accounts/forms.py:73
+#: accounts/forms.py:75
 msgid "Reset your PredictStamp password"
 msgstr "Restablece tu contraseña de PredictStamp"
 
-#: accounts/forms.py:99
+#: accounts/forms.py:101
 msgid "A person (no automation)"
 msgstr "Una persona (sin automatización)"
 
-#: accounts/forms.py:100
+#: accounts/forms.py:102
 msgid "A person using AI assistance"
 msgstr "Una persona que usa asistencia de IA"
 
-#: accounts/forms.py:101
+#: accounts/forms.py:103
 msgid "An autonomous AI agent"
 msgstr "Un agente de IA autónomo"
 
-#: accounts/forms.py:102
+#: accounts/forms.py:104
 msgid "An AI agent run by an organization"
 msgstr "Un agente de IA operado por una organización"
 
-#: accounts/forms.py:108
+#: accounts/forms.py:110
 msgid "Who operates this account?"
 msgstr "¿Quién opera esta cuenta?"
 
-#: accounts/forms.py:110
+#: accounts/forms.py:112
 msgid ""
 "Be honest — AI agents are welcome, but operating an undisclosed automated "
 "account is against the rules."
@@ -380,40 +380,40 @@ msgstr ""
 "Sé honesto — los agentes de IA son bienvenidos, pero operar una cuenta "
 "automatizada sin declararlo va contra las reglas."
 
-#: accounts/forms.py:118
+#: accounts/forms.py:120
 msgid "Agent operator"
 msgstr "Operador del agente"
 
-#: accounts/forms.py:119
+#: accounts/forms.py:121
 msgid "The person or organization accountable for this agent."
 msgstr "La persona u organización responsable de este agente."
 
-#: accounts/forms.py:124
+#: accounts/forms.py:126
 msgid "What does this agent do?"
 msgstr "¿Qué hace este agente?"
 
-#: accounts/forms.py:125
+#: accounts/forms.py:127
 msgid "Shown publicly on the agent's profile."
 msgstr "Se muestra públicamente en el perfil del agente."
 
-#: accounts/forms.py:131 accounts/forms.py:228
+#: accounts/forms.py:133 accounts/forms.py:230
 msgid "How do you want to appear?"
 msgstr "¿Cómo quieres aparecer?"
 
-#: accounts/forms.py:137
+#: accounts/forms.py:139
 #: templates/accounts/partials/identity_profile_section.html:9
 msgid "Display name"
 msgstr "Nombre para mostrar"
 
-#: accounts/forms.py:141
+#: accounts/forms.py:143
 msgid "How others will see you"
 msgstr "Cómo te verán los demás"
 
-#: accounts/forms.py:148 accounts/forms.py:233
+#: accounts/forms.py:150 accounts/forms.py:235
 msgid "Request verified identity"
 msgstr "Solicitar identidad verificada"
 
-#: accounts/forms.py:150 accounts/forms.py:235
+#: accounts/forms.py:152 accounts/forms.py:237
 msgid ""
 "Verified accounts get a badge on their profile and posts. Our team reviews "
 "requests — no payment required."
@@ -421,11 +421,11 @@ msgstr ""
 "Las cuentas verificadas reciben una insignia en su perfil y publicaciones. "
 "Nuestro equipo revisa las solicitudes — sin pago."
 
-#: accounts/forms.py:160 accounts/forms.py:244
+#: accounts/forms.py:162 accounts/forms.py:246
 msgid "Hide from user directory"
 msgstr "Ocultarse del directorio de usuarios"
 
-#: accounts/forms.py:162 accounts/forms.py:246
+#: accounts/forms.py:164 accounts/forms.py:248
 msgid ""
 "When enabled, you won't appear in the public user list or search. Direct "
 "profile links and your forecasts and comments still work."
@@ -434,137 +434,137 @@ msgstr ""
 "búsqueda. Los enlaces directos a tu perfil y tus pronósticos y comentarios "
 "siguen funcionando."
 
-#: accounts/forms.py:174
+#: accounts/forms.py:176
 msgid "Short bio (optional)"
 msgstr "Biografía breve (opcional)"
 
-#: accounts/forms.py:178
+#: accounts/forms.py:180
 msgid "Bio"
 msgstr "Biografía"
 
-#: accounts/forms.py:205 accounts/forms.py:288
+#: accounts/forms.py:207 accounts/forms.py:290
 msgid "Choose a pseudonym — it becomes your public name."
 msgstr "Elige un seudónimo — será tu nombre público."
 
-#: accounts/forms.py:210 accounts/forms.py:293
+#: accounts/forms.py:212 accounts/forms.py:295
 msgid ""
 "Pick an alias so others can recognize you without seeing your username."
 msgstr "Elige un alias para que otros te reconozcan sin ver tu @usuario."
 
-#: accounts/forms.py:220
+#: accounts/forms.py:222
 msgid "Declared agents must name an accountable operator."
 msgstr ""
 
-#: accounts/forms.py:278
+#: accounts/forms.py:280
 msgid "Your account is already verified."
 msgstr "Tu cuenta ya está verificada."
 
-#: accounts/forms.py:301
+#: accounts/forms.py:303
 msgid "Confirm your username"
 msgstr "Confirma tu nombre de usuario"
 
-#: accounts/forms.py:302
+#: accounts/forms.py:304
 msgid "Type your username exactly to confirm permanent deletion."
 msgstr ""
 "Escribe tu nombre de usuario exactamente para confirmar la eliminación "
 "permanente."
 
-#: accounts/forms.py:314 templates/accounts/login.html:63
+#: accounts/forms.py:316 templates/accounts/login.html:63
 #: templates/accounts/partials/auth_modal.html:120
 #: templates/accounts/partials/auth_modal.html:186
 msgid "Password"
 msgstr "Contraseña"
 
-#: accounts/forms.py:315
+#: accounts/forms.py:317
 msgid "Enter your current password to confirm."
 msgstr "Introduce tu contraseña actual para confirmar."
 
-#: accounts/forms.py:326
+#: accounts/forms.py:328
 msgid "Email confirmation code"
 msgstr "Código de confirmación por email"
 
-#: accounts/forms.py:327 accounts/forms.py:380
+#: accounts/forms.py:329 accounts/forms.py:382
 msgid "Enter the 6-digit code we emailed you."
 msgstr "Ingresa el código de 6 dígitos que te enviamos por email."
 
-#: accounts/forms.py:360
+#: accounts/forms.py:362
 msgid "Type your username exactly to confirm."
 msgstr "Escribe tu nombre de usuario exactamente para confirmar."
 
-#: accounts/forms.py:368
+#: accounts/forms.py:370
 msgid "Enter your password to confirm account deletion."
 msgstr "Introduce tu contraseña para confirmar la eliminación de la cuenta."
 
-#: accounts/forms.py:370
+#: accounts/forms.py:372
 msgid "Incorrect password."
 msgstr "Contraseña incorrecta."
 
-#: accounts/forms.py:382
+#: accounts/forms.py:384
 msgid "Invalid or expired confirmation code."
 msgstr "Código de confirmación inválido o caducado."
 
-#: accounts/forms.py:438
+#: accounts/forms.py:440
 msgid "Forecasts from users you follow"
 msgstr "Pronósticos de los usuarios que sigues"
 
-#: accounts/forms.py:439
+#: accounts/forms.py:441
 msgid "When someone follows you"
 msgstr "Cuando alguien te sigue"
 
-#: accounts/forms.py:440
+#: accounts/forms.py:442
 msgid "Upvotes and downvotes on your content"
 msgstr "Upvotes y downvotes en tu contenido"
 
-#: accounts/forms.py:441
+#: accounts/forms.py:443
 msgid "When your forecasts are resolved"
 msgstr "Cuando se resuelvan tus previsiones"
 
-#: accounts/forms.py:442
+#: accounts/forms.py:444
 msgid "Challenge invitations and updates"
 msgstr "Invitaciones y actualizaciones del desafío"
 
-#: accounts/forms.py:443
+#: accounts/forms.py:445
 msgid "Replies to your comments"
 msgstr "Respuestas a tus comentarios"
 
-#: accounts/forms.py:444
+#: accounts/forms.py:446
 msgid "When someone @mentions you"
 msgstr "Cuando alguien te @menciona"
 
-#: accounts/forms.py:445
+#: accounts/forms.py:447
 msgid "When a market you forecast is closing soon"
 msgstr "Cuando cierra pronto un mercado en el que pronosticaste"
 
-#: accounts/forms.py:446
+#: accounts/forms.py:448
 msgid "In-app notifications"
 msgstr "Notificaciones"
 
-#: accounts/forms.py:447
+#: accounts/forms.py:449
 msgid "Browser push notifications"
 msgstr "Notificaciones push del navegador"
 
-#: accounts/forms.py:448
+#: accounts/forms.py:450
 msgid "Email notifications"
 msgstr "Notificaciones"
 
-#: accounts/forms.py:452
+#: accounts/forms.py:454
 msgid "Get notified when someone you follow makes a new prediction."
 msgstr ""
 "Recibe una notificación cuando alguien a quien sigues haga una nueva "
 "predicción."
 
-#: accounts/forms.py:454
+#: accounts/forms.py:456
 msgid "Get notified when a user starts following you."
 msgstr "Recibe notificaciones cuando un usuario empiece a seguirte."
 
-#: accounts/forms.py:456
+#: accounts/forms.py:458
 msgid ""
 "Get notified when someone likes or dislikes your comments or forecasts."
 msgstr ""
 "Recibe notificaciones cuando a alguien le gusten o disgusten tus comentarios"
 " o pronósticos."
 
-#: accounts/forms.py:459
+#: accounts/forms.py:461
 msgid ""
 "Get notified when a market closes and see the reputation points you gained "
 "or lost."
@@ -572,33 +572,33 @@ msgstr ""
 "Reciba notificaciones cuando cierre un mercado y vea los puntos de "
 "reputación que ganó o perdió."
 
-#: accounts/forms.py:462
+#: accounts/forms.py:464
 msgid ""
 "Get notified about challenge invites, resolved events, and final results."
 msgstr ""
 "Recibe notificaciones sobre las invitaciones al desafío, los eventos "
 "resueltos y los resultados finales."
 
-#: accounts/forms.py:464
+#: accounts/forms.py:466
 msgid "Get notified when someone replies to one of your comments."
 msgstr ""
 "Recibe una notificación cuando alguien responda a uno de tus comentarios."
 
-#: accounts/forms.py:465
+#: accounts/forms.py:467
 msgid "Get notified when someone mentions your @username."
 msgstr "Recibe una notificación cuando alguien mencione tu @usuario."
 
-#: accounts/forms.py:467
+#: accounts/forms.py:469
 msgid "Get a reminder before a market you have an open forecast on closes."
 msgstr ""
 "Recibe un recordatorio antes de que cierre un mercado en el que tienes un "
 "pronóstico abierto."
 
-#: accounts/forms.py:469
+#: accounts/forms.py:471
 msgid "Show alerts in your notification bell."
 msgstr "Muestra alertas en tu timbre de notificación."
 
-#: accounts/forms.py:470
+#: accounts/forms.py:472
 msgid ""
 "Get alerts on this device even when PredictStamp isn't open (requires "
 "granting permission)."
@@ -606,11 +606,41 @@ msgstr ""
 "Recibe alertas en este dispositivo aunque PredictStamp no esté abierto "
 "(requiere permiso)."
 
-#: accounts/forms.py:471
+#: accounts/forms.py:473
 msgid "Send alerts to your email address (when email is configured)."
 msgstr ""
 "Envíe alertas a su dirección de correo electrónico (cuando el correo "
 "electrónico esté configurado)."
+
+#: accounts/forms.py:479
+msgid "Amount (USD)"
+msgstr "Monto (USD)"
+
+#: accounts/forms.py:493
+msgid "USDC wallet address (Base)"
+msgstr "Dirección wallet USDC (Base)"
+
+#: accounts/forms.py:504
+msgid ""
+"We send USDC on the Base network. Double-check your address — transfers "
+"cannot be reversed."
+msgstr ""
+"Enviamos USDC en la red Base. Revisa bien tu dirección — las transferencias "
+"no se pueden revertir."
+
+#: accounts/forms.py:522 reputation/payout_services.py:98
+#, python-format
+msgid "Minimum withdrawal is $%(amount)s."
+msgstr "El retiro mínimo es $%(amount)s."
+
+#: accounts/forms.py:525 reputation/payout_services.py:103
+msgid "Amount exceeds your available balance."
+msgstr "El monto supera tu saldo disponible."
+
+#: accounts/forms.py:535 reputation/payout_services.py:112
+#| msgid "Enter a valid email address."
+msgid "Enter a valid USDC wallet address on Base (0x…)."
+msgstr "Introduce una dirección wallet USDC válida en Base (0x…)."
 
 #: accounts/mission_services.py:41
 msgid "Make a forecast"
@@ -931,6 +961,19 @@ msgstr "Tu cuenta se eliminó permanentemente."
 #: accounts/views/profile.py:263
 msgid "Invalid bookmark target"
 msgstr "Destino de marcador no válido"
+
+#: accounts/views/profile.py:424
+#| msgid "Auth0 sign-in is not available right now."
+msgid "Withdrawal requests are not available right now."
+msgstr "Las solicitudes de retiro no están disponibles en este momento."
+
+#: accounts/views/profile.py:445
+msgid ""
+"Withdrawal request submitted. We will send USDC to your address after "
+"review."
+msgstr ""
+"Solicitud de retiro enviada. Enviaremos USDC a tu dirección tras la "
+"revisión."
 
 #: accounts/views/social.py:42
 msgid "Missing username"
@@ -1444,6 +1487,7 @@ msgid "Select at least one user to challenge, or choose a saved group."
 msgstr "Seleccione al menos un usuario para desafiar."
 
 #: challenges/models.py:12 integrations/models.py:111 predictions/models.py:11
+#: templates/accounts/profile_contest_earnings.html:37
 #: templates/challenges/partials/challenge_leaderboard.html:86
 #: templates/markets/partials/forecast_card.html:88
 #: templates/predictions/partials/prediction_history_item.html:123
@@ -1704,7 +1748,7 @@ msgstr "%(open)s abiertos · %(resolved)s resueltos"
 #: templates/dashboard/about.html:235 templates/dashboard/agent_arena.html:61
 #: templates/dashboard/home.html:21
 #: templates/dashboard/reputation_leaderboard.html:90
-#: templates/dashboard/weekly_contest.html:114
+#: templates/dashboard/weekly_contest.html:116
 msgid "Predictions"
 msgstr "Predicciones"
 
@@ -2170,9 +2214,19 @@ msgstr ""
 msgid "Poll not found"
 msgstr "Encuesta no encontrada"
 
+#: reputation/payout_services.py:92
+#| msgid "Auth0 sign-in is not available right now."
+msgid "Contest withdrawals are not available right now."
+msgstr "Los retiros del concurso no están disponibles en este momento."
+
+#: reputation/payout_services.py:106
+#| msgid "You already have a group with this name."
+msgid "You already have a pending withdrawal request."
+msgstr "Ya tienes una solicitud de retiro pendiente."
+
 #: templates/accounts/account_delete.html:4
 #: templates/accounts/account_delete.html:9
-#: templates/accounts/partials/profile_header.html:97
+#: templates/accounts/partials/profile_header.html:103
 #: templates/accounts/profile_edit.html:68
 msgid "Delete account"
 msgstr "Eliminar cuenta"
@@ -2252,6 +2306,7 @@ msgid "Save preferences"
 msgstr "Guardar preferencias"
 
 #: templates/accounts/alert_settings.html:34
+#: templates/accounts/profile_contest_earnings.html:11
 msgid "Back to profile"
 msgstr "Tu perfil"
 
@@ -2428,7 +2483,7 @@ msgstr "Tu perfil"
 
 #: templates/accounts/creator_setup.html:11
 #: templates/accounts/creator_subscribers.html:9
-#: templates/accounts/partials/profile_header.html:80
+#: templates/accounts/partials/profile_header.html:86
 msgid "Monetize"
 msgstr "Monetizar"
 
@@ -2937,31 +2992,38 @@ msgstr "Se unió el %(date)s"
 msgid "Subscribe"
 msgstr "Suscribirse"
 
-#: templates/accounts/partials/profile_header.html:84
+#: templates/accounts/partials/profile_header.html:81
+#: templates/accounts/profile_contest_earnings.html:4
+#: templates/accounts/profile_contest_earnings.html:13
+#| msgid "Contest"
+msgid "Contest earnings"
+msgstr "Ganancias del concurso"
+
+#: templates/accounts/partials/profile_header.html:90
 #: templates/accounts/profile_edit.html:13
 msgid "Edit profile"
 msgstr "Tu perfil"
 
-#: templates/accounts/partials/profile_header.html:89
+#: templates/accounts/partials/profile_header.html:95
 #: templates/includes/navbar.html:169 templates/includes/navbar.html:397
 msgid "Developers"
 msgstr "Desarrolladores"
 
-#: templates/accounts/partials/profile_header.html:93
+#: templates/accounts/partials/profile_header.html:99
 msgid "Alerts"
 msgstr "Alertas"
 
-#: templates/accounts/partials/profile_header.html:107
+#: templates/accounts/partials/profile_header.html:113
 #: templates/accounts/partials/user_search_form_forum.html:8
 #: templates/accounts/partials/user_search_panel.html:10
 msgid "Name, @user, email…"
 msgstr ""
 
-#: templates/accounts/partials/profile_header.html:108
+#: templates/accounts/partials/profile_header.html:114
 msgid "Find users"
 msgstr "Buscar usuarios"
 
-#: templates/accounts/partials/profile_header.html:113
+#: templates/accounts/partials/profile_header.html:119
 #: templates/accounts/partials/user_search_dropdown.html:49
 msgid "View users"
 msgstr "Ver usuarios"
@@ -3258,6 +3320,114 @@ msgstr "Aún no has votado en ningún evento del desafío."
 msgid "%(name)s is not following anyone yet."
 msgstr "%(name)s aún no sigue a nadie."
 
+#: templates/accounts/profile_contest_earnings.html:15
+msgid ""
+"Cash prizes from the weekly reputation contest. PredictStamp does not hold "
+"your funds — USDC is sent manually to your wallet after review."
+msgstr ""
+"Premios en efectivo del concurso semanal de reputación. PredictStamp no "
+"custodia tus fondos — el USDC se envía manualmente a tu wallet tras la "
+"revisión."
+
+#: templates/accounts/profile_contest_earnings.html:20
+#| msgid "Weekly Contest"
+msgid "View weekly contest"
+msgstr "Ver concurso semanal"
+
+#: templates/accounts/profile_contest_earnings.html:28
+msgid "Available balance"
+msgstr "Saldo disponible"
+
+#: templates/accounts/profile_contest_earnings.html:30
+msgid "USD equivalent · withdraw as USDC on Base"
+msgstr "Equivalente en USD · retira en USDC en Base"
+
+#: templates/accounts/profile_contest_earnings.html:33
+msgid "Lifetime earned"
+msgstr "Total ganado"
+
+#: templates/accounts/profile_contest_earnings.html:41
+msgid "Withdrawn"
+msgstr "Retirado"
+
+#: templates/accounts/profile_contest_earnings.html:50
+msgid "Request USDC withdrawal"
+msgstr "Solicitar retiro en USDC"
+
+#: templates/accounts/profile_contest_earnings.html:52
+#, python-format
+msgid "Minimum $%(min)s. Processing usually takes a few business days."
+msgstr ""
+
+#: templates/accounts/profile_contest_earnings.html:70
+msgid "Submit withdrawal request"
+msgstr "Enviar solicitud de retiro"
+
+#: templates/accounts/profile_contest_earnings.html:75
+msgid ""
+"You have a pending withdrawal request. We will email you when USDC has been "
+"sent."
+msgstr ""
+"Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se "
+"envíe el USDC."
+
+#: templates/accounts/profile_contest_earnings.html:79
+#, python-format
+msgid "Your balance is below the $%(min)s minimum withdrawal."
+msgstr ""
+
+#: templates/accounts/profile_contest_earnings.html:85
+#| msgid "Verifiable history"
+msgid "Prize history"
+msgstr "Historial de premios"
+
+#: templates/accounts/profile_contest_earnings.html:90
+#| msgid "Weekly"
+msgid "Week"
+msgstr "Semana"
+
+#: templates/accounts/profile_contest_earnings.html:91
+#: templates/accounts/profile_detail.html:226
+#: templates/markets/market_list.html:37
+msgid "Category"
+msgstr "Categoría"
+
+#: templates/accounts/profile_contest_earnings.html:92
+msgid "Prize"
+msgstr "Premio"
+
+#: templates/accounts/profile_contest_earnings.html:109
+msgid ""
+"No contest prizes yet. Top the weekly leaderboard to earn cash rewards."
+msgstr ""
+"Aún no tienes premios del concurso. Lidera la tabla semanal para ganar "
+"recompensas en efectivo."
+
+#: templates/accounts/profile_contest_earnings.html:115
+msgid "Withdrawal requests"
+msgstr "Solicitudes de retiro"
+
+#: templates/accounts/profile_contest_earnings.html:120
+msgid "Date"
+msgstr "Fecha"
+
+#: templates/accounts/profile_contest_earnings.html:121
+#| msgid "Account"
+msgid "Amount"
+msgstr "Monto"
+
+#: templates/accounts/profile_contest_earnings.html:122
+#: templates/integrations/batch_detail.html:51
+#: templates/integrations/proof_index.html:212
+#: templates/markets/market_list.html:28
+msgid "Status"
+msgstr "Estado"
+
+#: templates/accounts/profile_contest_earnings.html:123
+#| msgid "Email address"
+msgid "Address"
+msgstr "Dirección"
+
 #: templates/accounts/profile_detail.html:9
 #, python-format
 msgid "Level: %(title)s. "
@@ -3300,7 +3470,7 @@ msgstr "Compromiso social"
 #: templates/accounts/profile_detail.html:44
 #: templates/dashboard/agent_arena.html:38
 #: templates/dashboard/reputation_leaderboard.html:67
-#: templates/dashboard/weekly_contest.html:91
+#: templates/dashboard/weekly_contest.html:93
 msgid "Rep / forecast"
 msgstr "Rep / pronóstico"
 
@@ -3339,7 +3509,7 @@ msgstr "%(correct)s correcto · %(incorrect)s incorrecto"
 #: templates/dashboard/about.html:605 templates/dashboard/agent_arena.html:56
 #: templates/dashboard/home.html:27
 #: templates/dashboard/reputation_leaderboard.html:85
-#: templates/dashboard/weekly_contest.html:109
+#: templates/dashboard/weekly_contest.html:111
 #: templates/predictions/prediction_history.html:27
 msgid "Accuracy"
 msgstr "Exactitud"
@@ -3496,14 +3666,9 @@ msgstr "Participación social por categoría"
 #: templates/dashboard/agent_arena.html:25
 #: templates/dashboard/popularity_leaderboard.html:27
 #: templates/dashboard/reputation_leaderboard.html:54
-#: templates/dashboard/weekly_contest.html:78
+#: templates/dashboard/weekly_contest.html:80
 msgid "Swipe to see all columns →"
 msgstr "Desliza para ver todas las columnas →"
-
-#: templates/accounts/profile_detail.html:226
-#: templates/markets/market_list.html:37
-msgid "Category"
-msgstr "Categoría"
 
 #: templates/accounts/profile_detail.html:243
 #, python-format
@@ -5473,7 +5638,7 @@ msgstr ""
 #: templates/dashboard/agent_arena.html:31
 #: templates/dashboard/popularity_leaderboard.html:31
 #: templates/dashboard/reputation_leaderboard.html:60
-#: templates/dashboard/weekly_contest.html:84
+#: templates/dashboard/weekly_contest.html:86
 msgid "Rank"
 msgstr "Puesto"
 
@@ -6579,38 +6744,38 @@ msgstr ""
 "clasificados aquí solo por reputación predictiva."
 
 #: templates/dashboard/agent_arena.html:21
-#: templates/dashboard/weekly_contest.html:74
+#: templates/dashboard/weekly_contest.html:76
 msgid "Full reputation leaderboard"
 msgstr "Tabla completa de reputación"
 
 #: templates/dashboard/agent_arena.html:37
 #: templates/dashboard/reputation_leaderboard.html:66
-#: templates/dashboard/weekly_contest.html:90
+#: templates/dashboard/weekly_contest.html:92
 msgid "Sort by rep per forecast, highest first"
 msgstr "Ordenar por rep / pronóstico, mayor primero"
 
 #: templates/dashboard/agent_arena.html:46
 #: templates/dashboard/reputation_leaderboard.html:75
-#: templates/dashboard/weekly_contest.html:99
+#: templates/dashboard/weekly_contest.html:101
 msgid "Sort by reputation, highest first"
 msgstr "Ordenar por reputación, mayor primero"
 
 #: templates/dashboard/agent_arena.html:55
 #: templates/dashboard/reputation_leaderboard.html:84
-#: templates/dashboard/weekly_contest.html:108
+#: templates/dashboard/weekly_contest.html:110
 msgid "Sort by accuracy, highest first"
 msgstr "Ordenar por precisión, mayor primero"
 
 #: templates/dashboard/agent_arena.html:60
 #: templates/dashboard/reputation_leaderboard.html:89
-#: templates/dashboard/weekly_contest.html:113
+#: templates/dashboard/weekly_contest.html:115
 msgid "Scored"
 msgstr "Puntuados"
 
 #: templates/dashboard/agent_arena.html:62 templates/dashboard/home.html:47
 #: templates/dashboard/partials/forecast_community_card.html:43
 #: templates/dashboard/reputation_leaderboard.html:91
-#: templates/dashboard/weekly_contest.html:115
+#: templates/dashboard/weekly_contest.html:117
 #: templates/markets/partials/forecast_card.html:83
 #: templates/predictions/partials/prediction_history_item.html:116
 #: templates/predictions/prediction_detail.html:35
@@ -7410,12 +7575,12 @@ msgid "Featured open forecasts"
 msgstr "Pronósticos abiertos destacados"
 
 #: templates/dashboard/partials/leaderboard_reputation_mode_filter.html:11
-#: templates/dashboard/weekly_contest.html:66
+#: templates/dashboard/weekly_contest.html:68
 msgid "Relative ranking"
 msgstr "Ranking relativo"
 
 #: templates/dashboard/partials/leaderboard_reputation_mode_filter.html:16
-#: templates/dashboard/weekly_contest.html:61
+#: templates/dashboard/weekly_contest.html:63
 msgid "Absolute ranking"
 msgstr "Ranking absoluto"
 
@@ -7573,7 +7738,7 @@ msgstr ""
 
 #: templates/dashboard/popularity_leaderboard.html:32
 #: templates/dashboard/reputation_leaderboard.html:61
-#: templates/dashboard/weekly_contest.html:85
+#: templates/dashboard/weekly_contest.html:87
 msgid "User"
 msgstr "Usuario"
 
@@ -7887,10 +8052,16 @@ msgstr ""
 
 #: templates/dashboard/weekly_contest.html:50
 #, python-format
-msgid "Week %(week_code)s · %(start)s – %(end)s"
-msgstr "Semana %(week_code)s · %(start)s – %(end)s"
+#| msgid "Week %(week_code)s · %(start)s – %(end)s"
+msgid "Contest week · Sunday %(start)s – Saturday %(end)s"
+msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 
-#: templates/dashboard/weekly_contest.html:70
+#: templates/dashboard/weekly_contest.html:54
+#| msgid "Start"
+msgid "Starts soon"
+msgstr "Empieza pronto"
+
+#: templates/dashboard/weekly_contest.html:72
 msgid ""
 "Prizes are paid off-platform to verified winners after each week ends. "
 "PredictStamp does not hold balances or process payments."
@@ -7898,11 +8069,11 @@ msgstr ""
 "Los premios se pagan fuera de la plataforma a ganadores verificados al "
 "cerrar cada semana. PredictStamp no guarda saldos ni procesa pagos."
 
-#: templates/dashboard/weekly_contest.html:100
+#: templates/dashboard/weekly_contest.html:102
 msgid "Week reputation"
 msgstr "Reputación semanal"
 
-#: templates/dashboard/weekly_contest.html:122
+#: templates/dashboard/weekly_contest.html:124
 #, python-format
 msgid ""
 "No qualified players yet — make at least %(min)s scored forecasts this week "
@@ -8704,12 +8875,6 @@ msgstr "Raíz Merkle"
 #: templates/integrations/proof_index.html:210
 msgid "Records"
 msgstr "Registros"
-
-#: templates/integrations/batch_detail.html:51
-#: templates/integrations/proof_index.html:212
-#: templates/markets/market_list.html:28
-msgid "Status"
-msgstr "Estado"
 
 #: templates/integrations/batch_detail.html:60
 msgid "Previous batch root"
@@ -9893,212 +10058,3 @@ msgstr "Aún no hay likes."
 #: templates/predictions/prediction_history.html:74
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
-
-#~ msgid "An account with this email already exists. Try signing in instead."
-#~ msgstr "Ya existe una cuenta con este email. Prueba iniciar sesión."
-
-#~ msgid "MCP tokens"
-#~ msgstr "Tokens MCP"
-
-#, python-format
-#~ msgid "Trending in %(name)s"
-#~ msgstr "Tendencias en %(name)s"
-
-#~ msgid "Sorted by kickoff"
-#~ msgstr "Ordenados por inicio"
-
-#~ msgid "Watch match highlights on YouTube"
-#~ msgstr "Ver el resumen del partido en YouTube"
-
-#~ msgid "Watch on YouTube"
-#~ msgstr "Ver en YouTube"
-
-#~ msgid "Match highlights"
-#~ msgstr "Resumen del partido"
-
-#~ msgid "Official FIFA recap for this match."
-#~ msgstr "Resumen oficial de FIFA de este partido."
-
-#~ msgid "Match highlights available"
-#~ msgstr "Resumen del partido disponible"
-
-#~ msgid ""
-#~ "Slow mode is on for this live event — wait a few seconds between comments."
-#~ msgstr ""
-#~ "El modo lento está activado para este evento en vivo — espera unos segundos "
-#~ "entre comentarios."
-
-#~ msgid "Live event room"
-#~ msgstr "Sala del evento en vivo"
-
-#, python-format
-#~ msgid "Forecasts lock %(date)s UTC"
-#~ msgstr "Los pronósticos se cierran el %(date)s UTC"
-
-#~ msgid ""
-#~ "Comments in the live stream come from Discussion threads below — post a "
-#~ "comment on any forecast to show up here."
-#~ msgstr ""
-#~ "Los comentarios del stream salen de los hilos Discussion más abajo — publica"
-#~ " en cualquier pronóstico para aparecer aquí."
-
-#~ msgid "Lock in your call before it closes"
-#~ msgstr "Asegura tu pronóstico antes de que cierre"
-
-#~ msgid "This live room has ended."
-#~ msgstr "Esta sala en vivo ha terminado."
-
-#~ msgid "No comments yet — say something while it's live."
-#~ msgstr "Aún no hay comentarios — di algo mientras está en vivo."
-
-#, python-format
-#~ msgid "Score: %(score)s"
-#~ msgstr "Puntuación: %(score)s"
-
-#~ msgid "No comments yet. Start the discussion."
-#~ msgstr "Aún no hay comentarios. Inicie la discusión."
-
-#, python-format
-#~ msgid "You and @%(username)s must follow each other to challenge them."
-#~ msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
-
-#, python-format
-#~ msgid "You and @%(username)s must follow each other to add them to a group."
-#~ msgstr "Tú y @%(username)s deben seguirse para desafiarlos."
-
-#~ msgid ""
-#~ "You need mutual followers to create a challenge. Follow someone who follows "
-#~ "you back."
-#~ msgstr ""
-#~ "Necesitas seguidores mutuos para crear un desafío. Sigue a alguien que te "
-#~ "siga."
-
-#~ msgid "Select at least one mutual follower."
-#~ msgstr "Selecciona al menos un seguidor mutuo."
-
-#~ msgid "No mutual followers yet."
-#~ msgstr "Todavía no hay seguidores mutuos."
-
-#~ msgid ""
-#~ "You need mutual followers to create a group. Follow someone who follows you "
-#~ "back."
-#~ msgstr ""
-#~ "Necesitas seguidores mutuos para crear un grupo. Sigue a alguien que te siga"
-#~ " de vuelta."
-
-#~ msgid "Mutual followers"
-#~ msgstr "Seguidores mutuos"
-
-#~ msgid "You can only challenge people who follow you back."
-#~ msgstr "Solo puedes desafiar a personas que te siguen de vuelta."
-
-#~ msgid "Premium forecasts"
-#~ msgstr "Pronósticos premium"
-
-#~ msgid "Premium forum posts"
-#~ msgstr "Posts premium del foro"
-
-#, python-format
-#~ msgid "Listed price: $%(price)s/month (display only)."
-#~ msgstr "Precio publicado: $%(price)s/mes (solo visualización)."
-
-#~ msgid ""
-#~ "Turn on your creator program to accept subscribers and publish subscriber-"
-#~ "only forecasts and posts."
-#~ msgstr ""
-#~ "Activa tu programa de creador para aceptar suscriptores y publicar "
-#~ "pronósticos y posts solo para suscriptores."
-
-#, python-format
-#~ msgid "Membership — $%(price)s/month"
-#~ msgstr "Membresía — $%(price)s/mes"
-
-#~ msgid "You have access to subscriber-only content."
-#~ msgstr "Tienes acceso al contenido solo para suscriptores."
-
-#~ msgid "This creator has not enabled subscriptions yet."
-#~ msgstr "Este creador aún no activó suscripciones."
-
-#~ msgid "Build your track record"
-#~ msgstr "Construye tu historial"
-
-#~ msgid "Paid feeds — coming soon"
-#~ msgstr "Feeds de pago — próximamente"
-
-#~ msgid ""
-#~ "You are on the early creator list. Keep building reputation — we will notify"
-#~ " you when subscriptions open."
-#~ msgstr ""
-#~ "Estás en la lista temprana de creadores. Sigue construyendo reputación — te "
-#~ "avisaremos cuando abran las suscripciones."
-
-#~ msgid "Enable email alerts"
-#~ msgstr "Administrar alertas"
-
-#~ msgid "What's happening?"
-#~ msgstr "¿Qué está pasando?"
-
-#~ msgid "What's happening"
-#~ msgstr "Qué está pasando"
-
-#~ msgid "Prediction markets"
-#~ msgstr "Mercados de predicción"
-
-#~ msgid "Explore live events"
-#~ msgstr "Explora eventos en vivo"
-
-#~ msgid "Leaderboard rankings"
-#~ msgstr "Rankings"
-
-#~ msgid "Who to follow"
-#~ msgstr "A quién seguir"
-
-#~ msgid "Old media rewards attention. PredictStamp is building a model like"
-#~ msgstr ""
-#~ "Los medios tradicionales premian la atención. PredictStamp está construyendo"
-#~ " un modelo como"
-
-#~ msgid "did for writers, adapted for prediction markets on PredictStamp."
-#~ msgstr "para escritores, adaptado a mercados de predicción en PredictStamp."
-
-#~ msgid ""
-#~ "Live forecasts from the community — formal predictions tied to real markets."
-#~ msgstr ""
-#~ "Pronósticos en vivo de la comunidad — predicciones formales ligadas a "
-#~ "mercados reales."
-
-#~ msgid "Start typing to find people on PredictStamp."
-#~ msgstr "Empieza a escribir para encontrar personas en PredictStamp."
-
-#~ msgid ""
-#~ "Ranked by predictive quality across all categories — not social popularity."
-#~ msgstr ""
-#~ "Clasificados por calidad predictiva en todas las categorías — no por "
-#~ "popularidad social."
-
-#~ msgid "How challenges"
-#~ msgstr "Cómo funcionan los"
-
-#~ msgid "work"
-#~ msgstr "desafíos"
-
-#~ msgid "price"
-#~ msgstr "precio"
-
-#~ msgid "Prediction History"
-#~ msgstr "Historial de predicciones"
-
-#~ msgid "Sign up with Auth0"
-#~ msgstr "Registrarse con Auth0"
-
-#~ msgid "selected"
-#~ msgstr "seleccionados"
-
-#~ msgid "Prediction history"
-#~ msgstr "Historial de predicciones"
-
-#~ msgid "Formal forecasts and how they resolved."
-#~ msgstr "Pronósticos formales y cómo se resolvieron."
-
-#~ msgid "Standings"
-#~ msgstr "Clasificación"

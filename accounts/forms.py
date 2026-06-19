@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, UserCreationForm
 from django.core.exceptions import ValidationError
@@ -470,3 +472,64 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_push": _("Get alerts on this device even when PredictStamp isn't open (requires granting permission)."),
             "notify_email": _("Send alerts to your email address (when email is configured)."),
         }
+
+
+class ContestPayoutRequestForm(forms.Form):
+    amount_usd = forms.DecimalField(
+        label=_("Amount (USD)"),
+        min_value=Decimal("0.01"),
+        max_digits=8,
+        decimal_places=2,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "pr-input w-full",
+                "step": "0.01",
+                "min": "0.01",
+                "inputmode": "decimal",
+            }
+        ),
+    )
+    usdc_address = forms.CharField(
+        label=_("USDC wallet address (Base)"),
+        max_length=42,
+        widget=forms.TextInput(
+            attrs={
+                "class": "pr-input w-full font-mono text-sm",
+                "placeholder": "0x…",
+                "autocomplete": "off",
+                "spellcheck": "false",
+            }
+        ),
+        help_text=_(
+            "We send USDC on the Base network. Double-check your address — transfers cannot be reversed."
+        ),
+    )
+
+    def __init__(self, *args, available_usd=None, minimum_usd=None, **kwargs):
+        self.available_usd = available_usd
+        self.minimum_usd = minimum_usd
+        super().__init__(*args, **kwargs)
+        if available_usd is not None:
+            self.fields["amount_usd"].widget.attrs["max"] = str(available_usd)
+        if minimum_usd is not None:
+            self.fields["amount_usd"].min_value = minimum_usd
+            self.fields["amount_usd"].widget.attrs["min"] = str(minimum_usd)
+
+    def clean_amount_usd(self):
+        amount = self.cleaned_data["amount_usd"]
+        if self.minimum_usd is not None and amount < self.minimum_usd:
+            raise ValidationError(
+                _("Minimum withdrawal is $%(amount)s.") % {"amount": self.minimum_usd}
+            )
+        if self.available_usd is not None and amount > self.available_usd:
+            raise ValidationError(_("Amount exceeds your available balance."))
+        return amount
+
+    def clean_usdc_address(self):
+        from reputation.payout_services import normalize_usdc_address
+
+        address = self.cleaned_data["usdc_address"]
+        try:
+            return normalize_usdc_address(address)
+        except ValueError as exc:
+            raise ValidationError(_("Enter a valid USDC wallet address on Base (0x…).")) from exc

@@ -53,6 +53,7 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Contest week · Sunday %(start)s – Saturday %(end)s": (
         "Semana del concurso · domingo %(start)s – sábado %(end)s"
     ),
+    "Starts soon": "Empieza pronto",
     "Live": "En vivo",
     "Prizes are paid off-platform to verified winners after each week ends. PredictStamp does not hold balances or process payments.": (
         "Los premios se pagan fuera de la plataforma a ganadores verificados al cerrar cada semana. "
@@ -97,6 +98,61 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "View standings": "Ver clasificación",
     "Got it": "Entendido",
     "Don't show this message again": "No volver a ver este mensaje",
+    # --- Contest earnings / USDC withdrawal ---
+    "Contest earnings": "Ganancias del concurso",
+    "Cash prizes from the weekly reputation contest. PredictStamp does not hold your funds — USDC is sent manually to your wallet after review.": (
+        "Premios en efectivo del concurso semanal de reputación. PredictStamp no custodia tus fondos — "
+        "el USDC se envía manualmente a tu wallet tras la revisión."
+    ),
+    "View weekly contest": "Ver concurso semanal",
+    "Available balance": "Saldo disponible",
+    "USD equivalent · withdraw as USDC on Base": "Equivalente en USD · retira en USDC en Base",
+    "Lifetime earned": "Total ganado",
+    "Pending": "Pendiente",
+    "Withdrawn": "Retirado",
+    "Request USDC withdrawal": "Solicitar retiro en USDC",
+    "Minimum ${{ min }}. Processing usually takes a few business days.": (
+        "Mínimo ${{ min }}. El procesamiento suele tardar unos días hábiles."
+    ),
+    "Amount (USD)": "Monto (USD)",
+    "USDC wallet address (Base)": "Dirección wallet USDC (Base)",
+    "We send USDC on the Base network. Double-check your address — transfers cannot be reversed.": (
+        "Enviamos USDC en la red Base. Revisa bien tu dirección — las transferencias no se pueden revertir."
+    ),
+    "Submit withdrawal request": "Enviar solicitud de retiro",
+    "You have a pending withdrawal request. We will email you when USDC has been sent.": (
+        "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se envíe el USDC."
+    ),
+    "Your balance is below the ${{ min }} minimum withdrawal.": (
+        "Tu saldo está por debajo del mínimo de retiro de ${{ min }}."
+    ),
+    "Prize history": "Historial de premios",
+    "Week": "Semana",
+    "Category": "Categoría",
+    "Prize": "Premio",
+    "No contest prizes yet. Top the weekly leaderboard to earn cash rewards.": (
+        "Aún no tienes premios del concurso. Lidera la tabla semanal para ganar recompensas en efectivo."
+    ),
+    "Withdrawal requests": "Solicitudes de retiro",
+    "Date": "Fecha",
+    "Amount": "Monto",
+    "Status": "Estado",
+    "Address": "Dirección",
+    "Withdrawal request submitted. We will send USDC to your address after review.": (
+        "Solicitud de retiro enviada. Enviaremos USDC a tu dirección tras la revisión."
+    ),
+    "Withdrawal requests are not available right now.": (
+        "Las solicitudes de retiro no están disponibles en este momento."
+    ),
+    "Minimum withdrawal is $%(amount)s.": "El retiro mínimo es $%(amount)s.",
+    "Amount exceeds your available balance.": "El monto supera tu saldo disponible.",
+    "You already have a pending withdrawal request.": "Ya tienes una solicitud de retiro pendiente.",
+    "Enter a valid USDC wallet address on Base (0x…).": (
+        "Introduce una dirección wallet USDC válida en Base (0x…)."
+    ),
+    "Contest withdrawals are not available right now.": (
+        "Los retiros del concurso no están disponibles en este momento."
+    ),
     "Free to enter — no separate sign-up. Just make forecasts on the platform and you're in.": (
         "Participar es gratis — no hace falta inscribirse por separado. "
         "Solo con hacer pronósticos en la plataforma ya estás dentro."

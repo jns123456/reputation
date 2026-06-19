@@ -36,6 +36,7 @@ __all__ = [
     "profile_followers",
     "profile_following",
     "profile_monetize",
+    "profile_contest_earnings",
     "creator_setup",
     "creator_subscribers",
     "creator_subscribe",

@@ -3,7 +3,7 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-from datetime import timedelta
+from datetime import date, timedelta
 
 from conftest import create_market, create_user
 from predictions.models import Prediction
@@ -12,6 +12,8 @@ from reputation.period_leaderboard import get_top_predictors_between
 from reputation.weekly_contest_services import (
     current_week_code,
     finalize_weekly_contest,
+    is_live_contest_week,
+    is_upcoming_contest_week,
     sunday_start_for_date,
     week_date_range,
     week_code_for_date,
@@ -47,8 +49,6 @@ class WeeklyContestServicesTests(TestCase):
         self.runner_up = create_user("wcrunner")
 
     def test_week_starts_on_sunday(self):
-        from datetime import date
-
         fri = date(2026, 6, 19)
         sun = date(2026, 6, 21)
         self.assertEqual(sunday_start_for_date(fri), date(2026, 6, 14))
@@ -58,6 +58,14 @@ class WeeklyContestServicesTests(TestCase):
         self.assertEqual(timezone.localtime(since).date(), date(2026, 6, 21))
         self.assertEqual((timezone.localtime(until) - timedelta(seconds=1)).date(), date(2026, 6, 27))
 
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21")
+    def test_before_launch_shows_first_week_as_upcoming(self):
+        self.assertEqual(current_week_code(today=date(2026, 6, 19)), "2026-06-21")
+        self.assertTrue(is_upcoming_contest_week(today=date(2026, 6, 19)))
+        self.assertFalse(is_live_contest_week(today=date(2026, 6, 19)))
+        self.assertTrue(is_live_contest_week(today=date(2026, 6, 21)))
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
     def test_week_bounds_aggregate_current_week_events(self):
         since, until = week_date_range(current_week_code())
         _scored_prediction(self.leader, self.market, points=50)
@@ -68,6 +76,7 @@ class WeeklyContestServicesTests(TestCase):
         self.assertEqual(rows[0].user.id, self.leader.id)
         self.assertEqual(rows[0].reputation_points, 50)
 
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
     def test_finalize_skips_users_below_min_scored_forecasts(self):
         week_code = "2020-03-08"
         since, _until = week_date_range(week_code)
@@ -78,6 +87,7 @@ class WeeklyContestServicesTests(TestCase):
 
         self.assertEqual(finalize_weekly_contest(week_code), 0)
 
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
     def test_finalize_weekly_contest_is_idempotent(self):
         week_code = "2020-03-08"
         since, _until = week_date_range(week_code)
@@ -94,6 +104,13 @@ class WeeklyContestServicesTests(TestCase):
 
 @override_settings(WEEKLY_CONTEST_ENABLED=True)
 class WeeklyContestViewTests(TestCase):
+    @override_settings(WEEKLY_CONTEST_ENABLED=True, WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21")
+    def test_weekly_contest_page_shows_launch_week_before_start(self):
+        response = self.client.get(reverse("dashboard:weekly_contest"))
+        self.assertContains(response, "Jun 21")
+        self.assertContains(response, "Jun 27")
+        self.assertNotContains(response, "Jun 14")
+
     def test_weekly_contest_page_renders(self):
         response = self.client.get(reverse("dashboard:weekly_contest"))
         self.assertEqual(response.status_code, 200)

@@ -31,7 +31,7 @@ from accounts.follow_selectors import (
     is_following,
 )
 from accounts.follow_services import toggle_follow
-from accounts.forms import AccountDeletionForm, ProfileEditForm
+from accounts.forms import AccountDeletionForm, ContestPayoutRequestForm, ProfileEditForm
 from accounts.http_utils import enforce_ip_rate_limit, safe_redirect_to_referer
 from accounts.models import Bookmark, User
 from accounts.selectors import search_user_matches
@@ -392,4 +392,81 @@ def profile_following(request, username):
         active_tab="following",
     )
 
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def profile_contest_earnings(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    if request.user != profile_user:
+        return redirect("accounts:profile", username=username)
+
+    from reputation.payout_services import (
+        contest_payouts_enabled,
+        create_payout_request,
+        get_contest_earnings_summary,
+        get_user_contest_wins,
+        get_user_payout_requests,
+        minimum_payout_usd,
+        PayoutRequestError,
+        user_has_pending_payout_request,
+    )
+
+    summary = get_contest_earnings_summary(profile_user)
+    minimum_usd = minimum_payout_usd()
+    can_request = (
+        contest_payouts_enabled()
+        and summary["available_usd"] >= minimum_usd
+        and not user_has_pending_payout_request(profile_user)
+    )
+
+    if request.method == "POST":
+        if not can_request:
+            messages.error(request, _("Withdrawal requests are not available right now."))
+            return redirect("accounts:profile_contest_earnings", username=username)
+
+        form = ContestPayoutRequestForm(
+            request.POST,
+            available_usd=summary["available_usd"],
+            minimum_usd=minimum_usd,
+        )
+        if form.is_valid():
+            try:
+                create_payout_request(
+                    user=profile_user,
+                    amount_usd=form.cleaned_data["amount_usd"],
+                    usdc_address=form.cleaned_data["usdc_address"],
+                )
+            except PayoutRequestError as exc:
+                messages.error(request, exc.message)
+            else:
+                messages.success(
+                    request,
+                    _(
+                        "Withdrawal request submitted. We will send USDC to your address after review."
+                    ),
+                )
+                return redirect("accounts:profile_contest_earnings", username=username)
+    else:
+        initial_amount = summary["available_usd"] if can_request else None
+        form = ContestPayoutRequestForm(
+            available_usd=summary["available_usd"],
+            minimum_usd=minimum_usd,
+            initial={"amount_usd": initial_amount} if initial_amount else None,
+        )
+
+    return render(
+        request,
+        "accounts/profile_contest_earnings.html",
+        {
+            "profile_user": profile_user,
+            "summary": summary,
+            "minimum_usd": minimum_usd,
+            "contest_wins": get_user_contest_wins(profile_user),
+            "payout_requests": get_user_payout_requests(profile_user),
+            "form": form,
+            "can_request_payout": can_request,
+            "has_pending_payout": user_has_pending_payout_request(profile_user),
+            "payouts_enabled": contest_payouts_enabled(),
+        },
+    )
 

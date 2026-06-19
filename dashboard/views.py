@@ -297,6 +297,9 @@ def weekly_contest(request):
         current_week_code,
         filter_weekly_contest_qualified,
         get_weekly_contest_min_scored_forecasts,
+        is_live_contest_week,
+        is_upcoming_contest_week,
+        normalize_contest_week_code,
         qualifies_for_weekly_contest,
         week_date_range,
         weekly_contest_enabled,
@@ -307,7 +310,9 @@ def weekly_contest(request):
         raise Http404()
 
     ranking_mode = normalize_reputation_ranking_mode(request.GET.get("mode"))
-    week_code = request.GET.get("week", "").strip() or current_week_code()
+    week_code = normalize_contest_week_code(
+        request.GET.get("week", "").strip() or current_week_code()
+    )
 
     leaders = filter_weekly_contest_qualified(
         get_cached_top_predictors_for_week(
@@ -340,7 +345,8 @@ def weekly_contest(request):
             "week_code": week_code,
             "week_start": week_start,
             "week_end": week_end,
-            "is_current_week": week_code == current_week_code(),
+            "is_current_week": is_live_contest_week(week_code=week_code),
+            "is_upcoming_week": is_upcoming_contest_week(week_code=week_code),
             "prize_usd": weekly_contest_prize_usd(),
             "hero_description_key": hero_description_key,
             "weekly_contest_min_scored": get_weekly_contest_min_scored_forecasts(),

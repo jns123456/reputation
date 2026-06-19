@@ -17,4 +17,5 @@ def platform_context(request):
         "base_app_id": getattr(settings, "BASE_APP_ID", "") or "",
         "weekly_contest_enabled": getattr(settings, "WEEKLY_CONTEST_ENABLED", True),
         "weekly_contest_prize_usd": getattr(settings, "WEEKLY_CONTEST_PRIZE_USD", 5),
+        "contest_payouts_enabled": getattr(settings, "CONTEST_PAYOUTS_ENABLED", True),
     }
