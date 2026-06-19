@@ -178,30 +178,6 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (HTTPError, exc, None)}
         self.assertIsNone(_before_send(event, hint))
 
-    def test_drops_transient_polymarket_sync_timeouts(self):
-        class ReadTimeout(Exception):
-            pass
-
-        ReadTimeout.__module__ = "requests.exceptions"
-        event = {
-            "logger": "integrations.sync",
-            "logentry": {"message": "H2H/F1 sports sync failed for category sports"},
-            "exception": {
-                "values": [
-                    {
-                        "type": "ReadTimeout",
-                        "stacktrace": {
-                            "frames": [
-                                {"module": "integrations.polymarket.client", "function": "fetch_events"},
-                            ],
-                        },
-                    },
-                ],
-            },
-        }
-        hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
-        self.assertIsNone(_before_send(event, hint))
-
     def test_keeps_redis_errors_outside_cache_backend(self):
         class ConnectionError(Exception):
             pass

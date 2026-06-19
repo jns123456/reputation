@@ -72,18 +72,20 @@ def _is_best_effort_enqueue_noise(event, hint) -> bool:
     return False
 
 
-_TRANSIENT_POLYMARKET_LOG_MESSAGES = (
-    "Failed to fetch World Cup match event",
-    "Failed to fetch H2H match event",
-    "Failed to fetch Polymarket market",
-    "Failed to fetch Polymarket event",
-    "H2H/F1 sports sync failed for category",
-    "Polymarket category sync failed for",
-    "Polymarket top-volume sync failed",
-)
+def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
+    """Drop handled Polymarket upstream timeouts from integrations.services."""
+    if event.get("logger") != "integrations.services":
+        return False
 
+    message = _event_message(event)
+    if not (
+        message.startswith("Failed to fetch World Cup match event")
+        or message.startswith("Failed to fetch H2H match event")
+        or message.startswith("Failed to fetch Polymarket market")
+        or message.startswith("Failed to fetch Polymarket event")
+    ):
+        return False
 
-def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
     transient_types = {
         "ReadTimeout",
         "Timeout",
@@ -114,18 +116,6 @@ def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
                 return True
     return False
 
-
-def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
-    """Drop handled Polymarket upstream failures from integrations fetch/sync paths."""
-    logger_name = event.get("logger")
-    if logger_name not in {"integrations.services", "integrations.sync"}:
-        return False
-
-    message = _event_message(event)
-    if not any(message.startswith(prefix) for prefix in _TRANSIENT_POLYMARKET_LOG_MESSAGES):
-        return False
-
-    return _is_transient_polymarket_upstream_exception(event, hint)
 
 def _is_handled_redis_cache_error(event, hint) -> bool:
     """Drop Redis cache failures already swallowed by ResilientRedisCache."""
