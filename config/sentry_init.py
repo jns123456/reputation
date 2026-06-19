@@ -1,5 +1,7 @@
 """Optional Sentry integration — active only when SENTRY_DSN is set."""
 
+import re
+
 from django.conf import settings
 
 
@@ -108,9 +110,7 @@ def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
             return True
         if entry_type == "HTTPError":
             value = entry.get("value") or ""
-            if "Server Error" in value and any(
-                token in value for token in (" 500 ", " 502 ", " 503 ", " 504 ")
-            ):
+            if "Server Error" in value and re.search(r"\b5\d{2}\b", value):
                 return True
     return False
 

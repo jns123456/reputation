@@ -178,6 +178,24 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (HTTPError, exc, None)}
         self.assertIsNone(_before_send(event, hint))
 
+    def test_drops_http_error_when_status_code_not_in_exc_info(self):
+        event = {
+            "logger": "integrations.services",
+            "logentry": {"message": "Failed to fetch Polymarket event demo-slug"},
+            "exception": {
+                "values": [
+                    {
+                        "type": "HTTPError",
+                        "value": (
+                            "500 Server Error: Internal Server Error for url: "
+                            "https://gamma-api.polymarket.com/events/slug/demo"
+                        ),
+                    },
+                ],
+            },
+        }
+        self.assertIsNone(_before_send(event, {}))
+
     def test_drops_transient_polymarket_sync_timeouts(self):
         class ReadTimeout(Exception):
             pass
