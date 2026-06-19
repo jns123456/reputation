@@ -48,14 +48,13 @@ def get_prediction_comment_threads(prediction):
     return build_comment_forest(comments)
 
 
-def get_market_prediction_discussions(*, market, predictions):
-    """Map prediction.id -> list of top-level threaded comments."""
-    prediction_ids = [prediction.id for prediction in predictions]
+def get_predictions_discussions(prediction_ids):
+    """Map prediction.id -> top-level threaded comments (any market)."""
     if not prediction_ids:
         return {}
 
     comments = (
-        Comment.objects.filter(market=market, prediction_id__in=prediction_ids)
+        Comment.objects.filter(prediction_id__in=prediction_ids)
         .select_related("user", "user__profile")
         .order_by("created_at")
     )
@@ -67,6 +66,12 @@ def get_market_prediction_discussions(*, market, predictions):
         prediction_id: build_comment_forest(grouped[prediction_id])
         for prediction_id in prediction_ids
     }
+
+
+def get_market_prediction_discussions(*, market, predictions):
+    """Map prediction.id -> list of top-level threaded comments."""
+    prediction_ids = [prediction.id for prediction in predictions]
+    return get_predictions_discussions(prediction_ids)
 
 
 def get_market_comments(market):

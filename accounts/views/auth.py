@@ -33,6 +33,7 @@ from accounts.forms import SignUpForm, StyledPasswordResetForm, StyledSetPasswor
 from accounts.http_utils import enforce_ip_rate_limit
 from accounts.models import User
 from accounts.notification_services import queue_login_notification_toast
+from reputation.weekly_contest_services import queue_weekly_contest_announcement
 
 
 class CustomLoginView(LoginView):
@@ -59,6 +60,7 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         response = super().form_valid(form)
         queue_login_notification_toast(request=self.request)
+        queue_weekly_contest_announcement(request=self.request)
         return response
 
 
@@ -188,6 +190,7 @@ def auth0_callback(request):
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session["auth0_id_token"] = token.get("id_token", "")
     queue_login_notification_toast(request=request)
+    queue_weekly_contest_announcement(request=request)
     return _post_auth_redirect(user)
 
 
@@ -349,6 +352,7 @@ def verify_email_confirm(request, token):
                 return redirect("accounts:profile", username=result.user.username)
         else:
             login(request, result.user)
+            queue_weekly_contest_announcement(request=request)
             messages.success(request, result.message)
             if not result.user.onboarding_completed:
                 return redirect("accounts:profile_setup")

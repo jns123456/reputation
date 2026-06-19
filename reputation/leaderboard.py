@@ -33,15 +33,20 @@ def fetch_ranked_entries(queryset, *, limit, mode):
     return qualified + unqualified
 
 
-def build_leaderboard_rows(entries, *, ranking_mode):
+def build_leaderboard_rows(entries, *, ranking_mode, qualifies_fn=None):
     """Attach display rank and relative-qualification flags to leaderboard entries."""
     ranking_mode = normalize_reputation_ranking_mode(ranking_mode)
     rows = []
     qualified_rank = 0
     for entry in entries:
-        qualifies = ranking_mode != RELATIVE or qualifies_for_relative_ranking(
-            entry.scored_forecast_count
-        )
+        if ranking_mode == RELATIVE:
+            qualifies = (
+                qualifies_fn(entry.scored_forecast_count)
+                if qualifies_fn is not None
+                else qualifies_for_relative_ranking(entry.scored_forecast_count)
+            )
+        else:
+            qualifies = True
         if qualifies:
             qualified_rank += 1
             rank = qualified_rank

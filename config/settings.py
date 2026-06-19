@@ -611,6 +611,15 @@ if MARKET_RESOLVING_REMINDERS_ENABLED:
         "task": "accounts.tasks.send_market_resolving_reminders_task",
         "schedule": crontab(minute=15, hour="*/6"),
     }
+# Weekly reputation contest — off-platform cash prizes for top weekly finishers.
+WEEKLY_CONTEST_ENABLED = env.bool("WEEKLY_CONTEST_ENABLED", default=True)
+WEEKLY_CONTEST_PRIZE_USD = env.int("WEEKLY_CONTEST_PRIZE_USD", default=5)
+WEEKLY_CONTEST_MIN_SCORED_FORECASTS = env.int("WEEKLY_CONTEST_MIN_SCORED_FORECASTS", default=10)
+if WEEKLY_CONTEST_ENABLED:
+    CELERY_BEAT_SCHEDULE["finalize-previous-weekly-contest"] = {
+        "task": "reputation.tasks.finalize_previous_weekly_contest_task",
+        "schedule": crontab(minute=15, hour=1, day_of_week=0),
+    }
 # Quarterly reputation seasons — permanent awards for top finishers.
 SEASON_AWARDS_ENABLED = env.bool("SEASON_AWARDS_ENABLED", default=False)
 if SEASON_AWARDS_ENABLED:

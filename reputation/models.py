@@ -75,6 +75,47 @@ class SeasonAward(models.Model):
         return f"{self.user.username} #{self.rank} {scope} {self.season}"
 
 
+class WeeklyContestWinner(models.Model):
+    """Weekly contest winner — one row per prize category (absolute / relative).
+
+    Derived from immutable ``ReputationEvent`` history during the ISO calendar
+    week. Cash prizes are off-platform; ``prize_usd`` is display-only.
+    """
+
+    class PrizeType(models.TextChoices):
+        ABSOLUTE = "absolute", "Absolute reputation points"
+        RELATIVE = "relative", "Reputation per forecast"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="weekly_contest_wins",
+    )
+    week_code = models.CharField(max_length=10)  # e.g. "2026-06-21" (starting Sunday)
+    prize_type = models.CharField(max_length=20, choices=PrizeType.choices)
+    reputation_points = models.IntegerField(default=0)
+    reputation_score = models.FloatField(default=0)
+    scored_forecast_count = models.PositiveIntegerField(default=0)
+    prize_usd = models.PositiveSmallIntegerField(default=5)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["week_code", "prize_type"],
+                name="weeklycontestwinner_unique_week_prize",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["week_code", "prize_type"]),
+            models.Index(fields=["user", "-created_at"]),
+        ]
+        ordering = ["-week_code", "prize_type"]
+
+    def __str__(self):
+        return f"{self.user.username} {self.prize_type} {self.week_code}"
+
+
 class PopularityEvent(models.Model):
     class EventType(models.TextChoices):
         UPVOTE_RECEIVED = "upvote_received", "Upvote received"

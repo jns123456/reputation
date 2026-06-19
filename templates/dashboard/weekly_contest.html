@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Weekly Contest" %}{% endblock %}
+
+{% block extra_head %}
+<script defer src="{% static 'js/leaderboard-table-sort.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="pr-page pb-8">
+  {% trans "Leaderboard" as hero_eyebrow %}
+  {% trans "Weekly" as hero_title %}
+  {% trans "Contest" as hero_gradient %}
+  {% if hero_description_key == "weekly_absolute" %}
+  {% blocktrans asvar hero_description with prize=prize_usd min=weekly_contest_min_scored %}Earn reputation points this calendar week. The top absolute scorer wins ${{ prize }} — at least {{ min }} scored forecasts required.{% endblocktrans %}
+  {% else %}
+  {% blocktrans asvar hero_description with prize=prize_usd min=weekly_contest_min_scored %}Best average reputation per scored forecast this week wins ${{ prize }}. At least {{ min }} scored forecasts required to qualify.{% endblocktrans %}
+  {% endif %}
+  {% include "includes/pr_page_hero.html" with eyebrow=hero_eyebrow compact=True title=hero_title gradient=hero_gradient description=hero_description %}
+
+  <div class="mt-4 grid gap-3 sm:grid-cols-2">
+    <div class="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 dark:border-amber-800/60 dark:from-amber-950/30 dark:to-slate-900">
+      <div class="flex items-start gap-3">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
+          <i data-lucide="trophy" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+        </span>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">{% trans "Absolute prize" %}</p>
+          <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">${{ prize_usd }}</p>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% blocktrans with min=weekly_contest_min_scored %}Most reputation points earned this week (min. {{ min }} scored forecasts).{% endblocktrans %}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 dark:border-emerald-800/60 dark:from-emerald-950/30 dark:to-slate-900">
+      <div class="flex items-start gap-3">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+          <i data-lucide="target" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+        </span>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{% trans "Quality prize" %}</p>
+          <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">${{ prize_usd }}</p>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">{% blocktrans with min=weekly_contest_min_scored %}Best rep / forecast average this week (min. {{ min }} scored forecasts).{% endblocktrans %}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">
+    {% blocktrans with start=week_start|date:"M j" end=week_end|date:"M j, Y" %}Contest week · Sunday {{ start }} – Saturday {{ end }}{% endblocktrans %}
+    {% if is_current_week %}
+    <span class="ml-2 inline-flex rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">{% trans "Live" %}</span>
+    {% endif %}
+  </p>
+
+  {% url "dashboard:weekly_contest" as base_url %}
+  <div class="mt-4 flex flex-wrap gap-2">
+    <a href="{{ base_url }}?mode=absolute&week={{ week_code }}"
+       class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if ranking_mode == 'absolute' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700{% endif %}"
+       {% if ranking_mode == 'absolute' %}aria-current="page"{% endif %}>
+      {% trans "Absolute ranking" %}
+    </a>
+    <a href="{{ base_url }}?mode=relative&week={{ week_code }}"
+       class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if ranking_mode == 'relative' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700{% endif %}"
+       {% if ranking_mode == 'relative' %}aria-current="page"{% endif %}>
+      {% trans "Relative ranking" %}
+    </a>
+  </div>
+  <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+    {% trans "Prizes are paid off-platform to verified winners after each week ends. PredictStamp does not hold balances or process payments." %}
+  </p>
+
+  <div class="mt-4">
+    <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">← {% trans "Full reputation leaderboard" %}</a>
+  </div>
+
+  <div class="pr-table-wrap mt-6">
+    <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
+    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700"
+           data-leaderboard-table
+           data-default-sort="{% if ranking_mode == 'absolute' %}rep-points{% else %}rep-per-forecast{% endif %}">
+      <thead>
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "User" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="rep-per-forecast"
+                    aria-label="{% trans 'Sort by rep per forecast, highest first' %}">
+              {% trans "Rep / forecast" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="rep-points"
+                    aria-label="{% trans 'Sort by reputation, highest first' %}">
+              {% trans "Week reputation" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+            <button type="button"
+                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                    data-leaderboard-sort="accuracy"
+                    aria-label="{% trans 'Sort by accuracy, highest first' %}">
+              {% trans "Accuracy" %}
+              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+            </button>
+          </th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Scored" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        {% for row in leaderboard_rows %}
+          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=False relative_ranking_min_scored=weekly_contest_min_scored %}
+        {% empty %}
+          <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">{% blocktrans with min=weekly_contest_min_scored %}No qualified players yet — make at least {{ min }} scored forecasts this week to join the contest.{% endblocktrans %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

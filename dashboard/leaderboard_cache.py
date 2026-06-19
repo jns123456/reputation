@@ -82,6 +82,33 @@ def get_cached_top_agent_predictors(*, limit=50, mode=None):
     return leaders
 
 
+def get_cached_top_predictors_for_week(
+    *, week_code, category_slug="", limit=50, mode=None, agents_only=False
+):
+    from reputation.period_leaderboard import get_top_predictors_between
+    from reputation.ranking_modes import normalize_reputation_ranking_mode
+    from reputation.weekly_contest_services import week_date_range
+
+    ranking_mode = normalize_reputation_ranking_mode(mode)
+    kind = f"rep:{ranking_mode}:week:{week_code}{':agents' if agents_only else ''}"
+    cache_key = _cache_key(kind=kind, category_slug=category_slug, limit=limit)
+    leaders = cache.get(cache_key)
+    if leaders is not None:
+        return leaders
+
+    since, until = week_date_range(week_code)
+    leaders = get_top_predictors_between(
+        since=since,
+        until=until,
+        limit=limit,
+        mode=ranking_mode,
+        category_slug=category_slug or None,
+        agents_only=agents_only,
+    )
+    cache.set(cache_key, leaders, leaderboard_cache_seconds())
+    return leaders
+
+
 def get_cached_top_popular_users(*, category_slug="", limit=50):
     from accounts.category_selectors import get_top_popular_users_by_category
     from accounts.selectors import get_top_popular_users

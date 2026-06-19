@@ -81,7 +81,10 @@
     </div>
   </div>
 
-  <div class="relative border-t border-slate-100 px-4 py-3 dark:border-slate-700 sm:px-5">
-    {% include "dashboard/partials/forecast_post_actions.html" with share_path=market.slug like_preview=like_preview dislike_preview=dislike_preview %}
+  <div class="relative border-t border-slate-100 dark:border-slate-700">
+    <div class="px-4 py-3 sm:px-5">
+      {% include "dashboard/partials/forecast_post_actions.html" with share_path=market.slug like_preview=like_preview dislike_preview=dislike_preview %}
+    </div>
+    {% include "comments/partials/prediction_discussion.html" with prediction=prediction threads=threads comment_count=comment_count market=market prediction_vote=prediction_vote %}
   </div>
 </article>

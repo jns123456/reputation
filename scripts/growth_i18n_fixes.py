@@ -35,6 +35,72 @@ GROWTH_I18N_FIXES: dict[str, str] = {
         "Ningún agente de IA tiene todavía un historial puntuado."
     ),
     "Agent Arena — AI agents only": "Arena de Agentes — solo agentes de IA",
+    # --- Weekly contest ---
+    "Weekly Contest": "Concurso semanal",
+    "Weekly": "Semanal",
+    "Contest": "Concurso",
+    "Absolute prize": "Premio absoluto",
+    "Quality prize": "Premio por calidad",
+    "Most reputation points earned this week.": "Más puntos de reputación ganados esta semana.",
+    "Most reputation points earned this week (min. %(min)s scored forecasts).": (
+        "Más puntos de reputación ganados esta semana (mín. %(min)s pronósticos puntuados)."
+    ),
+    "Best rep / forecast average this week.": "Mejor promedio de rep / pronóstico esta semana.",
+    "Best rep / forecast average this week (min. %(min)s scored forecasts).": (
+        "Mejor promedio de rep / pronóstico esta semana (mín. %(min)s pronósticos puntuados)."
+    ),
+    "Week %(week_code)s · %(start)s – %(end)s": "Semana %(week_code)s · %(start)s – %(end)s",
+    "Contest week · Sunday %(start)s – Saturday %(end)s": (
+        "Semana del concurso · domingo %(start)s – sábado %(end)s"
+    ),
+    "Live": "En vivo",
+    "Prizes are paid off-platform to verified winners after each week ends. PredictStamp does not hold balances or process payments.": (
+        "Los premios se pagan fuera de la plataforma a ganadores verificados al cerrar cada semana. "
+        "PredictStamp no guarda saldos ni procesa pagos."
+    ),
+    "Week reputation": "Reputación semanal",
+    "No scored forecasts this week yet. Make a forecast to join the contest.": (
+        "Aún no hay pronósticos puntuados esta semana. Haz un pronóstico para unirte al concurso."
+    ),
+    "No qualified players yet — make at least %(min)s scored forecasts this week to join the contest.": (
+        "Aún no hay jugadores calificados — haz al menos %(min)s pronósticos puntuados esta semana para unirte al concurso."
+    ),
+    "Earn reputation points this calendar week. The top absolute scorer wins $%(prize)s — at least %(min)s scored forecasts required.": (
+        "Gana puntos de reputación esta semana calendario. El líder absoluto gana $%(prize)s — "
+        "se requieren al menos %(min)s pronósticos puntuados."
+    ),
+    "Best average reputation per scored forecast this week wins $%(prize)s. At least %(min)s scored forecasts required to qualify.": (
+        "El mejor promedio de reputación por pronóstico puntuado esta semana gana $%(prize)s. "
+        "Se requieren al menos %(min)s pronósticos puntuados para calificar."
+    ),
+    "Weekly Contest — win $%(prize)s": "Concurso semanal — gana $%(prize)s",
+    "Win cash for predictive skill": "Gana dinero por habilidad predictiva",
+    "This week (%(start)s – %(end)s) two predictors win $%(prize)s each — at least %(min)s scored forecasts required.": (
+        "Esta semana (%(start)s – %(end)s) dos pronosticadores ganan $%(prize)s cada uno — "
+        "se requieren al menos %(min)s pronósticos puntuados."
+    ),
+    "Absolute": "Absoluto",
+    "Quality": "Calidad",
+    "Most reputation points this week": "Más puntos de reputación esta semana",
+    "Best rep / forecast average": "Mejor rep / pronóstico",
+    "Compete all week — minimum %(min)s scored forecasts to qualify.": (
+        "Compite toda la semana — mínimo %(min)s pronósticos puntuados para calificar."
+    ),
+    "This week (%(start)s – %(end)s) two predictors win $%(prize)s each: the most absolute reputation points and the best rep / forecast average.": (
+        "Esta semana (%(start)s – %(end)s) dos pronosticadores ganan $%(prize)s cada uno: "
+        "el de más puntos absolutos de reputación y el de mejor rep / pronóstico."
+    ),
+    "Make forecasts on open markets — reputation is scored when they resolve.": (
+        "Haz pronósticos en mercados abiertos — la reputación se puntúa cuando se resuelven."
+    ),
+    "No betting or deposits — skill only.": "Sin apuestas ni depósitos — solo habilidad.",
+    "View standings": "Ver clasificación",
+    "Got it": "Entendido",
+    "Don't show this message again": "No volver a ver este mensaje",
+    "Free to enter — no separate sign-up. Just make forecasts on the platform and you're in.": (
+        "Participar es gratis — no hace falta inscribirse por separado. "
+        "Solo con hacer pronósticos en la plataforma ya estás dentro."
+    ),
     # --- Daily missions ---
     "Daily missions": "Misiones diarias",
     "Popularity points on completion": "Puntos de popularidad al completar",

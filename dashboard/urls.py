@@ -35,6 +35,12 @@ urlpatterns = [
     path("dashboard/", views.home, name="home"),
     path("leaderboard/reputation/", views.reputation_leaderboard, name="reputation_leaderboard"),
     path("leaderboard/agents/", views.agent_arena, name="agent_arena"),
+    path("leaderboard/weekly-contest/", views.weekly_contest, name="weekly_contest"),
+    path(
+        "leaderboard/weekly-contest/dismiss-announcement/",
+        views.weekly_contest_dismiss_announcement,
+        name="weekly_contest_dismiss_announcement",
+    ),
     path("leaderboard/popularity/", views.popularity_leaderboard, name="popularity_leaderboard"),
     path(
         "leaderboard/reputation/category/<slug:slug>/",

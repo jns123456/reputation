@@ -3,8 +3,17 @@
 from accounts.bookmark_selectors import get_user_bookmarked_ids
 from accounts.follow_selectors import get_following_ids
 from accounts.models import Bookmark
-from comments.selectors import get_user_prediction_votes, get_vote_previews_for_targets
 from comments.models import Vote
+from comments.selectors import (
+    attach_comment_votes,
+    attach_vote_summaries_to_comments,
+    collect_comment_ids,
+    get_predictions_discussions,
+    get_user_comment_votes,
+    get_user_prediction_votes,
+    get_vote_previews_for_targets,
+    get_vote_summaries_for_targets,
+)
 from predictions.selectors import get_forecasts_feed
 from predictions.services import build_forecast_card_metrics
 from reputation.services import calculate_reputation_stakes
@@ -74,10 +83,24 @@ def _build_items(*, user, predictions):
         prediction_ids,
     )
 
+    discussions = get_predictions_discussions(prediction_ids)
+    all_comment_ids = []
+    for threads in discussions.values():
+        all_comment_ids.extend(collect_comment_ids(threads))
+    comment_votes = get_user_comment_votes(user, all_comment_ids)
+    comment_vote_summaries = get_vote_summaries_for_targets(
+        target_type=Vote.TargetType.COMMENT,
+        target_ids=all_comment_ids,
+    )
+    for threads in discussions.values():
+        attach_comment_votes(threads, comment_votes)
+        attach_vote_summaries_to_comments(threads, comment_vote_summaries)
+
     return [
         {
             "prediction": prediction,
             "market": prediction.market,
+            "threads": discussions.get(prediction.id, []),
             "comment_count": prediction.comment_count,
             "prediction_vote": prediction_votes.get(prediction.id, 0),
             "is_bookmarked": prediction.id in bookmarked_ids,

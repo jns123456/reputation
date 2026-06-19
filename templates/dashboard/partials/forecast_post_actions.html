@@ -3,7 +3,7 @@
   <a href="{% url 'markets:detail' slug=market.slug %}#prediction-discussion-{{ prediction.id }}"
      class="forecast-action group flex items-center gap-1.5 rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/40 dark:hover:text-brand-400"
      title="{% if user == prediction.user %}{% trans 'View comments' %}{% else %}{% trans 'Reply' %}{% endif %}"
-     onclick="window.focusDiscussionComposer && window.focusDiscussionComposer('prediction-discussion-{{ prediction.id }}'); return false;">
+     onclick="var el = document.getElementById('prediction-discussion-{{ prediction.id }}'); if (el && window.focusDiscussionComposer) { window.focusDiscussionComposer('prediction-discussion-{{ prediction.id }}'); return false; }">
     <i data-lucide="message-circle" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
     {% if comment_count %}<span class="text-xs font-medium tabular-nums">{{ comment_count }}</span>{% endif %}
   </a>

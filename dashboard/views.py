@@ -6,6 +6,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 import logging
+from datetime import timedelta
 
 from accounts.category_selectors import (
     validate_category_slug,
@@ -283,6 +284,82 @@ def popularity_leaderboard(request):
             "is_category_leaderboard": category is not None,
         },
     )
+
+
+def weekly_contest(request):
+    """Weekly reputation contest — calendar-week standings with cash prizes."""
+    from django.http import Http404
+
+    from dashboard.leaderboard_cache import get_cached_top_predictors_for_week
+    from reputation.leaderboard import build_leaderboard_rows
+    from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
+    from reputation.weekly_contest_services import (
+        current_week_code,
+        filter_weekly_contest_qualified,
+        get_weekly_contest_min_scored_forecasts,
+        qualifies_for_weekly_contest,
+        week_date_range,
+        weekly_contest_enabled,
+        weekly_contest_prize_usd,
+    )
+
+    if not weekly_contest_enabled():
+        raise Http404()
+
+    ranking_mode = normalize_reputation_ranking_mode(request.GET.get("mode"))
+    week_code = request.GET.get("week", "").strip() or current_week_code()
+
+    leaders = filter_weekly_contest_qualified(
+        get_cached_top_predictors_for_week(
+            week_code=week_code,
+            limit=100,
+            mode=ranking_mode,
+        )
+    )[:50]
+
+    if ranking_mode == ABSOLUTE:
+        hero_description_key = "weekly_absolute"
+    else:
+        hero_description_key = "weekly_relative"
+
+    since, until = week_date_range(week_code)
+    week_start = since
+    week_end = until - timedelta(seconds=1)
+
+    return render(
+        request,
+        "dashboard/weekly_contest.html",
+        {
+            "leaders": leaders,
+            "leaderboard_rows": build_leaderboard_rows(
+                leaders,
+                ranking_mode=ranking_mode,
+                qualifies_fn=qualifies_for_weekly_contest,
+            ),
+            "ranking_mode": ranking_mode,
+            "week_code": week_code,
+            "week_start": week_start,
+            "week_end": week_end,
+            "is_current_week": week_code == current_week_code(),
+            "prize_usd": weekly_contest_prize_usd(),
+            "hero_description_key": hero_description_key,
+            "weekly_contest_min_scored": get_weekly_contest_min_scored_forecasts(),
+            "is_category_leaderboard": False,
+        },
+    )
+
+
+@login_required
+def weekly_contest_dismiss_announcement(request):
+    """Permanently hide the weekly contest login modal for this user."""
+    from django.http import HttpResponseNotAllowed, JsonResponse
+    from reputation.weekly_contest_services import dismiss_weekly_contest_announcement
+
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    dismiss_weekly_contest_announcement(user=request.user)
+    return JsonResponse({"ok": True})
 
 
 def agent_arena(request):

@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from reputation.models import PopularityEvent, ReputationEvent, SeasonAward
+from reputation.models import PopularityEvent, ReputationEvent, SeasonAward, WeeklyContestWinner
+
+
+@admin.register(WeeklyContestWinner)
+class WeeklyContestWinnerAdmin(admin.ModelAdmin):
+    list_display = ("user", "week_code", "prize_type", "reputation_points", "prize_usd", "created_at")
+    list_filter = ("week_code", "prize_type")
+    search_fields = ("user__username",)
+    readonly_fields = ("created_at",)
 
 
 @admin.register(SeasonAward)

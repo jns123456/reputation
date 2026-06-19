@@ -125,6 +125,14 @@ class ForecastsPageTests(TestCase):
         self.assertContains(response, "Forecasts")
         self.assertContains(response, "Strong signal from on-chain data.")
         self.assertContains(response, "Forecasts test market")
+        self.assertContains(response, f"prediction-discussion-{self.prediction.id}")
+        self.assertContains(response, "Log in")
+
+    def test_forecasts_page_shows_comment_composer_for_other_users(self):
+        self.client.login(username="forecastsuser", password="pass")
+        response = self.client.get("/forecasts/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Join the conversation")
 
     def test_forecasts_page_hides_handle_for_anonymous_users(self):
         anon = User.objects.create_user(
