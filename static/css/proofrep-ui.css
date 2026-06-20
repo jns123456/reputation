@@ -3680,14 +3680,6 @@ html.dark .pr-bottom-nav {
   box-shadow: 0 -4px 20px -4px rgba(0, 0, 0, 0.45);
 }
 
-body:has(.about-page) .pr-bottom-nav {
-  display: none;
-}
-
-body:has(.about-page).has-mobile-nav {
-  padding-bottom: 0;
-}
-
 .pr-bottom-nav-item {
   flex: 1;
   display: flex;
