@@ -1,9 +1,9 @@
-{% load i18n %}
+{% load i18n timezone_tags %}
 <div class="flex items-start justify-between gap-3{% if header_padding_class %} {{ header_padding_class }}{% endif %}">
   <div class="min-w-0 flex-1">
     {% if market.kickoff_at %}
     <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-      {{ market.kickoff_at|date:"D, M j · H:i" }} UTC
+      {% local_kickoff_time market.kickoff_at "D, M j · H:i" %}
     </p>
     {% endif %}
     {% if show_forecasts_closed_badge and market.status == "open" and not market.is_forecastable %}

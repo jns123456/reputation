@@ -97,6 +97,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "accounts.middleware.ClientTimezoneMiddleware",
     "accounts.middleware.CountryLanguageMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -199,6 +200,8 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # Optional path to MaxMind GeoLite2-Country.mmdb for IP → country (see .env.example).
 GEOIP_COUNTRY_PATH = env("GEOIP_COUNTRY_PATH", default="")
+# Optional GeoLite2-City.mmdb for IP → IANA timezone (more accurate than country fallback).
+GEOIP_CITY_PATH = env("GEOIP_CITY_PATH", default="")
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"

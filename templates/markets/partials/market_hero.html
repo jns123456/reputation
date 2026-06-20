@@ -1,4 +1,4 @@
-{% load i18n reputation_filters %}
+{% load i18n reputation_filters timezone_tags %}
 <article class="pr-hero pr-hero--compact relative overflow-hidden">
   <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
   <div class="pr-orb pr-orb--slow absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
@@ -43,7 +43,7 @@
               <div class="shrink-0 px-1">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{% trans "vs" %}</p>
                 {% if market.kickoff_at %}
-                <p class="mt-1 text-xs font-medium tabular-nums text-slate-500 dark:text-slate-400">{{ market.kickoff_at|date:"M j · H:i" }} UTC</p>
+                <p class="mt-1 text-xs font-medium tabular-nums text-slate-500 dark:text-slate-400">{% local_kickoff_time market.kickoff_at "M j · H:i" %}</p>
                 {% endif %}
               </div>
               <div class="min-w-0">

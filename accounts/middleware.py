@@ -2,9 +2,23 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import translation
 
+from accounts.client_timezone import get_client_timezone_name, timezone_display_label
 from accounts.country_language import language_for_request_country
 from accounts.email_verification_services import user_requires_email_verification
 from accounts.htmx_utils import redirect_response
+
+
+class ClientTimezoneMiddleware:
+    """Resolve visitor timezone for sports kickoff display only (see ``local_kickoff_time``)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        tz_name = get_client_timezone_name(request)
+        request.client_timezone_name = tz_name
+        request.client_timezone_label = timezone_display_label(tz_name)
+        return self.get_response(request)
 
 
 class CountryLanguageMiddleware:
