@@ -71,9 +71,9 @@ def main() -> int:
         return 1
 
     note_text = f"[autofix:{args.marker}] Cursor autonomous fix pipeline"
-    if project_slug:
+    if issue_id:
         note_resp = requests.post(
-            f"{api}/projects/{args.org}/{project_slug}/issues/{issue_id}/notes/",
+            f"{api}/issues/{issue_id}/notes/",
             headers=headers,
             json={"text": note_text},
             timeout=30,
