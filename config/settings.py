@@ -202,6 +202,11 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 GEOIP_COUNTRY_PATH = env("GEOIP_COUNTRY_PATH", default="")
 # Optional GeoLite2-City.mmdb for IP → IANA timezone (more accurate than country fallback).
 GEOIP_CITY_PATH = env("GEOIP_CITY_PATH", default="")
+# When GeoLite2 is not configured, resolve country/timezone via ipwho.is (cached 24h).
+GEOIP_HTTP_FALLBACK_ENABLED = env.bool(
+    "GEOIP_HTTP_FALLBACK_ENABLED",
+    default=not _RUNNING_TESTS,
+)
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"

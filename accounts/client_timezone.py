@@ -73,6 +73,17 @@ def get_client_timezone_name(request) -> str:
         if city_tz:
             return city_tz
 
+        if getattr(settings, "GEOIP_HTTP_FALLBACK_ENABLED", True):
+            from accounts.ip_geo_lookup import lookup_ip_geo
+
+            geo = lookup_ip_geo(ip)
+            if geo.timezone_name and _is_valid_timezone(geo.timezone_name):
+                return geo.timezone_name
+            if geo.country_code:
+                country_tz = COUNTRY_PRIMARY_TIMEZONE.get(geo.country_code.upper())
+                if country_tz and _is_valid_timezone(country_tz):
+                    return country_tz
+
     country = get_country_code_from_request(request)
     if country:
         country_tz = COUNTRY_PRIMARY_TIMEZONE.get(country.upper())

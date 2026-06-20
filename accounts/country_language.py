@@ -67,7 +67,16 @@ def get_country_code_from_request(request) -> str | None:
     ip = get_client_ip(request)
     if not ip:
         return None
-    return _lookup_country_geoip(ip)
+    country = _lookup_country_geoip(ip)
+    if country:
+        return country
+    if getattr(settings, "GEOIP_HTTP_FALLBACK_ENABLED", True):
+        from accounts.ip_geo_lookup import lookup_ip_geo
+
+        geo = lookup_ip_geo(ip)
+        if geo.country_code:
+            return geo.country_code
+    return None
 
 
 def official_language_for_country(country_code: str | None) -> str | None:
