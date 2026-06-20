@@ -29,13 +29,17 @@ def auth_headers() -> dict[str, str]:
 
 def issue_notes(api: str, headers: dict[str, str], org: str, project: str, issue_id: str) -> str:
     response = requests.get(
-        f"{api}/projects/{org}/{project}/issues/{issue_id}/notes/",
+        f"{api}/issues/{issue_id}/comments/",
         headers=headers,
         timeout=30,
     )
     if response.status_code != 200:
         return ""
-    return "\n".join(note.get("text", "") for note in response.json())
+    texts: list[str] = []
+    for note in response.json():
+        data = note.get("data") or {}
+        texts.append(data.get("text") or note.get("text", ""))
+    return "\n".join(texts)
 
 
 def already_handled(notes: str) -> bool:
