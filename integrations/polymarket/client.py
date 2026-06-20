@@ -81,6 +81,12 @@ class PolymarketClient:
             params["ascending"] = "false"
         url = f"{self.base_url}/markets"
         response = self._get_with_retry(url, params=params, timeout=30)
+        if response.status_code >= 500:
+            logger.warning(
+                "Polymarket markets unavailable (HTTP %s)",
+                response.status_code,
+            )
+            return []
         response.raise_for_status()
         data = response.json()
         if isinstance(data, list):
@@ -100,6 +106,12 @@ class PolymarketClient:
             params["ascending"] = "false"
         url = f"{self.base_url}/events"
         response = self._get_with_retry(url, params=params, timeout=30)
+        if response.status_code >= 500:
+            logger.warning(
+                "Polymarket events unavailable (HTTP %s)",
+                response.status_code,
+            )
+            return []
         response.raise_for_status()
         data = response.json()
         if isinstance(data, list):
