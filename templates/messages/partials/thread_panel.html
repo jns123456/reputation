@@ -6,7 +6,7 @@
     </a>
     <a href="{% url 'accounts:profile' username=other_user.username %}" class="dm-thread-user">
       <span class="dm-thread-avatar">
-        {% include "accounts/partials/user_avatar.html" with user=other_user %}
+        {% include "accounts/partials/user_avatar_stack.html" with user=other_user stack_size="sm" only %}
       </span>
       <span class="dm-thread-names">
         <span class="dm-thread-name">{{ other_user.public_name }}</span>

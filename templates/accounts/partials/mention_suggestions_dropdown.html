@@ -9,7 +9,7 @@
               role="option"
               data-username="{{ profile_user.username }}">
         <span class="pr-mention-avatar">
-          {% include "accounts/partials/user_avatar.html" with user=profile_user %}
+          {% include "accounts/partials/user_avatar_stack.html" with user=profile_user stack_size="sm" only %}
         </span>
         <span class="pr-mention-meta">
           <span class="pr-mention-name">{{ profile_user.public_name }}</span>

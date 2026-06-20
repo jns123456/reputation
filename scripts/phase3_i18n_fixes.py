@@ -8,6 +8,20 @@ PHASE3_FIXES: dict[str, str] = {
         "PredictStamp — La capa social de los mercados de predicción"
     ),
     "Play video": "Reproducir video",
+    "How it works": "Cómo funciona",
+    "Explore markets": "Explorá mercados",
+    "Browse real-world events and open forecasts — politics, sports, crypto, and more.": (
+        "Explorá eventos del mundo real y pronósticos abiertos: política, deportes, cripto y más."
+    ),
+    "Make a forecast": "Haz un pronóstico",
+    "Pick an outcome and publish your prediction in seconds. No wallets, no bets — just your judgment on record.": (
+        "Elegí un resultado y publicá tu pronóstico en segundos. Sin wallets, sin apuestas: solo tu criterio queda registrado."
+    ),
+    "Build reputation": "Construí reputación",
+    "Earn reputation when markets resolve — or exit early to lock in your track record. Better calls against the odds score higher.": (
+        "Ganá reputación cuando los mercados se resuelven — o salí antes para fijar tu historial. "
+        "Los aciertos contra las probabilidades suman más."
+    ),
     "Featured open forecasts": "Pronósticos abiertos destacados",
     "Welcome to PredictStamp": "Bienvenido a PredictStamp",
     "Welcome to PredictStamp!": "¡Bienvenido a PredictStamp!",

@@ -1,0 +1,38 @@
+{% load i18n %}
+<section class="pr-how-steps" aria-labelledby="pr-how-steps-title">
+  <p id="pr-how-steps-title" class="text-xs font-semibold uppercase tracking-widest text-brand-600">{% trans "How it works" %}</p>
+  <div class="mt-4 grid gap-4 sm:grid-cols-3">
+    <article class="about-card pr-card--neomorphic rounded-2xl p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-3">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white" aria-hidden="true">1</span>
+        <div class="pr-neo-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/50">
+          <i data-lucide="search" class="h-5 w-5 text-brand-600 dark:text-brand-400" stroke-width="1.75" aria-hidden="true"></i>
+        </div>
+      </div>
+      <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Explore markets" %}</h3>
+      <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "Browse real-world events and open forecasts — politics, sports, crypto, and more." %}</p>
+    </article>
+
+    <article class="about-card pr-card--neomorphic rounded-2xl p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-3">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white" aria-hidden="true">2</span>
+        <div class="pr-neo-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+          <i data-lucide="target" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
+        </div>
+      </div>
+      <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Make a forecast" %}</h3>
+      <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "Pick an outcome and publish your prediction in seconds. No wallets, no bets — just your judgment on record." %}</p>
+    </article>
+
+    <article class="about-card pr-card--neomorphic rounded-2xl p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-3">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white" aria-hidden="true">3</span>
+        <div class="pr-neo-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+          <i data-lucide="trophy" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" stroke-width="1.75" aria-hidden="true"></i>
+        </div>
+      </div>
+      <h3 class="mt-4 text-sm font-bold text-slate-900 dark:text-white">{% trans "Build reputation" %}</h3>
+      <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{% trans "Earn reputation when markets resolve — or exit early to lock in your track record. Better calls against the odds score higher." %}</p>
+    </article>
+  </div>
+</section>

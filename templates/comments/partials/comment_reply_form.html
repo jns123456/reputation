@@ -16,9 +16,7 @@
   {% if variant == 'composer' %}
   <div class="flex gap-3">
     <div class="flex h-9 w-9 shrink-0 overflow-hidden rounded-full" aria-hidden="true">
-      <span class="pr-user-avatar-ring pr-user-avatar-ring--sm">
-        {% include "accounts/partials/user_avatar.html" with user=user %}
-      </span>
+      {% include "accounts/partials/user_avatar_stack.html" with user=user ring_size="sm" stack_size="sm" only %}
     </div>
     <div class="min-w-0 flex-1">
       <label for="comment-body-{{ prediction.id }}-{% if parent_comment %}{{ parent_comment.id }}{% else %}top{% endif %}" class="sr-only">

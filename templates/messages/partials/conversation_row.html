@@ -3,7 +3,7 @@
   <a href="{% url 'messages:thread' conversation_id=row.conversation.id %}"
      class="dm-conversation-link">
     <span class="dm-conversation-avatar">
-      {% include "accounts/partials/user_avatar.html" with user=row.other_user %}
+      {% include "accounts/partials/user_avatar_stack.html" with user=row.other_user stack_size="sm" only %}
     </span>
     <span class="dm-conversation-meta">
       <span class="dm-conversation-top">

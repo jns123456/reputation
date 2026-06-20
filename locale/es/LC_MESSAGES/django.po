@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-20 17:48+0000\n"
+"POT-Creation-Date: 2026-06-20 22:31+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -193,6 +193,10 @@ msgstr "%(actor)s respondió a tu comentario"
 #, python-format
 msgid "%(actor)s mentioned you"
 msgstr "%(actor)s te mencionó"
+
+#, python-format
+msgid "%(actor)s sent you a direct message"
+msgstr "%(actor)s te envió un mensaje directo"
 
 msgid "A market you forecast is closing soon"
 msgstr "Cierra pronto un mercado en el que pronosticaste"
@@ -409,7 +413,6 @@ msgstr "Respuestas a tus comentarios"
 msgid "When someone @mentions you"
 msgstr "Cuando alguien te @menciona"
 
-#| msgid "When someone @mentions you"
 msgid "When someone sends you a direct message"
 msgstr "Cuando alguien te envía un mensaje directo"
 
@@ -459,7 +462,6 @@ msgstr ""
 msgid "Get notified when someone mentions your @username."
 msgstr "Recibe una notificación cuando alguien mencione tu @usuario."
 
-#| msgid "Get notified when someone mentions your @username."
 msgid "Get notified when someone sends you a private chat message."
 msgstr "Recibe una notificación cuando alguien te envía un mensaje privado."
 
@@ -1508,7 +1510,6 @@ msgstr ""
 msgid "Start a new message"
 msgstr "Escribe un mensaje nuevo"
 
-#| msgid "You cannot challenge yourself."
 msgid "You cannot message yourself."
 msgstr "No puedes desafiarte a ti mismo."
 
@@ -1519,15 +1520,12 @@ msgstr ""
 msgid "Message is too long (max %(max)s characters)."
 msgstr ""
 
-#| msgid "You are not part of this challenge."
 msgid "You are not part of this conversation."
 msgstr "No eres parte de este desafío."
 
-#| msgid "Vote target not found."
 msgid "Conversation not found."
 msgstr "Objetivo de voto no encontrado."
 
-#| msgid "Could not send the verification email."
 msgid "Could not send your message."
 msgstr "No se pudo enviar el email de verificación."
 
@@ -2000,7 +1998,7 @@ msgid "Follow"
 msgstr "Seguir"
 
 msgid "Explore markets"
-msgstr "Explorar mercados"
+msgstr "Explorá mercados"
 
 msgid "Skip for now"
 msgstr "Omitir por ahora"
@@ -2258,6 +2256,25 @@ msgstr "Conseguida el %(date)s"
 
 msgid "All badges"
 msgstr "Todos los mercados"
+
+msgid "Platform ranking badges"
+msgstr "Insignias de ranking en la plataforma"
+
+#, python-format
+msgid "#%(rank)s in total reputation points — absolute platform ranking."
+msgstr ""
+"#%(rank)s en puntos totales de reputación — ranking absoluto de la "
+"plataforma."
+
+#, python-format
+msgid "#%(rank)s in reputation per forecast — relative platform ranking."
+msgstr ""
+"#%(rank)s en reputación por pronóstico — ranking relativo de la plataforma."
+
+#, python-format
+msgid "#%(rank)s in popularity — social engagement platform ranking."
+msgstr ""
+"#%(rank)s en popularidad — ranking de engagement social en la plataforma."
 
 msgid "Subscriber-only content"
 msgstr "Contenido solo para suscriptores"
@@ -5647,6 +5664,31 @@ msgstr ""
 msgid "Loading more…"
 msgstr "Cargando más…"
 
+msgid ""
+"Browse real-world events and open forecasts — politics, sports, crypto, and "
+"more."
+msgstr ""
+"Explorá eventos del mundo real y pronósticos abiertos: política, deportes, "
+"cripto y más."
+
+msgid ""
+"Pick an outcome and publish your prediction in seconds. No wallets, no bets "
+"— just your judgment on record."
+msgstr ""
+"Elegí un resultado y publicá tu pronóstico en segundos. Sin wallets, sin "
+"apuestas: solo tu criterio queda registrado."
+
+#| msgid "reputation"
+msgid "Build reputation"
+msgstr "Construí reputación"
+
+msgid ""
+"Earn reputation when markets resolve — or exit early to lock in your track "
+"record. Better calls against the odds score higher."
+msgstr ""
+"Ganá reputación cuando los mercados se resuelven — o salí antes para fijar "
+"tu historial. Los aciertos contra las probabilidades suman más."
+
 msgid "Featured open forecasts"
 msgstr "Pronósticos abiertos destacados"
 
@@ -7308,11 +7350,9 @@ msgid "Using your token"
 msgstr ""
 
 #, python-format
-#| msgid "Events in %(name)s"
 msgid "Chat with %(name)s"
 msgstr "Chat con %(name)s"
 
-#| msgid "Join the conversation"
 msgid "Select a conversation"
 msgstr "Selecciona una conversación"
 
@@ -7320,7 +7360,6 @@ msgid "Choose a chat from the inbox or message someone from their profile."
 msgstr ""
 "Elige un chat del buzón o envía un mensaje desde el perfil de alguien."
 
-#| msgid "No challenges yet."
 msgid "No messages yet"
 msgstr "Aún no hay mensajes"
 
@@ -7333,7 +7372,6 @@ msgstr "Tú:"
 msgid "Say hello"
 msgstr "Saluda"
 
-#| msgid "Unrealized"
 msgid "Unread"
 msgstr "No leído"
 
@@ -7341,15 +7379,12 @@ msgstr "No leído"
 msgid "Start your conversation with %(name)s."
 msgstr "Empieza tu conversación con %(name)s."
 
-#| msgid "Back to login"
 msgid "Back to inbox"
 msgstr "Volver al buzón"
 
-#| msgid "Write a comment…"
 msgid "Write a message…"
 msgstr "Escribe un mensaje…"
 
-#| msgid "Welcome message"
 msgid "Send message"
 msgstr "Enviar mensaje"
 

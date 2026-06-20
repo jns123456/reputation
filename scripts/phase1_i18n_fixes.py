@@ -326,6 +326,16 @@ PHASE1_FIXES.update(
         "Absolute ranking by total reputation points — rewards sustained forecasting. Not social popularity.": (
             "Ranking absoluto por puntos totales de reputación — premia el volumen sostenido de pronósticos. No es popularidad social."
         ),
+        "Platform ranking badges": "Insignias de ranking en la plataforma",
+        "#%(rank)s in total reputation points — absolute platform ranking.": (
+            "#%(rank)s en puntos totales de reputación — ranking absoluto de la plataforma."
+        ),
+        "#%(rank)s in reputation per forecast — relative platform ranking.": (
+            "#%(rank)s en reputación por pronóstico — ranking relativo de la plataforma."
+        ),
+        "#%(rank)s in popularity — social engagement platform ranking.": (
+            "#%(rank)s en popularidad — ranking de engagement social en la plataforma."
+        ),
         "Top predictors in this category — ranked by total reputation points.": (
             "Mejores pronosticadores en esta categoría — clasificados por puntos totales de reputación."
         ),

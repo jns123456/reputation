@@ -8,9 +8,7 @@
          data-sort-reputation="{{ post.user.profile.reputation_score }}"
          data-sort-user-popularity="{{ post.user.profile.popularity_score }}"
          onclick="if (!event.target.closest('.x-tweet-actions, .x-tweet-menu, .x-inline-reply, a')) { window.location='{% url 'forum:detail' post_id=post.id %}'; }">
-  <a href="{% url 'accounts:profile' username=post.user.username %}" class="x-tweet-avatar" tabindex="-1" aria-hidden="true">
-    {% include "accounts/partials/user_avatar.html" with user=post.user %}
-  </a>
+  {% include "accounts/partials/user_avatar_stack.html" with user=post.user linked=True avatar_class="x-tweet-avatar" stack_size="md" avatar_tabindex="-1" avatar_hidden=True only %}
 
   <div class="x-tweet-body">
     <div class="x-tweet-head">

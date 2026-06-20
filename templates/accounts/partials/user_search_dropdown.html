@@ -7,7 +7,7 @@
     <li>
       <a href="{% url 'accounts:profile' username=profile_user.username %}" class="x-user-search-item" role="option">
         <span class="x-user-search-avatar">
-          {% include "accounts/partials/user_avatar.html" with user=profile_user %}
+          {% include "accounts/partials/user_avatar_stack.html" with user=profile_user stack_size="sm" only %}
         </span>
         <span class="x-user-search-meta">
           <span class="x-user-search-name">{{ profile_user.public_name }}</span>
@@ -24,7 +24,7 @@
     <li>
       <a href="{% url 'accounts:profile' username=profile_user.username %}" class="x-user-search-item x-user-search-item--similar" role="option">
         <span class="x-user-search-avatar">
-          {% include "accounts/partials/user_avatar.html" with user=profile_user %}
+          {% include "accounts/partials/user_avatar_stack.html" with user=profile_user stack_size="sm" only %}
         </span>
         <span class="x-user-search-meta">
           <span class="x-user-search-name">{{ profile_user.public_name }}</span>

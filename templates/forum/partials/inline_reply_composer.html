@@ -7,9 +7,7 @@
   {% if not always_open %}<div class="x-inline-reply-line" aria-hidden="true"></div>{% endif %}
   {% if user.is_authenticated %}
   <div class="x-inline-reply-inner">
-    <a href="{% url 'accounts:profile' username=user.username %}" class="x-tweet-avatar shrink-0" tabindex="-1" aria-hidden="true">
-      {% include "accounts/partials/user_avatar.html" with user=user %}
-    </a>
+    {% include "accounts/partials/user_avatar_stack.html" with user=user linked=True avatar_class="x-tweet-avatar shrink-0" stack_size="md" avatar_tabindex="-1" avatar_hidden=True only %}
     <div class="min-w-0 flex-1">
       {% trans "Post your reply" as reply_placeholder %}
       {% include "forum/partials/comment_form.html" with placeholder=placeholder|default:reply_placeholder reply_context=reply_context|default:"detail" parent_comment=parent_comment show_cancel=show_cancel cancel_action=cancel_action %}

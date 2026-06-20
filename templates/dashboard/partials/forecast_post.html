@@ -6,11 +6,7 @@
          data-sort-reputation="{{ prediction.user.profile.reputation_score }}"
          data-sort-user-popularity="{{ prediction.user.profile.popularity_score }}">
   <div class="flex gap-3">
-    <a href="{% url 'accounts:profile' username=prediction.user.username %}" class="shrink-0">
-      <span class="pr-user-avatar-ring pr-user-avatar-ring--md">
-        {% include "accounts/partials/user_avatar.html" with user=prediction.user %}
-      </span>
-    </a>
+    {% include "accounts/partials/user_avatar_stack.html" with user=prediction.user linked=True avatar_class="shrink-0" ring_size="md" stack_size="md" only %}
 
     <div class="min-w-0 flex-1">
       <div class="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm leading-tight">

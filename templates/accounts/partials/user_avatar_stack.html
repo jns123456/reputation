@@ -1,0 +1,9 @@
+{% load i18n platform_rank_tags %}
+<div class="pr-user-avatar-wrap{% if stack_size %} pr-user-avatar-wrap--{{ stack_size }}{% endif %}">
+  {% platform_rank_badges_for user compact=stack_size %}
+  {% if linked %}<a href="{% url 'accounts:profile' username=user.username %}" class="{{ avatar_class|default:'pr-user-avatar-link' }}"{% if avatar_tabindex %} tabindex="{{ avatar_tabindex }}"{% endif %}{% if avatar_hidden %} aria-hidden="true"{% endif %}>{% endif %}
+  {% if ring_size %}<span class="pr-user-avatar-ring pr-user-avatar-ring--{{ ring_size }}">{% endif %}
+  {% include "accounts/partials/user_avatar.html" with user=user extra_class=extra_class %}
+  {% if ring_size %}</span>{% endif %}
+  {% if linked %}</a>{% endif %}
+</div>

@@ -1,5 +1,6 @@
-{% load i18n %}
+{% load i18n platform_rank_tags %}
 <div class="pr-profile-avatar-wrap">
+  {% platform_rank_badges_for profile_user compact="profile" %}
   <div class="pr-profile-avatar" aria-hidden="true">
     <span class="pr-profile-avatar-inner">
       {% include "accounts/partials/user_avatar.html" with user=profile_user extra_class="pr-profile-avatar-media" %}

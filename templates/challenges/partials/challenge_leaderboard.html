@@ -68,14 +68,7 @@
               </td>
               <td>
                 <div class="challenge-leaderboard-player">
-                  <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
-                     class="challenge-leaderboard-avatar shrink-0"
-                     tabindex="-1"
-                     aria-hidden="true">
-                    <span class="pr-user-avatar-ring pr-user-avatar-ring--md">
-                      {% include "accounts/partials/user_avatar.html" with user=row.participant.user %}
-                    </span>
-                  </a>
+                  {% include "accounts/partials/user_avatar_stack.html" with user=row.participant.user linked=True avatar_class="challenge-leaderboard-avatar shrink-0" ring_size="md" stack_size="md" avatar_tabindex="-1" avatar_hidden=True only %}
                   <div class="min-w-0">
                     <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
                        class="challenge-leaderboard-name">
@@ -124,14 +117,7 @@
             <span class="challenge-leaderboard-rank-mobile">
               {% if row.rank %}{{ row.rank }}{% else %}—{% endif %}
             </span>
-            <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
-               class="challenge-leaderboard-avatar shrink-0"
-               tabindex="-1"
-               aria-hidden="true">
-              <span class="pr-user-avatar-ring pr-user-avatar-ring--md">
-                {% include "accounts/partials/user_avatar.html" with user=row.participant.user %}
-              </span>
-            </a>
+            {% include "accounts/partials/user_avatar_stack.html" with user=row.participant.user linked=True avatar_class="challenge-leaderboard-avatar shrink-0" ring_size="md" stack_size="md" avatar_tabindex="-1" avatar_hidden=True only %}
             <div class="min-w-0">
               <a href="{% url 'accounts:profile' username=row.participant.user.username %}"
                  class="font-semibold text-slate-900 dark:text-slate-100">

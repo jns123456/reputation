@@ -46,6 +46,10 @@ class LandingPageI18nTests(TestCase):
         self.assertContains(response, "/assets/landing-hero.mp4")
         self.assertContains(response, "landing-video-poster.png")
         self.assertContains(response, "pr-landing-video__play")
+        self.assertContains(response, "pr-how-steps")
+        self.assertContains(response, "Explore markets")
+        self.assertContains(response, "Make a forecast")
+        self.assertContains(response, "Build reputation")
 
     def test_landing_renders_market_tape_when_images_exist(self):
         Market.objects.create(
@@ -77,7 +81,12 @@ class LandingPageI18nTests(TestCase):
         self.assertContains(response, "Qué registramos")
         self.assertContains(response, "Compite sin apostar")
         self.assertContains(response, "Reputación vs. Popularidad")
+        self.assertContains(response, "Cómo funciona")
+        self.assertContains(response, "Explorá mercados")
+        self.assertContains(response, "Haz un pronóstico")
+        self.assertContains(response, "Construí reputación")
         self.assertNotContains(response, "Domains and topics:")
+        self.assertNotContains(response, "Explore markets")
 
     def test_landing_renders_spanish_tape_label_with_language_cookie(self):
         Market.objects.create(

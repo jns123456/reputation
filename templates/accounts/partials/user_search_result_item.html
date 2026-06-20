@@ -2,9 +2,7 @@
 <div class="pr-card flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:gap-4 sm:px-4">
   <a href="{% url 'accounts:profile' username=profile_user.username %}"
      class="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-    <span class="pr-user-avatar-ring pr-user-avatar-ring--md shrink-0">
-      {% include "accounts/partials/user_avatar.html" with user=profile_user %}
-    </span>
+    {% include "accounts/partials/user_avatar_stack.html" with user=profile_user ring_size="md" stack_size="md" only %}
     <span class="min-w-0 flex-1">
       <span class="flex flex-wrap items-center gap-2">
         <span class="font-medium text-slate-900 dark:text-slate-100">{% include "accounts/partials/user_display_name.html" with user=profile_user %}</span>

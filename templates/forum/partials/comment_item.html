@@ -6,9 +6,7 @@
          data-sort-time="{{ comment.created_at|date:'U' }}"
          data-sort-reputation="{{ comment.user.profile.reputation_score }}"
          data-sort-user-popularity="{{ comment.user.profile.popularity_score }}">
-  <a href="{% url 'accounts:profile' username=comment.user.username %}" class="x-tweet-avatar" tabindex="-1" aria-hidden="true">
-    {% include "accounts/partials/user_avatar.html" with user=comment.user %}
-  </a>
+  {% include "accounts/partials/user_avatar_stack.html" with user=comment.user linked=True avatar_class="x-tweet-avatar" stack_size="md" avatar_tabindex="-1" avatar_hidden=True only %}
 
   <div class="x-tweet-body">
     <div class="x-tweet-head">

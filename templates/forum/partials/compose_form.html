@@ -55,9 +55,7 @@
       }"
       @htmx:after-request="if ($event.detail.successful) resetCompose()">
   {% csrf_token %}
-  <a href="{% url 'accounts:profile' username=user.username %}" class="x-tweet-avatar shrink-0" aria-hidden="true">
-    {% include "accounts/partials/user_avatar.html" with user=user %}
-  </a>
+  {% include "accounts/partials/user_avatar_stack.html" with user=user linked=True avatar_class="x-tweet-avatar shrink-0" stack_size="md" avatar_hidden=True only %}
   <div class="min-w-0 flex-1" @input="if ($event.target.name === 'body') chars = $event.target.value.length">
     {{ post_form.body }}
     {% if post_form.body.errors %}

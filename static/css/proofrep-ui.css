@@ -439,7 +439,7 @@ html.dark .pr-market-hero-image--fallback {
 .pr-profile-header {
   position: relative;
   margin-bottom: 2rem;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 1.25rem;
   background: rgba(255, 255, 255, 0.92);
@@ -505,6 +505,176 @@ html.dark .pr-profile-header-banner {
 
 .pr-profile-avatar-wrap {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.pr-user-avatar-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 1;
+  overflow: visible;
+}
+
+.pr-profile-avatar-wrap:has(.pr-profile-rank-badge:hover),
+.pr-profile-avatar-wrap:has(.pr-profile-rank-badge:focus-visible),
+.pr-user-avatar-wrap:has(.pr-profile-rank-badge:hover),
+.pr-user-avatar-wrap:has(.pr-profile-rank-badge:focus-visible) {
+  z-index: 120;
+}
+
+.pr-profile-rank-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: 5.5rem;
+  margin-top: -1.25rem;
+  margin-bottom: 0.35rem;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+.pr-profile-rank-badges--profile {
+  max-width: 5.5rem;
+  margin-top: -1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.pr-profile-rank-badges--sm,
+.pr-profile-rank-badges--md {
+  max-width: 2.75rem;
+  margin-top: 0;
+  margin-bottom: 0.2rem;
+  gap: 0.15rem;
+}
+
+.pr-profile-rank-badges--sm .pr-profile-rank-badge,
+.pr-profile-rank-badges--md .pr-profile-rank-badge {
+  min-width: 1.2rem;
+  min-height: 1.2rem;
+  padding: 0.05rem 0.28rem;
+  font-size: 0.5625rem;
+  border-width: 1px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
+}
+
+.pr-profile-rank-badges--sm .pr-profile-rank-badge-tip,
+.pr-profile-rank-badges--md .pr-profile-rank-badge-tip {
+  max-width: 11rem;
+  font-size: 0.625rem;
+}
+
+.pr-profile-rank-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  cursor: default;
+  z-index: 1;
+}
+
+.pr-profile-rank-badge:hover,
+.pr-profile-rank-badge:focus-visible {
+  z-index: 121;
+}
+
+.pr-profile-rank-badge--reputation_absolute {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+}
+
+.pr-profile-rank-badge--reputation_relative {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+}
+
+.pr-profile-rank-badge--popularity {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  color: #fff;
+}
+
+.pr-profile-rank-badge-tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.45rem);
+  z-index: 122;
+  width: max-content;
+  max-width: 14rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(0.2rem);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pr-profile-rank-badge-tip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  border: 0.35rem solid transparent;
+  border-top-color: #0f172a;
+}
+
+.pr-profile-rank-badge:hover .pr-profile-rank-badge-tip,
+.pr-profile-rank-badge:focus-visible .pr-profile-rank-badge-tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+html.dark .pr-profile-rank-badge {
+  border-color: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .pr-profile-rank-badge-tip {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .pr-profile-rank-badge-tip::after {
+  border-top-color: #f8fafc;
+}
+
+@media (min-width: 640px) {
+  .pr-profile-rank-badges {
+    max-width: none;
+    margin-top: -1.5rem;
+  }
 }
 
 .pr-profile-avatar-form {
@@ -5703,6 +5873,7 @@ html.dark .x-forum-post-btn--ready:hover:not(:disabled) {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   cursor: pointer;
   position: relative;
+  overflow: visible;
 }
 
 .x-forum-feed > .x-tweet::before,
@@ -5728,6 +5899,7 @@ html.dark .x-forum-post-btn--ready:hover:not(:disabled) {
   border-bottom: 1px solid var(--x-border);
   margin: 0;
   padding: 0.875rem 1rem;
+  overflow: visible;
 }
 
 .x-forum-main > .x-tweet:not(.x-forum-post)::before,
@@ -5780,6 +5952,8 @@ html.dark .x-tweet-avatar {
 }
 
 .x-tweet-body {
+  position: relative;
+  z-index: 0;
   min-width: 0;
   flex: 1;
 }
