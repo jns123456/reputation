@@ -55,7 +55,11 @@ def main() -> int:
         help="Marker e.g. deployed, skipped, failed",
     )
     parser.add_argument("--org", default=sentry_org())
-    parser.add_argument("--resolve", action="store_true", help="Resolve issue if deployed")
+    parser.add_argument(
+        "--resolve",
+        action="store_true",
+        help="Resolve issue when marker is deployed (skipped always resolves)",
+    )
     args = parser.parse_args()
 
     token = os.environ.get("SENTRY_AUTH_TOKEN", "")
@@ -83,7 +87,11 @@ def main() -> int:
         else:
             print(f"tag_issue OK: note added ({args.marker})")
 
-    if args.resolve and args.marker == "deployed":
+    # deployed: resolve with --resolve; skipped: always resolve (clear non-app noise)
+    should_resolve = args.marker == "skipped" or (
+        args.marker == "deployed" and args.resolve
+    )
+    if should_resolve:
         resolve_resp = requests.put(
             f"{api}/issues/{issue_id}/",
             headers=headers,
@@ -93,7 +101,7 @@ def main() -> int:
         if resolve_resp.status_code != 200:
             print(f"tag_issue WARN: resolve failed {resolve_resp.status_code}")
         else:
-            print("tag_issue OK: issue resolved")
+            print(f"tag_issue OK: issue resolved ({args.marker})")
 
     return 0
 

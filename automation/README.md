@@ -42,7 +42,7 @@ Opcional: pedir a Cursor Agent **“open automation from sentry-autofix.workflow
 | `deploy.py` | push origin + heroku |
 | `verify.py` | `/health/` |
 | `rollback.py` | Heroku rollback + git revert |
-| `tag_issue.py` | Nota + resolve en Sentry |
+| `tag_issue.py` | Nota + resolve en Sentry (`deployed --resolve`; `skipped` auto-resolve) |
 
 ## Probar local
 
