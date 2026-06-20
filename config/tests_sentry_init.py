@@ -220,6 +220,36 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
         self.assertIsNone(_before_send(event, hint))
 
+    def test_drops_embedded_sync_transient_db_errors(self):
+        event = {
+            "logger": "integrations.market_sync_scheduler",
+            "logentry": {"message": "Embedded market sync loop failed"},
+            "exception": {
+                "values": [
+                    {
+                        "type": "OperationalError",
+                        "value": "consuming input failed: SSL error: unexpected eof while reading",
+                    },
+                ],
+            },
+        }
+        self.assertIsNone(_before_send(event, {}))
+
+    def test_keeps_embedded_sync_non_db_errors(self):
+        event = {
+            "logger": "integrations.market_sync_scheduler",
+            "logentry": {"message": "Embedded market sync loop failed"},
+            "exception": {
+                "values": [
+                    {
+                        "type": "ValueError",
+                        "value": "unexpected config",
+                    },
+                ],
+            },
+        }
+        self.assertIs(event, _before_send(event, {}))
+
     def test_keeps_redis_errors_outside_cache_backend(self):
         class ConnectionError(Exception):
             pass

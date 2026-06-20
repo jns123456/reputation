@@ -8,8 +8,36 @@ import time
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db import OperationalError, close_old_connections
 
 logger = logging.getLogger(__name__)
+
+_TRANSIENT_DB_ERROR_MARKERS = ("ssl", "eof", "connection reset", "closed unexpectedly")
+
+
+def _is_transient_db_error(exc: BaseException) -> bool:
+    """True for idle/stale PostgreSQL SSL drops common on Heroku."""
+    errors = [exc]
+    cause = getattr(exc, "__cause__", None)
+    if cause is not None:
+        errors.append(cause)
+    for err in errors:
+        if isinstance(err, OperationalError):
+            message = str(err).lower()
+            if any(marker in message for marker in _TRANSIENT_DB_ERROR_MARKERS):
+                return True
+    return False
+
+
+def _log_sync_loop_failure(exc: BaseException) -> None:
+    if _is_transient_db_error(exc):
+        logger.warning(
+            "Embedded market sync loop hit transient DB error; will retry (%s: %s)",
+            type(exc).__name__,
+            exc,
+        )
+        return
+    logger.exception("Embedded market sync loop failed")
 
 LAST_FULL_SYNC_KEY = "market_sync:last_full_run_epoch"
 LAST_STALE_SYNC_KEY = "market_sync:last_stale_run_epoch"
@@ -55,6 +83,7 @@ def record_stale_sync_run() -> None:
 
 def run_stale_market_refresh(*, force: bool = False) -> dict | None:
     """Refresh stale/elapsed open markets on a short cadence."""
+    close_old_connections()
     if not force and not is_stale_sync_due():
         logger.debug("Stale market refresh skipped; not due yet")
         return None
@@ -84,6 +113,7 @@ def run_scheduled_market_sync(*, force: bool = False) -> dict | None:
     Run category import and/or stale refresh when their intervals have elapsed.
     Uses a cache lock so concurrent workers only run one sync at a time.
     """
+    close_old_connections()
     full_due = force or is_full_sync_due()
     stale_due = force or is_stale_sync_due()
     if not full_due and not stale_due:
@@ -136,10 +166,11 @@ def run_scheduled_market_sync(*, force: bool = False) -> dict | None:
 
 def _sync_loop() -> None:
     while True:
+        close_old_connections()
         try:
             run_scheduled_market_sync()
-        except Exception:
-            logger.exception("Embedded market sync loop failed")
+        except Exception as exc:
+            _log_sync_loop_failure(exc)
         time.sleep(min(full_sync_interval_seconds(), stale_sync_interval_seconds()))
 
 

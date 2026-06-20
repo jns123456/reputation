@@ -2,6 +2,7 @@ import time
 from unittest.mock import patch
 
 from django.core.cache import cache
+from django.db import OperationalError
 from django.test import SimpleTestCase, override_settings
 
 from integrations.market_sync_scheduler import (
@@ -9,6 +10,8 @@ from integrations.market_sync_scheduler import (
     LAST_FULL_SYNC_KEY,
     LAST_STALE_SYNC_KEY,
     STALE_SYNC_LOCK_KEY,
+    _is_transient_db_error,
+    _log_sync_loop_failure,
     is_full_sync_due,
     is_stale_sync_due,
     run_stale_market_refresh,
@@ -85,3 +88,24 @@ class MarketSyncSchedulerTests(SimpleTestCase):
         self.assertEqual(result["refreshed"], 1)
         self.assertFalse(is_stale_sync_due())
         self.assertIsNone(cache.get(STALE_SYNC_LOCK_KEY))
+
+    def test_is_transient_db_error_detects_ssl_eof(self):
+        exc = OperationalError("consuming input failed: SSL error: unexpected eof while reading")
+        self.assertTrue(_is_transient_db_error(exc))
+
+    def test_is_transient_db_error_rejects_other_operational_errors(self):
+        exc = OperationalError("duplicate key value violates unique constraint")
+        self.assertFalse(_is_transient_db_error(exc))
+
+    @patch("integrations.market_sync_scheduler.logger")
+    def test_log_sync_loop_failure_downgrades_transient_db_errors(self, mock_logger):
+        exc = OperationalError("SSL error: unexpected eof while reading")
+        _log_sync_loop_failure(exc)
+        mock_logger.warning.assert_called_once()
+        mock_logger.exception.assert_not_called()
+
+    @patch("integrations.market_sync_scheduler.logger")
+    def test_log_sync_loop_failure_keeps_exception_for_other_errors(self, mock_logger):
+        _log_sync_loop_failure(RuntimeError("boom"))
+        mock_logger.exception.assert_called_once_with("Embedded market sync loop failed")
+        mock_logger.warning.assert_not_called()

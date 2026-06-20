@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass, field
 
 from django.conf import settings
+from django.db import OperationalError, close_old_connections
 from django.db.models import Q
 from django.utils import timezone
 
@@ -17,6 +18,20 @@ from markets.categories import CANONICAL_CATEGORIES, CanonicalCategory, FIFA_WOR
 from markets.models import Market
 
 logger = logging.getLogger(__name__)
+
+_TRANSIENT_DB_ERROR_MARKERS = ("ssl", "eof", "connection reset", "closed unexpectedly")
+
+
+def _materialize_queryset(queryset):
+    """Evaluate a queryset, retrying once after stale PostgreSQL SSL drops."""
+    try:
+        return list(queryset)
+    except OperationalError as exc:
+        message = str(exc).lower()
+        if not any(marker in message for marker in _TRANSIENT_DB_ERROR_MARKERS):
+            raise
+        close_old_connections()
+        return list(queryset)
 
 
 @dataclass
@@ -156,7 +171,7 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
         .order_by("polymarket_synced_at", "updated_at")[:batch_size]
     )
 
-    candidates = list(due_markets)
+    candidates = _materialize_queryset(due_markets)
 
     for market in candidates:
         try:

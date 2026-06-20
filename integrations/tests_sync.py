@@ -1,11 +1,13 @@
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import requests
-from django.test import TestCase
+from django.db import OperationalError
+from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 
 from integrations.sync import (
+    _materialize_queryset,
     refresh_market,
     refresh_stale_open_markets,
     sync_all_category_markets,
@@ -86,6 +88,24 @@ class SyncAllCategoryMarketsTests(TestCase):
         self.assertTrue(
             any("Polymarket top-volume sync failed" in msg for msg in logs.output)
         )
+
+
+class MaterializeQuerysetTests(SimpleTestCase):
+    @patch("integrations.sync.list")
+    def test_materialize_queryset_retries_transient_ssl_eof(self, mock_list):
+        mock_list.side_effect = [
+            OperationalError("consuming input failed: SSL error: unexpected eof while reading"),
+            ["market"],
+        ]
+        result = _materialize_queryset(MagicMock())
+        self.assertEqual(result, ["market"])
+        self.assertEqual(mock_list.call_count, 2)
+
+    @patch("integrations.sync.list")
+    def test_materialize_queryset_reraises_non_transient_operational_error(self, mock_list):
+        mock_list.side_effect = OperationalError("duplicate key value violates unique constraint")
+        with self.assertRaises(OperationalError):
+            _materialize_queryset(MagicMock())
 
 
 class RefreshStaleOpenMarketsTests(TestCase):

@@ -127,6 +127,31 @@ def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
 
     return _is_transient_polymarket_upstream_exception(event, hint)
 
+
+def _is_embedded_sync_transient_db_noise(event, hint) -> bool:
+    """Drop transient PostgreSQL SSL drops from the embedded market sync thread."""
+    if event.get("logger") != "integrations.market_sync_scheduler":
+        return False
+
+    message = _event_message(event)
+    if "Embedded market sync loop" not in message:
+        return False
+
+    transient_types = {"OperationalError", "InterfaceError", "DatabaseError"}
+    exc_info = hint.get("exc_info")
+    if exc_info and exc_info[0] is not None:
+        exc_name = getattr(exc_info[0], "__name__", "")
+        if exc_name in transient_types:
+            return True
+
+    for entry in event.get("exception", {}).get("values", []):
+        if entry.get("type") in transient_types:
+            value = (entry.get("value") or "").lower()
+            if any(token in value for token in ("ssl", "eof", "connection", "closed")):
+                return True
+    return False
+
+
 def _is_handled_redis_cache_error(event, hint) -> bool:
     """Drop Redis cache failures already swallowed by ResilientRedisCache."""
     exc_info = hint.get("exc_info")
@@ -162,6 +187,9 @@ def _before_send(event, hint):
         return None
 
     if _is_transient_polymarket_fetch_noise(event, hint):
+        return None
+
+    if _is_embedded_sync_transient_db_noise(event, hint):
         return None
 
     return event
