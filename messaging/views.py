@@ -117,14 +117,14 @@ def send_message_view(request, conversation_id):
             recipient=recipient,
             body=form.cleaned_data["body"],
         )
-    except abuse_services.RateLimitExceeded:
-        msg = write_guard_user_message("rate_limit")
+    except abuse_services.RateLimitExceeded as exc:
+        msg = write_guard_user_message(exc)
         if _is_htmx(request):
             return HttpResponse(msg, status=429)
         messages.error(request, msg)
         return redirect("messages:thread", conversation_id=conversation.id)
     except ContentRejected as exc:
-        msg = write_guard_user_message("content_rejected", reasons=exc.reasons)
+        msg = write_guard_user_message(exc)
         if _is_htmx(request):
             return HttpResponse(msg, status=400)
         messages.error(request, msg)
