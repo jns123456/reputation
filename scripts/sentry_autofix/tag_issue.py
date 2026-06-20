@@ -71,17 +71,21 @@ def main() -> int:
         return 1
 
     note_text = f"[autofix:{args.marker}] Cursor autonomous fix pipeline"
-    if project_slug:
-        note_resp = requests.post(
-            f"{api}/projects/{args.org}/{project_slug}/issues/{issue_id}/notes/",
-            headers=headers,
-            json={"text": note_text},
-            timeout=30,
-        )
-        if note_resp.status_code not in (200, 201):
-            print(f"tag_issue WARN: note failed {note_resp.status_code}")
-        else:
-            print(f"tag_issue OK: note added ({args.marker})")
+    note_resp = requests.post(
+        f"{api}/issues/{issue_id}/comments/",
+        headers=headers,
+        json={"text": note_text},
+        timeout=30,
+    )
+    if note_resp.status_code in (200, 201):
+        print(f"tag_issue OK: comment added ({args.marker})")
+    elif (
+        note_resp.status_code == 400
+        and "already posted" in (note_resp.text or "").lower()
+    ):
+        print(f"tag_issue OK: comment already present ({args.marker})")
+    else:
+        print(f"tag_issue WARN: comment failed {note_resp.status_code}")
 
     if args.resolve and args.marker == "deployed":
         resolve_resp = requests.put(
