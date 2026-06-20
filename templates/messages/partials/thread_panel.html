@@ -1,0 +1,47 @@
+{% load i18n %}
+<section class="dm-thread-panel">
+  <header class="dm-thread-header">
+    <a href="{% url 'messages:inbox' %}" class="dm-back-btn md:hidden" aria-label="{% trans 'Back to inbox' %}">
+      <i data-lucide="arrow-left" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+    </a>
+    <a href="{% url 'accounts:profile' username=other_user.username %}" class="dm-thread-user">
+      <span class="dm-thread-avatar">
+        {% include "accounts/partials/user_avatar.html" with user=other_user %}
+      </span>
+      <span class="dm-thread-names">
+        <span class="dm-thread-name">{{ other_user.public_name }}</span>
+        {% if other_user.show_username_publicly %}
+        <span class="dm-thread-handle">@{{ other_user.username }}</span>
+        {% endif %}
+      </span>
+    </a>
+  </header>
+
+  <div class="dm-thread-body">
+    {% include "messages/partials/message_list.html" with viewer=user %}
+  </div>
+
+  <footer class="dm-compose-bar">
+    <form method="post"
+          action="{% url 'messages:send' conversation_id=conversation.id %}"
+          hx-post="{% url 'messages:send' conversation_id=conversation.id %}"
+          hx-target="#dm-message-list"
+          hx-swap="beforeend"
+          hx-on::after-request="if (event.detail.successful) { this.reset(); this.querySelector('textarea').style.height='auto'; }"
+          class="dm-compose-form">
+      {% csrf_token %}
+      <label class="sr-only" for="dm-compose-body">{% trans "Message" %}</label>
+      <textarea id="dm-compose-body"
+                name="body"
+                rows="1"
+                maxlength="2000"
+                required
+                placeholder="{% trans 'Write a message…' %}"
+                class="dm-compose-input"
+                @input="$el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"></textarea>
+      <button type="submit" class="dm-send-btn" aria-label="{% trans 'Send message' %}">
+        <i data-lucide="send" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+      </button>
+    </form>
+  </footer>
+</section>

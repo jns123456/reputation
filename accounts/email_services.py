@@ -41,6 +41,7 @@ _NOTIFICATION_TYPE_TO_PREF = {
     "challenge_accepted": "notify_challenge_updates",
     "comment_reply": "notify_replies",
     "mention": "notify_mentions",
+    "direct_message": "notify_direct_messages",
     "market_resolving": "notify_market_resolving",
 }
 
@@ -279,6 +280,7 @@ def _notification_subject(notification, actor_name):
         Type.CHALLENGE_ACCEPTED: _("%(actor)s accepted your challenge"),
         Type.COMMENT_REPLY: _("%(actor)s replied to your comment"),
         Type.MENTION: _("%(actor)s mentioned you"),
+        Type.DIRECT_MESSAGE: _("%(actor)s sent you a direct message"),
         Type.MARKET_RESOLVING: _("A market you forecast is closing soon"),
     }
     template = mapping.get(notification.notification_type, _("You have a new notification"))

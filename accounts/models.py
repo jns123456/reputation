@@ -683,6 +683,10 @@ class NotificationPreference(models.Model):
         default=True,
         help_text="Receive alerts when someone @mentions you.",
     )
+    notify_direct_messages = models.BooleanField(
+        default=True,
+        help_text="Receive alerts when someone sends you a direct message.",
+    )
     notify_market_resolving = models.BooleanField(
         default=True,
         help_text="Receive a reminder when a market you forecast is about to close.",
@@ -728,6 +732,7 @@ class Notification(models.Model):
         CHALLENGE_ACCEPTED = ("challenge_accepted", "Challenge accepted")
         COMMENT_REPLY = ("comment_reply", "Reply to your comment")
         MENTION = ("mention", "You were mentioned")
+        DIRECT_MESSAGE = ("direct_message", "Direct message")
         MARKET_RESOLVING = ("market_resolving", "Market resolving soon")
 
     recipient = models.ForeignKey(
@@ -799,6 +804,13 @@ class Notification(models.Model):
         "markets.Market",
         on_delete=models.CASCADE,
         related_name="challenge_notifications",
+        null=True,
+        blank=True,
+    )
+    dm_message = models.ForeignKey(
+        "messaging.Message",
+        on_delete=models.CASCADE,
+        related_name="notifications",
         null=True,
         blank=True,
     )
@@ -929,6 +941,13 @@ class Notification(models.Model):
                 return f"{base}#forum-comment-{self.pulse_comment_id}"
             if self.pulse_post_id:
                 return reverse("forum:detail", kwargs={"post_id": self.pulse_post_id})
+        if self.notification_type == self.NotificationType.DIRECT_MESSAGE:
+            if self.dm_message_id:
+                return reverse(
+                    "messages:thread",
+                    kwargs={"conversation_id": self.dm_message.conversation_id},
+                )
+            return reverse("messages:inbox")
         if self.notification_type == self.NotificationType.MARKET_RESOLVING:
             if self.market_id:
                 return reverse("markets:detail", kwargs={"slug": self.market.slug})
@@ -959,6 +978,8 @@ class Notification(models.Model):
             self.NotificationType.MENTION,
         ):
             return "View conversation"
+        if self.notification_type == self.NotificationType.DIRECT_MESSAGE:
+            return "Open chat"
         if self.notification_type == self.NotificationType.MARKET_RESOLVING:
             return "View market"
         return "View"

@@ -51,6 +51,12 @@ DEFAULT_RATE_LIMITS = {
         "trusted": (200, 3600),
         "throttled": (5, 3600),
     },
+    "message": {
+        "new": (20, 3600),
+        "standard": (120, 3600),
+        "trusted": (500, 3600),
+        "throttled": (10, 3600),
+    },
     "registration": {  # keyed by IP, tier is always "ip"
         "ip": (5, 3600),
     },

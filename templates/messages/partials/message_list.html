@@ -1,0 +1,14 @@
+{% load i18n %}
+<div id="dm-message-list"
+     class="dm-message-list"
+     hx-get="{% url 'messages:poll' conversation_id=conversation.id %}"
+     hx-trigger="every 8s"
+     hx-swap="innerHTML">
+  {% for message in messages %}
+    {% include "messages/partials/message_bubble.html" with message=message viewer=viewer %}
+  {% empty %}
+  <div class="dm-thread-empty">
+    <p>{% blocktrans with name=other_user.public_name %}Start your conversation with {{ name }}.{% endblocktrans %}</p>
+  </div>
+  {% endfor %}
+</div>

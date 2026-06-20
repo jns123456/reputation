@@ -1,0 +1,12 @@
+{% load i18n %}
+<div id="dm-conversation-list" class="dm-conversation-list">
+  {% for row in inbox_rows %}
+    {% include "messages/partials/conversation_row.html" with row=row %}
+  {% empty %}
+  <div class="dm-empty-inbox">
+    <i data-lucide="mail" class="h-10 w-10 text-slate-300 dark:text-slate-600" stroke-width="1.5" aria-hidden="true"></i>
+    <p class="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "No messages yet" %}</p>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% trans "Visit a profile and tap Message to start a chat." %}</p>
+  </div>
+  {% endfor %}
+</div>

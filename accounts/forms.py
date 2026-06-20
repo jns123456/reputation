@@ -396,6 +396,7 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_challenge_updates",
             "notify_replies",
             "notify_mentions",
+            "notify_direct_messages",
             "notify_market_resolving",
             "notify_in_app",
             "notify_push",
@@ -423,6 +424,9 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_mentions": forms.CheckboxInput(
                 attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
             ),
+            "notify_direct_messages": forms.CheckboxInput(
+                attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
+            ),
             "notify_market_resolving": forms.CheckboxInput(
                 attrs={"class": "rounded border-slate-300 text-brand-600 focus:ring-brand-500"}
             ),
@@ -444,6 +448,7 @@ class NotificationPreferenceForm(forms.ModelForm):
             "notify_challenge_updates": _("Challenge invitations and updates"),
             "notify_replies": _("Replies to your comments"),
             "notify_mentions": _("When someone @mentions you"),
+            "notify_direct_messages": _("When someone sends you a direct message"),
             "notify_market_resolving": _("When a market you forecast is closing soon"),
             "notify_in_app": _("In-app notifications"),
             "notify_push": _("Browser push notifications"),
@@ -465,6 +470,7 @@ class NotificationPreferenceForm(forms.ModelForm):
             ),
             "notify_replies": _("Get notified when someone replies to one of your comments."),
             "notify_mentions": _("Get notified when someone mentions your @username."),
+            "notify_direct_messages": _("Get notified when someone sends you a private chat message."),
             "notify_market_resolving": _(
                 "Get a reminder before a market you have an open forecast on closes."
             ),

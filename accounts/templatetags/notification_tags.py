@@ -44,6 +44,7 @@ def notification_icon_bg(notification):
         Notification.NotificationType.CHALLENGE_ACCEPTED: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
         Notification.NotificationType.COMMENT_REPLY: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300",
         Notification.NotificationType.MENTION: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300",
+        Notification.NotificationType.DIRECT_MESSAGE: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
     }
     return icons.get(notification.notification_type, "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300")
 
@@ -94,6 +95,10 @@ def notification_icon(notification):
         Notification.NotificationType.MENTION: (
             '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
             '<path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>'
+        ),
+        Notification.NotificationType.DIRECT_MESSAGE: (
+            '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'
         ),
     }
     return mark_safe(icons.get(notification.notification_type, ""))
@@ -248,6 +253,9 @@ def notification_message(notification, compact=False):
 
     if t == Notification.NotificationType.MENTION:
         return _mention_message(notification, actor)
+
+    if t == Notification.NotificationType.DIRECT_MESSAGE:
+        return format_html("{} {}", actor, _("sent you a direct message"))
 
     return format_html("{} {}", actor, _("sent you a notification"))
 

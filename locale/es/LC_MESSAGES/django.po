@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-20 17:40+0000\n"
+"POT-Creation-Date: 2026-06-20 17:48+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -409,6 +409,10 @@ msgstr "Respuestas a tus comentarios"
 msgid "When someone @mentions you"
 msgstr "Cuando alguien te @menciona"
 
+#| msgid "When someone @mentions you"
+msgid "When someone sends you a direct message"
+msgstr "Cuando alguien te envía un mensaje directo"
+
 msgid "When a market you forecast is closing soon"
 msgstr "Cuando cierra pronto un mercado en el que pronosticaste"
 
@@ -454,6 +458,10 @@ msgstr ""
 
 msgid "Get notified when someone mentions your @username."
 msgstr "Recibe una notificación cuando alguien mencione tu @usuario."
+
+#| msgid "Get notified when someone mentions your @username."
+msgid "Get notified when someone sends you a private chat message."
+msgstr "Recibe una notificación cuando alguien te envía un mensaje privado."
 
 msgid "Get a reminder before a market you have an open forecast on closes."
 msgstr ""
@@ -632,6 +640,9 @@ msgstr "aceptó tu desafío"
 
 msgid "replied to your comment"
 msgstr "respondió a tu comentario"
+
+msgid "sent you a direct message"
+msgstr "te envió un mensaje directo"
 
 msgid "sent you a notification"
 msgstr "te envió una notificación"
@@ -1494,6 +1505,32 @@ msgstr ""
 msgid "Token rotated. Copy the new value now — it won't be shown again."
 msgstr ""
 
+msgid "Start a new message"
+msgstr "Escribe un mensaje nuevo"
+
+#| msgid "You cannot challenge yourself."
+msgid "You cannot message yourself."
+msgstr "No puedes desafiarte a ti mismo."
+
+msgid "Message cannot be empty."
+msgstr ""
+
+#, python-format
+msgid "Message is too long (max %(max)s characters)."
+msgstr ""
+
+#| msgid "You are not part of this challenge."
+msgid "You are not part of this conversation."
+msgstr "No eres parte de este desafío."
+
+#| msgid "Vote target not found."
+msgid "Conversation not found."
+msgstr "Objetivo de voto no encontrado."
+
+#| msgid "Could not send the verification email."
+msgid "Could not send your message."
+msgstr "No se pudo enviar el email de verificación."
+
 msgid "What data, news, or logic supports your pick?"
 msgstr "¿Qué datos, noticias o lógica respaldan su elección?"
 
@@ -2126,16 +2163,13 @@ msgstr "Siguiendo"
 msgid "Watch"
 msgstr "Seguir"
 
-#| msgid "Common questions"
 msgid "Mention suggestions"
 msgstr "Sugerencias de mención"
 
 #, python-format
-#| msgid "No users match \"%(query)s\"."
 msgid "No followed users match \"@%(query)s\"."
 msgstr "Ningún usuario que sigues coincide con \"@%(query)s\"."
 
-#| msgid "Follow people to see their posts here."
 msgid "Follow people to mention them with @."
 msgstr "Sigue a personas para mencionarlas con @."
 
@@ -2180,6 +2214,9 @@ msgstr[1] "Siguiendo"
 #, python-format
 msgid "Joined %(date)s"
 msgstr "Se unió el %(date)s"
+
+msgid "Message"
+msgstr "Mensaje"
 
 msgid "Subscribe"
 msgstr "Suscribirse"
@@ -4332,7 +4369,6 @@ msgstr ""
 "Los comentarios ganan <span class=\"badge-pop\">popularidad</span>, no "
 "reputación."
 
-#| msgid "Type @username to mention someone."
 msgid "Type @ to mention someone you follow."
 msgstr "Escribe @ para mencionar a alguien que sigues."
 
@@ -6567,6 +6603,9 @@ msgid_plural "%(days)s-day activity streak"
 msgstr[0] "Racha de actividad de %(days)s día"
 msgstr[1] "Racha de actividad de %(days)s días"
 
+msgid "Messages"
+msgstr "Mensajes"
+
 msgid "Loading notifications…"
 msgstr "Cargando notificaciones…"
 
@@ -7267,6 +7306,52 @@ msgstr "Aún no hay likes."
 
 msgid "Using your token"
 msgstr ""
+
+#, python-format
+#| msgid "Events in %(name)s"
+msgid "Chat with %(name)s"
+msgstr "Chat con %(name)s"
+
+#| msgid "Join the conversation"
+msgid "Select a conversation"
+msgstr "Selecciona una conversación"
+
+msgid "Choose a chat from the inbox or message someone from their profile."
+msgstr ""
+"Elige un chat del buzón o envía un mensaje desde el perfil de alguien."
+
+#| msgid "No challenges yet."
+msgid "No messages yet"
+msgstr "Aún no hay mensajes"
+
+msgid "Visit a profile and tap Message to start a chat."
+msgstr "Visita un perfil y pulsa Mensaje para iniciar un chat."
+
+msgid "You:"
+msgstr "Tú:"
+
+msgid "Say hello"
+msgstr "Saluda"
+
+#| msgid "Unrealized"
+msgid "Unread"
+msgstr "No leído"
+
+#, python-format
+msgid "Start your conversation with %(name)s."
+msgstr "Empieza tu conversación con %(name)s."
+
+#| msgid "Back to login"
+msgid "Back to inbox"
+msgstr "Volver al buzón"
+
+#| msgid "Write a comment…"
+msgid "Write a message…"
+msgstr "Escribe un mensaje…"
+
+#| msgid "Welcome message"
+msgid "Send message"
+msgstr "Enviar mensaje"
 
 msgid "Open Forecasts"
 msgstr "Pronósticos abiertos"

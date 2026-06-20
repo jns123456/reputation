@@ -1,0 +1,29 @@
+{% load i18n %}
+<div class="dm-conversation-row {% if active_conversation_id == row.conversation.id %}is-active{% endif %} {% if row.unread_count %}has-unread{% endif %}">
+  <a href="{% url 'messages:thread' conversation_id=row.conversation.id %}"
+     class="dm-conversation-link">
+    <span class="dm-conversation-avatar">
+      {% include "accounts/partials/user_avatar.html" with user=row.other_user %}
+    </span>
+    <span class="dm-conversation-meta">
+      <span class="dm-conversation-top">
+        <span class="dm-conversation-name">{{ row.other_user.public_name }}</span>
+        {% if row.latest_message %}
+        <time datetime="{{ row.latest_message.created_at|date:'c' }}" class="dm-conversation-time">
+          {{ row.latest_message.created_at|timesince }}
+        </time>
+        {% endif %}
+      </span>
+      <span class="dm-conversation-preview">
+        {% if row.latest_message %}
+          {% if row.latest_message.sender_id == user.id %}{% trans "You:" %} {% endif %}{{ row.latest_message.body|truncatechars:72 }}
+        {% else %}
+          {% trans "Say hello" %}
+        {% endif %}
+      </span>
+    </span>
+    {% if row.unread_count %}
+    <span class="dm-unread-dot" aria-label="{% trans 'Unread' %}"></span>
+    {% endif %}
+  </a>
+</div>

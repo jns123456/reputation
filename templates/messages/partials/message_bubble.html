@@ -1,0 +1,13 @@
+{% load i18n %}
+<div id="dm-message-{{ message.id }}"
+     class="dm-message {% if message.sender_id == viewer.id %}dm-message--mine{% else %}dm-message--theirs{% endif %}">
+  {% if message.sender_id != viewer.id %}
+  <span class="dm-message-avatar">
+    {% include "accounts/partials/user_avatar.html" with user=message.sender %}
+  </span>
+  {% endif %}
+  <div class="dm-message-bubble">
+    <p class="dm-message-text">{{ message.body|linebreaksbr }}</p>
+    <time datetime="{{ message.created_at|date:'c' }}" class="dm-message-time">{{ message.created_at|time:"H:i" }}</time>
+  </div>
+</div>

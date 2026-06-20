@@ -6,6 +6,7 @@ from accounts.nav_cache import (
     get_cached_display_streak,
     get_cached_unread_notification_count,
 )
+from messaging.nav_cache import get_cached_unread_dm_count
 from accounts.notification_services import consume_login_notification_toast
 from reputation.weekly_contest_services import consume_weekly_contest_announcement
 from reputation.weekly_contest_winner_notifications import (
@@ -25,6 +26,7 @@ def notification_context(request):
         )
         return {
             "unread_notification_count": get_cached_unread_notification_count(user=request.user),
+            "unread_dm_count": get_cached_unread_dm_count(user=request.user),
             "login_notification_toast": consume_login_notification_toast(request=request),
             "weekly_contest_announcement": weekly_contest_announcement,
             "weekly_contest_win_modal": weekly_contest_win_modal,
@@ -32,6 +34,7 @@ def notification_context(request):
         }
     return {
         "unread_notification_count": 0,
+        "unread_dm_count": 0,
         "login_notification_toast": None,
         "weekly_contest_announcement": None,
         "weekly_contest_win_modal": None,

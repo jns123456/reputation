@@ -243,6 +243,24 @@ def notify_mentions(
     return created
 
 
+def notify_direct_message(*, message, recipient):
+    """Alert ``recipient`` that they received a private direct message."""
+    actor = message.sender
+    if recipient.id == actor.id:
+        return None
+
+    preferences = get_or_create_notification_preferences(recipient)
+    if not preferences.notify_direct_messages:
+        return None
+
+    return _create_notification(
+        recipient=recipient,
+        actor=actor,
+        notification_type=Notification.NotificationType.DIRECT_MESSAGE,
+        dm_message=message,
+    )
+
+
 def notify_market_resolving(*, market):
     """Remind users with an open forecast that ``market`` is about to close.
 
