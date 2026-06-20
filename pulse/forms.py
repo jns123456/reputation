@@ -44,6 +44,7 @@ class PostForm(forms.ModelForm):
                         "Share your take on markets, events, or the community…"
                     ),
                     "class": "x-compose-textarea form-textarea resize-none border-0 bg-transparent p-0 shadow-none focus:ring-0",
+                    "data-mention-autocomplete": "",
                 }
             ),
         }

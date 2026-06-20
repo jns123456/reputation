@@ -151,6 +151,7 @@
         </button>
       </div>
       <div class="flex items-center gap-3">
+        <span class="hidden text-xs text-[var(--x-muted)] sm:inline">{% trans "Type @ to mention someone you follow." %}</span>
         <span class="text-xs tabular-nums" :class="chars > 200 ? 'text-red-600' : 'text-[var(--x-muted)]'" x-text="chars > 0 ? (200 - chars) : ''"></span>
         <button type="submit"
                 class="x-forum-post-btn"

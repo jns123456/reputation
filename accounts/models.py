@@ -916,9 +916,17 @@ class Notification(models.Model):
             self.NotificationType.MENTION,
         ):
             if self.comment_id:
-                return reverse("markets:detail", kwargs={"slug": self.comment.market.slug})
+                base = reverse(
+                    "markets:detail",
+                    kwargs={"slug": self.comment.market.slug},
+                )
+                return f"{base}#market-comment-{self.comment_id}"
             if self.pulse_comment_id:
-                return reverse("forum:detail", kwargs={"post_id": self.pulse_comment.post_id})
+                base = reverse(
+                    "forum:detail",
+                    kwargs={"post_id": self.pulse_comment.post_id},
+                )
+                return f"{base}#forum-comment-{self.pulse_comment_id}"
             if self.pulse_post_id:
                 return reverse("forum:detail", kwargs={"post_id": self.pulse_post_id})
         if self.notification_type == self.NotificationType.MARKET_RESOLVING:

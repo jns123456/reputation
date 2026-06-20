@@ -1,0 +1,33 @@
+{% load i18n %}
+<div class="pr-mention-dropdown-inner" role="listbox" aria-label="{% trans 'Mention suggestions' %}">
+  {% if users %}
+  <ul class="pr-mention-list">
+    {% for profile_user in users %}
+    <li>
+      <button type="button"
+              class="pr-mention-item"
+              role="option"
+              data-username="{{ profile_user.username }}">
+        <span class="pr-mention-avatar">
+          {% include "accounts/partials/user_avatar.html" with user=profile_user %}
+        </span>
+        <span class="pr-mention-meta">
+          <span class="pr-mention-name">{{ profile_user.public_name }}</span>
+          {% if profile_user.show_username_publicly %}
+          <span class="pr-mention-handle">@{{ profile_user.username }}</span>
+          {% endif %}
+        </span>
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="pr-mention-empty">
+    {% if query %}
+    {% blocktrans with query=query %}No followed users match "@{{ query }}".{% endblocktrans %}
+    {% else %}
+    {% trans "Follow people to mention them with @." %}
+    {% endif %}
+  </p>
+  {% endif %}
+</div>

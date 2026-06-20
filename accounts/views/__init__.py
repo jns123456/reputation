@@ -29,6 +29,7 @@ __all__ = [
     "account_delete",
     "user_search",
     "user_search_partial",
+    "mention_suggestions_partial",
     "user_list",
     "profile_detail",
     "bookmark_toggle",

@@ -140,6 +140,23 @@ def user_search_partial(request):
     )
 
 
+@login_required
+def mention_suggestions_partial(request):
+    """HTMX/JSON-ish partial: followed users matching an @-mention prefix."""
+    from accounts.mention_selectors import search_following_for_mention
+
+    query = request.GET.get("q", "").strip()
+    users = search_following_for_mention(user=request.user, prefix=query, limit=8)
+    return render(
+        request,
+        "accounts/partials/mention_suggestions_dropdown.html",
+        {
+            "users": users,
+            "query": query.lstrip("@"),
+        },
+    )
+
+
 def user_list(request):
     query = request.GET.get("q", "").strip()
     search_ready = is_valid_user_search_query(query)

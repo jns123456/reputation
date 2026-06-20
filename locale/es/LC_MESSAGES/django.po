@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-20 01:34+0000\n"
+"POT-Creation-Date: 2026-06-20 17:40+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -630,6 +630,9 @@ msgstr "te desafió a"
 msgid "accepted your challenge"
 msgstr "aceptó tu desafío"
 
+msgid "replied to your comment"
+msgstr "respondió a tu comentario"
+
 msgid "sent you a notification"
 msgstr "te envió una notificación"
 
@@ -641,6 +644,21 @@ msgstr "pronóstico"
 
 msgid "content"
 msgstr "contenido"
+
+msgid "mentioned you in a"
+msgstr "te mencionó en un"
+
+msgid "forum post"
+msgstr "post del foro"
+
+msgid "forum comment"
+msgstr "comentario del foro"
+
+msgid "mentioned you in a comment on"
+msgstr "te mencionó en un comentario sobre"
+
+msgid "mentioned you"
+msgstr "te mencionó"
 
 msgid "Too many login attempts. Please wait a few minutes and try again."
 msgstr ""
@@ -1639,14 +1657,12 @@ msgstr "Los retiros del concurso no están disponibles en este momento."
 msgid "You already have a pending withdrawal request."
 msgstr "Ya tienes una solicitud de retiro pendiente."
 
-#| msgid "Reputation leaders"
 msgid "Absolute reputation leader"
 msgstr "Líder absoluto de reputación"
 
 msgid "Best rep / forecast average"
 msgstr "Mejor rep / pronóstico"
 
-#| msgid "View weekly contest"
 msgid "You won the weekly contest!"
 msgstr "¡Ganaste el concurso semanal!"
 
@@ -2109,6 +2125,19 @@ msgstr "Siguiendo"
 
 msgid "Watch"
 msgstr "Seguir"
+
+#| msgid "Common questions"
+msgid "Mention suggestions"
+msgstr "Sugerencias de mención"
+
+#, python-format
+#| msgid "No users match \"%(query)s\"."
+msgid "No followed users match \"@%(query)s\"."
+msgstr "Ningún usuario que sigues coincide con \"@%(query)s\"."
+
+#| msgid "Follow people to see their posts here."
+msgid "Follow people to mention them with @."
+msgstr "Sigue a personas para mencionarlas con @."
 
 #, python-format
 msgid "%(time)s ago"
@@ -4303,6 +4332,10 @@ msgstr ""
 "Los comentarios ganan <span class=\"badge-pop\">popularidad</span>, no "
 "reputación."
 
+#| msgid "Type @username to mention someone."
+msgid "Type @ to mention someone you follow."
+msgstr "Escribe @ para mencionar a alguien que sigues."
+
 msgid "Post comment"
 msgstr "Comentario de la publicación"
 
@@ -5686,7 +5719,6 @@ msgid "Got it"
 msgstr "Entendido"
 
 #, python-format
-#| msgid "Contest week · Sunday %(start)s – Saturday %(end)s"
 msgid "Week %(start)s – %(end)s"
 msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 
@@ -5699,7 +5731,6 @@ msgstr ""
 "Sumado a tu saldo de ganancias del concurso — retira en USDC en Base cuando "
 "quieras."
 
-#| msgid "Contest earnings"
 msgid "View contest earnings"
 msgstr "Ganancias del concurso"
 
@@ -6216,7 +6247,6 @@ msgstr ""
 "PredictStamp. Puedes solicitar un retiro en USDC en Base desde tu perfil "
 "cuando quieras."
 
-#| msgid "Contest earnings"
 msgid "View contest earnings:"
 msgstr "Ver ganancias del concurso:"
 

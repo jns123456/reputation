@@ -441,6 +441,14 @@
   <script src="{% static 'js/forum-actions.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/market-tape.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}{% if static_version %}?v={{ static_version }}{% endif %}" defer></script>{% endif %}
+  {% if user.is_authenticated %}
+  <script>
+    window.PROOFREP_MENTION = {
+      suggestionsUrl: "{% filter escapejs %}{% url 'accounts:mention_suggestions_partial' %}{% endfilter %}"
+    };
+  </script>
+  <script src="{% static 'js/mention-autocomplete.js' %}{% if static_version %}?v={{ static_version }}{% endif %}" defer></script>
+  {% endif %}
   <script>
     window.focusDiscussionComposer = function (discussionId) {
       var root = document.getElementById(discussionId);

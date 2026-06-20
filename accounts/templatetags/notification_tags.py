@@ -42,6 +42,8 @@ def notification_icon_bg(notification):
         Notification.NotificationType.CHALLENGE_MARKET_RESOLVED: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300",
         Notification.NotificationType.CHALLENGE_COMPLETED: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300",
         Notification.NotificationType.CHALLENGE_ACCEPTED: "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300",
+        Notification.NotificationType.COMMENT_REPLY: "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300",
+        Notification.NotificationType.MENTION: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300",
     }
     return icons.get(notification.notification_type, "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300")
 
@@ -84,6 +86,14 @@ def notification_icon(notification):
         Notification.NotificationType.CHALLENGE_ACCEPTED: (
             '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
             '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        ),
+        Notification.NotificationType.COMMENT_REPLY: (
+            '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>'
+        ),
+        Notification.NotificationType.MENTION: (
+            '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">'
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>'
         ),
     }
     return mark_safe(icons.get(notification.notification_type, ""))
@@ -233,6 +243,12 @@ def notification_message(notification, compact=False):
     if t == Notification.NotificationType.CHALLENGE_COMPLETED and notification.challenge_id:
         return _challenge_completed_message(notification)
 
+    if t == Notification.NotificationType.COMMENT_REPLY:
+        return format_html("{} {}", actor, _("replied to your comment"))
+
+    if t == Notification.NotificationType.MENTION:
+        return _mention_message(notification, actor)
+
     return format_html("{} {}", actor, _("sent you a notification"))
 
 
@@ -242,3 +258,49 @@ def _vote_content_label(notification):
     if notification.prediction_id:
         return _("forecast")
     return _("content")
+
+
+def _mention_message(notification, actor):
+    from django.urls import reverse
+
+    if notification.pulse_post_id:
+        post_url = reverse("forum:detail", kwargs={"post_id": notification.pulse_post_id})
+        return format_html(
+            '{} {} <a href="{}" class="{}">{}</a>',
+            actor,
+            _("mentioned you in a"),
+            post_url,
+            LINK_CLASS,
+            _("forum post"),
+        )
+
+    if notification.pulse_comment_id:
+        post_url = reverse(
+            "forum:detail",
+            kwargs={"post_id": notification.pulse_comment.post_id},
+        )
+        return format_html(
+            '{} {} <a href="{}" class="{}">{}</a>',
+            actor,
+            _("mentioned you in a"),
+            post_url,
+            LINK_CLASS,
+            _("forum comment"),
+        )
+
+    if notification.comment_id:
+        market_url = reverse(
+            "markets:detail",
+            kwargs={"slug": notification.comment.market.slug},
+        )
+        market_title = notification.comment.market.display_title
+        return format_html(
+            '{} {} <a href="{}" class="{}">{}</a>',
+            actor,
+            _("mentioned you in a comment on"),
+            market_url,
+            LINK_CLASS,
+            market_title,
+        )
+
+    return format_html("{} {}", actor, _("mentioned you"))

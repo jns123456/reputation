@@ -2291,6 +2291,70 @@ html.dark .pr-market-tape__item:hover .pr-market-tape__title {
 .pr-mention:hover { text-decoration: underline; }
 html.dark .pr-mention { color: #a5b4fc; }
 
+/* @mention autocomplete in composers */
+.pr-mention-wrap { position: relative; }
+.pr-mention-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 40;
+  max-height: 16rem;
+  overflow-y: auto;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+html.dark .pr-mention-dropdown {
+  border-color: #334155;
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.pr-mention-list { list-style: none; margin: 0; padding: 0.35rem; }
+.pr-mention-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+.pr-mention-item:hover,
+.pr-mention-item.is-active {
+  background: #f8fafc;
+}
+html.dark .pr-mention-item:hover,
+html.dark .pr-mention-item.is-active {
+  background: #1e293b;
+}
+.pr-mention-avatar .pr-user-avatar-img,
+.pr-mention-avatar .pr-user-avatar-fallback {
+  width: 2rem;
+  height: 2rem;
+}
+.pr-mention-meta { min-width: 0; }
+.pr-mention-name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+html.dark .pr-mention-name { color: #f8fafc; }
+.pr-mention-handle {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.pr-mention-empty {
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
 /* CTA band */
 .pr-cta-band {
   position: relative;

@@ -1,5 +1,6 @@
 {% load i18n mention_tags %}
-<div class="flex gap-2 {% if depth %}mt-3{% else %}mt-4 first:mt-0{% endif %}"
+<div id="market-comment-{{ comment.id }}"
+     class="flex gap-2 {% if depth %}mt-3{% else %}mt-4 first:mt-0{% endif %}"
      x-data="{ showReply: false, collapsed: false }"
      data-sort-score="{{ comment.popularity_score }}"
      data-sort-time="{{ comment.created_at|date:'U' }}"

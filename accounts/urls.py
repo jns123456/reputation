@@ -69,6 +69,11 @@ urlpatterns = [
     path("creator/subscribe/", views.creator_subscribe, name="creator_subscribe"),
     path("creator/unsubscribe/", views.creator_unsubscribe, name="creator_unsubscribe"),
     path("users/search/partial/", views.user_search_partial, name="user_search_partial"),
+    path(
+        "users/mention-suggestions/",
+        views.mention_suggestions_partial,
+        name="mention_suggestions_partial",
+    ),
     path("users/search/", views.user_search, name="user_search"),
     path("users/list/", views.user_list, name="user_list"),
     path("users/<str:username>/followers/", views.profile_followers, name="profile_followers"),
