@@ -12,10 +12,10 @@ from reputation.models import (
 
 @admin.register(WeeklyContestWinner)
 class WeeklyContestWinnerAdmin(admin.ModelAdmin):
-    list_display = ("user", "week_code", "prize_type", "reputation_points", "prize_usd", "created_at")
+    list_display = ("user", "week_code", "prize_type", "reputation_points", "prize_usd", "notified_at", "created_at")
     list_filter = ("week_code", "prize_type")
     search_fields = ("user__username",)
-    readonly_fields = ("created_at",)
+    readonly_fields = ("created_at", "notified_at")
 
 
 @admin.register(ContestPayoutRequest)

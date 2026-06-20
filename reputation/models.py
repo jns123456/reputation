@@ -97,6 +97,11 @@ class WeeklyContestWinner(models.Model):
     reputation_score = models.FloatField(default=0)
     scored_forecast_count = models.PositiveIntegerField(default=0)
     prize_usd = models.PositiveSmallIntegerField(default=5)
+    notified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the winner email and login alert were sent.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

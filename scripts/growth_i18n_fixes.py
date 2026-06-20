@@ -153,6 +153,39 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Contest withdrawals are not available right now.": (
         "Los retiros del concurso no están disponibles en este momento."
     ),
+    # --- Weekly contest winner alerts ---
+    "You won the weekly contest!": "¡Ganaste el concurso semanal!",
+    "Prize credited": "Premio acreditado",
+    "Added to your contest earnings balance — withdraw as USDC on Base anytime.": (
+        "Sumado a tu saldo de ganancias del concurso — retira en USDC en Base cuando quieras."
+    ),
+    "Congratulations — you won $%(prize)s in the weekly reputation contest!": (
+        "¡Felicitaciones — ganaste $%(prize)s en el concurso semanal de reputación!"
+    ),
+    "Category: %(label)s · Week starting %(week)s": (
+        "Categoría: %(label)s · Semana que empieza el %(week)s"
+    ),
+    "Your prize has been credited to your contest earnings balance on PredictStamp. You can request a USDC withdrawal on Base from your profile whenever you are ready.": (
+        "Tu premio fue acreditado en tu saldo de ganancias del concurso en PredictStamp. "
+        "Puedes solicitar un retiro en USDC en Base desde tu perfil cuando quieras."
+    ),
+    "View contest earnings:": "Ver ganancias del concurso:",
+    "Keep forecasting — a new contest week starts every Sunday.": (
+        "Sigue pronosticando — cada domingo empieza una nueva semana del concurso."
+    ),
+    "Hi %(name)s, congratulations on topping the weekly reputation leaderboard.": (
+        "Hola %(name)s, felicitaciones por liderar la tabla semanal de reputación."
+    ),
+    "Your prize has been added to your contest earnings balance. Request a USDC withdrawal on Base from your profile whenever you are ready — PredictStamp does not hold funds on-platform.": (
+        "Tu premio se sumó a tu saldo de ganancias del concurso. Solicita un retiro en USDC en Base "
+        "desde tu perfil cuando quieras — PredictStamp no custodia fondos en la plataforma."
+    ),
+    "A new contest week starts every Sunday. Keep forecasting to defend your spot.": (
+        "Cada domingo empieza una nueva semana del concurso. Sigue pronosticando para defender tu puesto."
+    ),
+    "Absolute reputation leader": "Líder absoluto de reputación",
+    "Best rep / forecast average": "Mejor rep / pronóstico",
+    "Week %(week)s": "Semana %(week)s",
     "Free to enter — no separate sign-up. Just make forecasts on the platform and you're in.": (
         "Participar es gratis — no hace falta inscribirse por separado. "
         "Solo con hacer pronósticos en la plataforma ya estás dentro."

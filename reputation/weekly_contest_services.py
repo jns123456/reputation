@@ -164,6 +164,15 @@ def queue_weekly_contest_announcement(*, request):
         return
     if not request.user.is_authenticated:
         return
+    from reputation.weekly_contest_winner_notifications import (
+        WEEKLY_CONTEST_WIN_SESSION_KEY,
+        user_has_pending_weekly_contest_win,
+    )
+
+    if user_has_pending_weekly_contest_win(request.user):
+        return
+    if request.session.get(WEEKLY_CONTEST_WIN_SESSION_KEY):
+        return
     if user_dismissed_weekly_contest_announcement(request.user):
         return
     request.session[WEEKLY_CONTEST_ANNOUNCEMENT_SESSION_KEY] = True
@@ -204,6 +213,7 @@ def finalize_weekly_contest(week_code=None, *, prize_usd=None):
 
     prize_usd = prize_usd if prize_usd is not None else weekly_contest_prize_usd()
     created = 0
+    new_wins = []
 
     for prize_type, mode in (
         (WeeklyContestWinner.PrizeType.ABSOLUTE, ABSOLUTE),
@@ -232,4 +242,10 @@ def finalize_weekly_contest(week_code=None, *, prize_usd=None):
         )
         if was_created:
             created += 1
+            new_wins.append(_row)
+
+    if new_wins:
+        from reputation.weekly_contest_winner_notifications import notify_weekly_contest_winners
+
+        notify_weekly_contest_winners(new_wins)
     return created
