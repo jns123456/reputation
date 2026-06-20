@@ -28,7 +28,7 @@ Opcional: pedir a Cursor Agent **“open automation from sentry-autofix.workflow
 | `HEROKU_API_KEY` | Heroku API key |
 | `HEROKU_APP` | `reputation-juan` |
 | `SITE_BASE_URL` | URL prod |
-| `SENTRY_AUTH_TOKEN` | Token con `event:read`, `project:read`, `org:read` |
+| `SENTRY_AUTH_TOKEN` | **Personal Token** ([User settings → Personal Tokens](https://sentry.io/settings/account/api/auth-tokens/)). Scopes: `org:read`, `project:read`, **`project:write`**, `event:read`, `event:write`. No uses Organization Token (`org:ci` solo — sin resolve/tag). |
 | `SENTRY_ORG` | `fsc-ti` |
 | `SENTRY_PROJECT` | `predictstamp` |
 | `SENTRY_REGION_URL` | `https://us.sentry.io` |
@@ -44,11 +44,12 @@ Opcional: pedir a Cursor Agent **“open automation from sentry-autofix.workflow
 | `rollback.py` | Heroku rollback + git revert |
 | `tag_issue.py` | Nota + resolve en Sentry |
 
-## Probar poll local
+## Probar local
 
 ```bash
 export SENTRY_AUTH_TOKEN=...
 export SENTRY_ORG=fsc-ti
 export SENTRY_REGION_URL=https://us.sentry.io
 python scripts/sentry_autofix/poll.py
+python scripts/sentry_autofix/tag_issue.py PREDICTSTAMP-XX deployed --resolve
 ```
