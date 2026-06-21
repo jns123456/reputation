@@ -44,14 +44,14 @@ def send_message(*, sender, recipient, body):
             % {"max": Message.MAX_BODY_LENGTH}
         )
 
+    conversation = get_or_create_conversation(user_a=sender, user_b=recipient)
+
     guard_write_action(
         action="message",
         user=sender,
         text=body,
-        content_scope="write:message",
+        content_scope=f"write:message:conv:{conversation.id}",
     )
-
-    conversation = get_or_create_conversation(user_a=sender, user_b=recipient)
     with transaction.atomic():
         message = Message.objects.create(
             conversation=conversation,

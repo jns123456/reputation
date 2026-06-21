@@ -22,12 +22,13 @@
   </div>
 
   <footer class="dm-compose-bar">
+    <div id="dm-compose-error" class="dm-compose-error" role="alert" aria-live="polite"></div>
     <form method="post"
           action="{% url 'messages:send' conversation_id=conversation.id %}"
           hx-post="{% url 'messages:send' conversation_id=conversation.id %}"
           hx-target="#dm-message-list"
           hx-swap="beforeend"
-          hx-on::after-request="if (event.detail.successful) { this.reset(); this.querySelector('textarea').style.height='auto'; }"
+          hx-on::after-request="if (event.detail.successful) { this.reset(); this.querySelector('textarea').style.height='auto'; document.getElementById('dm-compose-error').replaceChildren(); }"
           class="dm-compose-form">
       {% csrf_token %}
       <label class="sr-only" for="dm-compose-body">{% trans "Message" %}</label>

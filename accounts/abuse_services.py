@@ -249,18 +249,21 @@ def assess_content(*, user, text, scope="comment"):
     reasons = []
     risk = 0
     normalized = _normalize_text(text)
+    is_direct_message = scope.startswith("write:message:")
 
-    is_dup = is_duplicate_content(user=user, text=text, scope=scope)
-    if is_dup:
-        reasons.append("duplicate")
-        risk += 50
+    is_dup = False
+    if not is_direct_message:
+        is_dup = is_duplicate_content(user=user, text=text, scope=scope)
+        if is_dup:
+            reasons.append("duplicate")
+            risk += 50
 
     links = link_count(text)
     if links >= 3:
         reasons.append("link_spam")
         risk += 30
 
-    if normalized and len(normalized) <= 3:
+    if not is_direct_message and normalized and len(normalized) <= 3:
         reasons.append("too_short")
         risk += 10
 

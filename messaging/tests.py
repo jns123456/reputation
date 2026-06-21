@@ -49,6 +49,17 @@ class DirectMessageServiceTests(TestCase):
         with self.assertRaises(ValueError):
             send_message(sender=self.alice, recipient=self.alice, body="solo")
 
+    def test_same_body_can_be_sent_to_multiple_recipients(self):
+        carol = create_user("carol")
+        send_message(sender=self.alice, recipient=self.bob, body="Hola")
+        send_message(sender=self.alice, recipient=carol, body="Hola")
+        self.assertEqual(Message.objects.count(), 2)
+
+    def test_same_body_can_be_resent_in_one_conversation(self):
+        send_message(sender=self.alice, recipient=self.bob, body="Hola")
+        send_message(sender=self.alice, recipient=self.bob, body="Hola")
+        self.assertEqual(Message.objects.count(), 2)
+
 
 class DirectMessageViewTests(TestCase):
     def setUp(self):

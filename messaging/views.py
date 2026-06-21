@@ -22,6 +22,14 @@ def _is_htmx(request):
     return request.headers.get("HX-Request") == "true"
 
 
+def _htmx_compose_error(request, message, *, status=400):
+    response = HttpResponse(message, status=status)
+    if _is_htmx(request):
+        response["HX-Retarget"] = "#dm-compose-error"
+        response["HX-Reswap"] = "innerHTML"
+    return response
+
+
 def _conversation_context(*, request, conversation):
     other = conversation.other_user(request.user)
     mark_conversation_read(user=request.user, conversation=conversation)
@@ -106,7 +114,7 @@ def send_message_view(request, conversation_id):
     form = MessageForm(request.POST)
     if not form.is_valid():
         if _is_htmx(request):
-            return HttpResponse(form.errors.as_text(), status=400)
+            return _htmx_compose_error(request, form.errors.as_text(), status=400)
         messages.error(request, _("Could not send your message."))
         return redirect("messages:thread", conversation_id=conversation.id)
 
@@ -120,18 +128,18 @@ def send_message_view(request, conversation_id):
     except abuse_services.RateLimitExceeded as exc:
         msg = write_guard_user_message(exc)
         if _is_htmx(request):
-            return HttpResponse(msg, status=429)
+            return _htmx_compose_error(request, msg, status=429)
         messages.error(request, msg)
         return redirect("messages:thread", conversation_id=conversation.id)
     except ContentRejected as exc:
         msg = write_guard_user_message(exc)
         if _is_htmx(request):
-            return HttpResponse(msg, status=400)
+            return _htmx_compose_error(request, msg, status=400)
         messages.error(request, msg)
         return redirect("messages:thread", conversation_id=conversation.id)
     except ValueError as exc:
         if _is_htmx(request):
-            return HttpResponse(str(exc), status=400)
+            return _htmx_compose_error(request, str(exc), status=400)
         messages.error(request, str(exc))
         return redirect("messages:thread", conversation_id=conversation.id)
 
