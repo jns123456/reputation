@@ -8,6 +8,7 @@ import environ
 import ssl
 
 from config.deploy_checks import validate_production_settings
+from config.media_storage import resolve_s3_media_settings
 
 # ``manage.py test`` / pytest should not require a local Redis for Django cache.
 _RUNNING_TESTS = "test" in sys.argv or "pytest" in sys.argv[0]
@@ -235,22 +236,22 @@ if not DEBUG:
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Pulse image uploads — local disk in dev; S3 in production (Heroku). Profile avatars are generated (DiceBear).
+# Pulse image uploads — local disk in dev; S3-compatible storage in production (Cloudflare R2 recommended).
+# Profile avatars are generated (DiceBear) and never use this bucket.
 USE_S3_MEDIA = env.bool("USE_S3_MEDIA", default=bool(env("AWS_STORAGE_BUCKET_NAME", default="")))
 if USE_S3_MEDIA:
     INSTALLED_APPS.append("storages")
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
-    AWS_S3_CUSTOM_DOMAIN = env(
-        "AWS_S3_CUSTOM_DOMAIN",
-        default=f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com",
+    _media_storage = resolve_s3_media_settings(
+        bucket_name=env("AWS_STORAGE_BUCKET_NAME"),
+        endpoint_url=env("AWS_S3_ENDPOINT_URL", default=""),
+        region_name=env("AWS_S3_REGION_NAME", default=""),
+        custom_domain=env("AWS_S3_CUSTOM_DOMAIN", default=""),
+        default_acl=env("AWS_DEFAULT_ACL", default=None),
+        running_tests=_RUNNING_TESTS,
     )
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
-    AWS_DEFAULT_ACL = "public-read"
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_FILE_OVERWRITE = False
+    globals().update(_media_storage)
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
@@ -263,7 +264,6 @@ if USE_S3_MEDIA:
             ),
         },
     }
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
 PULSE_MAX_IMAGE_BYTES = env.int("PULSE_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
 
@@ -797,6 +797,8 @@ validate_production_settings(
     admin_url_path=ADMIN_URL_PATH,
     environment=DJANGO_ENV,
     running_tests=_RUNNING_TESTS,
+    use_s3_media=USE_S3_MEDIA,
+    on_heroku=bool(os.environ.get("DYNO")),
 )
 
 # Error monitoring (optional — no-op when SENTRY_DSN is unset)

@@ -39,7 +39,64 @@ heroku run python manage.py sync_markets --categories --limit 48
 
 - Use managed PostgreSQL automated backups (Heroku Postgres, RDS, etc.).
 - Test restore on a staging app at least quarterly.
-- Pulse images on S3: enable bucket versioning if takedown/audit matters.
+- Pulse images on object storage: enable bucket versioning if takedown/audit matters.
+
+## Forum media (Cloudflare R2)
+
+Forum posts can include images (`pulse.Post.image`). Local dev writes to `media/`; **Heroku requires S3-compatible storage** — deploy checks fail if `USE_S3_MEDIA` is unset on a dyno.
+
+### All-in-one CLI (recommended)
+
+Requires **curl**, **python3**, and `CLOUDFLARE_API_TOKEN` (no Node/wrangler needed).
+
+```bash
+export CLOUDFLARE_API_TOKEN=<token with R2 Edit + Account API Tokens Edit>
+
+./scripts/provision_r2_media.sh --heroku-app reputation-juan
+```
+
+| Step | Tool |
+|------|------|
+| Account ID | Cloudflare API `GET /accounts` |
+| Create bucket | Cloudflare API `POST /accounts/{id}/r2/buckets` |
+| Public URL (beta) | Cloudflare API `PUT .../domains/managed` |
+| Public URL (prod) | Cloudflare API `POST .../domains/custom` |
+| S3 credentials | Cloudflare API `POST /accounts/{id}/tokens` |
+| Heroku config | `scripts/setup_heroku_r2_media.sh` |
+
+`r2.dev` URLs are rate-limited — use a custom domain for heavy production traffic.
+
+### Manual / dashboard alternative
+
+1. **R2** → **Create bucket** → e.g. `predictstamp-media`.
+2. **Manage R2 API tokens** → **Object Read & Write** on that bucket.
+3. Bucket **Settings** → **Public access** → copy `*.r2.dev` or attach a custom domain.
+
+```bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_STORAGE_BUCKET_NAME=predictstamp-media
+export AWS_S3_ENDPOINT_URL=https://<account_id>.r2.cloudflarestorage.com
+export AWS_S3_CUSTOM_DOMAIN=pub-xxxxxxxx.r2.dev
+./scripts/setup_heroku_r2_media.sh reputation-juan
+```
+
+### Verify
+
+```bash
+heroku run python manage.py check_media_storage -a reputation-juan
+```
+
+Uploads a tiny PNG, prints the public URL, and deletes the test object.
+
+### Notes
+
+| Topic | Detail |
+|-------|--------|
+| **ACL** | R2 ignores S3 object ACLs — public read is configured at bucket/domain level. |
+| **CSP** | `img-src` already allows `https:`; custom media domains need no CSP change. |
+| **Limits** | Default max upload 5 MB (`PULSE_MAX_IMAGE_BYTES`); JPEG/PNG/WebP/GIF only. |
+| **AWS S3** | Omit `AWS_S3_ENDPOINT_URL`; set `AWS_S3_REGION_NAME` and optional `AWS_S3_CUSTOM_DOMAIN`. |
 
 ## Staging
 
@@ -55,7 +112,7 @@ Maintain a staging app with:
 | Topic | Guidance |
 |-------|----------|
 | **Redis TLS** | Heroku `rediss://` may use `ssl_cert_reqs=CERT_NONE` — acceptable inside provider network; avoid public Redis endpoints. |
-| **Pulse media** | `AWS_DEFAULT_ACL=public-read` — URLs are world-readable by design for social posts. |
+| **Pulse media** | Forum images are world-readable via the R2 public hostname or custom domain. R2 does not use S3 object ACLs. |
 | **CSP** | Enable `CSP_ENABLED=True` with `CSP_REPORT_ONLY=True` first; fix violations, then enforce. |
 | **API raw payloads** | `?include_raw=1` on `/api/markets/{slug}/` requires a **staff** user. |
 

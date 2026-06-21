@@ -105,3 +105,11 @@ class ValidateProductionSettingsTests(SimpleTestCase):
 
     def test_passes_with_custom_admin_url_path(self):
         self._call(admin_url_path="ops-7f3a9c/")
+
+    def test_rejects_heroku_without_s3_media(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(on_heroku=True, use_s3_media=False)
+        self.assertIn("USE_S3_MEDIA", str(ctx.exception))
+
+    def test_passes_on_heroku_with_s3_media(self):
+        self._call(on_heroku=True, use_s3_media=True)

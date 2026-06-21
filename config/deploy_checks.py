@@ -19,6 +19,8 @@ def validate_production_settings(
     admin_url_path: str = DEFAULT_ADMIN_URL_PATH,
     environment: str = "",
     running_tests: bool = False,
+    use_s3_media: bool = False,
+    on_heroku: bool = False,
 ) -> None:
     """Raise ``ImproperlyConfigured`` when production settings are unsafe."""
     if running_tests:
@@ -83,6 +85,12 @@ def validate_production_settings(
         errors.append(
             "ADMIN_URL_PATH must be a non-guessable path in production "
             "(never use the default 'admin/')."
+        )
+
+    if on_heroku and not use_s3_media:
+        errors.append(
+            "USE_S3_MEDIA must be True on Heroku — the dyno filesystem is ephemeral "
+            "and forum image uploads require Cloudflare R2 or S3-compatible storage."
         )
 
     if errors:
