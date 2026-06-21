@@ -13,7 +13,12 @@
       {{ market.display_title }}
     </h3>
   </div>
-  {% if market.image_url %}
+  {% if market.is_soccer_match and market.match_team_a_icon and market.match_team_b_icon %}
+  <div class="flex shrink-0 items-center gap-1 rounded-lg border border-slate-100 bg-white p-1 dark:border-slate-500 dark:bg-white/90">
+    {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_a_icon size_class="pr-match-team-flag--card" %}
+    {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_b_icon size_class="pr-match-team-flag--card" %}
+  </div>
+  {% elif market.image_url %}
   <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-white p-1 dark:border-slate-500 dark:bg-white/90">
     <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="lazy">
   </div>

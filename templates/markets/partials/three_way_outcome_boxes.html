@@ -3,6 +3,13 @@
   {% for label, prob in market|soccer_match_probability_items %}
   <div class="flex min-w-0 flex-col items-center justify-center rounded-lg border px-1 py-2.5 text-center transition
     {% if label|lower == 'draw' %}border-amber-200 bg-amber-50 group-hover:bg-amber-100 dark:border-amber-800/50 dark:bg-amber-950/35 dark:group-hover:border-amber-700/60 dark:group-hover:bg-amber-900/45{% elif label == market.match_team_a %}border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-950/35 dark:group-hover:border-emerald-700/60 dark:group-hover:bg-emerald-900/45{% elif label == market.match_team_b %}border-rose-200 bg-rose-50 group-hover:bg-rose-100 dark:border-rose-800/50 dark:bg-rose-950/35 dark:group-hover:border-rose-700/60 dark:group-hover:bg-rose-900/45{% else %}border-slate-200 bg-slate-50 group-hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800/55 dark:group-hover:border-slate-500 dark:group-hover:bg-slate-700/70{% endif %}">
+    {% if label|lower != 'draw' %}
+      {% if label == market.match_team_a %}
+        {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_a_icon size_class="pr-match-team-flag--outcome" %}
+      {% elif label == market.match_team_b %}
+        {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_b_icon size_class="pr-match-team-flag--outcome" %}
+      {% endif %}
+    {% endif %}
     <span class="flex min-h-[2rem] w-full items-center justify-center text-center text-[10px] font-semibold uppercase leading-tight line-clamp-2
       {% if label|lower == 'draw' %}text-amber-700 dark:text-amber-300{% elif label == market.match_team_a %}text-emerald-700 dark:text-emerald-300{% elif label == market.match_team_b %}text-rose-700 dark:text-rose-300{% else %}text-slate-600 dark:text-slate-300{% endif %}">
       {% if label|lower == 'draw' %}{% trans "Draw" %}{% else %}{{ label }}{% endif %}

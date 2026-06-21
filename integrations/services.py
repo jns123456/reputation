@@ -563,23 +563,24 @@ def _world_cup_sync_limit(limit):
 
 def sync_world_cup_match_markets(*, limit=None):
     """Fetch Polymarket soccer match events and upsert as 3-outcome markets."""
-    from integrations.polymarket.soccer_matches import (
-        build_soccer_match_raw,
-        normalize_soccer_match_event,
-    )
+    from integrations.polymarket.team_logos import TeamLogoResolver, prepare_soccer_match_import
 
     client = PolymarketClient()
     events = client.fetch_soccer_match_events(limit=_world_cup_sync_limit(limit))
+    logo_resolver = TeamLogoResolver(client)
 
     imported = []
     errors = []
 
     for event in events:
         try:
-            normalized = normalize_soccer_match_event(event, default_category="Sports")
+            normalized, raw_market = prepare_soccer_match_import(
+                event,
+                default_category="Sports",
+                logo_resolver=logo_resolver,
+            )
             if not normalized:
                 continue
-            raw_market = build_soccer_match_raw(event, normalized=normalized)
             market, created = import_market_from_normalized(
                 normalized,
                 raw_market=raw_market,
@@ -683,10 +684,9 @@ def refresh_world_cup_match_market(market):
     """Refresh a composite soccer match market from its Polymarket event."""
     from integrations.polymarket.soccer_matches import (
         WORLD_CUP_MATCH_EXTERNAL_PREFIX,
-        build_soccer_match_raw,
         is_world_cup_match_market,
-        normalize_soccer_match_event,
     )
+    from integrations.polymarket.team_logos import prepare_soccer_match_import
 
     if not is_world_cup_match_market(market):
         return market
@@ -707,14 +707,14 @@ def refresh_world_cup_match_market(market):
     if not event:
         return market
 
-    normalized = normalize_soccer_match_event(
+    normalized, raw_market = prepare_soccer_match_import(
         event,
         default_category=market.category or "Sports",
+        client=client,
     )
     if not normalized:
         return market
 
-    raw_market = build_soccer_match_raw(event, normalized=normalized)
     market, _ = import_market_from_normalized(
         normalized,
         raw_market=raw_market,

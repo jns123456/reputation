@@ -7,7 +7,14 @@
   <div class="relative">
     <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
       <div class="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-start">
-        {% if market.image_url %}
+        {% if market.is_soccer_match and market.match_team_a_icon and market.match_team_b_icon %}
+        <div class="pr-market-hero-image pr-market-hero-image--match-flags shrink-0" aria-hidden="true">
+          <div class="flex h-full w-full items-center justify-center gap-2">
+            {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_a_icon size_class="pr-match-team-flag--hero" %}
+            {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_b_icon size_class="pr-match-team-flag--hero" %}
+          </div>
+        </div>
+        {% elif market.image_url %}
         <div class="pr-market-hero-image shrink-0">
           <img src="{{ market.image_url }}" alt="" class="h-full w-full object-contain" loading="eager">
         </div>
@@ -37,8 +44,9 @@
           {% if market.is_soccer_match and market.match_team_a and market.match_team_b %}
           <div class="mt-4 rounded-xl border border-slate-200 bg-white/80 px-4 py-4 dark:border-slate-600 dark:bg-slate-900/50">
             <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 text-center">
-              <div class="min-w-0">
-                <p class="truncate text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">{{ market.match_team_a }}</p>
+              <div class="min-w-0 flex flex-col items-center gap-2">
+                {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_a_icon size_class="pr-match-team-flag--hero" %}
+                <p class="truncate w-full text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">{{ market.match_team_a }}</p>
               </div>
               <div class="shrink-0 px-1">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{% trans "vs" %}</p>
@@ -46,8 +54,9 @@
                 <p class="mt-1 text-xs font-medium tabular-nums text-slate-500 dark:text-slate-400">{% local_kickoff_time market.kickoff_at "M j · H:i" %}</p>
                 {% endif %}
               </div>
-              <div class="min-w-0">
-                <p class="truncate text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">{{ market.match_team_b }}</p>
+              <div class="min-w-0 flex flex-col items-center gap-2">
+                {% include "markets/partials/match_team_flag.html" with icon_url=market.match_team_b_icon size_class="pr-match-team-flag--hero" %}
+                <p class="truncate w-full text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">{{ market.match_team_b }}</p>
               </div>
             </div>
             {% if market.current_probability %}

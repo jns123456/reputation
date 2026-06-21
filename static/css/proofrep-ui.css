@@ -435,6 +435,46 @@ html.dark .pr-market-hero-image--fallback {
   }
 }
 
+.pr-market-hero-image--match-flags {
+  padding: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .pr-market-hero-image--match-flags {
+    padding: 0.75rem;
+  }
+}
+
+/* Soccer / FIFA match team flags */
+.pr-match-team-flag {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.pr-match-team-flag--hero {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.pr-match-team-flag--card {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.pr-match-team-flag--outcome {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.125rem;
+}
+
+@media (min-width: 640px) {
+  .pr-match-team-flag--hero {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+}
+
 /* Profile header */
 .pr-profile-header {
   position: relative;
@@ -2766,6 +2806,23 @@ html.dark .dm-message--theirs .dm-message-bubble {
   white-space: pre-wrap;
   word-break: break-word;
 }
+.dm-message-media {
+  display: block;
+  margin-bottom: 0.375rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+.dm-message-media-img {
+  display: block;
+  max-width: min(100%, 16rem);
+  max-height: 16rem;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+}
+.dm-message--mine .dm-message-media-img {
+  margin-left: auto;
+}
 .dm-message-time {
   display: block;
   margin-top: 0.25rem;
@@ -2797,13 +2854,116 @@ html.dark .dm-compose-bar {
   border-color: #334155;
   background: #0f172a;
 }
+.dm-compose-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.dm-compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.375rem;
+}
+.dm-compose-tools {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+.dm-compose-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--pr-touch-min, 2.75rem);
+  height: var(--pr-touch-min, 2.75rem);
+  border-radius: 9999px;
+  color: #64748b;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.dm-compose-tool-btn:hover,
+.dm-compose-tool-btn.is-active {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+html.dark .dm-compose-tool-btn { color: #94a3b8; }
+html.dark .dm-compose-tool-btn:hover,
+html.dark .dm-compose-tool-btn.is-active {
+  background: rgba(79, 70, 229, 0.2);
+  color: #a5b4fc;
+}
+.dm-compose-field-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.dm-compose-preview {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+}
+html.dark .dm-compose-preview { border-color: #334155; }
+.dm-compose-preview-img {
+  display: block;
+  max-height: 10rem;
+  width: 100%;
+  object-fit: cover;
+}
+.dm-compose-preview-remove {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.65);
+  color: #fff;
+}
+.dm-emoji-picker {
+  position: absolute;
+  bottom: calc(100% + 0.375rem);
+  left: 0;
+  z-index: 20;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+}
+html.dark .dm-emoji-picker {
+  border-color: #334155;
+  background: #1e293b;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+.dm-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.125rem;
+}
+.dm-emoji-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  border-radius: 0.375rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.dm-emoji-btn:hover { background: #f1f5f9; }
+html.dark .dm-emoji-btn:hover { background: #334155; }
 .dm-compose-form {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
 }
 .dm-compose-input {
-  flex: 1;
+  width: 100%;
   min-height: 2.75rem;
   max-height: 8rem;
   resize: none;
@@ -2836,7 +2996,12 @@ html.dark .dm-compose-input {
   color: #fff;
   flex-shrink: 0;
 }
-.dm-send-btn:hover { background: #4338ca; }
+.dm-send-btn:hover:not(:disabled):not(.is-disabled) { background: #4338ca; }
+.dm-send-btn:disabled,
+.dm-send-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 /* CTA band */
 .pr-cta-band {

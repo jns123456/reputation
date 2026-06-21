@@ -226,6 +226,31 @@ class Market(models.Model):
     def match_team_b(self):
         return self._match_team_names()[1]
 
+    def _team_outcome_icon(self, team_label: str) -> str:
+        if not team_label:
+            return ""
+        for outcome in self.outcomes or []:
+            if isinstance(outcome, dict) and outcome.get("label") == team_label:
+                icon = outcome.get("icon") or ""
+                if icon:
+                    return icon
+        if self._card_payloads_deferred():
+            return ""
+        raw = self.polymarket_raw or {}
+        if team_label == raw.get("team_a"):
+            return raw.get("team_a_icon") or ""
+        if team_label == raw.get("team_b"):
+            return raw.get("team_b_icon") or ""
+        return ""
+
+    @property
+    def match_team_a_icon(self) -> str:
+        return self._team_outcome_icon(self.match_team_a)
+
+    @property
+    def match_team_b_icon(self) -> str:
+        return self._team_outcome_icon(self.match_team_b)
+
     @property
     def forecast_mode(self) -> str:
         from markets.forecast_modes import get_forecast_mode

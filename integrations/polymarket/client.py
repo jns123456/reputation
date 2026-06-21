@@ -118,6 +118,26 @@ class PolymarketClient:
             return data
         return data.get("data", data.get("events", []))
 
+    def fetch_teams_by_name(self, name, *, league=None, limit=10):
+        """Look up Polymarket sports teams (country flags, club crests) by name."""
+        params = {"name": name, "limit": limit}
+        if league:
+            params["league"] = league
+        url = f"{self.base_url}/teams"
+        response = self._get_with_retry(url, params=params, timeout=15)
+        if response.status_code >= 500:
+            logger.warning(
+                "Polymarket teams unavailable (HTTP %s) for %s",
+                response.status_code,
+                name,
+            )
+            return []
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, list):
+            return data
+        return data.get("data", data.get("teams", []))
+
     def fetch_events_paginated(
         self,
         *,
