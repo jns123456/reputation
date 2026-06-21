@@ -191,11 +191,17 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
     from integrations.services import repair_resolved_markets_with_pending_predictions
 
     repair = repair_resolved_markets_with_pending_predictions(limit=batch_size)
-    if repair["resolved_predictions"] or repair["repaired_markets"]:
+    if (
+        repair["resolved_predictions"]
+        or repair["repaired_markets"]
+        or repair.get("rescored_predictions")
+    ):
         logger.info(
-            "Resolved-market repair: %s markets backfilled, %s predictions scored",
+            "Resolved-market repair: %s markets backfilled, %s predictions scored, "
+            "%s multi-binary forecasts rescored",
             repair["repaired_markets"],
             repair["resolved_predictions"],
+            repair.get("rescored_predictions", 0),
         )
 
     return {

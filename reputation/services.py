@@ -1,7 +1,7 @@
 """Reputation scoring services."""
 
 from django.conf import settings
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from reputation.models import ReputationEvent
 
@@ -268,6 +268,99 @@ def apply_reputation_for_prediction_exit(prediction):
     evaluate_achievements(prediction.user)
 
     return event
+
+
+def rescore_resolved_prediction(prediction, *, is_correct):
+    """Replace a prior resolution score when ``is_correct`` was wrong."""
+    from accounts.models import UserCategoryStats, UserProfile
+    from accounts.category_stats_services import resolve_category_from_market
+
+    if prediction.status != prediction.Status.RESOLVED:
+        raise ValueError("Only resolved predictions can be rescored.")
+
+    old_event = prediction.reputation_events.filter(
+        event_type__in=[
+            ReputationEvent.EventType.CORRECT_PREDICTION,
+            ReputationEvent.EventType.INCORRECT_PREDICTION,
+        ]
+    ).first()
+    if prediction.is_correct == is_correct and old_event:
+        expected_delta = calculate_reputation_delta(
+            is_correct=is_correct,
+            predicted_outcome=prediction.predicted_outcome,
+            probability_snapshot=prediction.probability_at_prediction_time,
+            predicted_direction=prediction.predicted_direction,
+        )
+        if old_event.points_delta == expected_delta:
+            return prediction
+
+    with transaction.atomic():
+        if old_event:
+            profile = UserProfile.objects.select_for_update().get(user=prediction.user)
+            profile.reputation_points -= old_event.points_delta
+            profile.scored_forecast_count = max(0, profile.scored_forecast_count - 1)
+            old_was_correct = (
+                old_event.event_type == ReputationEvent.EventType.CORRECT_PREDICTION
+            )
+            if old_was_correct:
+                profile.correct_prediction_count = max(
+                    0, profile.correct_prediction_count - 1
+                )
+            else:
+                profile.incorrect_prediction_count = max(
+                    0, profile.incorrect_prediction_count - 1
+                )
+            refresh_profile_reputation_score(profile, save=False)
+            profile.save(
+                update_fields=[
+                    "reputation_points",
+                    "scored_forecast_count",
+                    "correct_prediction_count",
+                    "incorrect_prediction_count",
+                    "reputation_score",
+                    "updated_at",
+                ]
+            )
+
+            category_slug = resolve_category_from_market(prediction.market)
+            stats = UserCategoryStats.objects.select_for_update().filter(
+                user=prediction.user,
+                category_slug=category_slug,
+            ).first()
+            if stats:
+                stats.reputation_points -= old_event.points_delta
+                stats.scored_forecast_count = max(0, stats.scored_forecast_count - 1)
+                if old_was_correct:
+                    stats.correct_prediction_count = max(
+                        0, stats.correct_prediction_count - 1
+                    )
+                else:
+                    stats.incorrect_prediction_count = max(
+                        0, stats.incorrect_prediction_count - 1
+                    )
+                refresh_category_reputation_score(stats, save=False)
+                stats.save(
+                    update_fields=[
+                        "reputation_points",
+                        "scored_forecast_count",
+                        "correct_prediction_count",
+                        "incorrect_prediction_count",
+                        "reputation_score",
+                        "updated_at",
+                    ]
+                )
+
+            old_event.delete()
+
+        prediction.is_correct = is_correct
+        prediction.save(update_fields=["is_correct", "updated_at"])
+        prediction.user.profile.refresh_from_db()
+        apply_reputation_for_prediction(prediction)
+
+    from accounts.achievement_services import evaluate_achievements
+
+    evaluate_achievements(prediction.user)
+    return prediction
 
 
 def apply_reputation_for_prediction(prediction):

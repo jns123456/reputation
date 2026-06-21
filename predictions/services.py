@@ -371,6 +371,66 @@ def build_forecast_card_metrics(prediction):
     return metrics
 
 
+def prediction_is_correct_for_resolved_market(market, prediction):
+    """Return whether a forecast should score as correct for a resolved market."""
+    from markets.forecast_modes import ForecastMode, get_forecast_mode
+
+    if get_forecast_mode(market) == ForecastMode.MULTI_BINARY:
+        from integrations.polymarket.client import grouped_submarket_resolved_yes
+
+        event = market.polymarket_event_raw or {}
+        sub_resolved_yes = grouped_submarket_resolved_yes(event, prediction.predicted_outcome)
+        if sub_resolved_yes is None:
+            outcome_matches = (
+                prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
+            )
+        else:
+            outcome_matches = sub_resolved_yes
+    else:
+        outcome_matches = prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
+
+    if prediction.predicted_direction == Prediction.Direction.YES:
+        return outcome_matches
+    return not outcome_matches
+
+
+def repair_misscored_multi_binary_predictions(*, dry_run=False):
+    """Rescore resolved multi-binary forecasts that used pick-one logic."""
+    from markets.forecast_modes import ForecastMode, get_forecast_mode
+    from markets.models import Market
+    from reputation.services import rescore_resolved_prediction
+
+    rescored = []
+    for market in Market.objects.filter(status=Market.Status.RESOLVED).iterator():
+        if get_forecast_mode(market) != ForecastMode.MULTI_BINARY:
+            continue
+        event = market.polymarket_event_raw or {}
+        if not event.get("markets"):
+            continue
+        for prediction in Prediction.objects.filter(
+            market=market,
+            status=Prediction.Status.RESOLVED,
+        ).select_related("user", "user__profile"):
+            expected = prediction_is_correct_for_resolved_market(market, prediction)
+            if prediction.is_correct == expected:
+                continue
+            if dry_run:
+                rescored.append(
+                    {
+                        "prediction_id": prediction.id,
+                        "username": prediction.user.username,
+                        "market_slug": market.polymarket_slug,
+                        "was_correct": prediction.is_correct,
+                        "should_be_correct": expected,
+                    }
+                )
+                continue
+            rescore_resolved_prediction(prediction, is_correct=expected)
+            rescored.append(prediction.id)
+
+    return rescored
+
+
 def resolve_market_predictions(market):
     """Resolve all pending predictions when a market is resolved."""
     if market.status != market.Status.RESOLVED or not market.resolved_outcome:
@@ -383,8 +443,7 @@ def resolve_market_predictions(market):
     ).select_related("user", "user__profile")
 
     for prediction in predictions:
-        outcome_matches = prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
-        is_correct = outcome_matches if prediction.predicted_direction == Prediction.Direction.YES else not outcome_matches
+        is_correct = prediction_is_correct_for_resolved_market(market, prediction)
         prediction.status = Prediction.Status.RESOLVED
         prediction.is_correct = is_correct
         prediction.resolved_at = timezone.now()

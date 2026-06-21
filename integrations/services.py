@@ -16,7 +16,11 @@ from integrations.polymarket.client import (
     normalize_polymarket_record,
 )
 from markets.models import Market
-from predictions.services import resolve_eliminated_outcome_predictions, resolve_market_predictions
+from predictions.services import (
+    repair_misscored_multi_binary_predictions,
+    resolve_eliminated_outcome_predictions,
+    resolve_market_predictions,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -148,10 +152,14 @@ def repair_resolved_markets_with_pending_predictions(*, limit=200):
         elif market.status == Market.Status.OPEN:
             resolved_predictions += len(resolve_eliminated_outcome_predictions(market))
 
+    rescore_result = repair_misscored_multi_binary_predictions()
+    rescored_predictions = len(rescore_result)
+
     return {
         "repaired_markets": repaired_markets,
         "resolved_predictions": resolved_predictions,
         "refreshed_markets": refreshed_markets,
+        "rescored_predictions": rescored_predictions,
         "candidates": len(candidates),
     }
 

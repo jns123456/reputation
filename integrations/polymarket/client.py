@@ -816,6 +816,25 @@ def _market_is_resolved_yes(raw_market: dict) -> bool:
     return yes_price is not None and yes_price >= _RESOLVED_YES_PRICE_THRESHOLD
 
 
+def grouped_submarket_resolved_yes(raw_event: dict, outcome_label: str) -> bool | None:
+    """Whether a grouped sub-market resolved Yes for ``outcome_label``.
+
+    Returns ``None`` when the label is missing or the sub-market is not resolved.
+    """
+    pick = (outcome_label or "").strip()
+    if not pick:
+        return None
+    pick_lower = pick.lower()
+    for raw_market in _grouped_outcome_markets(raw_event, open_only=False):
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        if label.lower() != pick_lower:
+            continue
+        if not _market_is_resolved(raw_market):
+            return None
+        return _market_is_resolved_yes(raw_market)
+    return None
+
+
 def _grouped_outcome_markets(event: dict, *, open_only: bool) -> list[dict]:
     markets = []
     seen_labels = set()
