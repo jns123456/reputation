@@ -1,9 +1,12 @@
 {% extends "base.html" %}
-{% load i18n reputation_filters monetization_tags %}
+{% load i18n reputation_filters monetization_tags prediction_share_tags %}
 
 {% block title %}{% blocktrans with name=prediction.user.public_name %}Forecast by {{ name }}{% endblocktrans %} · PredictStamp{% endblock %}
 {% block og_type %}article{% endblock %}
-{% block og_title %}{{ prediction.user.public_name }} — {{ market.display_title|truncatechars:70 }}{% endblock %}
+{% block og_title %}{{ share_copy.title }}{% endblock %}
+{% block og_description %}{{ share_copy.text }}{% endblock %}
+{% block tw_title %}{{ share_copy.title }}{% endblock %}
+{% block tw_description %}{{ share_copy.text }}{% endblock %}
 {% block og_image_tags %}
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'prediction_card_og' prediction.id %}">
 <meta property="og:image:width" content="1200">
@@ -76,15 +79,7 @@
       {% endif %}
 
       <div class="pr-action-bar mt-5 border-t border-slate-200 pt-4 dark:border-slate-700">
-        <button type="button"
-                class="pr-touch-target inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
-                data-share-url="{{ share_url }}"
-                data-share-title="{% blocktrans with name=prediction.user.public_name title=market.display_title|truncatechars:40 %}{{ name }} on {{ title }}{% endblocktrans %}"
-                data-share-ping="{% url 'prediction_card_share' prediction.id %}"
-                onclick="window.shareForumPost && window.shareForumPost(this)">
-          <i data-lucide="share" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
-          {% trans "Share this forecast" %}
-        </button>
+        {% forecast_share_button prediction=prediction %}
         <a href="{% url 'markets:detail' slug=market.slug %}" class="pr-touch-target inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800">
           {% trans "View market" %}
         </a>

@@ -34,6 +34,14 @@ def _font(size):
         return ImageFont.load_default()
 
 
+def _viral_tagline(prediction):
+    if prediction.status != Prediction.Status.RESOLVED:
+        return None, None
+    if prediction.is_correct:
+        return "I TOLD YOU SO", _GREEN
+    return "YOU WERE RIGHT :(", _AMBER
+
+
 def _status_line(prediction, metrics):
     if prediction.status == Prediction.Status.RESOLVED:
         delta = metrics.get("pnl_delta")
@@ -82,6 +90,11 @@ def render_prediction_og_image(prediction, metrics):
         draw.text((x, y), line, font=_font(38), fill=_MUTED)
         y += 50
     y += 18
+
+    tagline, tagline_color = _viral_tagline(prediction)
+    if tagline:
+        draw.text((x, y), tagline, font=_font(52), fill=tagline_color)
+        y += 64
 
     status_text, status_color = _status_line(prediction, metrics)
     draw.text((x, y), status_text, font=_font(44), fill=status_color)

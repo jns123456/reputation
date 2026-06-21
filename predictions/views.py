@@ -44,10 +44,10 @@ def _persist_market_return_url(request, *, slug: str) -> str:
     return return_url or request.session.get(market_return_session_key(slug), "")
 
 
-def _forecast_success_redirect(request, *, slug: str):
+def _forecast_success_redirect(request, *, slug: str, prediction_id: int):
     _persist_market_return_url(request, slug=slug)
     detail_url = reverse("markets:detail", kwargs={"slug": slug})
-    return redirect(f"{detail_url}?posted=1#forecasts")
+    return redirect(f"{detail_url}?posted=1&share_forecast={prediction_id}#forecasts")
 
 
 def _forecast_form_anchor(market) -> str:
@@ -114,7 +114,7 @@ def create_prediction_view(request, slug):
         )
         if form.is_valid():
             try:
-                create_prediction(
+                prediction = create_prediction(
                     user=request.user,
                     market=market,
                     predicted_outcome=form.cleaned_data["predicted_outcome"],
@@ -129,7 +129,7 @@ def create_prediction_view(request, slug):
                 messages.error(request, write_guard_user_message(exc))
                 return redirect(f"{reverse('markets:detail', kwargs={'slug': slug})}{_forecast_form_anchor(market)}")
             messages.success(request, _("Your forecast was posted."))
-            return _forecast_success_redirect(request, slug=slug)
+            return _forecast_success_redirect(request, slug=slug, prediction_id=prediction.id)
     else:
         form = (
             ForecastForm(market=market, creator_program_enabled=creator_enabled)
@@ -246,6 +246,8 @@ def prediction_detail(request, prediction_id):
         pk=prediction_id,
     )
     metrics = build_forecast_card_metrics(prediction)
+    from predictions.share_copy import get_forecast_share_copy
+
     return render(
         request,
         "predictions/prediction_detail.html",
@@ -253,6 +255,7 @@ def prediction_detail(request, prediction_id):
             "prediction": prediction,
             "market": prediction.market,
             "metrics": metrics,
+            "share_copy": get_forecast_share_copy(prediction),
             "share_url": request.build_absolute_uri(
                 reverse("prediction_card", args=[prediction.id])
             ),

@@ -1,4 +1,4 @@
-{% load i18n reputation_filters timezone_tags %}
+{% load i18n reputation_filters timezone_tags prediction_share_tags %}
 <article class="pr-hero pr-hero--compact relative overflow-hidden">
   <div class="pr-mesh pointer-events-none absolute inset-0 opacity-80" aria-hidden="true"></div>
   <div class="pr-orb pr-orb--slow absolute -right-16 -top-16 h-48 w-48 bg-brand-500/20" aria-hidden="true"></div>
@@ -103,6 +103,9 @@
           {% endif %}
 
           <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            {% if existing_forecast %}
+            {% forecast_share_button prediction=existing_forecast %}
+            {% else %}
             <button type="button"
                     class="pr-touch-target inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-200 dark:hover:border-brand-700 dark:hover:bg-brand-950/40 dark:hover:text-brand-300"
                     title="{% trans 'Share event' %}"
@@ -115,6 +118,7 @@
               <i data-lucide="share-2" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
               {% trans "Share" %}
             </button>
+            {% endif %}
             {% if user.is_authenticated %}
             {% include "accounts/partials/market_watch_button.html" %}
             {% endif %}

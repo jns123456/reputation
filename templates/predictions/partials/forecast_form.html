@@ -1,4 +1,4 @@
-{% load i18n reputation_filters %}
+{% load i18n reputation_filters prediction_share_tags %}
 <section id="place-forecast" class="forecast-section{% if inline_layout %} forecast-section--paired flex h-full min-h-0 flex-col{% endif %}{% if not inline_layout %} mt-10{% endif %} overflow-hidden rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-white shadow-sm dark:border-brand-800/50 dark:from-slate-800 dark:to-slate-900 dark:shadow-lg dark:shadow-black/25"
   {% if not existing and form %}
   x-data="{ activeOutcome: {% if form.predicted_outcome.value %}'{{ form.predicted_outcome.value|escapejs }}'{% else %}null{% endif %} }"
@@ -98,6 +98,12 @@
           <a href="#forecasts" class="font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "View in public feed" %}</a>
         </p>
         <div class="flex flex-wrap items-center gap-3">
+          {% if existing.status == "resolved" %}
+          {% forecast_share_button prediction=existing %}
+          {% else %}
+          {% trans "Share my forecast" as share_forecast_label %}
+          {% forecast_share_button prediction=existing extra_class="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-700 sm:w-auto" label=share_forecast_label icon="share" icon_class="h-4 w-4 shrink-0" %}
+          {% endif %}
           {% include "predictions/partials/forecast_return_link.html" %}
         </div>
         <div>

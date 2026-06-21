@@ -260,6 +260,29 @@ def market_detail(request, slug):
 
     return_url = resolve_market_return_url(request, slug=slug)
 
+    share_forecast = None
+    share_forecast_raw = request.GET.get("share_forecast")
+    if share_forecast_raw and request.user.is_authenticated:
+        try:
+            share_forecast_id = int(share_forecast_raw)
+        except (TypeError, ValueError):
+            share_forecast_id = None
+        if share_forecast_id:
+            from predictions.models import Prediction
+
+            share_forecast = (
+                Prediction.objects.filter(
+                    pk=share_forecast_id,
+                    market=market,
+                    user=request.user,
+                )
+                .select_related("user", "market")
+                .first()
+            )
+
+    forecast_posted = request.GET.get("posted") == "1"
+    open_share_sheet = forecast_posted and share_forecast is not None
+
     return render(
         request,
         "markets/market_detail.html",
@@ -274,6 +297,8 @@ def market_detail(request, slug):
             "creator_program_enabled": creator_program_enabled,
             "is_watching_market": is_watching_market(user=request.user, market=market),
             "return_url": return_url,
-            "forecast_posted": request.GET.get("posted") == "1",
+            "forecast_posted": forecast_posted,
+            "share_forecast": share_forecast,
+            "open_share_sheet": open_share_sheet,
         },
     )

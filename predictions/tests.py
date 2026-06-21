@@ -11,6 +11,7 @@ from accounts.models import User
 from accounts.selectors import get_user_prediction_history
 from comments.models import Comment, Vote
 from comments.services import cast_vote
+from conftest import create_user
 from markets.models import Market
 from predictions.models import Prediction
 from predictions.selectors import (
@@ -972,11 +973,7 @@ class GuestForecastAccessTests(TestCase):
 
 class MarketReturnNavigationTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="return-nav-user",
-            password="pass",
-            onboarding_completed=True,
-        )
+        self.user = create_user(username="return-nav-user")
         self.market = Market.objects.create(
             external_id="return-nav-m1",
             title="Return navigation market",
@@ -1012,9 +1009,13 @@ class MarketReturnNavigationTests(TestCase):
             {"predicted_outcome": "Yes", "next": list_url},
         )
 
+        prediction = Prediction.objects.get(user=self.user, market=self.market)
         self.assertRedirects(
             response,
-            f"{reverse('markets:detail', kwargs={'slug': self.market.slug})}?posted=1#forecasts",
+            (
+                f"{reverse('markets:detail', kwargs={'slug': self.market.slug})}"
+                f"?posted=1&share_forecast={prediction.id}#forecasts"
+            ),
             fetch_redirect_response=False,
         )
 

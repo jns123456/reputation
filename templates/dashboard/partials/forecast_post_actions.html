@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n prediction_share_tags %}
 <div class="pr-action-bar mt-3 text-slate-500 dark:text-slate-400" id="forecast-actions-prediction-{{ prediction.id }}">
   <a href="{% url 'markets:detail' slug=market.slug %}#prediction-discussion-{{ prediction.id }}"
      class="forecast-action group flex items-center gap-1.5 rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/40 dark:hover:text-brand-400"
@@ -14,13 +14,5 @@
     {% include "dashboard/partials/forecast_bookmark_button.html" %}
   </div>
 
-  <button type="button"
-          class="forecast-action group flex items-center rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/40 dark:hover:text-brand-400"
-          title="{% trans 'Share forecast' %}"
-          data-share-url="{{ request.scheme }}://{{ request.get_host }}{% url 'prediction_card' prediction.id %}"
-          data-share-title="{% blocktrans with name=prediction.user.public_name title=market.display_title|truncatechars:40 %}{{ name }} on {{ title }}{% endblocktrans %}"
-          data-share-ping="{% url 'prediction_card_share' prediction.id %}"
-          onclick="window.shareForumPost && window.shareForumPost(this)">
-    <i data-lucide="share" class="h-[18px] w-[18px]" stroke-width="1.75" aria-hidden="true"></i>
-  </button>
+  {% forecast_share_button prediction=prediction icon_only=True extra_class="forecast-action group flex items-center rounded-full px-2 py-1.5 transition hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/40 dark:hover:text-brand-400" icon="share" icon_class="h-[18px] w-[18px]" %}
 </div>

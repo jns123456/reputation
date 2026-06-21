@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n reputation_filters %}
+{% load i18n reputation_filters prediction_share_tags %}
 
 {% block title %}{{ market.display_title }}{% endblock %}
 
@@ -79,6 +79,7 @@
       var url = new URL(window.location.href);
       if (url.searchParams.get("posted") !== "1") return;
       url.searchParams.delete("posted");
+      url.searchParams.delete("share_forecast");
       var cleanHref = url.pathname + (url.search ? url.search : "") + url.hash;
       window.history.replaceState(null, "", cleanHref);
 
@@ -95,6 +96,33 @@
         }
       });
     })();
+  </script>
+  {% elif forecast_posted %}
+  <script>
+    (function () {
+      if (!window.history || !window.history.replaceState) return;
+      var url = new URL(window.location.href);
+      if (url.searchParams.get("posted") !== "1") return;
+      url.searchParams.delete("posted");
+      url.searchParams.delete("share_forecast");
+      var cleanHref = url.pathname + (url.search ? url.search : "") + url.hash;
+      window.history.replaceState(null, "", cleanHref);
+    })();
+  </script>
+  {% endif %}
+
+  {% if open_share_sheet and share_forecast %}
+  <div class="sr-only" aria-hidden="true">
+    {% forecast_share_button prediction=share_forecast button_id="forecast-share-auto" icon_only=True extra_class="sr-only" %}
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var trigger = document.getElementById("forecast-share-auto");
+      if (!trigger || !window.shareForumPost) return;
+      window.setTimeout(function () {
+        window.shareForumPost(trigger);
+      }, 450);
+    });
   </script>
   {% endif %}
 </div>
