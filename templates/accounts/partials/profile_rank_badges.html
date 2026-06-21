@@ -1,17 +1,11 @@
 {% load i18n %}
 {% if platform_rank_badges %}
-<div class="pr-profile-rank-badges{% if compact %} pr-profile-rank-badges--{{ compact }}{% endif %}" aria-label="{% trans 'Platform ranking badges' %}">
+<div class="pr-profile-rank-badges{% if compact %} pr-profile-rank-badges--{{ compact }}{% endif %}" aria-label="{% trans 'Platform ranking badge' %}">
   {% for badge in platform_rank_badges %}
-  <span class="pr-profile-rank-badge pr-profile-rank-badge--{{ badge.kind }}" tabindex="0">
+  <span class="pr-profile-rank-badge pr-profile-rank-badge--reputation_relative" tabindex="0">
     <span class="pr-profile-rank-badge-value">#{{ badge.rank }}</span>
     <span class="pr-profile-rank-badge-tip" role="tooltip">
-      {% if badge.kind == "reputation_absolute" %}
-      {% blocktrans with rank=badge.rank %}#{{ rank }} in total reputation points — absolute platform ranking.{% endblocktrans %}
-      {% elif badge.kind == "reputation_relative" %}
       {% blocktrans with rank=badge.rank %}#{{ rank }} in reputation per forecast — relative platform ranking.{% endblocktrans %}
-      {% else %}
-      {% blocktrans with rank=badge.rank %}#{{ rank }} in popularity — social engagement platform ranking.{% endblocktrans %}
-      {% endif %}
     </span>
   </span>
   {% endfor %}

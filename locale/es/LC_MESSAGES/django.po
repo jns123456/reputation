@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-20 22:31+0000\n"
+"POT-Creation-Date: 2026-06-21 13:09+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -2257,24 +2257,14 @@ msgstr "Conseguida el %(date)s"
 msgid "All badges"
 msgstr "Todos los mercados"
 
-msgid "Platform ranking badges"
-msgstr "Insignias de ranking en la plataforma"
-
-#, python-format
-msgid "#%(rank)s in total reputation points — absolute platform ranking."
-msgstr ""
-"#%(rank)s en puntos totales de reputación — ranking absoluto de la "
-"plataforma."
+#| msgid "Platform ranking badges"
+msgid "Platform ranking badge"
+msgstr "Insignia de ranking en la plataforma"
 
 #, python-format
 msgid "#%(rank)s in reputation per forecast — relative platform ranking."
 msgstr ""
 "#%(rank)s en reputación por pronóstico — ranking relativo de la plataforma."
-
-#, python-format
-msgid "#%(rank)s in popularity — social engagement platform ranking."
-msgstr ""
-"#%(rank)s en popularidad — ranking de engagement social en la plataforma."
 
 msgid "Subscriber-only content"
 msgstr "Contenido solo para suscriptores"
@@ -5678,7 +5668,6 @@ msgstr ""
 "Elegí un resultado y publicá tu pronóstico en segundos. Sin wallets, sin "
 "apuestas: solo tu criterio queda registrado."
 
-#| msgid "reputation"
 msgid "Build reputation"
 msgstr "Construí reputación"
 
@@ -7752,3 +7741,14 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#, python-format
+#~ msgid "#%(rank)s in total reputation points — absolute platform ranking."
+#~ msgstr ""
+#~ "#%(rank)s en puntos totales de reputación — ranking absoluto de la "
+#~ "plataforma."
+
+#, python-format
+#~ msgid "#%(rank)s in popularity — social engagement platform ranking."
+#~ msgstr ""
+#~ "#%(rank)s en popularidad — ranking de engagement social en la plataforma."

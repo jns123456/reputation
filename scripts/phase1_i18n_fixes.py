@@ -327,6 +327,7 @@ PHASE1_FIXES.update(
             "Ranking absoluto por puntos totales de reputación — premia el volumen sostenido de pronósticos. No es popularidad social."
         ),
         "Platform ranking badges": "Insignias de ranking en la plataforma",
+        "Platform ranking badge": "Insignia de ranking en la plataforma",
         "#%(rank)s in total reputation points — absolute platform ranking.": (
             "#%(rank)s en puntos totales de reputación — ranking absoluto de la plataforma."
         ),
