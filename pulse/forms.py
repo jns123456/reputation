@@ -1,18 +1,11 @@
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from accounts.media_validation import clean_uploaded_image
 from accounts.models import SubscriberAudience
 from pulse.models import Post
 from pulse.poll_forms import PollValidationError, parse_poll_options_from_post, validate_poll_payload
-
-ALLOWED_IMAGE_CONTENT_TYPES = {
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-}
 
 
 class PostForm(forms.ModelForm):
@@ -53,36 +46,7 @@ class PostForm(forms.ModelForm):
         return (self.cleaned_data.get("body") or "").strip()
 
     def clean_image(self):
-        image = self.cleaned_data.get("image")
-        if not image:
-            return image
-
-        max_bytes = getattr(settings, "PULSE_MAX_IMAGE_BYTES", 5 * 1024 * 1024)
-        if image.size > max_bytes:
-            raise ValidationError(_("Image must be 5 MB or smaller."))
-
-        content_type = getattr(image, "content_type", "")
-        if content_type and content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
-            raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image."))
-
-        # The client-sent Content-Type is spoofable; verify the actual bytes
-        # are a real image of an allowed format before storing publicly.
-        from PIL import Image, UnidentifiedImageError
-
-        allowed_formats = {"JPEG", "PNG", "WEBP", "GIF"}
-        try:
-            with Image.open(image) as probe:
-                probe.verify()
-                detected = (probe.format or "").upper()
-        except (UnidentifiedImageError, OSError, ValueError) as exc:
-            raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image.")) from exc
-        finally:
-            # verify() consumes the stream; rewind so storage saves the full file.
-            image.seek(0)
-        if detected not in allowed_formats:
-            raise ValidationError(_("Upload a JPEG, PNG, WebP, or GIF image."))
-
-        return image
+        return clean_uploaded_image(self.cleaned_data.get("image"))
 
     def clean(self):
         cleaned = super().clean()

@@ -1,0 +1,17 @@
+{% load i18n %}
+<div class="dm-emoji-picker"
+     x-show="showEmoji"
+     x-cloak
+     x-transition
+     @click.outside="showEmoji = false">
+  <div class="dm-emoji-grid" role="listbox" aria-label="{% trans 'Emoji' %}">
+    <template x-for="emoji in emojis" :key="emoji">
+      <button type="button"
+              class="dm-emoji-btn"
+              role="option"
+              :aria-label="emoji"
+              @click="insertEmoji(emoji)"
+              x-text="emoji"></button>
+    </template>
+  </div>
+</div>

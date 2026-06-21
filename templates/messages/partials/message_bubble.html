@@ -7,7 +7,14 @@
   </span>
   {% endif %}
   <div class="dm-message-bubble">
+    {% if message.image %}
+    <a href="{{ message.image.url }}" target="_blank" rel="noopener noreferrer" class="dm-message-media">
+      <img src="{{ message.image.url }}" alt="{% trans 'Attached photo' %}" class="dm-message-media-img" loading="lazy">
+    </a>
+    {% endif %}
+    {% if message.body %}
     <p class="dm-message-text">{{ message.body|linebreaksbr }}</p>
+    {% endif %}
     <time datetime="{{ message.created_at|date:'c' }}" class="dm-message-time">{{ message.created_at|time:"H:i" }}</time>
   </div>
 </div>

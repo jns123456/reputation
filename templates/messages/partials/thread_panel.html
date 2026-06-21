@@ -25,24 +25,117 @@
     <div id="dm-compose-error" class="dm-compose-error" role="alert" aria-live="polite"></div>
     <form method="post"
           action="{% url 'messages:send' conversation_id=conversation.id %}"
+          enctype="multipart/form-data"
           hx-post="{% url 'messages:send' conversation_id=conversation.id %}"
           hx-target="#dm-message-list"
           hx-swap="beforeend"
-          hx-on::after-request="if (event.detail.successful) { this.reset(); this.querySelector('textarea').style.height='auto'; document.getElementById('dm-compose-error').replaceChildren(); }"
-          class="dm-compose-form">
+          hx-encoding="multipart/form-data"
+          class="dm-compose-stack"
+          x-data="{
+            preview: null,
+            showEmoji: false,
+            emojis: ['😀','😂','😍','🥲','😮','😢','🙏','👍','👎','👋','🔥','✨','🎉','💯','❤️','💙','⚽','🏆','📈','🤔'],
+            canSend() {
+              const body = (this.$refs.bodyInput?.value || '').trim();
+              const hasFile = this.$refs.imageInput?.files?.length > 0;
+              return body.length > 0 || hasFile;
+            },
+            insertEmoji(emoji) {
+              const ta = this.$refs.bodyInput;
+              if (!ta) return;
+              const start = ta.selectionStart ?? ta.value.length;
+              const end = ta.selectionEnd ?? ta.value.length;
+              ta.value = ta.value.slice(0, start) + emoji + ta.value.slice(end);
+              ta.selectionStart = ta.selectionEnd = start + emoji.length;
+              ta.dispatchEvent(new Event('input', { bubbles: true }));
+              this.showEmoji = false;
+              ta.focus();
+            },
+            onImageSelected(event) {
+              const file = event.target.files?.[0];
+              if (!file) {
+                this.preview = null;
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = (e) => { this.preview = e.target.result; };
+              reader.readAsDataURL(file);
+            },
+            clearImage() {
+              this.preview = null;
+              if (this.$refs.imageInput) {
+                this.$refs.imageInput.value = '';
+              }
+            },
+            resetCompose() {
+              this.preview = null;
+              this.showEmoji = false;
+              this.$el.reset();
+              if (this.$refs.imageInput) {
+                this.$refs.imageInput.value = '';
+              }
+              if (this.$refs.bodyInput) {
+                this.$refs.bodyInput.style.height = 'auto';
+              }
+              document.getElementById('dm-compose-error')?.replaceChildren();
+            }
+          }"
+          @htmx:after-request="if ($event.detail.successful) resetCompose()">
       {% csrf_token %}
-      <label class="sr-only" for="dm-compose-body">{% trans "Message" %}</label>
-      <textarea id="dm-compose-body"
-                name="body"
-                rows="1"
-                maxlength="2000"
-                required
-                placeholder="{% trans 'Write a message…' %}"
-                class="dm-compose-input"
-                @input="$el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"></textarea>
-      <button type="submit" class="dm-send-btn" aria-label="{% trans 'Send message' %}">
-        <i data-lucide="send" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
-      </button>
+
+      <div x-show="preview" x-cloak class="dm-compose-preview">
+        <img :src="preview" alt="" class="dm-compose-preview-img">
+        <button type="button"
+                class="dm-compose-preview-remove"
+                @click="clearImage()"
+                aria-label="{% trans 'Remove image' %}">
+          <i data-lucide="x" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="dm-compose-row">
+        <div class="dm-compose-tools">
+          <label class="dm-compose-tool-btn" title="{% trans 'Attach photo' %}">
+            <i data-lucide="image" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i>
+            <span class="sr-only">{% trans 'Attach photo' %}</span>
+            <input type="file"
+                   name="image"
+                   accept="image/jpeg,image/png,image/webp,image/gif"
+                   class="sr-only"
+                   x-ref="imageInput"
+                   @change="onImageSelected($event)">
+          </label>
+          <button type="button"
+                  class="dm-compose-tool-btn"
+                  :class="{ 'is-active': showEmoji }"
+                  title="{% trans 'Emoji' %}"
+                  aria-label="{% trans 'Emoji' %}"
+                  @click="showEmoji = !showEmoji">
+            <i data-lucide="smile" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="dm-compose-field-wrap">
+          {% include "messages/partials/emoji_picker.html" %}
+          <label class="sr-only" for="dm-compose-body">{% trans 'Message' %}</label>
+          <textarea id="dm-compose-body"
+                    name="body"
+                    rows="1"
+                    maxlength="2000"
+                    placeholder="{% trans 'Write a message…' %}"
+                    class="dm-compose-input"
+                    x-ref="bodyInput"
+                    @input="$el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"></textarea>
+        </div>
+
+        <button type="submit"
+                class="dm-send-btn"
+                :disabled="!canSend()"
+                :class="{ 'is-disabled': !canSend() }"
+                aria-label="{% trans 'Send message' %}">
+          <i data-lucide="send" class="h-4 w-4" stroke-width="2" aria-hidden="true"></i>
+        </button>
+      </div>
     </form>
   </footer>
 </section>

@@ -32,12 +32,13 @@ def get_or_create_conversation(*, user_a, user_b):
     return conversation
 
 
-def send_message(*, sender, recipient, body):
+def send_message(*, sender, recipient, body, image=None):
     from accounts.write_guard import guard_write_action
 
     body = (body or "").strip()
-    if not body:
-        raise ValueError(_("Message cannot be empty."))
+    has_image = bool(image)
+    if not body and not has_image:
+        raise ValueError(_("Add a message or attach a photo."))
     if len(body) > Message.MAX_BODY_LENGTH:
         raise ValueError(
             _("Message is too long (max %(max)s characters).")
@@ -46,18 +47,22 @@ def send_message(*, sender, recipient, body):
 
     conversation = get_or_create_conversation(user_a=sender, user_b=recipient)
 
-    guard_write_action(
-        action="message",
-        user=sender,
-        text=body,
-        content_scope=f"write:message:conv:{conversation.id}",
-    )
+    if body:
+        guard_write_action(
+            action="message",
+            user=sender,
+            text=body,
+            content_scope=f"write:message:conv:{conversation.id}",
+        )
     with transaction.atomic():
-        message = Message.objects.create(
+        message = Message(
             conversation=conversation,
             sender=sender,
             body=body,
         )
+        if has_image:
+            message.image = image
+        message.save()
         Conversation.objects.filter(pk=conversation.pk).update(updated_at=timezone.now())
         ConversationParticipant.objects.filter(
             conversation=conversation,

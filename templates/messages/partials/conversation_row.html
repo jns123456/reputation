@@ -16,7 +16,14 @@
       </span>
       <span class="dm-conversation-preview">
         {% if row.latest_message %}
-          {% if row.latest_message.sender_id == user.id %}{% trans "You:" %} {% endif %}{{ row.latest_message.body|truncatechars:72 }}
+          {% if row.latest_message.sender_id == user.id %}{% trans "You:" %} {% endif %}
+          {% if row.latest_message.image and not row.latest_message.body %}
+            {% trans "Photo" %}
+          {% elif row.latest_message.image %}
+            {% blocktrans with preview=row.latest_message.body|truncatechars:60 %}Photo · {{ preview }}{% endblocktrans %}
+          {% else %}
+            {{ row.latest_message.body|truncatechars:72 }}
+          {% endif %}
         {% else %}
           {% trans "Say hello" %}
         {% endif %}

@@ -1,13 +1,24 @@
 """Tests for private direct messages."""
 
+from io import BytesIO
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+from PIL import Image
 
 from accounts.models import Notification
 from conftest import create_user
 from messaging.models import Conversation, Message
 from messaging.selectors import get_unread_message_count
 from messaging.services import get_or_create_conversation, send_message
+
+
+def _test_image(name="photo.png"):
+    buffer = BytesIO()
+    Image.new("RGB", (8, 8), color="blue").save(buffer, format="PNG")
+    buffer.seek(0)
+    return SimpleUploadedFile(name, buffer.read(), content_type="image/png")
 
 
 class DirectMessageServiceTests(TestCase):
@@ -60,6 +71,30 @@ class DirectMessageServiceTests(TestCase):
         send_message(sender=self.alice, recipient=self.bob, body="Hola")
         self.assertEqual(Message.objects.count(), 2)
 
+    def test_send_image_only_message(self):
+        message = send_message(
+            sender=self.alice,
+            recipient=self.bob,
+            body="",
+            image=_test_image(),
+        )
+        self.assertTrue(message.image)
+        self.assertEqual(message.body, "")
+
+    def test_send_message_with_text_and_image(self):
+        message = send_message(
+            sender=self.alice,
+            recipient=self.bob,
+            body="Look at this",
+            image=_test_image(),
+        )
+        self.assertEqual(message.body, "Look at this")
+        self.assertTrue(message.image)
+
+    def test_empty_message_without_image_rejected(self):
+        with self.assertRaises(ValueError):
+            send_message(sender=self.alice, recipient=self.bob, body="")
+
 
 class DirectMessageViewTests(TestCase):
     def setUp(self):
@@ -87,3 +122,24 @@ class DirectMessageViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(conversation.messages.count(), 1)
+
+    def test_send_image_via_post(self):
+        conversation = get_or_create_conversation(user_a=self.alice, user_b=self.bob)
+        response = self.client.post(
+            reverse("messages:send", kwargs={"conversation_id": conversation.id}),
+            {"body": "Check this out", "image": _test_image()},
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, 302)
+        message = conversation.messages.get()
+        self.assertTrue(message.image)
+
+    def test_thread_renders_compose_tools_in_spanish(self):
+        conversation = get_or_create_conversation(user_a=self.alice, user_b=self.bob)
+        response = self.client.get(
+            reverse("messages:thread", kwargs={"conversation_id": conversation.id}),
+            HTTP_ACCEPT_LANGUAGE="es",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Adjuntar foto")
+        self.assertContains(response, "Emoji")

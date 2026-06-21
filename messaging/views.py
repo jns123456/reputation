@@ -111,7 +111,7 @@ def send_message_view(request, conversation_id):
         messages.error(request, _("Conversation not found."))
         return redirect("messages:inbox")
 
-    form = MessageForm(request.POST)
+    form = MessageForm(request.POST, request.FILES)
     if not form.is_valid():
         if _is_htmx(request):
             return _htmx_compose_error(request, form.errors.as_text(), status=400)
@@ -124,6 +124,7 @@ def send_message_view(request, conversation_id):
             sender=request.user,
             recipient=recipient,
             body=form.cleaned_data["body"],
+            image=form.cleaned_data.get("image"),
         )
     except abuse_services.RateLimitExceeded as exc:
         msg = write_guard_user_message(exc)

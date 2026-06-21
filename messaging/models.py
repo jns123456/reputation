@@ -86,7 +86,12 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name="sent_dm_messages",
     )
-    body = models.TextField(max_length=MAX_BODY_LENGTH)
+    body = models.TextField(max_length=MAX_BODY_LENGTH, blank=True, default="")
+    image = models.ImageField(
+        upload_to="messaging/attachments/%Y/%m/%d/",
+        blank=True,
+        default="",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -96,5 +101,9 @@ class Message(models.Model):
         ]
 
     def __str__(self):
-        preview = self.body[:40] + ("…" if len(self.body) > 40 else "")
-        return f"Message from {self.sender.username}: {preview}"
+        if self.body:
+            preview = self.body[:40] + ("…" if len(self.body) > 40 else "")
+            return f"Message from {self.sender.username}: {preview}"
+        if self.image:
+            return f"Message from {self.sender.username}: [photo]"
+        return f"Message from {self.sender.username}"
