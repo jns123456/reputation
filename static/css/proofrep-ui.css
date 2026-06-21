@@ -530,31 +530,41 @@ html.dark .pr-profile-header-banner {
   z-index: 120;
 }
 
-.pr-profile-rank-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.35rem;
-  max-width: 5.5rem;
-  margin-top: -1.25rem;
-  margin-bottom: 0.35rem;
+.pr-user-avatar-frame {
   position: relative;
-  z-index: 2;
+  display: inline-flex;
+  flex-shrink: 0;
   overflow: visible;
 }
 
+.pr-profile-rank-badges {
+  position: absolute;
+  left: 50%;
+  bottom: 0.1rem;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  max-width: calc(100% - 0.25rem);
+  z-index: 3;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pr-profile-rank-badges .pr-profile-rank-badge {
+  pointer-events: auto;
+}
+
 .pr-profile-rank-badges--profile {
-  max-width: 5.5rem;
-  margin-top: -1.25rem;
-  margin-bottom: 0.35rem;
+  bottom: 0.45rem;
+  max-width: calc(100% - 0.75rem);
 }
 
 .pr-profile-rank-badges--sm,
 .pr-profile-rank-badges--md {
-  max-width: 2.75rem;
-  margin-top: 0;
-  margin-bottom: 0.2rem;
-  gap: 0.15rem;
+  bottom: -0.05rem;
+  max-width: calc(100% - 0.15rem);
+  gap: 0;
 }
 
 .pr-profile-rank-badges--sm .pr-profile-rank-badge,
@@ -671,9 +681,8 @@ html.dark .pr-profile-rank-badge-tip::after {
 }
 
 @media (min-width: 640px) {
-  .pr-profile-rank-badges {
-    max-width: none;
-    margin-top: -1.5rem;
+  .pr-profile-rank-badges--profile {
+    bottom: 0.5rem;
   }
 }
 
@@ -728,6 +737,7 @@ html.dark .pr-profile-avatar-edit {
 }
 
 .pr-profile-avatar-inner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1448,6 +1458,7 @@ html.dark .pr-profile-search-input:focus {
 }
 
 .pr-user-avatar-ring {
+  position: relative;
   display: flex;
   overflow: hidden;
   border-radius: 9999px;
@@ -5937,6 +5948,7 @@ html.dark .x-forum-post-btn--ready:hover:not(:disabled) {
 }
 
 .x-tweet-avatar {
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
