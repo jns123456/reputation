@@ -250,8 +250,8 @@ def refresh_market_from_polymarket(market):
     client = PolymarketClient()
     try:
         raw_market = client.fetch_market_by_id(market.external_id)
-    except Exception:
-        logger.exception("Failed to fetch Polymarket market %s", market.external_id)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(exc, "Failed to fetch Polymarket market %s", market.external_id)
         return market
 
     raw_event = _fetch_event_for_market(client, raw_market)

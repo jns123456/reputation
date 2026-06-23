@@ -449,14 +449,14 @@ class PolymarketClient:
 
     def fetch_market_by_id(self, external_id):
         url = f"{self.base_url}/markets/{external_id}"
-        response = self.session.get(url, timeout=30)
+        response = self._get_with_retry(url, timeout=30)
         response.raise_for_status()
         raw = response.json()
         return self._enrich_market_with_events(raw)
 
     def fetch_market_by_slug(self, slug):
         url = f"{self.base_url}/markets"
-        response = self.session.get(url, params={"slug": slug}, timeout=30)
+        response = self._get_with_retry(url, params={"slug": slug}, timeout=30)
         response.raise_for_status()
         data = response.json()
         if isinstance(data, list) and data:
@@ -474,6 +474,11 @@ class PolymarketClient:
             enriched = self.fetch_market_by_slug(slug)
             if enriched and enriched.get("events"):
                 raw = {**raw, "events": enriched["events"]}
+        except _TRANSIENT_REQUEST_ERRORS:
+            logger.warning(
+                "Failed to enrich market with events for slug %s (transient upstream)",
+                slug,
+            )
         except Exception:
             logger.exception("Failed to enrich market with events for slug %s", slug)
         return raw
