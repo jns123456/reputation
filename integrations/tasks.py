@@ -62,6 +62,23 @@ def sync_all_category_markets_task(self):
         raise self.retry(exc=exc) from exc
 
 
+@shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=120)
+def refresh_stale_open_markets_task(self):
+    """Periodic refresh of stale open/closed-unresolved Polymarket imports."""
+    try:
+        result = refresh_stale_open_markets()
+        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        logger.info(
+            "refresh_stale_open_markets_task finished: refreshed=%s failures=%s candidates=%s",
+            result["refreshed"],
+            result["failures"],
+            result["candidates"],
+        )
+    except Exception as exc:
+        logger.exception("refresh_stale_open_markets_task failed")
+        raise self.retry(exc=exc) from exc
+
+
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
 def refresh_market_task(self, market_id):
     """Background refresh of a single market from its external source."""
