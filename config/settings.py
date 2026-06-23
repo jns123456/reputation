@@ -799,6 +799,12 @@ validate_production_settings(
     running_tests=_RUNNING_TESTS,
     use_s3_media=USE_S3_MEDIA,
     on_heroku=bool(os.environ.get("DYNO")),
+    dyno=os.environ.get("DYNO", ""),
+    enable_embedded_market_sync=ENABLE_EMBEDDED_MARKET_SYNC,
+    embedded_market_sync_on_web=os.environ.get("EMBEDDED_MARKET_SYNC_ON_WEB", "").lower()
+    in {"1", "true", "yes"},
+    web_concurrency=env.int("WEB_CONCURRENCY", default=2),
+    gunicorn_threads=env.int("GUNICORN_THREADS", default=4),
 )
 
 # Error monitoring (optional — no-op when SENTRY_DSN is unset)

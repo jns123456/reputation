@@ -17,6 +17,11 @@ class IntegrationsConfig(AppConfig):
 
     @staticmethod
     def _should_start_embedded_sync():
+        """
+        In-process market sync is for local ``runserver`` or single-dyno Eco
+        layouts without Celery. Production web dynos must not run sync loops —
+        that competes with Gunicorn for RAM; use Celery beat on the worker (-B).
+        """
         if "test" in sys.argv:
             return False
         if not getattr(settings, "ENABLE_EMBEDDED_MARKET_SYNC", False):
@@ -24,4 +29,11 @@ class IntegrationsConfig(AppConfig):
         if "runserver" in sys.argv:
             return True
         dyno = os.environ.get("DYNO", "")
-        return dyno.startswith("web.")
+        if dyno.startswith("web."):
+            # Opt-in only (Heroku Eco with no worker). Default off on web.
+            return os.environ.get("EMBEDDED_MARKET_SYNC_ON_WEB", "").lower() in {
+                "1",
+                "true",
+                "yes",
+            }
+        return False

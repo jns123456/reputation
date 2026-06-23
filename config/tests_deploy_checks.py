@@ -113,3 +113,25 @@ class ValidateProductionSettingsTests(SimpleTestCase):
 
     def test_passes_on_heroku_with_s3_media(self):
         self._call(on_heroku=True, use_s3_media=True)
+
+    def test_rejects_embedded_sync_on_web_with_worker_layout(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(
+                on_heroku=True,
+                use_s3_media=True,
+                dyno="web.1",
+                enable_embedded_market_sync=True,
+                embedded_market_sync_on_web=True,
+            )
+        self.assertIn("EMBEDDED_MARKET_SYNC_ON_WEB", str(ctx.exception))
+
+    def test_rejects_excessive_gunicorn_concurrency_on_web(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            self._call(
+                on_heroku=True,
+                use_s3_media=True,
+                dyno="web.1",
+                web_concurrency=2,
+                gunicorn_threads=6,
+            )
+        self.assertIn("GUNICORN_THREADS", str(ctx.exception))

@@ -21,6 +21,11 @@ def validate_production_settings(
     running_tests: bool = False,
     use_s3_media: bool = False,
     on_heroku: bool = False,
+    dyno: str = "",
+    enable_embedded_market_sync: bool = False,
+    embedded_market_sync_on_web: bool = False,
+    web_concurrency: int = 2,
+    gunicorn_threads: int = 4,
 ) -> None:
     """Raise ``ImproperlyConfigured`` when production settings are unsafe."""
     if running_tests:
@@ -92,6 +97,20 @@ def validate_production_settings(
             "USE_S3_MEDIA must be True on Heroku — the dyno filesystem is ephemeral "
             "and forum image uploads require Cloudflare R2 or S3-compatible storage."
         )
+
+    if on_heroku and dyno.startswith("web."):
+        if enable_embedded_market_sync and embedded_market_sync_on_web:
+            errors.append(
+                "EMBEDDED_MARKET_SYNC_ON_WEB must be False on the web dyno when a Celery "
+                "worker is available — market sync belongs on the worker (Procfile: celery -B). "
+                "Unset ENABLE_EMBEDDED_MARKET_SYNC or EMBEDDED_MARKET_SYNC_ON_WEB on web."
+            )
+        slots = max(1, web_concurrency) * max(1, gunicorn_threads)
+        if slots > 8:
+            errors.append(
+                f"WEB_CONCURRENCY×GUNICORN_THREADS={slots} exceeds 8 on Standard-2X (1 GB). "
+                "Lower GUNICORN_THREADS (e.g. 4) or WEB_CONCURRENCY (e.g. 1) to avoid R14 memory pressure."
+            )
 
     if errors:
         raise ImproperlyConfigured(" ".join(errors))
