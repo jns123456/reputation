@@ -76,9 +76,11 @@ def get_top_predictors_between(
     mode=None,
     category_slug=None,
     agents_only=False,
+    relative_qualifies_fn=None,
 ):
     """Top predictors by reputation earned inside an explicit window."""
     ranking_mode = normalize_reputation_ranking_mode(mode)
+    qualifies_relative = relative_qualifies_fn or qualifies_for_relative_ranking
 
     qs = ReputationEvent.objects.filter(created_at__gte=since)
     if until is not None:
@@ -144,8 +146,8 @@ def get_top_predictors_between(
         stats.sort(key=lambda s: (s.reputation_points, s.reputation_score), reverse=True)
         return stats[:limit]
 
-    qualified = [s for s in stats if qualifies_for_relative_ranking(s.scored_forecast_count)]
-    unqualified = [s for s in stats if not qualifies_for_relative_ranking(s.scored_forecast_count)]
+    qualified = [s for s in stats if qualifies_relative(s.scored_forecast_count)]
+    unqualified = [s for s in stats if not qualifies_relative(s.scored_forecast_count)]
     qualified.sort(
         key=lambda s: (s.reputation_score, s.reputation_points, s.scored_forecast_count),
         reverse=True,

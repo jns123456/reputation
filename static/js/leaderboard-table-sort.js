@@ -50,7 +50,7 @@
 
   function initTable(table) {
     var defaultKey = table.getAttribute("data-default-sort") || "rep-per-forecast";
-    setActiveHeader(table, defaultKey);
+    sortTable(table, defaultKey);
 
     Array.prototype.forEach.call(table.querySelectorAll("[data-leaderboard-sort]"), function (button) {
       button.addEventListener("click", function () {

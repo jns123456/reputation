@@ -224,6 +224,9 @@ def finalize_weekly_contest(week_code=None, *, prize_usd=None):
             until=until,
             limit=50,
             mode=mode,
+            relative_qualifies_fn=(
+                qualifies_for_weekly_contest if mode == RELATIVE else None
+            ),
         )
         winner = pick_weekly_contest_winner(standings)
         if winner is None:

@@ -77,6 +77,37 @@ class WeeklyContestServicesTests(TestCase):
         self.assertEqual(rows[0].reputation_points, 50)
 
     @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_relative_weekly_contest_ranks_by_rep_per_forecast_at_min_scored(self):
+        """Users with exactly min scored forecasts qualify for weekly relative ranking."""
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        exact_min = create_user("wc_exact_min")
+        above_min = create_user("wc_above_min")
+
+        for index in range(10):
+            market = create_market(external_id=f"wc-min-{index}", slug=f"wc-min-{index}")
+            prediction = _scored_prediction(exact_min, market, points=2)
+            ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        for index in range(18):
+            market = create_market(external_id=f"wc-above-{index}", slug=f"wc-above-{index}")
+            prediction = _scored_prediction(above_min, market, points=1 if index % 3 else -1)
+            ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        from reputation.weekly_contest_services import qualifies_for_weekly_contest
+
+        rows = get_top_predictors_between(
+            since=since,
+            until=week_date_range(week_code)[1],
+            limit=10,
+            mode="relative",
+            relative_qualifies_fn=qualifies_for_weekly_contest,
+        )
+        qualified = [row for row in rows if qualifies_for_weekly_contest(row.scored_forecast_count)]
+        self.assertEqual(qualified[0].user.id, exact_min.id)
+        self.assertGreater(qualified[0].reputation_score, qualified[1].reputation_score)
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
     def test_finalize_skips_users_below_min_scored_forecasts(self):
         week_code = "2020-03-08"
         since, _until = week_date_range(week_code)

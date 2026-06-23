@@ -87,7 +87,7 @@ def get_cached_top_predictors_for_week(
 ):
     from reputation.period_leaderboard import get_top_predictors_between
     from reputation.ranking_modes import normalize_reputation_ranking_mode
-    from reputation.weekly_contest_services import week_date_range
+    from reputation.weekly_contest_services import qualifies_for_weekly_contest, week_date_range
 
     ranking_mode = normalize_reputation_ranking_mode(mode)
     kind = f"rep:{ranking_mode}:week:{week_code}{':agents' if agents_only else ''}"
@@ -104,6 +104,7 @@ def get_cached_top_predictors_for_week(
         mode=ranking_mode,
         category_slug=category_slug or None,
         agents_only=agents_only,
+        relative_qualifies_fn=qualifies_for_weekly_contest,
     )
     cache.set(cache_key, leaders, leaderboard_cache_seconds())
     return leaders
