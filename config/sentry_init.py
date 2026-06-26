@@ -168,6 +168,18 @@ def _is_handled_redis_cache_error(event, hint) -> bool:
     return _stack_includes_filename(event, "cache_backends.py")
 
 
+def _is_celery_worker_sigterm_noise(message: str) -> bool:
+    """Drop expected Celery fork-pool SIGTERM noise during Heroku dyno cycling."""
+    if "ForkPoolWorker" not in message:
+        return False
+    lowered = message.lower()
+    return (
+        "sigterm" in lowered
+        or "exitcode 15" in lowered
+        or "signal 15" in lowered
+    )
+
+
 def _before_send(event, hint):
     """Drop expected Celery worker SIGTERM noise during Heroku dyno cycling."""
     exc_info = hint.get("exc_info")
@@ -180,7 +192,7 @@ def _before_send(event, hint):
         return None
 
     message = _event_message(event)
-    if "ForkPoolWorker" in message and "SIGTERM" in message:
+    if _is_celery_worker_sigterm_noise(message):
         return None
 
     if _is_best_effort_enqueue_noise(event, hint):

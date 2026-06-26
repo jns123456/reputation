@@ -32,6 +32,15 @@ class SentryBeforeSendTests(SimpleTestCase):
         }
         self.assertIsNone(_before_send(event, {}))
 
+    def test_drops_exitcode_15_fork_pool_worker(self):
+        event = {
+            "logger": "multiprocessing",
+            "logentry": {
+                "message": "Process 'ForkPoolWorker-9' pid:33 exited with 'exitcode 15'",
+            },
+        }
+        self.assertIsNone(_before_send(event, {}))
+
     def test_drops_best_effort_celery_enqueue_warnings(self):
         for message in (
             "Failed to enqueue category sync for politics; continuing",
