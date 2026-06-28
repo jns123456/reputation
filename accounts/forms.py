@@ -495,26 +495,35 @@ class ContestPayoutRequestForm(forms.Form):
             }
         ),
     )
+    chain = forms.ChoiceField(
+        label=_("Blockchain network"),
+        choices=(),
+        widget=forms.Select(attrs={"class": "pr-input w-full"}),
+        help_text=_("Select the network where you want to receive USDT or USDC."),
+    )
     usdc_address = forms.CharField(
-        label=_("USDT wallet address"),
-        max_length=42,
+        label=_("Wallet address"),
+        max_length=128,
         widget=forms.TextInput(
             attrs={
                 "class": "pr-input w-full font-mono text-sm",
-                "placeholder": "0x…",
+                "placeholder": "0x… / T… / Solana address",
                 "autocomplete": "off",
                 "spellcheck": "false",
             }
         ),
         help_text=_(
-            "We pay prizes in USDT. Double-check your address — transfers cannot be reversed."
+            "We pay prizes in USDT or USDC on the network you choose. Double-check your address — transfers cannot be reversed."
         ),
     )
 
     def __init__(self, *args, available_usd=None, minimum_usd=None, **kwargs):
+        from reputation.models import ContestPayoutRequest
+
         self.available_usd = available_usd
         self.minimum_usd = minimum_usd
         super().__init__(*args, **kwargs)
+        self.fields["chain"].choices = ContestPayoutRequest.Chain.choices
         if available_usd is not None:
             self.fields["amount_usd"].widget.attrs["max"] = str(available_usd)
         if minimum_usd is not None:
@@ -532,10 +541,19 @@ class ContestPayoutRequestForm(forms.Form):
         return amount
 
     def clean_usdc_address(self):
-        from reputation.payout_services import normalize_usdc_address
+        from reputation.payout_address_validation import (
+            InvalidPayoutAddressError,
+            validate_payout_wallet_address,
+        )
+        from reputation.payout_services import payout_address_validation_error_message
 
-        address = self.cleaned_data["usdc_address"]
+        address = self.cleaned_data.get("usdc_address")
+        chain = self.cleaned_data.get("chain")
+        if not chain:
+            return address
         try:
-            return normalize_usdc_address(address)
-        except ValueError as exc:
-            raise ValidationError(_("Enter a valid USDT wallet address (0x…).")) from exc
+            return validate_payout_wallet_address(chain=chain, address=address)
+        except InvalidPayoutAddressError as exc:
+            raise ValidationError(
+                payout_address_validation_error_message(chain=chain)
+            ) from exc

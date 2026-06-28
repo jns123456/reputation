@@ -122,7 +122,7 @@ class WeeklyContestWinner(models.Model):
 
 
 class ContestPayoutRequest(models.Model):
-    """Off-platform USDC withdrawal request for weekly contest earnings.
+    """Off-platform USDT/USDC withdrawal request for weekly contest earnings.
 
     PredictStamp does not custody funds — admins mark requests paid manually.
     """
@@ -134,7 +134,14 @@ class ContestPayoutRequest(models.Model):
         CANCELLED = "cancelled", "Cancelled"
 
     class Chain(models.TextChoices):
+        ETHEREUM = "ethereum", "Ethereum (ERC-20)"
         BASE = "base", "Base"
+        POLYGON = "polygon", "Polygon"
+        BSC = "bsc", "BNB Smart Chain (BEP-20)"
+        ARBITRUM = "arbitrum", "Arbitrum"
+        OPTIMISM = "optimism", "Optimism"
+        TRON = "tron", "Tron (TRC-20)"
+        SOLANA = "solana", "Solana"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -142,7 +149,7 @@ class ContestPayoutRequest(models.Model):
         related_name="contest_payout_requests",
     )
     amount_usd = models.DecimalField(max_digits=8, decimal_places=2)
-    usdc_address = models.CharField(max_length=42)
+    usdc_address = models.CharField(max_length=128)
     chain = models.CharField(max_length=20, choices=Chain.choices, default=Chain.BASE)
     status = models.CharField(
         max_length=20,

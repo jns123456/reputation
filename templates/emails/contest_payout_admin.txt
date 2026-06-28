@@ -3,6 +3,7 @@
 {% blocktrans with name=player.public_name username=player.username %}Player: {{ name }} (@{{ username }}){% endblocktrans %}
 {% trans "Email:" %} {{ player.email }}
 {% trans "Amount:" %} ${{ payout_request.amount_usd }}
-{% trans "USDT wallet address:" %} {{ payout_request.usdc_address }}
+{% trans "Blockchain network:" %} {{ payout_request.get_chain_display }}
+{% trans "Wallet address:" %} {{ payout_request.usdc_address }}
 
-{% trans "Review the request in Django admin and send USDT manually after verification." %}
+{% trans "Review the request in the admin panel and send USDT/USDC manually on the selected network after verification." %}

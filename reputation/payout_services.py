@@ -1,20 +1,23 @@
-"""Contest earnings balance and off-platform USDT withdrawal requests."""
+"""Contest earnings balance and off-platform USDT/USDC withdrawal requests."""
 
 from __future__ import annotations
 
 import logging
-import re
 from decimal import Decimal
 
 from django.conf import settings
 from django.db.models import Sum
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from reputation.models import ContestPayoutRequest, WeeklyContestWinner
+from reputation.payout_address_validation import (
+    InvalidPayoutAddressError,
+    normalize_payout_chain,
+    validate_payout_wallet_address,
+)
 
 logger = logging.getLogger(__name__)
-
-_USDT_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 
 
 class PayoutRequestError(Exception):
@@ -31,15 +34,17 @@ def minimum_payout_usd() -> Decimal:
     return Decimal(str(getattr(settings, "CONTEST_PAYOUT_MIN_USD", 5)))
 
 
-def normalize_usdc_address(address: str) -> str:
-    normalized = (address or "").strip()
-    if not _USDT_ADDRESS_RE.match(normalized):
-        raise ValueError("invalid address")
-    return normalized
-
-
 def contest_payout_notify_email() -> str:
     return str(getattr(settings, "CONTEST_PAYOUT_NOTIFY_EMAIL", "juaninappa@gmail.com")).strip()
+
+
+def payout_address_validation_error_message(*, chain: str) -> str:
+    chain = (chain or "").strip().lower()
+    if chain == ContestPayoutRequest.Chain.TRON:
+        return _("Enter a valid Tron wallet address (starts with T).")
+    if chain == ContestPayoutRequest.Chain.SOLANA:
+        return _("Enter a valid Solana wallet address.")
+    return _("Enter a valid wallet address for the selected network (0x… for EVM chains).")
 
 
 def send_contest_payout_admin_notification(*, payout_request: ContestPayoutRequest) -> bool:
@@ -125,7 +130,7 @@ def user_has_pending_payout_request(user) -> bool:
     ).exists()
 
 
-def create_payout_request(*, user, amount_usd, usdc_address):
+def create_payout_request(*, user, amount_usd, usdc_address, chain):
     if not contest_payouts_enabled():
         raise PayoutRequestError(_("Contest withdrawals are not available right now."))
 
@@ -144,17 +149,42 @@ def create_payout_request(*, user, amount_usd, usdc_address):
         raise PayoutRequestError(_("You already have a pending withdrawal request."))
 
     try:
-        normalized_address = normalize_usdc_address(usdc_address)
-    except ValueError as exc:
+        normalized_chain = normalize_payout_chain(chain)
+        normalized_address = validate_payout_wallet_address(
+            chain=normalized_chain,
+            address=usdc_address,
+        )
+    except InvalidPayoutAddressError as exc:
         raise PayoutRequestError(
-            _("Enter a valid USDT wallet address (0x…).")
+            payout_address_validation_error_message(chain=chain)
         ) from exc
 
     payout_request = ContestPayoutRequest.objects.create(
         user=user,
         amount_usd=amount,
         usdc_address=normalized_address,
-        chain=ContestPayoutRequest.Chain.BASE,
+        chain=normalized_chain,
     )
     send_contest_payout_admin_notification(payout_request=payout_request)
     return payout_request
+
+
+def resolve_contest_payout_request(*, payout_request, action, tx_hash=""):
+    """Mark a payout request paid or rejected from the admin panel."""
+    if payout_request.status != ContestPayoutRequest.Status.PENDING:
+        raise PayoutRequestError(_("Only pending withdrawal requests can be updated."))
+
+    if action == "mark_paid":
+        payout_request.status = ContestPayoutRequest.Status.PAID
+        payout_request.paid_at = timezone.now()
+        if tx_hash:
+            payout_request.tx_hash = tx_hash.strip()
+        payout_request.save(update_fields=["status", "paid_at", "tx_hash", "updated_at"])
+        return payout_request
+
+    if action == "mark_rejected":
+        payout_request.status = ContestPayoutRequest.Status.REJECTED
+        payout_request.save(update_fields=["status", "updated_at"])
+        return payout_request
+
+    raise PayoutRequestError(_("Invalid action."))

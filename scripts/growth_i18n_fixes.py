@@ -143,7 +143,47 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Available balance · $%(earned)s earned from weekly prizes": (
         "Saldo disponible · $%(earned)s ganados en premios semanales"
     ),
-    "Withdraw USDT": "Retirar USDT",
+    "Withdraw USDT/USDC": "Retirar USDT/USDC",
+    "Request USDT/USDC withdrawal": "Solicitar retiro en USDT/USDC",
+    "Minimum ${{ min }}. Choose the blockchain network and wallet address where you want to receive USDT or USDC. Processing usually takes a few business days.": (
+        "Mínimo ${{ min }}. Elige la red blockchain y la dirección wallet donde quieres recibir USDT o USDC. "
+        "El procesamiento suele tardar unos días hábiles."
+    ),
+    "Blockchain network": "Red blockchain",
+    "Select the network where you want to receive USDT or USDC.": (
+        "Selecciona la red donde quieres recibir USDT o USDC."
+    ),
+    "Wallet address": "Dirección wallet",
+    "We pay prizes in USDT or USDC on the network you choose. Double-check your address — transfers cannot be reversed.": (
+        "Pagamos los premios en USDT o USDC en la red que elijas. Revisa bien tu dirección — las transferencias no se pueden revertir."
+    ),
+    "Enter a valid wallet address for the selected network (0x… for EVM chains).": (
+        "Introduce una dirección wallet válida para la red seleccionada (0x… para cadenas EVM)."
+    ),
+    "Enter a valid Tron wallet address (starts with T).": (
+        "Introduce una dirección wallet Tron válida (empieza con T)."
+    ),
+    "Enter a valid Solana wallet address.": "Introduce una dirección wallet Solana válida.",
+    "USD equivalent · withdraw as USDT/USDC": "Equivalente en USD · retira en USDT/USDC",
+    "Network": "Red",
+    "Contest withdrawals": "Retiros del concurso",
+    "Pending: %(count)s requests · $%(total)s total. Pay USDT/USDC manually to the wallet on the selected network.": (
+        "Pendientes: %(count)s solicitudes · $%(total)s total. Paga USDT/USDC manualmente a la wallet en la red seleccionada."
+    ),
+    "%(count)s pending": "%(count)s pendientes",
+    "%(count)s paid": "%(count)s pagados",
+    "Wallet": "Wallet",
+    "Actions": "Acciones",
+    "Tx hash (optional)": "Hash de tx (opcional)",
+    "Mark paid": "Marcar pagado",
+    "Reject": "Rechazar",
+    "No pending contest withdrawal requests.": "No hay solicitudes de retiro del concurso pendientes.",
+    "Recent withdrawal history": "Historial reciente de retiros",
+    "Tx": "Tx",
+    "A player requested a USDT/USDC withdrawal.": "Un jugador solicitó un retiro en USDT/USDC.",
+    "Review the request in the admin panel and send USDT/USDC manually on the selected network after verification.": (
+        "Revisa la solicitud en el panel admin y envía USDT/USDC manualmente en la red seleccionada tras la verificación."
+    ),
     "Lifetime earned": "Total ganado",
     "Pending": "Pendiente",
     "Withdrawn": "Retirado",

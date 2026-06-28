@@ -9,6 +9,11 @@ urlpatterns = [
     path("", views.about, name="landing"),
     path("panel/", admin_panel_views.admin_panel, name="admin_panel"),
     path(
+        "panel/contest-payouts/<int:payout_id>/",
+        admin_panel_views.resolve_contest_payout,
+        name="resolve_contest_payout",
+    ),
+    path(
         "panel/verifications/<int:user_id>/",
         admin_panel_views.resolve_identity_verification,
         name="resolve_identity_verification",

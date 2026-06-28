@@ -5,6 +5,9 @@ from django.utils import timezone
 
 from conftest import create_user
 from dashboard.admin_panel_selectors import get_admin_panel_stats
+from reputation.models import ContestPayoutRequest
+from reputation.payout_services import create_payout_request
+from reputation.tests_payout import DEFAULT_CHAIN, VALID_ADDRESS, _create_win
 
 
 class AdminPanelSelectorTests(TestCase):
@@ -34,3 +37,38 @@ class AdminPanelViewTests(TestCase):
         response = self.client.get(reverse("dashboard:admin_panel"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Total users")
+
+    def test_admin_panel_shows_pending_contest_withdrawals(self):
+        winner = create_user("panelwinner")
+        _create_win(winner)
+        create_payout_request(
+            user=winner,
+            amount_usd=5,
+            usdc_address=VALID_ADDRESS,
+            chain=DEFAULT_CHAIN,
+        )
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("dashboard:admin_panel"))
+        self.assertContains(response, "Contest withdrawals")
+        self.assertContains(response, winner.public_name)
+        req = ContestPayoutRequest.objects.get(user=winner)
+        self.assertContains(response, req.usdc_address)
+
+    def test_admin_can_mark_contest_payout_paid(self):
+        winner = create_user("panelpaid")
+        _create_win(winner)
+        req = create_payout_request(
+            user=winner,
+            amount_usd=5,
+            usdc_address=VALID_ADDRESS,
+            chain=DEFAULT_CHAIN,
+        )
+        self.client.force_login(self.admin)
+        response = self.client.post(
+            reverse("dashboard:resolve_contest_payout", args=[req.pk]),
+            {"action": "mark_paid", "tx_hash": "0xdeadbeef"},
+        )
+        self.assertRedirects(response, reverse("dashboard:admin_panel"))
+        req.refresh_from_db()
+        self.assertEqual(req.status, ContestPayoutRequest.Status.PAID)
+        self.assertEqual(req.tx_hash, "0xdeadbeef")

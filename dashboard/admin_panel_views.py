@@ -23,6 +23,7 @@ from accounts.identity_verification_services import (
 from accounts.models import AbuseEvent, AIAgentProfile
 from dashboard.admin_panel_selectors import (
     build_admin_stat_cards,
+    get_admin_contest_payout_overview,
     get_admin_panel_stats,
     get_admin_recent_activity,
 )
@@ -47,9 +48,45 @@ def admin_panel(request):
         "stat_cards": build_admin_stat_cards(stats),
         "recent_users": recent["recent_users"],
         "recent_predictions": recent["recent_predictions"],
+        "contest_payouts": get_admin_contest_payout_overview(),
         **_verification_context(),
     }
     return render(request, "dashboard/admin_panel.html", context)
+
+
+@superadmin_required
+@require_POST
+def resolve_contest_payout(request, payout_id):
+    from django.contrib import messages
+
+    from reputation.models import ContestPayoutRequest
+    from reputation.payout_services import PayoutRequestError, resolve_contest_payout_request
+
+    payout = get_object_or_404(ContestPayoutRequest.objects.select_related("user"), pk=payout_id)
+    action = request.POST.get("action", "")
+    tx_hash = request.POST.get("tx_hash", "")
+
+    try:
+        resolve_contest_payout_request(
+            payout_request=payout,
+            action=action,
+            tx_hash=tx_hash,
+        )
+    except PayoutRequestError as exc:
+        messages.error(request, exc.message)
+    else:
+        if action == "mark_paid":
+            messages.success(
+                request,
+                f"Marked ${payout.amount_usd} withdrawal for @{payout.user.username} as paid.",
+            )
+        elif action == "mark_rejected":
+            messages.success(
+                request,
+                f"Rejected withdrawal request for @{payout.user.username}.",
+            )
+
+    return redirect("dashboard:admin_panel")
 
 
 @superadmin_required

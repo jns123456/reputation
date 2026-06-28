@@ -27,7 +27,7 @@
     <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Available balance" %}</p>
       <p class="mt-1 text-3xl font-bold tabular-nums text-emerald-700 dark:text-emerald-400">${{ summary.available_usd }}</p>
-      <p class="mt-1 text-xs text-slate-500">{% trans "USD equivalent · withdraw as USDT" %}</p>
+      <p class="mt-1 text-xs text-slate-500">{% trans "USD equivalent · withdraw as USDT/USDC" %}</p>
     </div>
     <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
       <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{% trans "Lifetime earned" %}</p>
@@ -47,9 +47,9 @@
 
   {% if payouts_enabled and can_request_payout %}
   <section class="mt-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
-    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{% trans "Request USDT withdrawal" %}</h2>
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{% trans "Request USDT/USDC withdrawal" %}</h2>
     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-      {% blocktrans with min=minimum_usd %}Minimum ${{ min }}. Prizes are paid in USDT after manual review — processing usually takes a few business days.{% endblocktrans %}
+      {% blocktrans with min=minimum_usd %}Minimum ${{ min }}. Choose the blockchain network and wallet address where you want to receive USDT or USDC. Processing usually takes a few business days.{% endblocktrans %}
     </p>
     <form method="post" class="mt-4 space-y-4">
       {% csrf_token %}
@@ -119,6 +119,7 @@
           <tr>
             <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Date" %}</th>
             <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Amount" %}</th>
+            <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Network" %}</th>
             <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Status" %}</th>
             <th scope="col" class="px-4 py-3 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Address" %}</th>
           </tr>
@@ -128,6 +129,7 @@
           <tr>
             <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-700 dark:text-slate-300">{{ req.created_at|date:"M j, Y" }}</td>
             <td class="whitespace-nowrap px-4 py-3 font-semibold tabular-nums text-slate-900 dark:text-white">${{ req.amount_usd }}</td>
+            <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ req.get_chain_display }}</td>
             <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ req.get_status_display }}</td>
             <td class="max-w-[10rem] truncate px-4 py-3 font-mono text-xs text-slate-500" title="{{ req.usdc_address }}">{{ req.usdc_address }}</td>
           </tr>

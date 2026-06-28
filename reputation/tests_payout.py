@@ -16,6 +16,8 @@ from reputation.payout_services import (
 )
 
 VALID_ADDRESS = "0x" + "a" * 40
+VALID_TRON = "T" + "9" * 33
+DEFAULT_CHAIN = ContestPayoutRequest.Chain.BASE
 
 
 def _create_win(user, *, prize_usd=5, week_code="2026-06-21"):
@@ -43,6 +45,7 @@ class ContestPayoutServicesTests(TestCase):
             user=self.user,
             amount_usd=Decimal("5"),
             usdc_address=VALID_ADDRESS,
+            chain=DEFAULT_CHAIN,
         )
         summary = get_contest_earnings_summary(self.user)
         self.assertEqual(summary["pending_usd"], Decimal("5"))
@@ -54,6 +57,17 @@ class ContestPayoutServicesTests(TestCase):
         self.assertEqual(summary["withdrawn_usd"], Decimal("5"))
         self.assertEqual(summary["available_usd"], Decimal("5"))
 
+    def test_stores_selected_chain(self):
+        _create_win(self.user)
+        req = create_payout_request(
+            user=self.user,
+            amount_usd=Decimal("5"),
+            usdc_address=VALID_TRON,
+            chain=ContestPayoutRequest.Chain.TRON,
+        )
+        self.assertEqual(req.chain, ContestPayoutRequest.Chain.TRON)
+        self.assertEqual(req.usdc_address, VALID_TRON)
+
     def test_rejects_invalid_address(self):
         _create_win(self.user)
         with self.assertRaises(PayoutRequestError):
@@ -61,6 +75,7 @@ class ContestPayoutServicesTests(TestCase):
                 user=self.user,
                 amount_usd=Decimal("5"),
                 usdc_address="not-an-address",
+                chain=DEFAULT_CHAIN,
             )
 
     def test_rejects_duplicate_pending_request(self):
@@ -69,12 +84,14 @@ class ContestPayoutServicesTests(TestCase):
             user=self.user,
             amount_usd=Decimal("5"),
             usdc_address=VALID_ADDRESS,
+            chain=DEFAULT_CHAIN,
         )
         with self.assertRaises(PayoutRequestError):
             create_payout_request(
                 user=self.user,
                 amount_usd=Decimal("5"),
                 usdc_address=VALID_ADDRESS,
+                chain=DEFAULT_CHAIN,
             )
 
     def test_rejects_below_minimum(self):
@@ -84,6 +101,7 @@ class ContestPayoutServicesTests(TestCase):
                 user=self.user,
                 amount_usd=Decimal("4"),
                 usdc_address=VALID_ADDRESS,
+                chain=DEFAULT_CHAIN,
             )
 
 
@@ -118,7 +136,11 @@ class ProfileContestEarningsViewTests(TestCase):
         with patch("reputation.payout_services.send_contest_payout_admin_notification") as mock_notify:
             response = self.client.post(
                 self.url,
-                {"amount_usd": "5", "usdc_address": VALID_ADDRESS},
+                {
+                    "amount_usd": "5",
+                    "chain": DEFAULT_CHAIN,
+                    "usdc_address": VALID_ADDRESS,
+                },
             )
         self.assertRedirects(response, self.url)
         self.assertEqual(ContestPayoutRequest.objects.filter(user=self.user).count(), 1)
@@ -132,8 +154,11 @@ class ProfileContestEarningsViewTests(TestCase):
             user=self.user,
             amount_usd=Decimal("5"),
             usdc_address=VALID_ADDRESS,
+            chain=DEFAULT_CHAIN,
         )
         mock_send.assert_called_once()
+        context = mock_send.call_args.kwargs["context"]
+        self.assertEqual(context["payout_request"].chain, DEFAULT_CHAIN)
         self.assertEqual(mock_send.call_args.kwargs["recipient_email"], "ops@example.com")
         self.assertEqual(
             mock_send.call_args.kwargs["template_base"],
@@ -146,7 +171,7 @@ class ProfileContestEarningsViewTests(TestCase):
         response = self.client.get(reverse("accounts:profile", args=[self.user.username]))
         self.assertContains(response, "Contest earnings")
         self.assertContains(response, "$10")
-        self.assertContains(response, "Withdraw USDT")
+        self.assertContains(response, "Withdraw USDT/USDC")
 
     def test_spanish_renders(self):
         _create_win(self.user)

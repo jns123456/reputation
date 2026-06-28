@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -11,6 +11,7 @@ from comments.models import Comment
 from markets.models import Market
 from predictions.models import Prediction
 from pulse.models import Post as ForumPost
+from reputation.models import ContestPayoutRequest
 
 
 def get_admin_panel_stats():
@@ -133,4 +134,27 @@ def get_admin_recent_activity():
         "recent_predictions": Prediction.objects.select_related("user", "market").order_by(
             "-created_at"
         )[:8],
+    }
+
+
+def get_admin_contest_payout_overview():
+    """Pending and recent contest withdrawal requests for the super-admin panel."""
+    pending_qs = ContestPayoutRequest.objects.filter(
+        status=ContestPayoutRequest.Status.PENDING
+    ).select_related("user")
+    stats = ContestPayoutRequest.objects.aggregate(
+        pending_count=Count("pk", filter=Q(status=ContestPayoutRequest.Status.PENDING)),
+        pending_usd=Sum("amount_usd", filter=Q(status=ContestPayoutRequest.Status.PENDING)),
+        paid_count=Count("pk", filter=Q(status=ContestPayoutRequest.Status.PAID)),
+        total_count=Count("pk"),
+    )
+    return {
+        "pending_requests": pending_qs.order_by("-created_at")[:50],
+        "recent_requests": ContestPayoutRequest.objects.select_related("user").order_by(
+            "-created_at"
+        )[:15],
+        "pending_count": stats["pending_count"] or 0,
+        "pending_usd": stats["pending_usd"] or 0,
+        "paid_count": stats["paid_count"] or 0,
+        "total_count": stats["total_count"] or 0,
     }

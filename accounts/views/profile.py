@@ -460,6 +460,7 @@ def profile_contest_earnings(request, username):
                     user=profile_user,
                     amount_usd=form.cleaned_data["amount_usd"],
                     usdc_address=form.cleaned_data["usdc_address"],
+                    chain=form.cleaned_data["chain"],
                 )
             except PayoutRequestError as exc:
                 messages.error(request, exc.message)
