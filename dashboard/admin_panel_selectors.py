@@ -12,6 +12,11 @@ from markets.models import Market
 from predictions.models import Prediction
 from pulse.models import Post as ForumPost
 from reputation.models import ContestPayoutRequest
+from reputation.payout_services import (
+    get_admin_contest_balance_rows,
+    get_admin_contest_winner_rows,
+    get_platform_contest_liability_summary,
+)
 
 
 def get_admin_panel_stats():
@@ -138,7 +143,7 @@ def get_admin_recent_activity():
 
 
 def get_admin_contest_payout_overview():
-    """Pending and recent contest withdrawal requests for the super-admin panel."""
+    """Contest liability, winners, balances, and withdrawal requests for the admin panel."""
     pending_qs = ContestPayoutRequest.objects.filter(
         status=ContestPayoutRequest.Status.PENDING
     ).select_related("user")
@@ -148,7 +153,11 @@ def get_admin_contest_payout_overview():
         paid_count=Count("pk", filter=Q(status=ContestPayoutRequest.Status.PAID)),
         total_count=Count("pk"),
     )
+    liability = get_platform_contest_liability_summary()
     return {
+        "liability": liability,
+        "winner_rows": get_admin_contest_winner_rows(limit=100),
+        "balance_rows": get_admin_contest_balance_rows(),
         "pending_requests": pending_qs.order_by("-created_at")[:50],
         "recent_requests": ContestPayoutRequest.objects.select_related("user").order_by(
             "-created_at"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 13:56+0000\n"
+"POT-Creation-Date: 2026-06-28 14:11+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -488,20 +488,15 @@ msgstr ""
 msgid "Amount (USD)"
 msgstr "Monto (USD)"
 
-#| msgid "Join the network"
 msgid "Blockchain network"
 msgstr "Red blockchain"
 
 msgid "Select the network where you want to receive USDT or USDC."
 msgstr "Selecciona la red donde quieres recibir USDT o USDC."
 
-#| msgid "USDT wallet address"
 msgid "Wallet address"
 msgstr "Dirección wallet"
 
-#| msgid ""
-#| "We pay prizes in USDT. Double-check your address — transfers cannot be "
-#| "reversed."
 msgid ""
 "We pay prizes in USDT or USDC on the network you choose. Double-check your "
 "address — transfers cannot be reversed."
@@ -1742,15 +1737,12 @@ msgstr ""
 msgid "Poll not found"
 msgstr "Encuesta no encontrada"
 
-#| msgid "Enter a valid USDT wallet address (0x…)."
 msgid "Enter a valid Tron wallet address (starts with T)."
 msgstr "Introduce una dirección wallet Tron válida (empieza con T)."
 
-#| msgid "Enter a valid USDT wallet address (0x…)."
 msgid "Enter a valid Solana wallet address."
 msgstr "Introduce una dirección wallet Solana válida."
 
-#| msgid "Enter a valid USDT wallet address (0x…)."
 msgid ""
 "Enter a valid wallet address for the selected network (0x… for EVM chains)."
 msgstr ""
@@ -1767,11 +1759,9 @@ msgstr "Los retiros del concurso no están disponibles en este momento."
 msgid "You already have a pending withdrawal request."
 msgstr "Ya tienes una solicitud de retiro pendiente."
 
-#| msgid "Only pending challenges can be cancelled."
 msgid "Only pending withdrawal requests can be updated."
 msgstr "Solo se pueden cancelar los desafíos pendientes."
 
-#| msgid "Invalid link"
 msgid "Invalid action."
 msgstr "Enlace no válido"
 
@@ -2559,7 +2549,6 @@ msgstr "Ver concurso semanal"
 msgid "Available balance"
 msgstr "Saldo disponible"
 
-#| msgid "USD equivalent · withdraw as USDT"
 msgid "USD equivalent · withdraw as USDT/USDC"
 msgstr "Equivalente en USD · retira en USDT/USDC"
 
@@ -2569,7 +2558,6 @@ msgstr "Total ganado"
 msgid "Withdrawn"
 msgstr "Retirado"
 
-#| msgid "Request USDT withdrawal"
 msgid "Request USDT/USDC withdrawal"
 msgstr "Solicitar retiro en USDT/USDC"
 
@@ -2658,7 +2646,6 @@ msgstr "Gestionar tokens MCP"
 msgid "Available balance · $%(earned)s earned from weekly prizes"
 msgstr "Saldo disponible · $%(earned)s ganados en premios semanales"
 
-#| msgid "Withdraw USDT"
 msgid "Withdraw USDT/USDC"
 msgstr "Retirar USDT/USDC"
 
@@ -5647,7 +5634,55 @@ msgstr ""
 "Nada en PredictStamp es asesoramiento financiero, de inversión, legal, "
 "fiscal o profesional."
 
-#| msgid "New contest withdrawal request"
+#| msgid "Weekly Contest"
+msgid "Weekly contest prizes"
+msgstr "Premios del concurso semanal"
+
+#, python-format
+msgid ""
+"Platform liability for off-platform prizes — %(weeks)s finalized weeks · "
+"%(winners)s winning players."
+msgstr ""
+"Deuda de la plataforma por premios off-platform — %(weeks)s semanas "
+"finalizadas · %(winners)s jugadores ganadores."
+
+msgid "Total awarded"
+msgstr "Total otorgado"
+
+msgid "Paid out"
+msgstr "Pagado"
+
+#| msgid "Contest withdrawals"
+msgid "Pending withdrawal"
+msgstr "Retiro pendiente"
+
+msgid "Outstanding debt"
+msgstr "Deuda pendiente"
+
+msgid "Credited but not yet requested or paid"
+msgstr "Acreditado pero aún no solicitado ni pagado"
+
+msgid "Player balances owed"
+msgstr "Saldos adeudados a jugadores"
+
+msgid ""
+"All players with contest earnings — including those who have not requested "
+"withdrawal yet."
+msgstr ""
+"Todos los jugadores con ganancias del concurso — incluidos quienes aún no "
+"han solicitado retiro."
+
+#| msgid "No one is following you yet."
+msgid "No contest winners recorded yet."
+msgstr "Aún no hay ganadores del concurso registrados."
+
+#| msgid "Past winners"
+msgid "Contest winners"
+msgstr "Ganadores del concurso"
+
+msgid "Weekly contest winners from all finalized weeks."
+msgstr "Ganadores del concurso semanal de todas las semanas finalizadas."
+
 msgid "Contest withdrawals"
 msgstr "Retiros del concurso"
 
@@ -5660,39 +5695,31 @@ msgstr ""
 "manualmente a la wallet en la red seleccionada."
 
 #, python-format
-#| msgid "%(count)s people"
 msgid "%(count)s pending"
 msgstr "%(count)s pendientes"
 
 #, python-format
-#| msgid "%(count)s people"
 msgid "%(count)s paid"
 msgstr "%(count)s pagados"
 
-#| msgid "No wallets"
 msgid "Wallet"
 msgstr "Wallet"
 
-#| msgid "Reactions"
 msgid "Actions"
 msgstr "Acciones"
 
-#| msgid "Name (optional)"
 msgid "Tx hash (optional)"
 msgstr "Hash de tx (opcional)"
 
-#| msgid "Mark read"
 msgid "Mark paid"
 msgstr "Marcar pagado"
 
 msgid "Reject"
 msgstr "Rechazar"
 
-#| msgid "New contest withdrawal request"
 msgid "No pending contest withdrawal requests."
 msgstr "No hay solicitudes de retiro del concurso pendientes."
 
-#| msgid "New contest withdrawal request"
 msgid "Recent withdrawal history"
 msgstr "Historial reciente de retiros"
 
@@ -6346,13 +6373,9 @@ msgstr "Administra tus alertas"
 msgid "New contest withdrawal request"
 msgstr "Nueva solicitud de retiro del concurso"
 
-#| msgid "A player requested a USDT withdrawal."
 msgid "A player requested a USDT/USDC withdrawal."
 msgstr "Un jugador solicitó un retiro en USDT/USDC."
 
-#| msgid ""
-#| "Review the request in Django admin and send USDT manually after "
-#| "verification."
 msgid ""
 "Review the request in the admin panel and send USDT/USDC manually on the "
 "selected network after verification."
@@ -6370,11 +6393,9 @@ msgstr "Email"
 msgid "Amount:"
 msgstr "Monto"
 
-#| msgid "Join the network"
 msgid "Blockchain network:"
 msgstr "Unirse a la red"
 
-#| msgid "USDT wallet address:"
 msgid "Wallet address:"
 msgstr "Dirección wallet USDC (Base)"
 

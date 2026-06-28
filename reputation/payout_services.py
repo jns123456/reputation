@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
@@ -128,6 +129,99 @@ def user_has_pending_payout_request(user) -> bool:
         user=user,
         status=ContestPayoutRequest.Status.PENDING,
     ).exists()
+
+
+def get_platform_contest_liability_summary() -> dict:
+    """Aggregate contest prize debt — awarded, in-flight withdrawals, and still owed."""
+    awarded_raw = (
+        WeeklyContestWinner.objects.aggregate(total=Sum("prize_usd"))["total"] or 0
+    )
+    paid_raw = (
+        ContestPayoutRequest.objects.filter(status=ContestPayoutRequest.Status.PAID).aggregate(
+            total=Sum("amount_usd")
+        )["total"]
+        or 0
+    )
+    pending_raw = (
+        ContestPayoutRequest.objects.filter(
+            status=ContestPayoutRequest.Status.PENDING
+        ).aggregate(total=Sum("amount_usd"))["total"]
+        or 0
+    )
+    awarded = Decimal(str(awarded_raw))
+    paid = Decimal(str(paid_raw))
+    pending = Decimal(str(pending_raw))
+    outstanding = awarded - paid - pending
+    if outstanding < 0:
+        outstanding = Decimal("0")
+
+    winner_users = WeeklyContestWinner.objects.values("user_id").distinct().count()
+    finalized_weeks = WeeklyContestWinner.objects.values("week_code").distinct().count()
+
+    return {
+        "total_awarded_usd": awarded,
+        "total_paid_usd": paid,
+        "pending_withdrawal_usd": pending,
+        "outstanding_usd": outstanding,
+        "winner_count": WeeklyContestWinner.objects.count(),
+        "winner_users": winner_users,
+        "finalized_weeks": finalized_weeks,
+    }
+
+
+def get_admin_contest_winner_rows(*, limit=100):
+    """All recorded weekly contest wins for the admin panel (newest first)."""
+    from reputation.weekly_contest_services import week_date_range
+
+    wins = list(
+        WeeklyContestWinner.objects.select_related("user")
+        .order_by("-week_code", "prize_type")[:limit]
+    )
+    summaries_by_user = {}
+    rows = []
+    for win in wins:
+        if win.user_id not in summaries_by_user:
+            summaries_by_user[win.user_id] = get_contest_earnings_summary(win.user)
+        summary = summaries_by_user[win.user_id]
+        since, until = week_date_range(win.week_code)
+        rows.append(
+            {
+                "win": win,
+                "week_start": since,
+                "week_end": until - timedelta(seconds=1),
+                "user_available_usd": summary["available_usd"],
+                "user_earned_usd": summary["earned_usd"],
+            }
+        )
+    return rows
+
+
+def get_admin_contest_balance_rows():
+    """Players with contest earnings — owed balance even if they never requested withdrawal."""
+    user_ids = WeeklyContestWinner.objects.values_list("user_id", flat=True).distinct()
+    if not user_ids:
+        return []
+
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    rows = []
+    for user in User.objects.filter(pk__in=user_ids).order_by("username"):
+        summary = get_contest_earnings_summary(user)
+        if summary["earned_usd"] <= 0:
+            continue
+        rows.append(
+            {
+                "user": user,
+                "earned_usd": summary["earned_usd"],
+                "available_usd": summary["available_usd"],
+                "pending_usd": summary["pending_usd"],
+                "withdrawn_usd": summary["withdrawn_usd"],
+                "has_pending_request": user_has_pending_payout_request(user),
+            }
+        )
+    rows.sort(key=lambda row: row["available_usd"], reverse=True)
+    return rows
 
 
 def create_payout_request(*, user, amount_usd, usdc_address, chain):

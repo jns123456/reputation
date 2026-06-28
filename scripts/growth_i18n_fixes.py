@@ -167,6 +167,25 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "USD equivalent · withdraw as USDT/USDC": "Equivalente en USD · retira en USDT/USDC",
     "Network": "Red",
     "Contest withdrawals": "Retiros del concurso",
+    "Weekly contest prizes": "Premios del concurso semanal",
+    "Platform liability for off-platform prizes — %(weeks)s finalized weeks · %(winners)s winning players.": (
+        "Deuda de la plataforma por premios off-platform — %(weeks)s semanas finalizadas · %(winners)s jugadores ganadores."
+    ),
+    "Total awarded": "Total otorgado",
+    "Paid out": "Pagado",
+    "Pending withdrawal": "Retiro pendiente",
+    "Outstanding debt": "Deuda pendiente",
+    "Credited but not yet requested or paid": "Acreditado pero aún no solicitado ni pagado",
+    "Player balances owed": "Saldos adeudados a jugadores",
+    "All players with contest earnings — including those who have not requested withdrawal yet.": (
+        "Todos los jugadores con ganancias del concurso — incluidos quienes aún no han solicitado retiro."
+    ),
+    "Available balance": "Saldo disponible",
+    "Contest winners": "Ganadores del concurso",
+    "Weekly contest winners from all finalized weeks.": (
+        "Ganadores del concurso semanal de todas las semanas finalizadas."
+    ),
+    "No contest winners recorded yet.": "Aún no hay ganadores del concurso registrados.",
     "Pending: %(count)s requests · $%(total)s total. Pay USDT/USDC manually to the wallet on the selected network.": (
         "Pendientes: %(count)s solicitudes · $%(total)s total. Paga USDT/USDC manualmente a la wallet en la red seleccionada."
     ),

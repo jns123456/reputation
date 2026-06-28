@@ -4,9 +4,12 @@ from django.urls import reverse
 from django.utils import timezone
 
 from conftest import create_user
-from dashboard.admin_panel_selectors import get_admin_panel_stats
-from reputation.models import ContestPayoutRequest
-from reputation.payout_services import create_payout_request
+from dashboard.admin_panel_selectors import get_admin_contest_payout_overview, get_admin_panel_stats
+from reputation.models import ContestPayoutRequest, WeeklyContestWinner
+from reputation.payout_services import (
+    create_payout_request,
+    get_platform_contest_liability_summary,
+)
 from reputation.tests_payout import DEFAULT_CHAIN, VALID_ADDRESS, _create_win
 
 
@@ -17,6 +20,24 @@ class AdminPanelSelectorTests(TestCase):
         with self.assertNumQueries(5):
             stats = get_admin_panel_stats()
         self.assertGreaterEqual(stats["users"]["total"], 2)
+
+    def test_contest_liability_summary(self):
+        winner = create_user("liabilitywinner")
+        _create_win(winner, prize_usd=5)
+        summary = get_platform_contest_liability_summary()
+        self.assertEqual(summary["total_awarded_usd"], 5)
+        self.assertEqual(summary["outstanding_usd"], 5)
+        self.assertEqual(summary["winner_users"], 1)
+
+    def test_contest_overview_includes_winners_without_withdrawal(self):
+        winner = create_user("nowithdraw")
+        _create_win(winner, prize_usd=5, week_code="2026-06-21")
+        overview = get_admin_contest_payout_overview()
+        self.assertEqual(overview["liability"]["outstanding_usd"], 5)
+        self.assertEqual(len(overview["winner_rows"]), 1)
+        self.assertEqual(overview["winner_rows"][0]["win"].user_id, winner.pk)
+        self.assertEqual(len(overview["balance_rows"]), 1)
+        self.assertEqual(overview["balance_rows"][0]["available_usd"], 5)
 
 
 class AdminPanelViewTests(TestCase):
@@ -53,6 +74,24 @@ class AdminPanelViewTests(TestCase):
         self.assertContains(response, winner.public_name)
         req = ContestPayoutRequest.objects.get(user=winner)
         self.assertContains(response, req.usdc_address)
+
+    def test_admin_panel_shows_contest_liability_and_winners(self):
+        winner = create_user("paneldebt")
+        _create_win(winner, prize_usd=5, week_code="2026-06-21")
+        WeeklyContestWinner.objects.create(
+            user=winner,
+            week_code="2026-06-21",
+            prize_type=WeeklyContestWinner.PrizeType.RELATIVE,
+            prize_usd=5,
+        )
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("dashboard:admin_panel"))
+        self.assertContains(response, "Weekly contest prizes")
+        self.assertContains(response, "Outstanding debt")
+        self.assertContains(response, "Player balances owed")
+        self.assertContains(response, "Contest winners")
+        self.assertContains(response, winner.email)
+        self.assertContains(response, "$10")
 
     def test_admin_can_mark_contest_payout_paid(self):
         winner = create_user("panelpaid")
