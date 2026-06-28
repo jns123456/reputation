@@ -10,10 +10,15 @@ from predictions.models import Prediction
 from reputation.models import ReputationEvent, WeeklyContestWinner
 from reputation.period_leaderboard import get_top_predictors_between
 from reputation.weekly_contest_services import (
+    build_contest_week_nav,
     current_week_code,
     finalize_weekly_contest,
+    get_past_weekly_contest_winners,
+    get_weekly_contest_winners_for_week,
+    is_completed_contest_week,
     is_live_contest_week,
     is_upcoming_contest_week,
+    list_contest_week_codes,
     sunday_start_for_date,
     week_date_range,
     week_code_for_date,
@@ -132,6 +137,33 @@ class WeeklyContestServicesTests(TestCase):
         self.assertEqual(WeeklyContestWinner.objects.filter(week_code=week_code).count(), 2)
         self.assertEqual(finalize_weekly_contest(week_code), 0)
 
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_get_past_weekly_contest_winners_groups_by_week(self):
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        for index in range(12):
+            market = create_market(external_id=f"wc-hist-{index}", slug=f"wc-hist-{index}")
+            prediction = _scored_prediction(self.leader, market, points=5)
+            ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        finalize_weekly_contest(week_code)
+        history = get_past_weekly_contest_winners()
+        self.assertEqual(len(history), 1)
+        self.assertEqual(history[0]["week_code"], week_code)
+        self.assertIn("absolute", history[0]["winners"])
+        self.assertIn("relative", history[0]["winners"])
+        winners = get_weekly_contest_winners_for_week(week_code)
+        self.assertEqual(winners["absolute"].user_id, self.leader.id)
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21")
+    def test_list_contest_week_codes_from_launch(self):
+        weeks = list_contest_week_codes(today=date(2026, 6, 28))
+        self.assertEqual(weeks, ["2026-06-28", "2026-06-21"])
+
+    def test_is_completed_contest_week_after_window_ends(self):
+        week_code = "2020-03-08"
+        self.assertTrue(is_completed_contest_week(week_code=week_code))
+
 
 @override_settings(WEEKLY_CONTEST_ENABLED=True)
 class WeeklyContestViewTests(TestCase):
@@ -155,6 +187,28 @@ class WeeklyContestViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Concurso")
         self.assertContains(response, "Semanal")
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_weekly_contest_page_shows_past_winners(self):
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        leader = create_user("wchist")
+        for index in range(12):
+            m = create_market(external_id=f"wc-hist-view-{index}", slug=f"wc-hist-view-{index}")
+            prediction = _scored_prediction(leader, m, points=5)
+            ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        finalize_weekly_contest(week_code)
+        response = self.client.get(reverse("dashboard:weekly_contest"))
+        self.assertContains(response, "Past winners")
+        self.assertContains(response, leader.public_name)
+
+        response_week = self.client.get(
+            reverse("dashboard:weekly_contest"),
+            {"week": week_code},
+        )
+        self.assertContains(response_week, "Week winners")
+        self.assertContains(response_week, leader.public_name)
 
     @override_settings(WEEKLY_CONTEST_ENABLED=False)
     def test_weekly_contest_disabled_returns_404(self):

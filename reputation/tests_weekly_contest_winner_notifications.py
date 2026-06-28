@@ -67,7 +67,9 @@ class WeeklyContestWinnerNotificationTests(TestCase):
         self.assertEqual(created, 2)
         win = WeeklyContestWinner.objects.filter(user=self.winner, week_code=week_code).first()
         self.assertIsNotNone(win.notified_at)
-        self.assertEqual(mock_send_email.call_count, 2)
+        self.assertEqual(mock_send_email.call_count, 1)
+        self.assertEqual(mock_send_email.call_args.kwargs["user"], self.winner)
+        self.assertEqual(len(mock_send_email.call_args.kwargs["wins"]), 2)
         self.assertTrue(user_has_pending_weekly_contest_win(self.winner))
 
     @patch("reputation.weekly_contest_winner_notifications.send_weekly_contest_winner_email")
@@ -102,7 +104,7 @@ class WeeklyContestWinnerNotificationTests(TestCase):
         response = client.get(reverse("dashboard:reputation_leaderboard"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "weekly-contest-win-modal-title")
-        self.assertContains(response, "Prize credited")
+        self.assertContains(response, "Credited to your account")
         self.assertNotContains(response, "weekly-contest-modal-title")
 
         response2 = client.get(reverse("dashboard:reputation_leaderboard"))
@@ -141,7 +143,7 @@ class WeeklyContestWinnerNotificationTests(TestCase):
         )
         from reputation.weekly_contest_winner_notifications import send_weekly_contest_winner_email
 
-        self.assertTrue(send_weekly_contest_winner_email(win=win))
+        self.assertTrue(send_weekly_contest_winner_email(user=self.winner, wins=[win]))
         mock_send.assert_called_once()
         self.assertEqual(mock_send.call_args.kwargs["template_base"], "weekly_contest_winner")
 

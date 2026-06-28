@@ -294,9 +294,13 @@ def weekly_contest(request):
     from reputation.leaderboard import build_leaderboard_rows
     from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
     from reputation.weekly_contest_services import (
+        build_contest_week_nav,
         current_week_code,
         filter_weekly_contest_qualified,
+        get_past_weekly_contest_winners,
         get_weekly_contest_min_scored_forecasts,
+        get_weekly_contest_winners_for_week,
+        is_completed_contest_week,
         is_live_contest_week,
         is_upcoming_contest_week,
         normalize_contest_week_code,
@@ -330,6 +334,8 @@ def weekly_contest(request):
     since, until = week_date_range(week_code)
     week_start = since
     week_end = until - timedelta(seconds=1)
+    week_is_completed = is_completed_contest_week(week_code=week_code)
+    week_winners = get_weekly_contest_winners_for_week(week_code) if week_is_completed else {}
 
     return render(
         request,
@@ -347,6 +353,10 @@ def weekly_contest(request):
             "week_end": week_end,
             "is_current_week": is_live_contest_week(week_code=week_code),
             "is_upcoming_week": is_upcoming_contest_week(week_code=week_code),
+            "week_is_completed": week_is_completed,
+            "week_winners": week_winners,
+            "contest_week_nav": build_contest_week_nav(selected_week_code=week_code),
+            "past_weekly_contest_winners": get_past_weekly_contest_winners(),
             "prize_usd": weekly_contest_prize_usd(),
             "hero_description_key": hero_description_key,
             "weekly_contest_min_scored": get_weekly_contest_min_scored_forecasts(),

@@ -142,6 +142,85 @@ def previous_week_code(*, today=None):
     return prev.isoformat()
 
 
+def is_completed_contest_week(*, week_code):
+    """True once the Sun–Sat contest window has fully ended."""
+    _, until = week_date_range(week_code)
+    return until <= timezone.now()
+
+
+def list_contest_week_codes(*, today=None):
+    """Contest weeks from launch through the active week (newest first)."""
+    today = today or timezone.localdate()
+    first = get_first_contest_week_start()
+    current_start = datetime.strptime(current_week_code(today=today), "%Y-%m-%d").date()
+    weeks = []
+    cursor = current_start
+    while cursor >= first:
+        weeks.append(cursor.isoformat())
+        cursor -= timedelta(days=7)
+    return weeks
+
+
+def build_contest_week_nav(*, selected_week_code, today=None):
+    """Navigation metadata for the week picker on the contest page."""
+    today = today or timezone.localdate()
+    selected_week_code = normalize_contest_week_code(selected_week_code)
+    nav = []
+    for week_code in list_contest_week_codes(today=today):
+        since, until = week_date_range(week_code)
+        nav.append(
+            {
+                "week_code": week_code,
+                "week_start": since,
+                "week_end": until - timedelta(seconds=1),
+                "is_current": week_code == current_week_code(today=today),
+                "is_selected": week_code == selected_week_code,
+                "is_completed": is_completed_contest_week(week_code=week_code),
+            }
+        )
+    return nav
+
+
+def get_weekly_contest_winners_for_week(week_code):
+    """Return ``{prize_type: WeeklyContestWinner}`` for a finalized week."""
+    from reputation.models import WeeklyContestWinner
+
+    wins = WeeklyContestWinner.objects.filter(week_code=week_code).select_related("user")
+    return {win.prize_type: win for win in wins}
+
+
+def get_past_weekly_contest_winners(*, limit=20):
+    """Historical winners grouped by week (newest first)."""
+    from reputation.models import WeeklyContestWinner
+
+    week_codes = list(
+        WeeklyContestWinner.objects.values_list("week_code", flat=True)
+        .distinct()
+        .order_by("-week_code")[:limit]
+    )
+    if not week_codes:
+        return []
+
+    wins_by_week = {week_code: {} for week_code in week_codes}
+    for win in WeeklyContestWinner.objects.filter(week_code__in=week_codes).select_related(
+        "user"
+    ):
+        wins_by_week[win.week_code][win.prize_type] = win
+
+    history = []
+    for week_code in week_codes:
+        since, until = week_date_range(week_code)
+        history.append(
+            {
+                "week_code": week_code,
+                "week_start": since,
+                "week_end": until - timedelta(seconds=1),
+                "winners": wins_by_week[week_code],
+            }
+        )
+    return history
+
+
 def get_announcement_context():
     since, until = current_week_bounds()
     week_code = current_week_code()

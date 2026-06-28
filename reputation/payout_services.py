@@ -1,7 +1,8 @@
-"""Contest earnings balance and off-platform USDC withdrawal requests."""
+"""Contest earnings balance and off-platform USDT withdrawal requests."""
 
 from __future__ import annotations
 
+import logging
 import re
 from decimal import Decimal
 
@@ -11,7 +12,9 @@ from django.utils.translation import gettext as _
 
 from reputation.models import ContestPayoutRequest, WeeklyContestWinner
 
-_USDC_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
+logger = logging.getLogger(__name__)
+
+_USDT_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 
 
 class PayoutRequestError(Exception):
@@ -30,9 +33,44 @@ def minimum_payout_usd() -> Decimal:
 
 def normalize_usdc_address(address: str) -> str:
     normalized = (address or "").strip()
-    if not _USDC_ADDRESS_RE.match(normalized):
+    if not _USDT_ADDRESS_RE.match(normalized):
         raise ValueError("invalid address")
     return normalized
+
+
+def contest_payout_notify_email() -> str:
+    return str(getattr(settings, "CONTEST_PAYOUT_NOTIFY_EMAIL", "juaninappa@gmail.com")).strip()
+
+
+def send_contest_payout_admin_notification(*, payout_request: ContestPayoutRequest) -> bool:
+    """Notify the operator that a player submitted a withdrawal request."""
+    recipient = contest_payout_notify_email()
+    if not recipient:
+        return False
+
+    from accounts.email_services import EmailDeliveryError, _send
+
+    player = payout_request.user
+    context = {
+        "player": player,
+        "payout_request": payout_request,
+    }
+    try:
+        _send(
+            subject=lambda: _("New contest withdrawal request — %(username)s") % {
+                "username": player.username
+            },
+            recipient_email=recipient,
+            template_base="contest_payout_admin",
+            context=context,
+        )
+    except EmailDeliveryError:
+        logger.exception(
+            "Contest payout admin notification failed for request_id=%s",
+            payout_request.pk,
+        )
+        return False
+    return True
 
 
 def get_contest_earnings_summary(user) -> dict[str, Decimal]:
@@ -109,12 +147,14 @@ def create_payout_request(*, user, amount_usd, usdc_address):
         normalized_address = normalize_usdc_address(usdc_address)
     except ValueError as exc:
         raise PayoutRequestError(
-            _("Enter a valid USDC wallet address on Base (0x…).")
+            _("Enter a valid USDT wallet address (0x…).")
         ) from exc
 
-    return ContestPayoutRequest.objects.create(
+    payout_request = ContestPayoutRequest.objects.create(
         user=user,
         amount_usd=amount,
         usdc_address=normalized_address,
         chain=ContestPayoutRequest.Chain.BASE,
     )
+    send_contest_payout_admin_notification(payout_request=payout_request)
+    return payout_request

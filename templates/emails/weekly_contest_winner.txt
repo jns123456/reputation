@@ -1,11 +1,15 @@
 {% load i18n %}{% blocktrans with name=recipient.public_name %}Hi {{ name }},{% endblocktrans %}
 
-{% blocktrans with prize=win.prize_usd %}Congratulations — you won ${{ prize }} in the weekly reputation contest!{% endblocktrans %}
+{% blocktrans with prize=total_prize_usd %}Congratulations — you won ${{ prize }} in the weekly reputation contest!{% endblocktrans %}
 
-{% blocktrans with label=prize_type_label week=week_code %}Category: {{ label }} · Week starting {{ week }}{% endblocktrans %}
+{% blocktrans with week=week_code %}Week starting {{ week }}{% endblocktrans %}
 
-{% trans "Your prize has been credited to your contest earnings balance on PredictStamp. You can request a USDC withdrawal on Base from your profile whenever you are ready." %}
+{% for win in wins %}
+- {{ win.get_prize_type_display }}: ${{ win.prize_usd }}
+{% endfor %}
 
-{% trans "View contest earnings:" %} {{ earnings_url }}
+{% blocktrans with amount=total_prize_usd %}We credited ${{ amount }} to your contest earnings balance on PredictStamp. You can request a USDT withdrawal from your profile whenever you are ready.{% endblocktrans %}
+
+{% trans "View balance & withdraw:" %} {{ earnings_url }}
 
 {% trans "Keep forecasting — a new contest week starts every Sunday." %}

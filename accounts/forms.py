@@ -496,7 +496,7 @@ class ContestPayoutRequestForm(forms.Form):
         ),
     )
     usdc_address = forms.CharField(
-        label=_("USDC wallet address (Base)"),
+        label=_("USDT wallet address"),
         max_length=42,
         widget=forms.TextInput(
             attrs={
@@ -507,7 +507,7 @@ class ContestPayoutRequestForm(forms.Form):
             }
         ),
         help_text=_(
-            "We send USDC on the Base network. Double-check your address — transfers cannot be reversed."
+            "We pay prizes in USDT. Double-check your address — transfers cannot be reversed."
         ),
     )
 
@@ -538,4 +538,4 @@ class ContestPayoutRequestForm(forms.Form):
         try:
             return normalize_usdc_address(address)
         except ValueError as exc:
-            raise ValidationError(_("Enter a valid USDC wallet address on Base (0x…).")) from exc
+            raise ValidationError(_("Enter a valid USDT wallet address (0x…).")) from exc

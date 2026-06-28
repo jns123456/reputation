@@ -34,6 +34,24 @@
   </div>
   {% endif %}
 
+  {% if user == profile_user and contest_payouts_enabled and contest_earnings_summary and contest_earnings_summary.earned_usd > 0 %}
+  <div class="mt-4 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 dark:border-emerald-800/60 dark:from-emerald-950/30 dark:to-slate-900 sm:p-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{% trans "Contest earnings" %}</p>
+        <p class="mt-1 text-3xl font-bold tabular-nums text-emerald-700 dark:text-emerald-400">${{ contest_earnings_summary.available_usd }}</p>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          {% blocktrans with earned=contest_earnings_summary.earned_usd %}Available balance · ${{ earned }} earned from weekly prizes{% endblocktrans %}
+        </p>
+      </div>
+      <a href="{% url 'accounts:profile_contest_earnings' username=profile_user.username %}"
+         class="btn-primary shrink-0 self-start sm:self-center">
+        {% trans "Withdraw USDT" %}
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
   {% trans "Reputation" as rep_label %}
   {% trans "Predictive quality" as rep_badge %}
   {% trans "Popularity" as pop_label %}

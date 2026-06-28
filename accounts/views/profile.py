@@ -242,6 +242,13 @@ def profile_detail(request, username):
     calibration = get_user_calibration(user)
     has_calibration_data = any(row["total"] for row in calibration)
 
+    contest_earnings_summary = None
+    if request.user.is_authenticated and request.user == user:
+        from reputation.payout_services import contest_payouts_enabled, get_contest_earnings_summary
+
+        if contest_payouts_enabled():
+            contest_earnings_summary = get_contest_earnings_summary(user)
+
     return render(
         request,
         "accounts/profile_detail.html",
@@ -266,6 +273,7 @@ def profile_detail(request, username):
             "earned_badges": earned_badges,
             "achievements_unlocked": unlocked_count,
             "achievements_total": len(achievements),
+            "contest_earnings_summary": contest_earnings_summary,
         },
     )
 
@@ -459,7 +467,7 @@ def profile_contest_earnings(request, username):
                 messages.success(
                     request,
                     _(
-                        "Withdrawal request submitted. We will send USDC to your address after review."
+                        "Withdrawal request submitted. We will send USDT to your address after review."
                     ),
                 )
                 return redirect("accounts:profile_contest_earnings", username=username)

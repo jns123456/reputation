@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-21 18:34+0000\n"
+"POT-Creation-Date: 2026-06-28 02:02+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -488,14 +488,18 @@ msgstr ""
 msgid "Amount (USD)"
 msgstr "Monto (USD)"
 
-msgid "USDC wallet address (Base)"
-msgstr "Dirección wallet USDC (Base)"
+#| msgid "USDC wallet address (Base)"
+msgid "USDT wallet address"
+msgstr "Dirección wallet USDT"
 
+#| msgid ""
+#| "We send USDC on the Base network. Double-check your address — transfers "
+#| "cannot be reversed."
 msgid ""
-"We send USDC on the Base network. Double-check your address — transfers "
-"cannot be reversed."
+"We pay prizes in USDT. Double-check your address — transfers cannot be "
+"reversed."
 msgstr ""
-"Enviamos USDC en la red Base. Revisa bien tu dirección — las transferencias "
+"Pagamos los premios en USDT. Revisa bien tu dirección — las transferencias "
 "no se pueden revertir."
 
 #, python-format
@@ -505,8 +509,9 @@ msgstr "El retiro mínimo es $%(amount)s."
 msgid "Amount exceeds your available balance."
 msgstr "El monto supera tu saldo disponible."
 
-msgid "Enter a valid USDC wallet address on Base (0x…)."
-msgstr "Introduce una dirección wallet USDC válida en Base (0x…)."
+#| msgid "Enter a valid USDC wallet address on Base (0x…)."
+msgid "Enter a valid USDT wallet address (0x…)."
+msgstr "Introduce una dirección wallet USDT válida (0x…)."
 
 msgid "Image must be 5 MB or smaller."
 msgstr "La imagen debe tener 5 MB o menos."
@@ -781,11 +786,14 @@ msgstr "Destino de marcador no válido"
 msgid "Withdrawal requests are not available right now."
 msgstr "Las solicitudes de retiro no están disponibles en este momento."
 
+#| msgid ""
+#| "Withdrawal request submitted. We will send USDC to your address after "
+#| "review."
 msgid ""
-"Withdrawal request submitted. We will send USDC to your address after "
+"Withdrawal request submitted. We will send USDT to your address after "
 "review."
 msgstr ""
-"Solicitud de retiro enviada. Enviaremos USDC a tu dirección tras la "
+"Solicitud de retiro enviada. Enviaremos USDT a tu dirección tras la "
 "revisión."
 
 msgid "Missing username"
@@ -1734,6 +1742,10 @@ msgstr ""
 msgid "Poll not found"
 msgstr "Encuesta no encontrada"
 
+#, python-format
+msgid "New contest withdrawal request — %(username)s"
+msgstr "Nueva solicitud de retiro del concurso — %(username)s"
+
 msgid "Contest withdrawals are not available right now."
 msgstr "Los retiros del concurso no están disponibles en este momento."
 
@@ -2510,12 +2522,15 @@ msgstr "Aún no has votado en ningún evento del desafío."
 msgid "%(name)s is not following anyone yet."
 msgstr "%(name)s aún no sigue a nadie."
 
+#| msgid ""
+#| "Cash prizes from the weekly reputation contest. PredictStamp does not hold "
+#| "your funds — USDC is sent manually to your wallet after review."
 msgid ""
 "Cash prizes from the weekly reputation contest. PredictStamp does not hold "
-"your funds — USDC is sent manually to your wallet after review."
+"your funds — USDT is sent manually to your wallet after review."
 msgstr ""
 "Premios en efectivo del concurso semanal de reputación. PredictStamp no "
-"custodia tus fondos — el USDC se envía manualmente a tu wallet tras la "
+"custodia tus fondos — el USDT se envía manualmente a tu wallet tras la "
 "revisión."
 
 msgid "View weekly contest"
@@ -2524,8 +2539,9 @@ msgstr "Ver concurso semanal"
 msgid "Available balance"
 msgstr "Saldo disponible"
 
-msgid "USD equivalent · withdraw as USDC on Base"
-msgstr "Equivalente en USD · retira en USDC en Base"
+#| msgid "USD equivalent · withdraw as USDC on Base"
+msgid "USD equivalent · withdraw as USDT"
+msgstr "Equivalente en USD · retira en USDT"
 
 msgid "Lifetime earned"
 msgstr "Total ganado"
@@ -2533,22 +2549,28 @@ msgstr "Total ganado"
 msgid "Withdrawn"
 msgstr "Retirado"
 
-msgid "Request USDC withdrawal"
-msgstr "Solicitar retiro en USDC"
+#| msgid "Request USDC withdrawal"
+msgid "Request USDT withdrawal"
+msgstr "Solicitar retiro en USDT"
 
 #, python-format
-msgid "Minimum $%(min)s. Processing usually takes a few business days."
+msgid ""
+"Minimum $%(min)s. Prizes are paid in USDT after manual review — processing "
+"usually takes a few business days."
 msgstr ""
 
 msgid "Submit withdrawal request"
 msgstr "Enviar solicitud de retiro"
 
+#| msgid ""
+#| "You have a pending withdrawal request. We will email you when USDC has been "
+#| "sent."
 msgid ""
-"You have a pending withdrawal request. We will email you when USDC has been "
+"You have a pending withdrawal request. We will email you when USDT has been "
 "sent."
 msgstr ""
 "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se "
-"envíe el USDC."
+"envíe el USDT."
 
 #, python-format
 msgid "Your balance is below the $%(min)s minimum withdrawal."
@@ -2611,6 +2633,14 @@ msgstr ""
 
 msgid "Manage MCP tokens"
 msgstr "Gestionar tokens MCP"
+
+#, python-format
+msgid "Available balance · $%(earned)s earned from weekly prizes"
+msgstr "Saldo disponible · $%(earned)s ganados en premios semanales"
+
+#| msgid "Withdrawn"
+msgid "Withdraw USDT"
+msgstr "Retirar USDT"
 
 msgid "Predictive quality"
 msgstr "Calidad predictiva"
@@ -5822,21 +5852,39 @@ msgstr "Ver clasificación"
 msgid "Got it"
 msgstr "Entendido"
 
+msgid "Absolute prize"
+msgstr "Premio absoluto"
+
+#, python-format
+msgid "+%(points)s rep this week · $%(prize)s prize"
+msgstr "+%(points)s rep esta semana · premio de $%(prize)s"
+
+msgid "No winner — nobody met the minimum scored forecasts."
+msgstr "Sin ganador — nadie alcanzó el mínimo de pronósticos puntuados."
+
+msgid "Quality prize"
+msgstr "Premio por calidad"
+
+#, python-format
+msgid "Rep / forecast %(score)s · $%(prize)s prize"
+msgstr "Rep / pronóstico %(score)s · premio de $%(prize)s"
+
 #, python-format
 msgid "Week %(start)s – %(end)s"
 msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 
-msgid "Prize credited"
-msgstr "Premio acreditado"
+#| msgid "replied to your comment"
+msgid "Credited to your account"
+msgstr "Acreditado en tu cuenta"
 
-msgid ""
-"Added to your contest earnings balance — withdraw as USDC on Base anytime."
+#| msgid ""
+#| "Added to your contest earnings balance — withdraw as USDC on Base anytime."
+msgid "Added to your contest earnings balance — withdraw as USDT anytime."
 msgstr ""
-"Sumado a tu saldo de ganancias del concurso — retira en USDC en Base cuando "
-"quieras."
+"Sumado a tu saldo de ganancias del concurso — retira en USDT cuando quieras."
 
-msgid "View contest earnings"
-msgstr "Ganancias del concurso"
+msgid "View balance & withdraw"
+msgstr "Ver saldo y retirar"
 
 #, python-format
 msgid "%(name)s Popularity"
@@ -6098,9 +6146,6 @@ msgstr ""
 "$%(prize)s. Se requieren al menos %(min)s pronósticos puntuados para "
 "calificar."
 
-msgid "Absolute prize"
-msgstr "Premio absoluto"
-
 #, python-format
 msgid ""
 "Most reputation points earned this week (min. %(min)s scored forecasts)."
@@ -6108,14 +6153,21 @@ msgstr ""
 "Más puntos de reputación ganados esta semana (mín. %(min)s pronósticos "
 "puntuados)."
 
-msgid "Quality prize"
-msgstr "Premio por calidad"
-
 #, python-format
 msgid "Best rep / forecast average this week (min. %(min)s scored forecasts)."
 msgstr ""
 "Mejor promedio de rep / pronóstico esta semana (mín. %(min)s pronósticos "
 "puntuados)."
+
+msgid "Select week"
+msgstr "Elegir semana"
+
+#, python-format
+msgid "%(start)s – %(end)s"
+msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
+
+msgid "Final"
+msgstr "Finalizada"
 
 #, python-format
 msgid "Contest week · Sunday %(start)s – Saturday %(end)s"
@@ -6131,6 +6183,13 @@ msgstr ""
 "Los premios se pagan fuera de la plataforma a ganadores verificados al "
 "cerrar cada semana. PredictStamp no guarda saldos ni procesa pagos."
 
+msgid "Week winners"
+msgstr "Ganadores de la semana"
+
+#, python-format
+msgid "Final results for Sunday %(start)s – Saturday %(end)s"
+msgstr "Resultados finales del domingo %(start)s al sábado %(end)s"
+
 msgid "Week reputation"
 msgstr "Reputación semanal"
 
@@ -6141,6 +6200,15 @@ msgid ""
 msgstr ""
 "Aún no hay jugadores calificados — haz al menos %(min)s pronósticos "
 "puntuados esta semana para unirte al concurso."
+
+msgid "Past winners"
+msgstr "Ganadores anteriores"
+
+msgid "Official prize winners from completed contest weeks."
+msgstr "Ganadores oficiales de semanas de concurso completadas."
+
+msgid "View week"
+msgstr "Ver semana"
 
 #, python-format
 msgid "%(name)s — Match Forecasts"
@@ -6208,6 +6276,38 @@ msgstr "Resultado: %(outcome)s"
 
 msgid "Manage your alert settings"
 msgstr "Administra tus alertas"
+
+#| msgid "Submit withdrawal request"
+msgid "New contest withdrawal request"
+msgstr "Nueva solicitud de retiro del concurso"
+
+#| msgid "Request USDC withdrawal"
+msgid "A player requested a USDT withdrawal."
+msgstr "Un jugador solicitó un retiro en USDT."
+
+msgid ""
+"Review the request in Django admin and send USDT manually after "
+"verification."
+msgstr ""
+"Revisa la solicitud en Django admin y envía USDT manualmente tras la "
+"verificación."
+
+#, python-format
+#| msgid "by @%(username)s"
+msgid "Player: %(name)s (@%(username)s)"
+msgstr "Por %(username)s"
+
+#| msgid "Email"
+msgid "Email:"
+msgstr "Email"
+
+#| msgid "Amount"
+msgid "Amount:"
+msgstr "Monto"
+
+#| msgid "USDC wallet address (Base)"
+msgid "USDT wallet address:"
+msgstr "Dirección wallet USDC (Base)"
 
 #, python-format
 msgid "%(name)s, here's your daily recap"
@@ -6314,17 +6414,23 @@ msgstr ""
 "Hola %(name)s, felicitaciones por liderar la tabla semanal de reputación."
 
 #, python-format
-msgid "Week %(week)s"
+#| msgid "Week %(week)s"
+msgid "Week starting %(week)s"
 msgstr "Semana %(week)s"
 
+#, python-format
+#| msgid ""
+#| "Your prize has been added to your contest earnings balance. Request a USDC "
+#| "withdrawal on Base from your profile whenever you are ready — PredictStamp "
+#| "does not hold funds on-platform."
 msgid ""
-"Your prize has been added to your contest earnings balance. Request a USDC "
-"withdrawal on Base from your profile whenever you are ready — PredictStamp "
-"does not hold funds on-platform."
+"We credited $%(amount)s to your contest earnings balance on PredictStamp. "
+"Request a USDT withdrawal from your profile whenever you are ready — "
+"PredictStamp does not hold funds on-platform."
 msgstr ""
-"Tu premio se sumó a tu saldo de ganancias del concurso. Solicita un retiro "
-"en USDC en Base desde tu perfil cuando quieras — PredictStamp no custodia "
-"fondos en la plataforma."
+"Acreditamos $%(amount)s en tu saldo de ganancias del concurso en "
+"PredictStamp. Solicita un retiro en USDT desde tu perfil cuando quieras — "
+"PredictStamp no custodia fondos en la plataforma."
 
 msgid ""
 "A new contest week starts every Sunday. Keep forecasting to defend your "
@@ -6339,20 +6445,20 @@ msgstr ""
 "¡Felicitaciones — ganaste $%(prize)s en el concurso semanal de reputación!"
 
 #, python-format
-msgid "Category: %(label)s · Week starting %(week)s"
-msgstr "Categoría: %(label)s · Semana que empieza el %(week)s"
-
+#| msgid ""
+#| "Your prize has been credited to your contest earnings balance on "
+#| "PredictStamp. You can request a USDC withdrawal on Base from your profile "
+#| "whenever you are ready."
 msgid ""
-"Your prize has been credited to your contest earnings balance on "
-"PredictStamp. You can request a USDC withdrawal on Base from your profile "
-"whenever you are ready."
+"We credited $%(amount)s to your contest earnings balance on PredictStamp. "
+"You can request a USDT withdrawal from your profile whenever you are ready."
 msgstr ""
-"Tu premio fue acreditado en tu saldo de ganancias del concurso en "
-"PredictStamp. Puedes solicitar un retiro en USDC en Base desde tu perfil "
-"cuando quieras."
+"Acreditamos $%(amount)s en tu saldo de ganancias del concurso en "
+"PredictStamp. Puedes solicitar un retiro en USDT desde tu perfil cuando "
+"quieras."
 
-msgid "View contest earnings:"
-msgstr "Ver ganancias del concurso:"
+msgid "View balance & withdraw:"
+msgstr ""
 
 msgid "Keep forecasting — a new contest week starts every Sunday."
 msgstr ""
@@ -7788,6 +7894,19 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "Prize credited"
+#~ msgstr "Premio acreditado"
+
+#~ msgid "View contest earnings"
+#~ msgstr "Ganancias del concurso"
+
+#, python-format
+#~ msgid "Category: %(label)s · Week starting %(week)s"
+#~ msgstr "Categoría: %(label)s · Semana que empieza el %(week)s"
+
+#~ msgid "View contest earnings:"
+#~ msgstr "Ver ganancias del concurso:"
 
 #~ msgid "Start a new message"
 #~ msgstr "Escribe un mensaje nuevo"

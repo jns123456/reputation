@@ -9,19 +9,30 @@
 
 <div style="margin:0 0 20px;border:1px solid #fde68a;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
   <div style="padding:18px 20px;text-align:center;">
-    <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#b45309;">{% trans "Prize credited" %}</p>
-    <p style="margin:0;font-size:32px;font-weight:800;color:#059669;">${{ win.prize_usd }}</p>
-    <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:#78350f;">{{ prize_type_label }} · {% blocktrans with week=week_code %}Week {{ week }}{% endblocktrans %}</p>
+    <p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#b45309;">{% trans "Credited to your account" %}</p>
+    <p style="margin:0;font-size:32px;font-weight:800;color:#059669;">${{ total_prize_usd }}</p>
+    <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:#78350f;">{% blocktrans with week=week_code %}Week starting {{ week }}{% endblocktrans %}</p>
   </div>
 </div>
 
+{% if wins|length > 1 %}
+<ul style="margin:0 0 16px;padding:0;list-style:none;">
+  {% for win in wins %}
+  <li style="margin:0 0 8px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;color:#475569;">
+    <span>{{ win.get_prize_type_display }}</span>
+    <strong style="float:right;color:#059669;">${{ win.prize_usd }}</strong>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
 <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#475569;">
-  {% trans "Your prize has been added to your contest earnings balance. Request a USDC withdrawal on Base from your profile whenever you are ready — PredictStamp does not hold funds on-platform." %}
+  {% blocktrans with amount=total_prize_usd %}We credited ${{ amount }} to your contest earnings balance on PredictStamp. Request a USDT withdrawal from your profile whenever you are ready — PredictStamp does not hold funds on-platform.{% endblocktrans %}
 </p>
 
 <p style="margin:0 0 20px;text-align:center;">
   <a href="{{ earnings_url }}" style="display:inline-block;background:#059669;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 20px;border-radius:9999px;">
-    {% trans "View contest earnings" %}
+    {% trans "View balance & withdraw" %}
   </a>
 </p>
 

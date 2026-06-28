@@ -98,11 +98,13 @@ def _prize_type_label(prize_type):
     return _("Best rep / forecast average")
 
 
-def send_weekly_contest_winner_email(*, win: WeeklyContestWinner) -> bool:
+def send_weekly_contest_winner_email(*, user, wins) -> bool:
+    """Email a user that contest prize USD was credited to their account."""
     if not weekly_contest_winner_emails_enabled():
         return False
+    if not wins:
+        return False
 
-    user = win.user
     email = (user.email or "").strip()
     if not email:
         return False
@@ -111,16 +113,17 @@ def send_weekly_contest_winner_email(*, win: WeeklyContestWinner) -> bool:
 
     from accounts.email_services import EmailDeliveryError, _send, absolute_url
 
-    week_code = win.week_code
+    week_code = wins[0].week_code
     since, until = week_date_range(week_code)
+    total_prize_usd = sum(win.prize_usd for win in wins)
     earnings_path = reverse(
         "accounts:profile_contest_earnings",
         kwargs={"username": user.username},
     )
     context = {
         "recipient": user,
-        "win": win,
-        "prize_type_label": _prize_type_label(win.prize_type),
+        "wins": wins,
+        "total_prize_usd": total_prize_usd,
         "week_code": week_code,
         "week_start": since,
         "week_end": until - timedelta(seconds=1),
@@ -140,18 +143,24 @@ def send_weekly_contest_winner_email(*, win: WeeklyContestWinner) -> bool:
 
 
 def notify_weekly_contest_winners(wins):
-    """Email winners and queue login modals. Idempotent via ``notified_at``."""
+    """Email winners and queue login modals. One email per user; idempotent via ``notified_at``."""
     if not wins:
         return 0
 
-    notified = 0
-    now = timezone.now()
+    pending_by_user: dict[int, list[WeeklyContestWinner]] = {}
     for win in wins:
         if win.notified_at is not None:
             continue
-        send_weekly_contest_winner_email(win=win)
-        _append_pending_win(user_id=win.user_id, win_id=win.id)
-        win.notified_at = now
-        win.save(update_fields=["notified_at"])
-        notified += 1
+        pending_by_user.setdefault(win.user_id, []).append(win)
+
+    notified = 0
+    now = timezone.now()
+    for user_wins in pending_by_user.values():
+        user = user_wins[0].user
+        send_weekly_contest_winner_email(user=user, wins=user_wins)
+        for win in user_wins:
+            _append_pending_win(user_id=win.user_id, win_id=win.id)
+            win.notified_at = now
+            win.save(update_fields=["notified_at"])
+            notified += 1
     return notified

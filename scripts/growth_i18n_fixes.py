@@ -109,32 +109,57 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     ),
     "No betting or deposits — skill only.": "Sin apuestas ni depósitos — solo habilidad.",
     "View standings": "Ver clasificación",
+    "Select week": "Elegir semana",
+    "Final": "Finalizada",
+    "Week winners": "Ganadores de la semana",
+    "Final results for Sunday %(start)s – Saturday %(end)s": (
+        "Resultados finales del domingo %(start)s al sábado %(end)s"
+    ),
+    "+%(points)s rep this week · $%(prize)s prize": (
+        "+%(points)s rep esta semana · premio de $%(prize)s"
+    ),
+    "Rep / forecast %(score)s · $%(prize)s prize": (
+        "Rep / pronóstico %(score)s · premio de $%(prize)s"
+    ),
+    "No winner — nobody met the minimum scored forecasts.": (
+        "Sin ganador — nadie alcanzó el mínimo de pronósticos puntuados."
+    ),
+    "Past winners": "Ganadores anteriores",
+    "Official prize winners from completed contest weeks.": (
+        "Ganadores oficiales de semanas de concurso completadas."
+    ),
+    "View week": "Ver semana",
     "Got it": "Entendido",
     "Don't show this message again": "No volver a ver este mensaje",
-    # --- Contest earnings / USDC withdrawal ---
+    # --- Contest earnings / USDT withdrawal ---
     "Contest earnings": "Ganancias del concurso",
-    "Cash prizes from the weekly reputation contest. PredictStamp does not hold your funds — USDC is sent manually to your wallet after review.": (
+    "Cash prizes from the weekly reputation contest. PredictStamp does not hold your funds — USDT is sent manually to your wallet after review.": (
         "Premios en efectivo del concurso semanal de reputación. PredictStamp no custodia tus fondos — "
-        "el USDC se envía manualmente a tu wallet tras la revisión."
+        "el USDT se envía manualmente a tu wallet tras la revisión."
     ),
     "View weekly contest": "Ver concurso semanal",
     "Available balance": "Saldo disponible",
-    "USD equivalent · withdraw as USDC on Base": "Equivalente en USD · retira en USDC en Base",
+    "USD equivalent · withdraw as USDT": "Equivalente en USD · retira en USDT",
+    "Available balance · $%(earned)s earned from weekly prizes": (
+        "Saldo disponible · $%(earned)s ganados en premios semanales"
+    ),
+    "Withdraw USDT": "Retirar USDT",
     "Lifetime earned": "Total ganado",
     "Pending": "Pendiente",
     "Withdrawn": "Retirado",
-    "Request USDC withdrawal": "Solicitar retiro en USDC",
-    "Minimum ${{ min }}. Processing usually takes a few business days.": (
-        "Mínimo ${{ min }}. El procesamiento suele tardar unos días hábiles."
+    "Request USDT withdrawal": "Solicitar retiro en USDT",
+    "Minimum ${{ min }}. Prizes are paid in USDT after manual review — processing usually takes a few business days.": (
+        "Mínimo ${{ min }}. Los premios se pagan en USDT tras revisión manual — "
+        "el procesamiento suele tardar unos días hábiles."
     ),
     "Amount (USD)": "Monto (USD)",
-    "USDC wallet address (Base)": "Dirección wallet USDC (Base)",
-    "We send USDC on the Base network. Double-check your address — transfers cannot be reversed.": (
-        "Enviamos USDC en la red Base. Revisa bien tu dirección — las transferencias no se pueden revertir."
+    "USDT wallet address": "Dirección wallet USDT",
+    "We pay prizes in USDT. Double-check your address — transfers cannot be reversed.": (
+        "Pagamos los premios en USDT. Revisa bien tu dirección — las transferencias no se pueden revertir."
     ),
     "Submit withdrawal request": "Enviar solicitud de retiro",
-    "You have a pending withdrawal request. We will email you when USDC has been sent.": (
-        "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se envíe el USDC."
+    "You have a pending withdrawal request. We will email you when USDT has been sent.": (
+        "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se envíe el USDT."
     ),
     "Your balance is below the ${{ min }} minimum withdrawal.": (
         "Tu saldo está por debajo del mínimo de retiro de ${{ min }}."
@@ -151,8 +176,8 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Amount": "Monto",
     "Status": "Estado",
     "Address": "Dirección",
-    "Withdrawal request submitted. We will send USDC to your address after review.": (
-        "Solicitud de retiro enviada. Enviaremos USDC a tu dirección tras la revisión."
+    "Withdrawal request submitted. We will send USDT to your address after review.": (
+        "Solicitud de retiro enviada. Enviaremos USDT a tu dirección tras la revisión."
     ),
     "Withdrawal requests are not available right now.": (
         "Las solicitudes de retiro no están disponibles en este momento."
@@ -160,17 +185,34 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Minimum withdrawal is $%(amount)s.": "El retiro mínimo es $%(amount)s.",
     "Amount exceeds your available balance.": "El monto supera tu saldo disponible.",
     "You already have a pending withdrawal request.": "Ya tienes una solicitud de retiro pendiente.",
-    "Enter a valid USDC wallet address on Base (0x…).": (
-        "Introduce una dirección wallet USDC válida en Base (0x…)."
+    "Enter a valid USDT wallet address (0x…).": (
+        "Introduce una dirección wallet USDT válida (0x…)."
     ),
     "Contest withdrawals are not available right now.": (
         "Los retiros del concurso no están disponibles en este momento."
     ),
     # --- Weekly contest winner alerts ---
     "You won the weekly contest!": "¡Ganaste el concurso semanal!",
-    "Prize credited": "Premio acreditado",
-    "Added to your contest earnings balance — withdraw as USDC on Base anytime.": (
-        "Sumado a tu saldo de ganancias del concurso — retira en USDC en Base cuando quieras."
+    "Credited to your account": "Acreditado en tu cuenta",
+    "Added to your contest earnings balance — withdraw as USDT anytime.": (
+        "Sumado a tu saldo de ganancias del concurso — retira en USDT cuando quieras."
+    ),
+    "View balance & withdraw": "Ver saldo y retirar",
+    "We credited $%(amount)s to your contest earnings balance on PredictStamp. Request a USDT withdrawal from your profile whenever you are ready — PredictStamp does not hold funds on-platform.": (
+        "Acreditamos $%(amount)s en tu saldo de ganancias del concurso en PredictStamp. "
+        "Solicita un retiro en USDT desde tu perfil cuando quieras — PredictStamp no custodia fondos en la plataforma."
+    ),
+    "We credited $%(amount)s to your contest earnings balance on PredictStamp. You can request a USDT withdrawal from your profile whenever you are ready.": (
+        "Acreditamos $%(amount)s en tu saldo de ganancias del concurso en PredictStamp. "
+        "Puedes solicitar un retiro en USDT desde tu perfil cuando quieras."
+    ),
+    "New contest withdrawal request": "Nueva solicitud de retiro del concurso",
+    "New contest withdrawal request — %(username)s": "Nueva solicitud de retiro del concurso — %(username)s",
+    "A player requested a USDT withdrawal.": "Un jugador solicitó un retiro en USDT.",
+    "Player": "Jugador",
+    "USDT wallet address": "Dirección wallet USDT",
+    "Review the request in Django admin and send USDT manually after verification.": (
+        "Revisa la solicitud en Django admin y envía USDT manualmente tras la verificación."
     ),
     "Congratulations — you won $%(prize)s in the weekly reputation contest!": (
         "¡Felicitaciones — ganaste $%(prize)s en el concurso semanal de reputación!"

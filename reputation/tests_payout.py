@@ -1,4 +1,6 @@
-"""Contest earnings balance and USDC withdrawal requests."""
+"""Contest earnings balance and USDT withdrawal requests."""
+
+from unittest.mock import patch
 
 from decimal import Decimal
 
@@ -113,12 +115,38 @@ class ProfileContestEarningsViewTests(TestCase):
     def test_submit_withdrawal_request(self):
         _create_win(self.user)
         self.client.force_login(self.user)
-        response = self.client.post(
-            self.url,
-            {"amount_usd": "5", "usdc_address": VALID_ADDRESS},
-        )
+        with patch("reputation.payout_services.send_contest_payout_admin_notification") as mock_notify:
+            response = self.client.post(
+                self.url,
+                {"amount_usd": "5", "usdc_address": VALID_ADDRESS},
+            )
         self.assertRedirects(response, self.url)
         self.assertEqual(ContestPayoutRequest.objects.filter(user=self.user).count(), 1)
+        mock_notify.assert_called_once()
+
+    @override_settings(CONTEST_PAYOUT_NOTIFY_EMAIL="ops@example.com")
+    @patch("accounts.email_services._send")
+    def test_admin_notification_email(self, mock_send):
+        _create_win(self.user)
+        create_payout_request(
+            user=self.user,
+            amount_usd=Decimal("5"),
+            usdc_address=VALID_ADDRESS,
+        )
+        mock_send.assert_called_once()
+        self.assertEqual(mock_send.call_args.kwargs["recipient_email"], "ops@example.com")
+        self.assertEqual(
+            mock_send.call_args.kwargs["template_base"],
+            "contest_payout_admin",
+        )
+
+    def test_profile_shows_contest_balance_banner(self):
+        _create_win(self.user, prize_usd=10)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("accounts:profile", args=[self.user.username]))
+        self.assertContains(response, "Contest earnings")
+        self.assertContains(response, "$10")
+        self.assertContains(response, "Withdraw USDT")
 
     def test_spanish_renders(self):
         _create_win(self.user)

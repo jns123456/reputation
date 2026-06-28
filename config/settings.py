@@ -631,6 +631,7 @@ WEEKLY_CONTEST_WINNER_EMAILS_ENABLED = env.bool(
 )
 CONTEST_PAYOUTS_ENABLED = env.bool("CONTEST_PAYOUTS_ENABLED", default=WEEKLY_CONTEST_ENABLED)
 CONTEST_PAYOUT_MIN_USD = env.int("CONTEST_PAYOUT_MIN_USD", default=5)
+CONTEST_PAYOUT_NOTIFY_EMAIL = env("CONTEST_PAYOUT_NOTIFY_EMAIL", default="juaninappa@gmail.com")
 if WEEKLY_CONTEST_ENABLED:
     CELERY_BEAT_SCHEDULE["finalize-previous-weekly-contest"] = {
         "task": "reputation.tasks.finalize_previous_weekly_contest_task",

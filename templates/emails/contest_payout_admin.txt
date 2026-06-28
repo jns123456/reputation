@@ -1,0 +1,8 @@
+{% load i18n %}{% trans "New contest withdrawal request" %}
+
+{% blocktrans with name=player.public_name username=player.username %}Player: {{ name }} (@{{ username }}){% endblocktrans %}
+{% trans "Email:" %} {{ player.email }}
+{% trans "Amount:" %} ${{ payout_request.amount_usd }}
+{% trans "USDT wallet address:" %} {{ payout_request.usdc_address }}
+
+{% trans "Review the request in Django admin and send USDT manually after verification." %}

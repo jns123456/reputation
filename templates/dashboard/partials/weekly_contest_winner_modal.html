@@ -69,10 +69,10 @@
 
     <div class="px-6 py-5">
       <div class="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-4 text-center dark:border-emerald-800/60 dark:bg-emerald-950/30">
-        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{% trans "Prize credited" %}</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{% trans "Credited to your account" %}</p>
         <p class="mt-1 text-4xl font-bold tabular-nums text-emerald-700 dark:text-emerald-400">${{ weekly_contest_win_modal.total_prize_usd }}</p>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          {% trans "Added to your contest earnings balance — withdraw as USDC on Base anytime." %}
+          {% trans "Added to your contest earnings balance — withdraw as USDT anytime." %}
         </p>
       </div>
 
@@ -93,7 +93,7 @@
             <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
             <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
           </svg>
-          {% trans "View contest earnings" %}
+          {% trans "View balance & withdraw" %}
         </a>
         <button type="button"
                 @click="closeModal()"
