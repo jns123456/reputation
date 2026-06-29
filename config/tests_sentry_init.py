@@ -1,6 +1,8 @@
+from unittest.mock import patch
+
 from django.test import SimpleTestCase
 
-from config.sentry_init import _before_send, _event_message
+from config.sentry_init import _before_send, _event_message, init_sentry
 
 
 class SentryBeforeSendTests(SimpleTestCase):
@@ -274,3 +276,13 @@ class SentryBeforeSendTests(SimpleTestCase):
             "message": "from top level",
         }
         self.assertEqual(_event_message(event), "from logentry")
+
+    @patch("config.sentry_init.settings")
+    def test_init_ignores_multiprocessing_logger(self, mock_settings):
+        mock_settings.SENTRY_DSN = "https://example@o0.ingest.sentry.io/0"
+        mock_settings.SENTRY_ENVIRONMENT = "test"
+        mock_settings.SENTRY_TRACES_SAMPLE_RATE = 0.0
+
+        with patch("sentry_sdk.integrations.logging.ignore_logger") as ignore_logger:
+            init_sentry()
+            ignore_logger.assert_any_call("multiprocessing")

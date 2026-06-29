@@ -13,6 +13,7 @@ def init_sentry():
     import sentry_sdk
     from sentry_sdk.integrations.celery import CeleryIntegration
     from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import ignore_logger
 
     sentry_sdk.init(
         dsn=dsn,
@@ -22,6 +23,8 @@ def init_sentry():
         before_send=_before_send,
         send_default_pii=False,
     )
+    # LoggingIntegration (via CeleryIntegration) can emit before before_send in workers.
+    ignore_logger("multiprocessing")
 
 
 def _event_message(event):
