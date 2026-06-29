@@ -23,15 +23,15 @@ class ContestPayoutRequestAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "amount_usd",
-        "chain",
+        "binance_id",
         "status",
-        "usdc_address",
+        "payment_reference",
         "created_at",
         "paid_at",
     )
-    list_filter = ("status", "chain")
-    search_fields = ("user__username", "usdc_address", "tx_hash")
-    readonly_fields = ("created_at", "updated_at")
+    list_filter = ("status",)
+    search_fields = ("user__username", "binance_id", "payment_reference")
+    readonly_fields = ("created_at", "updated_at", "payment_receipt")
     actions = ("mark_paid", "mark_rejected")
 
     @admin.action(description="Mark selected as paid")

@@ -27,6 +27,12 @@ from dashboard.admin_panel_selectors import (
     get_admin_panel_stats,
     get_admin_recent_activity,
 )
+from reputation.models import ContestPayoutRequest
+from reputation.payout_services import (
+    PayoutAdminError,
+    mark_payout_request_paid,
+    reject_payout_request,
+)
 
 superadmin_required = user_passes_test(lambda u: u.is_active and u.is_superuser)
 
@@ -59,32 +65,34 @@ def admin_panel(request):
 def resolve_contest_payout(request, payout_id):
     from django.contrib import messages
 
-    from reputation.models import ContestPayoutRequest
-    from reputation.payout_services import PayoutRequestError, resolve_contest_payout_request
-
     payout = get_object_or_404(ContestPayoutRequest.objects.select_related("user"), pk=payout_id)
     action = request.POST.get("action", "")
-    tx_hash = request.POST.get("tx_hash", "")
 
     try:
-        resolve_contest_payout_request(
-            payout_request=payout,
-            action=action,
-            tx_hash=tx_hash,
-        )
-    except PayoutRequestError as exc:
-        messages.error(request, exc.message)
-    else:
         if action == "mark_paid":
+            mark_payout_request_paid(
+                payout,
+                payment_reference=request.POST.get("payment_reference", ""),
+                payment_receipt=request.FILES.get("payment_receipt"),
+                admin_note=request.POST.get("admin_note", ""),
+            )
             messages.success(
                 request,
                 f"Marked ${payout.amount_usd} withdrawal for @{payout.user.username} as paid.",
             )
-        elif action == "mark_rejected":
+        elif action == "reject":
+            reject_payout_request(
+                payout,
+                admin_note=request.POST.get("admin_note", ""),
+            )
             messages.success(
                 request,
                 f"Rejected withdrawal request for @{payout.user.username}.",
             )
+        else:
+            return HttpResponseBadRequest("Invalid action.")
+    except PayoutAdminError as exc:
+        messages.error(request, exc.message)
 
     return redirect("dashboard:admin_panel")
 

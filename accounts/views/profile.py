@@ -459,8 +459,7 @@ def profile_contest_earnings(request, username):
                 create_payout_request(
                     user=profile_user,
                     amount_usd=form.cleaned_data["amount_usd"],
-                    usdc_address=form.cleaned_data["usdc_address"],
-                    chain=form.cleaned_data["chain"],
+                    binance_id=form.cleaned_data["binance_id"],
                 )
             except PayoutRequestError as exc:
                 messages.error(request, exc.message)
@@ -468,7 +467,7 @@ def profile_contest_earnings(request, username):
                 messages.success(
                     request,
                     _(
-                        "Withdrawal request submitted. We will send USDT to your address after review."
+                        "Withdrawal request submitted. We will send your payment via Binance after review."
                     ),
                 )
                 return redirect("accounts:profile_contest_earnings", username=username)

@@ -8,8 +8,8 @@
         <h2 class="text-sm font-bold text-slate-900 dark:text-white">{% trans "Weekly contest prizes" %}</h2>
       </div>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        {% blocktrans with weeks=liability.finalized_weeks winners=liability.winner_users %}Platform liability for off-platform prizes — {{ weeks }} finalized weeks · {{ winners }} winning players.{% endblocktrans %}
-      </p>
+      {% blocktrans with weeks=liability.finalized_weeks winners=liability.winner_users %}Platform liability for off-platform Binance prizes — {{ weeks }} finalized weeks · {{ winners }} winning players.{% endblocktrans %}
+    </p>
     </div>
   </div>
 
@@ -123,7 +123,7 @@
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">{% trans "Contest withdrawals" %}</h3>
         </div>
         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          {% blocktrans with count=contest_payouts.pending_count total=contest_payouts.pending_usd %}Pending: {{ count }} requests · ${{ total }} total. Pay USDT/USDC manually to the wallet on the selected network.{% endblocktrans %}
+          {% blocktrans with count=contest_payouts.pending_count total=contest_payouts.pending_usd %}Pending: {{ count }} requests · ${{ total }} total. Pay manually via Binance to the player's Binance user ID.{% endblocktrans %}
         </p>
       </div>
       <div class="flex flex-wrap gap-2 text-xs">
@@ -144,8 +144,7 @@
             <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Date" %}</th>
             <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Player" %}</th>
             <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Amount" %}</th>
-            <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Network" %}</th>
-            <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Wallet" %}</th>
+            <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Binance ID" %}</th>
             <th scope="col" class="px-3 py-2.5 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Actions" %}</th>
           </tr>
         </thead>
@@ -158,25 +157,39 @@
               <p class="text-xs text-slate-500">@{{ req.user.username }} · {{ req.user.email|default:"—" }}</p>
             </td>
             <td class="whitespace-nowrap px-3 py-3 font-bold tabular-nums text-emerald-700 dark:text-emerald-400">${{ req.amount_usd }}</td>
-            <td class="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">{{ req.get_chain_display }}</td>
-            <td class="max-w-[12rem] px-3 py-3 font-mono text-xs text-slate-600 break-all dark:text-slate-300" title="{{ req.usdc_address }}">{{ req.usdc_address }}</td>
+            <td class="px-3 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">{{ req.binance_id }}</td>
             <td class="px-3 py-3">
-              <form method="post" action="{% url 'dashboard:resolve_contest_payout' payout_id=req.pk %}" class="space-y-2">
+              <form method="post"
+                    action="{% url 'dashboard:resolve_contest_payout' payout_id=req.pk %}"
+                    enctype="multipart/form-data"
+                    class="space-y-2">
                 {% csrf_token %}
+                <input type="hidden" name="action" value="mark_paid">
                 <input type="text"
-                       name="tx_hash"
+                       name="payment_reference"
                        class="pr-input w-full min-w-[10rem] font-mono text-xs"
-                       placeholder="{% trans 'Tx hash (optional)' %}"
+                       placeholder="{% trans 'Binance transfer ID (optional)' %}"
                        autocomplete="off"
                        spellcheck="false">
+                <label class="block">
+                  <span class="text-xs font-medium text-slate-600 dark:text-slate-400">{% trans "Payment receipt" %}</span>
+                  <input type="file"
+                         name="payment_receipt"
+                         accept="image/jpeg,image/png,image/webp,application/pdf"
+                         class="mt-1 w-full text-xs text-slate-600 file:mr-2 file:rounded-lg file:border-0 file:bg-brand-50 file:px-2 file:py-1.5 file:text-xs file:font-semibold file:text-brand-700 dark:text-slate-400 dark:file:bg-brand-900/40 dark:file:text-brand-300">
+                </label>
                 <div class="flex flex-wrap gap-2">
-                  <button type="submit" name="action" value="mark_paid" class="btn-primary px-3 py-1.5 text-xs">
+                  <button type="submit" class="btn-primary px-3 py-1.5 text-xs">
                     {% trans "Mark paid" %}
                   </button>
-                  <button type="submit" name="action" value="mark_rejected" class="btn-secondary px-3 py-1.5 text-xs">
-                    {% trans "Reject" %}
-                  </button>
                 </div>
+              </form>
+              <form method="post" action="{% url 'dashboard:resolve_contest_payout' payout_id=req.pk %}" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <button type="submit" class="btn-secondary px-3 py-1.5 text-xs">
+                  {% trans "Reject" %}
+                </button>
               </form>
             </td>
           </tr>
@@ -202,9 +215,9 @@
               <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Date" %}</th>
               <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Player" %}</th>
               <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Amount" %}</th>
-              <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Network" %}</th>
               <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Status" %}</th>
-              <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Tx" %}</th>
+              <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Reference" %}</th>
+              <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">{% trans "Receipt" %}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-800">
@@ -213,9 +226,17 @@
               <td class="whitespace-nowrap px-3 py-2 tabular-nums text-slate-600 dark:text-slate-300">{{ req.created_at|date:"M j, Y" }}</td>
               <td class="px-3 py-2 text-slate-700 dark:text-slate-300">{{ req.user.public_name }}</td>
               <td class="whitespace-nowrap px-3 py-2 font-semibold tabular-nums">${{ req.amount_usd }}</td>
-              <td class="px-3 py-2 text-slate-700 dark:text-slate-300">{{ req.get_chain_display }}</td>
               <td class="px-3 py-2 text-slate-700 dark:text-slate-300">{{ req.get_status_display }}</td>
-              <td class="max-w-[8rem] truncate px-3 py-2 font-mono text-xs text-slate-500" title="{{ req.tx_hash }}">{{ req.tx_hash|default:"—" }}</td>
+              <td class="max-w-[8rem] truncate px-3 py-2 font-mono text-xs text-slate-500" title="{{ req.payment_reference }}">{{ req.payment_reference|default:"—" }}</td>
+              <td class="px-3 py-2">
+                {% if req.payment_receipt %}
+                <a href="{{ req.payment_receipt.url }}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400">
+                  {% trans "View receipt" %}
+                </a>
+                {% else %}
+                <span class="text-xs text-slate-400">—</span>
+                {% endif %}
+              </td>
             </tr>
             {% endfor %}
           </tbody>

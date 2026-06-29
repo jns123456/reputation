@@ -495,35 +495,28 @@ class ContestPayoutRequestForm(forms.Form):
             }
         ),
     )
-    chain = forms.ChoiceField(
-        label=_("Blockchain network"),
-        choices=(),
-        widget=forms.Select(attrs={"class": "pr-input w-full"}),
-        help_text=_("Select the network where you want to receive USDT or USDC."),
-    )
-    usdc_address = forms.CharField(
-        label=_("Wallet address"),
-        max_length=128,
+    binance_id = forms.CharField(
+        label=_("Binance user ID"),
+        max_length=64,
         widget=forms.TextInput(
             attrs={
                 "class": "pr-input w-full font-mono text-sm",
-                "placeholder": "0x… / T… / Solana address",
+                "placeholder": "123456789",
                 "autocomplete": "off",
                 "spellcheck": "false",
+                "inputmode": "numeric",
             }
         ),
         help_text=_(
-            "We pay prizes in USDT or USDC on the network you choose. Double-check your address — transfers cannot be reversed."
+            "Enter your numeric Binance user ID. Find it in the Binance app under Profile → User ID. "
+            "Double-check — transfers cannot be reversed."
         ),
     )
 
     def __init__(self, *args, available_usd=None, minimum_usd=None, **kwargs):
-        from reputation.models import ContestPayoutRequest
-
         self.available_usd = available_usd
         self.minimum_usd = minimum_usd
         super().__init__(*args, **kwargs)
-        self.fields["chain"].choices = ContestPayoutRequest.Chain.choices
         if available_usd is not None:
             self.fields["amount_usd"].widget.attrs["max"] = str(available_usd)
         if minimum_usd is not None:
@@ -540,20 +533,11 @@ class ContestPayoutRequestForm(forms.Form):
             raise ValidationError(_("Amount exceeds your available balance."))
         return amount
 
-    def clean_usdc_address(self):
-        from reputation.payout_address_validation import (
-            InvalidPayoutAddressError,
-            validate_payout_wallet_address,
-        )
-        from reputation.payout_services import payout_address_validation_error_message
+    def clean_binance_id(self):
+        from reputation.payout_services import normalize_binance_id
 
-        address = self.cleaned_data.get("usdc_address")
-        chain = self.cleaned_data.get("chain")
-        if not chain:
-            return address
+        binance_id = self.cleaned_data["binance_id"]
         try:
-            return validate_payout_wallet_address(chain=chain, address=address)
-        except InvalidPayoutAddressError as exc:
-            raise ValidationError(
-                payout_address_validation_error_message(chain=chain)
-            ) from exc
+            return normalize_binance_id(binance_id)
+        except ValueError as exc:
+            raise ValidationError(_("Enter a valid Binance user ID (6–20 digits).")) from exc

@@ -122,9 +122,10 @@ class WeeklyContestWinner(models.Model):
 
 
 class ContestPayoutRequest(models.Model):
-    """Off-platform USDT/USDC withdrawal request for weekly contest earnings.
+    """Off-platform withdrawal request for weekly contest earnings.
 
-    PredictStamp does not custody funds — admins mark requests paid manually.
+    PredictStamp does not custody funds — admins pay via Binance and mark
+    requests paid manually, optionally attaching a receipt.
     """
 
     class Status(models.TextChoices):
@@ -133,31 +134,28 @@ class ContestPayoutRequest(models.Model):
         REJECTED = "rejected", "Rejected"
         CANCELLED = "cancelled", "Cancelled"
 
-    class Chain(models.TextChoices):
-        ETHEREUM = "ethereum", "Ethereum (ERC-20)"
-        BASE = "base", "Base"
-        POLYGON = "polygon", "Polygon"
-        BSC = "bsc", "BNB Smart Chain (BEP-20)"
-        ARBITRUM = "arbitrum", "Arbitrum"
-        OPTIMISM = "optimism", "Optimism"
-        TRON = "tron", "Tron (TRC-20)"
-        SOLANA = "solana", "Solana"
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="contest_payout_requests",
     )
     amount_usd = models.DecimalField(max_digits=8, decimal_places=2)
-    usdc_address = models.CharField(max_length=128)
-    chain = models.CharField(max_length=20, choices=Chain.choices, default=Chain.BASE)
+    binance_id = models.CharField(max_length=64)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.PENDING,
     )
     admin_note = models.TextField(blank=True)
-    tx_hash = models.CharField(max_length=66, blank=True)
+    payment_reference = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text="Optional Binance transfer ID or admin note reference.",
+    )
+    payment_receipt = models.FileField(
+        upload_to="contest_payouts/receipts/%Y/%m/",
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     paid_at = models.DateTimeField(null=True, blank=True)

@@ -4,7 +4,7 @@
 {% block content %}
 <p style="margin:0 0 12px;font-size:16px;font-weight:600;color:#0f172a;">{% trans "New contest withdrawal request" %}</p>
 <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#475569;">
-  {% blocktrans with name=player.public_name username=player.username %}A player requested a USDT/USDC withdrawal.{% endblocktrans %}
+  {% blocktrans with name=player.public_name username=player.username %}A player requested a Binance withdrawal.{% endblocktrans %}
 </p>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
@@ -21,16 +21,12 @@
     <td style="padding:12px 14px;font-size:13px;font-weight:700;color:#059669;border-bottom:1px solid #f1f5f9;">${{ payout_request.amount_usd }}</td>
   </tr>
   <tr>
-    <td style="padding:12px 14px;font-size:13px;color:#64748b;border-bottom:1px solid #f1f5f9;">{% trans "Blockchain network" %}</td>
-    <td style="padding:12px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;">{{ payout_request.get_chain_display }}</td>
-  </tr>
-  <tr>
-    <td style="padding:12px 14px;font-size:13px;color:#64748b;">{% trans "Wallet address" %}</td>
-    <td style="padding:12px 14px;font-size:12px;font-family:ui-monospace,monospace;color:#0f172a;word-break:break-all;">{{ payout_request.usdc_address }}</td>
+    <td style="padding:12px 14px;font-size:13px;color:#64748b;">{% trans "Binance user ID" %}</td>
+    <td style="padding:12px 14px;font-size:12px;font-family:ui-monospace,monospace;color:#0f172a;word-break:break-all;">{{ payout_request.binance_id }}</td>
   </tr>
 </table>
 
 <p style="margin:0;font-size:13px;line-height:1.65;color:#475569;">
-  {% trans "Review the request in the admin panel and send USDT/USDC manually on the selected network after verification." %}
+  {% trans "Review the request in the admin panel and send the payment via Binance after verification." %}
 </p>
 {% endblock %}

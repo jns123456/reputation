@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-29 18:26+0000\n"
+"POT-Creation-Date: 2026-06-29 20:20+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -488,21 +488,19 @@ msgstr ""
 msgid "Amount (USD)"
 msgstr "Monto (USD)"
 
-msgid "Blockchain network"
-msgstr "Red blockchain"
+msgid "Binance user ID"
+msgstr "ID de usuario de Binance"
 
-msgid "Select the network where you want to receive USDT or USDC."
-msgstr "Selecciona la red donde quieres recibir USDT o USDC."
-
-msgid "Wallet address"
-msgstr "Dirección wallet"
-
+#| msgid ""
+#| "We pay prizes in USDT or USDC on the network you choose. Double-check your "
+#| "address — transfers cannot be reversed."
 msgid ""
-"We pay prizes in USDT or USDC on the network you choose. Double-check your "
-"address — transfers cannot be reversed."
+"Enter your numeric Binance user ID. Find it in the Binance app under Profile"
+" → User ID. Double-check — transfers cannot be reversed."
 msgstr ""
-"Pagamos los premios en USDT o USDC en la red que elijas. Revisa bien tu "
-"dirección — las transferencias no se pueden revertir."
+"Introduce tu ID numérico de usuario de Binance. Lo encuentras en la app de "
+"Binance en Perfil → ID de usuario. Revisa bien — las transferencias no se "
+"pueden revertir."
 
 #, python-format
 msgid "Minimum withdrawal is $%(amount)s."
@@ -510,6 +508,9 @@ msgstr "El retiro mínimo es $%(amount)s."
 
 msgid "Amount exceeds your available balance."
 msgstr "El monto supera tu saldo disponible."
+
+msgid "Enter a valid Binance user ID (6–20 digits)."
+msgstr "Introduce un ID de usuario de Binance válido (6–20 dígitos)."
 
 msgid "Image must be 5 MB or smaller."
 msgstr "La imagen debe tener 5 MB o menos."
@@ -784,11 +785,14 @@ msgstr "Destino de marcador no válido"
 msgid "Withdrawal requests are not available right now."
 msgstr "Las solicitudes de retiro no están disponibles en este momento."
 
+#| msgid ""
+#| "Withdrawal request submitted. We will send USDT to your address after "
+#| "review."
 msgid ""
-"Withdrawal request submitted. We will send USDT to your address after "
+"Withdrawal request submitted. We will send your payment via Binance after "
 "review."
 msgstr ""
-"Solicitud de retiro enviada. Enviaremos USDT a tu dirección tras la "
+"Solicitud de retiro enviada. Enviaremos tu pago vía Binance tras la "
 "revisión."
 
 msgid "Missing username"
@@ -1270,7 +1274,6 @@ msgstr "Desafíos"
 msgid "Share your thoughts…"
 msgstr "Comparte tus opiniones"
 
-#| msgid "Add text, an image, or a poll to your post."
 msgid "Add text or an image to your comment."
 msgstr "Añade texto o una imagen a tu comentario."
 
@@ -1741,17 +1744,13 @@ msgstr ""
 msgid "Poll not found"
 msgstr "Encuesta no encontrada"
 
-msgid "Enter a valid Tron wallet address (starts with T)."
-msgstr "Introduce una dirección wallet Tron válida (empieza con T)."
+#| msgid "Image must be 5 MB or smaller."
+msgid "Receipt must be 10 MB or smaller."
+msgstr "La imagen debe tener 5 MB o menos."
 
-msgid "Enter a valid Solana wallet address."
-msgstr "Introduce una dirección wallet Solana válida."
-
-msgid ""
-"Enter a valid wallet address for the selected network (0x… for EVM chains)."
-msgstr ""
-"Introduce una dirección wallet válida para la red seleccionada (0x… para "
-"cadenas EVM)."
+#| msgid "Upload a JPEG, PNG, WebP, or GIF image."
+msgid "Upload a JPEG, PNG, WebP, or PDF receipt."
+msgstr "Sube una imagen JPEG, PNG, WebP o GIF."
 
 #, python-format
 msgid "New contest withdrawal request — %(username)s"
@@ -1763,11 +1762,13 @@ msgstr "Los retiros del concurso no están disponibles en este momento."
 msgid "You already have a pending withdrawal request."
 msgstr "Ya tienes una solicitud de retiro pendiente."
 
-msgid "Only pending withdrawal requests can be updated."
+#| msgid "Only pending withdrawal requests can be updated."
+msgid "Only pending withdrawal requests can be marked paid."
 msgstr "Solo se pueden cancelar los desafíos pendientes."
 
-msgid "Invalid action."
-msgstr "Enlace no válido"
+#| msgid "Only pending withdrawal requests can be updated."
+msgid "Only pending withdrawal requests can be rejected."
+msgstr "Solo se pueden cancelar los desafíos pendientes."
 
 msgid "Absolute reputation leader"
 msgstr "Líder absoluto de reputación"
@@ -2539,12 +2540,15 @@ msgstr "Aún no has votado en ningún evento del desafío."
 msgid "%(name)s is not following anyone yet."
 msgstr "%(name)s aún no sigue a nadie."
 
+#| msgid ""
+#| "Cash prizes from the weekly reputation contest. PredictStamp does not hold "
+#| "your funds — USDT is sent manually to your wallet after review."
 msgid ""
 "Cash prizes from the weekly reputation contest. PredictStamp does not hold "
-"your funds — USDT is sent manually to your wallet after review."
+"your funds — payments are sent manually via Binance after review."
 msgstr ""
 "Premios en efectivo del concurso semanal de reputación. PredictStamp no "
-"custodia tus fondos — el USDT se envía manualmente a tu wallet tras la "
+"custodia tus fondos — los pagos se envían manualmente vía Binance tras la "
 "revisión."
 
 msgid "View weekly contest"
@@ -2553,8 +2557,9 @@ msgstr "Ver concurso semanal"
 msgid "Available balance"
 msgstr "Saldo disponible"
 
-msgid "USD equivalent · withdraw as USDT/USDC"
-msgstr "Equivalente en USD · retira en USDT/USDC"
+#| msgid "USD equivalent · withdraw as USDT/USDC"
+msgid "USD equivalent · withdraw via Binance"
+msgstr "Equivalente en USD · retira vía Binance"
 
 msgid "Lifetime earned"
 msgstr "Total ganado"
@@ -2562,24 +2567,26 @@ msgstr "Total ganado"
 msgid "Withdrawn"
 msgstr "Retirado"
 
-msgid "Request USDT/USDC withdrawal"
-msgstr "Solicitar retiro en USDT/USDC"
+#| msgid "Request USDT/USDC withdrawal"
+msgid "Request Binance withdrawal"
+msgstr "Solicitar retiro vía Binance"
 
 #, python-format
-msgid ""
-"Minimum $%(min)s. Choose the blockchain network and wallet address where you"
-" want to receive USDT or USDC. Processing usually takes a few business days."
+msgid "Minimum $%(min)s. Processing usually takes a few business days."
 msgstr ""
 
 msgid "Submit withdrawal request"
 msgstr "Enviar solicitud de retiro"
 
+#| msgid ""
+#| "You have a pending withdrawal request. We will email you when USDT has been "
+#| "sent."
 msgid ""
-"You have a pending withdrawal request. We will email you when USDT has been "
-"sent."
+"You have a pending withdrawal request. We will email you when your Binance "
+"payment has been sent."
 msgstr ""
 "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se "
-"envíe el USDT."
+"envíe el pago por Binance."
 
 #, python-format
 msgid "Your balance is below the $%(min)s minimum withdrawal."
@@ -2612,14 +2619,11 @@ msgstr "Fecha"
 msgid "Amount"
 msgstr "Monto"
 
-msgid "Network"
-msgstr "Red"
-
 msgid "Status"
 msgstr "Estado"
 
-msgid "Address"
-msgstr "Dirección"
+msgid "Binance ID"
+msgstr "ID de Binance"
 
 #, python-format
 msgid "Level: %(title)s. "
@@ -5648,12 +5652,15 @@ msgid "Weekly contest prizes"
 msgstr "Premios del concurso semanal"
 
 #, python-format
+#| msgid ""
+#| "Platform liability for off-platform prizes — %(weeks)s finalized weeks · "
+#| "%(winners)s winning players."
 msgid ""
-"Platform liability for off-platform prizes — %(weeks)s finalized weeks · "
-"%(winners)s winning players."
+"Platform liability for off-platform Binance prizes — %(weeks)s finalized "
+"weeks · %(winners)s winning players."
 msgstr ""
-"Deuda de la plataforma por premios off-platform — %(weeks)s semanas "
-"finalizadas · %(winners)s jugadores ganadores."
+"Deuda de la plataforma por premios off-platform vía Binance — %(weeks)s "
+"semanas finalizadas · %(winners)s jugadores ganadores."
 
 msgid "Total awarded"
 msgstr "Total otorgado"
@@ -5693,12 +5700,15 @@ msgid "Contest withdrawals"
 msgstr "Retiros del concurso"
 
 #, python-format
+#| msgid ""
+#| "Pending: %(count)s requests · $%(total)s total. Pay USDT/USDC manually to "
+#| "the wallet on the selected network."
 msgid ""
-"Pending: %(count)s requests · $%(total)s total. Pay USDT/USDC manually to "
-"the wallet on the selected network."
+"Pending: %(count)s requests · $%(total)s total. Pay manually via Binance to "
+"the player's Binance user ID."
 msgstr ""
-"Pendientes: %(count)s solicitudes · $%(total)s total. Paga USDT/USDC "
-"manualmente a la wallet en la red seleccionada."
+"Pendientes: %(count)s solicitudes · $%(total)s total. Paga manualmente vía "
+"Binance al ID de Binance del jugador."
 
 #, python-format
 msgid "%(count)s pending"
@@ -5708,14 +5718,14 @@ msgstr "%(count)s pendientes"
 msgid "%(count)s paid"
 msgstr "%(count)s pagados"
 
-msgid "Wallet"
-msgstr "Wallet"
-
 msgid "Actions"
 msgstr "Acciones"
 
-msgid "Tx hash (optional)"
-msgstr "Hash de tx (opcional)"
+msgid "Binance transfer ID (optional)"
+msgstr "ID de transferencia Binance (opcional)"
+
+msgid "Payment receipt"
+msgstr "Comprobante de pago"
 
 msgid "Mark paid"
 msgstr "Marcar pagado"
@@ -5729,8 +5739,17 @@ msgstr "No hay solicitudes de retiro del concurso pendientes."
 msgid "Recent withdrawal history"
 msgstr "Historial reciente de retiros"
 
-msgid "Tx"
-msgstr "Tx"
+#| msgid "ReDoc reference UI."
+msgid "Reference"
+msgstr "Referencia"
+
+#| msgid "Recent"
+msgid "Receipt"
+msgstr "Comprobante"
+
+#| msgid "View event"
+msgid "View receipt"
+msgstr "Ver comprobante"
 
 msgid "Daily missions"
 msgstr "Misiones diarias"
@@ -5978,9 +5997,12 @@ msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 msgid "Credited to your account"
 msgstr "Acreditado en tu cuenta"
 
-msgid "Added to your contest earnings balance — withdraw as USDT anytime."
+#| msgid ""
+#| "Added to your contest earnings balance — withdraw as USDT anytime."
+msgid "Added to your contest earnings balance — withdraw via Binance anytime."
 msgstr ""
-"Sumado a tu saldo de ganancias del concurso — retira en USDT cuando quieras."
+"Sumado a tu saldo de ganancias del concurso — retira vía Binance cuando "
+"quieras."
 
 msgid "View balance & withdraw"
 msgstr "Ver saldo y retirar"
@@ -6379,15 +6401,19 @@ msgstr "Administra tus alertas"
 msgid "New contest withdrawal request"
 msgstr "Nueva solicitud de retiro del concurso"
 
-msgid "A player requested a USDT/USDC withdrawal."
-msgstr "Un jugador solicitó un retiro en USDT/USDC."
+#| msgid "A player requested a USDT/USDC withdrawal."
+msgid "A player requested a Binance withdrawal."
+msgstr "Un jugador solicitó un retiro vía Binance."
 
+#| msgid ""
+#| "Review the request in the admin panel and send USDT/USDC manually on the "
+#| "selected network after verification."
 msgid ""
-"Review the request in the admin panel and send USDT/USDC manually on the "
-"selected network after verification."
+"Review the request in the admin panel and send the payment via Binance after"
+" verification."
 msgstr ""
-"Revisa la solicitud en el panel admin y envía USDT/USDC manualmente en la "
-"red seleccionada tras la verificación."
+"Revisa la solicitud en el panel admin y envía el pago vía Binance tras la "
+"verificación."
 
 #, python-format
 msgid "Player: %(name)s (@%(username)s)"
@@ -6399,11 +6425,8 @@ msgstr "Email"
 msgid "Amount:"
 msgstr "Monto"
 
-msgid "Blockchain network:"
-msgstr "Unirse a la red"
-
-msgid "Wallet address:"
-msgstr "Dirección wallet USDC (Base)"
+msgid "Binance user ID:"
+msgstr ""
 
 #, python-format
 msgid "%(name)s, here's your daily recap"
@@ -6523,6 +6546,19 @@ msgstr ""
 "PredictStamp. Solicita un retiro en USDT desde tu perfil cuando quieras — "
 "PredictStamp no custodia fondos en la plataforma."
 
+#| msgid ""
+#| "We credited $%(amount)s to your contest earnings balance on PredictStamp. "
+#| "Request a USDT withdrawal from your profile whenever you are ready — "
+#| "PredictStamp does not hold funds on-platform."
+msgid ""
+"Your prize has been added to your contest earnings balance. Request a "
+"Binance withdrawal from your profile whenever you are ready — PredictStamp "
+"does not hold funds on-platform."
+msgstr ""
+"Tu premio se sumó a tu saldo de ganancias del concurso. Solicita un retiro "
+"vía Binance desde tu perfil cuando quieras — PredictStamp no custodia fondos"
+" en la plataforma."
+
 msgid ""
 "A new contest week starts every Sunday. Keep forecasting to defend your "
 "spot."
@@ -6534,6 +6570,18 @@ msgstr ""
 msgid "Congratulations — you won $%(prize)s in the weekly reputation contest!"
 msgstr ""
 "¡Felicitaciones — ganaste $%(prize)s en el concurso semanal de reputación!"
+
+#| msgid ""
+#| "We credited $%(amount)s to your contest earnings balance on PredictStamp. "
+#| "You can request a USDT withdrawal from your profile whenever you are ready."
+msgid ""
+"Your prize has been credited to your contest earnings balance on "
+"PredictStamp. You can request a Binance withdrawal from your profile "
+"whenever you are ready."
+msgstr ""
+"Tu premio fue acreditado en tu saldo de ganancias del concurso en "
+"PredictStamp. Puedes solicitar un retiro vía Binance desde tu perfil cuando "
+"quieras."
 
 #, python-format
 msgid ""
@@ -7975,6 +8023,55 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "Added to your contest earnings balance — withdraw as USDT anytime."
+#~ msgstr ""
+#~ "Sumado a tu saldo de ganancias del concurso — retira en USDT cuando quieras."
+
+#~ msgid "Blockchain network"
+#~ msgstr "Red blockchain"
+
+#~ msgid "Select the network where you want to receive USDT or USDC."
+#~ msgstr "Selecciona la red donde quieres recibir USDT o USDC."
+
+#~ msgid "Wallet address"
+#~ msgstr "Dirección wallet"
+
+#~ msgid "Enter a valid Tron wallet address (starts with T)."
+#~ msgstr "Introduce una dirección wallet Tron válida (empieza con T)."
+
+#~ msgid "Enter a valid Solana wallet address."
+#~ msgstr "Introduce una dirección wallet Solana válida."
+
+#~ msgid ""
+#~ "Enter a valid wallet address for the selected network (0x… for EVM chains)."
+#~ msgstr ""
+#~ "Introduce una dirección wallet válida para la red seleccionada (0x… para "
+#~ "cadenas EVM)."
+
+#~ msgid "Invalid action."
+#~ msgstr "Enlace no válido"
+
+#~ msgid "Network"
+#~ msgstr "Red"
+
+#~ msgid "Address"
+#~ msgstr "Dirección"
+
+#~ msgid "Wallet"
+#~ msgstr "Wallet"
+
+#~ msgid "Tx hash (optional)"
+#~ msgstr "Hash de tx (opcional)"
+
+#~ msgid "Tx"
+#~ msgstr "Tx"
+
+#~ msgid "Blockchain network:"
+#~ msgstr "Unirse a la red"
+
+#~ msgid "Wallet address:"
+#~ msgstr "Dirección wallet USDC (Base)"
 
 #~ msgid "Prize credited"
 #~ msgstr "Premio acreditado"

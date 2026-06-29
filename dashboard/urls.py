@@ -18,6 +18,11 @@ urlpatterns = [
         admin_panel_views.resolve_identity_verification,
         name="resolve_identity_verification",
     ),
+    path(
+        "panel/contest-payouts/<int:payout_id>/",
+        admin_panel_views.resolve_contest_payout,
+        name="resolve_contest_payout",
+    ),
     path("panel/moderation/", admin_panel_views.moderation_queue, name="moderation_queue"),
     path(
         "panel/moderation/action/",

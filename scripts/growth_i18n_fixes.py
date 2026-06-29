@@ -131,45 +131,32 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "View week": "Ver semana",
     "Got it": "Entendido",
     "Don't show this message again": "No volver a ver este mensaje",
-    # --- Contest earnings / USDT withdrawal ---
+    # --- Contest earnings / Binance withdrawal ---
     "Contest earnings": "Ganancias del concurso",
-    "Cash prizes from the weekly reputation contest. PredictStamp does not hold your funds — USDT is sent manually to your wallet after review.": (
+    "Cash prizes from the weekly reputation contest. PredictStamp does not hold your funds — payments are sent manually via Binance after review.": (
         "Premios en efectivo del concurso semanal de reputación. PredictStamp no custodia tus fondos — "
-        "el USDT se envía manualmente a tu wallet tras la revisión."
+        "los pagos se envían manualmente vía Binance tras la revisión."
     ),
     "View weekly contest": "Ver concurso semanal",
     "Available balance": "Saldo disponible",
-    "USD equivalent · withdraw as USDT": "Equivalente en USD · retira en USDT",
+    "USD equivalent · withdraw via Binance": "Equivalente en USD · retira vía Binance",
     "Available balance · $%(earned)s earned from weekly prizes": (
         "Saldo disponible · $%(earned)s ganados en premios semanales"
     ),
-    "Withdraw USDT/USDC": "Retirar USDT/USDC",
-    "Request USDT/USDC withdrawal": "Solicitar retiro en USDT/USDC",
-    "Minimum ${{ min }}. Choose the blockchain network and wallet address where you want to receive USDT or USDC. Processing usually takes a few business days.": (
-        "Mínimo ${{ min }}. Elige la red blockchain y la dirección wallet donde quieres recibir USDT o USDC. "
-        "El procesamiento suele tardar unos días hábiles."
+    "Withdraw via Binance": "Retirar vía Binance",
+    "Request Binance withdrawal": "Solicitar retiro vía Binance",
+    "Minimum ${{ min }}. Processing usually takes a few business days.": (
+        "Mínimo ${{ min }}. El procesamiento suele tardar unos días hábiles."
     ),
-    "Blockchain network": "Red blockchain",
-    "Select the network where you want to receive USDT or USDC.": (
-        "Selecciona la red donde quieres recibir USDT o USDC."
+    "Binance user ID": "ID de usuario de Binance",
+    "Enter your numeric Binance user ID. Find it in the Binance app under Profile → User ID. Double-check — transfers cannot be reversed.": (
+        "Introduce tu ID numérico de usuario de Binance. Lo encuentras en la app de Binance en Perfil → ID de usuario. "
+        "Revisa bien — las transferencias no se pueden revertir."
     ),
-    "Wallet address": "Dirección wallet",
-    "We pay prizes in USDT or USDC on the network you choose. Double-check your address — transfers cannot be reversed.": (
-        "Pagamos los premios en USDT o USDC en la red que elijas. Revisa bien tu dirección — las transferencias no se pueden revertir."
-    ),
-    "Enter a valid wallet address for the selected network (0x… for EVM chains).": (
-        "Introduce una dirección wallet válida para la red seleccionada (0x… para cadenas EVM)."
-    ),
-    "Enter a valid Tron wallet address (starts with T).": (
-        "Introduce una dirección wallet Tron válida (empieza con T)."
-    ),
-    "Enter a valid Solana wallet address.": "Introduce una dirección wallet Solana válida.",
-    "USD equivalent · withdraw as USDT/USDC": "Equivalente en USD · retira en USDT/USDC",
-    "Network": "Red",
     "Contest withdrawals": "Retiros del concurso",
     "Weekly contest prizes": "Premios del concurso semanal",
-    "Platform liability for off-platform prizes — %(weeks)s finalized weeks · %(winners)s winning players.": (
-        "Deuda de la plataforma por premios off-platform — %(weeks)s semanas finalizadas · %(winners)s jugadores ganadores."
+    "Platform liability for off-platform Binance prizes — %(weeks)s finalized weeks · %(winners)s winning players.": (
+        "Deuda de la plataforma por premios off-platform vía Binance — %(weeks)s semanas finalizadas · %(winners)s jugadores ganadores."
     ),
     "Total awarded": "Total otorgado",
     "Paid out": "Pagado",
@@ -180,45 +167,37 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "All players with contest earnings — including those who have not requested withdrawal yet.": (
         "Todos los jugadores con ganancias del concurso — incluidos quienes aún no han solicitado retiro."
     ),
-    "Available balance": "Saldo disponible",
     "Contest winners": "Ganadores del concurso",
     "Weekly contest winners from all finalized weeks.": (
         "Ganadores del concurso semanal de todas las semanas finalizadas."
     ),
     "No contest winners recorded yet.": "Aún no hay ganadores del concurso registrados.",
-    "Pending: %(count)s requests · $%(total)s total. Pay USDT/USDC manually to the wallet on the selected network.": (
-        "Pendientes: %(count)s solicitudes · $%(total)s total. Paga USDT/USDC manualmente a la wallet en la red seleccionada."
+    "Pending: %(count)s requests · $%(total)s total. Pay manually via Binance to the player's Binance user ID.": (
+        "Pendientes: %(count)s solicitudes · $%(total)s total. Paga manualmente vía Binance al ID de Binance del jugador."
     ),
     "%(count)s pending": "%(count)s pendientes",
     "%(count)s paid": "%(count)s pagados",
-    "Wallet": "Wallet",
     "Actions": "Acciones",
-    "Tx hash (optional)": "Hash de tx (opcional)",
+    "Binance transfer ID (optional)": "ID de transferencia Binance (opcional)",
+    "Payment receipt": "Comprobante de pago",
     "Mark paid": "Marcar pagado",
     "Reject": "Rechazar",
     "No pending contest withdrawal requests.": "No hay solicitudes de retiro del concurso pendientes.",
     "Recent withdrawal history": "Historial reciente de retiros",
-    "Tx": "Tx",
-    "A player requested a USDT/USDC withdrawal.": "Un jugador solicitó un retiro en USDT/USDC.",
-    "Review the request in the admin panel and send USDT/USDC manually on the selected network after verification.": (
-        "Revisa la solicitud en el panel admin y envía USDT/USDC manualmente en la red seleccionada tras la verificación."
+    "Reference": "Referencia",
+    "Receipt": "Comprobante",
+    "View receipt": "Ver comprobante",
+    "A player requested a Binance withdrawal.": "Un jugador solicitó un retiro vía Binance.",
+    "Review the request in the admin panel and send the payment via Binance after verification.": (
+        "Revisa la solicitud en el panel admin y envía el pago vía Binance tras la verificación."
     ),
     "Lifetime earned": "Total ganado",
     "Pending": "Pendiente",
     "Withdrawn": "Retirado",
-    "Request USDT withdrawal": "Solicitar retiro en USDT",
-    "Minimum ${{ min }}. Prizes are paid in USDT after manual review — processing usually takes a few business days.": (
-        "Mínimo ${{ min }}. Los premios se pagan en USDT tras revisión manual — "
-        "el procesamiento suele tardar unos días hábiles."
-    ),
     "Amount (USD)": "Monto (USD)",
-    "USDT wallet address": "Dirección wallet USDT",
-    "We pay prizes in USDT. Double-check your address — transfers cannot be reversed.": (
-        "Pagamos los premios en USDT. Revisa bien tu dirección — las transferencias no se pueden revertir."
-    ),
     "Submit withdrawal request": "Enviar solicitud de retiro",
-    "You have a pending withdrawal request. We will email you when USDT has been sent.": (
-        "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se envíe el USDT."
+    "You have a pending withdrawal request. We will email you when your Binance payment has been sent.": (
+        "Tienes una solicitud de retiro pendiente. Te avisaremos por email cuando se envíe el pago por Binance."
     ),
     "Your balance is below the ${{ min }} minimum withdrawal.": (
         "Tu saldo está por debajo del mínimo de retiro de ${{ min }}."
@@ -234,9 +213,9 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Date": "Fecha",
     "Amount": "Monto",
     "Status": "Estado",
-    "Address": "Dirección",
-    "Withdrawal request submitted. We will send USDT to your address after review.": (
-        "Solicitud de retiro enviada. Enviaremos USDT a tu dirección tras la revisión."
+    "Binance ID": "ID de Binance",
+    "Withdrawal request submitted. We will send your payment via Binance after review.": (
+        "Solicitud de retiro enviada. Enviaremos tu pago vía Binance tras la revisión."
     ),
     "Withdrawal requests are not available right now.": (
         "Las solicitudes de retiro no están disponibles en este momento."
@@ -244,44 +223,69 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Minimum withdrawal is $%(amount)s.": "El retiro mínimo es $%(amount)s.",
     "Amount exceeds your available balance.": "El monto supera tu saldo disponible.",
     "You already have a pending withdrawal request.": "Ya tienes una solicitud de retiro pendiente.",
-    "Enter a valid USDT wallet address (0x…).": (
-        "Introduce una dirección wallet USDT válida (0x…)."
+    "Enter a valid Binance user ID (6–20 digits).": (
+        "Introduce un ID de usuario de Binance válido (6–20 dígitos)."
     ),
     "Contest withdrawals are not available right now.": (
         "Los retiros del concurso no están disponibles en este momento."
     ),
+    # --- Admin contest payouts panel ---
+    "Weekly contest prizes": "Premios del concurso semanal",
+    "Off-platform payments to contest winners via Binance.": (
+        "Pagos fuera de la plataforma a ganadores del concurso vía Binance."
+    ),
+    "Total granted": "Total otorgado",
+    "Paid": "Pagado",
+    "Pending withdrawal": "Retiro pendiente",
+    "Outstanding debt": "Deuda pendiente",
+    "Credited but not yet requested or paid": "Acreditado pero aún no solicitado ni pagado",
+    "Balances owed to players": "Saldos adeudados a jugadores",
+    "Player": "Jugador",
+    "Total earned": "Total ganado",
+    "Available": "Saldo disponible",
+    "Contest winners": "Ganadores del concurso",
+    "Available balance": "Saldo disponible",
+    "Contest withdrawals": "Retiros del concurso",
+    "Pay manually via Binance to the player's Binance user ID.": (
+        "Paga manualmente vía Binance al ID de usuario de Binance del jugador."
+    ),
+    "Actions": "Acciones",
+    "Binance transfer ID (optional)": "ID de transferencia Binance (opcional)",
+    "Payment receipt": "Comprobante de pago",
+    "Mark paid": "Marcar pagado",
+    "Reject": "Rechazar",
+    "No pending withdrawal requests.": "No hay solicitudes de retiro pendientes.",
+    "Recent withdrawal history": "Historial reciente de retiros",
+    "Reference": "Referencia",
+    "Receipt": "Comprobante",
+    "View receipt": "Ver comprobante",
     # --- Weekly contest winner alerts ---
     "You won the weekly contest!": "¡Ganaste el concurso semanal!",
     "Credited to your account": "Acreditado en tu cuenta",
-    "Added to your contest earnings balance — withdraw as USDT anytime.": (
-        "Sumado a tu saldo de ganancias del concurso — retira en USDT cuando quieras."
+    "Added to your contest earnings balance — withdraw via Binance anytime.": (
+        "Sumado a tu saldo de ganancias del concurso — retira vía Binance cuando quieras."
     ),
     "View balance & withdraw": "Ver saldo y retirar",
-    "We credited $%(amount)s to your contest earnings balance on PredictStamp. Request a USDT withdrawal from your profile whenever you are ready — PredictStamp does not hold funds on-platform.": (
+    "We credited $%(amount)s to your contest earnings balance on PredictStamp. Request a Binance withdrawal from your profile whenever you are ready — PredictStamp does not hold funds on-platform.": (
         "Acreditamos $%(amount)s en tu saldo de ganancias del concurso en PredictStamp. "
-        "Solicita un retiro en USDT desde tu perfil cuando quieras — PredictStamp no custodia fondos en la plataforma."
+        "Solicita un retiro vía Binance desde tu perfil cuando quieras — PredictStamp no custodia fondos en la plataforma."
     ),
-    "We credited $%(amount)s to your contest earnings balance on PredictStamp. You can request a USDT withdrawal from your profile whenever you are ready.": (
+    "We credited $%(amount)s to your contest earnings balance on PredictStamp. You can request a Binance withdrawal from your profile whenever you are ready.": (
         "Acreditamos $%(amount)s en tu saldo de ganancias del concurso en PredictStamp. "
-        "Puedes solicitar un retiro en USDT desde tu perfil cuando quieras."
+        "Puedes solicitar un retiro vía Binance desde tu perfil cuando quieras."
     ),
     "New contest withdrawal request": "Nueva solicitud de retiro del concurso",
     "New contest withdrawal request — %(username)s": "Nueva solicitud de retiro del concurso — %(username)s",
-    "A player requested a USDT withdrawal.": "Un jugador solicitó un retiro en USDT.",
     "Player": "Jugador",
-    "USDT wallet address": "Dirección wallet USDT",
-    "Review the request in Django admin and send USDT manually after verification.": (
-        "Revisa la solicitud en Django admin y envía USDT manualmente tras la verificación."
-    ),
     "Congratulations — you won $%(prize)s in the weekly reputation contest!": (
         "¡Felicitaciones — ganaste $%(prize)s en el concurso semanal de reputación!"
     ),
     "Category: %(label)s · Week starting %(week)s": (
         "Categoría: %(label)s · Semana que empieza el %(week)s"
     ),
-    "Your prize has been credited to your contest earnings balance on PredictStamp. You can request a USDC withdrawal on Base from your profile whenever you are ready.": (
+    "Your prize has been credited to your contest earnings balance on PredictStamp. You can request a Binance withdrawal from your profile whenever you are ready.": (
         "Tu premio fue acreditado en tu saldo de ganancias del concurso en PredictStamp. "
-        "Puedes solicitar un retiro en USDC en Base desde tu perfil cuando quieras."
+        "Puedes solicitar un retiro vía Binance desde tu perfil cuando quieras."
     ),
     "View contest earnings:": "Ver ganancias del concurso:",
     "Keep forecasting — a new contest week starts every Sunday.": (
@@ -290,8 +294,8 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "Hi %(name)s, congratulations on topping the weekly reputation leaderboard.": (
         "Hola %(name)s, felicitaciones por liderar la tabla semanal de reputación."
     ),
-    "Your prize has been added to your contest earnings balance. Request a USDC withdrawal on Base from your profile whenever you are ready — PredictStamp does not hold funds on-platform.": (
-        "Tu premio se sumó a tu saldo de ganancias del concurso. Solicita un retiro en USDC en Base "
+    "Your prize has been added to your contest earnings balance. Request a Binance withdrawal from your profile whenever you are ready — PredictStamp does not hold funds on-platform.": (
+        "Tu premio se sumó a tu saldo de ganancias del concurso. Solicita un retiro vía Binance "
         "desde tu perfil cuando quieras — PredictStamp no custodia fondos en la plataforma."
     ),
     "A new contest week starts every Sunday. Keep forecasting to defend your spot.": (

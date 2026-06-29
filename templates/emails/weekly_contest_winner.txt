@@ -4,9 +4,13 @@
 
 {% blocktrans with week=week_code %}Week starting {{ week }}{% endblocktrans %}
 
+<<<<<<< HEAD
 {% for win in wins %}
 - {{ win.get_prize_type_display }}: ${{ win.prize_usd }}
 {% endfor %}
+=======
+{% trans "Your prize has been credited to your contest earnings balance on PredictStamp. You can request a Binance withdrawal from your profile whenever you are ready." %}
+>>>>>>> e1a8016 (Add contest payout admin panel and switch withdrawals to Binance ID.)
 
 {% blocktrans with amount=total_prize_usd %}We credited ${{ amount }} to your contest earnings balance on PredictStamp. You can request a USDT withdrawal from your profile whenever you are ready.{% endblocktrans %}
 

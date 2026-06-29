@@ -1,8 +1,9 @@
-"""Contest earnings balance and off-platform USDT/USDC withdrawal requests."""
+"""Contest earnings balance and off-platform Binance withdrawal requests."""
 
 from __future__ import annotations
 
 import logging
+import re
 from datetime import timedelta
 from decimal import Decimal
 
@@ -12,16 +13,27 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from reputation.models import ContestPayoutRequest, WeeklyContestWinner
-from reputation.payout_address_validation import (
-    InvalidPayoutAddressError,
-    normalize_payout_chain,
-    validate_payout_wallet_address,
-)
 
 logger = logging.getLogger(__name__)
 
+_BINANCE_ID_RE = re.compile(r"^[0-9]{6,20}$")
+
+ALLOWED_RECEIPT_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+}
+MAX_RECEIPT_BYTES = 10 * 1024 * 1024
+
 
 class PayoutRequestError(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
+
+
+class PayoutAdminError(Exception):
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
@@ -39,13 +51,36 @@ def contest_payout_notify_email() -> str:
     return str(getattr(settings, "CONTEST_PAYOUT_NOTIFY_EMAIL", "juaninappa@gmail.com")).strip()
 
 
-def payout_address_validation_error_message(*, chain: str) -> str:
-    chain = (chain or "").strip().lower()
-    if chain == ContestPayoutRequest.Chain.TRON:
-        return _("Enter a valid Tron wallet address (starts with T).")
-    if chain == ContestPayoutRequest.Chain.SOLANA:
-        return _("Enter a valid Solana wallet address.")
-    return _("Enter a valid wallet address for the selected network (0x… for EVM chains).")
+def normalize_binance_id(binance_id: str) -> str:
+    normalized = (binance_id or "").strip()
+    if not _BINANCE_ID_RE.match(normalized):
+        raise ValueError("invalid binance id")
+    return normalized
+
+
+def clean_payment_receipt(receipt):
+    """Validate an optional admin-uploaded payment receipt."""
+    if not receipt:
+        return None
+
+    if receipt.size > MAX_RECEIPT_BYTES:
+        raise PayoutAdminError(_("Receipt must be 10 MB or smaller."))
+
+    content_type = getattr(receipt, "content_type", "")
+    if content_type and content_type not in ALLOWED_RECEIPT_CONTENT_TYPES:
+        raise PayoutAdminError(_("Upload a JPEG, PNG, WebP, or PDF receipt."))
+
+    if content_type.startswith("image/"):
+        from django.core.exceptions import ValidationError
+
+        from accounts.media_validation import clean_uploaded_image
+
+        try:
+            return clean_uploaded_image(receipt)
+        except ValidationError as exc:
+            raise PayoutAdminError(exc.messages[0]) from exc
+
+    return receipt
 
 
 def send_contest_payout_admin_notification(*, payout_request: ContestPayoutRequest) -> bool:
@@ -224,7 +259,7 @@ def get_admin_contest_balance_rows():
     return rows
 
 
-def create_payout_request(*, user, amount_usd, usdc_address, chain):
+def create_payout_request(*, user, amount_usd, binance_id):
     if not contest_payouts_enabled():
         raise PayoutRequestError(_("Contest withdrawals are not available right now."))
 
@@ -243,42 +278,53 @@ def create_payout_request(*, user, amount_usd, usdc_address, chain):
         raise PayoutRequestError(_("You already have a pending withdrawal request."))
 
     try:
-        normalized_chain = normalize_payout_chain(chain)
-        normalized_address = validate_payout_wallet_address(
-            chain=normalized_chain,
-            address=usdc_address,
-        )
-    except InvalidPayoutAddressError as exc:
+        normalized_id = normalize_binance_id(binance_id)
+    except ValueError as exc:
         raise PayoutRequestError(
-            payout_address_validation_error_message(chain=chain)
+            _("Enter a valid Binance user ID (6–20 digits).")
         ) from exc
 
     payout_request = ContestPayoutRequest.objects.create(
         user=user,
         amount_usd=amount,
-        usdc_address=normalized_address,
-        chain=normalized_chain,
+        binance_id=normalized_id,
     )
     send_contest_payout_admin_notification(payout_request=payout_request)
     return payout_request
 
 
-def resolve_contest_payout_request(*, payout_request, action, tx_hash=""):
-    """Mark a payout request paid or rejected from the admin panel."""
+def mark_payout_request_paid(
+    payout_request: ContestPayoutRequest,
+    *,
+    payment_reference: str = "",
+    payment_receipt=None,
+    admin_note: str = "",
+) -> ContestPayoutRequest:
     if payout_request.status != ContestPayoutRequest.Status.PENDING:
-        raise PayoutRequestError(_("Only pending withdrawal requests can be updated."))
+        raise PayoutAdminError(_("Only pending withdrawal requests can be marked paid."))
 
-    if action == "mark_paid":
-        payout_request.status = ContestPayoutRequest.Status.PAID
-        payout_request.paid_at = timezone.now()
-        if tx_hash:
-            payout_request.tx_hash = tx_hash.strip()
-        payout_request.save(update_fields=["status", "paid_at", "tx_hash", "updated_at"])
-        return payout_request
+    receipt = clean_payment_receipt(payment_receipt)
+    payout_request.status = ContestPayoutRequest.Status.PAID
+    payout_request.paid_at = timezone.now()
+    payout_request.payment_reference = (payment_reference or "").strip()[:128]
+    payout_request.admin_note = (admin_note or "").strip()
+    update_fields = ["status", "paid_at", "payment_reference", "admin_note", "updated_at"]
+    if receipt:
+        payout_request.payment_receipt = receipt
+        update_fields.append("payment_receipt")
+    payout_request.save(update_fields=update_fields)
+    return payout_request
 
-    if action == "mark_rejected":
-        payout_request.status = ContestPayoutRequest.Status.REJECTED
-        payout_request.save(update_fields=["status", "updated_at"])
-        return payout_request
 
-    raise PayoutRequestError(_("Invalid action."))
+def reject_payout_request(
+    payout_request: ContestPayoutRequest,
+    *,
+    admin_note: str = "",
+) -> ContestPayoutRequest:
+    if payout_request.status != ContestPayoutRequest.Status.PENDING:
+        raise PayoutAdminError(_("Only pending withdrawal requests can be rejected."))
+
+    payout_request.status = ContestPayoutRequest.Status.REJECTED
+    payout_request.admin_note = (admin_note or "").strip()
+    payout_request.save(update_fields=["status", "admin_note", "updated_at"])
+    return payout_request
