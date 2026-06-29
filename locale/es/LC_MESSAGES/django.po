@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 14:11+0000\n"
+"POT-Creation-Date: 2026-06-29 18:26+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1269,6 +1269,10 @@ msgstr "Desafíos"
 
 msgid "Share your thoughts…"
 msgstr "Comparte tus opiniones"
+
+#| msgid "Add text, an image, or a poll to your post."
+msgid "Add text or an image to your comment."
+msgstr "Añade texto o una imagen a tu comentario."
 
 msgid "Parent comment belongs to a different market."
 msgstr "El comentario de los padres pertenece a un mercado diferente."
@@ -4448,6 +4452,12 @@ msgstr "Comparte tus opiniones"
 msgid "Share your take on this forecast…"
 msgstr "Comparte tu opinión sobre este pronóstico..."
 
+msgid "Remove image"
+msgstr "Quitar imagen"
+
+msgid "Photo"
+msgstr "Foto"
+
 msgid ""
 "Comments earn <span class=\"badge-pop\">Popularity</span> — not Reputation."
 msgstr ""
@@ -5634,7 +5644,6 @@ msgstr ""
 "Nada en PredictStamp es asesoramiento financiero, de inversión, legal, "
 "fiscal o profesional."
 
-#| msgid "Weekly Contest"
 msgid "Weekly contest prizes"
 msgstr "Premios del concurso semanal"
 
@@ -5652,7 +5661,6 @@ msgstr "Total otorgado"
 msgid "Paid out"
 msgstr "Pagado"
 
-#| msgid "Contest withdrawals"
 msgid "Pending withdrawal"
 msgstr "Retiro pendiente"
 
@@ -5672,11 +5680,9 @@ msgstr ""
 "Todos los jugadores con ganancias del concurso — incluidos quienes aún no "
 "han solicitado retiro."
 
-#| msgid "No one is following you yet."
 msgid "No contest winners recorded yet."
 msgstr "Aún no hay ganadores del concurso registrados."
 
-#| msgid "Past winners"
 msgid "Contest winners"
 msgstr "Ganadores del concurso"
 
@@ -6679,9 +6685,6 @@ msgstr "Esta acción no se puede deshacer y eliminará tu comentario del hilo."
 msgid "You can't vote on your own comment"
 msgstr "No puedes votar tu propio comentario"
 
-msgid "Remove image"
-msgstr "Quitar imagen"
-
 msgid "Choice"
 msgstr "Opción"
 
@@ -6705,9 +6708,6 @@ msgstr "3 días"
 
 msgid "7 days"
 msgstr "7 días"
-
-msgid "Photo"
-msgstr "Foto"
 
 msgid "Poll"
 msgstr "Encuesta"

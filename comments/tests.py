@@ -1,4 +1,8 @@
 from django.test import Client, TestCase
+from io import BytesIO
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
 from comments.models import Comment, Vote
 from conftest import create_user
@@ -6,6 +10,13 @@ from comments.selectors import get_prediction_comment_threads
 from comments.services import cast_vote, create_comment
 from markets.models import Market
 from predictions.models import Prediction
+
+
+def _test_image(name="test.png"):
+    buffer = BytesIO()
+    Image.new("RGB", (8, 8), color="red").save(buffer, format="PNG")
+    buffer.seek(0)
+    return SimpleUploadedFile(name, buffer.read(), content_type="image/png")
 
 
 class PredictionThreadTests(TestCase):
@@ -154,6 +165,55 @@ class PredictionThreadTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Via HTMX")
         self.assertEqual(Comment.objects.filter(prediction=self.prediction).count(), 1)
+
+    def test_create_comment_with_image(self):
+        comment = create_comment(
+            user=self.commenter,
+            market=self.market,
+            prediction=self.prediction,
+            body="Photo comment",
+            image=_test_image(),
+        )
+        self.assertTrue(comment.image)
+
+    def test_create_comment_with_image_only(self):
+        comment = create_comment(
+            user=self.commenter,
+            market=self.market,
+            prediction=self.prediction,
+            body="",
+            image=_test_image(),
+        )
+        self.assertTrue(comment.image)
+        self.assertEqual(comment.body, "")
+
+    def test_post_comment_with_image_via_view(self):
+        self.client.login(username="debater", password="pass")
+        response = self.client.post(
+            f"/comments/markets/{self.market.slug}/create/",
+            {
+                "body": "Photo via HTMX",
+                "prediction": self.prediction.id,
+                "image": _test_image(),
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        comment = Comment.objects.get(prediction=self.prediction, user=self.commenter)
+        self.assertTrue(comment.image)
+        self.assertContains(response, comment.image.url)
+
+    def test_post_comment_requires_body_or_image(self):
+        self.client.login(username="debater", password="pass")
+        response = self.client.post(
+            f"/comments/markets/{self.market.slug}/create/",
+            {
+                "prediction": self.prediction.id,
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Comment.objects.filter(prediction=self.prediction).count(), 0)
 
     def test_comment_requires_prediction(self):
         self.client.login(username="debater", password="pass")

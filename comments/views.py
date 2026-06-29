@@ -56,7 +56,7 @@ def _discussion_context(request, *, market, prediction):
 @require_POST
 def create_comment_view(request, slug):
     market = get_object_or_404(Market, slug=slug)
-    form = CommentForm(request.POST)
+    form = CommentForm(request.POST, request.FILES)
     parent_id = request.POST.get("parent_comment")
     prediction_id = request.POST.get("prediction")
 
@@ -83,6 +83,7 @@ def create_comment_view(request, slug):
             body=form.cleaned_data["body"],
             parent_comment=parent,
             prediction=prediction,
+            image=form.cleaned_data.get("image"),
         )
     except (ValueError, ContentRejected) as exc:
         return HttpResponseBadRequest(write_guard_user_message(exc))

@@ -10,6 +10,7 @@ def backfill_category_leaderboard_stats(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("accounts", "0031_backfill_exit_correct_counts"),
+        ("comments", "0004_comment_image"),
         ("markets", "0015_market_liquidity_total"),
         ("predictions", "0006_prediction_audience"),
     ]

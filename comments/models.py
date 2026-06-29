@@ -27,7 +27,8 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name="replies",
     )
-    body = models.TextField()
+    body = models.TextField(blank=True)
+    image = models.ImageField(upload_to="comments/images/%Y/%m/%d/", blank=True)
     popularity_score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

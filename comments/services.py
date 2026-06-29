@@ -8,7 +8,7 @@ from reputation.models import PopularityEvent
 from reputation.popularity_services import apply_vote_popularity, record_popularity_event
 
 
-def create_comment(*, user, market, body, parent_comment=None, prediction=None):
+def create_comment(*, user, market, body, parent_comment=None, prediction=None, image=None):
     from accounts.write_guard import guard_write_action
 
     guard_write_action(
@@ -36,13 +36,16 @@ def create_comment(*, user, market, body, parent_comment=None, prediction=None):
     )
 
     with transaction.atomic():
-        comment = Comment.objects.create(
+        comment = Comment(
             user=user,
             market=market,
             prediction=prediction,
             body=body,
             parent_comment=parent_comment,
         )
+        if image:
+            comment.image = image
+        comment.save()
         record_popularity_event(
             user=user,
             points_delta=0,
