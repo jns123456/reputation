@@ -176,6 +176,7 @@ GROWTH_I18N_FIXES: dict[str, str] = {
         "Pendientes: %(count)s solicitudes · $%(total)s total. Paga manualmente vía Binance al ID de Binance del jugador."
     ),
     "%(count)s pending": "%(count)s pendientes",
+    "$%(amount)s owed": "$%(amount)s adeudados",
     "%(count)s paid": "%(count)s pagados",
     "Actions": "Acciones",
     "Binance transfer ID (optional)": "ID de transferencia Binance (opcional)",
