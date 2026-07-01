@@ -125,17 +125,18 @@
                     aria-label="{% trans 'Notifications' %}"
                     :aria-expanded="open">
               <i data-lucide="bell" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i>
-              {% if unread_notification_count %}
-              <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-slate-800">
-                {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
+              <span id="nav-notification-badge-desktop"
+                    class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-slate-800{% if not unread_notification_count %} hidden{% endif %}">
+                {% if unread_notification_count %}
+                  {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
+                {% endif %}
               </span>
-              {% endif %}
             </button>
             <div x-show="open" x-cloak x-transition
                  id="notifications-dropdown-panel"
                  class="absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800"
                  hx-get="{% url 'accounts:notifications_dropdown' %}"
-                 hx-trigger="load delay:300ms once, click from:#notifications-bell-btn once"
+                 hx-trigger="click from:#notifications-bell-btn"
                  hx-swap="innerHTML">
               <div class="hidden px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400 [.htmx-request_&]:block">{% trans "Loading notifications…" %}</div>
             </div>
@@ -219,11 +220,12 @@
            class="relative pr-nav-icon-btn md:hidden"
            aria-label="{% trans 'Notifications' %}">
           <i data-lucide="bell" class="h-5 w-5" stroke-width="1.75" aria-hidden="true"></i>
-          {% if unread_notification_count %}
-          <span class="pr-nav-badge">
-            {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
+          <span id="nav-notification-badge-mobile-top"
+                class="pr-nav-badge{% if not unread_notification_count %} hidden{% endif %}">
+            {% if unread_notification_count %}
+              {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
+            {% endif %}
           </span>
-          {% endif %}
         </a>
         {% endif %}
 
@@ -390,9 +392,10 @@
                   <i data-lucide="bell" stroke-width="1.75" aria-hidden="true"></i>
                 </span>
                 {% trans "Notifications" %}
-                {% if unread_notification_count %}
-                <span class="pr-mobile-nav-link-badge">{{ unread_notification_count }}</span>
-                {% endif %}
+                <span id="nav-notification-badge-mobile-menu"
+                      class="pr-mobile-nav-link-badge{% if not unread_notification_count %} hidden{% endif %}">
+                  {% if unread_notification_count %}{{ unread_notification_count }}{% endif %}
+                </span>
               </a>
               <a href="{% url 'accounts:bookmarks' %}" @click="closeMobile()" class="pr-mobile-nav-link">
                 <span class="pr-mobile-nav-link-icon">

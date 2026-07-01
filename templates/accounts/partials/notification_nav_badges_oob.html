@@ -1,0 +1,22 @@
+{% load i18n %}
+<span id="nav-notification-badge-desktop"
+      hx-swap-oob="true"
+      class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-slate-800{% if not unread_notification_count %} hidden{% endif %}">
+  {% if unread_notification_count %}
+    {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
+  {% endif %}
+</span>
+<span id="nav-notification-badge-mobile-top"
+      hx-swap-oob="true"
+      class="pr-nav-badge{% if not unread_notification_count %} hidden{% endif %}">
+  {% if unread_notification_count %}
+    {% if unread_notification_count > 99 %}99+{% else %}{{ unread_notification_count }}{% endif %}
+  {% endif %}
+</span>
+<span id="nav-notification-badge-mobile-menu"
+      hx-swap-oob="true"
+      class="pr-mobile-nav-link-badge{% if not unread_notification_count %} hidden{% endif %}">
+  {% if unread_notification_count %}
+    {{ unread_notification_count }}
+  {% endif %}
+</span>

@@ -20,6 +20,7 @@ from accounts.models import User
 from accounts.notification_selectors import get_user_notifications
 from accounts.notification_services import (
     get_or_create_notification_preferences,
+    mark_all_notifications_read,
     mark_notification_read,
 )
 from accounts.views.profile import _render_follow_button
@@ -155,6 +156,7 @@ def alert_settings(request):
 
 @login_required
 def notifications_list(request):
+    mark_all_notifications_read(user=request.user)
     notifications = get_user_notifications(user=request.user)
     return render(
         request,
@@ -169,6 +171,8 @@ def notifications_dropdown(request):
         get_cached_recent_notifications,
         get_cached_unread_notification_count,
     )
+
+    mark_all_notifications_read(user=request.user)
 
     return render(
         request,

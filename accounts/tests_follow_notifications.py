@@ -268,6 +268,33 @@ class NotificationOpenTests(TestCase):
         self.assertIsNotNone(self.notification.read_at)
         self.assertEqual(get_unread_notification_count(user=self.recipient), 0)
 
+    def test_dropdown_marks_all_read_and_clears_nav_badges(self):
+        Notification.objects.create(
+            recipient=self.recipient,
+            actor=self.actor,
+            notification_type=Notification.NotificationType.NEW_FOLLOWER,
+        )
+        self.assertEqual(get_unread_notification_count(user=self.recipient), 2)
+
+        response = self.client.get(reverse("accounts:notifications_dropdown"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(get_unread_notification_count(user=self.recipient), 0)
+        self.assertContains(response, 'id="nav-notification-badge-desktop"')
+        self.assertContains(response, "hx-swap-oob")
+        self.assertContains(response, "hidden")
+
+    def test_notifications_list_marks_all_read(self):
+        Notification.objects.create(
+            recipient=self.recipient,
+            actor=self.actor,
+            notification_type=Notification.NotificationType.NEW_FOLLOWER,
+        )
+        self.assertEqual(get_unread_notification_count(user=self.recipient), 2)
+
+        response = self.client.get(reverse("accounts:notifications"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(get_unread_notification_count(user=self.recipient), 0)
+
     def test_dropdown_does_not_show_mark_all_read(self):
         response = self.client.get(reverse("accounts:notifications_dropdown"))
         self.assertEqual(response.status_code, 200)

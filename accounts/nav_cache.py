@@ -25,9 +25,11 @@ def streak_cache_key(user_id: int) -> str:
 
 
 def invalidate_notification_nav_cache(user_id: int) -> None:
-    cache.delete(unread_notification_count_cache_key(user_id))
+    from integrations.celery_utils import safe_cache_delete
+
+    safe_cache_delete(unread_notification_count_cache_key(user_id))
     for limit in (8, 50):
-        cache.delete(recent_notifications_cache_key(user_id, limit=limit))
+        safe_cache_delete(recent_notifications_cache_key(user_id, limit=limit))
 
 
 def invalidate_streak_nav_cache(user_id: int) -> None:
