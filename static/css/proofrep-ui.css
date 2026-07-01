@@ -533,11 +533,13 @@ html.dark .pr-profile-header-banner {
 }
 
 .pr-profile-avatar {
+  position: relative;
   flex-shrink: 0;
   width: 5.5rem;
   height: 5.5rem;
   margin-top: -2.75rem;
   padding: 0.2rem;
+  overflow: visible;
   border-radius: 9999px;
   background: linear-gradient(135deg, #6366f1, #10b981);
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
@@ -596,8 +598,57 @@ html.dark .pr-profile-header-banner {
 }
 
 .pr-profile-rank-badges--profile {
-  bottom: 0.45rem;
+  bottom: 0.65rem;
   max-width: calc(100% - 0.75rem);
+}
+
+/* Profile badge sits on the avatar ring — tooltip opens upward on phones, to the right on wider layouts. */
+.pr-profile-rank-badges--profile .pr-profile-rank-badge-tip {
+  bottom: calc(100% + 0.45rem);
+  top: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%) translateY(0.2rem);
+}
+
+.pr-profile-rank-badges--profile .pr-profile-rank-badge-tip::after {
+  top: 100%;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  border-top-color: #0f172a;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.pr-profile-rank-badges--profile .pr-profile-rank-badge:hover .pr-profile-rank-badge-tip,
+.pr-profile-rank-badges--profile .pr-profile-rank-badge:focus-visible .pr-profile-rank-badge-tip {
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (min-width: 640px) {
+  .pr-profile-rank-badges--profile .pr-profile-rank-badge-tip {
+    bottom: auto;
+    top: 50%;
+    left: calc(100% + 0.55rem);
+    transform: translateY(-50%) translateX(0.2rem);
+  }
+
+  .pr-profile-rank-badges--profile .pr-profile-rank-badge:hover .pr-profile-rank-badge-tip,
+  .pr-profile-rank-badges--profile .pr-profile-rank-badge:focus-visible .pr-profile-rank-badge-tip {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .pr-profile-rank-badges--profile .pr-profile-rank-badge-tip::after {
+    top: 50%;
+    left: 0;
+    transform: translate(-100%, -50%);
+    border: 0.35rem solid transparent;
+    border-right-color: #0f172a;
+    border-top-color: transparent;
+  }
 }
 
 .pr-profile-rank-badges--sm,
@@ -720,9 +771,18 @@ html.dark .pr-profile-rank-badge-tip::after {
   border-top-color: #f8fafc;
 }
 
+html.dark .pr-profile-rank-badges--profile .pr-profile-rank-badge-tip::after {
+  border-top-color: #f8fafc;
+}
+
 @media (min-width: 640px) {
   .pr-profile-rank-badges--profile {
-    bottom: 0.5rem;
+    bottom: 0.7rem;
+  }
+
+  html.dark .pr-profile-rank-badges--profile .pr-profile-rank-badge-tip::after {
+    border-top-color: transparent;
+    border-right-color: #f8fafc;
   }
 }
 
