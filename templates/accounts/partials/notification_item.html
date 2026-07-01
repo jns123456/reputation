@@ -5,28 +5,13 @@
   <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {% notification_icon_bg notification %}">
     {% notification_icon notification %}
   </div>
-    <div class="min-w-0 flex-1">
+  <div class="min-w-0 flex-1">
     <div class="text-sm leading-snug {% if not notification.is_read %}font-medium text-slate-900 dark:text-slate-50{% else %}text-slate-600 dark:text-slate-200{% endif %}">
       {% notification_message notification compact=compact %}
     </div>
     <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400 group-hover:dark:text-slate-300">{% blocktrans with time=notification.created_at|timesince %}{{ time }} ago{% endblocktrans %}</p>
-    {% if not compact %}
-    <div class="mt-3 flex flex-wrap items-center gap-2">
-      <a href="{{ notification.action_url }}" class="btn-secondary text-xs">{{ notification.action_label }}</a>
-      {% if not notification.is_read %}
-      <form method="post"
-            action="{% url 'accounts:notification_mark_read' notification_id=notification.id %}"
-            hx-post="{% url 'accounts:notification_mark_read' notification_id=notification.id %}"
-            hx-target="#notification-{{ notification.id }}"
-            hx-swap="outerHTML">
-        {% csrf_token %}
-        <button type="submit" class="text-xs text-brand-600 hover:underline dark:text-brand-300 dark:hover:text-brand-200">{% trans "Mark read" %}</button>
-      </form>
-      {% endif %}
-    </div>
-    {% endif %}
   </div>
-  {% if compact %}
-  <a href="{{ notification.action_url }}" class="absolute inset-0" aria-label="{% trans 'View notification' %}"></a>
-  {% endif %}
+  <a href="{% url 'accounts:notification_open' notification_id=notification.id %}"
+     class="absolute inset-0"
+     aria-label="{% trans 'View notification' %}"></a>
 </div>

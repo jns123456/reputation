@@ -234,6 +234,53 @@ class FollowerNotificationTests(TestCase):
         self.assertEqual(Notification.objects.filter(recipient=self.target).count(), 1)
 
 
+class NotificationOpenTests(TestCase):
+    def setUp(self):
+        self.recipient = create_user("notifyme")
+        self.actor = create_user("actor")
+        self.market = create_market(slug="notify-market", external_id="notify-m1")
+        self.prediction = create_prediction(
+            user=self.actor,
+            market=self.market,
+            predicted_outcome="Yes",
+        )
+        self.notification = Notification.objects.create(
+            recipient=self.recipient,
+            actor=self.actor,
+            notification_type=Notification.NotificationType.FOLLOWED_USER_PREDICTION,
+            prediction=self.prediction,
+        )
+        self.client = Client()
+        self.client.force_login(self.recipient)
+
+    def test_open_marks_notification_read_and_redirects(self):
+        url = reverse(
+            "accounts:notification_open",
+            kwargs={"notification_id": self.notification.id},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response["Location"],
+            reverse("markets:detail", kwargs={"slug": self.market.slug}),
+        )
+        self.notification.refresh_from_db()
+        self.assertIsNotNone(self.notification.read_at)
+        self.assertEqual(get_unread_notification_count(user=self.recipient), 0)
+
+    def test_dropdown_does_not_show_mark_all_read(self):
+        response = self.client.get(reverse("accounts:notifications_dropdown"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Mark all read")
+        self.assertNotContains(response, "Marcar todas como leídas")
+
+    def test_notifications_page_does_not_show_mark_all_read(self):
+        response = self.client.get(reverse("accounts:notifications"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Mark all as read")
+        self.assertNotContains(response, "Marcar todo como leído")
+
+
 class LoginNotificationToastTests(TestCase):
     def setUp(self):
         from django.core.cache import cache

@@ -45,14 +45,14 @@ urlpatterns = [
         name="notifications_dropdown",
     ),
     path(
+        "notifications/<int:notification_id>/open/",
+        views.notification_open,
+        name="notification_open",
+    ),
+    path(
         "notifications/<int:notification_id>/read/",
         views.notification_mark_read,
         name="notification_mark_read",
-    ),
-    path(
-        "notifications/mark-all-read/",
-        views.notifications_mark_all_read,
-        name="notifications_mark_all_read",
     ),
     path("push/vapid-key/", push_views.vapid_public_key, name="push_vapid_key"),
     path("push/subscribe/", push_views.push_subscribe, name="push_subscribe"),

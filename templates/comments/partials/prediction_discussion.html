@@ -10,5 +10,9 @@
     </div>
   </div>
 
-  {% include "comments/partials/prediction_discussion_inner.html" %}
+  <div id="prediction-discussion-{{ prediction.id }}"
+       x-data="{ showComposer: false }"
+       @open-composer="showComposer = true">
+    {% include "comments/partials/prediction_discussion_inner.html" %}
+  </div>
 </section>

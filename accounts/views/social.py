@@ -20,7 +20,6 @@ from accounts.models import User
 from accounts.notification_selectors import get_user_notifications
 from accounts.notification_services import (
     get_or_create_notification_preferences,
-    mark_all_notifications_read,
     mark_notification_read,
 )
 from accounts.views.profile import _render_follow_button
@@ -185,6 +184,17 @@ def notifications_dropdown(request):
 
 
 @login_required
+def notification_open(request, notification_id):
+    from accounts.models import Notification
+
+    notification = get_object_or_404(
+        Notification, pk=notification_id, recipient=request.user
+    )
+    mark_notification_read(notification=notification, user=request.user)
+    return redirect(notification.action_url)
+
+
+@login_required
 @require_POST
 def notification_mark_read(request, notification_id):
     from accounts.models import Notification
@@ -202,12 +212,4 @@ def notification_mark_read(request, notification_id):
             "accounts/partials/notification_item.html",
             {"notification": notification},
         )
-    return redirect("accounts:notifications")
-
-
-@login_required
-@require_POST
-def notifications_mark_all_read(request):
-    mark_all_notifications_read(user=request.user)
-    messages.success(request, _("All notifications marked as read."))
     return redirect("accounts:notifications")

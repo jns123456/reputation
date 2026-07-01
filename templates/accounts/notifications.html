@@ -12,12 +12,6 @@
 
   <div class="mb-6 flex flex-wrap items-center gap-3">
     <a href="{% url 'accounts:alert_settings' %}" class="btn-secondary">{% trans "Alert settings" %}</a>
-    {% if notifications %}
-    <form method="post" action="{% url 'accounts:notifications_mark_all_read' %}">
-      {% csrf_token %}
-      <button type="submit" class="text-sm text-brand-600 hover:underline dark:text-brand-300 dark:hover:text-brand-200">{% trans "Mark all as read" %}</button>
-    </form>
-    {% endif %}
   </div>
 
   <div class="space-y-3">

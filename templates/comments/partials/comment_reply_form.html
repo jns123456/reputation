@@ -11,13 +11,10 @@
       class="{% if variant == 'composer' %}comment-composer{% else %}comment-reply-form{% endif %}"
       x-data="{
         preview: null,
+        bodyChars: 0,
         allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-        hasBody() {
-          const textarea = this.$el.querySelector('textarea[name=body]');
-          return textarea && textarea.value.trim().length > 0;
-        },
         canPost() {
-          return this.preview || this.hasBody();
+          return this.preview || this.bodyChars > 0;
         },
         setImageFile(file) {
           if (!file) return;
@@ -55,9 +52,11 @@
         },
         resetForm() {
           this.clearImage();
+          this.bodyChars = 0;
           this.$el.reset();
         }
       }"
+      @input="if ($event.target.name === 'body') bodyChars = $event.target.value.trim().length"
       @paste="handleImagePaste($event)"
       @htmx:after-request="if ($event.detail.successful) resetForm()">
   {% csrf_token %}

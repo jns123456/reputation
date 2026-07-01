@@ -1,8 +1,5 @@
 {% load i18n %}
-<div id="prediction-discussion-{{ prediction.id }}"
-     x-data="{ showComposer: false }"
-     @open-composer="showComposer = true">
-  {% if user.is_authenticated %}
+{% if user.is_authenticated %}
     {% if user == prediction.user %}
   <div class="mb-5 rounded-xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-400">
     {% trans "You can't start a thread on your own forecast. Like, dislike, or reply to comments from others below — or share your post." %}
@@ -72,4 +69,3 @@
     {% endif %}
   </p>
   {% endif %}
-</div>

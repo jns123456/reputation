@@ -48,6 +48,6 @@ __all__ = [
     "alert_settings",
     "notifications_list",
     "notifications_dropdown",
+    "notification_open",
     "notification_mark_read",
-    "notifications_mark_all_read",
 ]
