@@ -183,8 +183,15 @@ def _is_celery_worker_sigterm_noise(message: str) -> bool:
     )
 
 
+def _is_gunicorn_worker_sigterm_noise(event, message: str) -> bool:
+    """Drop expected Gunicorn worker SIGTERM noise during Heroku dyno cycling."""
+    if event.get("logger") != "gunicorn.error":
+        return False
+    return bool(re.search(r"Worker \(pid:\d+\) was sent SIGTERM", message, re.IGNORECASE))
+
+
 def _before_send(event, hint):
-    """Drop expected Celery worker SIGTERM noise during Heroku dyno cycling."""
+    """Drop expected worker SIGTERM noise during Heroku dyno cycling."""
     exc_info = hint.get("exc_info")
     if exc_info and exc_info[0] is not None:
         exc_name = getattr(exc_info[0], "__name__", "")
@@ -196,6 +203,9 @@ def _before_send(event, hint):
 
     message = _event_message(event)
     if _is_celery_worker_sigterm_noise(message):
+        return None
+
+    if _is_gunicorn_worker_sigterm_noise(event, message):
         return None
 
     if _is_best_effort_enqueue_noise(event, hint):

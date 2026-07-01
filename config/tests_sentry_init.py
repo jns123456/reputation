@@ -43,6 +43,20 @@ class SentryBeforeSendTests(SimpleTestCase):
         }
         self.assertIsNone(_before_send(event, {}))
 
+    def test_drops_gunicorn_worker_sigterm(self):
+        event = {
+            "logger": "gunicorn.error",
+            "logentry": {"message": "Worker (pid:10) was sent SIGTERM!"},
+        }
+        self.assertIsNone(_before_send(event, {}))
+
+    def test_keeps_other_gunicorn_errors(self):
+        event = {
+            "logger": "gunicorn.error",
+            "logentry": {"message": "Worker (pid:10) exited with code 1"},
+        }
+        self.assertIs(event, _before_send(event, {}))
+
     def test_drops_best_effort_celery_enqueue_warnings(self):
         for message in (
             "Failed to enqueue category sync for politics; continuing",
