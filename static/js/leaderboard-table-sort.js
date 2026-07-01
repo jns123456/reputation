@@ -4,7 +4,9 @@
     if (raw === null || raw === "") {
       return Number.NEGATIVE_INFINITY;
     }
-    var num = parseFloat(raw);
+    // L10N may render decimals with a comma; parseFloat stops at the comma.
+    var normalized = String(raw).trim().replace(",", ".");
+    var num = parseFloat(normalized);
     return Number.isFinite(num) ? num : Number.NEGATIVE_INFINITY;
   }
 

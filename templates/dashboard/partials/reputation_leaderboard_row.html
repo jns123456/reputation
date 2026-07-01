@@ -1,10 +1,10 @@
-{% load i18n reputation_filters %}
+{% load i18n l10n reputation_filters %}
 {% with accuracy=stats|resolved_forecast_accuracy %}
 <tr data-leaderboard-row
     data-leaderboard-qualifies="{% if qualifies_relative %}true{% else %}false{% endif %}"
-    data-sort-rep-points="{{ stats.reputation_points }}"
-    data-sort-rep-per-forecast="{% if qualifies_relative %}{{ stats.reputation_score }}{% else %}-1{% endif %}"
-    data-sort-accuracy="{% if accuracy is not None %}{{ accuracy }}{% else %}-1{% endif %}">
+    data-sort-rep-points="{{ stats.reputation_points|unlocalize }}"
+    data-sort-rep-per-forecast="{% if qualifies_relative %}{{ stats.reputation_score|unlocalize }}{% else %}-1{% endif %}"
+    data-sort-accuracy="{% if accuracy is not None %}{{ accuracy|unlocalize }}{% else %}-1{% endif %}">
   <td class="px-4 py-3 text-sm text-slate-400" data-leaderboard-rank>{% if rank %}{{ rank }}{% else %}—{% endif %}</td>
   <td class="px-4 py-3">
     <a href="{% url 'accounts:profile' username=stats.user.username %}" class="font-medium text-brand-700 hover:underline dark:text-brand-400">{{ stats.user.public_name }}</a>

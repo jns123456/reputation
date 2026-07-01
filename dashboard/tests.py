@@ -257,6 +257,16 @@ class ForecastsPageTests(TestCase):
 
 
 class ReputationLeaderboardI18nTests(TestCase):
+    def setUp(self):
+        from accounts.models import UserProfile
+
+        self.sort_user = User.objects.create_user(username="sorttest", password="pass")
+        UserProfile.objects.filter(user=self.sort_user).update(
+            reputation_points=192,
+            scored_forecast_count=67,
+            reputation_score=2.87,
+        )
+
     def test_reputation_leaderboard_renders_spanish_relative_mode(self):
         client = Client()
         client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
@@ -270,6 +280,15 @@ class ReputationLeaderboardI18nTests(TestCase):
         self.assertContains(response, "Solo califican quienes tienen más de 10 pronósticos puntuados")
         self.assertContains(response, "data-leaderboard-sort")
         self.assertNotContains(response, "Relative ranking")
+
+    def test_reputation_leaderboard_sort_data_uses_unlocalized_decimals_in_spanish(self):
+        client = Client()
+        client.cookies[settings.LANGUAGE_COOKIE_NAME] = "es"
+        response = client.get("/leaderboard/reputation/?mode=relative")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-sort-rep-per-forecast="2.87"')
+        self.assertNotContains(response, 'data-sort-rep-per-forecast="2,87"')
 
     def test_reputation_leaderboard_renders_spanish_absolute_mode(self):
         client = Client()
