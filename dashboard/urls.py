@@ -1,12 +1,11 @@
 from django.urls import path
-from django.views.generic import RedirectView
 
 from dashboard import admin_panel_views, views
 
 app_name = "dashboard"
 
 urlpatterns = [
-    path("", views.about, name="landing"),
+    path("", views.landing, name="landing"),
     path("panel/", admin_panel_views.admin_panel, name="admin_panel"),
     path(
         "panel/contest-payouts/<int:payout_id>/",
@@ -30,11 +29,7 @@ urlpatterns = [
         name="moderation_action",
     ),
     path("explore/", views.explore, name="explore"),
-    path(
-        "about/",
-        RedirectView.as_view(pattern_name="dashboard:landing", permanent=False),
-        name="about",
-    ),
+    path("about/", views.about, name="about"),
     path("legal/", views.legal, name="legal"),
     path("terms/", views.terms, name="terms"),
     path("faq/", views.faq, name="faq"),

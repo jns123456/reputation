@@ -17,6 +17,33 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "I told you so · %(title)s": "Te lo dije · %(title)s",
     "I told you so — I called %(title)s.": "Te lo dije — acerté en %(title)s.",
     "I told you so": "Te lo dije",
+    "I called it · %(title)s": "Lo dije · %(title)s",
+    "I called it — %(title)s.": "Lo dije — %(title)s.",
+    "I called it. Predicted at %(entry)s%%. Result: Correct. Reputation earned: +%(points)s.": (
+        "Lo dije. Predije al %(entry)s%%. Resultado: correcto. Reputación ganada: +%(points)s."
+    ),
+    "I called it": "Lo dije",
+    "Share — I called it": "Compartir — lo dije",
+    "This aged badly · %(title)s": "Envejeció mal · %(title)s",
+    "This prediction aged badly — %(title)s.": "Este pronóstico envejeció mal — %(title)s.",
+    "This prediction aged badly. Predicted %(direction)s at %(entry)s%%. Result: NO. Reputation lost: %(points)s.": (
+        "Este pronóstico envejeció mal. Predije %(direction)s al %(entry)s%%. Resultado: NO. Reputación perdida: %(points)s."
+    ),
+    "This aged badly": "Envejeció mal",
+    "Share — this aged badly": "Compartir — envejeció mal",
+    "This prediction aged badly": "Este pronóstico envejeció mal",
+    "%(name)s predicts · %(title)s": "%(name)s predice · %(title)s",
+    "Share prediction stamp": "Compartir sello de predicción",
+    "Share on X": "Compartir en X",
+    "Challenge a friend": "Desafiar a un amigo",
+    "Copy prediction card": "Copiar tarjeta de predicción",
+    "Embed": "Insertar",
+    "Post anonymously": "Publicar anónimamente",
+    "Position": "Posición",
+    "Market probability": "Probabilidad del mercado",
+    "Timestamp": "Marca de tiempo",
+    "Timing": "Momento",
+    "Predicted %(days)s days before resolution": "Predicho %(days)s días antes de la resolución",
     "Share your win": "Comparte tu acierto",
     "Share — I told you so": "Compartir — te lo dije",
     "You were right · %(title)s": "Tenías razón · %(title)s",
@@ -363,4 +390,33 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "%(points)s reputation over %(count_n)s scored forecasts": (
         "%(points)s de reputación en %(count_n)s pronósticos puntuados"
     ),
+    # --- Viral share: challenges + profiles ---
+    "Share challenge": "Compartir desafío",
+    "Share challenge result": "Compartir resultado del desafío",
+    "Public card": "Tarjeta pública",
+    "PredictStamp Challenge": "Desafío PredictStamp",
+    "%(challenger)s challenged %(challenged)s": "%(challenger)s desafió a %(challenged)s",
+    "Reputation comparison": "Comparación de reputación",
+    "Full challenge page": "Página completa del desafío",
+    "You've been challenged!": "¡Te han desafiado!",
+    "Create your account in one step — accept the challenge first, finish your profile after.": (
+        "Crea tu cuenta en un paso — acepta el desafío primero y termina tu perfil después."
+    ),
+    "Accept challenge": "Aceptar desafío",
+    "Share profile": "Compartir perfil",
+    "%(rep)s reputation · %(score)s per forecast": (
+        "%(rep)s de reputación · %(score)s por pronóstico"
+    ),
+    "%(pct)s%% accuracy on resolved forecasts": (
+        "%(pct)s%% de acierto en pronósticos resueltos"
+    ),
+    "Global rank #%(rank)s": "Puesto global #%(rank)s",
+    "Track record on PredictStamp — no money, just reputation.": (
+        "Historial en PredictStamp — sin dinero, solo reputación."
+    ),
+    "%(name)s on PredictStamp": "%(name)s en PredictStamp",
+    "Anonymous take — what do you think?\n%(url)s": (
+        "Opinión anónima — ¿qué piensas?\n%(url)s"
+    ),
+    "My forecast:\n%(url)s": "Mi pronóstico:\n%(url)s",
 }

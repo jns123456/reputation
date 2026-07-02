@@ -443,6 +443,10 @@ def popularity_leaderboard_category(request, slug):
     )
 
 
+def landing(request):
+    return render(request, "dashboard/landing_home.html")
+
+
 def about(request):
     return render(request, "dashboard/about.html")
 

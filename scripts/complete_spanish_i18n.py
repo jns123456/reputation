@@ -21,6 +21,7 @@ from phase2_i18n_fixes import (
 )
 from phase3_i18n_fixes import PHASE3_FIXES, PHASE3_PLURAL_FIXES
 from growth_i18n_fixes import GROWTH_I18N_FIXES
+from landing_i18n_fixes import LANDING_I18N_FIXES
 from api_i18n_fixes import API_I18N_FIXES
 from monetize_i18n_fixes import MONETIZE_I18N_FIXES
 from proof_i18n_fixes import (
@@ -41,6 +42,7 @@ FIXES: dict[str, str] = {
     **MONETIZE_I18N_FIXES,
     **GROWTH_I18N_FIXES,
     **API_I18N_FIXES,
+    **LANDING_I18N_FIXES,
 }
 PLURAL_FIXES: dict[str, tuple[str, str]] = {
     **PHASE1_PLURAL_FIXES,
@@ -54,6 +56,20 @@ BLOCK_FIXES: dict[str, str] = {
 
 # msgid -> natural Spanish (preserve %(placeholders)s)
 FIXES.update({
+    # Challenge share/result cards — msgmerge fuzzy-matched these to unrelated
+    # msgstrs with mismatched placeholders, which is fatal for msgfmt.
+    "%(winner)s won · %(title)s": "%(winner)s ganó · %(title)s",
+    "\n        %(challenger)s challenged %(challenged)s\n        ": (
+        "\n        %(challenger)s desafió a %(challenged)s\n        "
+    ),
+    "Resolves %(countdown)s": "Se resuelve %(countdown)s",
+    "Player: %(name)s (@%(username)s)": "Jugador: %(name)s (@%(username)s)",
+    "Top %(percent)s%% in %(category)s": "Top %(percent)s%% en %(category)s",
+    "See the head-to-head challenge result on PredictStamp.": (
+        "Mira el resultado del desafío cara a cara en PredictStamp."
+    ),
+    "YES": "SÍ",
+    "NO": "NO",
     "How do you want to appear?": "¿Cómo quieres aparecer?",
     "Display name": "Nombre para mostrar",
     "How others will see you": "Cómo te verán los demás",

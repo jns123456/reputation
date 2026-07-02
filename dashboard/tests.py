@@ -39,17 +39,39 @@ class LandingPageI18nTests(TestCase):
         response = self.client.get("/")
 
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Everyone has opinions.")
+        self.assertContains(response, "Few have a track record.")
+        self.assertContains(response, "No betting. No money at risk. Just your reputation.")
+        self.assertContains(response, "Reputation is not popularity.")
+        self.assertContains(response, "Stamp your prediction.")
+        self.assertContains(response, "You said it before it happened.")
+        self.assertContains(response, "Stop arguing. Make a prediction.")
+        self.assertContains(response, "Become a Founding Forecaster.")
+        self.assertContains(response, "The future will reveal who was right.")
+        self.assertContains(response, "/assets/landing-hero.mp4")
+        self.assertContains(response, "landing-video-poster.png")
+        self.assertContains(response, "pr-landing-video__play")
+        self.assertContains(response, "Make your prediction")
+        self.assertContains(response, "Explain your reasoning")
+        self.assertContains(response, "Build your reputation")
+
+    def test_landing_cta_links(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="/markets/"')
+        self.assertContains(response, 'href="/forecasts/"')
+        self.assertContains(response, 'href="/challenges/"')
+        self.assertContains(response, 'href="/accounts/signup/"')
+
+    def test_about_page_still_renders_at_about_url(self):
+        response = self.client.get("/about/")
+
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Domains and topics:")
         self.assertContains(response, "What we track")
         self.assertContains(response, "Compete without betting")
         self.assertContains(response, "Reputation vs Popularity")
-        self.assertContains(response, "/assets/landing-hero.mp4")
-        self.assertContains(response, "landing-video-poster.png")
-        self.assertContains(response, "pr-landing-video__play")
-        self.assertContains(response, "pr-how-steps")
-        self.assertContains(response, "Explore markets")
-        self.assertContains(response, "Make a forecast")
-        self.assertContains(response, "Build reputation")
 
     def test_landing_renders_market_tape_when_images_exist(self):
         Market.objects.create(
@@ -77,16 +99,16 @@ class LandingPageI18nTests(TestCase):
         response = self.client.get("/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Dominios y temas:")
-        self.assertContains(response, "Qué registramos")
-        self.assertContains(response, "Compite sin apostar")
-        self.assertContains(response, "Reputación vs. Popularidad")
-        self.assertContains(response, "Cómo funciona")
-        self.assertContains(response, "Explorá mercados")
-        self.assertContains(response, "Haz un pronóstico")
-        self.assertContains(response, "Construí reputación")
-        self.assertNotContains(response, "Domains and topics:")
-        self.assertNotContains(response, "Explore markets")
+        self.assertContains(response, "Todos tienen opiniones.")
+        self.assertContains(response, "Pocos tienen un historial.")
+        self.assertContains(response, "Sin apuestas. Sin dinero en riesgo. Solo tu reputación.")
+        self.assertContains(response, "La reputación no es popularidad.")
+        self.assertContains(response, "Estampa tu predicción.")
+        self.assertContains(response, "Deja de discutir. Haz una predicción.")
+        self.assertContains(response, "Conviértete en Pronosticador Fundador.")
+        self.assertContains(response, "El futuro revelará quién tenía razón.")
+        self.assertNotContains(response, "Everyone has opinions.")
+        self.assertNotContains(response, "Reputation is not popularity.")
 
     def test_landing_renders_spanish_tape_label_with_language_cookie(self):
         Market.objects.create(
