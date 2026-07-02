@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-02 14:31+0000\n"
+"POT-Creation-Date: 2026-07-02 15:03+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1690,29 +1690,35 @@ msgid "Share — I called it"
 msgstr "Compartir — lo dije"
 
 #, python-format
-msgid "This prediction aged badly — %(title)s."
-msgstr "Este pronóstico envejeció mal — %(title)s."
+#| msgid "I called it — %(title)s."
+msgid "Wrong call — %(title)s."
+msgstr "Erré feo — %(title)s."
 
 #, python-format
+#| msgid ""
+#| "This prediction aged badly. Predicted %(direction)s at %(entry)s%%. Result: "
+#| "NO. Reputation lost: %(points)s."
 msgid ""
-"This prediction aged badly. Predicted %(direction)s at %(entry)s%%. Result: "
-"NO. Reputation lost: %(points)s."
+"Wrong call. Predicted %(direction)s at %(entry)s%%. Result: Incorrect. "
+"Reputation lost: %(points)s."
 msgstr ""
-"Este pronóstico envejeció mal. Predije %(direction)s al %(entry)s%%. "
-"Resultado: NO. Reputación perdida: %(points)s."
+"Erré feo. Predije %(direction)s al %(entry)s%%. Resultado: incorrecto. "
+"Reputación perdida: %(points)s."
 
 #, python-format
-msgid "This aged badly · %(title)s"
-msgstr "Envejeció mal · %(title)s"
+#| msgid "I called it · %(title)s"
+msgid "Wrong call · %(title)s"
+msgstr "Erré feo · %(title)s"
 
-msgid "This aged badly"
-msgstr "Envejeció mal"
+msgid "Wrong call"
+msgstr "Erré feo"
 
 msgid "Share how it went"
 msgstr "Comparte cómo terminó"
 
-msgid "Share — this aged badly"
-msgstr "Compartir — envejeció mal"
+#| msgid "Share — I called it"
+msgid "Share — wrong call"
+msgstr "Compartir — erré feo"
 
 #, python-format
 msgid "%(name)s predicts · %(title)s"
@@ -8506,9 +8512,6 @@ msgstr "Publicar anónimamente"
 msgid "Forecast by %(name)s"
 msgstr "Pronóstico de %(name)s"
 
-msgid "This prediction aged badly"
-msgstr "Este pronóstico envejeció mal"
-
 msgid "predicts:"
 msgstr "Predicciones"
 
@@ -8591,6 +8594,23 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#, python-format
+#~ msgid "This prediction aged badly — %(title)s."
+#~ msgstr "Este pronóstico envejeció mal — %(title)s."
+
+#, python-format
+#~ msgid "This aged badly · %(title)s"
+#~ msgstr "Envejeció mal · %(title)s"
+
+#~ msgid "This aged badly"
+#~ msgstr "Envejeció mal"
+
+#~ msgid "Share — this aged badly"
+#~ msgstr "Compartir — envejeció mal"
+
+#~ msgid "This prediction aged badly"
+#~ msgstr "Este pronóstico envejeció mal"
 
 #, python-format
 #~ msgid "entry at %(percent)s%%"

@@ -47,7 +47,7 @@ class ForecastShareCopyTests(TestCase):
         self.assertIn("I called it", copy["text"])
         self.assertEqual(copy["button_label"], "I called it")
 
-    def test_incorrect_resolution_uses_aged_badly(self):
+    def test_incorrect_resolution_uses_wrong_call(self):
         self.prediction.status = Prediction.Status.RESOLVED
         self.prediction.is_correct = False
         self.prediction.resolved_at = timezone.now()
@@ -59,8 +59,20 @@ class ForecastShareCopyTests(TestCase):
         )
 
         self.assertEqual(copy["tone"], "loss")
-        self.assertIn("aged badly", copy["text"])
-        self.assertEqual(copy["button_label"], "This aged badly")
+        self.assertIn("Wrong call", copy["text"])
+        self.assertEqual(copy["button_label"], "Wrong call")
+
+    @override("es")
+    def test_spanish_loss_copy(self):
+        self.prediction.status = Prediction.Status.RESOLVED
+        self.prediction.is_correct = False
+        self.prediction.resolved_at = timezone.now()
+        self.prediction.save(update_fields=["status", "is_correct", "resolved_at"])
+
+        copy = get_forecast_share_copy(self.prediction)
+
+        self.assertEqual(copy["button_label"], "Erré feo")
+        self.assertIn("Erré feo", copy["text"])
 
     @override("es")
     def test_spanish_win_copy(self):

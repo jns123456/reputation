@@ -41,7 +41,7 @@ def _viral_tagline(prediction, stamp_context):
         return f"{author} predicts:", _FG
     if prediction.is_correct:
         return "I CALLED IT", _GREEN
-    return "THIS AGED BADLY", _AMBER
+    return "WRONG CALL", _AMBER
 
 
 def _status_line(prediction, metrics, stamp_context):

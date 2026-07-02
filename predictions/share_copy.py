@@ -39,21 +39,21 @@ def get_forecast_share_copy(prediction: Prediction, *, metrics: dict | None = No
                 "aria_label": _("Share — I called it"),
                 "tone": "win",
             }
-        body = _("This prediction aged badly — %(title)s.") % {"title": market_title}
+        body = _("Wrong call — %(title)s.") % {"title": market_title}
         if entry is not None and pnl is not None:
             direction = (
                 _("NO") if prediction.predicted_direction == Prediction.Direction.NO else _("YES")
             )
             body = _(
-                "This prediction aged badly. Predicted %(direction)s at %(entry)s%%. "
-                "Result: NO. Reputation lost: %(points)s."
+                "Wrong call. Predicted %(direction)s at %(entry)s%%. "
+                "Result: Incorrect. Reputation lost: %(points)s."
             ) % {"direction": direction, "entry": entry, "points": pnl}
         return {
-            "title": _("This aged badly · %(title)s") % {"title": market_title},
+            "title": _("Wrong call · %(title)s") % {"title": market_title},
             "text": body,
-            "button_label": _("This aged badly"),
+            "button_label": _("Wrong call"),
             "sheet_title": _("Share how it went"),
-            "aria_label": _("Share — this aged badly"),
+            "aria_label": _("Share — wrong call"),
             "tone": "loss",
         }
 

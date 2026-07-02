@@ -24,14 +24,13 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     ),
     "I called it": "Lo dije",
     "Share — I called it": "Compartir — lo dije",
-    "This aged badly · %(title)s": "Envejeció mal · %(title)s",
-    "This prediction aged badly — %(title)s.": "Este pronóstico envejeció mal — %(title)s.",
-    "This prediction aged badly. Predicted %(direction)s at %(entry)s%%. Result: NO. Reputation lost: %(points)s.": (
-        "Este pronóstico envejeció mal. Predije %(direction)s al %(entry)s%%. Resultado: NO. Reputación perdida: %(points)s."
+    "Wrong call · %(title)s": "Erré feo · %(title)s",
+    "Wrong call — %(title)s.": "Erré feo — %(title)s.",
+    "Wrong call. Predicted %(direction)s at %(entry)s%%. Result: Incorrect. Reputation lost: %(points)s.": (
+        "Erré feo. Predije %(direction)s al %(entry)s%%. Resultado: incorrecto. Reputación perdida: %(points)s."
     ),
-    "This aged badly": "Envejeció mal",
-    "Share — this aged badly": "Compartir — envejeció mal",
-    "This prediction aged badly": "Este pronóstico envejeció mal",
+    "Wrong call": "Erré feo",
+    "Share — wrong call": "Compartir — erré feo",
     "%(name)s predicts · %(title)s": "%(name)s predice · %(title)s",
     "Share prediction stamp": "Compartir sello de predicción",
     "Share on X": "Compartir en X",
