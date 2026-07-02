@@ -43,7 +43,6 @@ LAST_FULL_SYNC_KEY = "market_sync:last_full_run_epoch"
 LAST_STALE_SYNC_KEY = "market_sync:last_stale_run_epoch"
 FULL_SYNC_LOCK_KEY = "market_sync:full_sync_lock"
 STALE_SYNC_LOCK_KEY = "market_sync:stale_sync_lock"
-CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 
 _scheduler_started = False
 _start_lock = threading.Lock()
@@ -137,7 +136,9 @@ def run_scheduled_market_sync(*, force: bool = False) -> dict | None:
                     limit=getattr(settings, "MARKET_SYNC_CATEGORY_LIMIT", 48)
                 )
                 record_full_sync_run()
-                cache.delete(CATEGORY_SUMMARIES_CACHE_KEY)
+                from markets.selectors import invalidate_category_summaries_cache
+
+                invalidate_category_summaries_cache()
             finally:
                 cache.delete(FULL_SYNC_LOCK_KEY)
 

@@ -26,6 +26,7 @@ from markets.ending_filters import ENDING_WINDOW_CHOICES, ending_window_hours, n
 from markets.models import Market
 from markets.categories import get_category_for_slug
 from markets.selectors import (
+    MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY,
     apply_markets_list_ordering,
     get_market_categories,
     get_market_hub_category_summaries,
@@ -39,15 +40,12 @@ from predictions.forms import ForecastForm
 from predictions.selectors import get_market_predictions, get_user_active_prediction, attach_user_forecasts_to_markets
 from reputation.services import calculate_reputation_stakes
 
-MARKET_HUB_SUMMARIES_CACHE_KEY = "market_hub_category_summaries"
-
-
 def _load_market_hub_summaries():
-    summaries = cache.get(MARKET_HUB_SUMMARIES_CACHE_KEY)
+    summaries = cache.get(MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY)
     if summaries is None:
         summaries = get_market_hub_category_summaries()
         cache.set(
-            MARKET_HUB_SUMMARIES_CACHE_KEY,
+            MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY,
             summaries,
             settings.MARKET_SYNC_CACHE_SECONDS,
         )

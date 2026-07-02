@@ -19,6 +19,7 @@ from markets.categories import FIFA_WORLD_CUP_CATEGORY_SLUG, get_all_chart_categ
 from markets.browse_areas import WORLD_CUP_GAMES_AREA_SLUG, get_browse_area
 from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from markets.selectors import (
+    LANDING_CATEGORY_SUMMARIES_CACHE_KEY,
     get_browse_area_summaries,
     get_category_browse_queryset,
     get_category_summaries,
@@ -28,7 +29,6 @@ from predictions.selectors import attach_user_forecasts_to_markets
 
 logger = logging.getLogger(__name__)
 
-CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 CATEGORY_SYNC_CACHE_PREFIX = "category_synced:"
 WORLD_CUP_SYNC_CACHE_KEY = f"{CATEGORY_SYNC_CACHE_PREFIX}polymarket:world-cup-games"
 LANDING_TOP_PREDICTORS_CACHE_KEY = "landing_top_predictors"
@@ -36,10 +36,14 @@ LANDING_TOP_PREDICTORS_LIMIT = 5
 
 
 def _load_category_summaries():
-    summaries = cache.get(CATEGORY_SUMMARIES_CACHE_KEY)
+    summaries = cache.get(LANDING_CATEGORY_SUMMARIES_CACHE_KEY)
     if summaries is None:
         summaries = get_category_summaries(include_empty=False)
-        cache.set(CATEGORY_SUMMARIES_CACHE_KEY, summaries, settings.MARKET_SYNC_CACHE_SECONDS)
+        cache.set(
+            LANDING_CATEGORY_SUMMARIES_CACHE_KEY,
+            summaries,
+            settings.MARKET_SYNC_CACHE_SECONDS,
+        )
     return summaries
 
 

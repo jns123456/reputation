@@ -23,6 +23,18 @@ from markets.browse_areas import (
 from markets.models import Market
 from markets.sort_options import market_volume, normalize_sort_filter, sort_markets
 
+LANDING_CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
+MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY = "market_hub_category_summaries"
+
+
+def invalidate_category_summaries_cache() -> None:
+    """Bust cached category card counts (landing + markets hub)."""
+    from integrations.celery_utils import safe_cache_delete
+
+    safe_cache_delete(LANDING_CATEGORY_SUMMARIES_CACHE_KEY)
+    safe_cache_delete(MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY)
+
+
 MARKET_HUB_CATEGORY_SLUG_ORDER = (
     "politics",
     "sports",

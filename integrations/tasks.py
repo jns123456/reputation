@@ -4,13 +4,11 @@ import logging
 
 from celery import shared_task
 
-from integrations.celery_utils import safe_cache_delete
 from integrations.sync import refresh_stale_open_markets, sync_all_category_markets, sync_category_markets
 from markets.categories import get_category_for_slug
+from markets.selectors import invalidate_category_summaries_cache
 
 logger = logging.getLogger(__name__)
-
-CATEGORY_SUMMARIES_CACHE_KEY = "landing_category_summaries"
 
 
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
@@ -20,7 +18,7 @@ def sync_world_cup_match_markets_task(self):
 
     try:
         result = sync_world_cup_match_markets()
-        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        invalidate_category_summaries_cache()
         logger.info(
             "sync_world_cup_match_markets_task finished: imported=%s errors=%s",
             len(result["imported"]),
@@ -39,7 +37,7 @@ def sync_category_markets_task(self, category_slug):
         return
     try:
         sync_category_markets(category)
-        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        invalidate_category_summaries_cache()
     except Exception as exc:
         logger.exception("sync_category_markets_task failed for %s", category_slug)
         raise self.retry(exc=exc) from exc
@@ -50,7 +48,7 @@ def sync_all_category_markets_task(self):
     """Periodic import of category markets from Polymarket."""
     try:
         result = sync_all_category_markets()
-        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        invalidate_category_summaries_cache()
         logger.info(
             "sync_all_category_markets_task finished: imported=%s updated=%s errors=%s",
             result["imported"],
@@ -67,7 +65,7 @@ def refresh_stale_open_markets_task(self):
     """Periodic refresh of stale open/closed-unresolved Polymarket imports."""
     try:
         result = refresh_stale_open_markets()
-        safe_cache_delete(CATEGORY_SUMMARIES_CACHE_KEY)
+        invalidate_category_summaries_cache()
         logger.info(
             "refresh_stale_open_markets_task finished: refreshed=%s failures=%s candidates=%s",
             result["refreshed"],

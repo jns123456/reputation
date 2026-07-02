@@ -8,12 +8,10 @@ from django.utils import timezone
 from markets.categories import resolve_market_category_slug
 from markets.models import Market
 from markets.selectors import (
-    blend_markets_by_source,
-    filter_markets_by_browse_area,
-    filter_markets_by_search,
     get_browse_area_summaries,
-    get_category_display_markets,
+    get_category_browse_queryset,
     get_category_summaries,
+    get_market_hub_category_summaries,
     get_open_markets_by_canonical_category,
 )
 
@@ -112,6 +110,47 @@ class MarketCategoryResolutionTests(TestCase):
             category="Some niche label",
         )
         self.assertEqual(resolve_market_category_slug(market), "other")
+
+
+class CategorySummaryCountConsistencyTests(TestCase):
+    def test_hub_card_counts_match_category_browse_queryset(self):
+        Market.objects.create(
+            external_id="hub-esports-1",
+            title="CS2 match A",
+            slug="cs2-match-a",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            polymarket_event_raw={"tags": [{"slug": "esports"}, {"slug": "counter-strike-2"}]},
+        )
+        Market.objects.create(
+            external_id="hub-esports-inplay",
+            title="CS2 match live",
+            slug="cs2-match-live",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            game_start_time=timezone.now() - timedelta(minutes=5),
+            polymarket_event_raw={"tags": [{"slug": "esports"}]},
+        )
+        Market.objects.create(
+            external_id="hub-politics-1",
+            title="Election market",
+            slug="election-market",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            polymarket_event_raw={"tags": [{"slug": "politics"}]},
+        )
+
+        hub_counts = {
+            item["category"].slug: item["count"] for item in get_market_hub_category_summaries()
+        }
+        for category_slug in ("esports", "politics"):
+            browse_count = get_category_browse_queryset(category_slug=category_slug).count()
+            self.assertEqual(
+                hub_counts.get(category_slug, 0),
+                browse_count,
+                category_slug,
+            )
+        self.assertEqual(hub_counts["esports"], 1)
 
 
 class MarketCategorySelectorTests(TestCase):

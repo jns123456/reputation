@@ -70,6 +70,10 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
             summary.absorb(sync_world_cup_match_markets())
         except Exception:
             logger.exception("World Cup match sync failed for category %s", category.slug)
+        if summary.imported or summary.updated:
+            from markets.selectors import invalidate_category_summaries_cache
+
+            invalidate_category_summaries_cache()
         return summary
 
     if category.slug == "sports":
@@ -113,6 +117,11 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
                 exc, "Polymarket category sync failed for %s", category.slug
             )
 
+    if summary.imported or summary.updated:
+        from markets.selectors import invalidate_category_summaries_cache
+
+        invalidate_category_summaries_cache()
+
     return summary
 
 
@@ -139,6 +148,10 @@ def sync_all_category_markets(*, limit=None) -> dict:
         totals.imported += summary.imported
         totals.updated += summary.updated
         totals.errors.extend(summary.errors)
+
+    from markets.selectors import invalidate_category_summaries_cache
+
+    invalidate_category_summaries_cache()
 
     logger.info(
         "Category sync complete: %s imported, %s updated, %s errors",
