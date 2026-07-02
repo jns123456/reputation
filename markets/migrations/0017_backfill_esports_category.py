@@ -3,11 +3,43 @@ from django.db import migrations
 
 def backfill_esports_market_categories(apps, schema_editor):
     from markets.browse_areas import compute_browse_area_slugs
-    from markets.categories import resolve_market_category_slug
+    from markets.categories import _collect_tag_slugs, resolve_market_category_slug
 
     Market = apps.get_model("markets", "Market")
+    esports_tags = frozenset(
+        {
+            "esports",
+            "counter-strike-2",
+            "cs2",
+            "counter-strike",
+            "valorant",
+            "league-of-legends",
+            "lol",
+            "dota-2",
+            "mobile-legends-bang-bang",
+            "overwatch",
+            "rainbow-six-siege",
+            "honor-of-kings",
+            "call-of-duty",
+            "cod",
+            "rocket-league",
+            "starcraft-2",
+            "starcraft-ii",
+            "starcraft-brood-war",
+        }
+    )
     batch = []
-    for market in Market.objects.iterator(chunk_size=500):
+    for market in Market.objects.only(
+        "id",
+        "canonical_category_slug",
+        "browse_area_slugs",
+        "polymarket_event_raw",
+        "polymarket_raw",
+        "category",
+    ).iterator(chunk_size=100):
+        tag_slugs = _collect_tag_slugs(market)
+        if not tag_slugs.intersection(esports_tags):
+            continue
         slug = resolve_market_category_slug(market)
         slugs = compute_browse_area_slugs(market)
         changed = False
@@ -19,7 +51,7 @@ def backfill_esports_market_categories(apps, schema_editor):
             changed = True
         if changed:
             batch.append(market)
-        if len(batch) >= 500:
+        if len(batch) >= 100:
             Market.objects.bulk_update(batch, ["canonical_category_slug", "browse_area_slugs"])
             batch = []
     if batch:
