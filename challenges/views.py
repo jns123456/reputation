@@ -362,19 +362,53 @@ def challenge_market_search(request):
     return challenge_market_browse(request)
 
 
-@login_required
 def challenge_detail(request, pk):
-    from challenges.selectors import get_challenge_for_spectator, get_head_to_head_record
+    from challenges.selectors import (
+        get_challenge_for_spectator,
+        get_challenge_participant_by_token,
+        get_head_to_head_record,
+    )
 
-    challenge = get_challenge_for_user(challenge_id=pk, user=request.user)
+    invite_token = request.GET.get("token", "").strip()
+    challenge = None
     is_spectator = False
+    invite_participant = None
+
+    if request.user.is_authenticated:
+        challenge = get_challenge_for_user(challenge_id=pk, user=request.user)
+
+    if not challenge and invite_token:
+        invite_participant = get_challenge_participant_by_token(
+            challenge_id=pk,
+            invite_token=invite_token,
+        )
+        if invite_participant:
+            challenge = invite_participant.challenge
+
     if not challenge:
         challenge = get_challenge_for_spectator(pk)
         is_spectator = challenge is not None
+
     if not challenge:
         raise Http404("Challenge not found.")
 
-    participation = get_user_participation(challenge=challenge, user=request.user)
+    if (
+        request.user.is_authenticated
+        and challenge
+        and not is_spectator
+        and get_user_participation(challenge=challenge, user=request.user) is None
+        and invite_participant is None
+    ):
+        is_spectator = True
+
+    participation = (
+        get_user_participation(challenge=challenge, user=request.user)
+        if request.user.is_authenticated
+        else None
+    )
+    if invite_participant and request.user.is_authenticated:
+        if invite_participant.user_id == request.user.id:
+            participation = invite_participant
 
     # Head-to-head record + rematch only make sense for completed 1v1 duels.
     accepted_participants = [
@@ -430,6 +464,15 @@ def challenge_detail(request, pk):
         "total": sum(row["total_points"] for row in standings),
     }
 
+    from challenges.card_services import build_challenge_stamp_context, get_challenge_share_copy
+    from django.urls import reverse
+
+    stamp = build_challenge_stamp_context(challenge=challenge, markets=markets)
+    share_copy = get_challenge_share_copy(challenge)
+    share_url = request.build_absolute_uri(reverse("challenge_card", args=[challenge.pk]))
+    if invite_token:
+        share_url = f"{share_url}?token={invite_token}"
+
     return render(
         request,
         "challenges/challenge_detail.html",
@@ -442,10 +485,16 @@ def challenge_detail(request, pk):
             "event_filter_counts": event_filter_counts,
             "event_progress": get_challenge_event_progress(challenge),
             "resolution_snapshots": get_challenge_resolution_snapshots(challenge),
-            "is_creator": challenge.creator_id == request.user.id,
+            "is_creator": request.user.is_authenticated
+            and challenge.creator_id == request.user.id,
             "is_spectator": is_spectator,
             "duel_opponent": duel_opponent,
             "head_to_head": head_to_head,
+            "stamp": stamp,
+            "share_copy": share_copy,
+            "share_url": share_url,
+            "invite_token": invite_token,
+            "invite_participant": invite_participant,
         },
     )
 
@@ -453,13 +502,93 @@ def challenge_detail(request, pk):
 @login_required
 @require_POST
 def challenge_accept(request, pk):
+    from django.urls import reverse
+
     challenge = get_object_or_404(Challenge, pk=pk)
     try:
         accept_challenge(challenge=challenge, user=request.user)
         messages.success(request, _("You joined the challenge."))
     except ValidationError as exc:
         messages.error(request, exc.messages[0] if exc.messages else str(exc))
+    token = request.POST.get("invite_token", "").strip()
+    if token:
+        return redirect(f"{reverse('challenges:detail', kwargs={'pk': pk})}?token={token}")
     return redirect("challenges:detail", pk=pk)
+
+
+def _resolve_public_challenge(request, pk):
+    from challenges.selectors import get_challenge_for_spectator, get_challenge_participant_by_token
+
+    invite_token = request.GET.get("token", "").strip()
+    challenge = None
+    invite_participant = None
+
+    if request.user.is_authenticated:
+        challenge = get_challenge_for_user(challenge_id=pk, user=request.user)
+
+    if not challenge and invite_token:
+        invite_participant = get_challenge_participant_by_token(
+            challenge_id=pk,
+            invite_token=invite_token,
+        )
+        if invite_participant:
+            challenge = invite_participant.challenge
+
+    if not challenge:
+        challenge = get_challenge_for_spectator(pk)
+
+    if not challenge:
+        raise Http404("Challenge not found.")
+
+    markets = get_challenge_markets(challenge)
+    markets = _sort_challenge_markets_by_expiration(markets)
+    return challenge, markets, invite_token, invite_participant
+
+
+def challenge_public_card(request, pk):
+    """Public share landing for head-to-head challenges."""
+    challenge, markets, invite_token, invite_participant = _resolve_public_challenge(
+        request, pk
+    )
+    from challenges.card_services import build_challenge_stamp_context, get_challenge_share_copy
+    from django.urls import reverse
+
+    stamp = build_challenge_stamp_context(challenge=challenge, markets=markets)
+    share_copy = get_challenge_share_copy(challenge)
+    share_url = request.build_absolute_uri(reverse("challenge_card", args=[challenge.pk]))
+    if invite_token:
+        share_url = f"{share_url}?token={invite_token}"
+
+    standings = get_challenge_leaderboard(challenge) if challenge.status != Challenge.Status.PENDING else []
+    return render(
+        request,
+        "challenges/challenge_card.html",
+        {
+            "challenge": challenge,
+            "markets": markets,
+            "stamp": stamp,
+            "share_copy": share_copy,
+            "share_url": share_url,
+            "invite_token": invite_token,
+            "invite_participant": invite_participant,
+            "standings": standings[:2],
+            "event_progress": get_challenge_event_progress(challenge),
+        },
+    )
+
+
+def challenge_og_image(request, pk):
+    from django.http import HttpResponse
+
+    from challenges.card_services import build_challenge_stamp_context
+    from challenges.og_images import get_challenge_og_image
+
+    challenge, markets, _, _ = _resolve_public_challenge(request, pk)
+    stamp = build_challenge_stamp_context(challenge=challenge, markets=markets)
+    png_bytes = get_challenge_og_image(challenge, stamp)
+    response = HttpResponse(png_bytes, content_type="image/png")
+    response["Cache-Control"] = "public, max-age=3600"
+    return response
 
 
 @login_required

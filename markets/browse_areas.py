@@ -39,6 +39,43 @@ BROWSE_AREAS: tuple[BrowseArea, ...] = (
     BrowseArea("tennis", "Tennis", frozenset({"tennis"}), "sports"),
     BrowseArea("formula-1", "Formula 1", frozenset({"f1", "formula1"}), "sports"),
     BrowseArea("cricket", "Cricket", frozenset({"cricket"}), "sports"),
+    # Esports (Polymarket /esports/ game filters)
+    BrowseArea(
+        "counter-strike-2",
+        "Counter-Strike 2",
+        frozenset({"counter-strike-2", "cs2", "counter-strike"}),
+        "esports",
+    ),
+    BrowseArea("valorant", "Valorant", frozenset({"valorant"}), "esports"),
+    BrowseArea(
+        "league-of-legends",
+        "League of Legends",
+        frozenset({"league-of-legends", "lol"}),
+        "esports",
+    ),
+    BrowseArea("dota-2", "Dota 2", frozenset({"dota-2"}), "esports"),
+    BrowseArea(
+        "mobile-legends",
+        "Mobile Legends: Bang Bang",
+        frozenset({"mobile-legends-bang-bang"}),
+        "esports",
+    ),
+    BrowseArea("overwatch", "Overwatch", frozenset({"overwatch"}), "esports"),
+    BrowseArea(
+        "rainbow-six-siege",
+        "Rainbow Six Siege",
+        frozenset({"rainbow-six-siege"}),
+        "esports",
+    ),
+    BrowseArea("honor-of-kings", "Honor of Kings", frozenset({"honor-of-kings"}), "esports"),
+    BrowseArea("call-of-duty", "Call of Duty", frozenset({"call-of-duty", "cod"}), "esports"),
+    BrowseArea("rocket-league", "Rocket League", frozenset({"rocket-league"}), "esports"),
+    BrowseArea(
+        "starcraft",
+        "StarCraft",
+        frozenset({"starcraft-2", "starcraft-ii", "starcraft-brood-war", "brood-war"}),
+        "esports",
+    ),
     # Crypto
     BrowseArea("bitcoin", "Bitcoin", frozenset({"bitcoin"}), "crypto"),
     BrowseArea("ethereum", "Ethereum", frozenset({"ethereum", "eth"}), "crypto"),

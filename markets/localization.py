@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 CATEGORY_LABELS: dict[str, str] = {
     "politics": "Politics",
     "sports": "Sports",
+    "esports": "Esports",
     "crypto": "Crypto",
     "cryptocurrency": "Crypto",
     "economy": "Economy",
@@ -38,6 +39,7 @@ CATEGORY_LABELS: dict[str, str] = {
 CATEGORY_LABELS_ES: dict[str, str] = {
     "politics": "Política",
     "sports": "Deportes",
+    "esports": "Esports",
     "crypto": "Cripto",
     "cryptocurrency": "Cripto",
     "economy": "Economía",

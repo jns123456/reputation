@@ -26,6 +26,7 @@ from markets.sort_options import market_volume, normalize_sort_filter, sort_mark
 MARKET_HUB_CATEGORY_SLUG_ORDER = (
     "politics",
     "sports",
+    "esports",
     "crypto",
     "economy",
     "science-tech",

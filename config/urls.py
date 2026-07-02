@@ -4,6 +4,8 @@ from django.urls import include, path
 from django.views.i18n import set_language
 
 from config import brand_views, health_views, landing_video, pwa_views
+from challenges import views as challenge_card_views
+from accounts.views import profile as profile_at_views
 from predictions import views as prediction_card_views
 
 urlpatterns = [
@@ -23,6 +25,11 @@ urlpatterns = [
         prediction_card_views.prediction_share,
         name="prediction_card_share",
     ),
+    path(
+        "p/<int:prediction_id>/embed/",
+        prediction_card_views.prediction_detail,
+        name="prediction_card_embed",
+    ),
     path("health/", health_views.health, name="health"),
     path(
         "brand/auth0-logo.jpg",
@@ -39,6 +46,18 @@ urlpatterns = [
     path("manifest.webmanifest", pwa_views.webmanifest, name="webmanifest"),
     path(settings.ADMIN_URL_PATH, admin.site.urls),
     path("", include("dashboard.urls")),
+    path(
+        "c/<int:pk>/",
+        challenge_card_views.challenge_public_card,
+        name="challenge_card",
+    ),
+    path(
+        "c/<int:pk>/og.png",
+        challenge_card_views.challenge_og_image,
+        name="challenge_card_og",
+    ),
+    path("@<str:username>/", profile_at_views.profile_at_redirect, name="profile_at"),
+    path("@<str:username>/og.png", profile_at_views.profile_og_image, name="profile_at_og"),
     path("accounts/", include("accounts.urls")),
     path("markets/", include("markets.urls")),
     path("predictions/", include("predictions.urls")),

@@ -217,6 +217,15 @@ def profile_detail(request, username):
     from predictions.selectors import get_user_prediction_summary
 
     prediction_summary = get_user_prediction_summary(user)
+    from accounts.profile_share_services import build_profile_share_context
+    from django.urls import reverse
+
+    profile_share = build_profile_share_context(
+        user=user,
+        prediction_summary=prediction_summary,
+    )
+    profile_url = request.build_absolute_uri(reverse("accounts:profile", args=[username]))
+    at_profile_url = request.build_absolute_uri(reverse("profile_at", args=[username]))
     category_breakdown = get_user_category_breakdown(user)
     streak = getattr(user, "activity_streak", None)
     from accounts.achievement_services import (
@@ -274,8 +283,32 @@ def profile_detail(request, username):
             "achievements_unlocked": unlocked_count,
             "achievements_total": len(achievements),
             "contest_earnings_summary": contest_earnings_summary,
+            "profile_share": profile_share,
+            "profile_url": profile_url,
+            "at_profile_url": at_profile_url,
         },
     )
+
+
+def profile_at_redirect(request, username):
+    """Vanity URL predictstamp.com/@username → profile."""
+    return redirect("accounts:profile", username=username)
+
+
+def profile_og_image(request, username):
+    from django.http import HttpResponse
+
+    from accounts.profile_share_services import build_profile_share_context
+    from accounts.og_images import get_profile_og_image
+    from predictions.selectors import get_user_prediction_summary
+
+    user = get_object_or_404(User.objects.select_related("profile"), username=username)
+    prediction_summary = get_user_prediction_summary(user)
+    share_context = build_profile_share_context(user=user, prediction_summary=prediction_summary)
+    png_bytes = get_profile_og_image(user, share_context)
+    response = HttpResponse(png_bytes, content_type="image/png")
+    response["Cache-Control"] = "public, max-age=3600"
+    return response
 
 
 @login_required

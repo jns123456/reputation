@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-29 20:20+0000\n"
+"POT-Creation-Date: 2026-07-02 14:16+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -491,9 +491,6 @@ msgstr "Monto (USD)"
 msgid "Binance user ID"
 msgstr "ID de usuario de Binance"
 
-#| msgid ""
-#| "We pay prizes in USDT or USDC on the network you choose. Double-check your "
-#| "address — transfers cannot be reversed."
 msgid ""
 "Enter your numeric Binance user ID. Find it in the Binance app under Profile"
 " → User ID. Double-check — transfers cannot be reversed."
@@ -785,9 +782,6 @@ msgstr "Destino de marcador no válido"
 msgid "Withdrawal requests are not available right now."
 msgstr "Las solicitudes de retiro no están disponibles en este momento."
 
-#| msgid ""
-#| "Withdrawal request submitted. We will send USDT to your address after "
-#| "review."
 msgid ""
 "Withdrawal request submitted. We will send your payment via Binance after "
 "review."
@@ -811,9 +805,6 @@ msgstr "Falta el tema"
 
 msgid "Alert preferences saved."
 msgstr "Preferencias de alerta guardadas."
-
-msgid "All notifications marked as read."
-msgstr "Se han marcado todas las notificaciones como leídas"
 
 msgid "Content rejected by anti-spam checks."
 msgstr ""
@@ -1396,6 +1387,12 @@ msgstr "Política"
 msgid "Elections, policy, and government"
 msgstr "Elecciones, política y gobierno"
 
+msgid "Esports"
+msgstr "Esports"
+
+msgid "Competitive gaming — CS2, LoL, Valorant, and more"
+msgstr "Videojuegos competitivos: CS2, LoL, Valorant y más"
+
 msgid "Sports"
 msgstr "Deportes"
 
@@ -1545,6 +1542,12 @@ msgstr "Objetivo de voto no encontrado."
 msgid "Could not send your message."
 msgstr "No se pudo enviar el email de verificación."
 
+msgid "NO"
+msgstr ""
+
+msgid "YES"
+msgstr ""
+
 msgid "What data, news, or logic supports your pick?"
 msgstr "¿Qué datos, noticias o lógica respaldan su elección?"
 
@@ -1623,41 +1626,59 @@ msgid "Cannot exit a forecast after the market has closed."
 msgstr "No puedes cerrar un pronóstico después de que el mercado cierre."
 
 #, python-format
-msgid "I told you so · %(title)s"
-msgstr "Te lo dije · %(title)s"
-
-#, python-format
-msgid "I told you so — I called %(title)s."
+#| msgid "I told you so — I called %(title)s."
+msgid "I called it — %(title)s."
 msgstr "Te lo dije — acerté en %(title)s."
 
-msgid "I told you so"
-msgstr "Te lo dije"
+#, python-format
+msgid ""
+"I called it. Predicted at %(entry)s%%. Result: Correct. Reputation earned: "
+"+%(points)s."
+msgstr ""
+
+#, python-format
+#| msgid "I told you so · %(title)s"
+msgid "I called it · %(title)s"
+msgstr "Te lo dije · %(title)s"
+
+msgid "I called it"
+msgstr ""
 
 msgid "Share your win"
 msgstr "Comparte tu acierto"
 
-msgid "Share — I told you so"
+#| msgid "Share — I told you so"
+msgid "Share — I called it"
 msgstr "Compartir — te lo dije"
 
 #, python-format
-msgid "You were right · %(title)s"
-msgstr "Tenías razón · %(title)s"
+#| msgid "This prediction cannot be edited."
+msgid "This prediction aged badly — %(title)s."
+msgstr "Este pronóstico no se puede editar."
 
 #, python-format
-msgid "You were right on %(title)s :("
-msgstr "Tenías razón en %(title)s :("
+msgid ""
+"This prediction aged badly. Predicted %(direction)s at %(entry)s%%. Result: "
+"NO. Reputation lost: %(points)s."
+msgstr ""
 
-msgid "You were right :("
-msgstr "Tenías razón :("
+#, python-format
+#| msgid "I told you so · %(title)s"
+msgid "This aged badly · %(title)s"
+msgstr "Te lo dije · %(title)s"
+
+msgid "This aged badly"
+msgstr ""
 
 msgid "Share how it went"
 msgstr "Comparte cómo terminó"
 
-msgid "Share — you were right"
-msgstr "Compartir — tenías razón"
+msgid "Share — this aged badly"
+msgstr ""
 
 #, python-format
-msgid "%(name)s on %(title)s"
+#| msgid "%(name)s on %(title)s"
+msgid "%(name)s predicts · %(title)s"
 msgstr "%(name)s sobre %(title)s"
 
 #, python-format
@@ -1666,6 +1687,10 @@ msgstr "Mirá mi pronóstico en %(title)s"
 
 msgid "Share"
 msgstr "Compartir"
+
+#| msgid "Live prediction events"
+msgid "Share prediction stamp"
+msgstr "Eventos de predicción en vivo"
 
 msgid "Share forecast"
 msgstr "Compartir pronóstico"
@@ -1744,11 +1769,9 @@ msgstr ""
 msgid "Poll not found"
 msgstr "Encuesta no encontrada"
 
-#| msgid "Image must be 5 MB or smaller."
 msgid "Receipt must be 10 MB or smaller."
 msgstr "La imagen debe tener 5 MB o menos."
 
-#| msgid "Upload a JPEG, PNG, WebP, or GIF image."
 msgid "Upload a JPEG, PNG, WebP, or PDF receipt."
 msgstr "Sube una imagen JPEG, PNG, WebP o GIF."
 
@@ -1762,11 +1785,9 @@ msgstr "Los retiros del concurso no están disponibles en este momento."
 msgid "You already have a pending withdrawal request."
 msgstr "Ya tienes una solicitud de retiro pendiente."
 
-#| msgid "Only pending withdrawal requests can be updated."
 msgid "Only pending withdrawal requests can be marked paid."
 msgstr "Solo se pueden cancelar los desafíos pendientes."
 
-#| msgid "Only pending withdrawal requests can be updated."
 msgid "Only pending withdrawal requests can be rejected."
 msgstr "Solo se pueden cancelar los desafíos pendientes."
 
@@ -2029,9 +2050,6 @@ msgstr "Sigue, pronostica, le gusta y le disgusta su actividad."
 msgid "Alert settings"
 msgstr "Configuración de alertas"
 
-msgid "Mark all as read"
-msgstr "Marcar todo como leído"
-
 msgid "No notifications yet."
 msgstr "Notificaciones"
 
@@ -2253,14 +2271,8 @@ msgstr "Sigue a personas para mencionarlas con @."
 msgid "%(time)s ago"
 msgstr "hace %(time)s"
 
-msgid "Mark read"
-msgstr "Mercados"
-
 msgid "View notification"
 msgstr "Notificaciones"
-
-msgid "Mark all read"
-msgstr "Marcar todas como leídas"
 
 msgid "No notifications yet"
 msgstr "Notificaciones"
@@ -2540,9 +2552,6 @@ msgstr "Aún no has votado en ningún evento del desafío."
 msgid "%(name)s is not following anyone yet."
 msgstr "%(name)s aún no sigue a nadie."
 
-#| msgid ""
-#| "Cash prizes from the weekly reputation contest. PredictStamp does not hold "
-#| "your funds — USDT is sent manually to your wallet after review."
 msgid ""
 "Cash prizes from the weekly reputation contest. PredictStamp does not hold "
 "your funds — payments are sent manually via Binance after review."
@@ -2557,7 +2566,6 @@ msgstr "Ver concurso semanal"
 msgid "Available balance"
 msgstr "Saldo disponible"
 
-#| msgid "USD equivalent · withdraw as USDT/USDC"
 msgid "USD equivalent · withdraw via Binance"
 msgstr "Equivalente en USD · retira vía Binance"
 
@@ -2567,7 +2575,6 @@ msgstr "Total ganado"
 msgid "Withdrawn"
 msgstr "Retirado"
 
-#| msgid "Request USDT/USDC withdrawal"
 msgid "Request Binance withdrawal"
 msgstr "Solicitar retiro vía Binance"
 
@@ -2578,9 +2585,6 @@ msgstr ""
 msgid "Submit withdrawal request"
 msgstr "Enviar solicitud de retiro"
 
-#| msgid ""
-#| "You have a pending withdrawal request. We will email you when USDT has been "
-#| "sent."
 msgid ""
 "You have a pending withdrawal request. We will email you when your Binance "
 "payment has been sent."
@@ -5652,9 +5656,14 @@ msgid "Weekly contest prizes"
 msgstr "Premios del concurso semanal"
 
 #, python-format
-#| msgid ""
-#| "Platform liability for off-platform prizes — %(weeks)s finalized weeks · "
-#| "%(winners)s winning players."
+msgid "%(count)s pending"
+msgstr "%(count)s pendientes"
+
+#, python-format
+msgid "$%(amount)s owed"
+msgstr "$%(amount)s adeudados"
+
+#, python-format
 msgid ""
 "Platform liability for off-platform Binance prizes — %(weeks)s finalized "
 "weeks · %(winners)s winning players."
@@ -5700,19 +5709,12 @@ msgid "Contest withdrawals"
 msgstr "Retiros del concurso"
 
 #, python-format
-#| msgid ""
-#| "Pending: %(count)s requests · $%(total)s total. Pay USDT/USDC manually to "
-#| "the wallet on the selected network."
 msgid ""
 "Pending: %(count)s requests · $%(total)s total. Pay manually via Binance to "
 "the player's Binance user ID."
 msgstr ""
 "Pendientes: %(count)s solicitudes · $%(total)s total. Paga manualmente vía "
 "Binance al ID de Binance del jugador."
-
-#, python-format
-msgid "%(count)s pending"
-msgstr "%(count)s pendientes"
 
 #, python-format
 msgid "%(count)s paid"
@@ -5739,15 +5741,12 @@ msgstr "No hay solicitudes de retiro del concurso pendientes."
 msgid "Recent withdrawal history"
 msgstr "Historial reciente de retiros"
 
-#| msgid "ReDoc reference UI."
 msgid "Reference"
 msgstr "Referencia"
 
-#| msgid "Recent"
 msgid "Receipt"
 msgstr "Comprobante"
 
-#| msgid "View event"
 msgid "View receipt"
 msgstr "Ver comprobante"
 
@@ -5997,8 +5996,6 @@ msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 msgid "Credited to your account"
 msgstr "Acreditado en tu cuenta"
 
-#| msgid ""
-#| "Added to your contest earnings balance — withdraw as USDT anytime."
 msgid "Added to your contest earnings balance — withdraw via Binance anytime."
 msgstr ""
 "Sumado a tu saldo de ganancias del concurso — retira vía Binance cuando "
@@ -6401,13 +6398,9 @@ msgstr "Administra tus alertas"
 msgid "New contest withdrawal request"
 msgstr "Nueva solicitud de retiro del concurso"
 
-#| msgid "A player requested a USDT/USDC withdrawal."
 msgid "A player requested a Binance withdrawal."
 msgstr "Un jugador solicitó un retiro vía Binance."
 
-#| msgid ""
-#| "Review the request in the admin panel and send USDT/USDC manually on the "
-#| "selected network after verification."
 msgid ""
 "Review the request in the admin panel and send the payment via Binance after"
 " verification."
@@ -6546,10 +6539,6 @@ msgstr ""
 "PredictStamp. Solicita un retiro en USDT desde tu perfil cuando quieras — "
 "PredictStamp no custodia fondos en la plataforma."
 
-#| msgid ""
-#| "We credited $%(amount)s to your contest earnings balance on PredictStamp. "
-#| "Request a USDT withdrawal from your profile whenever you are ready — "
-#| "PredictStamp does not hold funds on-platform."
 msgid ""
 "Your prize has been added to your contest earnings balance. Request a "
 "Binance withdrawal from your profile whenever you are ready — PredictStamp "
@@ -6571,9 +6560,6 @@ msgid "Congratulations — you won $%(prize)s in the weekly reputation contest!"
 msgstr ""
 "¡Felicitaciones — ganaste $%(prize)s en el concurso semanal de reputación!"
 
-#| msgid ""
-#| "We credited $%(amount)s to your contest earnings balance on PredictStamp. "
-#| "You can request a USDT withdrawal from your profile whenever you are ready."
 msgid ""
 "Your prize has been credited to your contest earnings balance on "
 "PredictStamp. You can request a Binance withdrawal from your profile "
@@ -8023,6 +8009,35 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid "I told you so"
+#~ msgstr "Te lo dije"
+
+#, python-format
+#~ msgid "You were right · %(title)s"
+#~ msgstr "Tenías razón · %(title)s"
+
+#, python-format
+#~ msgid "You were right on %(title)s :("
+#~ msgstr "Tenías razón en %(title)s :("
+
+#~ msgid "You were right :("
+#~ msgstr "Tenías razón :("
+
+#~ msgid "Share — you were right"
+#~ msgstr "Compartir — tenías razón"
+
+#~ msgid "All notifications marked as read."
+#~ msgstr "Se han marcado todas las notificaciones como leídas"
+
+#~ msgid "Mark all as read"
+#~ msgstr "Marcar todo como leído"
+
+#~ msgid "Mark read"
+#~ msgstr "Mercados"
+
+#~ msgid "Mark all read"
+#~ msgstr "Marcar todas como leídas"
 
 #~ msgid "Added to your contest earnings balance — withdraw as USDT anytime."
 #~ msgstr ""

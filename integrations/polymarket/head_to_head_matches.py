@@ -29,6 +29,8 @@ H2H_MATCH_TAG_SLUGS = (
     "mlb",
     "nhl",
 )
+# Team-vs-team esports moneylines on Polymarket share the same event shape as sports H2H.
+ESPORTS_H2H_MATCH_TAG_SLUGS = ("esports",)
 
 _RESOLVED_PRICE_THRESHOLD = 0.99
 

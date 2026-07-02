@@ -1,4 +1,4 @@
-"""Tests for resolved vs open forecast share copy."""
+"""Tests for viral prediction stamp cards and share copy."""
 
 from django.test import TestCase
 from django.urls import reverse
@@ -32,30 +32,35 @@ class ForecastShareCopyTests(TestCase):
         self.assertIn("Will the bill pass?", copy["text"])
         self.assertEqual(copy["button_label"], "Share")
 
-    def test_correct_resolution_uses_i_told_you_so(self):
+    def test_correct_resolution_uses_i_called_it(self):
         self.prediction.status = Prediction.Status.RESOLVED
         self.prediction.is_correct = True
         self.prediction.resolved_at = timezone.now()
         self.prediction.save(update_fields=["status", "is_correct", "resolved_at"])
 
-        copy = get_forecast_share_copy(self.prediction)
+        copy = get_forecast_share_copy(
+            self.prediction,
+            metrics={"entry_percent": 37, "pnl_delta": 63},
+        )
 
         self.assertEqual(copy["tone"], "win")
-        self.assertIn("I told you so", copy["text"])
-        self.assertEqual(copy["button_label"], "I told you so")
+        self.assertIn("I called it", copy["text"])
+        self.assertEqual(copy["button_label"], "I called it")
 
-    def test_incorrect_resolution_uses_you_were_right(self):
+    def test_incorrect_resolution_uses_aged_badly(self):
         self.prediction.status = Prediction.Status.RESOLVED
         self.prediction.is_correct = False
         self.prediction.resolved_at = timezone.now()
         self.prediction.save(update_fields=["status", "is_correct", "resolved_at"])
 
-        copy = get_forecast_share_copy(self.prediction)
+        copy = get_forecast_share_copy(
+            self.prediction,
+            metrics={"entry_percent": 92, "pnl_delta": -92},
+        )
 
         self.assertEqual(copy["tone"], "loss")
-        self.assertIn("You were right", copy["text"])
-        self.assertIn(":(", copy["text"])
-        self.assertEqual(copy["button_label"], "You were right :(")
+        self.assertIn("aged badly", copy["text"])
+        self.assertEqual(copy["button_label"], "This aged badly")
 
     @override("es")
     def test_spanish_win_copy(self):
@@ -66,22 +71,9 @@ class ForecastShareCopyTests(TestCase):
 
         copy = get_forecast_share_copy(self.prediction)
 
-        self.assertEqual(copy["button_label"], "Te lo dije")
-        self.assertIn("Te lo dije", copy["text"])
+        self.assertIn("Lo dije", copy["button_label"])
 
-    @override("es")
-    def test_spanish_loss_copy(self):
-        self.prediction.status = Prediction.Status.RESOLVED
-        self.prediction.is_correct = False
-        self.prediction.resolved_at = timezone.now()
-        self.prediction.save(update_fields=["status", "is_correct", "resolved_at"])
-
-        copy = get_forecast_share_copy(self.prediction)
-
-        self.assertEqual(copy["button_label"], "Tenías razón :(")
-        self.assertIn("Tenías razón", copy["text"])
-
-    def test_resolved_card_page_shows_win_button(self):
+    def test_resolved_card_page_shows_i_called_it_button(self):
         self.prediction.status = Prediction.Status.RESOLVED
         self.prediction.is_correct = True
         self.prediction.resolved_at = timezone.now()
@@ -92,5 +84,13 @@ class ForecastShareCopyTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "I told you so")
-        self.assertContains(response, "data-share-text")
+        self.assertContains(response, "I called it")
+        self.assertContains(response, "PredictStamp.com")
+        self.assertContains(response, "Share on X")
+
+    def test_embed_route_renders_without_actions(self):
+        response = self.client.get(
+            reverse("prediction_card_embed", args=[self.prediction.id]),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Share on X")

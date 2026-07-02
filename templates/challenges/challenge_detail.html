@@ -52,6 +52,7 @@
   <p class="text-sm text-brand-900 dark:text-brand-200">{% trans "You've been challenged! Accept to compete." %}</p>
   <form method="post" action="{% url 'challenges:accept' pk=challenge.pk %}" class="inline">
     {% csrf_token %}
+    {% if invite_token %}<input type="hidden" name="invite_token" value="{{ invite_token }}">{% endif %}
     <button type="submit" class="btn-primary">{% trans "Accept challenge" %}</button>
   </form>
   <form method="post" action="{% url 'challenges:decline' pk=challenge.pk %}" class="inline">
@@ -89,6 +90,23 @@
   <p class="font-semibold text-slate-800 dark:text-slate-200">{% trans "Tie — no winner" %}</p>
 </div>
 {% endif %}
+
+<div class="mb-6 flex flex-wrap gap-2">
+  <button type="button"
+          class="pr-touch-target inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"
+          data-share-url="{{ share_url }}"
+          data-share-title="{{ share_copy.title }}"
+          data-share-text="{{ share_copy.text }}"
+          data-share-sheet-title="{{ share_copy.sheet_title }}"
+          onclick="window.shareForumPost && window.shareForumPost(this)">
+    <i data-lucide="share-2" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+    {% trans "Share challenge" %}
+  </button>
+  <a href="{% url 'challenge_card' pk=challenge.pk %}"
+     class="pr-touch-target inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+    {% trans "Public card" %}
+  </a>
+</div>
 
 {% if duel_opponent and head_to_head and head_to_head.total %}
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-4 dark:border-brand-800 dark:bg-brand-950/30">

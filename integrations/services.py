@@ -604,8 +604,8 @@ def _h2h_sync_limit(limit):
     return limit
 
 
-def sync_h2h_match_markets(*, limit=None, tag_slugs=None):
-    """Fetch Polymarket H2H match events (tennis, NBA, etc.) and upsert as pick-one markets."""
+def sync_h2h_match_markets(*, limit=None, tag_slugs=None, default_category="Sports"):
+    """Fetch Polymarket H2H match events (tennis, NBA, esports, etc.) and upsert as pick-one markets."""
     from integrations.polymarket.head_to_head_matches import (
         build_h2h_match_raw,
         normalize_h2h_match_event,
@@ -619,7 +619,7 @@ def sync_h2h_match_markets(*, limit=None, tag_slugs=None):
 
     for event in events:
         try:
-            normalized = normalize_h2h_match_event(event, default_category="Sports")
+            normalized = normalize_h2h_match_event(event, default_category=default_category)
             if not normalized:
                 continue
             raw_market = build_h2h_match_raw(event, normalized=normalized)

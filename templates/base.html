@@ -439,6 +439,7 @@
   {% endif %}
   <script src="{% static 'js/share-sheet.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/forum-actions.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
+  <script src="{% static 'js/forecast-share.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   <script src="{% static 'js/market-tape.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
   {% if user.is_authenticated %}<script src="{% static 'js/push.js' %}{% if static_version %}?v={{ static_version }}{% endif %}" defer></script>{% endif %}
   {% if user.is_authenticated %}

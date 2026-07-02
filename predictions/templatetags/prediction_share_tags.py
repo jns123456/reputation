@@ -14,13 +14,14 @@ def forecast_share_button(
     prediction,
     extra_class="",
     label=None,
+    share_copy=None,
     icon="share-2",
     icon_class="h-4 w-4 shrink-0",
     icon_only=False,
     button_id="",
 ):
     request = context["request"]
-    share_copy = get_forecast_share_copy(prediction)
+    share_copy = share_copy or get_forecast_share_copy(prediction)
     if label is None and not icon_only:
         label = share_copy["button_label"]
     return {

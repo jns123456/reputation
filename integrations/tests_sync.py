@@ -48,6 +48,23 @@ class SyncCategoryMarketsTests(TestCase):
         mock_poly.assert_called_once()
         self.assertEqual(summary.imported, 1)
 
+    @patch("integrations.services.sync_f1_markets")
+    @patch("integrations.services.sync_h2h_match_markets")
+    @patch("integrations.sync.sync_binary_markets_by_tag")
+    def test_sync_esports_category_imports_h2h_and_binary(self, mock_poly, mock_h2h, mock_f1):
+        category = get_category_for_slug("esports")
+        mock_poly.return_value = {"imported": [{"created": True}], "errors": []}
+        mock_h2h.return_value = {"imported": [{"created": True}], "errors": []}
+
+        summary = sync_category_markets(category, limit=12)
+
+        mock_h2h.assert_called_once()
+        mock_f1.assert_not_called()
+        mock_poly.assert_called_once()
+        self.assertEqual(summary.imported, 2)
+        _, h2h_kwargs = mock_h2h.call_args
+        self.assertEqual(h2h_kwargs.get("default_category"), category.name)
+
     @patch("integrations.sync.sync_binary_markets_by_tag")
     @patch("integrations.services.sync_f1_markets")
     @patch("integrations.services.sync_h2h_match_markets")

@@ -53,6 +53,23 @@ def pulse(request):
         page=request.GET.get("page", 1),
     )
     context["post_form"] = _forum_post_form(request.user)
+    share_prediction_id = request.GET.get("share_prediction", "").strip()
+    if share_prediction_id.isdigit() and context["post_form"] is not None:
+        from django.urls import reverse
+
+        card_url = request.build_absolute_uri(
+            reverse("prediction_card", args=[int(share_prediction_id)])
+        )
+        if request.GET.get("anonymous") == "1":
+            initial_body = _("Anonymous take — what do you think?\n%(url)s") % {"url": card_url}
+        else:
+            initial_body = _("My forecast:\n%(url)s") % {"url": card_url}
+        program = get_creator_program_or_none(request.user)
+        creator_enabled = program is not None and program.is_enabled
+        context["post_form"] = PostForm(
+            initial={"body": initial_body},
+            creator_program_enabled=creator_enabled,
+        )
     return render(request, "forum/forum.html", context)
 
 

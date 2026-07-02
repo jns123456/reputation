@@ -112,6 +112,7 @@ class ChallengeParticipant(models.Model):
         choices=Status.choices,
         default=Status.INVITED,
     )
+    invite_token = models.CharField(max_length=64, blank=True, db_index=True)
     joined_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

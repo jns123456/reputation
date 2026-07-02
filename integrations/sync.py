@@ -83,6 +83,22 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
                 exc, "H2H/F1 sports sync failed for category %s", category.slug
             )
 
+    if category.slug == "esports":
+        try:
+            from integrations.polymarket.head_to_head_matches import ESPORTS_H2H_MATCH_TAG_SLUGS
+            from integrations.services import sync_h2h_match_markets
+
+            summary.absorb(
+                sync_h2h_match_markets(
+                    tag_slugs=ESPORTS_H2H_MATCH_TAG_SLUGS,
+                    default_category=category.name,
+                )
+            )
+        except Exception as exc:
+            _log_polymarket_fetch_failure(
+                exc, "Esports H2H sync failed for category %s", category.slug
+            )
+
     if category.polymarket_tag:
         try:
             summary.absorb(

@@ -48,6 +48,30 @@ class MarketCategoryResolutionTests(TestCase):
         )
         self.assertEqual(resolve_market_category_slug(market), "sports")
 
+    def test_esports_resolves_before_sports_when_both_tags_present(self):
+        market = Market(
+            external_id="cat-esports",
+            title="BetBoom Team vs BIG",
+            slug="betboom-vs-big",
+            polymarket_event_raw={
+                "tags": [
+                    {"slug": "esports"},
+                    {"slug": "counter-strike-2"},
+                    {"slug": "sports"},
+                ],
+            },
+        )
+        self.assertEqual(resolve_market_category_slug(market), "esports")
+
+    def test_esports_from_game_tag_only(self):
+        market = Market(
+            external_id="cat-valorant",
+            title="EDG vs BBL",
+            slug="edg-vs-bbl",
+            polymarket_event_raw={"tags": [{"slug": "valorant"}]},
+        )
+        self.assertEqual(resolve_market_category_slug(market), "esports")
+
     def test_world_cup_match_market_resolves_to_world_cup_category(self):
         market = Market(
             external_id="wc-match:fifwc-mex-rsa-2026-06-11",

@@ -74,6 +74,8 @@ class EmailVerificationRequiredMiddleware:
         "/assets/",
         "/i18n/",
         "/p/",
+        "/c/",
+        "/@",
         "/sw.js",
         "/manifest.webmanifest",
     )
@@ -114,6 +116,8 @@ class ProfileSetupRequiredMiddleware:
         "/assets/",
         "/i18n/",
         "/p/",
+        "/c/",
+        "/@",
         "/sw.js",
         "/manifest.webmanifest",
     )

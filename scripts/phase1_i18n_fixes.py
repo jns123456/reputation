@@ -392,6 +392,11 @@ PHASE1_FIXES.update(
         "Too many attempts. Please wait a few minutes and try again.": (
             "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."
         ),
+        # --- Esports category (Polymarket /esports/) ---
+        "Esports": "Esports",
+        "Competitive gaming — CS2, LoL, Valorant, and more": (
+            "Videojuegos competitivos: CS2, LoL, Valorant y más"
+        ),
     }
 )
 

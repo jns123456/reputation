@@ -1,0 +1,52 @@
+{% load i18n %}
+<button type="button"
+        class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        data-share-url="{{ share_url }}"
+        data-share-title="{{ share_copy.title }}"
+        data-share-text="{{ share_copy.text }}"
+        data-share-sheet-title="{{ share_copy.sheet_title }}"
+        data-share-ping="{% url 'prediction_card_share' prediction.id %}"
+        onclick="window.shareForumPost && window.shareForumPost(this)">
+  <i data-lucide="twitter" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Share on X" %}
+</button>
+{% if user.is_authenticated %}
+<a href="{{ stamp.challenge_url }}"
+   class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+  <i data-lucide="swords" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Challenge a friend" %}
+</a>
+{% else %}
+<a href="{% url 'accounts:login' %}?next={{ stamp.challenge_url|urlencode }}"
+   class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+  <i data-lucide="swords" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Challenge a friend" %}
+</a>
+{% endif %}
+<button type="button"
+        class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        data-copy-card-url="{{ share_url }}"
+        onclick="window.copyPredictionCardLink && window.copyPredictionCardLink(this)">
+  <i data-lucide="copy" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Copy prediction card" %}
+</button>
+<button type="button"
+        class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        data-embed-id="{{ prediction.id }}"
+        onclick="window.copyPredictionEmbed && window.copyPredictionEmbed(this)">
+  <i data-lucide="code" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Embed" %}
+</button>
+{% if user.is_authenticated %}
+<a href="{{ stamp.forum_share_url }}"
+   class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+  <i data-lucide="message-square" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Post anonymously" %}
+</a>
+{% else %}
+<a href="{% url 'accounts:login' %}?next={{ stamp.forum_share_url|urlencode }}"
+   class="pr-touch-target inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+  <i data-lucide="message-square" class="h-4 w-4 shrink-0" stroke-width="2" aria-hidden="true"></i>
+  {% trans "Post anonymously" %}
+</a>
+{% endif %}

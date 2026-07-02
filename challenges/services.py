@@ -1,5 +1,7 @@
 """Challenge business logic."""
 
+import secrets
+
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.db import transaction
@@ -90,6 +92,7 @@ def create_challenge(*, creator, title="", market_ids, opponent_ids, challenge_g
                 challenge=challenge,
                 user=opponent,
                 status=ChallengeParticipant.Status.INVITED,
+                invite_token=secrets.token_urlsafe(16),
             )
 
     from challenges.notification_services import notify_challenge_invitations

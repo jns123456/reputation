@@ -347,6 +347,20 @@ def get_challenge_for_spectator(challenge_id):
     )
 
 
+def get_challenge_participant_by_token(*, challenge_id, invite_token):
+    if not invite_token:
+        return None
+    return (
+        ChallengeParticipant.objects.filter(
+            challenge_id=challenge_id,
+            invite_token=invite_token,
+            status=ChallengeParticipant.Status.INVITED,
+        )
+        .select_related("challenge", "user", "challenge__creator")
+        .first()
+    )
+
+
 def get_head_to_head_record(*, user, opponent):
     """Completed 1v1 duel record between two users.
 

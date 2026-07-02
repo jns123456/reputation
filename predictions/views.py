@@ -246,8 +246,13 @@ def prediction_detail(request, prediction_id):
         pk=prediction_id,
     )
     metrics = build_forecast_card_metrics(prediction)
+    from predictions.card_services import build_prediction_stamp_context
     from predictions.share_copy import get_forecast_share_copy
 
+    stamp = build_prediction_stamp_context(prediction=prediction, metrics=metrics)
+    share_copy = get_forecast_share_copy(prediction, metrics=metrics)
+    card_url = request.build_absolute_uri(reverse("prediction_card", args=[prediction.id]))
+    is_embed = getattr(request.resolver_match, "url_name", "") == "prediction_card_embed"
     return render(
         request,
         "predictions/prediction_detail.html",
@@ -255,10 +260,10 @@ def prediction_detail(request, prediction_id):
             "prediction": prediction,
             "market": prediction.market,
             "metrics": metrics,
-            "share_copy": get_forecast_share_copy(prediction),
-            "share_url": request.build_absolute_uri(
-                reverse("prediction_card", args=[prediction.id])
-            ),
+            "stamp": stamp,
+            "share_copy": share_copy,
+            "share_url": card_url,
+            "is_embed": is_embed,
         },
     )
 
@@ -274,7 +279,10 @@ def prediction_og_image(request, prediction_id):
         pk=prediction_id,
     )
     metrics = build_forecast_card_metrics(prediction)
-    png_bytes = get_prediction_og_image(prediction, metrics)
+    from predictions.card_services import build_prediction_stamp_context
+
+    stamp = build_prediction_stamp_context(prediction=prediction, metrics=metrics)
+    png_bytes = get_prediction_og_image(prediction, metrics, stamp)
     response = HttpResponse(png_bytes, content_type="image/png")
     response["Cache-Control"] = "public, max-age=3600"
     return response

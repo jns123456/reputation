@@ -90,5 +90,6 @@ urlpatterns = [
         views.profile_contest_earnings,
         name="profile_contest_earnings",
     ),
+    path("users/<str:username>/og.png", views.profile_og_image, name="profile_og"),
     path("users/<str:username>/", views.profile_detail, name="profile"),
 ]

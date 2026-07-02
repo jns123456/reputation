@@ -9,6 +9,7 @@ import io
 import textwrap
 
 from django.core.cache import cache
+from django.utils import timezone
 
 from predictions.models import Prediction
 
@@ -34,20 +35,36 @@ def _font(size):
         return ImageFont.load_default()
 
 
-def _viral_tagline(prediction):
+def _viral_tagline(prediction, stamp_context):
     if prediction.status != Prediction.Status.RESOLVED:
-        return None, None
+        author = prediction.user.public_name or prediction.user.username
+        return f"{author} predicts:", _FG
     if prediction.is_correct:
-        return "I TOLD YOU SO", _GREEN
-    return "YOU WERE RIGHT :(", _AMBER
+        return "I CALLED IT", _GREEN
+    return "THIS AGED BADLY", _AMBER
 
 
-def _status_line(prediction, metrics):
+def _status_line(prediction, metrics, stamp_context):
     if prediction.status == Prediction.Status.RESOLVED:
         delta = metrics.get("pnl_delta")
+        entry = metrics.get("entry_percent")
+        days = stamp_context.get("days_before_resolution")
         if prediction.is_correct:
-            return (f"CORRECT  +{delta} reputation" if delta is not None else "CORRECT"), _GREEN
-        return (f"INCORRECT  {delta} reputation" if delta is not None else "INCORRECT"), _RED
+            parts = ["Result: Correct"]
+            if delta is not None:
+                parts.append(f"+{delta} reputation")
+            if entry is not None:
+                parts.insert(0, f"Predicted at {entry}%")
+            if days is not None:
+                parts.append(f"{days}d before resolution")
+            return "  ·  ".join(parts), _GREEN
+        parts = ["Result: Incorrect"]
+        if delta is not None:
+            parts.append(f"{delta} reputation")
+        if entry is not None:
+            direction = "YES" if prediction.predicted_direction == Prediction.Direction.YES else "NO"
+            parts.insert(0, f"Predicted {direction} at {entry}%")
+        return "  ·  ".join(parts), _RED
     if prediction.status == Prediction.Status.EXITED:
         delta = metrics.get("pnl_delta")
         if delta is None:
@@ -55,67 +72,89 @@ def _status_line(prediction, metrics):
         sign = "+" if delta >= 0 else ""
         return f"EXITED  {sign}{delta} reputation", _AMBER
     delta = metrics.get("pnl_delta")
-    if delta is None:
+    entry = metrics.get("entry_percent")
+    lines = []
+    if entry is not None:
+        direction = "YES" if prediction.predicted_direction == Prediction.Direction.YES else "NO"
+        lines.append(f"Position: {direction}  ·  Market {entry}%")
+    if delta is not None:
+        sign = "+" if delta >= 0 else ""
+        lines.append(f"Unrealized {sign}{delta} rep")
+    if not lines:
         return "OPEN FORECAST", _MUTED
-    sign = "+" if delta >= 0 else ""
-    return f"OPEN  {sign}{delta} unrealized", _GREEN if delta >= 0 else _RED
+    return "  ·  ".join(lines), _MUTED
 
 
-def render_prediction_og_image(prediction, metrics):
+def _format_timestamp(when):
+    if when is None:
+        return ""
+    if timezone.is_naive(when):
+        when = timezone.make_aware(when, timezone.get_current_timezone())
+    return when.strftime("%B ") + str(when.day) + when.strftime(", %Y")
+
+
+def render_prediction_og_image(prediction, metrics, stamp_context=None):
     from PIL import Image, ImageDraw
 
+    stamp_context = stamp_context or {}
     image = Image.new("RGB", (OG_WIDTH, OG_HEIGHT), _BG)
     draw = ImageDraw.Draw(image)
 
-    draw.rectangle([0, 0, OG_WIDTH, 14], fill=_BRAND)
+    draw.rectangle([0, 0, OG_WIDTH, 18], fill=_BRAND)
+    draw.text((OG_WIDTH - 280, 28), "PredictStamp.com", font=_font(28), fill=_BRAND)
 
     x = 72
-    y = 70
-    draw.text((x, y), "PredictStamp", font=_font(36), fill=_BRAND)
-    y += 70
+    y = 56
+    tagline, tagline_color = _viral_tagline(prediction, stamp_context)
+    draw.text((x, y), tagline, font=_font(40), fill=tagline_color)
+    y += 58
 
     title = (prediction.market.display_title or prediction.market.title or "").strip()
-    for line in textwrap.wrap(title, width=42)[:3]:
-        draw.text((x, y), line, font=_font(48), fill=_FG)
-        y += 62
-    y += 18
+    for line in textwrap.wrap(title, width=42)[:2]:
+        draw.text((x, y), line, font=_font(46), fill=_FG)
+        y += 58
+    y += 12
 
-    direction = "No " if prediction.predicted_direction == Prediction.Direction.NO else ""
-    pick = f"{direction}{prediction.predicted_outcome}".strip()
-    entry = metrics.get("entry_percent")
+    pick = stamp_context.get("pick_label") or prediction.predicted_outcome
     pick_line = f"Forecast: {pick}"
-    if entry is not None:
-        pick_line = f"{pick_line}  ·  entry {entry}%"
-    for line in textwrap.wrap(pick_line, width=52)[:2]:
-        draw.text((x, y), line, font=_font(38), fill=_MUTED)
-        y += 50
-    y += 18
+    draw.text((x, y), pick_line, font=_font(34), fill=_MUTED)
+    y += 48
 
-    tagline, tagline_color = _viral_tagline(prediction)
-    if tagline:
-        draw.text((x, y), tagline, font=_font(52), fill=tagline_color)
-        y += 64
+    status_text, status_color = _status_line(prediction, metrics, stamp_context)
+    for line in textwrap.wrap(status_text, width=54)[:2]:
+        draw.text((x, y), line, font=_font(32), fill=status_color)
+        y += 42
+    y += 8
 
-    status_text, status_color = _status_line(prediction, metrics)
-    draw.text((x, y), status_text, font=_font(44), fill=status_color)
-
-    author = prediction.user.public_name or prediction.user.username
-    draw.text((x, OG_HEIGHT - 90), f"by {author}", font=_font(32), fill=_MUTED)
+    meta_parts = []
+    ts = _format_timestamp(prediction.created_at)
+    if ts:
+        meta_parts.append(ts)
+    rep = stamp_context.get("reputation_points")
+    if rep is not None:
+        meta_parts.append(f"Rep {rep:,}")
+    top_pct = stamp_context.get("category_top_percent")
+    cat_name = stamp_context.get("category_name")
+    if top_pct and cat_name:
+        meta_parts.append(f"Top {top_pct}% in {cat_name}")
+    if meta_parts:
+        draw.text((x, y), "  ·  ".join(meta_parts), font=_font(26), fill=_MUTED)
 
     buffer = io.BytesIO()
     image.save(buffer, format="PNG")
     return buffer.getvalue()
 
 
-def get_prediction_og_image(prediction, metrics):
+def get_prediction_og_image(prediction, metrics, stamp_context=None):
     """Return cached PNG bytes for the forecast share card."""
+    stamp_context = stamp_context or {}
     cache_key = (
-        f"prediction-og:{prediction.id}:{prediction.status}:"
-        f"{metrics.get('pnl_delta')}"
+        f"prediction-og:v2:{prediction.id}:{prediction.status}:"
+        f"{metrics.get('pnl_delta')}:{stamp_context.get('category_top_percent')}"
     )
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
-    rendered = render_prediction_og_image(prediction, metrics)
+    rendered = render_prediction_og_image(prediction, metrics, stamp_context)
     cache.set(cache_key, rendered, OG_CACHE_SECONDS)
     return rendered

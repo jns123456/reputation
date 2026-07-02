@@ -66,6 +66,16 @@
     </div>
 
     <div class="pr-profile-actions">
+      <button type="button"
+              class="btn-secondary pr-profile-action-btn"
+              data-share-url="{{ at_profile_url|default:profile_url }}"
+              data-share-title="{{ profile_share.share_title }}"
+              data-share-text="{{ profile_share.share_text }}"
+              data-share-sheet-title="{% trans 'Share profile' %}"
+              onclick="window.shareForumPost && window.shareForumPost(this)">
+        <i data-lucide="share-2" stroke-width="1.75" aria-hidden="true"></i>
+        <span>{% trans "Share profile" %}</span>
+      </button>
       {% include "accounts/partials/follow_button.html" %}
       {% if user.is_authenticated and user != profile_user %}
       <a href="{% url 'messages:start' username=profile_user.username %}" class="btn-secondary pr-profile-action-btn">
