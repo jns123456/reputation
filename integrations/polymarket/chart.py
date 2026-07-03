@@ -1,6 +1,7 @@
 """Build multi-outcome chart payloads from Polymarket CLOB price history."""
 
 import logging
+import time
 from datetime import datetime, timezone as dt_timezone
 
 import requests
@@ -17,8 +18,14 @@ from integrations.polymarket.client import (
     normalize_polymarket_event_record,
     select_top_chart_outcomes,
 )
+from integrations.services import _log_polymarket_fetch_failure
 
 logger = logging.getLogger(__name__)
+
+_TRANSIENT_REQUEST_ERRORS = (
+    requests.exceptions.Timeout,
+    requests.exceptions.ConnectionError,
+)
 
 CLOB_API_URL = "https://clob.polymarket.com"
 CHART_COLORS = [
@@ -325,22 +332,61 @@ def _persist_chart_backfill(market, *, normalized, raw, event):
         logger.exception("Failed to persist Polymarket chart backfill for %s", market.external_id)
 
 
+def _get_price_history_with_retry(token_id, *, interval, fidelity, max_attempts=3):
+    """GET CLOB price history with short backoff on transient Polymarket failures."""
+    url = f"{CLOB_API_URL}/prices-history"
+    params = {
+        "market": token_id,
+        "interval": interval,
+        "fidelity": fidelity,
+    }
+    last_exc = None
+    for attempt in range(max_attempts):
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                timeout=20,
+                headers={"Accept": "application/json"},
+            )
+        except _TRANSIENT_REQUEST_ERRORS as exc:
+            last_exc = exc
+            if attempt + 1 >= max_attempts:
+                raise
+            time.sleep(2**attempt)
+            continue
+        if response.status_code < 500:
+            return response
+        if attempt + 1 >= max_attempts:
+            return response
+        time.sleep(2**attempt)
+    if last_exc is not None:
+        raise last_exc
+    raise RuntimeError("unreachable")
+
+
 def _fetch_price_points(token_id, *, interval, fidelity):
     try:
-        response = requests.get(
-            f"{CLOB_API_URL}/prices-history",
-            params={
-                "market": token_id,
-                "interval": interval,
-                "fidelity": fidelity,
-            },
-            timeout=20,
-            headers={"Accept": "application/json"},
+        response = _get_price_history_with_retry(
+            token_id,
+            interval=interval,
+            fidelity=fidelity,
         )
+        if response.status_code >= 500:
+            logger.warning(
+                "Failed to fetch Polymarket price history for %s (HTTP %s)",
+                token_id,
+                response.status_code,
+            )
+            return []
         response.raise_for_status()
         history = response.json().get("history") or []
-    except Exception:
-        logger.exception("Failed to fetch Polymarket price history for %s", token_id)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(
+            exc,
+            "Failed to fetch Polymarket price history for %s",
+            token_id,
+        )
         return []
 
     points = []

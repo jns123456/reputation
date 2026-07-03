@@ -82,6 +82,7 @@ _TRANSIENT_POLYMARKET_LOG_MESSAGES = (
     "Failed to fetch H2H match event",
     "Failed to fetch Polymarket market",
     "Failed to fetch Polymarket event",
+    "Failed to fetch Polymarket price history",
     "H2H/F1 sports sync failed for category",
     "Polymarket category sync failed for",
     "Polymarket top-volume sync failed",
@@ -121,7 +122,11 @@ def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
 def _is_transient_polymarket_fetch_noise(event, hint) -> bool:
     """Drop handled Polymarket upstream failures from integrations fetch/sync paths."""
     logger_name = event.get("logger")
-    if logger_name not in {"integrations.services", "integrations.sync"}:
+    if logger_name not in {
+        "integrations.services",
+        "integrations.sync",
+        "integrations.polymarket.chart",
+    }:
         return False
 
     message = _event_message(event)

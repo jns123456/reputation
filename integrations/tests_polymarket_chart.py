@@ -1,9 +1,12 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 
+import requests
+
 from integrations.polymarket.chart import (
+    _fetch_price_points,
     build_polymarket_multi_outcome_chart_payload,
     build_polymarket_soccer_match_chart_payload,
 )
@@ -28,6 +31,39 @@ def _grouped_market(label, market_id, yes_price, token_id):
         "clobTokenIds": f'["{token_id}"]',
         "slug": f"will-{label.lower()}-win",
     }
+
+
+class FetchPricePointsTests(SimpleTestCase):
+    @patch("integrations.polymarket.chart.time.sleep")
+    @patch("integrations.polymarket.chart.requests.get")
+    def test_retries_transient_timeout(self, mock_get, mock_sleep):
+        success = MagicMock()
+        success.status_code = 200
+        success.json.return_value = {"history": [{"t": 1_700_000_000, "p": 0.42}]}
+        mock_get.side_effect = [
+            requests.exceptions.ReadTimeout("read timed out"),
+            success,
+        ]
+
+        points = _fetch_price_points("token-a", interval="max", fidelity=1440)
+
+        self.assertEqual(len(points), 1)
+        self.assertEqual(points[0]["value"], 42.0)
+        self.assertEqual(mock_get.call_count, 2)
+        mock_sleep.assert_called_once_with(1)
+
+    @patch("integrations.polymarket.chart.time.sleep")
+    @patch("integrations.polymarket.chart.requests.get")
+    @patch("integrations.services.logger")
+    def test_logs_warning_after_exhausted_retries(self, mock_logger, mock_get, mock_sleep):
+        mock_get.side_effect = requests.exceptions.ReadTimeout("read timed out")
+
+        points = _fetch_price_points("token-a", interval="max", fidelity=1440)
+
+        self.assertEqual(points, [])
+        self.assertEqual(mock_get.call_count, 3)
+        mock_logger.warning.assert_called_once()
+        mock_logger.exception.assert_not_called()
 
 
 class BuildPolymarketEventRawChartTests(SimpleTestCase):

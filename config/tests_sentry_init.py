@@ -245,6 +245,35 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
         self.assertIsNone(_before_send(event, hint))
 
+    def test_drops_transient_polymarket_chart_timeouts(self):
+        class ReadTimeout(Exception):
+            pass
+
+        ReadTimeout.__module__ = "requests.exceptions"
+        event = {
+            "logger": "integrations.polymarket.chart",
+            "logentry": {
+                "message": "Failed to fetch Polymarket price history for 47919384150197589232393964585899333320474050683727294311209365244400038751833",
+            },
+            "exception": {
+                "values": [
+                    {
+                        "type": "ReadTimeout",
+                        "stacktrace": {
+                            "frames": [
+                                {
+                                    "module": "integrations.polymarket.chart",
+                                    "function": "_fetch_price_points",
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        }
+        hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
+        self.assertIsNone(_before_send(event, hint))
+
     def test_drops_embedded_sync_transient_db_errors(self):
         event = {
             "logger": "integrations.market_sync_scheduler",
