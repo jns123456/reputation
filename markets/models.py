@@ -134,14 +134,19 @@ class Market(models.Model):
     def is_in_play(self):
         """True once the underlying event has started.
 
-        For live events (tennis/soccer) the outcome is revealed in real time, so
-        forecasting closes at kickoff. This is a local, network-free backstop
-        that holds even when the source's ``accepting_orders`` flag has not yet
-        synced — directly closing the sync-delay window for sports.
+        For live events (tennis/soccer/F1 races) the outcome is revealed in real
+        time, so forecasting closes at kickoff. This is a local, network-free
+        backstop that holds even when the source's ``accepting_orders`` flag has
+        not yet synced — directly closing the sync-delay window for sports.
         """
-        if not self.game_start_time:
+        start = self.game_start_time
+        if not start:
+            from integrations.polymarket.f1_markets import f1_race_start_from_market
+
+            start = f1_race_start_from_market(self)
+        if not start:
             return False
-        return self.game_start_time <= timezone.now()
+        return start <= timezone.now()
 
     @property
     def is_forecastable(self):
