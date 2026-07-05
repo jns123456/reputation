@@ -13,6 +13,8 @@
 <div class="pr-page pb-8">
   {% include "markets/partials/market_hero.html" %}
 
+  {% include "markets/partials/resolution_scorecard.html" %}
+
   {% if polymarket_embed and market.is_forecastable and not market.is_multi_binary_market %}
   {# Visual test: chart left, forecast right on large screens #}
   <div class="mt-8 grid gap-6 lg:grid-cols-2 lg:items-stretch">

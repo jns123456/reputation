@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-02 15:03+0000\n"
+"POT-Creation-Date: 2026-07-05 14:13+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -1690,14 +1690,10 @@ msgid "Share — I called it"
 msgstr "Compartir — lo dije"
 
 #, python-format
-#| msgid "I called it — %(title)s."
 msgid "Wrong call — %(title)s."
 msgstr "Erré feo — %(title)s."
 
 #, python-format
-#| msgid ""
-#| "This prediction aged badly. Predicted %(direction)s at %(entry)s%%. Result: "
-#| "NO. Reputation lost: %(points)s."
 msgid ""
 "Wrong call. Predicted %(direction)s at %(entry)s%%. Result: Incorrect. "
 "Reputation lost: %(points)s."
@@ -1706,7 +1702,6 @@ msgstr ""
 "Reputación perdida: %(points)s."
 
 #, python-format
-#| msgid "I called it · %(title)s"
 msgid "Wrong call · %(title)s"
 msgstr "Erré feo · %(title)s"
 
@@ -1716,7 +1711,6 @@ msgstr "Erré feo"
 msgid "Share how it went"
 msgstr "Comparte cómo terminó"
 
-#| msgid "Share — I called it"
 msgid "Share — wrong call"
 msgstr "Compartir — erré feo"
 
@@ -8097,6 +8091,89 @@ msgstr ""
 #, python-format
 msgid "Polymarket market chart — %(market_title)s"
 msgstr "Gráfico de mercado Polymarket — %(market_title)s"
+
+#| msgid "Resolution"
+msgid "Resolution scorecard"
+msgstr "Cuadro de resolución"
+
+#, python-format
+msgid "How the community performed after %(outcome)s resolved."
+msgstr "Cómo le fue a la comunidad tras resolverse %(outcome)s."
+
+#| msgid "Get notified before this market resolves"
+msgid "How the community performed after this market resolved."
+msgstr "Cómo le fue a la comunidad tras resolverse este mercado."
+
+#| msgid "Community Icon"
+msgid "Community accuracy"
+msgstr "Precisión de la comunidad"
+
+#, python-format
+#| msgid "%(correct)s/%(total)s correct"
+msgid "%(correct)s of %(total)s resolved forecasts correct"
+msgstr "%(correct)s de %(total)s pronósticos resueltos correctos"
+
+#| msgid "Closed forecasts"
+msgid "Scored forecasts"
+msgstr "Pronósticos puntuados"
+
+#, python-format
+#| msgid "Exited early"
+msgid "%(exited)s exited early"
+msgstr "%(exited)s salieron antes"
+
+#| msgid "At resolution"
+msgid "All held to resolution"
+msgstr "Todos mantuvieron hasta la resolución"
+
+#| msgid "Reputation radar"
+msgid "Reputation awarded"
+msgstr "Reputación otorgada"
+
+#| msgid "Most reputation points this week"
+msgid "Net reputation points on this market"
+msgstr "Puntos netos de reputación en este mercado"
+
+#| msgid "Top predictors"
+msgid "Top performers"
+msgstr "Mejores resultados"
+
+#| msgid "Highest reputation wins"
+msgid "Highest reputation earned on this market."
+msgstr "Mayor reputación ganada en este mercado."
+
+#| msgid "Biggest mistakes"
+msgid "Biggest wins"
+msgstr "Mayores ganancias"
+
+#, python-format
+#| msgid "Forecast side"
+msgid "Forecast %(side)s"
+msgstr "Pronóstico %(side)s"
+
+#| msgid "Biggest mistakes"
+msgid "Biggest losses"
+msgstr "Mayores pérdidas"
+
+msgid "Contrarian calls"
+msgstr "Apuestas contrarias"
+
+#| msgid "Place one forecast on any open market today."
+msgid "Correct forecasts made against low market odds."
+msgstr "Pronósticos correctos hechos contra cuotas bajas del mercado."
+
+#, python-format
+#| msgid "%(prob)s%% market probability"
+msgid "at %(prob)s%% market odds"
+msgstr "con %(prob)s%% de cuota de mercado"
+
+#| msgid "View open forecasts"
+msgid "View all forecasts"
+msgstr "Ver todos los pronósticos"
+
+#| msgid "This market is no longer open for forecasts."
+msgid "This market resolved before any forecasts were scored."
+msgstr "Este mercado se resolvió antes de que se puntuara algún pronóstico."
 
 msgid "Source"
 msgstr "Fuente"

@@ -308,6 +308,120 @@ def get_user_calibration(user):
     return rows
 
 
+SCORECARD_TOP_PERFORMERS = 5
+SCORECARD_HIGHLIGHTS = 3
+
+
+def get_market_resolution_scorecard(market):
+    """Aggregate recap for a resolved market — community accuracy, top performers, highlights.
+
+    Returns ``None`` when the market is not resolved. Uses immutable ``ReputationEvent``
+    rows as the source of truth for points on this market.
+    """
+    from reputation.models import ReputationEvent
+    from reputation.services import get_predicted_outcome_probability
+
+    if market.status != Market.Status.RESOLVED:
+        return None
+
+    events = list(
+        ReputationEvent.objects.filter(prediction__market=market)
+        .select_related("user", "user__profile", "prediction", "prediction__market")
+        .order_by("-points_delta", "-created_at")
+    )
+
+    resolved_qs = Prediction.objects.filter(
+        market=market,
+        status=Prediction.Status.RESOLVED,
+        is_correct__isnull=False,
+    )
+    correct_count = resolved_qs.filter(is_correct=True).count()
+    incorrect_count = resolved_qs.filter(is_correct=False).count()
+    resolved_count = correct_count + incorrect_count
+    exited_count = Prediction.objects.filter(
+        market=market,
+        status=Prediction.Status.EXITED,
+    ).count()
+    scored_count = len(events)
+
+    accuracy_pct = round(correct_count * 100 / resolved_count) if resolved_count else None
+    total_reputation_delta = sum(event.points_delta for event in events)
+
+    user_totals = {}
+    for event in events:
+        user_totals[event.user_id] = user_totals.get(event.user_id, 0) + event.points_delta
+
+    user_by_id = {event.user_id: event.user for event in events}
+    top_performers = [
+        {
+            "rank": index + 1,
+            "user": user_by_id[user_id],
+            "points_delta": points,
+        }
+        for index, (user_id, points) in enumerate(
+            sorted(user_totals.items(), key=lambda item: item[1], reverse=True)[
+                :SCORECARD_TOP_PERFORMERS
+            ]
+        )
+    ]
+
+    positive_events = [event for event in events if event.points_delta > 0]
+    negative_events = [event for event in events if event.points_delta < 0]
+    biggest_wins = sorted(positive_events, key=lambda event: event.points_delta, reverse=True)[
+        :SCORECARD_HIGHLIGHTS
+    ]
+    biggest_losses = sorted(negative_events, key=lambda event: event.points_delta)[
+        :SCORECARD_HIGHLIGHTS
+    ]
+
+    contrarian_winners = []
+    for prediction in resolved_qs.filter(is_correct=True).select_related(
+        "user", "user__profile"
+    ):
+        snapshot = prediction.probability_at_prediction_time or {}
+        if not snapshot:
+            continue
+        try:
+            entry_percent = int(
+                round(
+                    get_predicted_outcome_probability(
+                        prediction.predicted_outcome,
+                        snapshot,
+                        predicted_direction=prediction.predicted_direction,
+                    )
+                    * 100
+                )
+            )
+        except Exception:
+            continue
+        contrarian_winners.append(
+            {
+                "prediction": prediction,
+                "user": prediction.user,
+                "entry_prob_percent": entry_percent,
+            }
+        )
+    contrarian_winners.sort(key=lambda row: row["entry_prob_percent"])
+    contrarian_winners = contrarian_winners[:SCORECARD_HIGHLIGHTS]
+
+    return {
+        "has_scored_forecasts": scored_count > 0,
+        "scored_count": scored_count,
+        "resolved_count": resolved_count,
+        "exited_count": exited_count,
+        "correct_count": correct_count,
+        "incorrect_count": incorrect_count,
+        "accuracy_pct": accuracy_pct,
+        "total_reputation_delta": total_reputation_delta,
+        "top_performers": top_performers,
+        "biggest_wins": biggest_wins,
+        "biggest_losses": biggest_losses,
+        "contrarian_winners": contrarian_winners,
+        "resolved_outcome": market.resolved_outcome or "",
+        "resolved_at": market.resolution_date,
+    }
+
+
 def get_forecasts_market_options():
     cached = cache.get(FORECASTS_MARKET_OPTIONS_CACHE_KEY)
     if cached is not None:

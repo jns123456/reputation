@@ -1,0 +1,157 @@
+{% load i18n reputation_filters %}
+{% if resolution_scorecard %}
+<section id="resolution-scorecard" class="mt-8" aria-labelledby="resolution-scorecard-title">
+  <div class="pr-panel overflow-hidden">
+    <div class="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-4 dark:border-slate-700 dark:from-blue-950/40 dark:to-indigo-950/30 sm:px-5">
+      <h2 id="resolution-scorecard-title" class="pr-section-title">{% trans "Resolution scorecard" %}</h2>
+      <p class="pr-section-desc mt-1">
+        {% if resolution_scorecard.resolved_outcome %}
+        {% blocktrans with outcome=resolution_scorecard.resolved_outcome %}How the community performed after {{ outcome }} resolved.{% endblocktrans %}
+        {% else %}
+        {% trans "How the community performed after this market resolved." %}
+        {% endif %}
+      </p>
+    </div>
+
+    {% if resolution_scorecard.has_scored_forecasts %}
+    <div class="grid gap-3 border-b border-slate-200 p-4 sm:grid-cols-3 sm:px-5 dark:border-slate-700">
+      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-600 dark:bg-slate-900/50">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Community accuracy" %}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">
+          {% if resolution_scorecard.accuracy_pct is not None %}{{ resolution_scorecard.accuracy_pct }}%{% else %}—{% endif %}
+        </p>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          {% blocktrans with correct=resolution_scorecard.correct_count total=resolution_scorecard.resolved_count %}{{ correct }} of {{ total }} resolved forecasts correct{% endblocktrans %}
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-600 dark:bg-slate-900/50">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Scored forecasts" %}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-50">{{ resolution_scorecard.scored_count }}</p>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          {% if resolution_scorecard.exited_count %}
+          {% blocktrans with exited=resolution_scorecard.exited_count %}{{ exited }} exited early{% endblocktrans %}
+          {% else %}
+          {% trans "All held to resolution" %}
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-600 dark:bg-slate-900/50">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Reputation awarded" %}</p>
+        <p class="mt-1 text-2xl font-bold tabular-nums {% if resolution_scorecard.total_reputation_delta >= 0 %}text-emerald-700 dark:text-emerald-400{% else %}text-rose-700 dark:text-rose-400{% endif %}">
+          {% if resolution_scorecard.total_reputation_delta >= 0 %}+{% endif %}{{ resolution_scorecard.total_reputation_delta }}
+        </p>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{% trans "Net reputation points on this market" %}</p>
+      </div>
+    </div>
+
+    {% if resolution_scorecard.top_performers %}
+    <div class="border-b border-slate-200 px-4 py-4 sm:px-5 dark:border-slate-700">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{% trans "Top performers" %}</h3>
+      <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{% trans "Highest reputation earned on this market." %}</p>
+      <div class="pr-table-wrap mt-3">
+        <table class="w-full min-w-[280px] text-left text-sm">
+          <thead>
+            <tr class="border-b border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-400">
+              <th class="pb-2 pr-2 font-medium">#</th>
+              <th class="pb-2 pr-2 font-medium">{% trans "Forecaster" %}</th>
+              <th class="pb-2 text-right font-medium"><span class="badge-rep">{% trans "Reputation" %}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in resolution_scorecard.top_performers %}
+            <tr class="border-b border-slate-100 last:border-0 dark:border-slate-700">
+              <td class="py-2 pr-2 tabular-nums text-slate-500 dark:text-slate-400">{{ row.rank }}</td>
+              <td class="py-2 pr-2">
+                <a href="{% url 'accounts:profile' username=row.user.username %}" class="font-medium text-slate-800 hover:underline dark:text-slate-100">
+                  {{ row.user.public_name }}
+                </a>
+              </td>
+              <td class="py-2 text-right font-semibold tabular-nums {% if row.points_delta >= 0 %}text-emerald-700 dark:text-emerald-400{% else %}text-rose-700 dark:text-rose-400{% endif %}">
+                {% if row.points_delta >= 0 %}+{% endif %}{{ row.points_delta }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if resolution_scorecard.biggest_wins or resolution_scorecard.biggest_losses or resolution_scorecard.contrarian_winners %}
+    <div class="grid gap-4 px-4 py-4 sm:grid-cols-2 sm:px-5 lg:grid-cols-3">
+      {% if resolution_scorecard.biggest_wins %}
+      <div>
+        <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-300">{% trans "Biggest wins" %}</h3>
+        <ul class="mt-2 space-y-2">
+          {% for event in resolution_scorecard.biggest_wins %}
+          <li class="rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm dark:border-emerald-900/50 dark:bg-emerald-950/30">
+            <a href="{% url 'accounts:profile' username=event.user.username %}" class="font-semibold text-slate-900 hover:underline dark:text-slate-100">{{ event.user.public_name }}</a>
+            <span class="ml-1 font-bold tabular-nums text-emerald-700 dark:text-emerald-400">+{{ event.points_delta }}</span>
+            <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+              <a href="{% url 'markets:detail' slug=market.slug %}#forecast-{{ event.prediction.id }}" class="hover:underline">
+                {% blocktrans with side=event.prediction.predicted_outcome|localized_outcome %}Forecast {{ side }}{% endblocktrans %}
+              </a>
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if resolution_scorecard.biggest_losses %}
+      <div>
+        <h3 class="text-sm font-semibold text-rose-800 dark:text-rose-300">{% trans "Biggest losses" %}</h3>
+        <ul class="mt-2 space-y-2">
+          {% for event in resolution_scorecard.biggest_losses %}
+          <li class="rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm dark:border-rose-900/50 dark:bg-rose-950/30">
+            <a href="{% url 'accounts:profile' username=event.user.username %}" class="font-semibold text-slate-900 hover:underline dark:text-slate-100">{{ event.user.public_name }}</a>
+            <span class="ml-1 font-bold tabular-nums text-rose-700 dark:text-rose-400">{{ event.points_delta }}</span>
+            <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+              <a href="{% url 'markets:detail' slug=market.slug %}#forecast-{{ event.prediction.id }}" class="hover:underline">
+                {% blocktrans with side=event.prediction.predicted_outcome|localized_outcome %}Forecast {{ side }}{% endblocktrans %}
+              </a>
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if resolution_scorecard.contrarian_winners %}
+      <div class="sm:col-span-2 lg:col-span-1">
+        <h3 class="text-sm font-semibold text-brand-800 dark:text-brand-300">{% trans "Contrarian calls" %}</h3>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{% trans "Correct forecasts made against low market odds." %}</p>
+        <ul class="mt-2 space-y-2">
+          {% for row in resolution_scorecard.contrarian_winners %}
+          <li class="rounded-lg border border-brand-200 bg-brand-50/60 px-3 py-2 text-sm dark:border-brand-900/40 dark:bg-brand-950/25">
+            <a href="{% url 'accounts:profile' username=row.user.username %}" class="font-semibold text-slate-900 hover:underline dark:text-slate-100">{{ row.user.public_name }}</a>
+            <span class="ml-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+              {% blocktrans with prob=row.entry_prob_percent %}at {{ prob }}% market odds{% endblocktrans %}
+            </span>
+            <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+              <a href="{% url 'markets:detail' slug=market.slug %}#forecast-{{ row.prediction.id }}" class="hover:underline">
+                {% blocktrans with side=row.prediction.predicted_outcome|localized_outcome %}Forecast {{ side }}{% endblocktrans %}
+              </a>
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="border-t border-slate-200 px-4 py-3 sm:px-5 dark:border-slate-700">
+      <a href="#forecasts" class="text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">{% trans "View all forecasts" %} →</a>
+    </div>
+
+    {% else %}
+    <div class="px-4 py-6 text-center text-sm text-slate-500 sm:px-5 dark:text-slate-400">
+      {% trans "This market resolved before any forecasts were scored." %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
