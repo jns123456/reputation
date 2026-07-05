@@ -37,7 +37,12 @@ from markets.selectors import (
 from markets.sort_options import MARKET_SORT_CHOICES, normalize_sort_filter
 from markets.source_filters import build_browse_clear_search_url, build_source_filter_urls, normalize_source_filter
 from predictions.forms import ForecastForm
-from predictions.selectors import get_market_predictions, get_user_active_prediction, attach_user_forecasts_to_markets
+from predictions.selectors import (
+    attach_user_forecasts_to_markets,
+    get_market_predictions,
+    get_market_resolution_scorecard,
+    get_user_active_prediction,
+)
 from reputation.services import calculate_reputation_stakes
 
 def _load_market_hub_summaries():
@@ -280,12 +285,14 @@ def market_detail(request, slug):
 
     forecast_posted = request.GET.get("posted") == "1"
     open_share_sheet = forecast_posted and share_forecast is not None
+    resolution_scorecard = get_market_resolution_scorecard(market)
 
     return render(
         request,
         "markets/market_detail.html",
         {
             "market": market,
+            "resolution_scorecard": resolution_scorecard,
             "predictions": predictions,
             "prediction_sections": prediction_sections,
             "polymarket_embed": build_polymarket_embed_context(market),
