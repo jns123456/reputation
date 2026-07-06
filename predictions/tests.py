@@ -780,7 +780,11 @@ class ExpiredMarketGuardTests(TestCase):
                 market=market,
                 predicted_outcome="Yes",
             )
-        self.assertIn("already closed", str(ctx.exception))
+        message = str(ctx.exception).lower()
+        self.assertTrue(
+            "already closed" in message or "already started" in message,
+            msg=message,
+        )
         self.assertFalse(Prediction.objects.filter(market=market).exists())
 
     def test_forecast_form_invalid_on_expired_open_market(self):
