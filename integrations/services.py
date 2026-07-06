@@ -181,8 +181,10 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
         "resolution_date": data.get("resolution_date"),
         "resolved_outcome": data.get("resolved_outcome", ""),
         "accepting_orders": data.get("accepting_orders", True),
-        "game_start_time": data.get("game_start_time"),
     }
+    from integrations.polymarket.event_start import resolve_import_game_start_time
+
+    defaults["game_start_time"] = resolve_import_game_start_time(data)
 
     if source == Market.Source.POLYMARKET:
         defaults["polymarket_slug"] = data.get("polymarket_slug") or ""

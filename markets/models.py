@@ -131,17 +131,24 @@ class Market(models.Model):
         return self.close_date <= timezone.now()
 
     @property
+    def event_start_time(self):
+        """Scheduled start of the underlying event, when known."""
+        from integrations.polymarket.event_start import resolve_market_event_start_time
+
+        return resolve_market_event_start_time(self)
+
+    @property
     def is_in_play(self):
         """True once the underlying event has started.
 
-        For live events (tennis/soccer) the outcome is revealed in real time, so
-        forecasting closes at kickoff. This is a local, network-free backstop
-        that holds even when the source's ``accepting_orders`` flag has not yet
-        synced — directly closing the sync-delay window for sports.
+        Forecasting closes at kickoff for live events (sports, races, debates,
+        etc.). When no explicit start is known, ``close_date`` is used as the
+        cutoff so open markets still stop accepting forecasts once trading ends.
         """
-        if not self.game_start_time:
+        start = self.event_start_time
+        if not start:
             return False
-        return self.game_start_time <= timezone.now()
+        return start <= timezone.now()
 
     @property
     def is_forecastable(self):
@@ -265,20 +272,7 @@ class Market(models.Model):
 
     @property
     def kickoff_at(self):
-        if self.game_start_time:
-            return self.game_start_time
-        raw = self.polymarket_raw or {}
-        kickoff = raw.get("kickoff_at")
-        if not kickoff:
-            return self.close_date
-        from django.utils.dateparse import parse_datetime
-
-        parsed = parse_datetime(str(kickoff))
-        if parsed is None:
-            return self.close_date
-        if timezone.is_naive(parsed):
-            parsed = timezone.make_aware(parsed, timezone.utc)
-        return parsed
+        return self.event_start_time
 
     # Large JSON payloads deferred by ``market_card_queryset`` for list/grid views.
     _CARD_DEFERRED_PAYLOAD_FIELDS = frozenset(

@@ -1009,6 +1009,15 @@ def normalize_polymarket_event_record(
 
     label_markets = open_markets if open_markets else all_grouped_markets
     outcome_labels = [str(raw_market.get("groupItemTitle")).strip() for raw_market in label_markets]
+
+    from integrations.polymarket.event_start import grouped_event_start_time
+
+    game_start_time = grouped_event_start_time(
+        event,
+        close_date=close_date,
+        grouped_markets=all_grouped_markets,
+    )
+
     return {
         "external_id": f"{POLYMARKET_EVENT_EXTERNAL_PREFIX}{slug}",
         "title": str(title)[:500],
@@ -1022,7 +1031,7 @@ def normalize_polymarket_event_record(
         "resolution_date": close_date if status == "resolved" else None,
         "resolved_outcome": resolved_outcome,
         "accepting_orders": _any_accepts_orders(open_markets),
-        "game_start_time": _parse_date(event.get("gameStartTime")),
+        "game_start_time": game_start_time,
         "polymarket_slug": slug[:550],
     }
 
