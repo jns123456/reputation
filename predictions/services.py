@@ -425,6 +425,16 @@ def repair_misscored_multi_binary_predictions(*, dry_run=False):
                 )
                 continue
             rescore_resolved_prediction(prediction, is_correct=expected)
+            from predictions.incident_notice_services import (
+                is_f1_podium_leclerc_prediction,
+                notify_f1_podium_incident_rescore,
+            )
+
+            if is_f1_podium_leclerc_prediction(prediction):
+                notify_f1_podium_incident_rescore(
+                    user_id=prediction.user_id,
+                    prediction_id=prediction.id,
+                )
             rescored.append(prediction.id)
 
     return rescored

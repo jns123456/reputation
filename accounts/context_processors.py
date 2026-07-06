@@ -8,6 +8,10 @@ from accounts.nav_cache import (
 )
 from messaging.nav_cache import get_cached_unread_dm_count
 from accounts.notification_services import consume_login_notification_toast
+from predictions.incident_notice_services import (
+    consume_f1_podium_incident_notice,
+    queue_f1_podium_incident_on_login,
+)
 from reputation.weekly_contest_services import consume_weekly_contest_announcement
 from reputation.weekly_contest_winner_notifications import (
     consume_weekly_contest_win_modal,
@@ -18,10 +22,16 @@ from reputation.weekly_contest_winner_notifications import (
 def notification_context(request):
     if request.user.is_authenticated:
         queue_weekly_contest_win_on_login(request=request)
+        queue_f1_podium_incident_on_login(request=request)
         weekly_contest_win_modal = consume_weekly_contest_win_modal(request=request)
-        weekly_contest_announcement = (
+        f1_podium_incident_notice = (
             None
             if weekly_contest_win_modal
+            else consume_f1_podium_incident_notice(request=request)
+        )
+        weekly_contest_announcement = (
+            None
+            if weekly_contest_win_modal or f1_podium_incident_notice
             else consume_weekly_contest_announcement(request=request)
         )
         return {
@@ -30,6 +40,7 @@ def notification_context(request):
             "login_notification_toast": consume_login_notification_toast(request=request),
             "weekly_contest_announcement": weekly_contest_announcement,
             "weekly_contest_win_modal": weekly_contest_win_modal,
+            "f1_podium_incident_notice": f1_podium_incident_notice,
             "nav_streak_days": get_cached_display_streak(user=request.user),
         }
     return {
@@ -38,6 +49,7 @@ def notification_context(request):
         "login_notification_toast": None,
         "weekly_contest_announcement": None,
         "weekly_contest_win_modal": None,
+        "f1_podium_incident_notice": None,
         "nav_streak_days": 0,
     }
 

@@ -382,6 +382,19 @@ def weekly_contest_dismiss_announcement(request):
     return JsonResponse({"ok": True})
 
 
+@login_required
+def dismiss_f1_podium_incident_notice(request):
+    """Permanently hide the F1 podium incident notice for this user."""
+    from django.http import HttpResponseNotAllowed, JsonResponse
+    from predictions.incident_notice_services import dismiss_f1_podium_incident_notice
+
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    dismiss_f1_podium_incident_notice(user=request.user)
+    return JsonResponse({"ok": True})
+
+
 def agent_arena(request):
     """Agent Arena — reputation leaderboard restricted to declared AI agents."""
     from dashboard.leaderboard_cache import (

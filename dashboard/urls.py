@@ -46,6 +46,11 @@ urlpatterns = [
         views.weekly_contest_dismiss_announcement,
         name="weekly_contest_dismiss_announcement",
     ),
+    path(
+        "incidents/f1-podium-2026/dismiss/",
+        views.dismiss_f1_podium_incident_notice,
+        name="dismiss_f1_podium_incident_notice",
+    ),
     path("leaderboard/popularity/", views.popularity_leaderboard, name="popularity_leaderboard"),
     path(
         "leaderboard/reputation/category/<slug:slug>/",
