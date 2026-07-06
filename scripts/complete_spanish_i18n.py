@@ -278,6 +278,8 @@ FIXES.update({
     "This prediction cannot be edited.": "Este pronóstico no se puede editar.",
     "Only active forecasts can be exited.": "Solo los pronósticos activos se pueden cerrar.",
     "Cannot exit a forecast after the market has closed.": "No puedes cerrar un pronóstico después de que el mercado cierre.",
+    "Cannot exit a forecast after the event has started.": "No puedes cerrar un pronóstico después de que el evento haya comenzado.",
+    "Forecasts cannot be closed after the event has started.": "Los pronósticos no se pueden cerrar una vez que el evento ha comenzado.",
     "Cannot edit another user's prediction.": "No puedes editar el pronóstico de otro usuario.",
     "Cannot exit another user's prediction.": "No puedes cerrar el pronóstico de otro usuario.",
     "Users cannot follow themselves.": "No puedes seguirte a ti mismo.",

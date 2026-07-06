@@ -187,8 +187,11 @@ def exit_prediction(*, prediction, user):
             raise PermissionError(_("Cannot exit another user's prediction."))
         if prediction.status != Prediction.Status.PENDING:
             raise ValueError(_("Only active forecasts can be exited."))
-        if not prediction.market.is_exitable:
+        market = prediction.market
+        if not market.is_open:
             raise ValueError(_("Cannot exit a forecast after the market has closed."))
+        if market.is_in_play:
+            raise ValueError(_("Cannot exit a forecast after the event has started."))
 
         prediction.status = Prediction.Status.EXITED
         prediction.probability_at_exit_time = dict(prediction.market.current_probability or {})

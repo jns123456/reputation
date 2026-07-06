@@ -170,11 +170,10 @@ class Market(models.Model):
     def is_exitable(self):
         """Whether an existing pending forecast may be closed early.
 
-        Exits only require the market to remain ``OPEN`` locally — users may
-        realize mark-to-market reputation even when new forecasts are blocked
-        (expired close date, source stopped accepting orders, event in play).
+        Exits are allowed only while the market is open and the underlying
+        event has not started yet — the same kickoff window as new forecasts.
         """
-        return self.is_open
+        return self.is_open and not self.is_in_play
 
     @property
     def polymarket_url(self):

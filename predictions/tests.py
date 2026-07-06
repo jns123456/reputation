@@ -795,10 +795,10 @@ class ExpiredMarketGuardTests(TestCase):
         form = ForecastForm(data={"predicted_outcome": "Yes"}, market=market)
         self.assertFalse(form.is_valid())
 
-    def test_exit_allowed_after_close_date_passes(self):
+    def test_exit_blocked_after_close_date_passes(self):
         market = self._market(
             close_date=timezone.now() + timedelta(hours=1),
-            slug="expiry-exit-allowed",
+            slug="expiry-exit-blocked",
         )
         prediction = create_prediction(
             user=self.user,
@@ -809,10 +809,12 @@ class ExpiredMarketGuardTests(TestCase):
         market.save(update_fields=["close_date"])
 
         self.assertFalse(market.is_forecastable)
-        self.assertTrue(market.is_exitable)
+        self.assertFalse(market.is_exitable)
 
-        exited = exit_prediction(prediction=prediction, user=self.user)
-        self.assertEqual(exited.status, Prediction.Status.EXITED)
+        with self.assertRaises(ValueError) as ctx:
+            exit_prediction(prediction=prediction, user=self.user)
+        message = str(ctx.exception).lower()
+        self.assertIn("started", message)
 
     def test_exit_allowed_when_source_stopped_accepting_orders(self):
         market = self._market(
@@ -883,6 +885,26 @@ class ExpiredMarketGuardTests(TestCase):
                 predicted_outcome="Yes",
             )
         self.assertIn("already started", str(ctx.exception))
+
+    def test_exit_blocked_once_event_started(self):
+        market = self._market(
+            close_date=timezone.now() + timedelta(hours=4),
+            slug="event-in-play-exit",
+        )
+        prediction = create_prediction(
+            user=self.user,
+            market=market,
+            predicted_outcome="Yes",
+        )
+        market.game_start_time = timezone.now() - timedelta(minutes=10)
+        market.save(update_fields=["game_start_time"])
+
+        self.assertTrue(market.is_in_play)
+        self.assertFalse(market.is_exitable)
+
+        with self.assertRaises(ValueError) as ctx:
+            exit_prediction(prediction=prediction, user=self.user)
+        self.assertIn("event has started", str(ctx.exception).lower())
 
     def test_forecastable_before_event_starts(self):
         market = self._market(

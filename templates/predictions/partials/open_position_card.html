@@ -62,7 +62,11 @@
     </form>
     {% else %}
     <p class="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs sm:text-right">
+      {% if market.is_in_play %}
+      {% trans "Forecasts cannot be closed after the event has started." %}
+      {% else %}
       {% trans "This market has closed. Your forecast will resolve automatically when the outcome is known." %}
+      {% endif %}
     </p>
     {% endif %}
   </div>
