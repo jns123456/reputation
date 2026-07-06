@@ -841,23 +841,49 @@ def _market_is_resolved_yes(raw_market: dict) -> bool:
     return yes_price is not None and yes_price >= _RESOLVED_YES_PRICE_THRESHOLD
 
 
+def _find_grouped_submarket(raw_event: dict, outcome_label: str) -> dict | None:
+    """Match a grouped sub-market by exact or unique partial driver/outcome name."""
+    pick = (outcome_label or "").strip()
+    if not pick:
+        return None
+    pick_lower = pick.lower()
+    markets = _grouped_outcome_markets(raw_event, open_only=False)
+
+    for raw_market in markets:
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        if label.lower() == pick_lower:
+            return raw_market
+
+    partial_matches = []
+    for raw_market in markets:
+        label = str(raw_market.get("groupItemTitle") or "").strip()
+        label_lower = label.lower()
+        if pick_lower in label_lower or label_lower in pick_lower:
+            partial_matches.append(raw_market)
+    if len(partial_matches) == 1:
+        return partial_matches[0]
+    return None
+
+
+def grouped_event_all_submarkets_resolved(raw_event: dict) -> bool:
+    """True when every grouped outcome bucket has finished resolving."""
+    markets = _grouped_outcome_markets(raw_event, open_only=False)
+    if not markets:
+        return False
+    return all(_market_is_resolved(raw_market) for raw_market in markets)
+
+
 def grouped_submarket_resolved_yes(raw_event: dict, outcome_label: str) -> bool | None:
     """Whether a grouped sub-market resolved Yes for ``outcome_label``.
 
     Returns ``None`` when the label is missing or the sub-market is not resolved.
     """
-    pick = (outcome_label or "").strip()
-    if not pick:
+    raw_market = _find_grouped_submarket(raw_event, outcome_label)
+    if raw_market is None:
         return None
-    pick_lower = pick.lower()
-    for raw_market in _grouped_outcome_markets(raw_event, open_only=False):
-        label = str(raw_market.get("groupItemTitle") or "").strip()
-        if label.lower() != pick_lower:
-            continue
-        if not _market_is_resolved(raw_market):
-            return None
-        return _market_is_resolved_yes(raw_market)
-    return None
+    if not _market_is_resolved(raw_market):
+        return None
+    return _market_is_resolved_yes(raw_market)
 
 
 def _grouped_outcome_markets(event: dict, *, open_only: bool) -> list[dict]:
@@ -948,7 +974,7 @@ def normalize_polymarket_event_record(
 
     probabilities = {}
     outcome_markets = {}
-    resolved_outcome = ""
+    resolved_yes_labels = []
     for raw_market in all_grouped_markets:
         label = str(raw_market.get("groupItemTitle") or "").strip()
         if not label:
@@ -958,9 +984,14 @@ def normalize_polymarket_event_record(
             probabilities[label] = yes_price
         outcome_markets[label] = _outcome_market_meta(raw_market)
         if _market_is_resolved_yes(raw_market):
-            resolved_outcome = label
+            resolved_yes_labels.append(label)
 
-    if resolved_outcome:
+    resolved_outcome = resolved_yes_labels[-1] if resolved_yes_labels else ""
+    all_submarkets_resolved = grouped_event_all_submarkets_resolved(event)
+
+    if all_submarkets_resolved and resolved_yes_labels:
+        status = "resolved"
+    elif all_submarkets_resolved:
         status = "resolved"
     elif not open_markets:
         status = "closed"

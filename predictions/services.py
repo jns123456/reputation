@@ -381,11 +381,10 @@ def prediction_is_correct_for_resolved_market(market, prediction):
         event = market.polymarket_event_raw or {}
         sub_resolved_yes = grouped_submarket_resolved_yes(event, prediction.predicted_outcome)
         if sub_resolved_yes is None:
-            outcome_matches = (
-                prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
-            )
-        else:
-            outcome_matches = sub_resolved_yes
+            # Multi-binary events may resolve many Yes buckets (e.g. F1 podium).
+            # Never fall back to pick-one ``resolved_outcome`` comparison.
+            return None
+        outcome_matches = sub_resolved_yes
     else:
         outcome_matches = prediction.predicted_outcome.lower() == market.resolved_outcome.lower()
 
@@ -412,7 +411,7 @@ def repair_misscored_multi_binary_predictions(*, dry_run=False):
             status=Prediction.Status.RESOLVED,
         ).select_related("user", "user__profile"):
             expected = prediction_is_correct_for_resolved_market(market, prediction)
-            if prediction.is_correct == expected:
+            if expected is None or prediction.is_correct == expected:
                 continue
             if dry_run:
                 rescored.append(
@@ -444,6 +443,8 @@ def resolve_market_predictions(market):
 
     for prediction in predictions:
         is_correct = prediction_is_correct_for_resolved_market(market, prediction)
+        if is_correct is None:
+            continue
         prediction.status = Prediction.Status.RESOLVED
         prediction.is_correct = is_correct
         prediction.resolved_at = timezone.now()
