@@ -150,7 +150,7 @@
       </thead>
       <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
         {% for row in leaderboard_rows %}
-          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=False relative_ranking_min_scored=weekly_contest_min_scored %}
+          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=False relative_ranking_min_scored=weekly_contest_min_scored week_code=week_code %}
         {% empty %}
           <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">{% blocktrans with min=weekly_contest_min_scored %}No qualified players yet — make at least {{ min }} scored forecasts this week to join the contest.{% endblocktrans %}</td></tr>
         {% endfor %}
@@ -187,4 +187,5 @@
   </section>
   {% endif %}
 </div>
+<div id="weekly-contest-events-portal"></div>
 {% endblock %}

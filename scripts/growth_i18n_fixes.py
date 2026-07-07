@@ -99,6 +99,16 @@ GROWTH_I18N_FIXES: dict[str, str] = {
         "PredictStamp no guarda saldos ni procesa pagos."
     ),
     "Week reputation": "Reputación semanal",
+    "Week reputation events": "Eventos de reputación semanal",
+    "Week total": "Total semanal",
+    "Correct forecast": "Pronóstico correcto",
+    "Incorrect forecast": "Pronóstico incorrecto",
+    "Exited forecast": "Pronóstico cerrado",
+    "Void forecast": "Pronóstico anulado",
+    "No reputation events this week.": "No hay eventos de reputación esta semana.",
+    "View reputation events for %(name)s — %(points)s points this week": (
+        "Ver eventos de reputación de %(name)s — %(points)s puntos esta semana"
+    ),
     "No scored forecasts this week yet. Make a forecast to join the contest.": (
         "Aún no hay pronósticos puntuados esta semana. Haz un pronóstico para unirte al concurso."
     ),

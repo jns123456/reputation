@@ -6,7 +6,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from accounts.category_selectors import (
     validate_category_slug,
@@ -365,6 +365,56 @@ def weekly_contest(request):
             "hero_description_key": hero_description_key,
             "weekly_contest_min_scored": get_weekly_contest_min_scored_forecasts(),
             "is_category_leaderboard": False,
+        },
+    )
+
+
+def weekly_contest_week_events(request):
+    """Bottom sheet listing reputation events for a user's contest week."""
+    from django.contrib.auth import get_user_model
+    from django.http import Http404, HttpResponseBadRequest
+
+    from reputation.weekly_contest_services import (
+        get_user_reputation_events_for_week,
+        normalize_contest_week_code,
+        week_date_range,
+        weekly_contest_enabled,
+    )
+
+    if not weekly_contest_enabled():
+        raise Http404()
+
+    username = (request.GET.get("username") or "").strip()
+    week_code = (request.GET.get("week") or "").strip()
+    if not username or not week_code:
+        return HttpResponseBadRequest("username and week are required")
+
+    try:
+        week_code = normalize_contest_week_code(week_code)
+        datetime.strptime(week_code, "%Y-%m-%d")
+    except ValueError:
+        return HttpResponseBadRequest("invalid week")
+
+    User = get_user_model()
+    user = User.objects.filter(username=username).first()
+    if user is None:
+        raise Http404()
+
+    events = list(get_user_reputation_events_for_week(user=user, week_code=week_code))
+    since, until = week_date_range(week_code)
+    week_end = until - timedelta(seconds=1)
+    total_points = sum(event.points_delta for event in events)
+
+    return render(
+        request,
+        "dashboard/partials/weekly_contest_week_events_sheet.html",
+        {
+            "user": user,
+            "week_code": week_code,
+            "week_start": since,
+            "week_end": week_end,
+            "events": events,
+            "total_points": total_points,
         },
     )
 

@@ -14,6 +14,7 @@ from reputation.weekly_contest_services import (
     current_week_code,
     finalize_weekly_contest,
     get_past_weekly_contest_winners,
+    get_user_reputation_events_for_week,
     get_weekly_contest_winners_for_week,
     is_completed_contest_week,
     is_live_contest_week,
@@ -214,6 +215,84 @@ class WeeklyContestViewTests(TestCase):
     def test_weekly_contest_disabled_returns_404(self):
         response = self.client.get(reverse("dashboard:weekly_contest"))
         self.assertEqual(response.status_code, 404)
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_weekly_contest_page_links_week_points_to_events_sheet(self):
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        leader = create_user("wcevents")
+        for index in range(12):
+            market = create_market(external_id=f"wcev-link-{index}", slug=f"wcev-link-{index}")
+            prediction = _scored_prediction(leader, market, points=5)
+            ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        response = self.client.get(
+            reverse("dashboard:weekly_contest"),
+            {"week": week_code},
+        )
+        self.assertContains(response, "weekly-contest-events-portal")
+        self.assertContains(
+            response,
+            reverse("dashboard:weekly_contest_week_events")
+            + f"?username={leader.username}&week={week_code}",
+        )
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_weekly_contest_week_events_sheet_lists_events(self):
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        leader = create_user("wcevents2")
+        market = create_market(external_id="wcev-list", slug="wcev-list")
+        prediction = _scored_prediction(leader, market, points=90)
+        ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        response = self.client.get(
+            reverse("dashboard:weekly_contest_week_events"),
+            {"username": leader.username, "week": week_code},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, leader.public_name)
+        self.assertContains(response, market.title)
+        self.assertContains(response, "+90")
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_weekly_contest_week_events_sheet_renders_in_spanish(self):
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        leader = create_user("wcevents3")
+        market = create_market(external_id="wcev-es", slug="wcev-es")
+        prediction = _scored_prediction(leader, market, points=15)
+        ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        response = self.client.get(
+            reverse("dashboard:weekly_contest_week_events"),
+            {"username": leader.username, "week": week_code},
+            HTTP_ACCEPT_LANGUAGE="es",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Eventos de reputación semanal")
+
+
+@override_settings(WEEKLY_CONTEST_ENABLED=True)
+class WeeklyContestWeekEventsServiceTests(TestCase):
+    def setUp(self):
+        self.market = create_market(external_id="wcev-svc", slug="wcev-svc")
+        self.user = create_user("wcevuser")
+
+    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    def test_get_user_reputation_events_for_week_filters_by_bounds(self):
+        week_code = "2020-03-08"
+        since, until = week_date_range(week_code)
+        in_week = _scored_prediction(self.user, self.market, points=40)
+        ReputationEvent.objects.filter(prediction=in_week).update(created_at=since)
+
+        other_market = create_market(external_id="wcev-svc2", slug="wcev-svc2")
+        out_week = _scored_prediction(self.user, other_market, points=99)
+        ReputationEvent.objects.filter(prediction=out_week).update(created_at=until)
+
+        events = list(get_user_reputation_events_for_week(user=self.user, week_code=week_code))
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].points_delta, 40)
 
 
 @override_settings(WEEKLY_CONTEST_ENABLED=True)

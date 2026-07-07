@@ -15,7 +15,18 @@
           {% if ranking_mode == 'relative' and not qualifies_relative %}title="{% blocktrans with min=relative_ranking_min_scored %}More than {{ min }} scored forecasts required to qualify for relative ranking.{% endblocktrans %}"{% endif %}>{{ stats.reputation_score }}</span>
   </td>
   <td class="px-4 py-3">
+    {% if week_code %}
+    <button type="button"
+            class="badge-rep pr-touch-target cursor-pointer transition hover:ring-2 hover:ring-rep-500/40 {% if ranking_mode == 'absolute' %}ring-2 ring-rep-500/30{% endif %}"
+            hx-get="{% url 'dashboard:weekly_contest_week_events' %}?username={{ stats.user.username }}&week={{ week_code }}"
+            hx-target="#weekly-contest-events-portal"
+            hx-swap="innerHTML"
+            aria-label="{% blocktrans with name=stats.user.public_name points=stats.reputation_points %}View reputation events for {{ name }} — {{ points }} points this week{% endblocktrans %}">
+      {{ stats.reputation_points }}
+    </button>
+    {% else %}
     <span class="badge-rep {% if ranking_mode == 'absolute' %}ring-2 ring-rep-500/30{% endif %}">{{ stats.reputation_points }}</span>
+    {% endif %}
   </td>
   <td class="px-4 py-3 text-sm {% if accuracy is not None %}font-medium{% endif %}">
     {% if accuracy is not None %}{{ accuracy }}%{% else %}—{% endif %}

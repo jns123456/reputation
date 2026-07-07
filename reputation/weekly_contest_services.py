@@ -126,6 +126,23 @@ def week_date_range(week_code):
     return since, until
 
 
+def get_user_reputation_events_for_week(*, user, week_code):
+    """Reputation events that contributed to a user's weekly contest points."""
+    from reputation.models import ReputationEvent
+
+    week_code = normalize_contest_week_code(week_code)
+    since, until = week_date_range(week_code)
+    return (
+        ReputationEvent.objects.filter(
+            user=user,
+            created_at__gte=since,
+            created_at__lt=until,
+        )
+        .select_related("prediction", "prediction__market")
+        .order_by("-created_at", "-id")
+    )
+
+
 def current_week_bounds(*, today=None):
     """Bounds for the active Sun–Sat contest week (respects launch date)."""
     week_code = current_week_code(today=today)

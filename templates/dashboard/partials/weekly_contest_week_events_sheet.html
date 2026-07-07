@@ -1,0 +1,85 @@
+{% load i18n reputation_filters %}
+<div class="pr-vote-sheet"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="weekly-contest-events-title-{{ user.username }}-{{ week_code }}"
+     x-init="$nextTick(() => { $refs.closeBtn && $refs.closeBtn.focus(); if (window.refreshLucideIcons) window.refreshLucideIcons(); })"
+     @keydown.escape.window="$root.remove()">
+  <button type="button"
+          class="pr-vote-sheet-backdrop"
+          aria-label="{% trans 'Close' %}"
+          @click="$root.remove()"></button>
+
+  <div class="pr-vote-sheet-panel">
+    <div class="pr-vote-sheet-handle" aria-hidden="true"></div>
+
+    <div class="pr-vote-sheet-header">
+      <div class="min-w-0 flex-1">
+        <h2 id="weekly-contest-events-title-{{ user.username }}-{{ week_code }}" class="pr-vote-sheet-title">
+          {% trans "Week reputation events" %}
+        </h2>
+        <p class="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-400">
+          {{ user.public_name }}
+          <span class="mx-1">·</span>
+          {% blocktrans with start=week_start|date:"M j" end=week_end|date:"M j" %}{{ start }} – {{ end }}{% endblocktrans %}
+        </p>
+      </div>
+      <button type="button"
+              class="pr-vote-sheet-close"
+              x-ref="closeBtn"
+              aria-label="{% trans 'Close' %}"
+              @click="$root.remove()">
+        <i data-lucide="x" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "Week total" %}</p>
+      <p class="mt-0.5 text-2xl font-bold tabular-nums {% if total_points >= 0 %}text-emerald-700 dark:text-emerald-300{% else %}text-red-700 dark:text-red-300{% endif %}">
+        {% if total_points >= 0 %}+{% endif %}{{ total_points }}
+      </p>
+    </div>
+
+    <div class="pr-vote-sheet-body">
+      <ul class="pr-vote-sheet-list">
+        {% for event in events %}
+        <li class="border-b border-slate-100 px-4 py-3 last:border-b-0 dark:border-slate-700/60">
+          <a href="{% url 'markets:detail' slug=event.prediction.market.slug %}" class="block min-w-0">
+            <p class="truncate font-medium text-brand-700 hover:underline dark:text-brand-400">
+              {{ event.prediction.market.display_title }}
+            </p>
+          </a>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            {% trans "Forecast:" %}
+            <strong class="{% if event.prediction.predicted_outcome|lower == 'yes' %}text-emerald-700 dark:text-emerald-300{% elif event.prediction.predicted_outcome|lower == 'no' %}text-red-700 dark:text-red-300{% else %}text-brand-700 dark:text-brand-300{% endif %}">
+              {{ event.prediction.predicted_outcome|localized_outcome }}
+            </strong>
+          </p>
+          <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+              {% if event.event_type == "correct_prediction" %}
+              {% trans "Correct forecast" %}
+              {% elif event.event_type == "incorrect_prediction" %}
+              {% trans "Incorrect forecast" %}
+              {% elif event.event_type == "exited_prediction" %}
+              {% trans "Exited forecast" %}
+              {% elif event.event_type == "void_prediction" %}
+              {% trans "Void forecast" %}
+              {% else %}
+              {{ event.get_event_type_display }}
+              {% endif %}
+              <span class="mx-1">·</span>
+              {{ event.created_at|date:"M j, Y" }}
+            </span>
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums {% if event.points_delta >= 0 %}bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300{% else %}bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-300{% endif %}">
+              {% if event.points_delta >= 0 %}+{% endif %}{{ event.points_delta }}
+            </span>
+          </div>
+        </li>
+        {% empty %}
+        <li class="pr-vote-sheet-empty">{% trans "No reputation events this week." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>

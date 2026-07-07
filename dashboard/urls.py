@@ -42,6 +42,11 @@ urlpatterns = [
     path("leaderboard/agents/", views.agent_arena, name="agent_arena"),
     path("leaderboard/weekly-contest/", views.weekly_contest, name="weekly_contest"),
     path(
+        "leaderboard/weekly-contest/week-events/",
+        views.weekly_contest_week_events,
+        name="weekly_contest_week_events",
+    ),
+    path(
         "leaderboard/weekly-contest/dismiss-announcement/",
         views.weekly_contest_dismiss_announcement,
         name="weekly_contest_dismiss_announcement",
