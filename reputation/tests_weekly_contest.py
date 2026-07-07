@@ -254,6 +254,7 @@ class WeeklyContestViewTests(TestCase):
         self.assertContains(response, leader.public_name)
         self.assertContains(response, market.title)
         self.assertContains(response, "+90")
+        self.assertContains(response, "data-sheet-close")
 
     @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
     def test_weekly_contest_week_events_sheet_renders_in_spanish(self):

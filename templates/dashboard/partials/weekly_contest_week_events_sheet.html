@@ -2,13 +2,11 @@
 <div class="pr-vote-sheet"
      role="dialog"
      aria-modal="true"
-     aria-labelledby="weekly-contest-events-title-{{ user.username }}-{{ week_code }}"
-     x-init="$nextTick(() => { $refs.closeBtn && $refs.closeBtn.focus(); if (window.refreshLucideIcons) window.refreshLucideIcons(); })"
-     @keydown.escape.window="$root.remove()">
+     aria-labelledby="weekly-contest-events-title-{{ user.username }}-{{ week_code }}">
   <button type="button"
           class="pr-vote-sheet-backdrop"
           aria-label="{% trans 'Close' %}"
-          @click="$root.remove()"></button>
+          data-sheet-close></button>
 
   <div class="pr-vote-sheet-panel">
     <div class="pr-vote-sheet-handle" aria-hidden="true"></div>
@@ -26,9 +24,8 @@
       </div>
       <button type="button"
               class="pr-vote-sheet-close"
-              x-ref="closeBtn"
-              aria-label="{% trans 'Close' %}"
-              @click="$root.remove()">
+              data-sheet-close
+              aria-label="{% trans 'Close' %}">
         <i data-lucide="x" class="h-5 w-5" stroke-width="2" aria-hidden="true"></i>
       </button>
     </div>
