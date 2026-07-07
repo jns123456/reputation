@@ -10,12 +10,17 @@ from __future__ import annotations
 import json
 from datetime import date
 
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from integrations.polymarket.urls import get_parent_event_slug
 from markets.models import Market
 
 PRUNED_MARKER = "_pruned"
+
+ORDER_FIFO = "fifo"
+ORDER_PK = "pk"
+VALID_PRUNE_ORDERS = frozenset({ORDER_FIFO, ORDER_PK})
 
 DEFAULT_PRUNE_STATUSES = (
     Market.Status.RESOLVED,
@@ -120,16 +125,93 @@ def market_raw_needs_pruning(market, *, min_saved_bytes: int = 512) -> bool:
     return before - after >= min_saved_bytes
 
 
-def prune_market_raw_queryset(*, statuses=None):
-    statuses = statuses or list(DEFAULT_PRUNE_STATUSES)
-    return (
-        Market.objects.filter(
-            source=Market.Source.POLYMARKET,
-            status__in=statuses,
+def parse_order(value: str) -> str:
+    order = (value or ORDER_FIFO).strip().lower()
+    if order not in VALID_PRUNE_ORDERS:
+        raise ValueError(
+            f"Invalid order {order!r}. Choose from: {', '.join(sorted(VALID_PRUNE_ORDERS))}."
         )
-        .exclude(polymarket_raw__has_key=PRUNED_MARKER)
-        .order_by("pk")
-    )
+    return order
+
+
+def prune_market_raw_queryset(*, statuses=None, order: str = ORDER_FIFO):
+    """Candidates for compaction, oldest inactive markets first by default (FIFO)."""
+    statuses = statuses or list(DEFAULT_PRUNE_STATUSES)
+    order = parse_order(order)
+    queryset = Market.objects.filter(
+        source=Market.Source.POLYMARKET,
+        status__in=statuses,
+    ).exclude(polymarket_raw__has_key=PRUNED_MARKER)
+
+    if order == ORDER_FIFO:
+        return queryset.annotate(
+            _prune_sort_at=Coalesce(
+                "resolution_date",
+                "close_date",
+                "updated_at",
+                "created_at",
+            )
+        ).order_by("_prune_sort_at", "pk")
+
+    return queryset.order_by("pk")
+
+
+def empty_prune_stats() -> dict:
+    return {
+        "pending": 0,
+        "examined": 0,
+        "updated": 0,
+        "skipped": 0,
+        "bytes_before": 0,
+        "bytes_after": 0,
+    }
+
+
+def run_market_raw_prune(
+    *,
+    statuses=None,
+    limit: int = 0,
+    batch_size: int = 500,
+    dry_run: bool = False,
+    min_saved_bytes: int = 512,
+    order: str = ORDER_FIFO,
+) -> dict:
+    """Compact raw payloads for up to ``limit`` markets (0 = all candidates)."""
+    statuses = statuses or list(DEFAULT_PRUNE_STATUSES)
+    batch_size = max(1, batch_size)
+    limit = max(0, limit)
+
+    queryset = prune_market_raw_queryset(statuses=statuses, order=order)
+    totals = empty_prune_stats()
+    totals["pending"] = queryset.count()
+
+    processed = 0
+    offset = 0
+
+    while True:
+        if limit and processed >= limit:
+            break
+
+        chunk_size = batch_size
+        if limit:
+            chunk_size = min(chunk_size, limit - processed)
+
+        batch = list(queryset[offset : offset + chunk_size])
+        if not batch:
+            break
+
+        merge_prune_stats(
+            totals,
+            prune_market_raw_batch(
+                batch,
+                dry_run=dry_run,
+                min_saved_bytes=min_saved_bytes,
+            ),
+        )
+        processed += len(batch)
+        offset += len(batch)
+
+    return totals
 
 
 def prune_market_raw_batch(

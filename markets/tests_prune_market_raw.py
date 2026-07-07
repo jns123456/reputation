@@ -1,8 +1,10 @@
 from io import StringIO
 
+from datetime import datetime, timezone as dt_timezone
+
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from integrations.polymarket.urls import resolve_polymarket_public_url
 from markets.composite_redirect import is_orphan_polymarket_leg
@@ -14,7 +16,10 @@ from markets.prune_services import (
     market_raw_is_already_pruned,
     market_raw_needs_pruning,
     prune_market_raw_batch,
+    prune_market_raw_queryset,
+    run_market_raw_prune,
 )
+from markets.tasks import prune_market_raw_fifo_task
 
 
 class CompactPolymarketRawTests(TestCase):
@@ -104,6 +109,115 @@ class CompactPolymarketRawTests(TestCase):
         self.assertEqual(stats["updated"], 1)
         market.refresh_from_db()
         self.assertIn("markets", market.polymarket_event_raw)
+
+
+class FifoPruneTests(TestCase):
+    def _bloated_raw(self, slug: str) -> dict:
+        return {"slug": slug, "blob": "x" * 2000}
+
+    def test_queryset_orders_oldest_resolved_first(self):
+        older = Market.objects.create(
+            external_id="fifo-old",
+            title="Older",
+            slug="fifo-old",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            resolution_date=datetime(2024, 1, 1, tzinfo=dt_timezone.utc),
+            polymarket_raw=self._bloated_raw("fifo-old"),
+            polymarket_event_raw={"slug": "fifo-old"},
+        )
+        newer = Market.objects.create(
+            external_id="fifo-new",
+            title="Newer",
+            slug="fifo-new",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            resolution_date=datetime(2026, 1, 1, tzinfo=dt_timezone.utc),
+            polymarket_raw=self._bloated_raw("fifo-new"),
+            polymarket_event_raw={"slug": "fifo-new"},
+        )
+
+        ordered = list(
+            prune_market_raw_queryset(order="fifo").values_list("pk", flat=True)
+        )
+        self.assertEqual(ordered, [older.pk, newer.pk])
+
+    def test_run_market_raw_prune_fifo_respects_limit(self):
+        older = Market.objects.create(
+            external_id="fifo-old-run",
+            title="Older run",
+            slug="fifo-old-run",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            resolution_date=datetime(2024, 6, 1, tzinfo=dt_timezone.utc),
+            polymarket_raw=self._bloated_raw("fifo-old-run"),
+            polymarket_event_raw={"slug": "fifo-old-run"},
+        )
+        newer = Market.objects.create(
+            external_id="fifo-new-run",
+            title="Newer run",
+            slug="fifo-new-run",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            resolution_date=datetime(2026, 6, 1, tzinfo=dt_timezone.utc),
+            polymarket_raw=self._bloated_raw("fifo-new-run"),
+            polymarket_event_raw={"slug": "fifo-new-run"},
+        )
+
+        stats = run_market_raw_prune(limit=1, order="fifo")
+        self.assertEqual(stats["updated"], 1)
+
+        older.refresh_from_db()
+        newer.refresh_from_db()
+        self.assertTrue(market_raw_is_already_pruned(older))
+        self.assertFalse(market_raw_is_already_pruned(newer))
+
+    @override_settings(MARKET_RAW_PRUNE_ENABLED=True, MARKET_RAW_PRUNE_BATCH_SIZE=1)
+    def test_fifo_task_compacts_oldest_batch(self):
+        older = Market.objects.create(
+            external_id="fifo-task-old",
+            title="Older task",
+            slug="fifo-task-old",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            resolution_date=datetime(2023, 1, 1, tzinfo=dt_timezone.utc),
+            polymarket_raw=self._bloated_raw("fifo-task-old"),
+            polymarket_event_raw={"slug": "fifo-task-old"},
+        )
+        newer = Market.objects.create(
+            external_id="fifo-task-new",
+            title="Newer task",
+            slug="fifo-task-new",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            resolution_date=datetime(2026, 2, 1, tzinfo=dt_timezone.utc),
+            polymarket_raw=self._bloated_raw("fifo-task-new"),
+            polymarket_event_raw={"slug": "fifo-task-new"},
+        )
+
+        prune_market_raw_fifo_task()
+
+        older.refresh_from_db()
+        newer.refresh_from_db()
+        self.assertTrue(market_raw_is_already_pruned(older))
+        self.assertFalse(market_raw_is_already_pruned(newer))
+
+    @override_settings(MARKET_RAW_PRUNE_ENABLED=False)
+    def test_fifo_task_skips_when_disabled(self):
+        market = Market.objects.create(
+            external_id="fifo-disabled",
+            title="Disabled",
+            slug="fifo-disabled",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.RESOLVED,
+            polymarket_raw=self._bloated_raw("fifo-disabled"),
+            polymarket_event_raw={"slug": "fifo-disabled"},
+        )
+
+        prune_market_raw_fifo_task()
+
+        market.refresh_from_db()
+        self.assertIn("blob", market.polymarket_raw)
 
 
 class PruneMarketRawCommandTests(TestCase):

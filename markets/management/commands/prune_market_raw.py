@@ -5,18 +5,19 @@ from django.core.management.base import BaseCommand, CommandError
 from markets.models import Market
 from markets.prune_services import (
     DEFAULT_PRUNE_STATUSES,
+    ORDER_FIFO,
+    ORDER_PK,
     format_bytes,
-    merge_prune_stats,
+    parse_order,
     parse_statuses,
-    prune_market_raw_batch,
-    prune_market_raw_queryset,
+    run_market_raw_prune,
 )
 
 
 class Command(BaseCommand):
     help = (
         "Compact polymarket_raw / polymarket_event_raw on resolved or closed markets. "
-        "Denormalized columns and user predictions are untouched."
+        "Default order is FIFO (oldest resolved/closed events first)."
     )
 
     def add_arguments(self, parser):
@@ -24,6 +25,12 @@ class Command(BaseCommand):
             "--status",
             default=",".join(DEFAULT_PRUNE_STATUSES),
             help="Comma-separated market statuses to prune (default: resolved,closed).",
+        )
+        parser.add_argument(
+            "--order",
+            default=ORDER_FIFO,
+            choices=[ORDER_FIFO, ORDER_PK],
+            help="Compaction order: fifo (oldest first) or pk (default: fifo).",
         )
         parser.add_argument(
             "--batch-size",
@@ -60,6 +67,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             statuses = parse_statuses(options["status"])
+            order = parse_order(options["order"])
         except ValueError as exc:
             raise CommandError(str(exc)) from exc
 
@@ -69,72 +77,42 @@ class Command(BaseCommand):
                 "Default scope is resolved,closed only."
             )
 
-        batch_size = max(1, options["batch_size"])
-        limit = max(0, options["limit"])
-        min_saved_bytes = max(0, options["min_saved_bytes"])
         dry_run = options["dry_run"]
-
-        queryset = prune_market_raw_queryset(statuses=statuses)
-        pending = queryset.count()
+        pending_hint = "candidate"
 
         if dry_run:
             self.stdout.write(
                 self.style.WARNING(
-                    f"Dry run — {pending} candidate markets with status "
-                    f"{', '.join(statuses)}."
+                    f"Dry run — FIFO order={order}, status={', '.join(statuses)}."
                 )
             )
         else:
             self.stdout.write(
-                f"Pruning up to {pending} markets (status: {', '.join(statuses)})."
+                f"Pruning markets (order={order}, status: {', '.join(statuses)})."
             )
 
-        totals = {
-            "examined": 0,
-            "updated": 0,
-            "skipped": 0,
-            "bytes_before": 0,
-            "bytes_after": 0,
-        }
-        last_pk = 0
+        totals = run_market_raw_prune(
+            statuses=statuses,
+            limit=max(0, options["limit"]),
+            batch_size=max(1, options["batch_size"]),
+            dry_run=dry_run,
+            min_saved_bytes=max(0, options["min_saved_bytes"]),
+            order=order,
+        )
 
-        while True:
-            if limit and totals["examined"] >= limit:
-                break
-
-            remaining = batch_size
-            if limit:
-                remaining = min(remaining, limit - totals["examined"])
-            if remaining <= 0:
-                break
-
-            batch = list(
-                queryset.filter(pk__gt=last_pk).select_related(None)[:remaining]
+        if totals["updated"] and totals["updated"] % 5000 == 0:
+            saved = totals["bytes_before"] - totals["bytes_after"]
+            self.stdout.write(
+                f"  … {totals['updated']} compacted so far ({format_bytes(saved)} JSON saved)"
             )
-            if not batch:
-                break
-
-            last_pk = batch[-1].pk
-            batch_stats = prune_market_raw_batch(
-                batch,
-                dry_run=dry_run,
-                min_saved_bytes=min_saved_bytes,
-            )
-            merge_prune_stats(totals, batch_stats)
-
-            if totals["updated"] and totals["updated"] % 5000 == 0:
-                saved = totals["bytes_before"] - totals["bytes_after"]
-                self.stdout.write(
-                    f"  … {totals['updated']} compacted so far "
-                    f"({format_bytes(saved)} JSON saved)"
-                )
 
         saved = totals["bytes_before"] - totals["bytes_after"]
         action = "Would compact" if dry_run else "Compacted"
         self.stdout.write(
             self.style.SUCCESS(
                 f"{action} {totals['updated']} markets "
-                f"(examined {totals['examined']}, skipped {totals['skipped']}). "
+                f"(examined {totals['examined']}, skipped {totals['skipped']}, "
+                f"{pending_hint} {totals['pending']}). "
                 f"Estimated JSON reduction: {format_bytes(saved)}."
             )
         )
@@ -142,7 +120,7 @@ class Command(BaseCommand):
         if not dry_run and totals["updated"]:
             self.stdout.write(
                 self.style.WARNING(
-                    "Run VACUUM on markets_market to reclaim disk on Postgres "
+                    "Run VACUUM on markets_market periodically to reclaim disk on Postgres "
                     "(e.g. heroku pg:psql -c \"VACUUM FULL markets_market;\"). "
                     "Capture a backup first: heroku pg:backups:capture."
                 )

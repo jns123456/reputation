@@ -586,6 +586,10 @@ STREAK_REMINDER_EMAILS_ENABLED = env.bool("STREAK_REMINDER_EMAILS_ENABLED", defa
 MARKET_RESOLVING_REMINDERS_ENABLED = env.bool(
     "MARKET_RESOLVING_REMINDERS_ENABLED", default=False
 )
+# FIFO compaction of bulky Polymarket JSON on resolved/closed markets (Heroku disk).
+MARKET_RAW_PRUNE_ENABLED = env.bool("MARKET_RAW_PRUNE_ENABLED", default=True)
+MARKET_RAW_PRUNE_BATCH_SIZE = env.int("MARKET_RAW_PRUNE_BATCH_SIZE", default=500)
+MARKET_RAW_PRUNE_HOUR_UTC = env.int("MARKET_RAW_PRUNE_HOUR_UTC", default=4)
 
 CELERY_BEAT_SCHEDULE = {
     "sync-all-category-markets": {
@@ -597,6 +601,11 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": schedule(run_every=timedelta(minutes=MARKET_STALE_SYNC_INTERVAL_MINUTES)),
     },
 }
+if MARKET_RAW_PRUNE_ENABLED:
+    CELERY_BEAT_SCHEDULE["prune-market-raw-fifo"] = {
+        "task": "markets.tasks.prune_market_raw_fifo_task",
+        "schedule": crontab(minute=45, hour=MARKET_RAW_PRUNE_HOUR_UTC),
+    }
 if EAS_DAILY_BATCH_ENABLED:
     CELERY_BEAT_SCHEDULE["build-daily-attestation-batch"] = {
         "task": "integrations.tasks.build_daily_attestation_batch_task",
