@@ -232,17 +232,20 @@ def profile_detail(request, username):
         get_level_progress,
         get_pop_level_progress,
         get_user_achievements,
+        sort_earned_badges,
     )
 
     profile = getattr(user, "profile", None)
     level = get_level_progress(getattr(profile, "reputation_points", 0))
     pop_level = get_pop_level_progress(getattr(profile, "popularity_points", 0))
     achievements = get_user_achievements(user)
-    earned_badges = [
-        (achievement, awarded_at, count)
-        for achievement, awarded_at, unlocked, count in achievements
-        if unlocked
-    ]
+    earned_badges = sort_earned_badges(
+        [
+            (achievement, awarded_at, count)
+            for achievement, awarded_at, unlocked, count in achievements
+            if unlocked
+        ]
+    )
     unlocked_count = sum(1 for _achievement, _at, unlocked, _count in achievements if unlocked)
     from predictions.selectors import get_user_calibration
     from reputation.season_services import get_user_season_awards

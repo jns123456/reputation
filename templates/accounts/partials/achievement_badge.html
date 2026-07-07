@@ -1,18 +1,18 @@
 {% load i18n %}
 {# Single earned/locked badge — description always visible (mobile-friendly). #}
-<div class="pr-badge-card flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center {% if unlocked %}border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30{% else %}border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/40{% endif %}"
+<div class="pr-badge-card flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center {% if achievement.code == 'founding_forecaster' and unlocked %}pr-badge-card--founding border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 dark:border-slate-500 dark:from-slate-800/80 dark:to-slate-900/60{% elif unlocked %}border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30{% else %}border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/40{% endif %}"
      aria-label="{% if unlocked %}{% if count > 1 %}{% blocktrans with name=achievement.name counter=count %}Badge earned {{ counter }} times: {{ name }}{% endblocktrans %}{% else %}{% blocktrans with name=achievement.name %}Badge earned: {{ name }}{% endblocktrans %}{% endif %}{% else %}{% blocktrans with name=achievement.name %}Badge locked: {{ name }}{% endblocktrans %}{% endif %}">
-  <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-full {% if unlocked %}bg-amber-100 dark:bg-amber-900/50{% else %}bg-slate-200/80 dark:bg-slate-700/60{% endif %}"
+  <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-full {% if achievement.code == 'founding_forecaster' and unlocked %}pr-badge-icon--founding{% elif unlocked %}bg-amber-100 dark:bg-amber-900/50{% else %}bg-slate-200/80 dark:bg-slate-700/60{% endif %}"
         aria-hidden="true">
-    <i data-lucide="{{ achievement.icon }}" class="h-5 w-5 {% if unlocked %}text-amber-600 dark:text-amber-400{% else %}text-slate-400{% endif %}"></i>
+    <i data-lucide="{{ achievement.icon }}" class="h-5 w-5 {% if achievement.code == 'founding_forecaster' and unlocked %}text-slate-600 dark:text-slate-200{% elif unlocked %}text-amber-600 dark:text-amber-400{% else %}text-slate-400{% endif %}"></i>
     {% if unlocked and count > 1 %}
     <span class="pr-badge-stack-count" aria-hidden="true">{{ count }}</span>
     {% endif %}
   </span>
-  <span class="text-[0.6875rem] font-semibold leading-tight {% if unlocked %}text-amber-800 dark:text-amber-300{% else %}text-slate-600 dark:text-slate-400{% endif %}">
+  <span class="text-[0.6875rem] font-semibold leading-tight {% if achievement.code == 'founding_forecaster' and unlocked %}text-slate-700 dark:text-slate-200{% elif unlocked %}text-amber-800 dark:text-amber-300{% else %}text-slate-600 dark:text-slate-400{% endif %}">
     {{ achievement.name }}
   </span>
-  <p class="text-[0.625rem] leading-snug {% if unlocked %}text-amber-900/80 dark:text-amber-200/70{% else %}text-slate-500 dark:text-slate-400{% endif %}">
+  <p class="text-[0.625rem] leading-snug {% if achievement.code == 'founding_forecaster' and unlocked %}text-slate-600 dark:text-slate-300{% elif unlocked %}text-amber-900/80 dark:text-amber-200/70{% else %}text-slate-500 dark:text-slate-400{% endif %}">
     {{ achievement.description }}
   </p>
   {% if unlocked and awarded_at %}

@@ -71,6 +71,9 @@ def build_forecasts_feed(*, user, market_slug=None, sort="recent", page=1, page_
 
 
 def _build_items(*, user, predictions):
+    from accounts.achievement_services import prefetch_founding_forecaster_flags
+
+    prefetch_founding_forecaster_flags([prediction.user for prediction in predictions])
     prediction_ids = [prediction.id for prediction in predictions]
     prediction_votes = get_user_prediction_votes(user, prediction_ids)
     vote_previews = get_vote_previews_for_targets(

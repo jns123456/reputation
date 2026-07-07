@@ -12,10 +12,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.achievement_services import (
+    FOUNDING_FORECASTER_LIMIT,
     evaluate_achievements,
     get_level_progress,
     get_pop_level_progress,
     get_user_achievements,
+    is_founding_forecaster,
+    sort_earned_badges,
 )
 from accounts.models import (
     Notification,
@@ -250,7 +253,7 @@ class AchievementTests(TestCase):
         evaluate_achievements(self.user)
         again = evaluate_achievements(self.user)
         self.assertNotIn("first_forecast", again)
-        self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(UserAchievement.objects.filter(user=self.user).count(), 2)
 
     def test_stackable_forecaster_10(self):
         self.user.profile.prediction_count = 25
@@ -299,7 +302,10 @@ class AchievementTests(TestCase):
         self.assertEqual(rows["forecaster_10"][1], 2)
 
     def test_no_award_when_unmet(self):
-        new = evaluate_achievements(self.user)
+        for idx in range(FOUNDING_FORECASTER_LIMIT):
+            create_user(f"prefill_{idx}")
+        user = create_user("no_milestones_yet")
+        new = evaluate_achievements(user)
         self.assertEqual(new, [])
 
     def test_challenge_win_awarded(self):
@@ -317,6 +323,48 @@ class AchievementTests(TestCase):
                 user=self.user, code="challenge_win_1"
             ).exists()
         )
+
+    def test_founding_forecaster_awarded_for_first_users(self):
+        self.assertTrue(is_founding_forecaster(self.user))
+        new = evaluate_achievements(self.user)
+        self.assertIn("founding_forecaster", new)
+        self.assertTrue(
+            UserAchievement.objects.filter(
+                user=self.user, code="founding_forecaster"
+            ).exists()
+        )
+
+    def test_founding_forecaster_not_awarded_after_limit(self):
+        for idx in range(FOUNDING_FORECASTER_LIMIT):
+            create_user(f"founder_{idx}")
+        late_user = create_user("late_joiner")
+        self.assertFalse(is_founding_forecaster(late_user))
+        new = evaluate_achievements(late_user)
+        self.assertNotIn("founding_forecaster", new)
+
+    def test_founding_badge_sorts_first(self):
+        self.user.profile.prediction_count = 1
+        self.user.profile.save()
+        evaluate_achievements(self.user)
+        earned = [
+            (achievement, awarded_at, count)
+            for achievement, awarded_at, unlocked, count in get_user_achievements(self.user)
+            if unlocked
+        ]
+        sorted_badges = sort_earned_badges(earned)
+        self.assertEqual(sorted_badges[0][0].code, "founding_forecaster")
+
+    def test_prefetch_founding_forecaster_flags(self):
+        from accounts.achievement_services import prefetch_founding_forecaster_flags
+
+        evaluate_achievements(self.user)
+        other = create_user("not_founding")
+        for idx in range(FOUNDING_FORECASTER_LIMIT):
+            create_user(f"fill_{idx}")
+
+        prefetch_founding_forecaster_flags([self.user, other])
+        self.assertTrue(self.user._is_founding_forecaster)
+        self.assertFalse(other._is_founding_forecaster)
 
 
 class LinkifyMentionsTests(TestCase):

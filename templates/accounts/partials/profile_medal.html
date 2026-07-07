@@ -1,12 +1,12 @@
 {% load i18n %}
 {# Single earned badge as a military-style medal (ribbon + disc). #}
 <button type="button"
-        class="pr-medal"
+        class="pr-medal{% if achievement.code == 'founding_forecaster' %} pr-medal--founding{% endif %}"
         @click.stop="openMedal = openMedal === '{{ achievement.code }}' ? null : '{{ achievement.code }}'"
         :aria-expanded="openMedal === '{{ achievement.code }}'"
         aria-label="{% if count > 1 %}{% blocktrans with name=achievement.name counter=count %}{{ name }} badge, earned {{ counter }} times{% endblocktrans %}{% else %}{% blocktrans with name=achievement.name %}{{ name }} badge{% endblocktrans %}{% endif %}">
   <span class="pr-medal-ribbon pr-medal-ribbon--{{ ribbon_variant }}" aria-hidden="true"></span>
-  <span class="pr-medal-disc" aria-hidden="true">
+  <span class="pr-medal-disc{% if achievement.code == 'founding_forecaster' %} pr-medal-disc--founding{% endif %}" aria-hidden="true">
     <i data-lucide="{{ achievement.icon }}"></i>
     {% if count > 1 %}
     <span class="pr-medal-stack-count">{{ count }}</span>

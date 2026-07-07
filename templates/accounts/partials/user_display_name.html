@@ -1,9 +1,5 @@
 {% load i18n %}
 <span class="inline-flex items-center gap-1">
   <span>{{ user.public_name }}</span>
-  {% if user.is_verified %}
-  <span class="inline-flex shrink-0 align-middle" title="{% trans 'Verified account' %}">
-    {% include "accounts/partials/verified_badge.html" %}
-  </span>
-  {% endif %}
+  {% include "accounts/partials/user_identity_badges.html" %}
 </span>

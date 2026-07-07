@@ -227,6 +227,9 @@ def signup(request):
             return render(request, "accounts/signup.html", _signup_context(request, form))
         if form.is_valid():
             user = form.save()
+            from accounts.achievement_services import evaluate_achievements
+
+            evaluate_achievements(user)
             if human_check["passed"] and human_check["provider"] != "noop":
                 user.verification_status = User.VerificationStatus.HUMAN_CHALLENGE_PASSED
                 user.save(update_fields=["verification_status", "updated_at"])

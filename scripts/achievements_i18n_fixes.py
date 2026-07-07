@@ -34,6 +34,7 @@ ACHIEVEMENTS_I18N_FIXES: dict[str, str] = {
     "Influencer": "Influencer",
     "Community Icon": "Icono de la comunidad",
     # Achievements — names
+    "Founding Forecaster": "Pronosticador Fundador",
     "First Forecast": "Primer pronóstico",
     "Getting Serious": "En serio",
     "Prolific Forecaster": "Predictor prolífico",
@@ -44,6 +45,13 @@ ACHIEVEMENTS_I18N_FIXES: dict[str, str] = {
     "Week Warrior": "Guerrero semanal",
     "Unstoppable": "Imparable",
     # Achievements — descriptions
+    "One of the first 100 members of PredictStamp.": (
+        "Uno de los primeros 100 miembros de PredictStamp."
+    ),
+    "Founding Forecaster — one of the first 100 members": (
+        "Pronosticador Fundador — uno de los primeros 100 miembros"
+    ),
+    "Founding Forecaster badge": "Insignia de Pronosticador Fundador",
     "Published your first prediction.": "Publicaste tu primer pronóstico.",
     "Published 10 predictions.": "Publicaste 10 pronósticos.",
     "Published 50 predictions.": "Publicaste 50 pronósticos.",

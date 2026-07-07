@@ -1,0 +1,9 @@
+{% load i18n achievement_tags %}
+{% if user|is_founding_forecaster_user %}
+{% include "accounts/partials/founding_forecaster_badge.html" %}
+{% endif %}
+{% if user.is_verified %}
+<span class="inline-flex shrink-0 align-middle" title="{% trans 'Verified account' %}">
+  {% include "accounts/partials/verified_badge.html" %}
+</span>
+{% endif %}

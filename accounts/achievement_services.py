@@ -14,7 +14,12 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Callable
 
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
+
+FOUNDING_FORECASTER_LIMIT = 100
+FOUNDING_FORECASTER_CODE = "founding_forecaster"
 
 
 # --------------------------------------------------------------------------- #
@@ -121,6 +126,7 @@ class Achievement:
 # One-time badges — awarded at most once per user.
 ONE_TIME_ACHIEVEMENT_CODES = frozenset(
     {
+        FOUNDING_FORECASTER_CODE,
         "first_forecast",
         "first_correct",
         "challenge_win_1",
@@ -147,6 +153,13 @@ STACKABLE_METRICS = {
 #   reputation_points, longest_streak, streak_7_completions,
 #   streak_30_completions, challenges_won
 ACHIEVEMENTS = (
+    Achievement(
+        FOUNDING_FORECASTER_CODE,
+        _("Founding Forecaster"),
+        _("One of the first 100 members of PredictStamp."),
+        "gem",
+        lambda _s: False,  # membership-based; evaluated via ``is_founding_forecaster``
+    ),
     Achievement(
         "first_forecast",
         _("First Forecast"),
@@ -236,6 +249,50 @@ ACHIEVEMENTS = (
 ACHIEVEMENTS_BY_CODE = {a.code: a for a in ACHIEVEMENTS}
 
 
+def is_founding_forecaster(user) -> bool:
+    """Return whether ``user`` is among the first ``FOUNDING_FORECASTER_LIMIT`` signups."""
+    if not user or not getattr(user, "pk", None):
+        return False
+
+    cached = getattr(user, "_is_founding_forecaster", None)
+    if cached is not None:
+        return cached
+
+    from accounts.models import UserAchievement
+
+    if UserAchievement.objects.filter(user=user, code=FOUNDING_FORECASTER_CODE).exists():
+        user._is_founding_forecaster = True
+        return True
+
+    from accounts.models import User
+
+    earlier_count = User.objects.filter(
+        Q(created_at__lt=user.created_at)
+        | Q(created_at=user.created_at, pk__lt=user.pk)
+    ).count()
+    result = earlier_count < FOUNDING_FORECASTER_LIMIT
+    user._is_founding_forecaster = result
+    return result
+
+
+def prefetch_founding_forecaster_flags(users):
+    """Attach ``_is_founding_forecaster`` on each user with at most one query."""
+    from accounts.models import UserAchievement
+
+    user_list = [user for user in users if getattr(user, "pk", None)]
+    if not user_list:
+        return
+
+    founding_ids = set(
+        UserAchievement.objects.filter(
+            user_id__in=[user.pk for user in user_list],
+            code=FOUNDING_FORECASTER_CODE,
+        ).values_list("user_id", flat=True)
+    )
+    for user in user_list:
+        user._is_founding_forecaster = user.pk in founding_ids
+
+
 def _target_stack_count(code, stats):
     key, threshold = STACKABLE_METRICS[code]
     value = stats.get(key, 0) or 0
@@ -292,7 +349,12 @@ def evaluate_achievements(user):
             if code in ONE_TIME_ACHIEVEMENT_CODES:
                 if earned_counts.get(code, 0) >= 1:
                     continue
-                if achievement.predicate(stats):
+                eligible = (
+                    is_founding_forecaster(user)
+                    if code == FOUNDING_FORECASTER_CODE
+                    else achievement.predicate(stats)
+                )
+                if eligible:
                     UserAchievement.objects.create(user=user, code=code)
                     newly.append(code)
             elif code in STACKABLE_METRICS:
@@ -335,5 +397,19 @@ def get_user_achievements(user):
     for achievement in ACHIEVEMENTS:
         count = counts.get(achievement.code, 0)
         awarded_at = latest.get(achievement.code)
-        rows.append((achievement, awarded_at, count > 0, count))
+        unlocked = count > 0
+        if achievement.code == FOUNDING_FORECASTER_CODE and not unlocked:
+            unlocked = is_founding_forecaster(user)
+        rows.append((achievement, awarded_at, unlocked, count))
     return rows
+
+
+def sort_earned_badges(earned_badges):
+    """Put the founding badge first so it stays visually prominent."""
+    founding = ACHIEVEMENTS_BY_CODE[FOUNDING_FORECASTER_CODE]
+
+    def sort_key(item):
+        achievement, _awarded_at, _count = item
+        return (0 if achievement.code == founding.code else 1, achievement.code)
+
+    return sorted(earned_badges, key=sort_key)

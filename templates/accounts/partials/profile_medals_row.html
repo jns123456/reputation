@@ -13,7 +13,11 @@
   {% endif %}
   <div class="pr-profile-medals" role="list" aria-label="{% trans 'Earned badges' %}">
     {% for achievement, awarded_at, count in earned_badges %}
-      {% if "popular" in achievement.code %}
+      {% if achievement.code == "founding_forecaster" %}
+        {% with ribbon_variant="founding" %}
+          {% include "accounts/partials/profile_medal.html" %}
+        {% endwith %}
+      {% elif "popular" in achievement.code %}
         {% with ribbon_variant="pop" %}
           {% include "accounts/partials/profile_medal.html" %}
         {% endwith %}

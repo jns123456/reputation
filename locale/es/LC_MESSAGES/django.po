@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-07 21:28+0000\n"
+"POT-Creation-Date: 2026-07-07 23:56+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -77,6 +77,13 @@ msgstr "Favorito del público"
 
 msgid "Community Icon"
 msgstr "Icono de la comunidad"
+
+#| msgid "Become a Founding Forecaster."
+msgid "Founding Forecaster"
+msgstr "Pronosticador Fundador"
+
+msgid "One of the first 100 members of PredictStamp."
+msgstr "Uno de los primeros 100 miembros de PredictStamp."
 
 msgid "First Forecast"
 msgstr "Primer pronóstico"
@@ -1615,7 +1622,6 @@ msgstr "Elige Sí o No para este resultado."
 msgid "This market is no longer open for forecasts."
 msgstr "Elige un tema para explorar pronósticos abiertos."
 
-#| msgid "Your pick"
 msgid "your pick"
 msgstr "Tu perfil"
 
@@ -1680,7 +1686,6 @@ msgstr "Solo los pronósticos activos se pueden cerrar."
 msgid "Cannot exit a forecast after the market has closed."
 msgstr "No puedes cerrar un pronóstico después de que el mercado cierre."
 
-#| msgid "Cannot exit a forecast after the market has closed."
 msgid "Cannot exit a forecast after the event has started."
 msgstr ""
 "No puedes cerrar un pronóstico después de que el evento haya comenzado."
@@ -2228,6 +2233,13 @@ msgstr ""
 
 msgid "Unfollow"
 msgstr "Seguir"
+
+msgid "Founding Forecaster — one of the first 100 members"
+msgstr "Pronosticador Fundador — uno de los primeros 100 miembros"
+
+#| msgid "Founding Forecasters receive:"
+msgid "Founding Forecaster badge"
+msgstr "Insignia de Pronosticador Fundador"
 
 msgid "Public"
 msgstr "Público"
@@ -6555,7 +6567,6 @@ msgstr "Ver clasificación"
 msgid "Got it"
 msgstr "Entendido"
 
-#| msgid "Reputation events"
 msgid "Week reputation events"
 msgstr "Eventos de reputación semanal"
 
@@ -6563,27 +6574,21 @@ msgstr "Eventos de reputación semanal"
 msgid "%(start)s – %(end)s"
 msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 
-#| msgid "Weekly"
 msgid "Week total"
 msgstr "Total semanal"
 
-#| msgid "✓ Correct forecast"
 msgid "Correct forecast"
 msgstr "Pronóstico correcto"
 
-#| msgid "✗ Incorrect forecast"
 msgid "Incorrect forecast"
 msgstr "Pronóstico incorrecto"
 
-#| msgid "Exit forecast"
 msgid "Exited forecast"
 msgstr "Pronóstico cerrado"
 
-#| msgid "Your forecast"
 msgid "Void forecast"
 msgstr "Pronóstico anulado"
 
-#| msgid "Most reputation points this week"
 msgid "No reputation events this week."
 msgstr "No hay eventos de reputación esta semana."
 
@@ -8432,7 +8437,6 @@ msgstr "Salir ahora realizaría %(points)s de reputación."
 msgid "Exit forecast"
 msgstr "Cerrar pronóstico"
 
-#| msgid "Forecasts are closed for this market."
 msgid "Forecasts cannot be closed after the event has started."
 msgstr ""
 "Los pronósticos no se pueden cerrar una vez que el evento ha comenzado."

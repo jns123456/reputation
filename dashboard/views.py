@@ -236,6 +236,12 @@ def _reputation_leaderboard_context(request, *, category=None):
     else:
         leaders = get_cached_top_predictors(limit=50, mode=ranking_mode)
 
+    from accounts.achievement_services import prefetch_founding_forecaster_flags
+
+    prefetch_founding_forecaster_flags(
+        [entry.user for entry in leaders if getattr(entry, "user", None)]
+    )
+
     if ranking_mode == ABSOLUTE:
         hero_description_key = "category_absolute" if category else "global_absolute"
     else:
@@ -277,6 +283,17 @@ def popularity_leaderboard(request):
         leaders = get_cached_top_popular_users(category_slug=category.slug, limit=50)
     else:
         leaders = get_cached_top_popular_users(limit=50)
+
+    from accounts.achievement_services import prefetch_founding_forecaster_flags
+
+    if category:
+        prefetch_founding_forecaster_flags(
+            [row.user for row in leaders if getattr(row, "user", None)]
+        )
+    else:
+        prefetch_founding_forecaster_flags(
+            [profile.user for profile in leaders if getattr(profile, "user", None)]
+        )
 
     return render(
         request,
@@ -467,6 +484,12 @@ def agent_arena(request):
         )
     else:
         leaders = get_cached_top_agent_predictors(limit=50, mode=ranking_mode)
+
+    from accounts.achievement_services import prefetch_founding_forecaster_flags
+
+    prefetch_founding_forecaster_flags(
+        [entry.user for entry in leaders if getattr(entry, "user", None)]
+    )
 
     return render(
         request,
