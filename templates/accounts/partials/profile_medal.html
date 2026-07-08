@@ -7,7 +7,11 @@
         aria-label="{% if count > 1 %}{% blocktrans with name=achievement.name counter=count %}{{ name }} badge, earned {{ counter }} times{% endblocktrans %}{% else %}{% blocktrans with name=achievement.name %}{{ name }} badge{% endblocktrans %}{% endif %}">
   <span class="pr-medal-ribbon pr-medal-ribbon--{{ ribbon_variant }}" aria-hidden="true"></span>
   <span class="pr-medal-disc{% if achievement.code == 'founding_forecaster' %} pr-medal-disc--founding{% endif %}" aria-hidden="true">
+    {% if achievement.code == 'founding_forecaster' %}
+    {% include "accounts/partials/founding_gem_icon.html" with size_class="pr-founding-gem--medal" %}
+    {% else %}
     <i data-lucide="{{ achievement.icon }}"></i>
+    {% endif %}
     {% if count > 1 %}
     <span class="pr-medal-stack-count">{{ count }}</span>
     {% endif %}
