@@ -5,7 +5,7 @@
   <span class="relative inline-flex h-9 w-9 items-center justify-center rounded-full {% if achievement.code == 'founding_forecaster' and unlocked %}pr-badge-icon--founding{% elif unlocked %}bg-amber-100 dark:bg-amber-900/50{% else %}bg-slate-200/80 dark:bg-slate-700/60{% endif %}"
         aria-hidden="true">
     {% if achievement.code == 'founding_forecaster' and unlocked %}
-    {% include "accounts/partials/founding_gem_icon.html" with size_class="pr-founding-gem--card" %}
+    <span class="pr-founding-badge pr-founding-badge--card" aria-hidden="true">💎</span>
     {% else %}
     <i data-lucide="{{ achievement.icon }}" class="h-5 w-5 {% if unlocked %}text-amber-600 dark:text-amber-400{% else %}text-slate-400{% endif %}"></i>
     {% endif %}

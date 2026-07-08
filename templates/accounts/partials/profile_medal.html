@@ -8,7 +8,7 @@
   <span class="pr-medal-ribbon pr-medal-ribbon--{{ ribbon_variant }}" aria-hidden="true"></span>
   <span class="pr-medal-disc{% if achievement.code == 'founding_forecaster' %} pr-medal-disc--founding{% endif %}" aria-hidden="true">
     {% if achievement.code == 'founding_forecaster' %}
-    {% include "accounts/partials/founding_gem_icon.html" with size_class="pr-founding-gem--medal" %}
+    <span class="pr-founding-badge pr-founding-badge--medal" aria-hidden="true">💎</span>
     {% else %}
     <i data-lucide="{{ achievement.icon }}"></i>
     {% endif %}
