@@ -29,6 +29,7 @@ from proof_i18n_fixes import (
     PROOF_I18N_FIXES,
     PROOF_I18N_PLURAL_FIXES,
 )
+from debrief_i18n_fixes import DEBRIEF_I18N_FIXES
 
 PO_PATH = Path(__file__).resolve().parent.parent / "locale" / "es" / "LC_MESSAGES" / "django.po"
 
@@ -43,6 +44,7 @@ FIXES: dict[str, str] = {
     **GROWTH_I18N_FIXES,
     **API_I18N_FIXES,
     **LANDING_I18N_FIXES,
+    **DEBRIEF_I18N_FIXES,
 }
 PLURAL_FIXES: dict[str, tuple[str, str]] = {
     **PHASE1_PLURAL_FIXES,

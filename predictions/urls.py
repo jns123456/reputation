@@ -12,5 +12,10 @@ urlpatterns = [
         views.exit_prediction_view,
         name="exit",
     ),
+    path(
+        "<int:prediction_id>/debrief/",
+        views.create_debrief_view,
+        name="create_debrief",
+    ),
     path("users/<str:username>/history/", views.prediction_history, name="history"),
 ]

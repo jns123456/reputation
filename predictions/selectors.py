@@ -62,7 +62,7 @@ def get_market_predictions(market, limit=50):
             ],
         )
         .exclude(status=Prediction.Status.VOID)
-        .select_related("user", "user__profile", "market")
+        .select_related("user", "user__profile", "market", "debrief")
         .order_by(*DISPLAY_RANK_ORM_FIELDS)
     )
     return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
@@ -71,7 +71,9 @@ def get_market_predictions(market, limit=50):
 def get_prediction_with_interactions(pk):
     return annotate_prediction_interactions(
         prefetch_verified_prediction_attestations(
-            Prediction.objects.filter(pk=pk).select_related("user", "user__profile", "market")
+            Prediction.objects.filter(pk=pk).select_related(
+                "user", "user__profile", "market", "debrief"
+            )
         )
     ).first()
 
@@ -153,7 +155,7 @@ def get_user_closed_prediction_history(user, *, limit=100, status=None):
             user=user,
             status__in=[Prediction.Status.RESOLVED, Prediction.Status.EXITED],
         )
-        .select_related("market", "user")
+        .select_related("market", "user", "debrief")
         .order_by(Coalesce("resolved_at", "exited_at", "created_at").desc())
     )
     if status == Prediction.Status.RESOLVED:

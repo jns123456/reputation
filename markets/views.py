@@ -210,6 +210,31 @@ def market_detail(request, slug):
         target_type=Vote.TargetType.PREDICTION,
         target_ids=[p.id for p in predictions],
     )
+    from predictions.debrief_services import get_debrief_for_prediction
+    from predictions.forms import ForecastDebriefForm
+
+    debrief_ids = []
+    debriefs_by_prediction = {}
+    for p in predictions:
+        if p.status != p.Status.RESOLVED:
+            continue
+        debrief = get_debrief_for_prediction(p)
+        if debrief is not None:
+            debriefs_by_prediction[p.id] = debrief
+            debrief_ids.append(debrief.id)
+
+    debrief_votes = {}
+    if debrief_ids and request.user.is_authenticated:
+        for vote in Vote.objects.filter(
+            user=request.user,
+            target_type=Vote.TargetType.DEBRIEF,
+            target_id__in=debrief_ids,
+        ):
+            debrief_votes[vote.target_id] = vote.value
+    debrief_vote_previews = get_vote_previews_for_targets(
+        target_type=Vote.TargetType.DEBRIEF,
+        target_ids=debrief_ids,
+    )
     bookmarked_ids = get_user_bookmarked_ids(
         request.user,
         Bookmark.TargetType.PREDICTION,
@@ -238,23 +263,49 @@ def market_detail(request, slug):
             creator_program_enabled=creator_program_enabled,
         )
 
-    prediction_sections = [
-        {
-            "prediction": p,
-            "threads": discussions.get(p.id, []),
-            "comment_count": len(collect_comment_ids(discussions.get(p.id, []))),
-            "prediction_vote": prediction_votes.get(p.id, 0),
-            "is_bookmarked": p.id in bookmarked_ids,
-            "reputation_stakes": calculate_reputation_stakes(
-                predicted_outcome=p.predicted_outcome,
-                probability_snapshot=p.probability_at_prediction_time,
-                predicted_direction=p.predicted_direction,
-            ),
-            "like_preview": prediction_vote_previews.get(p.id, {}).get("likes", []),
-            "dislike_preview": prediction_vote_previews.get(p.id, {}).get("dislikes", []),
-        }
-        for p in predictions
-    ]
+    prediction_sections = []
+    for p in predictions:
+        debrief = debriefs_by_prediction.get(p.id)
+        can_write_debrief = (
+            request.user.is_authenticated
+            and request.user.id == p.user_id
+            and p.status == p.Status.RESOLVED
+            and debrief is None
+        )
+        prediction_sections.append(
+            {
+                "prediction": p,
+                "threads": discussions.get(p.id, []),
+                "comment_count": len(collect_comment_ids(discussions.get(p.id, []))),
+                "prediction_vote": prediction_votes.get(p.id, 0),
+                "is_bookmarked": p.id in bookmarked_ids,
+                "reputation_stakes": calculate_reputation_stakes(
+                    predicted_outcome=p.predicted_outcome,
+                    probability_snapshot=p.probability_at_prediction_time,
+                    predicted_direction=p.predicted_direction,
+                ),
+                "like_preview": prediction_vote_previews.get(p.id, {}).get("likes", []),
+                "dislike_preview": prediction_vote_previews.get(p.id, {}).get(
+                    "dislikes", []
+                ),
+                "debrief": debrief,
+                "debrief_form": ForecastDebriefForm() if can_write_debrief else None,
+                "can_write_debrief": can_write_debrief,
+                "debrief_vote": (
+                    debrief_votes.get(debrief.id, 0) if debrief is not None else 0
+                ),
+                "debrief_like_preview": (
+                    debrief_vote_previews.get(debrief.id, {}).get("likes", [])
+                    if debrief is not None
+                    else []
+                ),
+                "debrief_dislike_preview": (
+                    debrief_vote_previews.get(debrief.id, {}).get("dislikes", [])
+                    if debrief is not None
+                    else []
+                ),
+            }
+        )
 
     from accounts.follow_selectors import is_watching_market
     from markets.navigation import resolve_market_return_url

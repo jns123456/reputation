@@ -906,16 +906,20 @@ class Notification(models.Model):
                     kwargs={"slug": self.comment.market.slug},
                 )
             if self.prediction_id:
-                return reverse(
+                base = reverse(
                     "markets:detail",
                     kwargs={"slug": self.prediction.market.slug},
                 )
+                if self.vote_target_type == "debrief":
+                    return f"{base}#debrief-{self.prediction_id}"
+                return base
         if self.notification_type == self.NotificationType.PREDICTION_RESOLVED:
             if self.prediction_id:
-                return reverse(
+                base = reverse(
                     "markets:detail",
                     kwargs={"slug": self.prediction.market.slug},
                 )
+                return f"{base}#debrief-{self.prediction_id}"
         if self.challenge_id and self.notification_type in (
             self.NotificationType.CHALLENGE_INVITATION,
             self.NotificationType.CHALLENGE_MARKET_RESOLVED,
@@ -965,7 +969,7 @@ class Notification(models.Model):
         ):
             return "View content"
         if self.notification_type == self.NotificationType.PREDICTION_RESOLVED:
-            return "View market"
+            return "Write your debrief"
         if self.notification_type in (
             self.NotificationType.CHALLENGE_INVITATION,
             self.NotificationType.CHALLENGE_MARKET_RESOLVED,

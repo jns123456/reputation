@@ -1,0 +1,48 @@
+{% load i18n %}
+{# Post-resolution debrief: composer for owner, or published reflection + votes. #}
+<div id="debrief-{{ prediction.id }}" class="mt-3">
+  {% if debrief %}
+  <div class="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-3 dark:border-slate-600 dark:bg-slate-800/60">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-xs font-bold uppercase tracking-wide text-brand-700 dark:text-brand-300">{% trans "Debrief" %}</span>
+      <span class="text-xs text-slate-500 dark:text-slate-400">{% trans "What they learned after resolution" %}</span>
+    </div>
+    <p class="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800 dark:text-slate-200">{{ debrief.body }}</p>
+    <div class="mt-2">
+      {% if user.is_authenticated and user.id == debrief.user_id %}
+      {% include "comments/partials/vote_block.html" with target_type="debrief" target_id=debrief.id score=debrief.popularity_score user_vote=debrief_vote layout="horizontal" like_preview=debrief_like_preview dislike_preview=debrief_dislike_preview can_vote=False %}
+      {% else %}
+      {% include "comments/partials/vote_block.html" with target_type="debrief" target_id=debrief.id score=debrief.popularity_score user_vote=debrief_vote layout="horizontal" like_preview=debrief_like_preview dislike_preview=debrief_dislike_preview %}
+      {% endif %}
+    </div>
+  </div>
+  {% elif can_write_debrief and debrief_form %}
+  <div class="rounded-xl border border-dashed border-brand-300 bg-brand-50/40 px-3 py-3 dark:border-brand-700 dark:bg-brand-950/30">
+    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{% trans "Write your debrief" %}</p>
+    <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">{% trans "What went right or wrong? Publish once — others can upvote useful reflections." %}</p>
+    <form method="post"
+          action="{% url 'predictions:create_debrief' prediction.id %}"
+          class="mt-3 space-y-2"
+          hx-post="{% url 'predictions:create_debrief' prediction.id %}"
+          hx-target="#debrief-{{ prediction.id }}"
+          hx-swap="outerHTML">
+      {% csrf_token %}
+      <label for="id_debrief_body_{{ prediction.id }}" class="sr-only">{{ debrief_form.body.label }}</label>
+      <textarea name="body"
+                id="id_debrief_body_{{ prediction.id }}"
+                rows="3"
+                maxlength="{{ debrief_form.body.field.max_length }}"
+                required
+                placeholder="{{ debrief_form.body.field.widget.attrs.placeholder }}"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"></textarea>
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-xs text-slate-500 dark:text-slate-400">{{ debrief_form.body.help_text }}</p>
+        <button type="submit"
+                class="pr-touch-target inline-flex min-h-11 items-center justify-center rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600">
+          {% trans "Publish debrief" %}
+        </button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+</div>

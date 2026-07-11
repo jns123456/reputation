@@ -113,3 +113,31 @@ class Prediction(models.Model):
             .order_by("-created_at")
             .first()
         )
+
+
+class ForecastDebrief(models.Model):
+    """One-shot post-resolution reflection on a forecast (popularity only)."""
+
+    prediction = models.OneToOneField(
+        Prediction,
+        on_delete=models.CASCADE,
+        related_name="debrief",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="forecast_debriefs",
+    )
+    body = models.TextField()
+    popularity_score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"Debrief by {self.user.username} on prediction {self.prediction_id}"

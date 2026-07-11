@@ -114,6 +114,7 @@ def vote_view(request):
         Vote.TargetType.PREDICTION,
         Vote.TargetType.PULSE_POST,
         Vote.TargetType.PULSE_COMMENT,
+        Vote.TargetType.DEBRIEF,
     ):
         return HttpResponseBadRequest(_("Invalid target type"))
 
@@ -156,6 +157,36 @@ def vote_view(request):
                     **_vote_preview_context(
                         target_type=target_type,
                         target_id=comment.id,
+                        like_count=like_count,
+                        dislike_count=dislike_count,
+                    ),
+                },
+            )
+        if target_type == Vote.TargetType.DEBRIEF:
+            from predictions.models import ForecastDebrief
+
+            debrief = get_object_or_404(
+                ForecastDebrief.objects.select_related("prediction"),
+                pk=int(target_id),
+            )
+            user_vote = get_user_vote(request.user, target_type, int(target_id))
+            like_count, dislike_count = get_target_vote_counts(
+                target_type=target_type,
+                target_id=debrief.id,
+            )
+            return render(
+                request,
+                "comments/partials/vote_block.html",
+                {
+                    "target_type": Vote.TargetType.DEBRIEF,
+                    "target_id": debrief.id,
+                    "score": debrief.popularity_score,
+                    "user_vote": user_vote.value if user_vote else 0,
+                    "layout": request.POST.get("layout", "horizontal"),
+                    "can_vote": request.user.id != debrief.user_id,
+                    **_vote_preview_context(
+                        target_type=target_type,
+                        target_id=debrief.id,
                         like_count=like_count,
                         dislike_count=dislike_count,
                     ),
@@ -306,6 +337,7 @@ def vote_reactions_sheet(request):
         Vote.TargetType.PREDICTION,
         Vote.TargetType.PULSE_POST,
         Vote.TargetType.PULSE_COMMENT,
+        Vote.TargetType.DEBRIEF,
     ):
         return HttpResponseBadRequest(_("Invalid target type"))
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-07 23:56+0000\n"
+"POT-Creation-Date: 2026-07-11 21:48+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -78,7 +78,6 @@ msgstr "Favorito del público"
 msgid "Community Icon"
 msgstr "Icono de la comunidad"
 
-#| msgid "Become a Founding Forecaster."
 msgid "Founding Forecaster"
 msgstr "Pronosticador Fundador"
 
@@ -176,8 +175,9 @@ msgstr "%(actor)s votó positivamente tu contenido"
 msgid "Your content received a vote"
 msgstr "Tu contenido recibió un voto"
 
-msgid "Your forecast resolved — see your reputation"
-msgstr "Tu pronóstico se resolvió — mira tu reputación"
+#| msgid "Your forecast resolved — see your reputation"
+msgid "Your forecast resolved — write your debrief"
+msgstr "Tu forecast se resolvió — escribe tu debrief"
 
 #, python-format
 msgid "%(actor)s invited you to a challenge"
@@ -667,6 +667,9 @@ msgstr "se resolvió. Tu pronóstico fue"
 msgid "reputation points"
 msgstr "puntos de reputación"
 
+msgid "Share what you learned in a debrief."
+msgstr "Comparte lo que aprendiste en un debrief."
+
 msgid "challenged you to"
 msgstr "te desafió a"
 
@@ -681,6 +684,9 @@ msgstr "te envió un mensaje directo"
 
 msgid "sent you a notification"
 msgstr "te envió una notificación"
+
+msgid "debrief"
+msgstr "debrief"
 
 msgid "comment"
 msgstr "Comentario"
@@ -1338,6 +1344,10 @@ msgstr "No puede votar por su propio pronóstico."
 msgid "You cannot vote on your own post."
 msgstr "No puedes votar por tu propio post"
 
+#| msgid "You cannot vote on your own forecast."
+msgid "You cannot vote on your own debrief."
+msgstr "No puedes votar tu propio debrief."
+
 msgid "Cannot vote on your own content."
 msgstr "No puedes votar sobre tu propio contenido."
 
@@ -1594,6 +1604,41 @@ msgstr "Objetivo de voto no encontrado."
 msgid "Could not send your message."
 msgstr "No se pudo enviar el email de verificación."
 
+#, python-format
+#| msgid "Enter at least 2 characters, or an email address."
+msgid "Write at least %(min)s characters for your debrief."
+msgstr "Escribe al menos %(min)s caracteres para tu debrief."
+
+#, python-format
+#| msgid "Each poll choice must be %(max)s characters or fewer."
+msgid "Debriefs must be %(max)s characters or fewer."
+msgstr "Los debriefs deben tener %(max)s caracteres o menos."
+
+#| msgid "You cannot vote on your own forecast."
+msgid "You can only write a debrief on your own forecast."
+msgstr "Solo puedes escribir un debrief en tu propio forecast."
+
+msgid "Debriefs are only available after a forecast resolves."
+msgstr "Los debriefs solo están disponibles cuando el forecast se resuelve."
+
+#| msgid "You already have a group with this name."
+msgid "You already published a debrief for this forecast."
+msgstr "Ya publicaste un debrief para este forecast."
+
+#| msgid "What you can do:"
+msgid "What did you learn?"
+msgstr "¿Qué aprendiste?"
+
+msgid "What went right or wrong? What would you change next time?"
+msgstr "¿Qué salió bien o mal? ¿Qué cambiarías la próxima vez?"
+
+msgid ""
+"Published once — cannot be edited. Earns popularity when others find it "
+"useful, never reputation."
+msgstr ""
+"Se publica una sola vez — no se puede editar. Suma popularidad si resulta "
+"útil, nunca reputación."
+
 msgid "What data, news, or logic supports your pick?"
 msgstr "¿Qué datos, noticias o lógica respaldan su elección?"
 
@@ -1773,6 +1818,14 @@ msgstr "Pronóstico cerrado. Realizaste %(points)s de reputación."
 
 msgid "Forecast exited. You can enter again."
 msgstr "Pronóstico cerrado. Puedes volver a participar."
+
+#| msgid "Invalid vote"
+msgid "Invalid debrief"
+msgstr "Debrief inválido"
+
+#| msgid "Your forecast was posted."
+msgid "Your debrief was published."
+msgstr "Tu debrief fue publicado."
 
 msgid "Who can see this post"
 msgstr "Quién puede ver este post"
@@ -2237,7 +2290,6 @@ msgstr "Seguir"
 msgid "Founding Forecaster — one of the first 100 members"
 msgstr "Pronosticador Fundador — uno de los primeros 100 miembros"
 
-#| msgid "Founding Forecasters receive:"
 msgid "Founding Forecaster badge"
 msgstr "Insignia de Pronosticador Fundador"
 
@@ -8382,6 +8434,27 @@ msgstr ""
 msgid "View market"
 msgstr "Ver mercado"
 
+msgid "Debrief"
+msgstr "Debrief"
+
+msgid "What they learned after resolution"
+msgstr "Lo que aprendieron tras la resolución"
+
+#| msgid "Estimate your earnings"
+msgid "Write your debrief"
+msgstr "Escribe tu debrief"
+
+msgid ""
+"What went right or wrong? Publish once — others can upvote useful "
+"reflections."
+msgstr ""
+"¿Qué salió bien o mal? Se publica una sola vez — otros pueden votar "
+"reflexiones útiles."
+
+#| msgid "Publishing"
+msgid "Publish debrief"
+msgstr "Publicar debrief"
+
 #, python-format
 msgid ""
 "Posted %(timesince)s ago. You can exit this forecast at the current market "
@@ -8595,6 +8668,9 @@ msgstr "Reputación %(points)s al cerrar"
 #, python-format
 msgid "Reputation %(points)s earned"
 msgstr "Reputación %(points)s ganados"
+
+msgid "Write your debrief →"
+msgstr "Escribe tu debrief →"
 
 msgid "Scoring pending"
 msgstr "Verificación pendiente"

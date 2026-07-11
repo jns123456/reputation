@@ -273,7 +273,7 @@ def _notification_subject(notification, actor_name):
         Type.NEW_FOLLOWER: _("%(actor)s started following you"),
         Type.UPVOTE_RECEIVED: _("%(actor)s upvoted your content"),
         Type.DOWNVOTE_RECEIVED: _("Your content received a vote"),
-        Type.PREDICTION_RESOLVED: _("Your forecast resolved — see your reputation"),
+        Type.PREDICTION_RESOLVED: _("Your forecast resolved — write your debrief"),
         Type.CHALLENGE_INVITATION: _("%(actor)s invited you to a challenge"),
         Type.CHALLENGE_MARKET_RESOLVED: _("A challenge event just resolved"),
         Type.CHALLENGE_COMPLETED: _("A challenge you joined is complete"),

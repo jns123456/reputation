@@ -104,6 +104,10 @@
         {% endif %}
       {% endif %}
 
+      {% if not is_embed and prediction.status == "resolved" %}
+      {% include "predictions/partials/forecast_debrief.html" with prediction=prediction debrief=debrief debrief_form=debrief_form debrief_vote=debrief_vote debrief_like_preview=debrief_like_preview debrief_dislike_preview=debrief_dislike_preview can_write_debrief=can_write_debrief %}
+      {% endif %}
+
       {% if not is_embed %}
       {% include "dashboard/partials/forecast_live_pnl.html" with prediction=prediction %}
       {% endif %}

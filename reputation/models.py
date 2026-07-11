@@ -182,6 +182,7 @@ class PopularityEvent(models.Model):
         STREAK_MILESTONE = "streak_milestone", "Activity streak milestone"
         SHARE_RECEIVED = "share_received", "Share received"
         MISSION_COMPLETED = "mission_completed", "Mission completed"
+        DEBRIEF_POSTED = "debrief_posted", "Debrief posted"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

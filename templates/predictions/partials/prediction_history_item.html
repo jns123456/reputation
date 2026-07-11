@@ -103,6 +103,18 @@
       <p class="mt-2 text-sm leading-relaxed text-slate-700">{{ prediction.reasoning }}</p>
       {% endif %}
 
+      {% if prediction.status == "resolved" and prediction.debrief %}
+      <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-600 dark:bg-slate-900/40">
+        <p class="text-[0.65rem] font-bold uppercase tracking-wide text-brand-700 dark:text-brand-300">{% trans "Debrief" %}</p>
+        <p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{{ prediction.debrief.body }}</p>
+      </div>
+      {% elif prediction.status == "resolved" and user.is_authenticated and user.id == prediction.user_id %}
+      <a href="{% url 'markets:detail' slug=prediction.market.slug %}#debrief-{{ prediction.id }}"
+         class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-brand-700 hover:underline dark:text-brand-300">
+        {% trans "Write your debrief →" %}
+      </a>
+      {% endif %}
+
       {% include "predictions/partials/prediction_interaction_stats.html" %}
     </div>
 

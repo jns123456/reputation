@@ -58,7 +58,7 @@
     </p>
     <div id="forecast-list" class="pr-panel mt-4 divide-y divide-slate-200 dark:divide-slate-700" data-popularity-sort>
       {% for item in prediction_sections %}
-        {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes like_preview=item.like_preview dislike_preview=item.dislike_preview %}
+        {% include "markets/partials/forecast_card.html" with prediction=item.prediction threads=item.threads comment_count=item.comment_count prediction_vote=item.prediction_vote is_bookmarked=item.is_bookmarked reputation_stakes=item.reputation_stakes like_preview=item.like_preview dislike_preview=item.dislike_preview debrief=item.debrief debrief_form=item.debrief_form can_write_debrief=item.can_write_debrief debrief_vote=item.debrief_vote debrief_like_preview=item.debrief_like_preview debrief_dislike_preview=item.debrief_dislike_preview %}
       {% empty %}
       {% if market.is_forecastable %}
       <p class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">{% trans "No forecasts yet. Be the first to place one." %}</p>

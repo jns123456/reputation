@@ -49,6 +49,7 @@ class Vote(models.Model):
         PREDICTION = "prediction", "Prediction"
         PULSE_POST = "pulse_post", "Pulse post"
         PULSE_COMMENT = "pulse_comment", "Pulse comment"
+        DEBRIEF = "debrief", "Forecast debrief"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

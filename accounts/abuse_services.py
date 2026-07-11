@@ -33,6 +33,12 @@ DEFAULT_RATE_LIMITS = {
         "trusted": (300, 3600),
         "throttled": (3, 3600),
     },
+    "debrief": {
+        "new": (10, 3600),
+        "standard": (40, 3600),
+        "trusted": (200, 3600),
+        "throttled": (2, 3600),
+    },
     "vote": {
         "new": (60, 3600),
         "standard": (300, 3600),

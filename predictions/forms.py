@@ -2,7 +2,34 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import SubscriberAudience
+from predictions.debrief_services import DEBRIEF_MAX_CHARS, DEBRIEF_MIN_CHARS
 from predictions.models import Prediction
+
+
+class ForecastDebriefForm(forms.Form):
+    """Short post-resolution reflection — distinct from pre-forecast reasoning."""
+
+    body = forms.CharField(
+        label=_("What did you learn?"),
+        min_length=DEBRIEF_MIN_CHARS,
+        max_length=DEBRIEF_MAX_CHARS,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "maxlength": str(DEBRIEF_MAX_CHARS),
+                "placeholder": _(
+                    "What went right or wrong? What would you change next time?"
+                ),
+                "class": "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
+            }
+        ),
+        help_text=_(
+            "Published once — cannot be edited. Earns popularity when others find it useful, never reputation."
+        ),
+    )
+
+    def clean_body(self):
+        return self.cleaned_data["body"].strip()
 
 
 class ForecastForm(forms.ModelForm):

@@ -127,6 +127,9 @@ def apply_vote_popularity(*, content_owner, target, target_type, old_value, new_
     prediction = target if target_type == Vote.TargetType.PREDICTION else None
     pulse_post = target if target_type == Vote.TargetType.PULSE_POST else None
     pulse_comment = target if target_type == Vote.TargetType.PULSE_COMMENT else None
+    if target_type == Vote.TargetType.DEBRIEF:
+        # Attribute category popularity to the underlying forecast's market.
+        prediction = getattr(target, "prediction", None)
 
     record_popularity_event(
         user=content_owner,

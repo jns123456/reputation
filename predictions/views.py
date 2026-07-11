@@ -2,13 +2,15 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_POST
 
 from markets.models import Market
-from predictions.forms import ForecastForm
+from predictions.forms import ForecastDebriefForm, ForecastForm
 from predictions.models import Prediction
+from predictions.debrief_services import DebriefError, create_forecast_debrief
 from predictions.selectors import (
     get_user_active_prediction,
     get_user_closed_prediction_history,
@@ -239,10 +241,93 @@ def open_predictions(request):
     )
 
 
+@login_required
+@require_POST
+def create_debrief_view(request, prediction_id):
+    """Publish a one-shot post-resolution debrief (HTMX-friendly)."""
+    prediction = get_object_or_404(
+        Prediction.objects.select_related("user", "market", "debrief"),
+        pk=prediction_id,
+        user=request.user,
+    )
+    form = ForecastDebriefForm(request.POST)
+    if not form.is_valid():
+        error = next(iter(form.errors.get("body", [])), _("Invalid debrief"))
+        if request.headers.get("HX-Request"):
+            return HttpResponseBadRequest(str(error))
+        messages.error(request, str(error))
+        return redirect(
+            f"{reverse('markets:detail', kwargs={'slug': prediction.market.slug})}"
+            f"#debrief-{prediction.id}"
+        )
+
+    try:
+        debrief = create_forecast_debrief(
+            prediction=prediction,
+            user=request.user,
+            body=form.cleaned_data["body"],
+        )
+    except DebriefError as exc:
+        if request.headers.get("HX-Request"):
+            return HttpResponseBadRequest(str(exc))
+        messages.error(request, str(exc))
+        return redirect(
+            f"{reverse('markets:detail', kwargs={'slug': prediction.market.slug})}"
+            f"#debrief-{prediction.id}"
+        )
+    except ContentRejected as exc:
+        if request.headers.get("HX-Request"):
+            return HttpResponseBadRequest(write_guard_user_message(exc))
+        messages.error(request, write_guard_user_message(exc))
+        return redirect(
+            f"{reverse('markets:detail', kwargs={'slug': prediction.market.slug})}"
+            f"#debrief-{prediction.id}"
+        )
+    except abuse_services.RateLimitExceeded as exc:
+        if request.headers.get("HX-Request"):
+            return HttpResponseBadRequest(write_guard_user_message(exc), status=429)
+        messages.error(request, write_guard_user_message(exc))
+        return redirect(
+            f"{reverse('markets:detail', kwargs={'slug': prediction.market.slug})}"
+            f"#debrief-{prediction.id}"
+        )
+
+    from comments.models import Vote
+    from comments.selectors import get_vote_previews_for_targets
+    from comments.services import get_user_vote
+
+    user_vote = get_user_vote(request.user, Vote.TargetType.DEBRIEF, debrief.id)
+    previews = get_vote_previews_for_targets(
+        target_type=Vote.TargetType.DEBRIEF,
+        target_ids=[debrief.id],
+    )
+    preview = previews.get(debrief.id, {"likes": [], "dislikes": []})
+    context = {
+        "prediction": prediction,
+        "debrief": debrief,
+        "debrief_form": None,
+        "debrief_vote": user_vote.value if user_vote else 0,
+        "debrief_like_preview": preview["likes"],
+        "debrief_dislike_preview": preview["dislikes"],
+        "can_write_debrief": False,
+    }
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "predictions/partials/forecast_debrief.html",
+            context,
+        )
+    messages.success(request, _("Your debrief was published."))
+    return redirect(
+        f"{reverse('markets:detail', kwargs={'slug': prediction.market.slug})}"
+        f"#debrief-{prediction.id}"
+    )
+
+
 def prediction_detail(request, prediction_id):
     """Public, shareable forecast card page (works logged-out for virality)."""
     prediction = get_object_or_404(
-        Prediction.objects.select_related("user", "user__profile", "market"),
+        Prediction.objects.select_related("user", "user__profile", "market", "debrief"),
         pk=prediction_id,
     )
     metrics = build_forecast_card_metrics(prediction)
@@ -253,6 +338,41 @@ def prediction_detail(request, prediction_id):
     share_copy = get_forecast_share_copy(prediction, metrics=metrics)
     card_url = request.build_absolute_uri(reverse("prediction_card", args=[prediction.id]))
     is_embed = getattr(request.resolver_match, "url_name", "") == "prediction_card_embed"
+
+    debrief = None
+    debrief_vote = 0
+    debrief_like_preview = []
+    debrief_dislike_preview = []
+    can_write_debrief = False
+    debrief_form = None
+    if prediction.status == Prediction.Status.RESOLVED:
+        from predictions.debrief_services import get_debrief_for_prediction
+
+        debrief = get_debrief_for_prediction(prediction)
+        can_write_debrief = (
+            request.user.is_authenticated
+            and request.user.id == prediction.user_id
+            and debrief is None
+        )
+        if can_write_debrief:
+            debrief_form = ForecastDebriefForm()
+        if debrief is not None:
+            from comments.models import Vote
+            from comments.selectors import get_vote_previews_for_targets
+            from comments.services import get_user_vote
+
+            user_vote = get_user_vote(
+                request.user, Vote.TargetType.DEBRIEF, debrief.id
+            )
+            debrief_vote = user_vote.value if user_vote else 0
+            previews = get_vote_previews_for_targets(
+                target_type=Vote.TargetType.DEBRIEF,
+                target_ids=[debrief.id],
+            )
+            preview = previews.get(debrief.id, {"likes": [], "dislikes": []})
+            debrief_like_preview = preview["likes"]
+            debrief_dislike_preview = preview["dislikes"]
+
     return render(
         request,
         "predictions/prediction_detail.html",
@@ -264,6 +384,12 @@ def prediction_detail(request, prediction_id):
             "share_copy": share_copy,
             "share_url": card_url,
             "is_embed": is_embed,
+            "debrief": debrief,
+            "debrief_form": debrief_form,
+            "debrief_vote": debrief_vote,
+            "debrief_like_preview": debrief_like_preview,
+            "debrief_dislike_preview": debrief_dislike_preview,
+            "can_write_debrief": can_write_debrief,
         },
     )
 

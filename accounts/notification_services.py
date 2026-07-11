@@ -148,6 +148,9 @@ def notify_vote_received(*, actor, recipient, target, target_type, value):
 
     if target_type == "comment":
         kwargs["comment"] = target
+    elif target_type == "debrief":
+        # Deep-link via the underlying forecast on the market page.
+        kwargs["prediction"] = getattr(target, "prediction", None)
 
     return _create_notification(recipient=recipient, **kwargs)
 

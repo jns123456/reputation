@@ -57,6 +57,7 @@
           <p class="mt-2 text-xs font-semibold {% if prediction.is_correct %}text-emerald-700 dark:text-emerald-400{% else %}text-red-700 dark:text-red-400{% endif %}">
             {% if prediction.is_correct %}{% trans "✓ Correct forecast" %}{% else %}{% trans "✗ Incorrect forecast" %}{% endif %}
           </p>
+          {% include "predictions/partials/forecast_debrief.html" with prediction=prediction debrief=debrief debrief_form=debrief_form debrief_vote=debrief_vote debrief_like_preview=debrief_like_preview debrief_dislike_preview=debrief_dislike_preview can_write_debrief=can_write_debrief %}
           {% elif prediction.status == "exited" %}
           {% with delta=prediction|prediction_reputation_delta %}
           {% if delta != None %}

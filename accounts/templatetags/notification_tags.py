@@ -207,15 +207,16 @@ def notification_message(notification, compact=False):
         return format_html(
             '{market} <a href="{url}" class="{link}">{title}</a> '
             "{resolved} {outcome} — "
-            '<span class="font-semibold">{delta}</span> {points}.',
+            '<span class="font-semibold">{delta}</span> {points}. {cta}',
             market=_("Market"),
-            url=market_url,
+            url=f"{market_url}#debrief-{notification.prediction_id}",
             link=LINK_CLASS,
             title=market_title,
             resolved=_("was resolved. Your forecast was"),
             outcome=outcome_label,
             delta=delta_label,
             points=_("reputation points"),
+            cta=_("Share what you learned in a debrief."),
         )
 
     if t == Notification.NotificationType.CHALLENGE_INVITATION and notification.challenge_id:
@@ -261,6 +262,8 @@ def notification_message(notification, compact=False):
 
 
 def _vote_content_label(notification):
+    if notification.vote_target_type == "debrief":
+        return _("debrief")
     if notification.comment_id:
         return _("comment")
     if notification.prediction_id:
