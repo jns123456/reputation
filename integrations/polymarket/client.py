@@ -87,6 +87,12 @@ class PolymarketClient:
                 response.status_code,
             )
             return []
+        if response.status_code == 422:
+            logger.warning(
+                "Polymarket markets pagination ended (HTTP 422) offset=%s",
+                offset,
+            )
+            return []
         response.raise_for_status()
         data = response.json()
         if isinstance(data, list):
@@ -110,6 +116,13 @@ class PolymarketClient:
             logger.warning(
                 "Polymarket events unavailable (HTTP %s)",
                 response.status_code,
+            )
+            return []
+        if response.status_code == 422:
+            logger.warning(
+                "Polymarket events pagination ended (HTTP 422) tag_slug=%s offset=%s",
+                tag_slug,
+                offset,
             )
             return []
         response.raise_for_status()

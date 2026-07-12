@@ -37,7 +37,7 @@ def _is_transient_polymarket_upstream_error(exc) -> bool:
     return (
         isinstance(exc, requests.HTTPError)
         and response is not None
-        and response.status_code >= 500
+        and (response.status_code >= 500 or response.status_code == 422)
     )
 
 
