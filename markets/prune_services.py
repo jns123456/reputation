@@ -186,7 +186,6 @@ def run_market_raw_prune(
     totals["pending"] = queryset.count()
 
     processed = 0
-    offset = 0
 
     while True:
         if limit and processed >= limit:
@@ -196,7 +195,9 @@ def run_market_raw_prune(
         if limit:
             chunk_size = min(chunk_size, limit - processed)
 
-        batch = list(queryset[offset : offset + chunk_size])
+        # Always take from the start: compacted rows drop out of the queryset
+        # via the pruned-marker exclude, so an advancing offset would skip work.
+        batch = list(queryset[:chunk_size])
         if not batch:
             break
 
@@ -209,7 +210,9 @@ def run_market_raw_prune(
             ),
         )
         processed += len(batch)
-        offset += len(batch)
+        if dry_run:
+            # Dry-run does not mark rows pruned; advance past this slice.
+            queryset = queryset.exclude(pk__in=[m.pk for m in batch])
 
     return totals
 

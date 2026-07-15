@@ -590,6 +590,19 @@ MARKET_RESOLVING_REMINDERS_ENABLED = env.bool(
 MARKET_RAW_PRUNE_ENABLED = env.bool("MARKET_RAW_PRUNE_ENABLED", default=True)
 MARKET_RAW_PRUNE_BATCH_SIZE = env.int("MARKET_RAW_PRUNE_BATCH_SIZE", default=500)
 MARKET_RAW_PRUNE_HOUR_UTC = env.int("MARKET_RAW_PRUNE_HOUR_UTC", default=4)
+# Delete resolved markets with no user history after N days (keeps disk bounded).
+MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED = env.bool(
+    "MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED", default=True
+)
+MARKET_ORPHAN_RESOLVED_RETENTION_DAYS = env.int(
+    "MARKET_ORPHAN_RESOLVED_RETENTION_DAYS", default=30
+)
+MARKET_ORPHAN_RESOLVED_CLEANUP_BATCH_SIZE = env.int(
+    "MARKET_ORPHAN_RESOLVED_CLEANUP_BATCH_SIZE", default=1000
+)
+MARKET_ORPHAN_RESOLVED_CLEANUP_HOUR_UTC = env.int(
+    "MARKET_ORPHAN_RESOLVED_CLEANUP_HOUR_UTC", default=5
+)
 
 CELERY_BEAT_SCHEDULE = {
     "sync-all-category-markets": {
@@ -605,6 +618,13 @@ if MARKET_RAW_PRUNE_ENABLED:
     CELERY_BEAT_SCHEDULE["prune-market-raw-fifo"] = {
         "task": "markets.tasks.prune_market_raw_fifo_task",
         "schedule": crontab(minute=45, hour=MARKET_RAW_PRUNE_HOUR_UTC),
+    }
+if MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED:
+    CELERY_BEAT_SCHEDULE["delete-orphan-resolved-markets"] = {
+        "task": "markets.tasks.delete_orphan_resolved_markets_task",
+        "schedule": crontab(
+            minute=15, hour=MARKET_ORPHAN_RESOLVED_CLEANUP_HOUR_UTC
+        ),
     }
 if EAS_DAILY_BATCH_ENABLED:
     CELERY_BEAT_SCHEDULE["build-daily-attestation-batch"] = {

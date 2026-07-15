@@ -226,6 +226,13 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
 
         sync_market_display_metadata(market, save=True)
 
+        # Compact bulky Polymarket JSON as soon as a market is resolved so disk
+        # does not grow unbounded between nightly prune batches.
+        if market.status == Market.Status.RESOLVED:
+            from markets.cleanup_services import maybe_compact_resolved_market_raw
+
+            maybe_compact_resolved_market_raw(market)
+
     return market, created
 
 
