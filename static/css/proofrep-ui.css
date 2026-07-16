@@ -168,7 +168,7 @@ html.dark .pr-page-bg {
   position: absolute;
   inset: 0 auto 0 0;
   width: 3px;
-  background: #059669;
+  background: #4f46e5;
   pointer-events: none;
 }
 
@@ -178,15 +178,15 @@ html.dark .pr-landing-surface {
 }
 
 html.dark .pr-landing-surface::before {
-  background: #34d399;
+  background: #818cf8;
 }
 
 .pr-landing-accent {
-  color: #047857;
+  color: #4f46e5;
 }
 
 html.dark .pr-landing-accent {
-  color: #6ee7b7;
+  color: #a5b4fc;
 }
 
 /* Mesh & orbs (about page / legacy) */
