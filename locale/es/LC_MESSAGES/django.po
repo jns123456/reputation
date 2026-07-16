@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-11 21:48+0000\n"
+"POT-Creation-Date: 2026-07-15 22:24+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -175,7 +175,6 @@ msgstr "%(actor)s votó positivamente tu contenido"
 msgid "Your content received a vote"
 msgstr "Tu contenido recibió un voto"
 
-#| msgid "Your forecast resolved — see your reputation"
 msgid "Your forecast resolved — write your debrief"
 msgstr "Tu forecast se resolvió — escribe tu debrief"
 
@@ -1344,7 +1343,6 @@ msgstr "No puede votar por su propio pronóstico."
 msgid "You cannot vote on your own post."
 msgstr "No puedes votar por tu propio post"
 
-#| msgid "You cannot vote on your own forecast."
 msgid "You cannot vote on your own debrief."
 msgstr "No puedes votar tu propio debrief."
 
@@ -1605,27 +1603,22 @@ msgid "Could not send your message."
 msgstr "No se pudo enviar el email de verificación."
 
 #, python-format
-#| msgid "Enter at least 2 characters, or an email address."
 msgid "Write at least %(min)s characters for your debrief."
 msgstr "Escribe al menos %(min)s caracteres para tu debrief."
 
 #, python-format
-#| msgid "Each poll choice must be %(max)s characters or fewer."
 msgid "Debriefs must be %(max)s characters or fewer."
 msgstr "Los debriefs deben tener %(max)s caracteres o menos."
 
-#| msgid "You cannot vote on your own forecast."
 msgid "You can only write a debrief on your own forecast."
 msgstr "Solo puedes escribir un debrief en tu propio forecast."
 
 msgid "Debriefs are only available after a forecast resolves."
 msgstr "Los debriefs solo están disponibles cuando el forecast se resuelve."
 
-#| msgid "You already have a group with this name."
 msgid "You already published a debrief for this forecast."
 msgstr "Ya publicaste un debrief para este forecast."
 
-#| msgid "What you can do:"
 msgid "What did you learn?"
 msgstr "¿Qué aprendiste?"
 
@@ -1819,11 +1812,9 @@ msgstr "Pronóstico cerrado. Realizaste %(points)s de reputación."
 msgid "Forecast exited. You can enter again."
 msgstr "Pronóstico cerrado. Puedes volver a participar."
 
-#| msgid "Invalid vote"
 msgid "Invalid debrief"
 msgstr "Debrief inválido"
 
-#| msgid "Your forecast was posted."
 msgid "Your debrief was published."
 msgstr "Tu debrief fue publicado."
 
@@ -5756,19 +5747,15 @@ msgstr "Todos tienen opiniones."
 msgid "Few have a track record."
 msgstr "Pocos tienen un historial."
 
+#| msgid ""
+#| "Predict real-world outcomes, explain your reasoning, and build a public "
+#| "reputation for being right."
 msgid ""
-"Predict real-world outcomes, explain your reasoning, and build a public "
-"reputation for being right."
+"Predict real-world outcomes, explain your reasoning, and build a permanent "
+"public record of judgment — no betting, no wallets."
 msgstr ""
-"Predice resultados del mundo real, explica tu razonamiento y construye una "
-"reputación pública por acertar."
-
-msgid ""
-"PredictStamp turns your predictions into a permanent, measurable record of "
-"judgment."
-msgstr ""
-"PredictStamp convierte tus predicciones en un registro permanente y medible "
-"de tu criterio."
+"Predice resultados del mundo real, explica tu razonamiento y construye un "
+"registro público permanente de tu criterio — sin apuestas, sin wallets."
 
 msgid "Start Predicting"
 msgstr "Empieza a predecir"
@@ -5779,66 +5766,38 @@ msgstr "Explora predicciones"
 msgid "No betting. No money at risk. Just your reputation."
 msgstr "Sin apuestas. Sin dinero en riesgo. Solo tu reputación."
 
-msgid "Social media measures popularity."
-msgstr "Las redes sociales miden popularidad."
-
-msgid "PredictStamp measures judgment."
-msgstr "PredictStamp mide criterio."
-
-msgid "Followers show how many people listen to you."
-msgstr "Los seguidores muestran cuántas personas te escuchan."
-
-msgid "PredictStamp shows whether you were actually right."
-msgstr "PredictStamp muestra si realmente acertaste."
-
-msgid ""
-"Every prediction is timestamped, scored, and added to your public track "
-"record."
-msgstr ""
-"Cada predicción queda fechada, puntuada y sumada a tu historial público."
-
 msgid "Make your prediction"
 msgstr "Haz tu predicción"
 
+#| msgid "Take a position based on the current market probability."
 msgid ""
-"Choose a live question from politics, markets, technology, sports, culture, "
-"or global events."
+"Choose a live question and take a position based on the current market "
+"probability."
 msgstr ""
-"Elige una pregunta en vivo sobre política, mercados, tecnología, deportes, "
-"cultura o eventos globales."
-
-msgid "Take a position based on the current market probability."
-msgstr "Toma una posición según la probabilidad actual del mercado."
+"Elige una pregunta en vivo y toma una posición según la probabilidad actual "
+"del mercado."
 
 msgid "Explain your reasoning"
 msgstr "Explica tu razonamiento"
 
-msgid "Share the argument behind your prediction."
-msgstr "Comparte el argumento detrás de tu predicción."
-
+#| msgid ""
+#| "Share the argument behind your pick — visible in the public forecast feed."
 msgid ""
-"Good forecasting is not only about the answer. It is about how you got "
-"there."
+"Share the argument behind your prediction — good forecasting is about how "
+"you got there."
 msgstr ""
-"Pronosticar bien no se trata solo de la respuesta. Se trata de cómo llegaste"
-" a ella."
+"Comparte el argumento detrás de tu predicción — pronosticar bien se trata de"
+" cómo llegaste ahí."
 
 msgid "Build your reputation"
 msgstr "Construye tu reputación"
 
 msgid ""
-"When the event resolves, your reputation score goes up or down based on how "
-"difficult your prediction was."
+"When the event resolves, your score moves with difficulty — harder calls pay"
+" more, crowd misses cost more."
 msgstr ""
-"Cuando el evento se resuelve, tu puntaje de reputación sube o baja según lo "
-"difícil que era tu predicción."
-
-msgid ""
-"Predict something unlikely and get it right, and you earn more. Follow the "
-"crowd and get it wrong, and the cost is higher."
-msgstr ""
-"Predice algo improbable y acierta, y ganas más. Sigue a la multitud y falla,"
-" y el costo es mayor."
+"Cuando el evento se resuelve, tu puntaje se mueve con la dificultad — las "
+"predicciones difíciles pagan más, fallar con la multitud cuesta más."
 
 msgid "Reputation is not popularity."
 msgstr "La reputación no es popularidad."
@@ -5863,14 +5822,13 @@ msgstr ""
 "Una medida de cuánta atención, interacción y conversación genera tu "
 "contenido."
 
-msgid "You can be popular without being right."
-msgstr "Puedes ser popular sin tener razón."
-
-msgid "You can be right before anyone is paying attention."
-msgstr "Puedes tener razón antes de que alguien preste atención."
-
-msgid "PredictStamp makes the difference visible."
-msgstr "PredictStamp hace visible la diferencia."
+#| msgid "PredictStamp makes the difference visible."
+msgid ""
+"You can be popular without being right — PredictStamp makes the difference "
+"visible."
+msgstr ""
+"Puedes ser popular sin tener razón — PredictStamp hace visible la "
+"diferencia."
 
 msgid "Shareable predictions"
 msgstr "Predicciones para compartir"
@@ -5878,14 +5836,13 @@ msgstr "Predicciones para compartir"
 msgid "Stamp your prediction."
 msgstr "Estampa tu predicción."
 
-msgid "Every prediction creates a public, shareable record."
-msgstr "Cada predicción crea un registro público y compartible."
-
-msgid "Share it anywhere. Challenge someone to disagree."
-msgstr "Compártelo donde quieras. Desafía a alguien a estar en desacuerdo."
-
-msgid "Come back later and prove you called it before it happened."
-msgstr "Vuelve más tarde y demuestra que lo dijiste antes de que ocurriera."
+#| msgid "Come back later and prove you called it before it happened."
+msgid ""
+"Every prediction creates a public, shareable record. Come back later and "
+"prove you called it before it happened."
+msgstr ""
+"Cada predicción crea un registro público y compartible. Vuelve más tarde y "
+"demuestra que lo dijiste antes de que ocurriera."
 
 msgid "Create Your First Stamp"
 msgstr "Crea tu primer stamp"
@@ -5899,30 +5856,11 @@ msgstr "Tu posición"
 msgid "The market probability"
 msgstr "La probabilidad del mercado"
 
-msgid "Your reasoning"
-msgstr "Tu razonamiento"
-
 msgid "The exact timestamp"
 msgstr "La fecha y hora exactas"
 
-msgid "Your reputation score"
-msgstr "Tu puntaje de reputación"
-
 msgid "The final result"
 msgstr "El resultado final"
-
-msgid "Result cards"
-msgstr "Tarjetas de resultado"
-
-msgid "You said it before it happened."
-msgstr "Lo dijiste antes de que ocurriera."
-
-msgid ""
-"When a prediction resolves, PredictStamp creates your result card "
-"automatically."
-msgstr ""
-"Cuando una predicción se resuelve, PredictStamp crea tu tarjeta de resultado"
-" automáticamente."
 
 msgid "I called it."
 msgstr "Lo predije."
@@ -5944,67 +5882,15 @@ msgstr ""
 msgid "You were wrong. Your record shows that too."
 msgstr "Te equivocaste. Tu historial también lo muestra."
 
-msgid "Because real reputation includes both the wins and the mistakes."
-msgstr ""
-"Porque la reputación real incluye tanto los aciertos como los errores."
-
-msgid "Public profiles"
-msgstr "Perfiles públicos"
-
-msgid "Your judgment deserves a track record."
-msgstr "Tu criterio merece un historial."
-
-msgid "Your PredictStamp profile shows:"
-msgstr "Tu perfil de PredictStamp muestra:"
-
-msgid "Global reputation"
-msgstr "Reputación global"
-
-msgid "Reputation by category"
-msgstr "Reputación por categoría"
-
-msgid "Accuracy over time"
-msgstr "Precisión a lo largo del tiempo"
-
-msgid "Best predictions"
-msgstr "Mejores predicciones"
-
-msgid "Biggest mistakes"
-msgstr "Mayores errores"
-
-msgid "Active positions"
-msgstr "Posiciones abiertas"
-
-msgid "Current streak"
-msgstr "Racha actual"
-
-msgid "Performance against the market"
-msgstr "Desempeño frente al mercado"
-
-msgid "Popularity score"
-msgstr "Puntaje de popularidad"
-
-msgid "Global and category rankings"
-msgstr "Rankings globales y por categoría"
-
-msgid "Your profile becomes a public record of how you think."
-msgstr "Tu perfil se convierte en un registro público de cómo piensas."
-
-msgid "Not how confidently you speak. Not how many followers you have."
-msgstr "No de cuán seguro hablas. No de cuántos seguidores tienes."
-
-msgid "How well you predict."
-msgstr "De qué tan bien predices."
-
 msgid "Stop arguing. Make a prediction."
 msgstr "Deja de discutir. Haz una predicción."
 
-msgid "Challenge a friend, creator, analyst, community, or AI agent."
-msgstr "Desafía a un amigo, creador, analista, comunidad o agente de IA."
-
-msgid "Choose a question. Take opposite positions. Let the outcome decide."
+#| msgid ""
+#| "Choose a question. Take opposite positions. Let the outcome decide."
+msgid ""
+"Challenge someone, take opposite positions, and let the outcome decide."
 msgstr ""
-"Elige una pregunta. Tomen posiciones opuestas. Deja que el resultado decida."
+"Desafía a alguien, tomen posiciones opuestas y deja que el resultado decida."
 
 msgid "Challenge Someone"
 msgstr "Desafía a alguien"
@@ -6017,159 +5903,6 @@ msgstr "Predice NO"
 
 msgid "One question. Two public positions. One permanent result."
 msgstr "Una pregunta. Dos posiciones públicas. Un resultado permanente."
-
-msgid "Community competitions"
-msgstr "Competencias comunitarias"
-
-msgid "Who understands the future better?"
-msgstr "¿Quién entiende mejor el futuro?"
-
-msgid "Create or join prediction leagues for:"
-msgstr "Crea o únete a ligas de predicción para:"
-
-msgid "Friends"
-msgstr "Amigos"
-
-msgid "Companies"
-msgstr "Empresas"
-
-msgid "Universities"
-msgstr "Universidades"
-
-msgid "Countries"
-msgstr "Países"
-
-msgid "Online communities"
-msgstr "Comunidades en línea"
-
-msgid "Traders"
-msgstr "Traders"
-
-msgid "Journalists"
-msgstr "Periodistas"
-
-msgid ""
-"Compare humans against AI. Experts against the crowd. One community against "
-"another."
-msgstr ""
-"Compara humanos contra IA. Expertos contra la multitud. Una comunidad contra"
-" otra."
-
-msgid "Every competition produces a measurable result."
-msgstr "Cada competencia produce un resultado medible."
-
-msgid "Humans and AI"
-msgstr "Humanos e IA"
-
-msgid "Humans and AI compete on the same scoreboard."
-msgstr "Humanos e IA compiten en el mismo marcador."
-
-msgid "PredictStamp is built for both people and autonomous agents."
-msgstr ""
-"PredictStamp está construido tanto para personas como para agentes "
-"autónomos."
-
-msgid ""
-"AI agents can publish predictions, explain their reasoning, build "
-"specialized reputations, and compete openly against human forecasters."
-msgstr ""
-"Los agentes de IA pueden publicar predicciones, explicar su razonamiento, "
-"construir reputaciones especializadas y competir abiertamente contra "
-"pronosticadores humanos."
-
-msgid ""
-"The result is not another benchmark. It is a live, public test of judgment "
-"against real-world outcomes."
-msgstr ""
-"El resultado no es otro benchmark. Es una prueba pública y en vivo del "
-"criterio frente a resultados del mundo real."
-
-msgid "One reputation across every prediction market."
-msgstr "Una sola reputación en todos los mercados de predicción."
-
-msgid ""
-"PredictStamp connects public prediction markets with a social reputation "
-"layer."
-msgstr ""
-"PredictStamp conecta los mercados de predicción públicos con una capa social"
-" de reputación."
-
-msgid "Markets determine the probability."
-msgstr "Los mercados determinan la probabilidad."
-
-msgid "PredictStamp determines who deserves credibility."
-msgstr "PredictStamp determina quién merece credibilidad."
-
-msgid "Finance"
-msgstr "Finanzas"
-
-msgid "Technology"
-msgstr "Tecnología"
-
-msgid "Global events"
-msgstr "Eventos globales"
-
-msgid "Build one track record across every domain."
-msgstr "Construye un solo historial en todos los dominios."
-
-msgid "Why PredictStamp"
-msgstr "Por qué PredictStamp"
-
-msgid "The internet rewards certainty."
-msgstr "Internet premia la certeza."
-
-msgid ""
-"People are rewarded for speaking first, speaking loudly, and attracting "
-"attention."
-msgstr "Se premia a quien habla primero, habla fuerte y atrae atención."
-
-msgid "Wrong predictions disappear into the timeline."
-msgstr "Las predicciones erradas desaparecen en el timeline."
-
-msgid ""
-"Correct predictions are often claimed after the outcome is already known."
-msgstr ""
-"Las predicciones correctas suelen reclamarse cuando el resultado ya se "
-"conoce."
-
-msgid "PredictStamp changes that."
-msgstr "PredictStamp cambia eso."
-
-msgid "Every prediction is recorded before the result."
-msgstr "Cada predicción queda registrada antes del resultado."
-
-msgid "Every position has a cost."
-msgstr "Cada posición tiene un costo."
-
-msgid "Every outcome affects your reputation."
-msgstr "Cada resultado afecta tu reputación."
-
-msgid "No revisionism"
-msgstr "Sin revisionismo"
-
-msgid "No deleting the past"
-msgstr "Sin borrar el pasado"
-
-msgid "No pretending everyone knew"
-msgstr "Sin fingir que todos lo sabían"
-
-msgid "Opinions expire."
-msgstr "Las opiniones caducan."
-
-msgid "Reputation compounds."
-msgstr "La reputación se acumula."
-
-msgid "PredictStamp is the social layer for prediction markets."
-msgstr "PredictStamp es la capa social de los mercados de predicción."
-
-msgid ""
-"A place where people and AI agents can make predictions, explain their "
-"reasoning, compete publicly, and build a reputation that survives the news "
-"cycle."
-msgstr ""
-"Un lugar donde personas y agentes de IA pueden hacer predicciones, explicar "
-"su razonamiento, competir públicamente y construir una reputación que "
-"sobrevive al ciclo de noticias."
 
 msgid "Early access"
 msgstr "Acceso anticipado"
@@ -6210,12 +5943,6 @@ msgstr "El futuro revelará quién tenía razón."
 
 msgid "Make your prediction before it becomes obvious."
 msgstr "Haz tu predicción antes de que sea obvio."
-
-msgid "The social layer for prediction markets."
-msgstr "La capa social de los mercados de predicción."
-
-msgid "Build a reputation for being right."
-msgstr "Construye una reputación por acertar."
 
 msgid "information"
 msgstr "información"
@@ -8440,7 +8167,6 @@ msgstr "Debrief"
 msgid "What they learned after resolution"
 msgstr "Lo que aprendieron tras la resolución"
 
-#| msgid "Estimate your earnings"
 msgid "Write your debrief"
 msgstr "Escribe tu debrief"
 
@@ -8451,7 +8177,6 @@ msgstr ""
 "¿Qué salió bien o mal? Se publica una sola vez — otros pueden votar "
 "reflexiones útiles."
 
-#| msgid "Publishing"
 msgid "Publish debrief"
 msgstr "Publicar debrief"
 
@@ -8494,6 +8219,9 @@ msgstr ""
 "            <span class=\"font-semibold text-emerald-700 dark:text-emerald-400\">+%(win)s</span> si aciertas,\n"
 "            <span class=\"font-semibold text-red-700 dark:text-red-400\">−%(loss)s</span> si fallas.\n"
 "            "
+
+msgid "Your reasoning"
+msgstr "Tu razonamiento"
 
 #, python-format
 msgid "Current market probability for your side: %(prob)s%%."
@@ -8762,6 +8490,9 @@ msgstr "Abierto"
 msgid "View open forecasts"
 msgstr "pronóstico abierto"
 
+msgid "Active positions"
+msgstr "Posiciones abiertas"
+
 msgid "Filter track record"
 msgstr "historial"
 
@@ -8776,6 +8507,301 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid ""
+#~ "PredictStamp turns your predictions into a permanent, measurable record of "
+#~ "judgment."
+#~ msgstr ""
+#~ "PredictStamp convierte tus predicciones en un registro permanente y medible "
+#~ "de tu criterio."
+
+#~ msgid "Social media measures popularity."
+#~ msgstr "Las redes sociales miden popularidad."
+
+#~ msgid "PredictStamp measures judgment."
+#~ msgstr "PredictStamp mide criterio."
+
+#~ msgid "Followers show how many people listen to you."
+#~ msgstr "Los seguidores muestran cuántas personas te escuchan."
+
+#~ msgid "PredictStamp shows whether you were actually right."
+#~ msgstr "PredictStamp muestra si realmente acertaste."
+
+#~ msgid ""
+#~ "Every prediction is timestamped, scored, and added to your public track "
+#~ "record."
+#~ msgstr ""
+#~ "Cada predicción queda fechada, puntuada y sumada a tu historial público."
+
+#~ msgid ""
+#~ "Choose a live question from politics, markets, technology, sports, culture, "
+#~ "or global events."
+#~ msgstr ""
+#~ "Elige una pregunta en vivo sobre política, mercados, tecnología, deportes, "
+#~ "cultura o eventos globales."
+
+#~ msgid "Share the argument behind your prediction."
+#~ msgstr "Comparte el argumento detrás de tu predicción."
+
+#~ msgid ""
+#~ "Good forecasting is not only about the answer. It is about how you got "
+#~ "there."
+#~ msgstr ""
+#~ "Pronosticar bien no se trata solo de la respuesta. Se trata de cómo llegaste"
+#~ " a ella."
+
+#~ msgid ""
+#~ "When the event resolves, your reputation score goes up or down based on how "
+#~ "difficult your prediction was."
+#~ msgstr ""
+#~ "Cuando el evento se resuelve, tu puntaje de reputación sube o baja según lo "
+#~ "difícil que era tu predicción."
+
+#~ msgid ""
+#~ "Predict something unlikely and get it right, and you earn more. Follow the "
+#~ "crowd and get it wrong, and the cost is higher."
+#~ msgstr ""
+#~ "Predice algo improbable y acierta, y ganas más. Sigue a la multitud y falla,"
+#~ " y el costo es mayor."
+
+#~ msgid "You can be popular without being right."
+#~ msgstr "Puedes ser popular sin tener razón."
+
+#~ msgid "You can be right before anyone is paying attention."
+#~ msgstr "Puedes tener razón antes de que alguien preste atención."
+
+#~ msgid "Every prediction creates a public, shareable record."
+#~ msgstr "Cada predicción crea un registro público y compartible."
+
+#~ msgid "Share it anywhere. Challenge someone to disagree."
+#~ msgstr "Compártelo donde quieras. Desafía a alguien a estar en desacuerdo."
+
+#~ msgid "Your reputation score"
+#~ msgstr "Tu puntaje de reputación"
+
+#~ msgid "Result cards"
+#~ msgstr "Tarjetas de resultado"
+
+#~ msgid "You said it before it happened."
+#~ msgstr "Lo dijiste antes de que ocurriera."
+
+#~ msgid ""
+#~ "When a prediction resolves, PredictStamp creates your result card "
+#~ "automatically."
+#~ msgstr ""
+#~ "Cuando una predicción se resuelve, PredictStamp crea tu tarjeta de resultado"
+#~ " automáticamente."
+
+#~ msgid "Because real reputation includes both the wins and the mistakes."
+#~ msgstr ""
+#~ "Porque la reputación real incluye tanto los aciertos como los errores."
+
+#~ msgid "Public profiles"
+#~ msgstr "Perfiles públicos"
+
+#~ msgid "Your judgment deserves a track record."
+#~ msgstr "Tu criterio merece un historial."
+
+#~ msgid "Your PredictStamp profile shows:"
+#~ msgstr "Tu perfil de PredictStamp muestra:"
+
+#~ msgid "Global reputation"
+#~ msgstr "Reputación global"
+
+#~ msgid "Reputation by category"
+#~ msgstr "Reputación por categoría"
+
+#~ msgid "Accuracy over time"
+#~ msgstr "Precisión a lo largo del tiempo"
+
+#~ msgid "Best predictions"
+#~ msgstr "Mejores predicciones"
+
+#~ msgid "Biggest mistakes"
+#~ msgstr "Mayores errores"
+
+#~ msgid "Current streak"
+#~ msgstr "Racha actual"
+
+#~ msgid "Performance against the market"
+#~ msgstr "Desempeño frente al mercado"
+
+#~ msgid "Popularity score"
+#~ msgstr "Puntaje de popularidad"
+
+#~ msgid "Global and category rankings"
+#~ msgstr "Rankings globales y por categoría"
+
+#~ msgid "Your profile becomes a public record of how you think."
+#~ msgstr "Tu perfil se convierte en un registro público de cómo piensas."
+
+#~ msgid "Not how confidently you speak. Not how many followers you have."
+#~ msgstr "No de cuán seguro hablas. No de cuántos seguidores tienes."
+
+#~ msgid "How well you predict."
+#~ msgstr "De qué tan bien predices."
+
+#~ msgid "Challenge a friend, creator, analyst, community, or AI agent."
+#~ msgstr "Desafía a un amigo, creador, analista, comunidad o agente de IA."
+
+#~ msgid "Community competitions"
+#~ msgstr "Competencias comunitarias"
+
+#~ msgid "Who understands the future better?"
+#~ msgstr "¿Quién entiende mejor el futuro?"
+
+#~ msgid "Create or join prediction leagues for:"
+#~ msgstr "Crea o únete a ligas de predicción para:"
+
+#~ msgid "Friends"
+#~ msgstr "Amigos"
+
+#~ msgid "Companies"
+#~ msgstr "Empresas"
+
+#~ msgid "Universities"
+#~ msgstr "Universidades"
+
+#~ msgid "Countries"
+#~ msgstr "Países"
+
+#~ msgid "Online communities"
+#~ msgstr "Comunidades en línea"
+
+#~ msgid "Traders"
+#~ msgstr "Traders"
+
+#~ msgid "Journalists"
+#~ msgstr "Periodistas"
+
+#~ msgid ""
+#~ "Compare humans against AI. Experts against the crowd. One community against "
+#~ "another."
+#~ msgstr ""
+#~ "Compara humanos contra IA. Expertos contra la multitud. Una comunidad contra"
+#~ " otra."
+
+#~ msgid "Every competition produces a measurable result."
+#~ msgstr "Cada competencia produce un resultado medible."
+
+#~ msgid "Humans and AI"
+#~ msgstr "Humanos e IA"
+
+#~ msgid "Humans and AI compete on the same scoreboard."
+#~ msgstr "Humanos e IA compiten en el mismo marcador."
+
+#~ msgid "PredictStamp is built for both people and autonomous agents."
+#~ msgstr ""
+#~ "PredictStamp está construido tanto para personas como para agentes "
+#~ "autónomos."
+
+#~ msgid ""
+#~ "AI agents can publish predictions, explain their reasoning, build "
+#~ "specialized reputations, and compete openly against human forecasters."
+#~ msgstr ""
+#~ "Los agentes de IA pueden publicar predicciones, explicar su razonamiento, "
+#~ "construir reputaciones especializadas y competir abiertamente contra "
+#~ "pronosticadores humanos."
+
+#~ msgid ""
+#~ "The result is not another benchmark. It is a live, public test of judgment "
+#~ "against real-world outcomes."
+#~ msgstr ""
+#~ "El resultado no es otro benchmark. Es una prueba pública y en vivo del "
+#~ "criterio frente a resultados del mundo real."
+
+#~ msgid "One reputation across every prediction market."
+#~ msgstr "Una sola reputación en todos los mercados de predicción."
+
+#~ msgid ""
+#~ "PredictStamp connects public prediction markets with a social reputation "
+#~ "layer."
+#~ msgstr ""
+#~ "PredictStamp conecta los mercados de predicción públicos con una capa social"
+#~ " de reputación."
+
+#~ msgid "Markets determine the probability."
+#~ msgstr "Los mercados determinan la probabilidad."
+
+#~ msgid "PredictStamp determines who deserves credibility."
+#~ msgstr "PredictStamp determina quién merece credibilidad."
+
+#~ msgid "Finance"
+#~ msgstr "Finanzas"
+
+#~ msgid "Technology"
+#~ msgstr "Tecnología"
+
+#~ msgid "Global events"
+#~ msgstr "Eventos globales"
+
+#~ msgid "Build one track record across every domain."
+#~ msgstr "Construye un solo historial en todos los dominios."
+
+#~ msgid "Why PredictStamp"
+#~ msgstr "Por qué PredictStamp"
+
+#~ msgid "The internet rewards certainty."
+#~ msgstr "Internet premia la certeza."
+
+#~ msgid ""
+#~ "People are rewarded for speaking first, speaking loudly, and attracting "
+#~ "attention."
+#~ msgstr "Se premia a quien habla primero, habla fuerte y atrae atención."
+
+#~ msgid "Wrong predictions disappear into the timeline."
+#~ msgstr "Las predicciones erradas desaparecen en el timeline."
+
+#~ msgid ""
+#~ "Correct predictions are often claimed after the outcome is already known."
+#~ msgstr ""
+#~ "Las predicciones correctas suelen reclamarse cuando el resultado ya se "
+#~ "conoce."
+
+#~ msgid "PredictStamp changes that."
+#~ msgstr "PredictStamp cambia eso."
+
+#~ msgid "Every prediction is recorded before the result."
+#~ msgstr "Cada predicción queda registrada antes del resultado."
+
+#~ msgid "Every position has a cost."
+#~ msgstr "Cada posición tiene un costo."
+
+#~ msgid "Every outcome affects your reputation."
+#~ msgstr "Cada resultado afecta tu reputación."
+
+#~ msgid "No revisionism"
+#~ msgstr "Sin revisionismo"
+
+#~ msgid "No deleting the past"
+#~ msgstr "Sin borrar el pasado"
+
+#~ msgid "No pretending everyone knew"
+#~ msgstr "Sin fingir que todos lo sabían"
+
+#~ msgid "Opinions expire."
+#~ msgstr "Las opiniones caducan."
+
+#~ msgid "Reputation compounds."
+#~ msgstr "La reputación se acumula."
+
+#~ msgid "PredictStamp is the social layer for prediction markets."
+#~ msgstr "PredictStamp es la capa social de los mercados de predicción."
+
+#~ msgid ""
+#~ "A place where people and AI agents can make predictions, explain their "
+#~ "reasoning, compete publicly, and build a reputation that survives the news "
+#~ "cycle."
+#~ msgstr ""
+#~ "Un lugar donde personas y agentes de IA pueden hacer predicciones, explicar "
+#~ "su razonamiento, competir públicamente y construir una reputación que "
+#~ "sobrevive al ciclo de noticias."
+
+#~ msgid "The social layer for prediction markets."
+#~ msgstr "La capa social de los mercados de predicción."
+
+#~ msgid "Build a reputation for being right."
+#~ msgstr "Construye una reputación por acertar."
 
 #, python-format
 #~ msgid "This prediction aged badly — %(title)s."

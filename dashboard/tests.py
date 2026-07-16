@@ -44,7 +44,7 @@ class LandingPageI18nTests(TestCase):
         self.assertContains(response, "No betting. No money at risk. Just your reputation.")
         self.assertContains(response, "Reputation is not popularity.")
         self.assertContains(response, "Stamp your prediction.")
-        self.assertContains(response, "You said it before it happened.")
+        self.assertContains(response, "I called it.")
         self.assertContains(response, "Stop arguing. Make a prediction.")
         self.assertContains(response, "Become a Founding Forecaster.")
         self.assertContains(response, "The future will reveal who was right.")
