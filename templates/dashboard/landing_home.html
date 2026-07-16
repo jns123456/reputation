@@ -12,18 +12,12 @@
 
   {# ── HERO ── #}
   <section id="landing-hero"
-           class="about-full-bleed relative overflow-hidden border-b border-slate-200/60 dark:border-slate-700/60">
-    <div class="about-mesh absolute inset-0"></div>
-    <div class="about-grid-bg absolute inset-0"></div>
-    <div class="about-orb about-orb--slow absolute -left-20 top-20 h-72 w-72 bg-brand-500/30" aria-hidden="true"></div>
-    <div class="about-orb absolute -right-10 top-32 h-64 w-64 bg-emerald-400/25" aria-hidden="true"></div>
-    <div class="about-orb absolute bottom-10 left-1/3 h-48 w-48 bg-violet-500/20" aria-hidden="true"></div>
-
+           class="pr-landing-surface about-full-bleed relative overflow-hidden border-b border-slate-200 dark:border-slate-700">
     <div class="relative mx-auto flex max-w-6xl flex-col justify-center gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid lg:min-h-[80vh] lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-8">
       <div class="max-w-4xl lg:max-w-none">
         <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl dark:text-white">
           {% trans "Everyone has opinions." %}
-          <span class="about-gradient-text block">{% trans "Few have a track record." %}</span>
+          <span class="pr-landing-accent block">{% trans "Few have a track record." %}</span>
         </h1>
 
         <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl dark:text-slate-300">
@@ -31,10 +25,10 @@
         </p>
 
         <div class="mt-10 flex flex-wrap gap-3">
-          <a href="{% url 'markets:list' %}" class="btn-primary pr-touch-target px-6 py-3 text-sm shadow-lg shadow-brand-500/25">
+          <a href="{% url 'markets:list' %}" class="btn-primary pr-touch-target px-6 py-3 text-sm">
             {% trans "Start Predicting" %}
           </a>
-          <a href="{% url 'dashboard:forecasts' %}" class="btn-secondary pr-btn-neomorphic pr-touch-target px-6 py-3 text-sm">
+          <a href="{% url 'dashboard:forecasts' %}" class="btn-secondary pr-touch-target px-6 py-3 text-sm">
             {% trans "Explore Predictions" %}
           </a>
         </div>
@@ -186,7 +180,7 @@
           <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
             {% trans "Every prediction creates a public, shareable record. Come back later and prove you called it before it happened." %}
           </p>
-          <a href="{% url 'markets:list' %}" class="btn-primary pr-touch-target mt-8 inline-flex px-6 py-3 text-sm shadow-lg shadow-brand-500/25">
+          <a href="{% url 'markets:list' %}" class="btn-primary pr-touch-target mt-8 inline-flex px-6 py-3 text-sm">
             {% trans "Create Your First Stamp" %}
           </a>
         </div>
@@ -254,7 +248,7 @@
           <p class="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300">
             {% trans "Challenge someone, take opposite positions, and let the outcome decide." %}
           </p>
-          <a href="{% url 'challenges:list' %}" class="btn-primary pr-touch-target mt-8 inline-flex px-6 py-3 text-sm shadow-lg shadow-brand-500/25">
+          <a href="{% url 'challenges:list' %}" class="btn-primary pr-touch-target mt-8 inline-flex px-6 py-3 text-sm">
             {% trans "Challenge Someone" %}
           </a>
         </div>
@@ -318,7 +312,7 @@
             {% trans "A permanent place in PredictStamp history" %}
           </li>
         </ul>
-        <a href="{% url 'accounts:signup' %}" class="btn-primary pr-touch-target mt-8 inline-flex px-6 py-3 text-sm shadow-lg shadow-brand-500/25">
+        <a href="{% url 'accounts:signup' %}" class="btn-primary pr-touch-target mt-8 inline-flex px-6 py-3 text-sm">
           {% trans "Claim Your Username" %}
         </a>
       </div>
@@ -326,8 +320,7 @@
 
     {# ── FINAL CTA ── #}
     <section id="landing-cta" class="scroll-mt-28">
-      <div class="about-full-bleed relative overflow-hidden">
-        <div class="about-mesh absolute inset-0 opacity-80"></div>
+      <div class="pr-landing-surface about-full-bleed relative overflow-hidden border-y border-slate-200 dark:border-slate-700">
         <div class="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-3xl text-center">
             <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
@@ -337,8 +330,8 @@
               {% trans "Make your prediction before it becomes obvious." %}
             </p>
             <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <a href="{% url 'markets:list' %}" class="btn-primary pr-touch-target px-8 py-3 shadow-lg shadow-brand-500/25">{% trans "Start Predicting" %}</a>
-              <a href="{% url 'dashboard:forecasts' %}" class="btn-secondary pr-btn-neomorphic pr-touch-target px-8 py-3">{% trans "Explore Predictions" %}</a>
+              <a href="{% url 'markets:list' %}" class="btn-primary pr-touch-target px-8 py-3">{% trans "Start Predicting" %}</a>
+              <a href="{% url 'dashboard:forecasts' %}" class="btn-secondary pr-touch-target px-8 py-3">{% trans "Explore Predictions" %}</a>
             </div>
             <p class="mt-6 text-sm font-medium text-slate-500 dark:text-slate-400">
               {% trans "No betting. No money at risk. Just your reputation." %}

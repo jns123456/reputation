@@ -155,7 +155,41 @@ html.dark .pr-page-bg {
     radial-gradient(ellipse 50% 40% at 95% 5%, rgba(16, 185, 129, 0.08), transparent 45%);
 }
 
-/* Mesh & orbs */
+/* Landing hero/CTA — ledger surface (no blur orbs / mesh) */
+.pr-landing-surface {
+  background-color: #f8fafc;
+  background-image: linear-gradient(rgba(15, 23, 42, 0.055) 1px, transparent 1px);
+  background-size: 100% 2.75rem;
+  background-position: 0 0;
+}
+
+.pr-landing-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #059669;
+  pointer-events: none;
+}
+
+html.dark .pr-landing-surface {
+  background-color: #0f172a;
+  background-image: linear-gradient(rgba(148, 163, 184, 0.09) 1px, transparent 1px);
+}
+
+html.dark .pr-landing-surface::before {
+  background: #34d399;
+}
+
+.pr-landing-accent {
+  color: #047857;
+}
+
+html.dark .pr-landing-accent {
+  color: #6ee7b7;
+}
+
+/* Mesh & orbs (about page / legacy) */
 .pr-mesh,
 .about-mesh {
   background:
