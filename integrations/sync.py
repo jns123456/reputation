@@ -68,8 +68,10 @@ def sync_category_markets(category: CanonicalCategory, *, limit=None) -> SyncSum
             from integrations.services import sync_world_cup_match_markets
 
             summary.absorb(sync_world_cup_match_markets())
-        except Exception:
-            logger.exception("World Cup match sync failed for category %s", category.slug)
+        except Exception as exc:
+            _log_polymarket_fetch_failure(
+                exc, "World Cup match sync failed for category %s", category.slug
+            )
         if summary.imported or summary.updated:
             from markets.selectors import invalidate_category_summaries_cache
 

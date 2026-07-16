@@ -72,6 +72,40 @@ class PolymarketClientRetryTests(SimpleTestCase):
         self.assertTrue(any("unavailable (HTTP 500)" in msg for msg in logs.output))
 
     @patch("integrations.polymarket.client.time.sleep")
+    def test_fetch_events_returns_empty_on_422_pagination_limit(self, mock_sleep):
+        error_response = MagicMock()
+        error_response.status_code = 422
+
+        self.client.session.get = MagicMock(return_value=error_response)
+
+        with self.assertLogs("integrations.polymarket.client", level="WARNING") as logs:
+            events = self.client.fetch_events(tag_slug="soccer", limit=100, offset=2100)
+
+        self.assertEqual(events, [])
+        self.assertEqual(self.client.session.get.call_count, 1)
+        self.assertTrue(any("pagination ended (HTTP 422)" in msg for msg in logs.output))
+
+    @patch("integrations.polymarket.client.time.sleep")
+    def test_fetch_events_paginated_stops_on_422(self, mock_sleep):
+        ok_response = MagicMock()
+        ok_response.status_code = 200
+        ok_response.json.return_value = [{"slug": f"match-{idx}"} for idx in range(100)]
+
+        error_response = MagicMock()
+        error_response.status_code = 422
+
+        self.client.session.get = MagicMock(side_effect=[ok_response, ok_response, error_response])
+
+        events = self.client.fetch_events_paginated(
+            tag_slug="soccer",
+            page_size=100,
+            max_pages=50,
+        )
+
+        self.assertEqual(len(events), 200)
+        self.assertEqual(self.client.session.get.call_count, 3)
+
+    @patch("integrations.polymarket.client.time.sleep")
     def test_fetch_events_returns_empty_after_persistent_500(self, mock_sleep):
         error_response = MagicMock()
         error_response.status_code = 500

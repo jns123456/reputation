@@ -78,6 +78,7 @@ def _is_best_effort_enqueue_noise(event, hint) -> bool:
 
 
 _TRANSIENT_POLYMARKET_LOG_MESSAGES = (
+    "World Cup match sync failed for category",
     "Failed to fetch World Cup match event",
     "Failed to fetch H2H match event",
     "Failed to fetch Polymarket market",
@@ -105,7 +106,9 @@ def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
         if exc_name == "HTTPError":
             exc = exc_info[1]
             response = getattr(exc, "response", None)
-            if response is not None and response.status_code >= 500:
+            if response is not None and (
+                response.status_code >= 500 or response.status_code == 422
+            ):
                 return True
 
     for entry in event.get("exception", {}).get("values", []):
@@ -114,6 +117,8 @@ def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
             return True
         if entry_type == "HTTPError":
             value = entry.get("value") or ""
+            if "422" in value and "Unprocessable Entity" in value:
+                return True
             if "Server Error" in value and re.search(r"\b5\d{2}\b", value):
                 return True
     return False
