@@ -15,6 +15,7 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 from _config import sentry_api_base, sentry_org  # noqa: E402
+from _sentry_issues import add_issue_comment  # noqa: E402
 
 
 def resolve_issue_id(
@@ -75,17 +76,18 @@ def main() -> int:
         return 1
 
     note_text = f"[autofix:{args.marker}] Cursor autonomous fix pipeline"
-    if project_slug:
-        note_resp = requests.post(
-            f"{api}/projects/{args.org}/{project_slug}/issues/{issue_id}/notes/",
-            headers=headers,
-            json={"text": note_text},
-            timeout=30,
-        )
-        if note_resp.status_code not in (200, 201):
-            print(f"tag_issue WARN: note failed {note_resp.status_code}")
-        else:
-            print(f"tag_issue OK: note added ({args.marker})")
+    ok, status_code = add_issue_comment(
+        api,
+        headers,
+        issue_id,
+        note_text,
+        args.org,
+        project_slug or "",
+    )
+    if ok:
+        print(f"tag_issue OK: comment added ({args.marker})")
+    else:
+        print(f"tag_issue WARN: comment failed {status_code}")
 
     # deployed: resolve with --resolve; skipped: always resolve (clear non-app noise)
     should_resolve = args.marker == "skipped" or (

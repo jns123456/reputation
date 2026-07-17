@@ -16,8 +16,7 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 from _config import sentry_api_base, sentry_org, sentry_project  # noqa: E402
-
-AUTOFIX_MARKERS = ("[autofix:deployed]", "[autofix:skipped]", "[autofix:failed]")
+from _sentry_issues import already_handled, issue_activity_text  # noqa: E402
 
 
 def auth_headers() -> dict[str, str]:
@@ -25,21 +24,6 @@ def auth_headers() -> dict[str, str]:
     if not token:
         raise SystemExit("poll FAIL: set SENTRY_AUTH_TOKEN")
     return {"Authorization": f"Bearer {token}"}
-
-
-def issue_notes(api: str, headers: dict[str, str], org: str, project: str, issue_id: str) -> str:
-    response = requests.get(
-        f"{api}/projects/{org}/{project}/issues/{issue_id}/notes/",
-        headers=headers,
-        timeout=30,
-    )
-    if response.status_code != 200:
-        return ""
-    return "\n".join(note.get("text", "") for note in response.json())
-
-
-def already_handled(notes: str) -> bool:
-    return any(marker in notes for marker in AUTOFIX_MARKERS)
 
 
 def main() -> int:
@@ -75,8 +59,10 @@ def main() -> int:
         issue_id = str(row["id"])
         short_id = row.get("shortId", issue_id)
         project_slug = row.get("project", {}).get("slug") or args.project
-        notes = issue_notes(api, headers, args.org, project_slug, issue_id)
-        if already_handled(notes):
+        activity = issue_activity_text(
+            api, headers, issue_id, args.org, project_slug
+        )
+        if already_handled(activity):
             continue
 
         payload = {
