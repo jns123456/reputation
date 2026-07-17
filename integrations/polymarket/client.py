@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 _TRANSIENT_REQUEST_ERRORS = (
     requests.exceptions.Timeout,
     requests.exceptions.ConnectionError,
+    requests.exceptions.ChunkedEncodingError,
 )
 
 ECONOMY_TAG_SLUG = "economy"

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 _TRANSIENT_REQUEST_ERRORS = (
     requests.exceptions.Timeout,
     requests.exceptions.ConnectionError,
+    requests.exceptions.ChunkedEncodingError,
 )
 
 CLOB_API_URL = "https://clob.polymarket.com"
@@ -214,8 +215,12 @@ def _select_soccer_chart_outcomes(market) -> list[dict]:
 
     try:
         event = PolymarketClient().fetch_event_by_slug(slug)
-    except Exception:
-        logger.exception("Failed to fetch Polymarket event for soccer match chart: %s", slug)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(
+            exc,
+            "Failed to fetch Polymarket event for soccer match chart: %s",
+            slug,
+        )
         return []
 
     if not event:
@@ -273,8 +278,12 @@ def _select_chart_outcomes(market, *, limit):
 
     try:
         event = PolymarketClient().fetch_event_by_slug(slug)
-    except Exception:
-        logger.exception("Failed to fetch Polymarket event for multi-outcome chart: %s", slug)
+    except Exception as exc:
+        _log_polymarket_fetch_failure(
+            exc,
+            "Failed to fetch Polymarket event for multi-outcome chart: %s",
+            slug,
+        )
         return []
 
     if not event:

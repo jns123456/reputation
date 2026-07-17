@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 _TRANSIENT_POLYMARKET_ERRORS = (
     requests.exceptions.Timeout,
     requests.exceptions.ConnectionError,
+    requests.exceptions.ChunkedEncodingError,
 )
 
 

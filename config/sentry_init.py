@@ -97,6 +97,8 @@ def _is_transient_polymarket_upstream_exception(event, hint) -> bool:
         "ConnectionError",
         "ConnectTimeout",
         "ReadTimeoutError",
+        "ChunkedEncodingError",
+        "ProtocolError",
     }
     exc_info = hint.get("exc_info")
     if exc_info and exc_info[0] is not None:

@@ -274,6 +274,41 @@ class SentryBeforeSendTests(SimpleTestCase):
         hint = {"exc_info": (ReadTimeout, ReadTimeout("read timed out"), None)}
         self.assertIsNone(_before_send(event, hint))
 
+    def test_drops_transient_polymarket_chart_chunked_encoding_errors(self):
+        class ChunkedEncodingError(Exception):
+            pass
+
+        ChunkedEncodingError.__module__ = "requests.exceptions"
+        event = {
+            "logger": "integrations.polymarket.chart",
+            "logentry": {
+                "message": "Failed to fetch Polymarket event for multi-outcome chart: demo-event",
+            },
+            "exception": {
+                "values": [
+                    {
+                        "type": "ChunkedEncodingError",
+                        "stacktrace": {
+                            "frames": [
+                                {
+                                    "module": "integrations.polymarket.chart",
+                                    "function": "_select_chart_outcomes",
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        }
+        hint = {
+            "exc_info": (
+                ChunkedEncodingError,
+                ChunkedEncodingError("Response ended prematurely"),
+                None,
+            )
+        }
+        self.assertIsNone(_before_send(event, hint))
+
     def test_drops_embedded_sync_transient_db_errors(self):
         event = {
             "logger": "integrations.market_sync_scheduler",

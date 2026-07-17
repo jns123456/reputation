@@ -54,6 +54,23 @@ class FetchPricePointsTests(SimpleTestCase):
 
     @patch("integrations.polymarket.chart.time.sleep")
     @patch("integrations.polymarket.chart.requests.get")
+    def test_retries_chunked_encoding_error(self, mock_get, mock_sleep):
+        success = MagicMock()
+        success.status_code = 200
+        success.json.return_value = {"history": [{"t": 1_700_000_000, "p": 0.42}]}
+        mock_get.side_effect = [
+            requests.exceptions.ChunkedEncodingError("Response ended prematurely"),
+            success,
+        ]
+
+        points = _fetch_price_points("token-a", interval="max", fidelity=1440)
+
+        self.assertEqual(len(points), 1)
+        self.assertEqual(mock_get.call_count, 2)
+        mock_sleep.assert_called_once_with(1)
+
+    @patch("integrations.polymarket.chart.time.sleep")
+    @patch("integrations.polymarket.chart.requests.get")
     @patch("integrations.services.logger")
     def test_logs_warning_after_exhausted_retries(self, mock_logger, mock_get, mock_sleep):
         mock_get.side_effect = requests.exceptions.ReadTimeout("read timed out")
@@ -62,6 +79,31 @@ class FetchPricePointsTests(SimpleTestCase):
 
         self.assertEqual(points, [])
         self.assertEqual(mock_get.call_count, 3)
+        mock_logger.warning.assert_called_once()
+        mock_logger.exception.assert_not_called()
+
+    @patch("integrations.polymarket.chart.PolymarketClient")
+    @patch("integrations.services.logger")
+    def test_select_chart_outcomes_logs_warning_on_chunked_encoding_error(
+        self, mock_logger, mock_client_class
+    ):
+        market = MagicMock()
+        market.polymarket_slug = "demo-event"
+        market.polymarket_raw = {"market_kind": MULTI_OUTCOME_EVENT_KIND}
+        market.outcome_labels = ["Alpha", "Bravo"]
+        market.current_probability = {}
+        market.category = "Sports"
+
+        mock_client = mock_client_class.return_value
+        mock_client.fetch_event_by_slug.side_effect = requests.exceptions.ChunkedEncodingError(
+            "Response ended prematurely"
+        )
+
+        from integrations.polymarket.chart import _select_chart_outcomes
+
+        outcomes = _select_chart_outcomes(market, limit=4)
+
+        self.assertEqual(outcomes, [])
         mock_logger.warning.assert_called_once()
         mock_logger.exception.assert_not_called()
 
