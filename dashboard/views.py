@@ -316,6 +316,7 @@ def weekly_contest(request):
     from reputation.ranking_modes import ABSOLUTE, normalize_reputation_ranking_mode
     from reputation.weekly_contest_services import (
         build_contest_week_nav,
+        contest_program_has_ended,
         current_week_code,
         filter_weekly_contest_qualified,
         get_past_weekly_contest_winners,
@@ -381,6 +382,7 @@ def weekly_contest(request):
             "prize_usd": weekly_contest_prize_usd(),
             "hero_description_key": hero_description_key,
             "weekly_contest_min_scored": get_weekly_contest_min_scored_forecasts(),
+            "contest_program_ended": contest_program_has_ended(),
             "is_category_leaderboard": False,
         },
     )

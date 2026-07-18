@@ -11,6 +11,7 @@ from reputation.models import ReputationEvent, WeeklyContestWinner
 from reputation.period_leaderboard import get_top_predictors_between
 from reputation.weekly_contest_services import (
     build_contest_week_nav,
+    contest_program_has_ended,
     current_week_code,
     finalize_weekly_contest,
     get_past_weekly_contest_winners,
@@ -20,6 +21,8 @@ from reputation.weekly_contest_services import (
     is_live_contest_week,
     is_upcoming_contest_week,
     list_contest_week_codes,
+    normalize_contest_week_code,
+    previous_week_code,
     sunday_start_for_date,
     week_date_range,
     week_code_for_date,
@@ -156,10 +159,31 @@ class WeeklyContestServicesTests(TestCase):
         winners = get_weekly_contest_winners_for_week(week_code)
         self.assertEqual(winners["absolute"].user_id, self.leader.id)
 
-    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21")
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21",
+        WEEKLY_CONTEST_LAST_WEEK_START="",
+    )
     def test_list_contest_week_codes_from_launch(self):
         weeks = list_contest_week_codes(today=date(2026, 6, 28))
         self.assertEqual(weeks, ["2026-06-28", "2026-06-21"])
+
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21",
+        WEEKLY_CONTEST_LAST_WEEK_START="2026-07-12",
+    )
+    def test_last_week_clamps_future_weeks_and_ends_program(self):
+        self.assertEqual(current_week_code(today=date(2026, 7, 18)), "2026-07-12")
+        self.assertEqual(current_week_code(today=date(2026, 7, 19)), "2026-07-12")
+        self.assertEqual(normalize_contest_week_code("2026-07-19"), "2026-07-12")
+        self.assertTrue(is_live_contest_week(today=date(2026, 7, 18), week_code="2026-07-12"))
+        self.assertFalse(is_live_contest_week(today=date(2026, 7, 19), week_code="2026-07-12"))
+        self.assertFalse(contest_program_has_ended(today=date(2026, 7, 18)))
+        self.assertTrue(contest_program_has_ended(today=date(2026, 7, 19)))
+        self.assertEqual(
+            list_contest_week_codes(today=date(2026, 7, 25)),
+            ["2026-07-12", "2026-07-05", "2026-06-28", "2026-06-21"],
+        )
+        self.assertEqual(previous_week_code(today=date(2026, 7, 19)), "2026-07-12")
 
     def test_is_completed_contest_week_after_window_ends(self):
         week_code = "2020-03-08"

@@ -70,9 +70,7 @@ def week_code_for_date(date):
     return sunday_start_for_date(date).isoformat()
 
 
-def get_first_contest_week_start():
-    """First Sunday when the weekly contest counts reputation (launch date)."""
-    raw = getattr(settings, "WEEKLY_CONTEST_FIRST_WEEK_START", "2026-06-21")
+def _parse_contest_week_start(raw):
     if hasattr(raw, "year"):
         start = raw
     else:
@@ -80,24 +78,62 @@ def get_first_contest_week_start():
     return sunday_start_for_date(start)
 
 
+def get_first_contest_week_start():
+    """First Sunday when the weekly contest counts reputation (launch date)."""
+    raw = getattr(settings, "WEEKLY_CONTEST_FIRST_WEEK_START", "2026-06-21")
+    return _parse_contest_week_start(raw)
+
+
+def get_last_contest_week_start():
+    """Last Sunday that still awards weekly prizes, or None if open-ended."""
+    raw = getattr(settings, "WEEKLY_CONTEST_LAST_WEEK_START", "") or ""
+    if hasattr(raw, "year"):
+        return sunday_start_for_date(raw)
+    text = str(raw).strip()
+    if not text:
+        return None
+    last = _parse_contest_week_start(text)
+    first = get_first_contest_week_start()
+    if last < first:
+        return first
+    return last
+
+
+def contest_program_has_ended(*, today=None):
+    """True once the final Sat 23:59 contest window has fully elapsed."""
+    last = get_last_contest_week_start()
+    if last is None:
+        return False
+    today = today or timezone.localdate()
+    _, until = week_date_range(last.isoformat())
+    end = (timezone.localtime(until) - timedelta(seconds=1)).date()
+    return today > end
+
+
 def normalize_contest_week_code(week_code):
-    """Clamp requested weeks to the first contest Sunday onward."""
+    """Clamp requested weeks to the configured contest Sunday window."""
     first = get_first_contest_week_start()
     start_date = datetime.strptime(week_code, "%Y-%m-%d").date()
     if start_date < first:
         return first.isoformat()
+    last = get_last_contest_week_start()
+    if last is not None and start_date > last:
+        return last.isoformat()
     return week_code
 
 
 def current_week_code(*, today=None):
-    """Active contest week — never before ``WEEKLY_CONTEST_FIRST_WEEK_START``."""
+    """Active contest week — clamped to first/last configured Sundays."""
     today = today or timezone.localdate()
     first = get_first_contest_week_start()
+    last = get_last_contest_week_start()
     if today < first:
         return first.isoformat()
     natural = sunday_start_for_date(today)
     if natural < first:
         return first.isoformat()
+    if last is not None and natural > last:
+        return last.isoformat()
     return natural.isoformat()
 
 
@@ -107,6 +143,9 @@ def is_live_contest_week(*, today=None, week_code=None):
     since, until = week_date_range(week_code)
     start = timezone.localtime(since).date()
     end = (timezone.localtime(until) - timedelta(seconds=1)).date()
+    last = get_last_contest_week_start()
+    if last is not None and start > last:
+        return False
     return start >= get_first_contest_week_start() and start <= today <= end
 
 
@@ -114,7 +153,11 @@ def is_upcoming_contest_week(*, today=None, week_code=None):
     today = today or timezone.localdate()
     week_code = normalize_contest_week_code(week_code or current_week_code(today=today))
     since, _until = week_date_range(week_code)
-    return today < timezone.localtime(since).date()
+    start = timezone.localtime(since).date()
+    last = get_last_contest_week_start()
+    if last is not None and start > last:
+        return False
+    return today < start
 
 
 def week_date_range(week_code):
@@ -144,7 +187,7 @@ def get_user_reputation_events_for_week(*, user, week_code):
 
 
 def current_week_bounds(*, today=None):
-    """Bounds for the active Sun–Sat contest week (respects launch date)."""
+    """Bounds for the active Sun–Sat contest week (respects launch/end dates)."""
     week_code = current_week_code(today=today)
     return week_date_range(week_code)
 
@@ -152,6 +195,10 @@ def current_week_bounds(*, today=None):
 def previous_week_code(*, today=None):
     today = today or timezone.localdate()
     current_start = datetime.strptime(current_week_code(today=today), "%Y-%m-%d").date()
+    # After the program ends, still finalize the last completed week once.
+    if contest_program_has_ended(today=today):
+        last = get_last_contest_week_start()
+        return last.isoformat() if last is not None else None
     prev = current_start - timedelta(days=7)
     first = get_first_contest_week_start()
     if prev < first:
@@ -166,7 +213,7 @@ def is_completed_contest_week(*, week_code):
 
 
 def list_contest_week_codes(*, today=None):
-    """Contest weeks from launch through the active week (newest first)."""
+    """Contest weeks from launch through the active (or last) week (newest first)."""
     today = today or timezone.localdate()
     first = get_first_contest_week_start()
     current_start = datetime.strptime(current_week_code(today=today), "%Y-%m-%d").date()
@@ -249,6 +296,7 @@ def get_announcement_context():
         "min_scored": get_weekly_contest_min_scored_forecasts(),
         "is_live": is_live_contest_week(week_code=week_code),
         "is_upcoming": is_upcoming_contest_week(week_code=week_code),
+        "contest_ended": contest_program_has_ended(),
         "contest_url_name": "dashboard:weekly_contest",
         "dismiss_url_name": "dashboard:weekly_contest_dismiss_announcement",
     }
@@ -257,6 +305,8 @@ def get_announcement_context():
 def queue_weekly_contest_announcement(*, request):
     """Flag the next authenticated page load to show the weekly contest modal."""
     if not weekly_contest_enabled():
+        return
+    if contest_program_has_ended():
         return
     if not request.user.is_authenticated:
         return
@@ -302,7 +352,11 @@ def finalize_weekly_contest(week_code=None, *, prize_usd=None):
     if not week_code:
         return 0
     since, until = week_date_range(week_code)
-    if timezone.localtime(since).date() < get_first_contest_week_start():
+    start = timezone.localtime(since).date()
+    if start < get_first_contest_week_start():
+        return 0
+    last = get_last_contest_week_start()
+    if last is not None and start > last:
         return 0
     if until > timezone.now():
         return 0

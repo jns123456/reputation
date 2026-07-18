@@ -115,6 +115,11 @@ GROWTH_I18N_FIXES: dict[str, str] = {
     "No qualified players yet — make at least %(min)s scored forecasts this week to join the contest.": (
         "Aún no hay jugadores calificados — haz al menos %(min)s pronósticos puntuados esta semana para unirte al concurso."
     ),
+    "The weekly contest has ended. Browse final standings and past winners below — no new weekly prizes after this season.": (
+        "El concurso semanal terminó. Consultá la clasificación final y los ganadores anteriores abajo — "
+        "no hay nuevos premios semanales después de esta temporada."
+    ),
+    "Contest ended": "Concurso finalizado",
     "Earn reputation points this calendar week. The top absolute scorer wins $%(prize)s — at least %(min)s scored forecasts required.": (
         "Gana puntos de reputación esta semana calendario. El líder absoluto gana $%(prize)s — "
         "se requieren al menos %(min)s pronósticos puntuados."

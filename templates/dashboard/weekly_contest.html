@@ -13,7 +13,9 @@
   {% trans "Leaderboard" as hero_eyebrow %}
   {% trans "Weekly" as hero_title %}
   {% trans "Contest" as hero_gradient %}
-  {% if hero_description_key == "weekly_absolute" %}
+  {% if contest_program_ended %}
+  {% blocktrans asvar hero_description %}The weekly contest has ended. Browse final standings and past winners below — no new weekly prizes after this season.{% endblocktrans %}
+  {% elif hero_description_key == "weekly_absolute" %}
   {% blocktrans asvar hero_description with prize=prize_usd min=weekly_contest_min_scored %}Earn reputation points this calendar week. The top absolute scorer wins ${{ prize }} — at least {{ min }} scored forecasts required.{% endblocktrans %}
   {% else %}
   {% blocktrans asvar hero_description with prize=prize_usd min=weekly_contest_min_scored %}Best average reputation per scored forecast this week wins ${{ prize }}. At least {{ min }} scored forecasts required to qualify.{% endblocktrans %}
@@ -69,7 +71,9 @@
 
   <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">
     {% blocktrans with start=week_start|date:"M j" end=week_end|date:"M j, Y" %}Contest week · Sunday {{ start }} – Saturday {{ end }}{% endblocktrans %}
-    {% if is_current_week %}
+    {% if contest_program_ended %}
+    <span class="ml-2 inline-flex rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200">{% trans "Contest ended" %}</span>
+    {% elif is_current_week %}
     <span class="ml-2 inline-flex rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">{% trans "Live" %}</span>
     {% elif is_upcoming_week %}
     <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">{% trans "Starts soon" %}</span>
