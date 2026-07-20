@@ -36,6 +36,13 @@
           if (window.lucide && window.lucide.createIcons) {
             window.lucide.createIcons();
           }
+          if (
+            self.tab === "signup" &&
+            window.predictStampTurnstile &&
+            window.predictStampTurnstile.initDeferredWidgets
+          ) {
+            window.predictStampTurnstile.initDeferredWidgets();
+          }
           var focusId =
             self.tab === "login" ? "auth-modal-username" : "auth-modal-signup-username";
           var input = document.getElementById(focusId);

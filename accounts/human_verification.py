@@ -69,12 +69,16 @@ class TurnstileHumanVerificationProvider(BaseHumanVerificationProvider):
         try:
             import requests
 
-            remote_ip = None
+            from accounts.country_language import get_client_ip
+
+            payload = {"secret": secret, "response": token}
             if request is not None:
-                remote_ip = request.META.get("REMOTE_ADDR")
+                remote_ip = get_client_ip(request)
+                if remote_ip:
+                    payload["remoteip"] = remote_ip
             resp = requests.post(
                 self.VERIFY_URL,
-                data={"secret": secret, "response": token, "remoteip": remote_ip},
+                data=payload,
                 timeout=5,
             )
             data = resp.json()

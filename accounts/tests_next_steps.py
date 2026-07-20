@@ -199,6 +199,7 @@ class SignupHumanVerificationTests(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(User.objects.filter(username="botter").exists())
+        self.assertContains(resp, "data-human-verification-error")
         self.assertTrue(
             AbuseEvent.objects.filter(
                 event_type=AbuseEvent.EventType.REGISTRATION_RISK

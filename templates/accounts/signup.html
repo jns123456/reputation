@@ -1,5 +1,5 @@
 {% extends "accounts/auth_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Sign up" %}{% endblock %}
 
@@ -34,7 +34,7 @@
 </div>
 {% endif %}
 
-<form method="post" class="space-y-5">
+<form method="post" class="space-y-5"{% if human_verification_failed %} data-human-verification-error="1"{% endif %}>
   {% csrf_token %}
 
   {% if form.non_field_errors %}
@@ -88,7 +88,8 @@
 </form>
 
 {% if turnstile_site_key %}
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="{% static 'js/turnstile-signup.js' %}{% if static_version %}?v={{ static_version }}{% endif %}"></script>
 {% endif %}
 {% endblock %}
 

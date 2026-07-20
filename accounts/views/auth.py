@@ -224,7 +224,11 @@ def signup(request):
                 request,
                 _("We could not verify you are human. Please try again."),
             )
-            return render(request, "accounts/signup.html", _signup_context(request, form))
+            return render(
+                request,
+                "accounts/signup.html",
+                _signup_context(request, form, human_verification_failed=True),
+            )
         if form.is_valid():
             user = form.save()
             from accounts.achievement_services import evaluate_achievements
@@ -265,10 +269,11 @@ def signup(request):
     return render(request, "accounts/signup.html", _signup_context(request, form))
 
 
-def _signup_context(request, form):
+def _signup_context(request, form, *, human_verification_failed=False):
     return {
         "form": form,
         "turnstile_site_key": getattr(settings, "TURNSTILE_SITE_KEY", ""),
+        "human_verification_failed": human_verification_failed,
     }
 
 
@@ -291,8 +296,10 @@ def _run_signup_human_verification(request):
     allowed = result.passed or not required
 
     if not result.passed:
+        from accounts.country_language import get_client_ip
+
         risk = calculate_request_risk_score(
-            ip=request.META.get("REMOTE_ADDR"),
+            ip=get_client_ip(request),
             user_agent=request.META.get("HTTP_USER_AGENT", ""),
             is_human_verified=False,
         )
@@ -304,7 +311,10 @@ def _run_signup_human_verification(request):
             scope="registration",
             risk_score=risk,
             action_taken="blocked" if not allowed else "flagged",
-            reason=f"Human verification failed (provider={result.provider}).",
+            reason=(
+                f"Human verification failed (provider={result.provider}, "
+                f"detail={result.detail})."
+            ),
         )
     return {"allowed": allowed, "passed": result.passed, "provider": result.provider}
 
