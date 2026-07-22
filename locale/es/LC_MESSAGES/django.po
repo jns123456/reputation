@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PredictStamp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-18 20:01+0000\n"
+"POT-Creation-Date: 2026-07-22 12:14+0000\n"
 "PO-Revision-Date: 2026-05-27 16:40+0000\n"
 "Last-Translator: PredictStamp\n"
 "Language-Team: Spanish\n"
@@ -6336,6 +6336,24 @@ msgstr "Ver clasificación"
 msgid "Got it"
 msgstr "Entendido"
 
+msgid "User"
+msgstr "Usuario"
+
+msgid "Week reputation"
+msgstr "Reputación semanal"
+
+#| msgid "No reputation events this week."
+msgid "No qualified players for this week."
+msgstr "No hay jugadores calificados esta semana."
+
+#, python-format
+msgid ""
+"No qualified players yet — make at least %(min)s scored forecasts this week "
+"to join the contest."
+msgstr ""
+"Aún no hay jugadores calificados — haz al menos %(min)s pronósticos "
+"puntuados esta semana para unirte al concurso."
+
 msgid "Week reputation events"
 msgstr "Eventos de reputación semanal"
 
@@ -6393,6 +6411,28 @@ msgstr ""
 msgid "View balance & withdraw"
 msgstr "Ver saldo y retirar"
 
+#| msgid "View standings"
+msgid "Viewing standings"
+msgstr "Viendo clasificación"
+
+#| msgid "Settings"
+msgid "Standings"
+msgstr "Clasificación"
+
+#, python-format
+#| msgid "+%(points)s rep this week · $%(prize)s prize"
+msgid "+%(points)s · $%(prize)s"
+msgstr "+%(points)s · $%(prize)s"
+
+#| msgid "Contest winners"
+msgid "No winner"
+msgstr "Sin ganador"
+
+#, python-format
+#| msgid "Rep / forecast %(score)s · $%(prize)s prize"
+msgid "%(score)s / forecast · $%(prize)s"
+msgstr "%(score)s / pronóstico · $%(prize)s"
+
 #, python-format
 msgid "%(name)s Popularity"
 msgstr "Popularidad de %(name)s"
@@ -6413,9 +6453,6 @@ msgid ""
 msgstr ""
 "Clasificados por engagement social en todas las categorías — separado de la "
 "reputación predictiva."
-
-msgid "User"
-msgstr "Usuario"
 
 msgid "Category popularity"
 msgstr "Popularidad"
@@ -6461,6 +6498,10 @@ msgid ""
 msgstr ""
 "Ranking relativo por reputación media por pronóstico puntuado — premia la "
 "calidad predictiva. No es popularidad social."
+
+#| msgid "Weekly contest prizes"
+msgid "Weekly Contest archive"
+msgstr "Archivo del concurso semanal"
 
 #, python-format
 msgid "Weekly Contest — win $%(prize)s"
@@ -6637,12 +6678,11 @@ msgid "Contest"
 msgstr "Semanal"
 
 msgid ""
-"The weekly contest has ended. Browse final standings and past winners below "
-"— no new weekly prizes after this season."
+"There is no weekly contest right now. Browse past winners and final "
+"standings below."
 msgstr ""
-"El concurso semanal terminó. Consultá la clasificación final y los ganadores"
-" anteriores abajo — no hay nuevos premios semanales después de esta "
-"temporada."
+"No hay concurso semanal por el momento. Consultá los ganadores anteriores y "
+"la clasificación final abajo."
 
 #, python-format
 msgid ""
@@ -6660,6 +6700,29 @@ msgstr ""
 "El mejor promedio de reputación por pronóstico puntuado esta semana gana "
 "$%(prize)s. Se requieren al menos %(min)s pronósticos puntuados para "
 "calificar."
+
+#| msgid "View weekly contest"
+msgid "No weekly contest at the moment"
+msgstr "No hay concurso semanal por el momento"
+
+msgid ""
+"The last season has finished — no new weekly prizes until a future contest "
+"is announced."
+msgstr ""
+"La última temporada terminó — no hay nuevos premios semanales hasta que se "
+"anuncie un concurso futuro."
+
+msgid "Past winners"
+msgstr "Ganadores anteriores"
+
+#| msgid "View standings"
+msgid "Week standings"
+msgstr "Clasificación de la semana"
+
+#, python-format
+#| msgid "Contest week · Sunday %(start)s – Saturday %(end)s"
+msgid "Sunday %(start)s – Saturday %(end)s"
+msgstr "Domingo %(start)s – sábado %(end)s"
 
 #, python-format
 msgid ""
@@ -6684,10 +6747,6 @@ msgstr "Finalizada"
 msgid "Contest week · Sunday %(start)s – Saturday %(end)s"
 msgstr "Semana del concurso · domingo %(start)s – sábado %(end)s"
 
-#| msgid "Contest winners"
-msgid "Contest ended"
-msgstr "Concurso finalizado"
-
 msgid "Starts soon"
 msgstr "Empieza pronto"
 
@@ -6704,20 +6763,6 @@ msgstr "Ganadores de la semana"
 #, python-format
 msgid "Final results for Sunday %(start)s – Saturday %(end)s"
 msgstr "Resultados finales del domingo %(start)s al sábado %(end)s"
-
-msgid "Week reputation"
-msgstr "Reputación semanal"
-
-#, python-format
-msgid ""
-"No qualified players yet — make at least %(min)s scored forecasts this week "
-"to join the contest."
-msgstr ""
-"Aún no hay jugadores calificados — haz al menos %(min)s pronósticos "
-"puntuados esta semana para unirte al concurso."
-
-msgid "Past winners"
-msgstr "Ganadores anteriores"
 
 msgid "Official prize winners from completed contest weeks."
 msgstr "Ganadores oficiales de semanas de concurso completadas."
@@ -8509,6 +8554,17 @@ msgstr "Aún no hay likes."
 
 msgid "to make your first forecast."
 msgstr "Haz tu primer pronóstico"
+
+#~ msgid ""
+#~ "The weekly contest has ended. Browse final standings and past winners below "
+#~ "— no new weekly prizes after this season."
+#~ msgstr ""
+#~ "El concurso semanal terminó. Consultá la clasificación final y los ganadores"
+#~ " anteriores abajo — no hay nuevos premios semanales después de esta "
+#~ "temporada."
+
+#~ msgid "Contest ended"
+#~ msgstr "Concurso finalizado"
 
 #~ msgid ""
 #~ "PredictStamp turns your predictions into a permanent, measurable record of "

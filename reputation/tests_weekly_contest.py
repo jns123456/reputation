@@ -74,7 +74,10 @@ class WeeklyContestServicesTests(TestCase):
         self.assertFalse(is_live_contest_week(today=date(2026, 6, 19)))
         self.assertTrue(is_live_contest_week(today=date(2026, 6, 21)))
 
-    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01",
+        WEEKLY_CONTEST_LAST_WEEK_START="",
+    )
     def test_week_bounds_aggregate_current_week_events(self):
         since, until = week_date_range(current_week_code())
         _scored_prediction(self.leader, self.market, points=50)
@@ -213,7 +216,23 @@ class WeeklyContestViewTests(TestCase):
         self.assertContains(response, "Concurso")
         self.assertContains(response, "Semanal")
 
-    @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2026-06-21",
+        WEEKLY_CONTEST_LAST_WEEK_START="2026-07-12",
+        LANGUAGE_CODE="es",
+    )
+    def test_weekly_contest_archive_renders_in_spanish(self):
+        response = self.client.get(
+            reverse("dashboard:weekly_contest"),
+            HTTP_ACCEPT_LANGUAGE="es",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No hay concurso semanal por el momento")
+
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01",
+        WEEKLY_CONTEST_LAST_WEEK_START="2020-03-08",
+    )
     def test_weekly_contest_page_shows_past_winners(self):
         week_code = "2020-03-08"
         since, _until = week_date_range(week_code)
@@ -226,14 +245,39 @@ class WeeklyContestViewTests(TestCase):
         finalize_weekly_contest(week_code)
         response = self.client.get(reverse("dashboard:weekly_contest"))
         self.assertContains(response, "Past winners")
+        self.assertContains(response, "No weekly contest at the moment")
         self.assertContains(response, leader.public_name)
+        self.assertNotContains(response, "Absolute prize")
+        self.assertNotContains(response, "· Live")
 
+        response_week = self.client.get(
+            reverse("dashboard:weekly_contest"),
+            {"week": week_code},
+        )
+        self.assertContains(response_week, "Week standings")
+        self.assertContains(response_week, leader.public_name)
+
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01",
+        WEEKLY_CONTEST_LAST_WEEK_START="",
+    )
+    def test_weekly_contest_live_page_shows_week_winners_section(self):
+        week_code = "2020-03-08"
+        since, _until = week_date_range(week_code)
+        leader = create_user("wclivehist")
+        for index in range(12):
+            m = create_market(external_id=f"wc-live-view-{index}", slug=f"wc-live-view-{index}")
+            prediction = _scored_prediction(leader, m, points=5)
+            ReputationEvent.objects.filter(prediction=prediction).update(created_at=since)
+
+        finalize_weekly_contest(week_code)
         response_week = self.client.get(
             reverse("dashboard:weekly_contest"),
             {"week": week_code},
         )
         self.assertContains(response_week, "Week winners")
         self.assertContains(response_week, leader.public_name)
+        self.assertContains(response_week, "Absolute prize")
 
     @override_settings(WEEKLY_CONTEST_ENABLED=False)
     def test_weekly_contest_disabled_returns_404(self):
@@ -241,8 +285,15 @@ class WeeklyContestViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     @override_settings(WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01")
+    @override_settings(
+        WEEKLY_CONTEST_FIRST_WEEK_START="2020-01-01",
+        WEEKLY_CONTEST_LAST_WEEK_START="",
+    )
     def test_weekly_contest_page_links_week_points_to_events_sheet(self):
-        week_code = "2020-03-08"
+        from django.core.cache import cache
+
+        cache.clear()
+        week_code = "2020-03-15"
         since, _until = week_date_range(week_code)
         leader = create_user("wcevents")
         for index in range(12):

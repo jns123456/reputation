@@ -119,6 +119,22 @@ GROWTH_I18N_FIXES: dict[str, str] = {
         "El concurso semanal terminó. Consultá la clasificación final y los ganadores anteriores abajo — "
         "no hay nuevos premios semanales después de esta temporada."
     ),
+    "There is no weekly contest right now. Browse past winners and final standings below.": (
+        "No hay concurso semanal por el momento. Consultá los ganadores anteriores y la clasificación final abajo."
+    ),
+    "No weekly contest at the moment": "No hay concurso semanal por el momento",
+    "The last season has finished — no new weekly prizes until a future contest is announced.": (
+        "La última temporada terminó — no hay nuevos premios semanales hasta que se anuncie un concurso futuro."
+    ),
+    "Week standings": "Clasificación de la semana",
+    "Sunday %(start)s – Saturday %(end)s": "Domingo %(start)s – sábado %(end)s",
+    "Standings": "Clasificación",
+    "Viewing standings": "Viendo clasificación",
+    "No winner": "Sin ganador",
+    "+%(points)s · $%(prize)s": "+%(points)s · $%(prize)s",
+    "%(score)s / forecast · $%(prize)s": "%(score)s / pronóstico · $%(prize)s",
+    "No qualified players for this week.": "No hay jugadores calificados esta semana.",
+    "Weekly Contest archive": "Archivo del concurso semanal",
     "Contest ended": "Concurso finalizado",
     "Earn reputation points this calendar week. The top absolute scorer wins $%(prize)s — at least %(min)s scored forecasts required.": (
         "Gana puntos de reputación esta semana calendario. El líder absoluto gana $%(prize)s — "

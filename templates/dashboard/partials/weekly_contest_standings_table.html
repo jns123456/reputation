@@ -1,0 +1,57 @@
+{% load i18n %}
+<div class="pr-table-wrap mt-6">
+  <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
+  <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700"
+         data-leaderboard-table
+         data-default-sort="{% if ranking_mode == 'absolute' %}rep-points{% else %}rep-per-forecast{% endif %}">
+    <thead>
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "User" %}</th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+          <button type="button"
+                  class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                  data-leaderboard-sort="rep-per-forecast"
+                  aria-label="{% trans 'Sort by rep per forecast, highest first' %}">
+            {% trans "Rep / forecast" %}
+            <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+          </button>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+          <button type="button"
+                  class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                  data-leaderboard-sort="rep-points"
+                  aria-label="{% trans 'Sort by reputation, highest first' %}">
+            {% trans "Week reputation" %}
+            <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+          </button>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
+          <button type="button"
+                  class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
+                  data-leaderboard-sort="accuracy"
+                  aria-label="{% trans 'Sort by accuracy, highest first' %}">
+            {% trans "Accuracy" %}
+            <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
+          </button>
+        </th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Scored" %}</th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
+        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+      {% for row in leaderboard_rows %}
+        {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=False relative_ranking_min_scored=weekly_contest_min_scored week_code=week_code %}
+      {% empty %}
+        <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">
+          {% if contest_program_ended %}
+          {% trans "No qualified players for this week." %}
+          {% else %}
+          {% blocktrans with min=weekly_contest_min_scored %}No qualified players yet — make at least {{ min }} scored forecasts this week to join the contest.{% endblocktrans %}
+          {% endif %}
+        </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

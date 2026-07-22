@@ -1,0 +1,51 @@
+{% load i18n %}
+{# Compact winner list for archive / past-winners (one row per week). #}
+<ul class="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-800">
+  {% for entry in entries %}
+  <li class="px-3 py-3 sm:px-4">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
+        {% blocktrans with start=entry.week_start|date:"M j" end=entry.week_end|date:"M j, Y" %}{{ start }} – {{ end }}{% endblocktrans %}
+      </h3>
+      <a href="{{ base_url }}?mode={{ ranking_mode }}&week={{ entry.week_code }}"
+         class="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400">
+        {% if entry.week_code == week_code %}{% trans "Viewing standings" %}{% else %}{% trans "Standings" %} →{% endif %}
+      </a>
+    </div>
+    <dl class="mt-2 grid gap-1 text-sm sm:grid-cols-2">
+      <div class="min-w-0">
+        <dt class="inline text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">{% trans "Absolute" %}</dt>
+        <dd class="mt-0.5 text-slate-700 dark:text-slate-200">
+          {% with win=entry.winners.absolute %}
+          {% if win %}
+          <a href="{% url 'accounts:profile' username=win.user.username %}" class="font-medium hover:underline">{{ win.user.public_name }}</a>
+          <span class="text-slate-500 dark:text-slate-400">
+            {% blocktrans with points=win.reputation_points prize=win.prize_usd %}+{{ points }} · ${{ prize }}{% endblocktrans %}
+          </span>
+          {% else %}
+          <span class="text-slate-500 dark:text-slate-400">{% trans "No winner" %}</span>
+          {% endif %}
+          {% endwith %}
+        </dd>
+      </div>
+      <div class="min-w-0">
+        <dt class="inline text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{% trans "Quality" %}</dt>
+        <dd class="mt-0.5 text-slate-700 dark:text-slate-200">
+          {% with win=entry.winners.relative %}
+          {% if win %}
+          <a href="{% url 'accounts:profile' username=win.user.username %}" class="font-medium hover:underline">{{ win.user.public_name }}</a>
+          <span class="text-slate-500 dark:text-slate-400">
+            {% blocktrans with score=win.reputation_score prize=win.prize_usd %}{{ score }} / forecast · ${{ prize }}{% endblocktrans %}
+          </span>
+          {% else %}
+          <span class="text-slate-500 dark:text-slate-400">{% trans "No winner" %}</span>
+          {% endif %}
+          {% endwith %}
+        </dd>
+      </div>
+    </dl>
+  </li>
+  {% empty %}
+  <li class="px-4 py-6 text-center text-sm text-slate-500">{% trans "No contest winners recorded yet." %}</li>
+  {% endfor %}
+</ul>

@@ -14,7 +14,7 @@
   {% trans "Weekly" as hero_title %}
   {% trans "Contest" as hero_gradient %}
   {% if contest_program_ended %}
-  {% blocktrans asvar hero_description %}The weekly contest has ended. Browse final standings and past winners below — no new weekly prizes after this season.{% endblocktrans %}
+  {% blocktrans asvar hero_description %}There is no weekly contest right now. Browse past winners and final standings below.{% endblocktrans %}
   {% elif hero_description_key == "weekly_absolute" %}
   {% blocktrans asvar hero_description with prize=prize_usd min=weekly_contest_min_scored %}Earn reputation points this calendar week. The top absolute scorer wins ${{ prize }} — at least {{ min }} scored forecasts required.{% endblocktrans %}
   {% else %}
@@ -24,6 +24,59 @@
 
   {% url "dashboard:weekly_contest" as base_url %}
 
+  {% if contest_program_ended %}
+  <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/60">
+    <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{% trans "No weekly contest at the moment" %}</p>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      {% trans "The last season has finished — no new weekly prizes until a future contest is announced." %}
+    </p>
+  </div>
+
+  {% if past_weekly_contest_winners %}
+  <section class="mt-6">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 class="text-base font-semibold text-slate-900 dark:text-white">{% trans "Past winners" %}</h2>
+      <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">← {% trans "Full reputation leaderboard" %}</a>
+    </div>
+    <div class="mt-3">
+      {% include "dashboard/partials/weekly_contest_winner_rows.html" with entries=past_weekly_contest_winners base_url=base_url ranking_mode=ranking_mode week_code=week_code %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="mt-8">
+    <h2 class="text-base font-semibold text-slate-900 dark:text-white">{% trans "Week standings" %}</h2>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      {% blocktrans with start=week_start|date:"M j" end=week_end|date:"M j, Y" %}Sunday {{ start }} – Saturday {{ end }}{% endblocktrans %}
+    </p>
+
+    <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+      {% for week in contest_week_nav %}
+      <a href="{{ base_url }}?mode={{ ranking_mode }}&week={{ week.week_code }}"
+         class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if week.is_selected %}bg-slate-900 text-white dark:bg-white dark:text-slate-900{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700{% endif %}"
+         {% if week.is_selected %}aria-current="page"{% endif %}>
+        {% blocktrans with start=week.week_start|date:"M j" end=week.week_end|date:"M j" %}{{ start }} – {{ end }}{% endblocktrans %}
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="mt-3 flex flex-wrap gap-2">
+      <a href="{{ base_url }}?mode=absolute&week={{ week_code }}"
+         class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if ranking_mode == 'absolute' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700{% endif %}"
+         {% if ranking_mode == 'absolute' %}aria-current="page"{% endif %}>
+        {% trans "Absolute ranking" %}
+      </a>
+      <a href="{{ base_url }}?mode=relative&week={{ week_code }}"
+         class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if ranking_mode == 'relative' %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700{% endif %}"
+         {% if ranking_mode == 'relative' %}aria-current="page"{% endif %}>
+        {% trans "Relative ranking" %}
+      </a>
+    </div>
+  </section>
+
+  {% include "dashboard/partials/weekly_contest_standings_table.html" %}
+
+  {% else %}
   <div class="mt-4 grid gap-3 sm:grid-cols-2">
     <div class="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 dark:border-amber-800/60 dark:from-amber-950/30 dark:to-slate-900">
       <div class="flex items-start gap-3">
@@ -59,7 +112,7 @@
          class="shrink-0 rounded-full px-3 py-2 text-xs font-medium transition {% if week.is_selected %}bg-slate-900 text-white dark:bg-white dark:text-slate-900{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700{% endif %}"
          {% if week.is_selected %}aria-current="page"{% endif %}>
         {% blocktrans with start=week.week_start|date:"M j" end=week.week_end|date:"M j" %}{{ start }} – {{ end }}{% endblocktrans %}
-        {% if week.is_current %}
+        {% if week.is_live %}
         <span class="ml-1 opacity-80">· {% trans "Live" %}</span>
         {% elif week.is_completed %}
         <span class="ml-1 opacity-80">· {% trans "Final" %}</span>
@@ -71,9 +124,7 @@
 
   <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">
     {% blocktrans with start=week_start|date:"M j" end=week_end|date:"M j, Y" %}Contest week · Sunday {{ start }} – Saturday {{ end }}{% endblocktrans %}
-    {% if contest_program_ended %}
-    <span class="ml-2 inline-flex rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200">{% trans "Contest ended" %}</span>
-    {% elif is_current_week %}
+    {% if is_current_week %}
     <span class="ml-2 inline-flex rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">{% trans "Live" %}</span>
     {% elif is_upcoming_week %}
     <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">{% trans "Starts soon" %}</span>
@@ -112,56 +163,7 @@
     <a href="{% url 'dashboard:reputation_leaderboard' %}" class="text-sm font-medium text-brand-600 hover:underline dark:text-brand-400">← {% trans "Full reputation leaderboard" %}</a>
   </div>
 
-  <div class="pr-table-wrap mt-6">
-    <p class="px-3 py-2 text-xs text-slate-400 md:hidden">{% trans "Swipe to see all columns →" %}</p>
-    <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700"
-           data-leaderboard-table
-           data-default-sort="{% if ranking_mode == 'absolute' %}rep-points{% else %}rep-per-forecast{% endif %}">
-      <thead>
-        <tr>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Rank" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "User" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
-            <button type="button"
-                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
-                    data-leaderboard-sort="rep-per-forecast"
-                    aria-label="{% trans 'Sort by rep per forecast, highest first' %}">
-              {% trans "Rep / forecast" %}
-              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
-            </button>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
-            <button type="button"
-                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
-                    data-leaderboard-sort="rep-points"
-                    aria-label="{% trans 'Sort by reputation, highest first' %}">
-              {% trans "Week reputation" %}
-              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
-            </button>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">
-            <button type="button"
-                    class="pr-leaderboard-sort pr-touch-target inline-flex items-center gap-1 text-left uppercase"
-                    data-leaderboard-sort="accuracy"
-                    aria-label="{% trans 'Sort by accuracy, highest first' %}">
-              {% trans "Accuracy" %}
-              <i data-lucide="arrow-down" class="h-3.5 w-3.5 opacity-40" stroke-width="2" aria-hidden="true"></i>
-            </button>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Scored" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Predictions" %}</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-500">{% trans "Correct" %}</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-        {% for row in leaderboard_rows %}
-          {% include "dashboard/partials/reputation_leaderboard_row.html" with stats=row.stats rank=row.rank qualifies_relative=row.qualifies_relative ranking_mode=ranking_mode show_global=False relative_ranking_min_scored=weekly_contest_min_scored week_code=week_code %}
-        {% empty %}
-          <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">{% blocktrans with min=weekly_contest_min_scored %}No qualified players yet — make at least {{ min }} scored forecasts this week to join the contest.{% endblocktrans %}</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  {% include "dashboard/partials/weekly_contest_standings_table.html" %}
 
   {% if past_weekly_contest_winners %}
   <section class="mt-10">
@@ -190,6 +192,7 @@
       {% endfor %}
     </div>
   </section>
+  {% endif %}
   {% endif %}
 </div>
 <div id="weekly-contest-events-portal"></div>

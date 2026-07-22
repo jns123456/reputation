@@ -229,15 +229,20 @@ def build_contest_week_nav(*, selected_week_code, today=None):
     """Navigation metadata for the week picker on the contest page."""
     today = today or timezone.localdate()
     selected_week_code = normalize_contest_week_code(selected_week_code)
+    program_ended = contest_program_has_ended(today=today)
     nav = []
     for week_code in list_contest_week_codes(today=today):
         since, until = week_date_range(week_code)
+        is_live = (not program_ended) and is_live_contest_week(
+            today=today, week_code=week_code
+        )
         nav.append(
             {
                 "week_code": week_code,
                 "week_start": since,
                 "week_end": until - timedelta(seconds=1),
                 "is_current": week_code == current_week_code(today=today),
+                "is_live": is_live,
                 "is_selected": week_code == selected_week_code,
                 "is_completed": is_completed_contest_week(week_code=week_code),
             }
