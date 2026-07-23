@@ -226,6 +226,35 @@ def _is_transient_postgres_oom(event, hint) -> bool:
     return False
 
 
+def _is_handled_stale_refresh_postgres_oom(event, hint) -> bool:
+    """Drop handled PostgreSQL OOM during stale market refresh batch/task."""
+    logger_name = event.get("logger")
+    if logger_name not in {"integrations.sync", "integrations.tasks"}:
+        return False
+
+    message = _event_message(event)
+    stale_refresh_markers = (
+        "Stale market refresh skipped",
+        "refresh_stale_open_markets_task failed",
+    )
+    if not any(marker in message for marker in stale_refresh_markers):
+        return False
+
+    oom_markers = ("out of memory", "failed on request of size")
+    exc_info = hint.get("exc_info")
+    if exc_info and exc_info[1] is not None:
+        if any(marker in str(exc_info[1]).lower() for marker in oom_markers):
+            return True
+
+    for entry in event.get("exception", {}).get("values", []):
+        if entry.get("type") not in {"OperationalError", "OutOfMemory"}:
+            continue
+        value = (entry.get("value") or "").lower()
+        if any(marker in value for marker in oom_markers):
+            return True
+    return False
+
+
 def _before_send(event, hint):
     """Drop expected worker SIGTERM noise during Heroku dyno cycling."""
     exc_info = hint.get("exc_info")
@@ -254,6 +283,9 @@ def _before_send(event, hint):
         return None
 
     if _is_transient_postgres_oom(event, hint):
+        return None
+
+    if _is_handled_stale_refresh_postgres_oom(event, hint):
         return None
 
     return event

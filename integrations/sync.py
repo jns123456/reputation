@@ -8,7 +8,11 @@ from django.db import OperationalError, close_old_connections
 from django.db.models import Q
 from django.utils import timezone
 
-from integrations.market_refresh import REFRESH_MARKET_DEFER_FIELDS, attach_refresh_routing_raw
+from integrations.market_refresh import (
+    attach_refresh_routing_raw,
+    is_postgres_out_of_memory,
+    load_market_for_refresh,
+)
 from integrations.services import (
     _log_polymarket_fetch_failure,
     refresh_market_from_polymarket,
@@ -184,7 +188,7 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
     refreshed = 0
     failures = 0
 
-    due_markets = (
+    due_market_ids = (
         Market.objects.filter(source=Market.Source.POLYMARKET)
         .filter(
             Q(status=Market.Status.OPEN)
@@ -200,17 +204,50 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
             | Q(status=Market.Status.CLOSED, resolved_outcome="")
             | Q(status=Market.Status.RESOLVED, resolved_outcome="")
         )
-        .defer(*REFRESH_MARKET_DEFER_FIELDS)
-        .order_by("polymarket_synced_at", "updated_at")[:batch_size]
+        .order_by("polymarket_synced_at", "updated_at")
+        .values_list("pk", flat=True)[:batch_size]
     )
 
-    candidates = _materialize_queryset(due_markets)
+    try:
+        candidate_ids = _materialize_queryset(due_market_ids)
+    except OperationalError as exc:
+        if is_postgres_out_of_memory(exc):
+            logger.warning(
+                "Stale market refresh skipped — PostgreSQL out of memory on candidate fetch"
+            )
+            candidate_ids = []
+        else:
+            raise
 
-    for market in candidates:
+    for market_id in candidate_ids:
+        try:
+            market = load_market_for_refresh(market_id)
+        except OperationalError as exc:
+            if is_postgres_out_of_memory(exc):
+                logger.warning(
+                    "Stale market refresh skipped market %s — PostgreSQL out of memory on load",
+                    market_id,
+                )
+                failures += 1
+                continue
+            raise
+        if market is None:
+            continue
+
         attach_refresh_routing_raw(market)
         try:
             refresh_market(market)
             refreshed += 1
+        except OperationalError as exc:
+            if is_postgres_out_of_memory(exc):
+                logger.warning(
+                    "Stale market refresh skipped market %s — PostgreSQL out of memory during refresh",
+                    market_id,
+                )
+                failures += 1
+                continue
+            failures += 1
+            logger.exception("Failed to refresh stale market %s", market.external_id)
         except Exception:
             failures += 1
             logger.exception("Failed to refresh stale market %s", market.external_id)
@@ -241,6 +278,6 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
     return {
         "refreshed": refreshed,
         "failures": failures,
-        "candidates": len(candidates),
+        "candidates": len(candidate_ids),
         "repair": repair,
     }
