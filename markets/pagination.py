@@ -2,7 +2,23 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
+
 from django.core.paginator import Paginator
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.utils.urls import replace_query_param
+
+
+def resolve_markets_list_status(request) -> tuple[str | None, str]:
+    """Return (filter for ``get_markets_list``, status key for windowed pagination).
+
+    Matches the HTML market list: default to open; explicit ``?status=`` lists all.
+    """
+    if "status" in request.query_params:
+        raw = request.query_params.get("status", "")
+        return (raw or None, raw)
+    return (Market.Status.OPEN, Market.Status.OPEN)
 
 
 def markets_list_requires_windowed_pagination(*, status: str) -> bool:
@@ -112,3 +128,75 @@ def paginate_queryset(qs, *, page, per_page: int, windowed: bool = False):
 
     paginator = Paginator(qs, per_page)
     return paginator.get_page(page)
+
+
+class MarketApiPagination(PageNumberPagination):
+    """DRF pagination that skips COUNT for all-status and resolved market listings."""
+
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+    def _windowed_status(self) -> str:
+        _, status_key = resolve_markets_list_status(self.request)
+        return status_key
+
+    def _use_windowed(self) -> bool:
+        return markets_list_requires_windowed_pagination(status=self._windowed_status())
+
+    def paginate_queryset(self, queryset, request, view=None):
+        self.request = request
+        self._windowed = False
+        if not self._use_windowed():
+            return super().paginate_queryset(queryset, request, view)
+
+        page_size = self.get_page_size(request)
+        if not page_size:
+            return None
+
+        page_number = request.query_params.get(self.page_query_param, 1)
+        try:
+            page_number = int(page_number)
+        except (TypeError, ValueError):
+            page_number = 1
+
+        self.windowed_page = paginate_queryset_windowed(
+            queryset,
+            page=page_number,
+            per_page=page_size,
+        )
+        self._windowed = True
+        return list(self.windowed_page.object_list)
+
+    def get_next_link(self):
+        if not getattr(self, "_windowed", False):
+            return super().get_next_link()
+        if not self.windowed_page.has_next:
+            return None
+        return self._page_link(self.windowed_page.next_page_number)
+
+    def get_previous_link(self):
+        if not getattr(self, "_windowed", False):
+            return super().get_previous_link()
+        if not self.windowed_page.has_previous:
+            return None
+        return self._page_link(self.windowed_page.previous_page_number)
+
+    def _page_link(self, page_number: int) -> str:
+        url = self.request.build_absolute_uri()
+        return replace_query_param(url, self.page_query_param, page_number)
+
+    def get_paginated_response(self, data):
+        if not getattr(self, "_windowed", False):
+            return super().get_paginated_response(data)
+
+        return Response(
+            OrderedDict(
+                [
+                    ("count", self.windowed_page.paginator.count),
+                    ("next", self.get_next_link()),
+                    ("previous", self.get_previous_link()),
+                    ("results", data),
+                ]
+            )
+        )

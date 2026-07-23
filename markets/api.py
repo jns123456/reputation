@@ -2,6 +2,7 @@ from rest_framework import serializers, viewsets
 from rest_framework.exceptions import PermissionDenied
 
 from markets.models import Market
+from markets.pagination import MarketApiPagination, resolve_markets_list_status
 from markets.selectors import get_markets_list
 
 
@@ -51,6 +52,7 @@ class MarketViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Market.objects.all()
     serializer_class = MarketSerializer
     lookup_field = "slug"
+    pagination_class = MarketApiPagination
 
     def _include_raw_requested(self):
         return self.request.query_params.get("include_raw") in {"1", "true", "yes"}
@@ -68,7 +70,7 @@ class MarketViewSet(viewsets.ReadOnlyModelViewSet):
         return MarketSerializer
 
     def get_queryset(self):
-        status = self.request.query_params.get("status")
+        status, _ = resolve_markets_list_status(self.request)
         category = self.request.query_params.get("category")
         search = self.request.query_params.get("q")
         return get_markets_list(
