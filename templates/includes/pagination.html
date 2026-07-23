@@ -2,12 +2,19 @@
 {% if page_obj.paginator.num_pages > 1 %}
 <nav class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between" aria-label="{% trans 'Pagination' %}">
   <p class="text-sm text-slate-500">
+    {% if page_obj.paginator.count_is_approximate %}
+    {% blocktrans with start=page_obj.start_index end=page_obj.end_index %}
+    Showing
+    <span class="font-medium text-slate-700">{{ start }}–{{ end }}</span>
+    {% endblocktrans %}
+    {% else %}
     {% blocktrans with start=page_obj.start_index end=page_obj.end_index count=page_obj.paginator.count %}
     Showing
     <span class="font-medium text-slate-700">{{ start }}–{{ end }}</span>
     of
     <span class="font-medium text-slate-700">{{ count }}</span>
     {% endblocktrans %}
+    {% endif %}
   </p>
   <div class="flex items-center gap-2">
     {% if page_obj.has_previous %}
@@ -20,7 +27,11 @@
     {% endif %}
 
     <span class="px-2 text-sm tabular-nums text-slate-600">
+      {% if page_obj.paginator.count_is_approximate %}
+      {% blocktrans with number=page_obj.number %}Page {{ number }}{% endblocktrans %}
+      {% else %}
       {% blocktrans with number=page_obj.number total=page_obj.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktrans %}
+      {% endif %}
     </span>
 
     {% if page_obj.has_next %}

@@ -2,7 +2,6 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.core.cache import cache
-from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -25,6 +24,7 @@ from integrations.polymarket.embed import build_polymarket_embed_context
 from integrations.celery_utils import enqueue_market_refresh_if_stale
 from markets.ending_filters import ENDING_WINDOW_CHOICES, ending_window_hours, normalize_ending_filter
 from markets.models import Market
+from markets.pagination import markets_list_requires_windowed_pagination, paginate_queryset
 from markets.categories import get_category_for_slug
 from markets.selectors import (
     MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY,
@@ -98,7 +98,11 @@ def market_hub(request):
 
 
 def market_list(request):
-    status = request.GET.get("status", "")
+    # Default to open/discoverable listings; explicit ``?status=`` keeps all statuses.
+    if "status" in request.GET:
+        status = request.GET.get("status", "")
+    else:
+        status = Market.Status.OPEN
     category = normalize_category_filter(request.GET.get("category", ""))
     search = request.GET.get("q", "")
     source = normalize_source_filter(request.GET.get("source", ""))
@@ -123,9 +127,12 @@ def market_list(request):
         sort=sort,
         ending_within_hours=ending_hours,
     )
-    paginator = Paginator(qs, page_size)
-
-    page_obj = paginator.get_page(request.GET.get("page"))
+    page_obj = paginate_queryset(
+        qs,
+        page=request.GET.get("page"),
+        per_page=page_size,
+        windowed=markets_list_requires_windowed_pagination(status=status),
+    )
     markets = attach_user_forecasts_to_markets(request.user, list(page_obj.object_list))
 
     source_filter_urls = build_source_filter_urls(
@@ -155,7 +162,7 @@ def market_list(request):
         "markets/market_list.html",
         {
             "markets": markets,
-            "market_count": paginator.count,
+            "market_count": page_obj.paginator.count,
             "page_obj": page_obj,
             "pagination_query": _pagination_extra_query(request),
             "categories": get_market_categories(),
