@@ -202,6 +202,30 @@ def _is_gunicorn_worker_sigterm_noise(event, message: str) -> bool:
     return bool(re.search(r"Worker \(pid:\d+\) was sent SIGTERM", message, re.IGNORECASE))
 
 
+def _is_transient_postgres_oom(event, hint) -> bool:
+    """Drop handled PostgreSQL OOM during market import resolution."""
+    if event.get("logger") != "integrations.services":
+        return False
+
+    message = _event_message(event)
+    if "Deferred prediction resolution after import" not in message:
+        return False
+
+    oom_markers = ("out of memory", "failed on request of size")
+    exc_info = hint.get("exc_info")
+    if exc_info and exc_info[1] is not None:
+        if any(marker in str(exc_info[1]).lower() for marker in oom_markers):
+            return True
+
+    for entry in event.get("exception", {}).get("values", []):
+        if entry.get("type") not in {"OperationalError", "OutOfMemory"}:
+            continue
+        value = (entry.get("value") or "").lower()
+        if any(marker in value for marker in oom_markers):
+            return True
+    return False
+
+
 def _before_send(event, hint):
     """Drop expected worker SIGTERM noise during Heroku dyno cycling."""
     exc_info = hint.get("exc_info")
@@ -227,6 +251,9 @@ def _before_send(event, hint):
         return None
 
     if _is_embedded_sync_transient_db_noise(event, hint):
+        return None
+
+    if _is_transient_postgres_oom(event, hint):
         return None
 
     return event
