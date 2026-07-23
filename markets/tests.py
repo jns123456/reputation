@@ -312,6 +312,29 @@ class MarketCategoryFilterTests(TestCase):
         self.assertTrue(response.context["page_obj"].paginator.count_is_approximate)
         self.assertTrue(response.context["page_obj"].has_next)
 
+    @override_settings(MARKET_LIST_PAGE_SIZE=1)
+    def test_market_list_open_category_uses_windowed_pagination(self):
+        """Regression: OPEN + category deep pages must not run COUNT (PREDICTSTAMP-19)."""
+        for index in range(2):
+            Market.objects.create(
+                external_id=f"other-cat-{index}",
+                title=f"Other category market {index}",
+                slug=f"other-cat-market-{index}",
+                status=Market.Status.OPEN,
+                category="Other",
+                canonical_category_slug="other",
+                volume_total=float(10 - index),
+                polymarket_event_raw={"tags": [{"slug": "other"}]},
+            )
+
+        response = self.client.get(
+            reverse("markets:all"),
+            {"category": "other", "status": "open", "page": "2"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["page_obj"].paginator.count_is_approximate)
+
     def test_liquidity_sort_uses_single_denormalized_query(self):
         for index, liquidity in enumerate((100, 900, 300)):
             Market.objects.create(

@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from django.core.paginator import Paginator
 
-from markets.models import Market
-
 
 def markets_list_requires_windowed_pagination(*, status: str) -> bool:
-    """Return True when a full-table COUNT is too expensive for Postgres."""
-    normalized = (status or "").strip().casefold()
-    return normalized in ("", Market.Status.RESOLVED)
+    """Return True when a full-table COUNT is too expensive for Postgres.
+
+    Always windowed: even filtered OPEN listings (e.g. category + deep pages)
+    can OOM Postgres on Heroku Essential-0 during COUNT aggregation.
+    """
+    return True
 
 
 class WindowedPaginator:
