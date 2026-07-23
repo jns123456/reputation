@@ -1,6 +1,7 @@
 from datetime import timedelta
+from unittest.mock import patch
 
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -447,6 +448,26 @@ class MarketApiTests(TestCase):
             any("COUNT(*)" in query["sql"] for query in ctx.captured_queries),
             msg="all-status market API list must not COUNT the full table",
         )
+
+
+class MarketListPaginationTransientDbTests(SimpleTestCase):
+    @patch("markets.pagination.list")
+    def test_windowed_pagination_retries_transient_ssl_eof(self, mock_list):
+        from unittest.mock import MagicMock
+
+        from django.db import OperationalError
+
+        from markets.pagination import paginate_queryset_windowed
+
+        mock_list.side_effect = [
+            OperationalError(
+                "consuming input failed: SSL error: unexpected eof while reading"
+            ),
+            ["market"],
+        ]
+        page = paginate_queryset_windowed(MagicMock(), page=1, per_page=20)
+        self.assertEqual(list(page), ["market"])
+        self.assertEqual(mock_list.call_count, 2)
 
 
 class LandingTapeSelectorTests(TestCase):

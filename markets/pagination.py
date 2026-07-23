@@ -5,9 +5,14 @@ from __future__ import annotations
 from collections import OrderedDict
 
 from django.core.paginator import Paginator
+from django.db import OperationalError, close_old_connections
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param
+
+from markets.models import Market
+
+_TRANSIENT_DB_ERROR_MARKERS = ("ssl", "eof", "connection reset", "closed unexpectedly")
 
 
 def resolve_markets_list_status(request) -> tuple[str | None, str]:
@@ -105,11 +110,23 @@ class WindowedPage:
         return self.start_index + len(self.object_list) - 1
 
 
+def _materialize_window(qs, *, offset: int, limit: int):
+    """Evaluate a queryset slice, retrying once after stale PostgreSQL SSL drops."""
+    try:
+        return list(qs[offset : offset + limit])
+    except OperationalError as exc:
+        message = str(exc).lower()
+        if not any(marker in message for marker in _TRANSIENT_DB_ERROR_MARKERS):
+            raise
+        close_old_connections()
+        return list(qs[offset : offset + limit])
+
+
 def paginate_queryset_windowed(qs, *, page, per_page: int):
     """Return a Page without issuing a COUNT query."""
     page_number = max(1, int(page or 1))
     offset = (page_number - 1) * per_page
-    window = list(qs[offset : offset + per_page + 1])
+    window = _materialize_window(qs, offset=offset, limit=per_page + 1)
     has_next = len(window) > per_page
     object_list = window[:per_page]
     paginator = WindowedPaginator(
