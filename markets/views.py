@@ -3,7 +3,8 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import Http404
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from accounts.bookmark_selectors import get_user_bookmarked_ids
@@ -29,6 +30,7 @@ from markets.selectors import (
     MARKET_HUB_CATEGORY_SUMMARIES_CACHE_KEY,
     apply_markets_list_ordering,
     get_market_categories,
+    get_market_for_detail,
     get_market_hub_category_summaries,
     get_markets_for_display,
     get_markets_list,
@@ -175,7 +177,9 @@ def market_list(request):
 
 
 def market_detail(request, slug):
-    market = get_object_or_404(Market, slug=slug)
+    market = get_market_for_detail(slug)
+    if market is None:
+        raise Http404
 
     from markets.composite_redirect import get_composite_redirect_market
 

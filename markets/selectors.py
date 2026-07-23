@@ -68,6 +68,11 @@ def market_card_queryset(qs):
     return _market_card_queryset(qs)
 
 
+def get_market_for_detail(slug: str):
+    """Single market for the detail page without loading TOAST JSON payloads."""
+    return _market_card_queryset(Market.objects.filter(slug=slug)).first()
+
+
 def _exclude_disabled_sources(markets):
     excluded = {Market.Source.MANUAL}
     if isinstance(markets, list):

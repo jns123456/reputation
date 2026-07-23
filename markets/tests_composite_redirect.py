@@ -8,6 +8,7 @@ from markets.composite_redirect import (
     is_orphan_polymarket_leg,
 )
 from markets.models import Market
+from markets.selectors import get_market_for_detail
 
 
 class CompositeRedirectTests(TestCase):
@@ -193,3 +194,44 @@ class CompositeRedirectViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response["Location"], reverse("markets:detail", kwargs={"slug": composite.slug}))
+
+    def test_market_detail_defers_large_json_payloads(self):
+        market = Market.objects.create(
+            external_id="esports-detail-defer",
+            title="LoL match",
+            slug="lol-detail-defer",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            polymarket_raw={"blob": "x" * 5000},
+            polymarket_event_raw={"blob": "y" * 5000},
+        )
+        fetched = get_market_for_detail(market.slug)
+        self.assertIsNotNone(fetched)
+        self.assertIn("polymarket_raw", fetched.get_deferred_fields())
+        self.assertIn("polymarket_event_raw", fetched.get_deferred_fields())
+
+    def test_composite_redirect_works_with_deferred_payloads(self):
+        composite = Market.objects.create(
+            external_id=f"{WORLD_CUP_MATCH_EXTERNAL_PREFIX}defer-redirect",
+            title="Team A vs Team B",
+            slug="team-a-vs-team-b-defer",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Team A"}, {"label": "Draw"}, {"label": "Team B"}],
+            polymarket_raw={"market_kind": "soccer_match_3way"},
+        )
+        orphan = Market.objects.create(
+            external_id="orphan-defer-redirect",
+            title="Will Team A win?",
+            slug="will-team-a-win-defer",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            outcomes=[{"label": "Yes"}, {"label": "No"}],
+            polymarket_raw={"sportsMarketType": "moneyline"},
+            polymarket_event_raw={"slug": "defer-redirect"},
+        )
+        deferred_orphan = get_market_for_detail(orphan.slug)
+        self.assertTrue(is_orphan_polymarket_leg(deferred_orphan))
+        target = get_composite_redirect_market(deferred_orphan)
+        self.assertEqual(target.pk, composite.pk)

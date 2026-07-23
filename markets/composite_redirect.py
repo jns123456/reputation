@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from django.db.models import Q
+from django.db.models import CharField, Q, Value
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Cast, Coalesce, NullIf, Trim
 
 from integrations.polymarket.constants import (
     MULTI_OUTCOME_EVENT_KIND,
@@ -22,7 +24,47 @@ from markets.forecast_modes import ForecastMode, get_forecast_mode
 from markets.models import Market
 
 
+def _raw_payloads_deferred(market) -> bool:
+    return bool({"polymarket_raw", "polymarket_event_raw"} & market.get_deferred_fields())
+
+
+def _parent_event_slug_from_db(market_pk: int) -> str:
+    """Extract parent event slug via JSON key lookups (avoids loading TOAST blobs)."""
+    slug = (
+        Market.objects.filter(pk=market_pk)
+        .annotate(
+            parent_slug=Coalesce(
+                NullIf(
+                    Trim(
+                        Cast(
+                            KeyTextTransform("slug", "polymarket_event_raw"),
+                            CharField(),
+                        )
+                    ),
+                    Value(""),
+                ),
+                NullIf(
+                    Trim(
+                        Cast(
+                            KeyTextTransform("event_slug", "polymarket_raw"),
+                            CharField(),
+                        )
+                    ),
+                    Value(""),
+                ),
+                output_field=CharField(),
+            )
+        )
+        .values_list("parent_slug", flat=True)
+        .first()
+    )
+    return str(slug or "").strip()
+
+
 def _parent_event_slug(market) -> str:
+    if _raw_payloads_deferred(market) and market.pk:
+        return _parent_event_slug_from_db(market.pk)
+
     event_raw = market.polymarket_event_raw or {}
     slug = event_raw.get("slug")
     if slug:
@@ -76,6 +118,11 @@ def is_orphan_polymarket_leg(market) -> bool:
         or external_id.startswith(H2H_MATCH_EXTERNAL_PREFIX)
         or external_id.startswith(POLYMARKET_EVENT_EXTERNAL_PREFIX)
     ):
+        return False
+
+    if _raw_payloads_deferred(market) and market.pk:
+        if Market.objects.filter(pk=market.pk).filter(orphan_polymarket_leg_q()).exists():
+            return True
         return False
 
     raw = market.polymarket_raw or {}
@@ -161,11 +208,13 @@ def get_composite_redirect_market(market) -> Market | None:
     if not event_slug:
         return None
 
-    event = dict(market.polymarket_event_raw or {})
-    if not event.get("slug"):
-        event["slug"] = event_slug
+    composite_external_id = None
+    if not _raw_payloads_deferred(market):
+        event = dict(market.polymarket_event_raw or {})
+        if not event.get("slug"):
+            event["slug"] = event_slug
+        composite_external_id = composite_external_id_for_event(event)
 
-    composite_external_id = composite_external_id_for_event(event)
     if not composite_external_id:
         for candidate in _candidate_composite_external_ids(event_slug):
             if Market.objects.filter(external_id=candidate).exclude(pk=market.pk).exists():
