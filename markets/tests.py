@@ -273,6 +273,45 @@ class MarketCategoryFilterTests(TestCase):
         self.assertEqual(page_two.status_code, 200)
         self.assertContains(page_two, "Next")
 
+    def test_market_list_defaults_to_open_status(self):
+        open_market = Market.objects.create(
+            external_id="default-open-market",
+            title="Default open market",
+            slug="default-open-market",
+            status=Market.Status.OPEN,
+            polymarket_event_raw={"tags": [{"slug": "soccer"}]},
+        )
+        Market.objects.create(
+            external_id="default-resolved-market",
+            title="Default resolved market",
+            slug="default-resolved-market",
+            status=Market.Status.RESOLVED,
+        )
+
+        response = self.client.get(reverse("markets:all"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["current_status"], Market.Status.OPEN)
+        slugs = [market.slug for market in response.context["markets"]]
+        self.assertEqual(slugs, [open_market.slug])
+
+    @override_settings(MARKET_LIST_PAGE_SIZE=1)
+    def test_market_list_all_statuses_uses_windowed_pagination(self):
+        for index, status in enumerate((Market.Status.OPEN, Market.Status.RESOLVED)):
+            Market.objects.create(
+                external_id=f"all-status-{index}",
+                title=f"All status market {index}",
+                slug=f"all-status-market-{index}",
+                status=status,
+                volume_total=float(10 - index),
+            )
+
+        response = self.client.get(reverse("markets:all"), {"status": ""})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["page_obj"].paginator.count_is_approximate)
+        self.assertTrue(response.context["page_obj"].has_next)
+
     def test_liquidity_sort_uses_single_denormalized_query(self):
         for index, liquidity in enumerate((100, 900, 300)):
             Market.objects.create(
