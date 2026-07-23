@@ -193,7 +193,7 @@ def market_detail(request, slug):
 
     enqueue_market_refresh_if_stale(market)
 
-    predictions = get_market_predictions(market)
+    predictions = get_market_predictions(market, with_interactions=False)
     from accounts.achievement_services import prefetch_founding_forecaster_flags
 
     prefetch_founding_forecaster_flags([prediction.user for prediction in predictions])

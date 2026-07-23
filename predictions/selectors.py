@@ -13,28 +13,30 @@ FORECASTS_MARKET_OPTIONS_CACHE_KEY = "forecasts_market_options_v1"
 FORECASTS_MARKET_OPTIONS_CACHE_SECONDS = 120
 
 
-def _prediction_vote_count_subquery(value):
+def _prediction_vote_counts_subquery():
     return (
         Vote.objects.filter(
             target_type=Vote.TargetType.PREDICTION,
             target_id=OuterRef("pk"),
-            value=value,
         )
         .values("target_id")
-        .annotate(c=Count("pk"))
-        .values("c")
+        .annotate(
+            likes=Count("pk", filter=Q(value=1)),
+            dislikes=Count("pk", filter=Q(value=-1)),
+        )
     )
 
 
 def annotate_prediction_interactions(qs):
+    vote_counts = _prediction_vote_counts_subquery()
     return qs.annotate(
         comment_count=Count("comments", distinct=True),
         like_count=Coalesce(
-            Subquery(_prediction_vote_count_subquery(1), output_field=IntegerField()),
+            Subquery(vote_counts.values("likes")[:1], output_field=IntegerField()),
             Value(0),
         ),
         dislike_count=Coalesce(
-            Subquery(_prediction_vote_count_subquery(-1), output_field=IntegerField()),
+            Subquery(vote_counts.values("dislikes")[:1], output_field=IntegerField()),
             Value(0),
         ),
     )
@@ -47,11 +49,28 @@ def prefetch_verified_prediction_attestations(qs):
             queryset=OffchainAttestation.objects.filter(
                 schema__kind="prediction_claim",
                 status=OffchainAttestation.Status.VERIFIED,
-            ).select_related("schema"),
+            )
+            .select_related("schema")
+            .only(
+                "id",
+                "uid",
+                "status",
+                "prediction_id",
+                "schema_id",
+                "schema__id",
+                "schema__kind",
+                "schema__name",
+            ),
         )
     )
 
-def get_market_predictions(market, limit=50):
+
+def get_market_predictions(market, limit=50, *, with_interactions=True):
+    """Forecasts for a market detail page or similar lists.
+
+    Slice before vote/comment annotations so Postgres only scores the rows we
+    render (markets can have thousands of forecasts).
+    """
     qs = (
         Prediction.objects.filter(
             market=market,
@@ -64,8 +83,11 @@ def get_market_predictions(market, limit=50):
         .exclude(status=Prediction.Status.VOID)
         .select_related("user", "user__profile", "market", "debrief")
         .order_by(*DISPLAY_RANK_ORM_FIELDS)
-    )
-    return annotate_prediction_interactions(prefetch_verified_prediction_attestations(qs))[:limit]
+    )[:limit]
+    qs = prefetch_verified_prediction_attestations(qs)
+    if with_interactions:
+        qs = annotate_prediction_interactions(qs)
+    return qs
 
 
 def get_prediction_with_interactions(pk):
