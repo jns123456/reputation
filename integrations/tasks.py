@@ -80,14 +80,42 @@ def refresh_stale_open_markets_task(self):
 @shared_task(bind=True, ignore_result=True, max_retries=2, default_retry_delay=60)
 def refresh_market_task(self, market_id):
     """Background refresh of a single market from its external source."""
-    from integrations.sync import refresh_market
-    from markets.models import Market
+    from django.db import OperationalError
 
-    market = Market.objects.filter(pk=market_id).first()
+    from integrations.market_refresh import (
+        attach_refresh_routing_raw,
+        is_postgres_out_of_memory,
+        load_market_for_refresh,
+    )
+    from integrations.sync import refresh_market
+
+    try:
+        market = load_market_for_refresh(market_id)
+    except OperationalError as exc:
+        if is_postgres_out_of_memory(exc):
+            logger.warning(
+                "refresh_market_task skipped market %s — PostgreSQL out of memory on load",
+                market_id,
+            )
+            return
+        raise
+
     if market is None:
         return
+
+    attach_refresh_routing_raw(market)
+
     try:
         refresh_market(market)
+    except OperationalError as exc:
+        if is_postgres_out_of_memory(exc):
+            logger.warning(
+                "refresh_market_task skipped market %s — PostgreSQL out of memory during refresh",
+                market_id,
+            )
+            return
+        logger.exception("refresh_market_task failed for market %s", market_id)
+        raise self.retry(exc=exc) from exc
     except Exception as exc:
         logger.exception("refresh_market_task failed for market %s", market_id)
         raise self.retry(exc=exc) from exc
