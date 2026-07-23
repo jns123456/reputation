@@ -119,10 +119,13 @@ def repair_resolved_markets_with_pending_predictions(*, limit=200):
     """Refresh Polymarket state, backfill outcomes, and score stuck pending forecasts."""
     from predictions.models import Prediction
 
+    from markets.selectors import MARKET_CARD_DEFER_FIELDS
+
     candidates = (
         Market.objects.filter(source=Market.Source.POLYMARKET)
         .filter(predictions__status=Prediction.Status.PENDING)
         .distinct()
+        .defer(*MARKET_CARD_DEFER_FIELDS)
         .order_by("-updated_at")[:limit]
     )
     repaired_markets = 0

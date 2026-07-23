@@ -2,8 +2,10 @@ from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 import requests
+from django.db import connection
 from django.db import OperationalError
 from django.test import SimpleTestCase, TestCase
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from integrations.sync import (
@@ -185,3 +187,25 @@ class RefreshStaleOpenMarketsTests(TestCase):
 
         self.assertEqual(result["refreshed"], 1)
         mock_refresh.assert_called_once_with(market)
+
+    @patch("integrations.sync.refresh_market")
+    def test_refresh_stale_open_markets_defers_heavy_json_on_batch_fetch(self, mock_refresh):
+        stale_time = timezone.now() - timedelta(hours=2)
+        Market.objects.create(
+            external_id="bloated-poly",
+            title="Bloated market",
+            slug="bloated-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            polymarket_synced_at=stale_time,
+            polymarket_raw={"padding": "x" * 5000},
+            polymarket_event_raw={"padding": "y" * 5000},
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            refresh_stale_open_markets(batch_size=10, stale_minutes=30)
+
+        stale_batch_sql = ctx.captured_queries[0]["sql"].lower()
+        self.assertNotIn("polymarket_raw", stale_batch_sql)
+        self.assertNotIn("polymarket_event_raw", stale_batch_sql)
+        mock_refresh.assert_called_once()

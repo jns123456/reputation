@@ -16,6 +16,7 @@ from integrations.services import (
 )
 from markets.categories import CANONICAL_CATEGORIES, CanonicalCategory, FIFA_WORLD_CUP_CATEGORY_SLUG
 from markets.models import Market
+from markets.selectors import MARKET_CARD_DEFER_FIELDS
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +200,7 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
             | Q(status=Market.Status.CLOSED, resolved_outcome="")
             | Q(status=Market.Status.RESOLVED, resolved_outcome="")
         )
+        .defer(*MARKET_CARD_DEFER_FIELDS)
         .order_by("polymarket_synced_at", "updated_at")[:batch_size]
     )
 
