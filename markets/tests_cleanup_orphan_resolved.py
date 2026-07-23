@@ -144,6 +144,9 @@ class OrphanResolvedCleanupTests(TestCase):
         MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED=True,
         MARKET_ORPHAN_RESOLVED_RETENTION_DAYS=30,
         MARKET_ORPHAN_RESOLVED_CLEANUP_BATCH_SIZE=10,
+        MARKET_ORPHAN_RESOLVED_CLEANUP_MAX_PER_RUN=0,
+        MARKET_VACUUM_AFTER_DELETE_MIN=10_000,
+        MARKET_STORAGE_ALERT_ENABLED=False,
     )
     def test_celery_task_respects_retention(self):
         old = self._resolved(

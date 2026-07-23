@@ -172,7 +172,12 @@ class FifoPruneTests(TestCase):
         self.assertTrue(market_raw_is_already_pruned(older))
         self.assertFalse(market_raw_is_already_pruned(newer))
 
-    @override_settings(MARKET_RAW_PRUNE_ENABLED=True, MARKET_RAW_PRUNE_BATCH_SIZE=1)
+    @override_settings(
+        MARKET_RAW_PRUNE_ENABLED=True,
+        MARKET_RAW_PRUNE_BATCH_SIZE=1,
+        MARKET_RAW_PRUNE_MAX_PER_RUN=1,
+        MARKET_STORAGE_ALERT_ENABLED=False,
+    )
     def test_fifo_task_compacts_oldest_batch(self):
         older = Market.objects.create(
             external_id="fifo-task-old",

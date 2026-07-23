@@ -589,20 +589,43 @@ MARKET_RESOLVING_REMINDERS_ENABLED = env.bool(
 # FIFO compaction of bulky Polymarket JSON on resolved/closed markets (Heroku disk).
 MARKET_RAW_PRUNE_ENABLED = env.bool("MARKET_RAW_PRUNE_ENABLED", default=True)
 MARKET_RAW_PRUNE_BATCH_SIZE = env.int("MARKET_RAW_PRUNE_BATCH_SIZE", default=500)
+# 0 = drain all prune candidates each run (batch_size is chunk size only).
+MARKET_RAW_PRUNE_MAX_PER_RUN = env.int("MARKET_RAW_PRUNE_MAX_PER_RUN", default=0)
 MARKET_RAW_PRUNE_HOUR_UTC = env.int("MARKET_RAW_PRUNE_HOUR_UTC", default=4)
 # Delete resolved markets with no user history after N days (keeps disk bounded).
 MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED = env.bool(
     "MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED", default=True
 )
 MARKET_ORPHAN_RESOLVED_RETENTION_DAYS = env.int(
-    "MARKET_ORPHAN_RESOLVED_RETENTION_DAYS", default=30
+    "MARKET_ORPHAN_RESOLVED_RETENTION_DAYS", default=7
 )
+# Chunk size for DELETE batches (not a per-run cap).
 MARKET_ORPHAN_RESOLVED_CLEANUP_BATCH_SIZE = env.int(
-    "MARKET_ORPHAN_RESOLVED_CLEANUP_BATCH_SIZE", default=1000
+    "MARKET_ORPHAN_RESOLVED_CLEANUP_BATCH_SIZE", default=500
+)
+# 0 = drain all eligible orphans each night.
+MARKET_ORPHAN_RESOLVED_CLEANUP_MAX_PER_RUN = env.int(
+    "MARKET_ORPHAN_RESOLVED_CLEANUP_MAX_PER_RUN", default=0
 )
 MARKET_ORPHAN_RESOLVED_CLEANUP_HOUR_UTC = env.int(
     "MARKET_ORPHAN_RESOLVED_CLEANUP_HOUR_UTC", default=5
 )
+# VACUUM after sizable orphan deletes + weekly VACUUM FULL (Postgres only).
+MARKET_VACUUM_ENABLED = env.bool("MARKET_VACUUM_ENABLED", default=True)
+MARKET_VACUUM_FULL_ENABLED = env.bool("MARKET_VACUUM_FULL_ENABLED", default=True)
+MARKET_VACUUM_AFTER_DELETE_MIN = env.int("MARKET_VACUUM_AFTER_DELETE_MIN", default=100)
+MARKET_VACUUM_FULL_HOUR_UTC = env.int("MARKET_VACUUM_FULL_HOUR_UTC", default=6)
+# Sunday=0 … Saturday=6 (Celery crontab day_of_week).
+MARKET_VACUUM_FULL_DAY_OF_WEEK = env.int("MARKET_VACUUM_FULL_DAY_OF_WEEK", default=0)
+# Sentry/log warning when DB size or orphan backlog crosses thresholds.
+MARKET_STORAGE_ALERT_ENABLED = env.bool("MARKET_STORAGE_ALERT_ENABLED", default=True)
+MARKET_STORAGE_ALERT_DB_BYTES = env.int(
+    "MARKET_STORAGE_ALERT_DB_BYTES", default=500 * 1024 * 1024
+)
+MARKET_STORAGE_ALERT_ORPHAN_COUNT = env.int(
+    "MARKET_STORAGE_ALERT_ORPHAN_COUNT", default=5000
+)
+MARKET_STORAGE_ALERT_HOUR_UTC = env.int("MARKET_STORAGE_ALERT_HOUR_UTC", default=7)
 
 CELERY_BEAT_SCHEDULE = {
     "sync-all-category-markets": {
@@ -625,6 +648,21 @@ if MARKET_ORPHAN_RESOLVED_CLEANUP_ENABLED:
         "schedule": crontab(
             minute=15, hour=MARKET_ORPHAN_RESOLVED_CLEANUP_HOUR_UTC
         ),
+    }
+if MARKET_VACUUM_ENABLED and MARKET_VACUUM_FULL_ENABLED:
+    CELERY_BEAT_SCHEDULE["vacuum-markets-market-full"] = {
+        "task": "markets.tasks.vacuum_markets_market_task",
+        "schedule": crontab(
+            minute=30,
+            hour=MARKET_VACUUM_FULL_HOUR_UTC,
+            day_of_week=MARKET_VACUUM_FULL_DAY_OF_WEEK,
+        ),
+        "kwargs": {"full": True},
+    }
+if MARKET_STORAGE_ALERT_ENABLED:
+    CELERY_BEAT_SCHEDULE["check-market-storage-pressure"] = {
+        "task": "markets.tasks.check_market_storage_pressure_task",
+        "schedule": crontab(minute=0, hour=MARKET_STORAGE_ALERT_HOUR_UTC),
     }
 if EAS_DAILY_BATCH_ENABLED:
     CELERY_BEAT_SCHEDULE["build-daily-attestation-batch"] = {

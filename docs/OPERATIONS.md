@@ -126,6 +126,29 @@ Local reproducible install:
 pip install -r requirements.lock
 ```
 
+## Market DB maintenance (Essential-0 disk/RAM)
+
+Celery Beat keeps `markets_market` bounded without deleting user forecasts:
+
+| Job | Schedule (UTC) | Behavior |
+|-----|----------------|----------|
+| `prune-market-raw-fifo` | daily ~04:45 | Compact `polymarket_*_raw` on resolved/closed |
+| `delete-orphan-resolved-markets` | daily ~05:15 | Delete resolved markets with **no** predictions/comments/challenges/watches/notifications older than `MARKET_ORPHAN_RESOLVED_RETENTION_DAYS` (default **7**). Drains all eligible rows each run. |
+| post-delete `VACUUM ANALYZE` | after ≥`MARKET_VACUUM_AFTER_DELETE_MIN` deletes | Reclaims table bloat (Postgres) |
+| `vacuum-markets-market-full` | weekly (default Sunday 06:30) | `VACUUM FULL ANALYZE markets_market` — frees disk to the OS |
+| `check-market-storage-pressure` | daily ~07:00 | Sentry warning if DB size ≥500 MB or orphan backlog ≥5000 |
+
+Manual catch-up:
+
+```bash
+heroku run python manage.py delete_orphan_resolved_markets -a reputation-juan
+heroku run python manage.py prune_market_raw -a reputation-juan
+# VACUUM FULL (locks the table briefly):
+heroku run python manage.py shell -c "from markets.db_maintenance import vacuum_markets_market; print(vacuum_markets_market(full=True))" -a reputation-juan
+```
+
+Never delete markets that still have predictions — the orphan queryset enforces that.
+
 ## Logs
 
 - `LOG_LEVEL=INFO` in production.
