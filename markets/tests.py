@@ -380,6 +380,51 @@ class MarketApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["polymarket_raw"], {"large": "payload"})
 
+    def test_list_defaults_to_open_markets(self):
+        open_market = Market.objects.create(
+            external_id="api-open-default",
+            title="Open default market",
+            slug="api-open-default",
+            status=Market.Status.OPEN,
+            accepting_orders=True,
+            close_date=timezone.now() + timedelta(days=3),
+        )
+        Market.objects.create(
+            external_id="api-resolved-default",
+            title="Resolved default market",
+            slug="api-resolved-default",
+            status=Market.Status.RESOLVED,
+        )
+
+        response = self.client.get(reverse("market-list"))
+
+        self.assertEqual(response.status_code, 200)
+        slugs = [row["slug"] for row in response.json()["results"]]
+        self.assertIn(open_market.slug, slugs)
+        self.assertNotIn("api-resolved-default", slugs)
+
+    def test_list_all_statuses_skips_full_table_count(self):
+        for index, status in enumerate((Market.Status.OPEN, Market.Status.RESOLVED)):
+            Market.objects.create(
+                external_id=f"api-all-status-{index}",
+                title=f"API all status {index}",
+                slug=f"api-all-status-{index}",
+                status=status,
+            )
+
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(reverse("market-list"), {"status": ""})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreaterEqual(len(response.json()["results"]), 2)
+        self.assertFalse(
+            any("COUNT(*)" in query["sql"] for query in ctx.captured_queries),
+            msg="all-status market API list must not COUNT the full table",
+        )
+
 
 class LandingTapeSelectorTests(TestCase):
     def _forecastable_market(self, *, slug, title, image_url=""):

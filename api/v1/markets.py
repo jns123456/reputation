@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from api.permissions import HasApiScope, IsReadOnlyOrAuthenticated
 from api.serializers import PublicUsernameMixin
 from markets.models import Market
+from markets.pagination import MarketApiPagination, resolve_markets_list_status
 from markets.selectors import discoverable_market_q, get_markets_for_display, get_markets_list
 
 
@@ -65,6 +66,7 @@ class MarketRawDetailSerializer(MarketDetailSerializer):
 class MarketViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = "slug"
     permission_classes = [IsReadOnlyOrAuthenticated]
+    pagination_class = MarketApiPagination
 
     def _include_raw_requested(self):
         return self.request.query_params.get("include_raw") in {"1", "true", "yes"}
@@ -80,7 +82,7 @@ class MarketViewSet(viewsets.ReadOnlyModelViewSet):
         return MarketListSerializer
 
     def get_queryset(self):
-        status = self.request.query_params.get("status")
+        status, _ = resolve_markets_list_status(self.request)
         category = self.request.query_params.get("category")
         search = self.request.query_params.get("q")
         forecastable_only = self.request.query_params.get("forecastable") in {
