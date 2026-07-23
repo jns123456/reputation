@@ -8,6 +8,7 @@ from django.db import OperationalError, close_old_connections
 from django.db.models import Q
 from django.utils import timezone
 
+from integrations.market_refresh import REFRESH_MARKET_DEFER_FIELDS, attach_refresh_routing_raw
 from integrations.services import (
     _log_polymarket_fetch_failure,
     refresh_market_from_polymarket,
@@ -199,12 +200,14 @@ def refresh_stale_open_markets(*, batch_size=None, stale_minutes=None) -> dict:
             | Q(status=Market.Status.CLOSED, resolved_outcome="")
             | Q(status=Market.Status.RESOLVED, resolved_outcome="")
         )
+        .defer(*REFRESH_MARKET_DEFER_FIELDS)
         .order_by("polymarket_synced_at", "updated_at")[:batch_size]
     )
 
     candidates = _materialize_queryset(due_markets)
 
     for market in candidates:
+        attach_refresh_routing_raw(market)
         try:
             refresh_market(market)
             refreshed += 1
