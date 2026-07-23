@@ -3,7 +3,7 @@
 import logging
 
 import requests
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.text import slugify
@@ -115,6 +115,21 @@ def backfill_market_resolved_outcome(market, *, raw_market=None):
     return market
 
 
+def _resolve_imported_market_predictions(market, *, raw_event=None):
+    """Score pending forecasts after import; repair job retries on transient DB errors."""
+    try:
+        if market.status == Market.Status.RESOLVED and market.resolved_outcome:
+            return resolve_market_predictions(market)
+        if market.status == Market.Status.OPEN:
+            return resolve_eliminated_outcome_predictions(market, raw_event=raw_event)
+    except OperationalError:
+        logger.exception(
+            "Deferred prediction resolution after import for market %s",
+            market.external_id,
+        )
+    return []
+
+
 def repair_resolved_markets_with_pending_predictions(*, limit=200):
     """Refresh Polymarket state, backfill outcomes, and score stuck pending forecasts."""
     from predictions.models import Prediction
@@ -200,6 +215,10 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
 
     apply_spanish_translations_to_defaults(defaults, existing_market=existing_market)
 
+    # Prediction resolution runs outside the import transaction so transient
+    # PostgreSQL pressure (e.g. Essential-0 OOM) cannot roll back the market row.
+    resolve_after_import = False
+
     with transaction.atomic():
         market, created = Market.objects.update_or_create(
             external_id=external_id,
@@ -218,10 +237,9 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
 
         if market.status == Market.Status.RESOLVED:
             market = backfill_market_resolved_outcome(market, raw_market=raw_market)
-            if market.resolved_outcome:
-                resolve_market_predictions(market)
+            resolve_after_import = bool(market.resolved_outcome)
         elif market.status == Market.Status.OPEN:
-            resolve_eliminated_outcome_predictions(market, raw_event=raw_event)
+            resolve_after_import = True
 
         from markets.display_metadata import sync_market_display_metadata
 
@@ -233,6 +251,9 @@ def import_market_from_normalized(data, *, raw_market=None, raw_event=None):
             from markets.cleanup_services import maybe_compact_resolved_market_raw
 
             maybe_compact_resolved_market_raw(market)
+
+    if resolve_after_import:
+        _resolve_imported_market_predictions(market, raw_event=raw_event)
 
     return market, created
 

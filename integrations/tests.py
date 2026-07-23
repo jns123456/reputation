@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 from django.core.management import call_command
+from django.db import OperationalError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
@@ -64,6 +67,50 @@ class MarketImportServiceTests(TestCase):
         market, created = import_market_from_normalized(data)
         self.assertFalse(created)
         self.assertEqual(market.title, "Updated Title")
+
+    @patch("integrations.services.resolve_market_predictions")
+    def test_import_keeps_market_when_resolution_hits_transient_db_error(self, mock_resolve):
+        from conftest import create_user
+
+        mock_resolve.side_effect = OperationalError(
+            "out of memory\nDETAIL:  Failed on request of size 1024."
+        )
+        user = create_user("import-oom-user")
+        base_data = {
+            "external_id": "import-oom-1",
+            "title": "Resolved import market",
+            "description": "",
+            "category": "Sports",
+            "source": "polymarket",
+            "status": "open",
+            "outcomes": [{"label": "Yes"}, {"label": "No"}],
+            "current_probability": {"Yes": 0.4, "No": 0.6},
+            "close_date": None,
+            "resolution_date": None,
+            "resolved_outcome": "",
+        }
+        market, _created = import_market_from_normalized(base_data)
+        prediction = create_prediction(
+            user=user,
+            market=market,
+            predicted_outcome="Yes",
+        )
+
+        resolved_data = {
+            **base_data,
+            "status": "resolved",
+            "current_probability": {"Yes": 1.0, "No": 0.0},
+            "resolved_outcome": "Yes",
+        }
+        market, created = import_market_from_normalized(resolved_data)
+        market.refresh_from_db()
+        prediction.refresh_from_db()
+
+        self.assertFalse(created)
+        self.assertEqual(market.status, Market.Status.RESOLVED)
+        self.assertEqual(market.resolved_outcome, "Yes")
+        self.assertEqual(prediction.status, Prediction.Status.PENDING)
+        mock_resolve.assert_called_once()
 
 
 @override_settings(MARKET_TRANSLATION_ENABLED=False)

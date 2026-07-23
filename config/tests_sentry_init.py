@@ -324,6 +324,23 @@ class SentryBeforeSendTests(SimpleTestCase):
         }
         self.assertIsNone(_before_send(event, {}))
 
+    def test_drops_transient_postgres_oom_during_import_resolution(self):
+        event = {
+            "logger": "integrations.services",
+            "logentry": {
+                "message": "Deferred prediction resolution after import for market h2h-wta-1",
+            },
+            "exception": {
+                "values": [
+                    {
+                        "type": "OperationalError",
+                        "value": "out of memory\nDETAIL:  Failed on request of size 1024.",
+                    },
+                ],
+            },
+        }
+        self.assertIsNone(_before_send(event, {}))
+
     def test_keeps_embedded_sync_non_db_errors(self):
         event = {
             "logger": "integrations.market_sync_scheduler",
