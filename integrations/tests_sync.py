@@ -208,4 +208,54 @@ class RefreshStaleOpenMarketsTests(TestCase):
         stale_batch_sql = ctx.captured_queries[0]["sql"].lower()
         self.assertNotIn("polymarket_raw", stale_batch_sql)
         self.assertNotIn("polymarket_event_raw", stale_batch_sql)
+        self.assertIn("markets_market\".\"id", stale_batch_sql)
         mock_refresh.assert_called_once()
+
+    @patch("integrations.sync.refresh_market")
+    @patch("integrations.sync._materialize_queryset")
+    def test_refresh_stale_open_markets_skips_postgres_oom_on_candidate_fetch(
+        self, mock_materialize, mock_refresh
+    ):
+        mock_materialize.side_effect = OperationalError(
+            "out of memory\nDETAIL:  Failed on request of size 8192."
+        )
+
+        with self.assertLogs("integrations.sync", level="WARNING") as logs:
+            result = refresh_stale_open_markets(batch_size=10, stale_minutes=30)
+
+        self.assertEqual(result["refreshed"], 0)
+        self.assertEqual(result["candidates"], 0)
+        mock_refresh.assert_not_called()
+        self.assertTrue(
+            any("PostgreSQL out of memory on candidate fetch" in msg for msg in logs.output)
+        )
+
+    @patch("integrations.sync.refresh_market")
+    @patch("integrations.sync.load_market_for_refresh")
+    def test_refresh_stale_open_markets_skips_postgres_oom_on_load(
+        self, mock_load, mock_refresh
+    ):
+        stale_time = timezone.now() - timedelta(hours=2)
+        market = Market.objects.create(
+            external_id="oom-load-poly",
+            title="OOM load market",
+            slug="oom-load-market",
+            source=Market.Source.POLYMARKET,
+            status=Market.Status.OPEN,
+            polymarket_synced_at=stale_time,
+        )
+        mock_load.side_effect = OperationalError(
+            "out of memory\nDETAIL:  Failed on request of size 8192."
+        )
+
+        with self.assertLogs("integrations.sync", level="WARNING") as logs:
+            result = refresh_stale_open_markets(batch_size=10, stale_minutes=30)
+
+        self.assertEqual(result["refreshed"], 0)
+        self.assertEqual(result["failures"], 1)
+        self.assertEqual(result["candidates"], 1)
+        mock_load.assert_called_once_with(market.pk)
+        mock_refresh.assert_not_called()
+        self.assertTrue(
+            any("PostgreSQL out of memory on load" in msg for msg in logs.output)
+        )

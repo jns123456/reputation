@@ -341,6 +341,21 @@ class SentryBeforeSendTests(SimpleTestCase):
         }
         self.assertIsNone(_before_send(event, {}))
 
+    def test_drops_handled_postgres_oom_during_stale_refresh(self):
+        event = {
+            "logger": "integrations.tasks",
+            "logentry": {"message": "refresh_stale_open_markets_task failed"},
+            "exception": {
+                "values": [
+                    {
+                        "type": "OperationalError",
+                        "value": "out of memory\nDETAIL:  Failed on request of size 8192.",
+                    },
+                ],
+            },
+        }
+        self.assertIsNone(_before_send(event, {}))
+
     def test_keeps_embedded_sync_non_db_errors(self):
         event = {
             "logger": "integrations.market_sync_scheduler",
